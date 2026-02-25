@@ -15,22 +15,29 @@ import {
 } from '@/hooks/use-standard-list';
 import { AdminPageHeader, useAdminConfirm } from '../components';
 
-interface Payout {
+type TransactionStatus = 'pending' | 'processing' | 'paid' | 'failed' | 'reversed' | 'on_hold';
+
+interface PayoutTransaction {
     id: string;
+    placement_split_id: string;
     placement_id: string;
     recruiter_id: string;
-    payout_amount: number;
-    placement_fee: number;
-    recruiter_share_percentage: number;
-    status: 'pending' | 'processing' | 'completed' | 'failed' | 'on_hold';
+    amount: number;
+    status: TransactionStatus;
+    stripe_transfer_id?: string;
+    stripe_payout_id?: string;
+    stripe_connect_account_id?: string;
     created_at: string;
-    processed_at?: string;
-    // Enriched
-    recruiter_name?: string;
+    updated_at: string;
+    processing_started_at?: string;
+    completed_at?: string;
+    failed_at?: string;
+    failure_reason?: string;
+    retry_count: number;
 }
 
-interface PayoutFilters {
-    status?: 'pending' | 'processing' | 'completed' | 'failed' | 'on_hold';
+interface TransactionFilters {
+    status?: TransactionStatus;
 }
 
 export default function PayoutsAdminPage() {
@@ -45,10 +52,10 @@ export default function PayoutsAdminPage() {
     });
 
     // Memoize defaultFilters to prevent infinite re-renders in useStandardList
-    const defaultFilters = useMemo<PayoutFilters>(() => ({ status: 'pending' }), []);
+    const defaultFilters = useMemo<TransactionFilters>(() => ({ status: 'pending' }), []);
 
     const {
-        items: payouts,
+        items: transactions,
         loading,
         error,
         pagination,
@@ -58,7 +65,7 @@ export default function PayoutsAdminPage() {
         setFilters,
         setPage,
         refresh,
-    } = useStandardList<Payout, PayoutFilters>({
+    } = useStandardList<PayoutTransaction, TransactionFilters>({
         fetchFn: async (params) => {
             const token = await getToken();
             if (!token) throw new Error('No auth token');
@@ -72,7 +79,7 @@ export default function PayoutsAdminPage() {
             if (params.sort_by) queryParams.set('sort_by', params.sort_by);
             if (params.sort_order) queryParams.set('sort_order', params.sort_order);
 
-            const response = await apiClient.get(`/payouts?${queryParams.toString()}`);
+            const response = await apiClient.get(`/payout-transactions?${queryParams.toString()}`);
             return response;
         },
         defaultFilters,
@@ -109,46 +116,48 @@ export default function PayoutsAdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    async function processPayout(payoutId: string) {
+    async function processTransaction(transactionId: string) {
         const confirmed = await confirm({
-            title: 'Process Payout',
+            title: 'Process Payout Transaction',
             message: 'This will initiate a Stripe transfer to the recruiter. Are you sure you want to proceed?',
-            confirmText: 'Process Payout',
+            confirmText: 'Process',
             type: 'warning',
         });
         if (!confirmed) return;
 
-        setProcessingId(payoutId);
+        setProcessingId(transactionId);
         try {
             const token = await getToken();
             if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
-            await apiClient.post(`/payouts/${payoutId}/process`);
-            toast.success('Payout processed successfully');
+            await apiClient.post(`/payout-transactions/${transactionId}/process`);
+            toast.success('Payout transaction processed successfully');
             refresh();
         } catch (error) {
-            console.error('Failed to process payout:', error);
-            toast.error('Failed to process payout');
+            console.error('Failed to process payout transaction:', error);
+            toast.error('Failed to process payout transaction');
         } finally {
             setProcessingId(null);
         }
     }
 
     // Status badge component
-    function StatusBadge({ status }: { status: Payout['status'] }) {
+    function StatusBadge({ status }: { status: TransactionStatus }) {
         const colors: Record<string, string> = {
             pending: 'badge-warning',
             processing: 'badge-info',
-            completed: 'badge-success',
+            paid: 'badge-success',
             failed: 'badge-error',
+            reversed: 'badge-neutral',
             on_hold: 'badge-neutral',
         };
         return (
             <span className={`badge ${colors[status] || 'badge-neutral'} gap-1`}>
                 {status === 'pending' && <i className="fa-duotone fa-regular fa-clock"></i>}
                 {status === 'processing' && <i className="fa-duotone fa-regular fa-spinner fa-spin"></i>}
-                {status === 'completed' && <i className="fa-duotone fa-regular fa-check"></i>}
+                {status === 'paid' && <i className="fa-duotone fa-regular fa-check"></i>}
                 {status === 'failed' && <i className="fa-duotone fa-regular fa-xmark"></i>}
+                {status === 'reversed' && <i className="fa-duotone fa-regular fa-rotate-left"></i>}
                 {status === 'on_hold' && <i className="fa-duotone fa-regular fa-pause"></i>}
                 {status}
             </span>
@@ -159,18 +168,19 @@ export default function PayoutsAdminPage() {
         { value: '', label: 'All Statuses' },
         { value: 'pending', label: 'Pending' },
         { value: 'processing', label: 'Processing' },
-        { value: 'completed', label: 'Completed' },
+        { value: 'paid', label: 'Paid' },
         { value: 'failed', label: 'Failed' },
+        { value: 'reversed', label: 'Reversed' },
         { value: 'on_hold', label: 'On Hold' },
     ];
 
     // Calculate summary stats from loaded page
-    const pendingCount = payouts.filter(p => p.status === 'pending').length;
-    const processingCount = payouts.filter(p => p.status === 'processing').length;
-    const completedCount = payouts.filter(p => p.status === 'completed').length;
-    const totalAmount = payouts
-        .filter(p => p.status === 'completed')
-        .reduce((sum, p) => sum + (p.payout_amount || 0), 0);
+    const pendingCount = transactions.filter(t => t.status === 'pending').length;
+    const processingCount = transactions.filter(t => t.status === 'processing').length;
+    const paidCount = transactions.filter(t => t.status === 'paid').length;
+    const totalAmount = transactions
+        .filter(t => t.status === 'paid')
+        .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     return (
         <div className="space-y-6">
@@ -262,9 +272,9 @@ export default function PayoutsAdminPage() {
                 </div>
 
                 <div className="stat bg-base-100 shadow rounded-lg">
-                    <div className="stat-title">Completed</div>
+                    <div className="stat-title">Paid</div>
                     <div className="stat-value text-success">
-                        {loading ? '...' : completedCount}
+                        {loading ? '...' : paidCount}
                     </div>
                     <div className="stat-desc">This page</div>
                 </div>
@@ -283,14 +293,14 @@ export default function PayoutsAdminPage() {
                 <SearchInput
                     value={search}
                     onChange={setSearch}
-                    placeholder="Search payouts..."
+                    placeholder="Search transactions..."
                 />
                 <select
                     className="select select-sm"
                     value={filters.status || ''}
                     onChange={(e) => setFilters({
                         ...filters,
-                        status: e.target.value as PayoutFilters['status'] || undefined
+                        status: e.target.value as TransactionFilters['status'] || undefined
                     })}
                 >
                     {statusOptions.map((opt) => (
@@ -306,14 +316,14 @@ export default function PayoutsAdminPage() {
                 <LoadingState />
             ) : error ? (
                 <ErrorState message={error} onRetry={refresh} />
-            ) : payouts.length === 0 ? (
+            ) : transactions.length === 0 ? (
                 <EmptyState
                     icon="fa-duotone fa-regular fa-money-bill-wave"
-                    title="No payouts found"
+                    title="No payout transactions found"
                     description={
                         search || filters.status
                             ? 'Try adjusting your search or filters'
-                            : 'Payouts will appear here once placements are completed'
+                            : 'Payout transactions will appear here once placements are completed'
                     }
                 />
             ) : (
@@ -326,48 +336,50 @@ export default function PayoutsAdminPage() {
                                         <th>Placement</th>
                                         <th>Recruiter</th>
                                         <th>Amount</th>
-                                        <th>Fee</th>
-                                        <th>Share %</th>
                                         <th>Status</th>
+                                        <th>Retries</th>
                                         <th>Created</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {payouts.map((payout) => (
-                                        <tr key={payout.id}>
+                                    {transactions.map((txn) => (
+                                        <tr key={txn.id}>
                                             <td>
                                                 <span className="font-mono text-sm">
-                                                    {payout.placement_id?.substring(0, 8) || '-'}...
+                                                    {txn.placement_id?.substring(0, 8) || '-'}...
                                                 </span>
                                             </td>
                                             <td>
-                                                {payout.recruiter_name || (
-                                                    <span className="font-mono text-sm">
-                                                        {payout.recruiter_id?.substring(0, 8) || '-'}...
-                                                    </span>
-                                                )}
+                                                <span className="font-mono text-sm">
+                                                    {txn.recruiter_id?.substring(0, 8) || '-'}...
+                                                </span>
                                             </td>
                                             <td className="font-semibold">
-                                                ${(payout.payout_amount || 0).toLocaleString()}
-                                            </td>
-                                            <td>${(payout.placement_fee || 0).toLocaleString()}</td>
-                                            <td>{payout.recruiter_share_percentage || 0}%</td>
-                                            <td>
-                                                <StatusBadge status={payout.status} />
+                                                ${(txn.amount || 0).toLocaleString()}
                                             </td>
                                             <td>
-                                                {new Date(payout.created_at).toLocaleDateString()}
+                                                <StatusBadge status={txn.status} />
+                                            </td>
+                                            <td>
+                                                {txn.retry_count > 0 ? (
+                                                    <span className="badge badge-ghost badge-sm">{txn.retry_count}</span>
+                                                ) : (
+                                                    <span className="text-base-content/40">-</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                {new Date(txn.created_at).toLocaleDateString()}
                                             </td>
                                             <td>
                                                 <div className="flex gap-2">
-                                                    {payout.status === 'pending' && (
+                                                    {txn.status === 'pending' && (
                                                         <button
                                                             className="btn btn-primary btn-xs"
-                                                            onClick={() => processPayout(payout.id)}
-                                                            disabled={processingId === payout.id}
+                                                            onClick={() => processTransaction(txn.id)}
+                                                            disabled={processingId === txn.id}
                                                         >
-                                                            {processingId === payout.id ? (
+                                                            {processingId === txn.id ? (
                                                                 <span className="loading loading-spinner loading-xs"></span>
                                                             ) : (
                                                                 <>
@@ -377,12 +389,13 @@ export default function PayoutsAdminPage() {
                                                             )}
                                                         </button>
                                                     )}
-                                                    <Link
-                                                        href={`/portal/admin/payouts/${payout.id}`}
-                                                        className="btn btn-ghost btn-xs"
-                                                    >
-                                                        <i className="fa-duotone fa-regular fa-eye"></i>
-                                                    </Link>
+                                                    {txn.failure_reason && (
+                                                        <div className="tooltip" data-tip={txn.failure_reason}>
+                                                            <button className="btn btn-ghost btn-xs text-error">
+                                                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -395,7 +408,7 @@ export default function PayoutsAdminPage() {
             )}
 
             {/* Pagination */}
-            {!loading && !error && payouts.length > 0 && (
+            {!loading && !error && transactions.length > 0 && (
                 <PaginationControls
                     pagination={pagination}
                     setPage={setPage}

@@ -11,8 +11,63 @@ import {
     TransactionStatus
 } from './types';
 
+export interface TransactionListFilters {
+    status?: TransactionStatus;
+    recruiter_id?: string;
+    placement_id?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+}
+
 export class PlacementPayoutTransactionRepository {
     constructor(private supabase: SupabaseClient) { }
+
+    /**
+     * List transactions with pagination, filtering, and sorting
+     */
+    async listTransactions(
+        filters: TransactionListFilters = {}
+    ): Promise<{ data: PlacementPayoutTransaction[]; total: number }> {
+        const page = filters.page ?? 1;
+        const limit = filters.limit ?? 25;
+        const offset = (page - 1) * limit;
+        const sortBy = filters.sort_by || 'created_at';
+        const sortOrder = filters.sort_order === 'asc';
+
+        let query = this.supabase
+            .from('placement_payout_transactions')
+            .select('*', { count: 'exact' });
+
+        if (filters.status) {
+            query = query.eq('status', filters.status);
+        }
+        if (filters.recruiter_id) {
+            query = query.eq('recruiter_id', filters.recruiter_id);
+        }
+        if (filters.placement_id) {
+            query = query.eq('placement_id', filters.placement_id);
+        }
+        if (filters.search) {
+            query = query.or(
+                `placement_id.ilike.%${filters.search}%,recruiter_id.ilike.%${filters.search}%,stripe_transfer_id.ilike.%${filters.search}%`
+            );
+        }
+
+        query = query
+            .order(sortBy, { ascending: sortOrder })
+            .range(offset, offset + limit - 1);
+
+        const { data, count, error } = await query;
+
+        if (error) {
+            throw new Error(`Failed to list payout transactions: ${error.message}`);
+        }
+
+        return { data: (data || []) as PlacementPayoutTransaction[], total: count || 0 };
+    }
 
     /**
      * Create multiple transactions in a batch (typically 5 transactions per placement)

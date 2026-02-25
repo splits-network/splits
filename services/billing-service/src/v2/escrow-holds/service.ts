@@ -3,6 +3,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 import { IEventPublisher } from '../shared/events';
+import { resolveAccessContext, AccessContext } from '../shared/access';
 import { EscrowHoldRepository } from './repository';
 import { PayoutAuditRepository } from '../audit/repository';
 import {
@@ -13,6 +14,7 @@ import {
 } from './types';
 
 export class EscrowHoldServiceV2 {
+    private supabase: SupabaseClient;
     private repository: EscrowHoldRepository;
     private eventPublisher: IEventPublisher;
     private auditRepository: PayoutAuditRepository;
@@ -22,9 +24,14 @@ export class EscrowHoldServiceV2 {
         eventPublisher: IEventPublisher,
         auditRepository: PayoutAuditRepository
     ) {
+        this.supabase = supabase;
         this.repository = new EscrowHoldRepository(supabase);
         this.eventPublisher = eventPublisher;
         this.auditRepository = auditRepository;
+    }
+
+    async resolveAccess(clerkUserId: string): Promise<AccessContext> {
+        return resolveAccessContext(this.supabase, clerkUserId);
     }
 
     /**

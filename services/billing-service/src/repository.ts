@@ -2,9 +2,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import {
     Plan,
     Subscription,
-    Payout,
     PayoutSchedule,
-    PayoutSplit,
     EscrowHold,
     PayoutAuditLog,
 } from '@splits-network/shared-types';
@@ -142,100 +140,6 @@ export class BillingRepository {
         return data;
     }
 
-    // ============================================================================
-    // Phase 3: Payout methods
-    // ============================================================================
-
-    async findPayoutById(id: string): Promise<Payout | null> {
-        const { data, error } = await this.supabase
-            
-            .from('payouts')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (error) {
-            if (error.code === 'PGRST116') return null;
-            throw error;
-        }
-        return data;
-    }
-
-    async findPayoutsByPlacementId(placementId: string): Promise<Payout[]> {
-        const { data, error } = await this.supabase
-            
-            .from('payouts')
-            .select('*')
-            .eq('placement_id', placementId)
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return data || [];
-    }
-
-    async findPayoutsByRecruiterId(recruiterId: string): Promise<Payout[]> {
-        const { data, error } = await this.supabase
-            
-            .from('payouts')
-            .select('*')
-            .eq('recruiter_id', recruiterId)
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return data || [];
-    }
-
-    async createPayout(payout: Omit<Payout, 'id' | 'created_at' | 'updated_at'>): Promise<Payout> {
-        const { data, error } = await this.supabase
-            
-            .from('payouts')
-            .insert(payout)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data;
-    }
-
-    async updatePayout(id: string, updates: Partial<Payout>): Promise<Payout> {
-        const { data, error } = await this.supabase
-            
-            .from('payouts')
-            .update({ ...updates, updated_at: new Date() })
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data;
-    }
-
-    async updatePayoutStatus(id: string, status: string): Promise<Payout> {
-        const updates: any = {
-            status,
-            updated_at: new Date(),
-        };
-
-        if (status === 'processing') {
-            updates.processing_started_at = new Date();
-        } else if (status === 'completed') {
-            updates.completed_at = new Date();
-        } else if (status === 'failed') {
-            updates.failed_at = new Date();
-        }
-
-        const { data, error } = await this.supabase
-            
-            .from('payouts')
-            .update(updates)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data;
-    }
-
     // Payout schedules
     async findScheduledPayoutsDue(): Promise<PayoutSchedule[]> {
         const { data, error } = await this.supabase
@@ -278,32 +182,6 @@ export class BillingRepository {
 
         if (error) throw error;
         return data;
-    }
-
-    // Payout splits
-    async createPayoutSplit(
-        split: Omit<PayoutSplit, 'id' | 'created_at' | 'updated_at'>
-    ): Promise<PayoutSplit> {
-        const { data, error } = await this.supabase
-            
-            .from('payout_splits')
-            .insert(split)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data;
-    }
-
-    async findPayoutSplitsByPayoutId(payoutId: string): Promise<PayoutSplit[]> {
-        const { data, error } = await this.supabase
-            
-            .from('payout_splits')
-            .select('*')
-            .eq('payout_id', payoutId);
-
-        if (error) throw error;
-        return data || [];
     }
 
     // Escrow holds

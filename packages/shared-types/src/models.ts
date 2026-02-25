@@ -912,7 +912,7 @@ export interface PayoutSplit {
     updated_at: Date;
 }
 
-export type EscrowHoldStatus = 'active' | 'released' | 'forfeited';
+export type EscrowHoldStatus = 'active' | 'released' | 'cancelled';
 
 export interface EscrowHold {
     id: string;

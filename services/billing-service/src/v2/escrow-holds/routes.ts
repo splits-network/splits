@@ -246,8 +246,11 @@ export async function escrowHoldRoutes(
                 return reply.code(401).send({ error: 'Unauthorized' });
             }
 
-            // This endpoint should be called by the automation job or admin only
-            // Additional authentication check would be ideal here (e.g., API key)
+            // Verify admin access before processing
+            const access = await service.resolveAccess(clerkUserId);
+            if (!access.isPlatformAdmin) {
+                return reply.code(403).send({ error: 'Only platform administrators can process due releases' });
+            }
 
             const results = await service.processDueReleases();
             return reply.send({ data: results });

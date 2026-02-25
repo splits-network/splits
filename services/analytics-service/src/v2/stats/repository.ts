@@ -191,16 +191,16 @@ export class StatsRepository {
                     .reduce((sum, s) => sum + Number(s.split_amount || 0), 0);
             }
 
-            // 5. Pending payouts
-            const { data: payouts } = await this.supabase
-                .from('payouts')
-                .select('payout_amount, status')
+            // 5. Pending payouts (from placement_payout_transactions)
+            const { data: pendingTxns } = await this.supabase
+                .from('placement_payout_transactions')
+                .select('amount, status')
                 .eq('recruiter_id', recruiterId)
                 .in('status', ['pending', 'on_hold']);
 
-            if (payouts) {
-                stats.pending_payouts = payouts.reduce(
-                    (sum, p) => sum + Number(p.payout_amount || 0), 0
+            if (pendingTxns) {
+                stats.pending_payouts = pendingTxns.reduce(
+                    (sum, t) => sum + Number(t.amount || 0), 0
                 );
             }
 
@@ -613,13 +613,13 @@ export class StatsRepository {
                     .in('state', ['hired', 'active', 'completed'])
                     .gte('created_at', monthStart.toISOString()),
                 // 9. Pending payouts (count + sum)
-                this.supabase.from('payouts').select('payout_amount').in('status', ['pending', 'on_hold']),
+                this.supabase.from('placement_payout_transactions').select('amount').in('status', ['pending', 'on_hold']),
                 // 10. Paid payouts YTD
-                this.supabase.from('payouts').select('payout_amount').eq('status', 'paid').gte('created_at', yearStart.toISOString()),
+                this.supabase.from('placement_payout_transactions').select('amount').eq('status', 'paid').gte('created_at', yearStart.toISOString()),
                 // 11. Active fraud signals
                 this.supabase.from('fraud_signals').select('*', { count: 'exact', head: true }).eq('status', 'active'),
                 // 12. Active escrow holds
-                this.supabase.from('escrow_holds').select('amount').eq('status', 'active'),
+                this.supabase.from('escrow_holds').select('hold_amount').eq('status', 'active'),
                 // 13. Pending recruiter approvals
                 this.supabase.from('recruiters').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
                 // 14. New signups this month
@@ -678,20 +678,20 @@ export class StatsRepository {
             const pendingPayouts = pendingPayoutsResult.data || [];
             stats.pending_payouts_count = pendingPayouts.length;
             stats.pending_payouts_amount = pendingPayouts.reduce(
-                (sum, p) => sum + Number(p.payout_amount || 0), 0
+                (sum, p) => sum + Number(p.amount || 0), 0
             );
 
             // Paid payouts YTD
             const paidPayouts = paidPayoutsYtdResult.data || [];
             stats.total_payouts_processed_ytd = paidPayouts.reduce(
-                (sum, p) => sum + Number(p.payout_amount || 0), 0
+                (sum, p) => sum + Number(p.amount || 0), 0
             );
 
             // Escrow holds
             const escrowHolds = escrowResult.data || [];
             stats.active_escrow_holds = escrowHolds.length;
             stats.active_escrow_amount = escrowHolds.reduce(
-                (sum, e) => sum + Number(e.amount || 0), 0
+                (sum, e) => sum + Number(e.hold_amount || 0), 0
             );
 
             // Subscriptions
@@ -790,8 +790,8 @@ export class StatsRepository {
                     .select('id, signal_type, severity, created_at')
                     .eq('status', 'active')
                     .order('created_at', { ascending: false }).limit(10),
-                this.supabase.from('payouts')
-                    .select('id, payout_amount, status, created_at')
+                this.supabase.from('placement_payout_transactions')
+                    .select('id, amount, status, created_at')
                     .eq('status', 'paid')
                     .order('created_at', { ascending: false }).limit(10),
             ]);
@@ -847,7 +847,7 @@ export class StatsRepository {
                 events.push({
                     type: 'payout',
                     title: 'Payout processed',
-                    description: `$${Number(p.payout_amount || 0).toLocaleString()} paid out`,
+                    description: `$${Number(p.amount || 0).toLocaleString()} paid out`,
                     href: `/portal/admin/payouts/audit`,
                     created_at: p.created_at,
                 });

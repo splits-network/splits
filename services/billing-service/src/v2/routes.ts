@@ -5,7 +5,6 @@ import { PlanRepository } from './plans/repository';
 import { PlanServiceV2 } from './plans/service';
 import { SubscriptionRepository } from './subscriptions/repository';
 import { SubscriptionServiceV2 } from './subscriptions/service';
-import { PayoutRepository } from './payouts/repository';
 import { PayoutServiceV2 } from './payouts/service';
 import { PayoutScheduleServiceV2 } from './payout-schedules/service';
 import { EscrowHoldServiceV2 } from './escrow-holds/service';
@@ -42,7 +41,6 @@ interface BillingV2Config {
 export async function registerV2Routes(app: FastifyInstance, config: BillingV2Config) {
     const planRepository = new PlanRepository(config.supabaseUrl, config.supabaseKey);
     const subscriptionRepository = new SubscriptionRepository(config.supabaseUrl, config.supabaseKey);
-    const payoutRepository = new PayoutRepository(config.supabaseUrl, config.supabaseKey);
     const accessClient = createClient(config.supabaseUrl, config.supabaseKey);
     const accessResolver = (clerkUserId: string) => resolveAccessContext(accessClient, clerkUserId);
 
@@ -96,10 +94,9 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         accessResolver
     );
     const payoutService = new PayoutServiceV2(
-        payoutRepository,
-        snapshotRepository,  // Phase 6: Wire in PlacementSnapshotRepository
-        splitRepository,     // Phase 6: Wire in PlacementSplitRepository
-        transactionRepository, // Phase 6: Wire in PlacementPayoutTransactionRepository
+        snapshotRepository,
+        splitRepository,
+        transactionRepository,
         recruiterConnectRepository,
         accessResolver,
         config.eventPublisher

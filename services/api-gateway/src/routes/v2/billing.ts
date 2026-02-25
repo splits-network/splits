@@ -18,12 +18,6 @@ const BILLING_RESOURCES: ResourceDefinition[] = [
         tag: 'billing',
     },
     {
-        name: 'payouts',
-        service: 'billing',
-        basePath: '/payouts',
-        tag: 'billing',
-    },
-    {
         name: 'payout-schedules',
         service: 'billing',
         basePath: '/payout-schedules',
@@ -465,6 +459,33 @@ function registerStripeConnectRoutes(app: FastifyInstance, services: ServiceRegi
 
 function registerPayoutTransactionRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/payout-transactions',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const queryString = new URL(request.url, 'http://localhost').search;
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/payout-transactions${queryString}`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to list payout transactions');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to list payout transactions' } });
+            }
+        }
+    );
 
     app.post(
         '/api/v2/payout-transactions/:id/process',

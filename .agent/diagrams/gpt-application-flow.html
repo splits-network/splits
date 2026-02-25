@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Copilot GPT — Application Flow Architecture</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-card: #1a1d27;
+    --bg-card-hover: #222633;
+    --border: #2a2e3d;
+    --border-highlight: #4a9eff;
+    --text: #e1e4ed;
+    --text-muted: #8b8fa3;
+    --text-heading: #ffffff;
+    --green: #34d399;
+    --green-dim: #065f46;
+    --green-glow: rgba(52, 211, 153, 0.15);
+    --orange: #fb923c;
+    --orange-dim: #7c2d12;
+    --orange-glow: rgba(251, 146, 60, 0.15);
+    --blue: #60a5fa;
+    --blue-dim: #1e3a5f;
+    --blue-glow: rgba(96, 165, 250, 0.15);
+    --purple: #a78bfa;
+    --purple-dim: #3b2e6e;
+    --purple-glow: rgba(167, 139, 250, 0.15);
+    --red: #f87171;
+    --red-dim: #7f1d1d;
+    --yellow: #fbbf24;
+    --cyan: #22d3ee;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #13151f 0%, var(--bg) 100%);
+  }
+
+  header h1 {
+    font-size: 1.75rem;
+    color: var(--text-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .controls button {
+    background: var(--bg-card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+
+  .controls button:hover, .controls button.active {
+    border-color: var(--border-highlight);
+    background: var(--bg-card-hover);
+    color: var(--text-heading);
+  }
+
+  .controls button.active {
+    box-shadow: 0 0 8px rgba(74, 158, 255, 0.25);
+  }
+
+  .diagram-container {
+    width: 100%;
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  svg {
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  /* Stage flow */
+  .stage-flow {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .stage-flow h2 {
+    font-size: 1.1rem;
+    color: var(--text-heading);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .stage-track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .stage-node {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.7rem;
+    border-radius: 5px;
+    font-size: 0.72rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+    white-space: nowrap;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+
+  .stage-node.highlight {
+    border-color: var(--green);
+    background: var(--green-dim);
+    color: var(--green);
+  }
+
+  .stage-arrow {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+  }
+
+  .stage-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .stage-branch-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+
+  /* Failure points */
+  .failure-section {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 0 1rem 2rem;
+  }
+
+  .failure-section h2 {
+    font-size: 1.1rem;
+    color: var(--text-heading);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .failure-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .failure-card {
+    background: var(--bg-card);
+    border: 1px solid var(--orange-dim);
+    border-left: 3px solid var(--orange);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+  }
+
+  .failure-card h3 {
+    font-size: 0.85rem;
+    color: var(--orange);
+    margin-bottom: 0.25rem;
+  }
+
+  .failure-card p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* Print styles */
+  @media print {
+    body { background: #fff; color: #1a1a1a; }
+    header { background: none; border-bottom-color: #ccc; }
+    header h1 { color: #111; }
+    header p, .controls { display: none; }
+    .legend { border-top-color: #ccc; }
+    .legend-item { color: #555; }
+    .failure-card { border-color: #ddd; background: #f9f9f9; }
+    .failure-card h3 { color: #c2410c; }
+    .failure-card p { color: #555; }
+    .stage-node { background: #f3f3f3; border-color: #ccc; color: #333; }
+    .stage-node.highlight { background: #d1fae5; border-color: #10b981; color: #065f46; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Career Copilot GPT &mdash; Application Flow Architecture</h1>
+  <p>Complete request flow from ChatGPT Custom GPT through backend services</p>
+</header>
+
+<div class="controls">
+  <button class="active" data-flow="all">All Flows</button>
+  <button data-flow="search">Flow 1: Job Search</button>
+  <button data-flow="apply">Flow 2: Application Submit</button>
+  <button data-flow="status">Flow 3: App Status</button>
+  <button data-flow="resume">Flow 4: Resume Analysis</button>
+  <button data-flow="async">Async: AI Pipeline</button>
+</div>
+
+<div class="diagram-container">
+<svg id="diagram" viewBox="0 0 1300 820" width="1300" height="820" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Arrowheads -->
+    <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#34d399" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#60a5fa" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#a78bfa" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#fb923c" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#22d3ee" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#8b8fa3" stroke-width="1.2"/>
+    </marker>
+    <marker id="arrow-yellow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#fbbf24" stroke-width="1.2"/>
+    </marker>
+
+    <!-- Glow filters -->
+    <filter id="glow-green"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#34d399" flood-opacity="0.4"/></filter>
+    <filter id="glow-blue"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#60a5fa" flood-opacity="0.4"/></filter>
+    <filter id="glow-purple"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#a78bfa" flood-opacity="0.4"/></filter>
+    <filter id="glow-orange"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#fb923c" flood-opacity="0.4"/></filter>
+    <filter id="glow-cyan"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#22d3ee" flood-opacity="0.4"/></filter>
+  </defs>
+
+  <!-- Background grid -->
+  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e2130" stroke-width="0.5"/>
+  </pattern>
+  <rect width="100%" height="100%" fill="url(#grid)" opacity="0.5"/>
+
+  <!-- ==================== COMPONENT BOXES ==================== -->
+
+  <!-- User -->
+  <g class="component" data-id="user" style="cursor:pointer">
+    <rect x="30" y="90" width="140" height="60" rx="8" fill="#1a1d27" stroke="#4a9eff" stroke-width="1.5"/>
+    <text x="100" y="115" text-anchor="middle" fill="#e1e4ed" font-size="13" font-weight="600">ChatGPT User</text>
+    <text x="100" y="133" text-anchor="middle" fill="#8b8fa3" font-size="10">Candidate</text>
+  </g>
+
+  <!-- ChatGPT GPT -->
+  <g class="component" data-id="gpt" style="cursor:pointer">
+    <rect x="220" y="70" width="170" height="100" rx="8" fill="#1a1d27" stroke="#34d399" stroke-width="1.5"/>
+    <text x="305" y="98" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">CHATGPT CUSTOM GPT</text>
+    <text x="305" y="116" text-anchor="middle" fill="#e1e4ed" font-size="12" font-weight="500">Career Copilot</text>
+    <text x="305" y="133" text-anchor="middle" fill="#8b8fa3" font-size="9.5">Instructions &lt;8000 chars</text>
+    <text x="305" y="147" text-anchor="middle" fill="#8b8fa3" font-size="9.5">OpenAPI Actions Schema</text>
+    <text x="305" y="161" text-anchor="middle" fill="#fb923c" font-size="9.5">! OAuth config required</text>
+  </g>
+
+  <!-- OpenAI Servers -->
+  <g class="component" data-id="openai" style="cursor:pointer">
+    <rect x="440" y="85" width="160" height="70" rx="8" fill="#1a1d27" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="520" y="112" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700">OPENAI SERVERS</text>
+    <text x="520" y="130" text-anchor="middle" fill="#e1e4ed" font-size="11">Action Executor</text>
+    <text x="520" y="145" text-anchor="middle" fill="#8b8fa3" font-size="9.5">Calls registered endpoints</text>
+  </g>
+
+  <!-- API Gateway -->
+  <g class="component" data-id="gateway" style="cursor:pointer">
+    <rect x="650" y="65" width="200" height="110" rx="8" fill="#1a1d27" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="750" y="90" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700">API GATEWAY</text>
+    <rect x="665" y="100" width="170" height="22" rx="4" fill="#1e3a5f"/>
+    <text x="750" y="115" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="Consolas, monospace">api.applicant.network</text>
+    <rect x="665" y="126" width="170" height="22" rx="4" fill="#1e3a5f"/>
+    <text x="750" y="141" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="Consolas, monospace">api.staging.applicant.network</text>
+    <text x="750" y="166" text-anchor="middle" fill="#fb923c" font-size="9.5">! /api/v1/gpt/* routes</text>
+  </g>
+
+  <!-- GPT Service -->
+  <g class="component" data-id="gpt-service" style="cursor:pointer">
+    <rect x="910" y="65" width="180" height="110" rx="8" fill="#1a1d27" stroke="#34d399" stroke-width="1.5"/>
+    <text x="1000" y="90" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">GPT SERVICE</text>
+    <text x="1000" y="110" text-anchor="middle" fill="#e1e4ed" font-size="10">Fastify + TypeScript</text>
+    <line x1="925" y1="120" x2="1075" y2="120" stroke="#2a2e3d" stroke-width="0.5"/>
+    <text x="1000" y="137" text-anchor="middle" fill="#8b8fa3" font-size="9">searchJobs()</text>
+    <text x="1000" y="150" text-anchor="middle" fill="#8b8fa3" font-size="9">submitApplication()</text>
+    <text x="1000" y="163" text-anchor="middle" fill="#8b8fa3" font-size="9">getApplications() | analyzeResume()</text>
+  </g>
+
+  <!-- Supabase -->
+  <g class="component" data-id="supabase" style="cursor:pointer">
+    <rect x="910" y="230" width="180" height="80" rx="8" fill="#1a1d27" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="1000" y="257" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="700">SUPABASE POSTGRES</text>
+    <text x="1000" y="275" text-anchor="middle" fill="#e1e4ed" font-size="10">jobs, applications,</text>
+    <text x="1000" y="290" text-anchor="middle" fill="#e1e4ed" font-size="10">pre_screen_answers</text>
+  </g>
+
+  <!-- RabbitMQ -->
+  <g class="component" data-id="rabbitmq" style="cursor:pointer">
+    <rect x="650" y="230" width="200" height="80" rx="8" fill="#1a1d27" stroke="#fb923c" stroke-width="1.5"/>
+    <text x="750" y="257" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">RABBITMQ</text>
+    <text x="750" y="275" text-anchor="middle" fill="#e1e4ed" font-size="10">Event Bus</text>
+    <text x="750" y="290" text-anchor="middle" fill="#fb923c" font-size="9.5">! Connection required</text>
+  </g>
+
+  <!-- AI Service -->
+  <g class="component" data-id="ai-service" style="cursor:pointer">
+    <rect x="440" y="230" width="160" height="80" rx="8" fill="#1a1d27" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="520" y="257" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700">AI SERVICE</text>
+    <text x="520" y="275" text-anchor="middle" fill="#e1e4ed" font-size="10">AI Review Pipeline</text>
+    <text x="520" y="290" text-anchor="middle" fill="#fb923c" font-size="9.5">! Must be listening</text>
+  </g>
+
+  <!-- ATS Service -->
+  <g class="component" data-id="ats-service" style="cursor:pointer">
+    <rect x="220" y="230" width="170" height="80" rx="8" fill="#1a1d27" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="305" y="257" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700">ATS SERVICE</text>
+    <text x="305" y="275" text-anchor="middle" fill="#e1e4ed" font-size="10">Stage Management</text>
+    <text x="305" y="290" text-anchor="middle" fill="#8b8fa3" font-size="9.5">ai_review.completed consumer</text>
+  </g>
+
+  <!-- OpenAI (for resume) -->
+  <g class="component" data-id="openai-api" style="cursor:pointer">
+    <rect x="1140" y="230" width="140" height="80" rx="8" fill="#1a1d27" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="1210" y="257" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700">OPENAI API</text>
+    <text x="1210" y="275" text-anchor="middle" fill="#e1e4ed" font-size="10">GPT-4 / Embeddings</text>
+    <text x="1210" y="290" text-anchor="middle" fill="#8b8fa3" font-size="9.5">Resume + AI Review</text>
+  </g>
+
+  <!-- ==================== FLOW CONNECTIONS ==================== -->
+
+  <!-- === Flow 1: Job Search (green) === -->
+  <g class="flow" data-flow="search">
+    <path d="M170,120 L218,120" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+    <path d="M390,120 L438,120" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+    <path d="M600,120 L648,120" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+    <path d="M850,120 L908,120" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+    <path d="M1000,175 L1000,228" fill="none" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+  </g>
+
+  <!-- === Flow 2: Application (blue) - uses same horizontal path but show confirmation loop === -->
+  <g class="flow" data-flow="apply">
+    <!-- Forward path -->
+    <path d="M170,120 L218,120" fill="none" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="6,3"/>
+    <path d="M390,120 L438,120" fill="none" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="6,3"/>
+    <path d="M600,120 L648,120" fill="none" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="6,3"/>
+    <path d="M850,120 L908,120" fill="none" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="6,3"/>
+    <!-- DB check -->
+    <path d="M1000,175 L1000,228" fill="none" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" stroke-dasharray="6,3"/>
+    <!-- RabbitMQ publish -->
+    <path d="M910,160 L860,220 L852,228" fill="none" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrow-orange)"/>
+  </g>
+
+  <!-- === Async pipeline (purple) === -->
+  <g class="flow" data-flow="async">
+    <!-- RabbitMQ → AI Service -->
+    <path d="M650,270 L602,270" fill="none" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+    <!-- AI Service → OpenAI API (via GPT service area) -->
+    <path d="M520,310 L520,345 L1210,345 L1210,312" fill="none" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-purple)" stroke-dasharray="5,3"/>
+    <!-- AI Service → RabbitMQ (publishes ai_review.completed) -->
+    <path d="M560,310 L560,330 L680,330 L680,312" fill="none" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrow-orange)"/>
+    <!-- RabbitMQ → ATS Service -->
+    <path d="M650,260 L392,260" fill="none" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+  </g>
+
+  <!-- === Flow 3: Status (cyan) === -->
+  <g class="flow" data-flow="status">
+    <path d="M170,120 L218,120" fill="none" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" stroke-dasharray="2,4"/>
+    <path d="M390,120 L438,120" fill="none" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" stroke-dasharray="2,4"/>
+    <path d="M600,120 L648,120" fill="none" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" stroke-dasharray="2,4"/>
+    <path d="M850,120 L908,120" fill="none" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" stroke-dasharray="2,4"/>
+    <path d="M1000,175 L1000,228" fill="none" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" stroke-dasharray="2,4"/>
+  </g>
+
+  <!-- === Flow 4: Resume (yellow) === -->
+  <g class="flow" data-flow="resume">
+    <path d="M170,120 L218,120" fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-yellow)" stroke-dasharray="8,4"/>
+    <path d="M390,120 L438,120" fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-yellow)" stroke-dasharray="8,4"/>
+    <path d="M600,120 L648,120" fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-yellow)" stroke-dasharray="8,4"/>
+    <path d="M850,120 L908,120" fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-yellow)" stroke-dasharray="8,4"/>
+    <!-- GPT Service → OpenAI API -->
+    <path d="M1090,150 L1210,150 L1210,228" fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-yellow)" stroke-dasharray="8,4"/>
+  </g>
+
+  <!-- ==================== FLOW DETAIL PANELS ==================== -->
+
+  <!-- Flow 1 Detail: Job Search -->
+  <g class="flow-detail" data-flow="search">
+    <rect x="30" y="400" width="560" height="100" rx="8" fill="#0d1f0d" stroke="#34d399" stroke-width="1" opacity="0.95"/>
+    <text x="50" y="425" fill="#34d399" font-size="12" font-weight="700">Flow 1: Job Search</text>
+    <text x="50" y="445" fill="#e1e4ed" font-size="10" font-family="Consolas, monospace">User asks "Find React jobs in NYC"</text>
+    <text x="50" y="460" fill="#8b8fa3" font-size="10">  GPT extracts: keywords=["React"], location="NYC"</text>
+    <text x="50" y="475" fill="#8b8fa3" font-size="10">  OpenAI calls: POST /api/v1/gpt/search-jobs {keywords, location, ...}</text>
+    <text x="50" y="490" fill="#34d399" font-size="10">  GPT Service queries jobs table with filters, returns rich formatted results</text>
+  </g>
+
+  <!-- Flow 2 Detail: Application -->
+  <g class="flow-detail" data-flow="apply">
+    <rect x="30" y="400" width="1250" height="195" rx="8" fill="#0d1520" stroke="#60a5fa" stroke-width="1" opacity="0.95"/>
+    <text x="50" y="425" fill="#60a5fa" font-size="12" font-weight="700">Flow 2: Application Submission (Two-Step Confirmation)</text>
+
+    <text x="50" y="448" fill="#fbbf24" font-size="11" font-weight="600">Step 1 — Confirmation Request</text>
+    <text x="50" y="465" fill="#8b8fa3" font-size="10">  OpenAI calls: POST /api/v1/gpt/apply { confirmed: false, jobId, answers }</text>
+    <text x="50" y="480" fill="#8b8fa3" font-size="10">  GPT Service: check duplicates (Supabase) → fetch job details → generate HMAC token → return summary</text>
+
+    <text x="50" y="505" fill="#34d399" font-size="11" font-weight="600">Step 2 — Confirmed Execution</text>
+    <text x="50" y="522" fill="#8b8fa3" font-size="10">  OpenAI calls: POST /api/v1/gpt/apply { confirmed: true, confirmationToken, jobId, answers }</text>
+    <text x="50" y="537" fill="#8b8fa3" font-size="10">  GPT Service: validate HMAC → re-check duplicates → branch:</text>
+    <text x="50" y="555" fill="#a78bfa" font-size="10">    IF recruiter_proposed: acceptProposalForReview() → update app stage to 'ai_review' → publish 'application.stage_changed'</text>
+    <text x="50" y="573" fill="#a78bfa" font-size="10">    ELSE: createApplication() → insert new app (stage: 'ai_review') → publish 'application.created'</text>
+    <text x="50" y="588" fill="#8b8fa3" font-size="10">  Save pre-screen answers to Supabase → return AI_REVIEW status</text>
+  </g>
+
+  <!-- Flow 3 Detail: Status -->
+  <g class="flow-detail" data-flow="status">
+    <rect x="30" y="400" width="560" height="80" rx="8" fill="#0d1f1f" stroke="#22d3ee" stroke-width="1" opacity="0.95"/>
+    <text x="50" y="425" fill="#22d3ee" font-size="12" font-weight="700">Flow 3: Application Status</text>
+    <text x="50" y="445" fill="#e1e4ed" font-size="10" font-family="Consolas, monospace">User asks "What's the status of my applications?"</text>
+    <text x="50" y="462" fill="#8b8fa3" font-size="10">  OpenAI calls: GET /api/v1/gpt/applications</text>
+    <text x="50" y="477" fill="#22d3ee" font-size="10">  GPT Service queries applications by candidate clerkUserId, returns list with stages</text>
+  </g>
+
+  <!-- Flow 4 Detail: Resume -->
+  <g class="flow-detail" data-flow="resume">
+    <rect x="30" y="400" width="560" height="100" rx="8" fill="#1f1a0d" stroke="#fbbf24" stroke-width="1" opacity="0.95"/>
+    <text x="50" y="425" fill="#fbbf24" font-size="12" font-weight="700">Flow 4: Resume Analysis</text>
+    <text x="50" y="445" fill="#e1e4ed" font-size="10" font-family="Consolas, monospace">User shares resume text in chat</text>
+    <text x="50" y="462" fill="#8b8fa3" font-size="10">  OpenAI calls: POST /api/v1/gpt/analyze-resume { resumeText }</text>
+    <text x="50" y="477" fill="#8b8fa3" font-size="10">  GPT Service forwards to OpenAI API (GPT-4) for structured analysis</text>
+    <text x="50" y="492" fill="#fbbf24" font-size="10">  Returns skills, experience, suggestions — used to improve applications</text>
+  </g>
+
+  <!-- Async Detail: AI Pipeline -->
+  <g class="flow-detail" data-flow="async">
+    <rect x="30" y="400" width="800" height="140" rx="8" fill="#1a0d20" stroke="#a78bfa" stroke-width="1" opacity="0.95"/>
+    <text x="50" y="425" fill="#a78bfa" font-size="12" font-weight="700">Async: AI Review Pipeline (post-application)</text>
+
+    <text x="50" y="450" fill="#fb923c" font-size="11" font-weight="600">Event: application.created / application.stage_changed {stage: 'ai_review'}</text>
+
+    <text x="50" y="472" fill="#8b8fa3" font-size="10">1. RabbitMQ delivers event to AI Service consumer</text>
+    <text x="50" y="487" fill="#8b8fa3" font-size="10">2. AI Service enriches candidate data, calls OpenAI for structured review</text>
+    <text x="50" y="502" fill="#8b8fa3" font-size="10">3. AI Service saves review to Supabase, publishes 'ai_review.completed' to RabbitMQ</text>
+    <text x="50" y="517" fill="#8b8fa3" font-size="10">4. ATS Service consumes 'ai_review.completed' → moves application to 'ai_reviewed' stage</text>
+    <text x="50" y="535" fill="#34d399" font-size="10">Result: Application automatically progresses from ai_review → ai_reviewed without human intervention</text>
+  </g>
+
+  <!-- ==================== ENVIRONMENT LABELS ==================== -->
+  <g>
+    <rect x="30" y="15" width="110" height="28" rx="5" fill="#065f46" stroke="#34d399" stroke-width="1"/>
+    <text x="85" y="34" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">Production</text>
+
+    <rect x="155" y="15" width="110" height="28" rx="5" fill="#7c2d12" stroke="#fb923c" stroke-width="1"/>
+    <text x="210" y="34" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="600">Staging</text>
+
+    <text x="285" y="34" fill="#8b8fa3" font-size="10">Both environments share the same architecture; only hostnames differ</text>
+  </g>
+
+  <!-- ==================== OAUTH FLOW CALLOUT ==================== -->
+  <g class="component" data-id="oauth" style="cursor:pointer">
+    <rect x="440" y="10" width="160" height="40" rx="6" fill="#1a1d27" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="520" y="28" text-anchor="middle" fill="#fb923c" font-size="10" font-weight="600">OAuth / Clerk Token</text>
+    <text x="520" y="42" text-anchor="middle" fill="#8b8fa3" font-size="9">! Token exchange</text>
+  </g>
+
+  <!-- Connection from OAuth to Gateway -->
+  <path d="M520,50 L520,65 L710,65" fill="none" stroke="#fb923c" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrow-orange)"/>
+
+  <!-- HMAC Token callout -->
+  <g class="component" data-id="hmac" style="cursor:pointer">
+    <rect x="1120" y="65" width="160" height="50" rx="6" fill="#1a1d27" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="1200" y="85" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">HMAC Confirmation</text>
+    <text x="1200" y="100" text-anchor="middle" fill="#8b8fa3" font-size="9">Stateless token validation</text>
+    <text x="1200" y="112" text-anchor="middle" fill="#8b8fa3" font-size="9">SHA-256 signed</text>
+  </g>
+  <path d="M1090,100 L1118,95" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrow-yellow)"/>
+
+</svg>
+</div>
+
+<!-- Application Stage Flow -->
+<div class="stage-flow">
+  <h2>Application Stage Progression</h2>
+  <div style="display:flex; flex-direction:column; gap:1rem; align-items:center;">
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <span class="stage-node" style="border-color:#a78bfa; color:#a78bfa;">recruiter_proposed</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="stage-node highlight">ai_review</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="stage-node highlight">ai_reviewed</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="stage-node">submitted</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="stage-node">under_review</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="stage-node">interviewing</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="stage-node">offer</span>
+      <span class="stage-arrow">&rarr;</span>
+      <div class="stage-branch">
+        <span class="stage-node" style="border-color:#34d399; color:#34d399;">hired</span>
+        <span class="stage-node" style="border-color:#f87171; color:#f87171;">not_selected</span>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <span class="stage-node" style="border-color:#60a5fa; color:#60a5fa;">new application</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="stage-node highlight">ai_review</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span style="color:#8b8fa3; font-size:0.75rem;">(same pipeline)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Failure Points -->
+<div class="failure-section">
+  <h2>Key Integration Points / Potential Failure Points</h2>
+  <div class="failure-grid">
+    <div class="failure-card">
+      <h3>1. GPT Builder Configuration</h3>
+      <p>Instructions must be &lt;8000 characters. OpenAPI schema must be imported correctly. OAuth authentication must be configured with Clerk credentials.</p>
+    </div>
+    <div class="failure-card">
+      <h3>2. OAuth / Clerk Token Exchange</h3>
+      <p>ChatGPT must exchange tokens with Clerk. If the OAuth callback URL or client credentials are wrong, all authenticated actions fail silently.</p>
+    </div>
+    <div class="failure-card">
+      <h3>3. API Gateway Routing</h3>
+      <p><code>/api/v1/gpt/*</code> routes must be configured in the gateway. POST/DELETE body re-serialization must be handled correctly.</p>
+    </div>
+    <div class="failure-card">
+      <h3>4. RabbitMQ Connection</h3>
+      <p>GPT Service must have an active RabbitMQ connection to publish <code>application.created</code> and <code>application.stage_changed</code> events.</p>
+    </div>
+    <div class="failure-card">
+      <h3>5. AI Service Consumer</h3>
+      <p>AI Service must be running and listening for events where stage = 'ai_review'. If down, applications stall at ai_review indefinitely.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#34d399"></div>
+    <span>Job Search Flow</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#60a5fa"></div>
+    <span>Application Flow</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#22d3ee"></div>
+    <span>Status Check Flow</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#fbbf24"></div>
+    <span>Resume Analysis Flow</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#a78bfa"></div>
+    <span>Async AI Pipeline</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#fb923c"></div>
+    <span>Potential Failure Point</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#fb923c; opacity:0.5; border: 1px dashed #fb923c;"></div>
+    <span>External Dependency</span>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Flow visibility control
+  const buttons = document.querySelectorAll('.controls button');
+  const flows = document.querySelectorAll('.flow');
+  const flowDetails = document.querySelectorAll('.flow-detail');
+  const components = document.querySelectorAll('.component');
+
+  function showFlow(flowName) {
+    flows.forEach(f => {
+      if (flowName === 'all') {
+        f.style.opacity = '1';
+      } else {
+        f.style.opacity = f.dataset.flow === flowName ? '1' : '0.08';
+      }
+    });
+    flowDetails.forEach(fd => {
+      if (flowName === 'all') {
+        fd.style.display = 'none';
+      } else {
+        fd.style.display = fd.dataset.flow === flowName ? 'block' : 'none';
+      }
+    });
+  }
+
+  // Initialize: hide all flow details
+  flowDetails.forEach(fd => fd.style.display = 'none');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      showFlow(btn.dataset.flow);
+    });
+  });
+
+  // Component click highlighting
+  const componentFlowMap = {
+    'user': ['search', 'apply', 'status', 'resume'],
+    'gpt': ['search', 'apply', 'status', 'resume'],
+    'openai': ['search', 'apply', 'status', 'resume'],
+    'gateway': ['search', 'apply', 'status', 'resume'],
+    'gpt-service': ['search', 'apply', 'status', 'resume'],
+    'supabase': ['search', 'apply', 'status', 'async'],
+    'rabbitmq': ['apply', 'async'],
+    'ai-service': ['async'],
+    'ats-service': ['async'],
+    'openai-api': ['resume', 'async'],
+    'oauth': ['apply', 'status', 'resume', 'search'],
+    'hmac': ['apply']
+  };
+
+  let activeComponent = null;
+
+  components.forEach(comp => {
+    comp.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = comp.dataset.id;
+
+      if (activeComponent === id) {
+        // Deselect
+        activeComponent = null;
+        components.forEach(c => {
+          c.querySelector('rect').style.filter = '';
+          c.style.opacity = '1';
+        });
+        // Reset to current button state
+        const activeBtn = document.querySelector('.controls button.active');
+        showFlow(activeBtn.dataset.flow);
+        return;
+      }
+
+      activeComponent = id;
+      const relatedFlows = componentFlowMap[id] || [];
+
+      // Dim unrelated components
+      components.forEach(c => {
+        const cid = c.dataset.id;
+        const cFlows = componentFlowMap[cid] || [];
+        const hasOverlap = cFlows.some(f => relatedFlows.includes(f));
+        c.style.opacity = (cid === id || hasOverlap) ? '1' : '0.25';
+        if (cid === id) {
+          const rect = c.querySelector('rect');
+          const color = getComputedStyle(rect).stroke;
+          rect.style.filter = `drop-shadow(0 0 8px ${color})`;
+        } else {
+          c.querySelector('rect').style.filter = '';
+        }
+      });
+
+      // Show related flows
+      flows.forEach(f => {
+        f.style.opacity = relatedFlows.includes(f.dataset.flow) ? '1' : '0.08';
+      });
+
+      // Hide flow details on component click
+      flowDetails.forEach(fd => fd.style.display = 'none');
+    });
+  });
+
+  // Click on SVG background to deselect
+  document.getElementById('diagram').addEventListener('click', () => {
+    if (activeComponent) {
+      activeComponent = null;
+      components.forEach(c => {
+        c.querySelector('rect').style.filter = '';
+        c.style.opacity = '1';
+      });
+      const activeBtn = document.querySelector('.controls button.active');
+      showFlow(activeBtn.dataset.flow);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

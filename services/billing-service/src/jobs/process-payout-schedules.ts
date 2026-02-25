@@ -15,7 +15,6 @@ import { EventPublisher } from '../v2/shared/events';
 import { PayoutScheduleServiceV2 } from '../v2/payout-schedules/service';
 import { PayoutAuditRepository } from '../v2/audit/repository';
 import { createLogger, Logger } from '@splits-network/shared-logging';
-import { PayoutRepository } from '../v2/payouts/repository';
 import { PayoutServiceV2 } from '../v2/payouts/service';
 import { PlacementSnapshotRepository } from '../v2/placement-snapshot/repository';
 import { PlacementSplitRepository } from '../v2/payouts/placement-split-repository';
@@ -61,14 +60,12 @@ async function main() {
         const auditRepository = new PayoutAuditRepository(supabase);
 
         // Initialize payout service dependencies
-        const payoutRepository = new PayoutRepository(supabaseUrl, supabaseKey);
         const snapshotRepository = new PlacementSnapshotRepository(supabase);
         const splitRepository = new PlacementSplitRepository(supabase);
         const transactionRepository = new PlacementPayoutTransactionRepository(supabase);
         const recruiterConnectRepository = new RecruiterConnectRepository(supabase);
 
         const payoutService = new PayoutServiceV2(
-            payoutRepository,
             snapshotRepository,
             splitRepository,
             transactionRepository,

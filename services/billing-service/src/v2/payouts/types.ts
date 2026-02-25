@@ -2,8 +2,6 @@
  * Payout Domain Types
  */
 
-export type PayoutStatus = 'pending' | 'processing' | 'completed' | 'failed';
-
 /**
  * PayoutRole - Represents which commission role earned this payout
  * Part of the 5-role commission structure
@@ -14,46 +12,6 @@ export type PayoutRole =
     | 'job_owner'            // Specs Owner - created the job posting
     | 'candidate_sourcer'    // Discovery - first brought candidate to platform
     | 'company_sourcer';     // BD - first brought company to platform
-
-export interface Payout {
-    id: string;
-    recruiter_id: string;
-    placement_id: string;
-    payout_amount: number;          // Changed from amount_cents to match DB
-    placement_fee: number;
-    recruiter_share_percentage: number;  // Legacy field for backward compatibility
-    role: PayoutRole | null;        // Which commission role earned this payout
-    status: PayoutStatus;
-    stripe_payout_id: string | null;
-    stripe_connect_account_id: string | null;
-    stripe_transfer_id: string | null;
-    holdback_amount: number | null;
-    holdback_released_at: string | null;
-    processing_started_at: string | null;
-    completed_at: string | null;
-    failed_at: string | null;
-    failure_reason: string | null;
-    created_by: string | null;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface PayoutFilters {
-    recruiter_id?: string;
-    placement_id?: string;
-    role?: PayoutRole;
-    status?: PayoutStatus;
-}
-
-export interface PayoutListFilters extends PayoutFilters {
-    page?: number;
-    limit?: number;
-    sort_by?: string;
-    sort_order?: 'asc' | 'desc';
-}
-
-export type PayoutCreateInput = Omit<Payout, 'id' | 'created_at' | 'updated_at' | 'processing_started_at' | 'completed_at' | 'failed_at'>;
-export type PayoutUpdateInput = Partial<Omit<Payout, 'id' | 'created_at' | 'updated_at'>>;
 
 /**
  * PlacementSplit - Attribution layer (who gets paid what role)

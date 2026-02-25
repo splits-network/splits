@@ -25,22 +25,22 @@ export class PayoutAuditRepository {
 
         // Apply role-based filtering (audit logs visible based on payout access)
         if (isRecruiter(context)) {
-            // Recruiters see audit logs for their payouts
-            const { data: payouts } = await this.supabase
-                .from('payouts')
+            // Recruiters see audit logs for their payout transactions
+            const { data: transactions } = await this.supabase
+                .from('placement_payout_transactions')
                 .select('id')
-                .eq('recruiter_user_id', context.identityUserId);
+                .eq('recruiter_id', context.identityUserId);
 
-            const payoutIds = payouts?.map(p => p.id) || [];
-            if (payoutIds.length === 0) {
+            const transactionIds = transactions?.map(t => t.id) || [];
+            if (transactionIds.length === 0) {
                 return {
                     data: [],
                     pagination: { total: 0, page, limit, total_pages: 0 }
                 };
             }
-            query = query.in('payout_id', payoutIds);
+            query = query.in('payout_id', transactionIds);
         } else if (isCompanyUser(context)) {
-            // Company users see audit logs for their organization's payouts
+            // Company users see audit logs for their organization's payout transactions
             const { data: placements } = await this.supabase
                 .from('placements')
                 .select('id')
@@ -54,19 +54,19 @@ export class PayoutAuditRepository {
                 };
             }
 
-            const { data: payouts } = await this.supabase
-                .from('payouts')
+            const { data: transactions } = await this.supabase
+                .from('placement_payout_transactions')
                 .select('id')
                 .in('placement_id', placementIds);
 
-            const payoutIds = payouts?.map(p => p.id) || [];
-            if (payoutIds.length === 0) {
+            const transactionIds = transactions?.map(t => t.id) || [];
+            if (transactionIds.length === 0) {
                 return {
                     data: [],
                     pagination: { total: 0, page, limit, total_pages: 0 }
                 };
             }
-            query = query.in('payout_id', payoutIds);
+            query = query.in('payout_id', transactionIds);
         }
         // Platform admins see all audit logs (no filter)
 
@@ -142,18 +142,18 @@ export class PayoutAuditRepository {
 
         // Additional role-based access check
         if (data && data.length > 0 && !context.isPlatformAdmin) {
-            // Verify access to this payout
-            const { data: payout } = await this.supabase
-                .from('payouts')
-                .select('recruiter_user_id, placement_id')
+            // Verify access to this payout transaction
+            const { data: transaction } = await this.supabase
+                .from('placement_payout_transactions')
+                .select('recruiter_id, placement_id')
                 .eq('id', payoutId)
                 .single();
 
-            if (!payout) {
+            if (!transaction) {
                 return [];
             }
 
-            if (isRecruiter(context) && payout.recruiter_user_id !== context.identityUserId) {
+            if (isRecruiter(context) && transaction.recruiter_id !== context.identityUserId) {
                 return [];
             }
 
@@ -161,7 +161,7 @@ export class PayoutAuditRepository {
                 const { data: placement } = await this.supabase
                     .from('placements')
                     .select('company_id')
-                    .eq('id', payout.placement_id)
+                    .eq('id', transaction.placement_id)
                     .single();
 
                 if (!placement || !getAccessibleCompanyIds(context).includes(placement.company_id)) {
