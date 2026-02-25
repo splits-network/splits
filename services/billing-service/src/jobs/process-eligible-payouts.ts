@@ -84,6 +84,9 @@ async function main() {
         payoutService
     );
 
+    let created = 0;
+    let processed = 0;
+
     for (const invoice of invoices || []) {
         if (!invoice.placement_id) continue;
         const collectible =
@@ -92,8 +95,37 @@ async function main() {
 
         if (!collectible) continue;
 
-        await payoutScheduleService.processDueSchedulesForPlacement(invoice.placement_id);
+        // Safety net: create a payout schedule if none exists for this placement
+        const { data: existingSchedule } = await supabase
+            .from('payout_schedules')
+            .select('id')
+            .eq('placement_id', invoice.placement_id)
+            .limit(1)
+            .maybeSingle();
+
+        if (!existingSchedule) {
+            const { error: insertError } = await supabase
+                .from('payout_schedules')
+                .insert({
+                    placement_id: invoice.placement_id,
+                    scheduled_date: new Date().toISOString(),
+                    trigger_event: 'eligible_payout_catchup',
+                    status: 'scheduled',
+                    retry_count: 0,
+                });
+
+            if (insertError) {
+                console.error(`Failed to create catchup schedule for ${invoice.placement_id}:`, insertError.message);
+                continue;
+            }
+            created++;
+        }
+
+        const result = await payoutScheduleService.processDueSchedulesForPlacement(invoice.placement_id);
+        processed += result.processed;
     }
+
+    console.log(`Eligible payouts: created ${created} missing schedules, processed ${processed} schedules`);
 
     await eventPublisher.close();
 }

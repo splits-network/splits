@@ -295,16 +295,63 @@ export class BillingEventConsumer {
                 return;
             }
 
-            // Trigger immediate payout processing for this placement
-            // TODO: Create PayoutScheduleServiceV2 instance for immediate processing
-            // For now, this enables faster processing via existing scheduled jobs
+            const placementId = placementInvoice.placement_id;
+
+            // Check if a payout schedule already exists for this placement
+            const { data: existingSchedule } = await this.supabase
+                .from('payout_schedules')
+                .select('id')
+                .eq('placement_id', placementId)
+                .limit(1)
+                .maybeSingle();
+
+            if (existingSchedule) {
+                this.logger.info(
+                    { placement_id: placementId, schedule_id: existingSchedule.id },
+                    'Payout schedule already exists for placement — skipping creation'
+                );
+                return;
+            }
+
+            // Get the invoice's collectible_at date (settlement buffer)
+            const { data: invoiceDetails } = await this.supabase
+                .from('placement_invoices')
+                .select('collectible_at')
+                .eq('stripe_invoice_id', event.stripe_invoice_id)
+                .single();
+
+            const scheduledDate = invoiceDetails?.collectible_at || new Date().toISOString();
+
+            // Create payout schedule so cron jobs can process it
+            const { data: schedule, error: scheduleError } = await this.supabase
+                .from('payout_schedules')
+                .insert({
+                    placement_id: placementId,
+                    scheduled_date: scheduledDate,
+                    trigger_event: 'invoice.paid',
+                    status: 'scheduled',
+                    retry_count: 0,
+                })
+                .select()
+                .single();
+
+            if (scheduleError) {
+                this.logger.error(
+                    { err: scheduleError, placement_id: placementId },
+                    'Failed to create payout schedule for paid invoice'
+                );
+                throw scheduleError;
+            }
+
             this.logger.info(
                 {
-                    placement_id: placementInvoice.placement_id,
+                    placement_id: placementId,
+                    schedule_id: schedule.id,
+                    scheduled_date: scheduledDate,
                     stripe_invoice_id: event.stripe_invoice_id,
                     amount_paid: event.amount_paid,
                 },
-                'Invoice paid - placement eligible for immediate payout processing'
+                'Created payout schedule for paid invoice'
             );
 
         } catch (error) {
