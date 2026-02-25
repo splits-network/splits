@@ -10,7 +10,7 @@ export default function AIMatchesPage() {
     const [matches, setMatches] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const toast = useToast();
-    const { getToken } = useAuth();
+    const { getToken, userId } = useAuth();
 
     useEffect(() => {
         loadMatches();
@@ -54,7 +54,7 @@ export default function AIMatchesPage() {
 
             const client = createAuthenticatedClient(token);
             await client.post(`/automation/matches/${matchId}/review`, {
-                reviewed_by: "admin", // TODO: Get from auth
+                reviewed_by: userId,
                 accepted,
                 rejection_reason: rejectionReason,
             });

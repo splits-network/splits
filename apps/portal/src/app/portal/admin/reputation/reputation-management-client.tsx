@@ -103,7 +103,7 @@ export default function ReputationManagementClient() {
             if (params.sort_by) queryParams.set('sort_by', params.sort_by);
             if (params.sort_order) queryParams.set('sort_order', params.sort_order);
 
-            // TODO: Backend enhancement needed - add ?include=reputation to avoid N+1 queries
+            queryParams.set('include', 'reputation');
             const response = await apiClient.get(`/recruiters?${queryParams.toString()}`);
             return response;
         },

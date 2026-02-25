@@ -13,11 +13,13 @@ import {
     PayoutScheduleCreate,
     PayoutScheduleUpdate,
     PayoutScheduleFilters,
+    PayoutScheduleWithAmount,
 } from './types';
 
 const MAX_RETRY_ATTEMPTS = 3;
 
 export class PayoutScheduleServiceV2 {
+    private supabase: SupabaseClient;
     private repository: PayoutScheduleRepository;
     private eventPublisher: IEventPublisher;
     private auditRepository: PayoutAuditRepository;
@@ -29,6 +31,7 @@ export class PayoutScheduleServiceV2 {
         auditRepository: PayoutAuditRepository,
         private payoutService: PayoutServiceV2
     ) {
+        this.supabase = supabase;
         this.repository = new PayoutScheduleRepository(supabase);
         this.eventPublisher = eventPublisher;
         this.auditRepository = auditRepository;
@@ -36,13 +39,40 @@ export class PayoutScheduleServiceV2 {
     }
 
     /**
-     * List payout schedules with filters
+     * List payout schedules with filters, enriched with transaction amounts
      */
     async list(
         clerkUserId: string,
         params: StandardListParams & { filters?: PayoutScheduleFilters }
-    ): Promise<StandardListResponse<PayoutSchedule>> {
-        return this.repository.list(clerkUserId, params);
+    ): Promise<StandardListResponse<PayoutScheduleWithAmount>> {
+        const result = await this.repository.list(clerkUserId, params);
+
+        if (result.data.length === 0) {
+            return { ...result, data: [] };
+        }
+
+        // Enrich with transaction totals
+        const placementIds = [...new Set(result.data.map(s => s.placement_id))];
+        const { data: totals } = await this.supabase
+            .from('placement_payout_transactions')
+            .select('placement_id, amount')
+            .in('placement_id', placementIds);
+
+        const amountMap = new Map<string, { total: number; count: number }>();
+        for (const row of totals || []) {
+            const entry = amountMap.get(row.placement_id) || { total: 0, count: 0 };
+            entry.total += Number(row.amount) || 0;
+            entry.count += 1;
+            amountMap.set(row.placement_id, entry);
+        }
+
+        const enriched: PayoutScheduleWithAmount[] = result.data.map(schedule => ({
+            ...schedule,
+            total_amount: amountMap.get(schedule.placement_id)?.total || 0,
+            transaction_count: amountMap.get(schedule.placement_id)?.count || 0,
+        }));
+
+        return { ...result, data: enriched };
     }
 
     /**
@@ -65,17 +95,16 @@ export class PayoutScheduleServiceV2 {
         // Create schedule
         const schedule = await this.repository.create(clerkUserId, scheduleData);
 
-        // Log schedule creation (not payout creation - that happens during processing)
-        if (schedule.payout_id) {
-            await this.auditRepository.logAction(
-                schedule.payout_id,
-                'create_schedule',
-                'Created payout schedule',
-                { trigger_event: schedule.trigger_event, scheduled_date: schedule.scheduled_date, placement_id: schedule.placement_id },
-                clerkUserId,
-                'platform_admin'
-            );
-        }
+        // Log schedule creation
+        await this.auditRepository.logScheduleAction(
+            schedule.id,
+            schedule.placement_id,
+            'create_schedule',
+            'Created payout schedule',
+            { trigger_event: schedule.trigger_event, scheduled_date: schedule.scheduled_date },
+            clerkUserId,
+            'platform_admin'
+        );
 
         // Publish event
         await this.eventPublisher.publish('payout_schedule.created', {
@@ -114,17 +143,16 @@ export class PayoutScheduleServiceV2 {
         // Update schedule
         const schedule = await this.repository.update(id, clerkUserId, updates);
 
-        // Log update to audit log if payout exists
-        if (schedule.payout_id) {
-            await this.auditRepository.logAction(
-                schedule.payout_id,
-                'update_schedule',
-                `Updated payout schedule`,
-                updates,
-                clerkUserId,
-                'platform_admin'
-            );
-        }
+        // Log update to audit log
+        await this.auditRepository.logScheduleAction(
+            schedule.id,
+            schedule.placement_id,
+            'update_schedule',
+            'Updated payout schedule',
+            updates,
+            clerkUserId,
+            'platform_admin'
+        );
 
         // Publish event
         await this.eventPublisher.publish('payout_schedule.updated', {
@@ -170,17 +198,16 @@ export class PayoutScheduleServiceV2 {
             throw new Error('Payout schedule not found');
         }
 
-        // Log deletion to audit log if payout exists
-        if (schedule.payout_id) {
-            await this.auditRepository.logAction(
-                schedule.payout_id,
-                'delete_schedule',
-                `Payout schedule deleted by admin`,
-                undefined,
-                clerkUserId,
-                'platform_admin'
-            );
-        }
+        // Log deletion to audit log
+        await this.auditRepository.logScheduleAction(
+            schedule.id,
+            schedule.placement_id,
+            'delete_schedule',
+            'Payout schedule deleted by admin',
+            undefined,
+            clerkUserId,
+            'platform_admin'
+        );
 
         await this.repository.delete(id, clerkUserId);
 
@@ -274,18 +301,16 @@ export class PayoutScheduleServiceV2 {
     /**
      * Process a single schedule
      */
-    private async processSchedule(schedule: PayoutSchedule): Promise<void> {
+    private async processSchedule(schedule: PayoutSchedule, callerClerkUserId?: string): Promise<void> {
         // Mark as processing
         await this.repository.markProcessing(schedule.id);
 
-        // Log processing start if payout exists
-        if (schedule.payout_id) {
-            await this.auditRepository.logProcessing(
-                schedule.payout_id,
-                undefined,
-                { schedule_id: schedule.id, trigger_event: schedule.trigger_event }
-            );
-        }
+        // Log processing start
+        await this.auditRepository.logScheduleProcessing(
+            schedule.id,
+            schedule.placement_id,
+            { trigger_event: schedule.trigger_event, payout_id: schedule.payout_id }
+        );
 
         console.log(`Processing schedule ${schedule.id} for placement ${schedule.placement_id}`);
 
@@ -299,31 +324,50 @@ export class PayoutScheduleServiceV2 {
             return;
         }
 
-        // Execute Stripe transfers for all pending transactions (system user)
-        const systemUserId = process.env.SYSTEM_USER_ID || 'system';
-        const processed = await this.payoutService.processPlacementTransactions(
-            schedule.placement_id,
-            systemUserId
-        );
-
-        const payoutId = processed[0]?.id || `payout_${schedule.id}`;
-
-        // Mark as processed
-        await this.repository.markProcessed(schedule.id, payoutId);
-
-        // Log successful completion if payout exists
-        if (schedule.payout_id) {
-            await this.auditRepository.logCompletion(
-                schedule.payout_id,
-                { schedule_id: schedule.id, created_payout_id: payoutId }
-            );
+        // Execute Stripe transfers for all pending transactions
+        // Admin triggers pass clerkUserId for auth; cron/system use internal method (no auth check)
+        let processed;
+        try {
+            processed = callerClerkUserId
+                ? await this.payoutService.processPlacementTransactions(schedule.placement_id, callerClerkUserId)
+                : await this.payoutService.processPlacementTransactionsInternal(schedule.placement_id);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error during transfer processing';
+            await this.repository.markFailed(schedule.id, errorMessage);
+            throw error;
         }
+
+        // Check for partial failures (some paid, some failed)
+        const paid = processed.filter(t => t.status === 'paid');
+        const failed = processed.filter(t => t.status === 'failed');
+        const payoutId = paid[0]?.id || null;
+
+        if (failed.length > 0 && paid.length > 0) {
+            // Partial success — mark as processed but note the failures
+            const failureNote = `Partial: ${paid.length} paid, ${failed.length} failed`;
+            await this.repository.markProcessed(schedule.id, payoutId);
+            console.warn(`Schedule ${schedule.id}: ${failureNote}`);
+        } else {
+            // Full success (or all skipped/zero-amount)
+            await this.repository.markProcessed(schedule.id, payoutId);
+        }
+
+        // Log successful completion
+        await this.auditRepository.logScheduleCompletion(
+            schedule.id,
+            schedule.placement_id,
+            {
+                paid_count: paid.length,
+                failed_count: failed.length,
+                payout_id: payoutId,
+            }
+        );
 
         // Publish event
         await this.eventPublisher.publish('payout_schedule.processed', {
             scheduleId: schedule.id,
             placementId: schedule.placement_id,
-            payoutId,
+            ...(payoutId && { payoutId }),
         });
     }
 
@@ -364,10 +408,10 @@ export class PayoutScheduleServiceV2 {
     ): Promise<void> {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-        // Get current schedule to check retry count and payout_id
+        // Get current schedule to check retry count
         const { data: schedule } = await this.repository['supabase']
             .from('payout_schedules')
-            .select('retry_count, payout_id')
+            .select('retry_count, payout_id, placement_id')
             .eq('id', scheduleId)
             .single();
 
@@ -376,12 +420,13 @@ export class PayoutScheduleServiceV2 {
         // Mark as failed
         await this.repository.markFailed(scheduleId, errorMessage);
 
-        // Log failure to audit log if payout exists
-        if (schedule?.payout_id) {
-            await this.auditRepository.logFailure(
-                schedule.payout_id,
+        // Log failure to audit log
+        if (schedule?.placement_id) {
+            await this.auditRepository.logScheduleFailure(
+                scheduleId,
+                schedule.placement_id,
                 errorMessage,
-                { retry_count: retryCount, schedule_id: scheduleId }
+                { retry_count: retryCount }
             );
         }
 
@@ -408,25 +453,24 @@ export class PayoutScheduleServiceV2 {
             throw new Error('Payout schedule not found');
         }
 
-        // Only process schedules in scheduled status
-        if (schedule.status !== 'scheduled') {
+        // Only allow triggering schedules that are scheduled or failed (retry)
+        if (schedule.status !== 'scheduled' && schedule.status !== 'failed') {
             throw new Error(`Cannot process schedule in ${schedule.status} status`);
         }
 
-        // Log manual trigger action if payout exists
-        if (schedule.payout_id) {
-            await this.auditRepository.logAction(
-                schedule.payout_id,
-                'trigger_processing',
-                `Manual processing triggered by admin`,
-                undefined,
-                clerkUserId,
-                'platform_admin'
-            );
-        }
+        // Log manual trigger action
+        await this.auditRepository.logScheduleAction(
+            schedule.id,
+            schedule.placement_id,
+            'trigger_processing',
+            'Manual processing triggered by admin',
+            undefined,
+            clerkUserId,
+            'platform_admin'
+        );
 
-        // Process the schedule
-        await this.processSchedule(schedule);
+        // Process the schedule with admin's identity for auth
+        await this.processSchedule(schedule, clerkUserId);
 
         // Return updated schedule
         const updated = await this.repository.getById(scheduleId, clerkUserId);

@@ -94,8 +94,8 @@ export default function PayoutsAdminPage() {
                 if (!token) return;
                 const apiClient = createAuthenticatedClient(token);
 
-                // Load pending schedules count
-                const schedulesResponse = await apiClient.get('/payout-schedules?status=pending&limit=1');
+                // Load scheduled count
+                const schedulesResponse = await apiClient.get('/payout-schedules?status=scheduled&limit=1');
                 const pendingSchedules = schedulesResponse.pagination?.total || 0;
 
                 // Load active holds count

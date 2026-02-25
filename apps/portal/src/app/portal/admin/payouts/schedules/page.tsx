@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -18,12 +18,16 @@ interface PayoutSchedule {
     id: string;
     payout_id?: string;
     placement_id?: string;
-    trigger_event: 'manual' | 'guarantee_period_end' | 'milestone_reached' | 'contract_signed';
+    trigger_event: string;
     scheduled_date: string;
     processed_at?: string;
-    status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+    triggered_at?: string;
+    status: 'scheduled' | 'triggered' | 'processing' | 'processed' | 'failed' | 'cancelled';
     retry_count: number;
-    last_error?: string;
+    failure_reason?: string;
+    cancellation_reason?: string;
+    total_amount: number;
+    transaction_count: number;
     created_at: string;
     updated_at: string;
 }
@@ -34,7 +38,7 @@ interface ScheduleFilters {
 }
 
 interface Stats {
-    pending: number;
+    scheduled: number;
     processed_today: number;
     failed: number;
     total_amount: number;
@@ -47,7 +51,7 @@ export default function PayoutSchedulesPage() {
     const [loadingStats, setLoadingStats] = useState(true);
     const toast = useToast();
 
-    const defaultFilters = useMemo<ScheduleFilters>(() => ({ status: 'pending' }), []);
+    const defaultFilters = useMemo<ScheduleFilters>(() => ({ status: 'scheduled' }), []);
 
     const {
         items: schedules,
@@ -83,25 +87,15 @@ export default function PayoutSchedulesPage() {
     });
 
     // Load stats on mount
-    useMemo(() => {
+    useEffect(() => {
         async function loadStats() {
             try {
                 const token = await getToken();
                 if (!token) return;
                 const apiClient = createAuthenticatedClient(token);
 
-                // Get counts for each status
-                const [pending, failed] = await Promise.all([
-                    apiClient.get('/payout-schedules?status=pending&limit=1'),
-                    apiClient.get('/payout-schedules?status=failed&limit=1'),
-                ]);
-
-                setStats({
-                    pending: pending.pagination?.total || 0,
-                    processed_today: 0, // TODO: Add date filter for today
-                    failed: failed.pagination?.total || 0,
-                    total_amount: 0, // TODO: Calculate from payouts
-                });
+                const response = await apiClient.get('/payout-schedules/stats');
+                setStats(response.data);
             } catch (error) {
                 console.error('Failed to load stats:', error);
             } finally {
@@ -123,9 +117,11 @@ export default function PayoutSchedulesPage() {
             await apiClient.post(`/payout-schedules/${scheduleId}/trigger`);
             toast.success('Schedule triggered successfully');
             refresh();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to trigger schedule:', error);
-            toast.error('Failed to trigger schedule');
+            const message = error?.message || error?.error || 'Failed to trigger schedule';
+            toast.error(message);
+            refresh();
         } finally {
             setProcessingId(null);
         }
@@ -161,9 +157,10 @@ export default function PayoutSchedulesPage() {
             });
             toast.success('Schedule reset to pending');
             refresh();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to retry schedule:', error);
-            toast.error('Failed to retry schedule');
+            const message = error?.message || error?.error || 'Failed to retry schedule';
+            toast.error(message);
         } finally {
             setProcessingId(null);
         }
@@ -171,9 +168,10 @@ export default function PayoutSchedulesPage() {
 
     function StatusBadge({ status }: { status: PayoutSchedule['status'] }) {
         const colors: Record<string, string> = {
-            pending: 'badge-warning',
+            scheduled: 'badge-warning',
+            triggered: 'badge-info',
             processing: 'badge-info',
-            completed: 'badge-success',
+            processed: 'badge-success',
             failed: 'badge-error',
             cancelled: 'badge-neutral',
         };
@@ -181,12 +179,12 @@ export default function PayoutSchedulesPage() {
         return <span className={`badge ${colors[status] || 'badge-neutral'}`}>{status}</span>;
     }
 
-    function TriggerEventBadge({ event }: { event: PayoutSchedule['trigger_event'] }) {
+    function TriggerEventBadge({ event }: { event: string }) {
         const labels: Record<string, string> = {
-            manual: 'Manual',
-            guarantee_period_end: 'Guarantee End',
-            milestone_reached: 'Milestone',
-            contract_signed: 'Contract',
+            'invoice.paid': 'Invoice Paid',
+            'eligible_payout_catchup': 'Catchup',
+            'backfill': 'Backfill',
+            'manual': 'Manual',
         };
 
         return <span className="badge badge-ghost">{labels[event] || event}</span>;
@@ -202,7 +200,7 @@ export default function PayoutSchedulesPage() {
                         Automated payout processing schedules
                     </p>
                 </div>
-                <Link href="/portal/admin/payouts/schedules/audit" className="btn btn-ghost">
+                <Link href="/portal/admin/payouts/audit" className="btn btn-ghost">
                     <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
                     Audit Log
                 </Link>
@@ -224,8 +222,8 @@ export default function PayoutSchedulesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="card bg-base-200">
                         <div className="card-body">
-                            <h3 className="text-sm text-base-content/60">Pending Schedules</h3>
-                            <p className="text-3xl font-bold">{stats.pending}</p>
+                            <h3 className="text-sm text-base-content/60">Scheduled</h3>
+                            <p className="text-3xl font-bold">{stats.scheduled}</p>
                         </div>
                     </div>
                     <div className="card bg-base-200">
@@ -265,9 +263,10 @@ export default function PayoutSchedulesPage() {
                                 onChange={(e) => setFilters({ ...filters, status: e.target.value as any })}
                             >
                                 <option value="">All Statuses</option>
-                                <option value="pending">Pending</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="triggered">Triggered</option>
                                 <option value="processing">Processing</option>
-                                <option value="completed">Completed</option>
+                                <option value="processed">Processed</option>
                                 <option value="failed">Failed</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>
@@ -281,10 +280,10 @@ export default function PayoutSchedulesPage() {
                                 onChange={(e) => setFilters({ ...filters, trigger_event: e.target.value as any })}
                             >
                                 <option value="">All Events</option>
+                                <option value="invoice.paid">Invoice Paid</option>
+                                <option value="eligible_payout_catchup">Catchup</option>
+                                <option value="backfill">Backfill</option>
                                 <option value="manual">Manual</option>
-                                <option value="guarantee_period_end">Guarantee End</option>
-                                <option value="milestone_reached">Milestone</option>
-                                <option value="contract_signed">Contract</option>
                             </select>
                         </fieldset>
 
@@ -329,6 +328,7 @@ export default function PayoutSchedulesPage() {
                                         <tr>
                                             <th>Status</th>
                                             <th>Trigger Event</th>
+                                            <th>Amount</th>
                                             <th>Scheduled Date</th>
                                             <th>Retry Count</th>
                                             <th>Created</th>
@@ -343,6 +343,20 @@ export default function PayoutSchedulesPage() {
                                                 </td>
                                                 <td>
                                                     <TriggerEventBadge event={schedule.trigger_event} />
+                                                </td>
+                                                <td>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-semibold">
+                                                            {schedule.total_amount > 0
+                                                                ? `$${schedule.total_amount.toLocaleString()}`
+                                                                : '-'}
+                                                        </span>
+                                                        {schedule.transaction_count > 0 && (
+                                                            <span className="text-sm text-base-content/60">
+                                                                {schedule.transaction_count} txn{schedule.transaction_count !== 1 ? 's' : ''}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div className="flex flex-col">
@@ -377,7 +391,7 @@ export default function PayoutSchedulesPage() {
                                                 </td>
                                                 <td>
                                                     <div className="flex gap-2">
-                                                        {schedule.status === 'pending' && (
+                                                        {schedule.status === 'scheduled' && (
                                                             <>
                                                                 <button
                                                                     onClick={() => triggerSchedule(schedule.id)}
@@ -414,10 +428,10 @@ export default function PayoutSchedulesPage() {
                                                                         <i className="fa-duotone fa-regular fa-rotate"></i>
                                                                     )}
                                                                 </button>
-                                                                {schedule.last_error && (
+                                                                {schedule.failure_reason && (
                                                                     <div
                                                                         className="tooltip tooltip-left"
-                                                                        data-tip={schedule.last_error}
+                                                                        data-tip={schedule.failure_reason}
                                                                     >
                                                                         <button className="btn btn-sm btn-ghost">
                                                                             <i className="fa-duotone fa-regular fa-circle-exclamation text-error"></i>
@@ -429,7 +443,7 @@ export default function PayoutSchedulesPage() {
                                                         {schedule.status === 'processing' && (
                                                             <span className="loading loading-spinner loading-sm text-info"></span>
                                                         )}
-                                                        {(schedule.status === 'completed' ||
+                                                        {(schedule.status === 'processed' ||
                                                             schedule.status === 'cancelled') && (
                                                                 <span className="text-xs text-base-content/60">
                                                                     {schedule.processed_at

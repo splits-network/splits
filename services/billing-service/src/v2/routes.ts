@@ -30,6 +30,7 @@ import { companyBillingProfileRoutes } from './company-billing/routes';
 import { PlacementInvoiceRepository } from './placement-invoices/repository';
 import { PlacementInvoiceService } from './placement-invoices/service';
 import { placementInvoiceRoutes } from './placement-invoices/routes';
+import { placementPayoutAuditRoutes } from './audit/routes';
 import { resolveAccessContext } from './shared/access';
 
 interface BillingV2Config {
@@ -127,8 +128,9 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     placementInvoiceRoutes(app, placementInvoiceService);
 
     // Register automation routes
-    await payoutScheduleRoutes(app, payoutScheduleService);
-    await escrowHoldRoutes(app, escrowHoldService);
+    await payoutScheduleRoutes(app, payoutScheduleService, accessClient);
+    await escrowHoldRoutes(app, escrowHoldService, accessClient);
+    await placementPayoutAuditRoutes(app, auditRepository);
 
     // Phase 6: Return services for use by event consumers
     return {

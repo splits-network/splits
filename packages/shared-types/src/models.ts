@@ -682,32 +682,6 @@ export interface MarketplaceConfig {
     updated_at: Date;
 }
 
-// Billing domain types
-export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing';
-
-export interface Plan {
-    id: string;
-    name: string;
-    price_monthly: number;
-    stripe_price_id?: string;
-    features: Record<string, any>;
-    created_at: Date;
-    updated_at: Date;
-}
-
-export interface Subscription {
-    id: string;
-    recruiter_id: string;
-    plan_id: string;
-    stripe_subscription_id?: string;
-    status: SubscriptionStatus;
-    current_period_start?: Date;
-    current_period_end?: Date;
-    cancel_at?: Date;
-    created_at: Date;
-    updated_at: Date;
-}
-
 // ============================================================================
 // Phase 2 Types
 // ============================================================================
@@ -846,102 +820,10 @@ export interface MarketplaceEvent {
 }
 
 // ============================================================================
-// Phase 3 Types - Automated Payouts & Intelligence
+// Phase 3 Types - Intelligence & Automation
 // ============================================================================
-
-// Payout System
-export type PayoutStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'reversed' | 'on_hold';
-
-export interface Payout {
-    id: string;
-    placement_id: string;
-    recruiter_id: string;
-
-    // Amounts
-    placement_fee: number;
-    recruiter_share_percentage: number;
-    payout_amount: number;
-
-    // Stripe details
-    stripe_transfer_id?: string;
-    stripe_payout_id?: string;
-    stripe_connect_account_id?: string;
-
-    // Status tracking
-    status: PayoutStatus;
-    processing_started_at?: Date;
-    completed_at?: Date;
-    failed_at?: Date;
-    failure_reason?: string;
-
-    // Escrow/Holdback
-    holdback_amount: number;
-    holdback_released_at?: Date;
-
-    // Audit
-    created_at: Date;
-    updated_at: Date;
-    created_by?: string;
-}
-
-export type PayoutScheduleStatus = 'scheduled' | 'triggered' | 'cancelled';
-
-export interface PayoutSchedule {
-    id: string;
-    placement_id: string;
-    scheduled_date: Date;
-    trigger_event: string; // guarantee_complete, replacement_cleared, manual
-    status: PayoutScheduleStatus;
-    triggered_at?: Date;
-    cancelled_at?: Date;
-    cancellation_reason?: string;
-    created_at: Date;
-    updated_at: Date;
-}
-
-export interface PayoutSplit {
-    id: string;
-    payout_id: string;
-    collaborator_recruiter_id: string;
-    split_percentage: number;
-    split_amount: number;
-    status: PayoutStatus;
-    stripe_transfer_id?: string;
-    completed_at?: Date;
-    created_at: Date;
-    updated_at: Date;
-}
-
-export type EscrowHoldStatus = 'active' | 'released' | 'cancelled';
-
-export interface EscrowHold {
-    id: string;
-    placement_id: string;
-    payout_id?: string;
-    hold_amount: number;
-    hold_reason: string;
-    held_at: Date;
-    release_scheduled_date?: Date;
-    released_at?: Date;
-    released_by?: string;
-    status: EscrowHoldStatus;
-    created_at: Date;
-    updated_at: Date;
-}
-
-export interface PayoutAuditLog {
-    id: string;
-    payout_id: string;
-    event_type: string;
-    old_status?: string;
-    new_status?: string;
-    old_amount?: number;
-    new_amount?: number;
-    reason?: string;
-    metadata?: Record<string, any>;
-    created_at: Date;
-    created_by: string;
-}
+// NOTE: Payout/billing types (Plan, Subscription, Payout, PayoutSchedule,
+// PayoutSplit, EscrowHold, PayoutAuditLog) live in database/billing.types.ts
 
 // Decision Audit System
 export interface DecisionAuditLog {

@@ -50,6 +50,11 @@ export interface PayoutScheduleUpdate {
     last_retry_at?: string;
 }
 
+export interface PayoutScheduleWithAmount extends PayoutSchedule {
+    total_amount: number;
+    transaction_count: number;
+}
+
 export interface PayoutScheduleFilters {
     status?: PayoutScheduleStatus;
     date_from?: string;

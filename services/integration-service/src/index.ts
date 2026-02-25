@@ -5,6 +5,7 @@ import {
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
+import { getCryptoService } from "@splits-network/shared-config/src/crypto";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
@@ -114,12 +115,16 @@ async function main() {
     outboxWorker.start();
     logger.info('Outbox worker started - events will be durably delivered');
 
+    const crypto = await getCryptoService();
+    logger.info('Encryption service initialized from Vault');
+
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
         rabbitMqUrl: rabbitConfig.url,
         eventPublisher: outboxPublisher,
         logger,
+        crypto,
     });
 
     app.get("/health", async (request, reply) => {

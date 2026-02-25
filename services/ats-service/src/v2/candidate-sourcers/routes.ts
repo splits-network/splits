@@ -20,6 +20,7 @@ export async function candidateSourcerRoutes(app: FastifyInstance, service: Cand
                     active_protection: { type: 'boolean' },
                     sort_by: { type: 'string', default: 'sourced_at' },
                     sort_order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
+                    include: { type: 'string' },
                 },
             },
             response: {
@@ -56,6 +57,7 @@ export async function candidateSourcerRoutes(app: FastifyInstance, service: Cand
             },
             sort_by: params.sort_by,
             sort_order: params.sort_order,
+            include: params.include,
         });
 
         return reply.send({ data: result.data, pagination: result.pagination });

@@ -8,6 +8,8 @@ import {
     StripeConnectDisabledData,
     companyBillingSetupCompleteEmail,
     CompanyBillingSetupCompleteData,
+    payoutConnectRequiredEmail,
+    PayoutConnectRequiredData,
 } from '../../templates/billing';
 
 export class BillingEmailService {
@@ -26,6 +28,11 @@ export class BillingEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            channel?: 'email' | 'in_app' | 'both';
+            priority?: 'low' | 'normal' | 'high' | 'urgent';
+            category?: string;
+            actionUrl?: string;
+            actionLabel?: string;
         }
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
@@ -36,10 +43,13 @@ export class BillingEmailService {
             template: 'custom',
             payload: options.payload,
             status: 'pending',
-            channel: 'email',
+            channel: options.channel || 'email',
             read: false,
             dismissed: false,
-            priority: 'normal',
+            priority: options.priority || 'normal',
+            category: options.category,
+            action_url: options.actionUrl,
+            action_label: options.actionLabel,
         });
 
         try {
@@ -111,5 +121,28 @@ export class BillingEmailService {
             userId: data.userId,
             payload: { recruiter_id: data.recruiterId },
         });
+    }
+
+    async sendPayoutConnectRequired(
+        email: string,
+        data: PayoutConnectRequiredData & { userId?: string; recruiterId?: string }
+    ): Promise<void> {
+        const html = payoutConnectRequiredEmail(data);
+
+        await this.sendEmail(
+            email,
+            `Set Up Payouts — $${data.amount.toLocaleString()} Commission Waiting`,
+            html,
+            {
+                eventType: 'payout_transaction.connect_required',
+                userId: data.userId,
+                channel: 'both',
+                priority: 'high',
+                category: 'billing',
+                actionUrl: data.connectUrl,
+                actionLabel: 'Set Up Payouts',
+                payload: { recruiter_id: data.recruiterId, amount: data.amount, reason: data.reason },
+            }
+        );
     }
 }

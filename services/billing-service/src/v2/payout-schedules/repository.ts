@@ -331,6 +331,7 @@ export class PayoutScheduleRepository {
             .from('payout_schedules')
             .update({
                 status: 'processing',
+                triggered_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             })
             .eq('id', id)
@@ -347,12 +348,12 @@ export class PayoutScheduleRepository {
     /**
      * Mark schedule as processed
      */
-    async markProcessed(id: string, payoutId: string): Promise<PayoutSchedule> {
+    async markProcessed(id: string, payoutId: string | null): Promise<PayoutSchedule> {
         const { data, error } = await this.supabase
             .from('payout_schedules')
             .update({
                 status: 'processed',
-                payout_id: payoutId,
+                ...(payoutId && { payout_id: payoutId }),
                 processed_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             })

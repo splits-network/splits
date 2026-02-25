@@ -258,6 +258,9 @@ export class DomainEventConsumer {
             // Billing events - Company billing setup
             await this.channel.bindQueue(this.queue, this.exchange, 'company.billing_profile_completed');
 
+            // Billing events - Payout processing failures
+            await this.channel.bindQueue(this.queue, this.exchange, 'payout_transaction.connect_required');
+
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
             await this.channel.bindQueue(this.queue, this.exchange, 'chat.message.created');
@@ -502,6 +505,11 @@ export class DomainEventConsumer {
             // Billing domain - Company billing setup
             case 'company.billing_profile_completed':
                 await this.billingConsumer.handleCompanyBillingProfileCompleted(event);
+                break;
+
+            // Billing domain - Payout Connect required
+            case 'payout_transaction.connect_required':
+                await this.billingConsumer.handlePayoutConnectRequired(event);
                 break;
 
             case 'status.contact_submitted':

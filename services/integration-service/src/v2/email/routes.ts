@@ -5,17 +5,19 @@ import { EmailService, SendEmailParams } from './service';
 import { IEventPublisher } from '../shared/events';
 import { requireUserContext } from '../shared/helpers';
 import { Logger } from '@splits-network/shared-logging';
+import { CryptoService } from '@splits-network/shared-config/src/crypto';
 
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
     eventPublisher: IEventPublisher;
     logger: Logger;
+    crypto: CryptoService;
 }
 
 export async function registerEmailRoutes(app: FastifyInstance, config: RegisterConfig) {
     const connectionRepo = new ConnectionRepository(config.supabaseUrl, config.supabaseKey);
-    const tokenRefresh = new TokenRefreshService(connectionRepo, config.eventPublisher, config.logger);
+    const tokenRefresh = new TokenRefreshService(connectionRepo, config.eventPublisher, config.logger, config.crypto);
     const service = new EmailService(connectionRepo, tokenRefresh, config.logger);
 
     // GET /api/v2/integrations/email/:connectionId/messages

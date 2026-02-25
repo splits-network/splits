@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { BillingService } from '../../service';
+import { WebhookServiceV2 } from '../../v2/webhooks/service';
 import { UnauthorizedError } from '@splits-network/shared-fastify';
 import { WebhookEventRepository } from '../../v2/webhook-events/repository';
 import Stripe from 'stripe';
@@ -10,7 +10,7 @@ import Stripe from 'stripe';
  */
 export function registerWebhookRoutes(
     app: FastifyInstance,
-    service: BillingService,
+    webhookService: WebhookServiceV2,
     stripeWebhookSecret: string,
     webhookEventRepository: WebhookEventRepository
 ) {
@@ -72,7 +72,7 @@ export function registerWebhookRoutes(
             // Process the event
             try {
                 await webhookEventRepository.markProcessing(event.id);
-                await service.handleStripeWebhook(event);
+                await webhookService.handleStripeWebhook(event);
                 await webhookEventRepository.markSucceeded(event.id);
             } catch (processErr: any) {
                 request.log.error(

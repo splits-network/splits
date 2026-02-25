@@ -2,21 +2,20 @@ import Stripe from 'stripe';
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/node';
-import { EventPublisher } from '../../v2/shared/events';
+import { IEventPublisher } from '../shared/events';
 
 /**
- * Webhook Service
- * Handles Stripe webhook events
- * TODO: Migrate to V2 architecture with proper event publishing
+ * V2 Webhook Service
+ * Handles Stripe webhook events with proper domain event publishing.
  */
-export class WebhookService {
+export class WebhookServiceV2 {
     private stripe: Stripe;
 
     constructor(
         private supabase: SupabaseClient,
         private logger: Logger,
-        stripeSecretKey?: string,
-        private eventPublisher?: EventPublisher
+        private eventPublisher: IEventPublisher,
+        stripeSecretKey?: string
     ) {
         this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {
             apiVersion: '2025-11-17.clover',
@@ -30,14 +29,10 @@ export class WebhookService {
             case 'customer.subscription.created':
             case 'customer.subscription.updated':
                 await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
-                // TODO: Replace with V2 event publishing when webhooks are migrated
-                this.logger.info({ event_type: event.type }, 'Subscription webhook received - needs V2 migration');
                 break;
 
             case 'customer.subscription.deleted':
                 await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
-                // TODO: Replace with V2 event publishing when webhooks are migrated
-                this.logger.info({ event_type: event.type }, 'Subscription deletion webhook received - needs V2 migration');
                 break;
 
             case 'account.updated':
@@ -84,13 +79,16 @@ export class WebhookService {
         }
     }
 
+    // ========================================================================
+    // Connect account events
+    // ========================================================================
+
     private async handleAccountUpdated(account: Stripe.Account): Promise<void> {
         if (!account.id) return;
 
         const onboarded = !!account.charges_enabled && !!account.payouts_enabled && !!account.details_submitted;
         const onboardedAt = onboarded ? new Date().toISOString() : null;
 
-        // Fetch current status to detect transitions
         const { data: recruiter } = await this.supabase
             .from('recruiters')
             .select('id, stripe_connect_onboarded')
@@ -113,8 +111,7 @@ export class WebhookService {
             return;
         }
 
-        // Publish domain events on status transitions
-        if (this.eventPublisher && recruiter?.id) {
+        if (recruiter?.id) {
             if (!previouslyOnboarded && onboarded) {
                 await this.eventPublisher.publish('recruiter.stripe_connect_onboarded', {
                     recruiter_id: recruiter.id,
@@ -132,6 +129,75 @@ export class WebhookService {
             }
         }
     }
+
+    // ========================================================================
+    // Subscription events
+    // ========================================================================
+
+    private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
+        if (!subscription.id) return;
+
+        const updates: Record<string, any> = {
+            status: subscription.status,
+            updated_at: new Date().toISOString(),
+        };
+
+        const itemPeriods = subscription.items?.data || [];
+        const periodStarts = itemPeriods
+            .map((item) => item.current_period_start)
+            .filter((value): value is number => typeof value === 'number');
+        const periodEnds = itemPeriods
+            .map((item) => item.current_period_end)
+            .filter((value): value is number => typeof value === 'number');
+
+        if (periodStarts.length > 0) {
+            updates.current_period_start = new Date(Math.min(...periodStarts) * 1000).toISOString();
+        }
+        if (periodEnds.length > 0) {
+            updates.current_period_end = new Date(Math.max(...periodEnds) * 1000).toISOString();
+        }
+
+        const { error } = await this.supabase
+            .from('subscriptions')
+            .update(updates)
+            .eq('stripe_subscription_id', subscription.id);
+
+        if (error) {
+            this.logger.error({ err: error, subscription_id: subscription.id }, 'Failed to update subscription from webhook');
+            return;
+        }
+
+        await this.eventPublisher.publish('subscription.webhook_updated', {
+            stripe_subscription_id: subscription.id,
+            status: subscription.status,
+        });
+    }
+
+    private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
+        if (!subscription.id) return;
+
+        const { error } = await this.supabase
+            .from('subscriptions')
+            .update({
+                status: 'canceled',
+                canceled_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_subscription_id', subscription.id);
+
+        if (error) {
+            this.logger.error({ err: error, subscription_id: subscription.id }, 'Failed to cancel subscription from webhook');
+            return;
+        }
+
+        await this.eventPublisher.publish('subscription.webhook_canceled', {
+            stripe_subscription_id: subscription.id,
+        });
+    }
+
+    // ========================================================================
+    // Transfer / payout events
+    // ========================================================================
 
     private async handleTransferEvent(eventType: string, transfer: Stripe.Transfer): Promise<void> {
         if (!transfer.id) return;
@@ -224,7 +290,7 @@ export class WebhookService {
             this.logger.error({ err: error, payout_id: payout.id }, 'Failed to update payout transaction from payout transfers');
         }
 
-        // Handle incoming fund availability when payout.paid (funds now in our available balance)
+        // When funds settle (payout.paid), mark associated invoices as funds-available
         if (eventType === 'payout.paid') {
             await this.handleIncomingFundsAvailable(payout);
         }
@@ -238,7 +304,6 @@ export class WebhookService {
         this.logger.info({ payout_id: payout.id, amount: payout.amount / 100 }, 'Processing incoming funds availability from payout.paid');
 
         try {
-            // Get all balance transactions that were settled in this payout
             let startingAfter: string | undefined = undefined;
 
             while (true) {
@@ -250,11 +315,9 @@ export class WebhookService {
                 });
 
                 for (const transaction of response.data) {
-                    // Look for charge transactions (customer payments) that are now settled
                     if (transaction.type === 'charge' && transaction.source) {
-                        const charge = transaction.source as any; // Use any to access invoice property
+                        const charge = transaction.source as any;
                         if (charge.invoice) {
-                            // Mark this invoice as funds available for immediate transfer
                             const { error } = await this.supabase
                                 .from('placement_invoices')
                                 .update({
@@ -279,31 +342,23 @@ export class WebhookService {
                                 amount: transaction.amount / 100
                             }, 'Invoice funds now available - can process transfers immediately');
 
-                            // Trigger immediate payout processing since funds are definitely available
-                            if (this.eventPublisher) {
-                                try {
-                                    await this.eventPublisher.publish('invoice.funds_available', {
-                                        stripe_invoice_id: charge.invoice,
-                                        payout_id: payout.id,
-                                        amount_available: transaction.amount / 100,
-                                        available_at: new Date().toISOString()
-                                    });
-                                } catch (eventError) {
-                                    this.logger.error({ err: eventError, invoice_id: charge.invoice }, 'Failed to publish invoice.funds_available event');
-                                }
+                            try {
+                                await this.eventPublisher.publish('invoice.funds_available', {
+                                    stripe_invoice_id: charge.invoice,
+                                    payout_id: payout.id,
+                                    amount_available: transaction.amount / 100,
+                                    available_at: new Date().toISOString()
+                                });
+                            } catch (eventError) {
+                                this.logger.error({ err: eventError, invoice_id: charge.invoice }, 'Failed to publish invoice.funds_available event');
                             }
                         }
                     }
                 }
 
-                if (!response.has_more) {
-                    break;
-                }
-
+                if (!response.has_more) break;
                 startingAfter = response.data[response.data.length - 1]?.id;
-                if (!startingAfter) {
-                    break;
-                }
+                if (!startingAfter) break;
             }
         } catch (error) {
             this.logger.error({ err: error, payout_id: payout.id }, 'Failed to process incoming funds availability');
@@ -311,8 +366,8 @@ export class WebhookService {
     }
 
     /**
-     * Handle balance.available event - fires when available balance increases
-     * This provides faster detection than payout.paid but requires correlation logic
+     * Handle balance.available event - fires when available balance increases.
+     * Marks pending invoices as funds-available (broad approach, less precise than payout.paid).
      */
     private async handleBalanceAvailable(balance: Stripe.Balance): Promise<void> {
         this.logger.info({
@@ -321,7 +376,6 @@ export class WebhookService {
         }, 'Balance available event received - checking for newly available invoice funds');
 
         try {
-            // Find all paid invoices that don't have funds confirmed available yet
             const { data: pendingInvoices, error } = await this.supabase
                 .from('placement_invoices')
                 .select('id, stripe_invoice_id, paid_at')
@@ -341,8 +395,6 @@ export class WebhookService {
                 return;
             }
 
-            // Since balance increased, assume older paid invoices now have settled funds
-            // Mark them as funds available (broad brush approach - less precise than payout.paid)
             const now = new Date().toISOString();
             const invoiceIds = pendingInvoices.map(inv => inv.id);
 
@@ -365,22 +417,19 @@ export class WebhookService {
                 invoice_ids: invoiceIds
             }, 'Marked invoice funds as available via balance.available event');
 
-            // Publish events for immediate payout processing
-            if (this.eventPublisher) {
-                for (const invoice of pendingInvoices) {
-                    if (invoice.stripe_invoice_id) {
-                        try {
-                            await this.eventPublisher.publish('invoice.funds_available', {
-                                stripe_invoice_id: invoice.stripe_invoice_id,
-                                detection_method: 'balance.available',
-                                available_at: now
-                            });
-                        } catch (eventError) {
-                            this.logger.error({
-                                err: eventError,
-                                invoice_id: invoice.stripe_invoice_id
-                            }, 'Failed to publish invoice.funds_available event from balance.available');
-                        }
+            for (const invoice of pendingInvoices) {
+                if (invoice.stripe_invoice_id) {
+                    try {
+                        await this.eventPublisher.publish('invoice.funds_available', {
+                            stripe_invoice_id: invoice.stripe_invoice_id,
+                            detection_method: 'balance.available',
+                            available_at: now
+                        });
+                    } catch (eventError) {
+                        this.logger.error({
+                            err: eventError,
+                            invoice_id: invoice.stripe_invoice_id
+                        }, 'Failed to publish invoice.funds_available event from balance.available');
                     }
                 }
             }
@@ -389,58 +438,26 @@ export class WebhookService {
         }
     }
 
-    private async getTransferIdsForPayout(payoutId: string): Promise<string[]> {
-        const transferIds: string[] = [];
-        let startingAfter: string | undefined = undefined;
-
-        try {
-            while (true) {
-                const response: Stripe.ApiList<Stripe.BalanceTransaction> = await this.stripe.balanceTransactions.list({
-                    payout: payoutId,
-                    limit: 100,
-                    ...(startingAfter ? { starting_after: startingAfter } : {}),
-                });
-
-                for (const balanceTx of response.data) {
-                    const source = balanceTx.source;
-                    if (typeof source === 'string' && source.startsWith('tr_')) {
-                        transferIds.push(source);
-                    }
-                }
-
-                if (!response.has_more) {
-                    break;
-                }
-
-                startingAfter = response.data[response.data.length - 1]?.id;
-                if (!startingAfter) {
-                    break;
-                }
-            }
-        } catch (error) {
-            this.logger.error({ err: error, payout_id: payoutId }, 'Failed to load payout balance transactions');
-        }
-
-        return Array.from(new Set(transferIds));
-    }
+    // ========================================================================
+    // Invoice events
+    // ========================================================================
 
     private async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
         if (!invoice.id) return;
 
-        // Calculate settlement date: 7 business days after payment for maximum safety
-        // This accounts for credit card (2 business days) and ACH (3-5 business days) settlement delays
         const paidDate = invoice.status_transitions?.paid_at
             ? new Date(invoice.status_transitions.paid_at * 1000)
             : new Date();
 
+        // 7-day settlement buffer for all payment methods (credit card 2 days, ACH 3-5 days)
         const settlementDate = new Date(paidDate);
-        settlementDate.setDate(settlementDate.getDate() + 7); // 7-day buffer for all payment methods
+        settlementDate.setDate(settlementDate.getDate() + 7);
 
         const updates: Record<string, any> = {
             invoice_status: 'paid',
             amount_paid: (invoice.amount_paid ?? 0) / 100,
             paid_at: paidDate.toISOString(),
-            collectible_at: settlementDate.toISOString(), // Set collectible after settlement delay
+            collectible_at: settlementDate.toISOString(),
             updated_at: new Date().toISOString(),
         };
 
@@ -458,94 +475,30 @@ export class WebhookService {
             invoice_id: invoice.id,
             paid_at: paidDate.toISOString(),
             collectible_at: settlementDate.toISOString()
-        }, 'Invoice marked as paid with settlement buffer (may be overridden by payout.paid event)');
-
-        // Trigger immediate payout processing for paid invoice (instead of waiting for scheduled job)
-        if (this.eventPublisher) {
-            try {
-                await this.eventPublisher.publish('invoice.paid', {
-                    stripe_invoice_id: invoice.id,
-                    amount_paid: (invoice.amount_paid ?? 0) / 100,
-                    paid_at: updates.paid_at,
-                });
-                this.logger.info({ invoice_id: invoice.id }, 'Published invoice.paid event for immediate payout processing');
-            } catch (eventError) {
-                this.logger.error({ err: eventError, invoice_id: invoice.id }, 'Failed to publish invoice.paid event');
-            }
-        }
-    }
-    private async handlePayoutPaid(payout: Stripe.Payout): Promise<void> {
-        if (!payout.id) return;
-
-        this.logger.info({ payout_id: payout.id, amount: payout.amount / 100 }, 'Processing payout.paid webhook - funds now available in balance');
+        }, 'Invoice marked as paid with settlement buffer');
 
         try {
-            // Get all balance transactions included in this payout
-            const balanceTransactions = await this.stripe.balanceTransactions.list({
-                payout: payout.id,
-                limit: 100,
-                expand: ['data.source']
+            await this.eventPublisher.publish('invoice.paid', {
+                stripe_invoice_id: invoice.id,
+                amount_paid: (invoice.amount_paid ?? 0) / 100,
+                paid_at: updates.paid_at,
             });
-
-            for (const transaction of balanceTransactions.data) {
-                if (transaction.type === 'charge' && transaction.source) {
-                    const charge = transaction.source as any; // Use any to access invoice property
-                    if (charge.invoice) {
-                        // Mark this invoice as funds available immediately
-                        const { error } = await this.supabase
-                            .from('placement_invoices')
-                            .update({
-                                funds_available: true,
-                                funds_available_at: new Date().toISOString(),
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq('stripe_invoice_id', charge.invoice as string);
-
-                        if (error) {
-                            this.logger.error({
-                                err: error,
-                                invoice_id: charge.invoice as string,
-                                payout_id: payout.id
-                            }, 'Failed to mark invoice funds as available');
-                            continue;
-                        }
-
-                        this.logger.info({
-                            invoice_id: charge.invoice as string,
-                            payout_id: payout.id
-                        }, 'Invoice funds now available - triggering immediate payout processing');
-
-                        // Trigger immediate payout processing now that funds are definitely available
-                        if (this.eventPublisher) {
-                            try {
-                                await this.eventPublisher.publish('invoice.funds_available', {
-                                    stripe_invoice_id: charge.invoice as string,
-                                    payout_id: payout.id,
-                                    funds_available_at: new Date().toISOString()
-                                });
-                            } catch (eventError) {
-                                this.logger.error({ err: eventError, invoice_id: charge.invoice as string }, 'Failed to publish invoice.funds_available event');
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            this.logger.error({ err: error, payout_id: payout.id }, 'Failed to process payout.paid webhook');
+            this.logger.info({ invoice_id: invoice.id }, 'Published invoice.paid event for payout processing');
+        } catch (eventError) {
+            this.logger.error({ err: eventError, invoice_id: invoice.id }, 'Failed to publish invoice.paid event');
         }
     }
+
     private async handleInvoiceFailed(invoice: Stripe.Invoice): Promise<void> {
         if (!invoice.id) return;
 
-        const updates: Record<string, any> = {
-            invoice_status: 'failed',
-            failure_reason: invoice.last_finalization_error?.message || 'Unknown error',
-            updated_at: new Date().toISOString(),
-        };
-
         const { error } = await this.supabase
             .from('placement_invoices')
-            .update(updates)
+            .update({
+                invoice_status: 'failed',
+                failure_reason: invoice.last_finalization_error?.message || 'Unknown error',
+                updated_at: new Date().toISOString(),
+            })
             .eq('stripe_invoice_id', invoice.id);
 
         if (error) {
@@ -585,15 +538,13 @@ export class WebhookService {
     private async handleInvoiceMarkedUncollectible(invoice: Stripe.Invoice): Promise<void> {
         if (!invoice.id) return;
 
-        const updates: Record<string, any> = {
-            invoice_status: 'uncollectible',
-            failure_reason: 'Invoice marked uncollectible',
-            updated_at: new Date().toISOString(),
-        };
-
         const { error } = await this.supabase
             .from('placement_invoices')
-            .update(updates)
+            .update({
+                invoice_status: 'uncollectible',
+                failure_reason: 'Invoice marked uncollectible',
+                updated_at: new Date().toISOString(),
+            })
             .eq('stripe_invoice_id', invoice.id);
 
         if (error) {
@@ -604,17 +555,15 @@ export class WebhookService {
     private async handleInvoiceVoided(invoice: Stripe.Invoice): Promise<void> {
         if (!invoice.id) return;
 
-        const updates: Record<string, any> = {
-            invoice_status: 'void',
-            voided_at: invoice.status_transitions?.voided_at
-                ? new Date(invoice.status_transitions.voided_at * 1000).toISOString()
-                : new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        };
-
         const { error } = await this.supabase
             .from('placement_invoices')
-            .update(updates)
+            .update({
+                invoice_status: 'void',
+                voided_at: invoice.status_transitions?.voided_at
+                    ? new Date(invoice.status_transitions.voided_at * 1000).toISOString()
+                    : new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
             .eq('stripe_invoice_id', invoice.id);
 
         if (error) {
@@ -622,53 +571,37 @@ export class WebhookService {
         }
     }
 
-    private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
-        if (!subscription.id) return;
+    // ========================================================================
+    // Helpers
+    // ========================================================================
 
-        const updates: Record<string, any> = {
-            status: subscription.status,
-            updated_at: new Date().toISOString(),
-        };
+    private async getTransferIdsForPayout(payoutId: string): Promise<string[]> {
+        const transferIds: string[] = [];
+        let startingAfter: string | undefined = undefined;
 
-        const itemPeriods = subscription.items?.data || [];
-        const periodStarts = itemPeriods
-            .map((item) => item.current_period_start)
-            .filter((value): value is number => typeof value === 'number');
-        const periodEnds = itemPeriods
-            .map((item) => item.current_period_end)
-            .filter((value): value is number => typeof value === 'number');
+        try {
+            while (true) {
+                const response: Stripe.ApiList<Stripe.BalanceTransaction> = await this.stripe.balanceTransactions.list({
+                    payout: payoutId,
+                    limit: 100,
+                    ...(startingAfter ? { starting_after: startingAfter } : {}),
+                });
 
-        if (periodStarts.length > 0) {
-            updates.current_period_start = new Date(Math.min(...periodStarts) * 1000).toISOString();
+                for (const balanceTx of response.data) {
+                    const source = balanceTx.source;
+                    if (typeof source === 'string' && source.startsWith('tr_')) {
+                        transferIds.push(source);
+                    }
+                }
+
+                if (!response.has_more) break;
+                startingAfter = response.data[response.data.length - 1]?.id;
+                if (!startingAfter) break;
+            }
+        } catch (error) {
+            this.logger.error({ err: error, payout_id: payoutId }, 'Failed to load payout balance transactions');
         }
-        if (periodEnds.length > 0) {
-            updates.current_period_end = new Date(Math.max(...periodEnds) * 1000).toISOString();
-        }
 
-        const { error } = await this.supabase
-            .from('subscriptions')
-            .update(updates)
-            .eq('stripe_subscription_id', subscription.id);
-
-        if (error) {
-            this.logger.error({ err: error, subscription_id: subscription.id }, 'Failed to update subscription from webhook');
-        }
-    }
-
-    private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
-        if (!subscription.id) return;
-
-        const { error } = await this.supabase
-            .from('subscriptions')
-            .update({
-                status: 'canceled',
-                canceled_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            })
-            .eq('stripe_subscription_id', subscription.id);
-
-        if (error) {
-            this.logger.error({ err: error, subscription_id: subscription.id }, 'Failed to cancel subscription from webhook');
-        }
+        return Array.from(new Set(transferIds));
     }
 }

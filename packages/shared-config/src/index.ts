@@ -6,11 +6,12 @@ try {
     // dotenv not available or failed to load (e.g., in Edge runtime)
 }
 
-// Note: Vault utilities are NOT re-exported here to avoid bundling
-// server-side dependencies (@supabase/supabase-js) in client bundles.
+// Note: Vault and Crypto utilities are NOT re-exported here to avoid bundling
+// server-side dependencies (@supabase/supabase-js, node:crypto) in client bundles.
 // Vault functionality is accessible through the *FromVault() functions below,
 // which use dynamic imports. If you need direct access to VaultClient,
 // use: import { VaultClient } from '@splits-network/shared-config/src/vault';
+// For encryption: import { getCryptoService } from '@splits-network/shared-config/src/crypto';
 
 export interface BaseConfig {
     nodeEnv: string;

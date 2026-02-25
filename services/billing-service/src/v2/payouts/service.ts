@@ -159,7 +159,15 @@ export class PayoutServiceV2 {
     ): Promise<PlacementPayoutTransaction> {
         const access = await this.resolveAccessContext(clerkUserId);
         requireBillingAdmin(access);
+        return this.executeTransactionProcessing(transactionId);
+    }
 
+    /**
+     * Internal: process a transaction without auth checks (for system/cron use)
+     */
+    private async executeTransactionProcessing(
+        transactionId: string
+    ): Promise<PlacementPayoutTransaction> {
         const transaction = await this.transactionRepository.getById(transactionId);
         if (!transaction) {
             throw new Error(`Payout transaction ${transactionId} not found`);
@@ -170,16 +178,30 @@ export class PayoutServiceV2 {
         }
 
         if (transaction.amount <= 0) {
-            throw new Error('Transaction amount must be positive');
+            throw new Error(`Transaction amount must be positive (recruiter ${transaction.recruiter_id}, amount: $${transaction.amount})`);
         }
 
         const recruiterStatus = await this.recruiterConnectRepository.getStatus(transaction.recruiter_id);
         if (!recruiterStatus?.stripe_connect_account_id) {
-            throw new Error('Recruiter does not have a Stripe Connect account');
+            await this.publishEvent('payout_transaction.connect_required', {
+                recruiterId: transaction.recruiter_id,
+                placementId: transaction.placement_id,
+                transactionId: transaction.id,
+                amount: transaction.amount,
+                reason: 'no_connect_account',
+            });
+            throw new Error(`Recruiter ${transaction.recruiter_id} does not have a Stripe Connect account — they must complete Stripe onboarding before payouts can be processed`);
         }
 
         if (!recruiterStatus.stripe_connect_onboarded) {
-            throw new Error('Recruiter Stripe Connect account is not onboarded');
+            await this.publishEvent('payout_transaction.connect_required', {
+                recruiterId: transaction.recruiter_id,
+                placementId: transaction.placement_id,
+                transactionId: transaction.id,
+                amount: transaction.amount,
+                reason: 'not_onboarded',
+            });
+            throw new Error(`Recruiter ${transaction.recruiter_id} has not completed Stripe Connect onboarding — payouts cannot be sent until onboarding is finished`);
         }
 
         const amountCents = Math.round(transaction.amount * 100);
@@ -225,7 +247,7 @@ export class PayoutServiceV2 {
     }
 
     /**
-     * Process all pending payout transactions for a placement
+     * Process all pending payout transactions for a placement (admin-gated)
      */
     async processPlacementTransactions(
         placementId: string,
@@ -233,14 +255,69 @@ export class PayoutServiceV2 {
     ): Promise<PlacementPayoutTransaction[]> {
         const access = await this.resolveAccessContext(clerkUserId);
         requireBillingAdmin(access);
+        return this.executePlacementTransactionProcessing(placementId);
+    }
 
+    /**
+     * Process all pending payout transactions for a placement (system/cron use, no auth check)
+     */
+    async processPlacementTransactionsInternal(
+        placementId: string
+    ): Promise<PlacementPayoutTransaction[]> {
+        return this.executePlacementTransactionProcessing(placementId);
+    }
+
+    private async executePlacementTransactionProcessing(
+        placementId: string
+    ): Promise<PlacementPayoutTransaction[]> {
         const transactions = await this.transactionRepository.getByPlacementId(placementId);
         const pending = transactions.filter(t => t.status === 'pending' || t.status === 'failed');
 
+        if (pending.length === 0) {
+            return [];
+        }
+
         const results: PlacementPayoutTransaction[] = [];
+        const errors: Array<{ transactionId: string; recruiterId: string; amount: number; error: string }> = [];
+
         for (const transaction of pending) {
-            const processed = await this.processPayoutTransaction(transaction.id, clerkUserId);
-            results.push(processed);
+            // Skip zero-amount transactions (no-op, mark as paid)
+            if (transaction.amount <= 0) {
+                const skipped = await this.transactionRepository.updateStatus(transaction.id, 'paid', {
+                    failure_reason: 'Skipped: zero amount',
+                });
+                results.push(skipped);
+                continue;
+            }
+
+            try {
+                const processed = await this.executeTransactionProcessing(transaction.id);
+                results.push(processed);
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                errors.push({
+                    transactionId: transaction.id,
+                    recruiterId: transaction.recruiter_id,
+                    amount: transaction.amount,
+                    error: errorMessage,
+                });
+                // Continue processing remaining transactions
+            }
+        }
+
+        // If ALL transactions failed, throw a summary error
+        if (errors.length > 0 && results.filter(r => r.status === 'paid').length === 0) {
+            const summary = errors.map(e => `$${e.amount} to ${e.recruiterId}: ${e.error}`).join('; ');
+            throw new Error(`All ${errors.length} transaction(s) failed: ${summary}`);
+        }
+
+        // If some failed but some succeeded, log but don't throw (partial success)
+        if (errors.length > 0) {
+            console.warn(
+                `Partial payout processing for placement ${placementId}: ` +
+                `${results.filter(r => r.status === 'paid').length} succeeded, ${errors.length} failed`,
+                errors
+            );
         }
 
         return results;

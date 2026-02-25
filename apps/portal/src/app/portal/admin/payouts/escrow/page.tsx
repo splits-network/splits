@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -86,31 +86,15 @@ export default function EscrowHoldsPage() {
     });
 
     // Load stats on mount
-    useMemo(() => {
+    useEffect(() => {
         async function loadStats() {
             try {
                 const token = await getToken();
                 if (!token) return;
                 const apiClient = createAuthenticatedClient(token);
 
-                // Get counts and totals
-                const [active, released] = await Promise.all([
-                    apiClient.get('/escrow-holds?status=active&limit=1'),
-                    apiClient.get('/escrow-holds?status=released&limit=1'),
-                ]);
-
-                // Calculate total held amount (would need aggregation endpoint)
-                const totalHeld = (active.data || []).reduce(
-                    (sum: number, hold: EscrowHold) => sum + hold.hold_amount,
-                    0
-                );
-
-                setStats({
-                    active_holds: active.pagination?.total || 0,
-                    total_held: totalHeld,
-                    due_for_release: 0, // TODO: Add date filter
-                    released_today: 0, // TODO: Add date filter
-                });
+                const response = await apiClient.get('/escrow-holds/stats');
+                setStats(response.data);
             } catch (error) {
                 console.error('Failed to load stats:', error);
             } finally {

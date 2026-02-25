@@ -29,6 +29,12 @@ const BILLING_RESOURCES: ResourceDefinition[] = [
         basePath: '/escrow-holds',
         tag: 'billing',
     },
+    {
+        name: 'placement-payout-audit-log',
+        service: 'billing',
+        basePath: '/placement-payout-audit-log',
+        tag: 'billing',
+    },
 ];
 
 function registerSubscriptionMeRoute(app: FastifyInstance, services: ServiceRegistry) {
@@ -452,6 +458,64 @@ function registerStripeConnectRoutes(app: FastifyInstance, services: ServiceRegi
                 return reply
                     .status(error.statusCode || 400)
                     .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch payouts' } });
+            }
+        }
+    );
+}
+
+function registerPayoutScheduleActionRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    // Stats route must be registered before generic :id routes to avoid collision
+    app.get(
+        '/api/v2/payout-schedules/stats',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().get(
+                    '/api/v2/payout-schedules/stats',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch payout schedule stats');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch payout schedule stats' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/payout-schedules/:id/trigger',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { id } = request.params as { id: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/payout-schedules/${id}/trigger`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to trigger payout schedule processing');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to trigger payout schedule processing' } });
             }
         }
     );
@@ -891,6 +955,36 @@ function registerPublicPlansRoute(app: FastifyInstance, services: ServiceRegistr
     );
 }
 
+function registerEscrowHoldStatsRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/escrow-holds/stats',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().get(
+                    '/api/v2/escrow-holds/stats',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch escrow hold stats');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch escrow hold stats' } });
+            }
+        }
+    );
+}
+
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register webhook proxy (no auth - verified by Stripe signature)
     registerStripeWebhookProxy(app, services);
@@ -898,7 +992,7 @@ export function registerBillingRoutes(app: FastifyInstance, services: ServiceReg
     // Register PUBLIC routes FIRST (must be before auth routes that conflict)
     registerPublicPlansRoute(app, services);
 
-    // Register specific auth-required routes
+    // Register specific auth-required routes (including /stats sub-routes that must come before generic :id routes)
     registerSubscriptionMeRoute(app, services);
     registerSubscriptionSetupIntentRoute(app, services);
     registerSubscriptionActivateRoute(app, services);
@@ -907,6 +1001,8 @@ export function registerBillingRoutes(app: FastifyInstance, services: ServiceReg
     registerSubscriptionInvoicesRoute(app, services);
     registerDiscountValidationRoute(app, services);
     registerStripeConnectRoutes(app, services);
+    registerPayoutScheduleActionRoutes(app, services);
+    registerEscrowHoldStatsRoute(app, services);
     registerPayoutTransactionRoutes(app, services);
     registerCompanyBillingProfileRoutes(app, services);
     registerPlacementInvoiceRoutes(app, services);

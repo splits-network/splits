@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Logger } from '@splits-network/shared-logging';
+import { CryptoService } from '@splits-network/shared-config/src/crypto';
 import { IEventPublisher } from '../shared/events';
 import { ConnectionRepository } from './repository';
 import { ProviderRepository } from '../providers/repository';
@@ -33,6 +34,7 @@ export class ConnectionService {
         private providerRepo: ProviderRepository,
         private eventPublisher: IEventPublisher,
         private logger: Logger,
+        private crypto: CryptoService,
     ) {}
 
     /** Strip sensitive fields before returning to the client */
@@ -134,8 +136,10 @@ export class ConnectionService {
             provider_id: provider.id,
             provider_slug: providerSlug,
             status: 'active',
-            access_token_enc: tokenResponse.access_token,  // TODO: encrypt at rest
-            refresh_token_enc: tokenResponse.refresh_token ?? null,
+            access_token_enc: this.crypto.encrypt(tokenResponse.access_token),
+            refresh_token_enc: tokenResponse.refresh_token
+                ? this.crypto.encrypt(tokenResponse.refresh_token)
+                : null,
             token_expires_at: tokenResponse.expires_in
                 ? new Date(Date.now() + tokenResponse.expires_in * 1000).toISOString()
                 : null,
@@ -167,9 +171,12 @@ export class ConnectionService {
         if (!connection) throw new Error('Connection not found');
         if (connection.clerk_user_id !== clerkUserId) throw new Error('Unauthorized');
 
-        // Try to revoke at the provider (best-effort)
+        // Try to revoke at the provider (best-effort, decrypt stored token first)
         try {
-            await this.revokeAtProvider(connection.provider_slug, connection.access_token_enc);
+            const decryptedToken = connection.access_token_enc
+                ? this.crypto.decrypt(connection.access_token_enc)
+                : null;
+            await this.revokeAtProvider(connection.provider_slug, decryptedToken);
         } catch (err) {
             this.logger.warn({ err, connectionId }, 'Failed to revoke token at provider');
         }

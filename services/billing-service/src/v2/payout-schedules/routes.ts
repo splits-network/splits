@@ -1,15 +1,40 @@
 // PayoutSchedule Routes - V2 5-route CRUD pattern + admin trigger
 
 import { FastifyInstance } from 'fastify';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams } from '@splits-network/shared-types';
 import { PayoutScheduleServiceV2 } from './service';
+import { PayoutScheduleStatsRepository } from './stats-repository';
 import { PayoutScheduleFilters, PayoutScheduleCreate, PayoutScheduleUpdate } from './types';
 
 export async function payoutScheduleRoutes(
     app: FastifyInstance,
-    service: PayoutScheduleServiceV2
+    service: PayoutScheduleServiceV2,
+    supabase?: SupabaseClient
 ) {
     const basePath = '/api/v2';
+
+    // STATS - Get aggregated stats for admin dashboard (before :id to avoid conflict)
+    if (supabase) {
+        app.get(`${basePath}/payout-schedules/stats`, async (request, reply) => {
+            try {
+                const clerkUserId = request.headers['x-clerk-user-id'] as string;
+                if (!clerkUserId) {
+                    return reply.code(401).send({ error: 'Unauthorized' });
+                }
+
+                const statsRepo = new PayoutScheduleStatsRepository(supabase);
+                const stats = await statsRepo.getStats();
+                return reply.send({ data: stats });
+            } catch (error) {
+                console.error('Error getting payout schedule stats:', error);
+                return reply.code(500).send({
+                    error: error instanceof Error ? error.message : 'Internal server error',
+                });
+            }
+        });
+    }
+
     // LIST - Get all payout schedules with filters
     app.get<{
         Querystring: StandardListParams & { filters?: string };
@@ -200,6 +225,16 @@ export async function payoutScheduleRoutes(
                 }
                 if (error.message.includes('Cannot process')) {
                     return reply.code(400).send({ error: error.message });
+                }
+                // Business logic failures (Connect account, onboarding, balance, collectibility)
+                if (
+                    error.message.includes('Stripe Connect') ||
+                    error.message.includes('onboarding') ||
+                    error.message.includes('insufficient') ||
+                    error.message.includes('not collectible') ||
+                    error.message.includes('transaction(s) failed')
+                ) {
+                    return reply.code(422).send({ error: error.message });
                 }
             }
 
