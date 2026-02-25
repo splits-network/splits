@@ -5,11 +5,12 @@
  * Phase 13: GPT API Endpoints
  */
 
-import { randomUUID } from "crypto";
+import { randomUUID, createHmac, timingSafeEqual } from "crypto";
 import {
     GptErrorResponse,
     ConfirmationToken,
     GptJobSearchResult,
+    GptResumeDataInput,
 } from "./types";
 
 // ============================================================================
@@ -116,13 +117,33 @@ export function formatStageLabel(stage: string): string {
 }
 
 // ============================================================================
-// Confirmation Token Store (In-Memory)
+// Confirmation Token — Stateless HMAC-Signed (works across replicas)
 // ============================================================================
 
-const confirmationTokens = new Map<string, ConfirmationToken>();
+/**
+ * Signing key for confirmation tokens.
+ * Uses INTERNAL_SERVICE_KEY (available in all environments).
+ */
+function getSigningKey(): string {
+    const key = process.env.INTERNAL_SERVICE_KEY;
+    if (!key) throw new Error('INTERNAL_SERVICE_KEY is required for confirmation tokens');
+    return key;
+}
+
+function hmacSign(payload: string): string {
+    return createHmac('sha256', getSigningKey()).update(payload).digest('base64url');
+}
+
+function hmacVerify(payload: string, signature: string): boolean {
+    const expected = createHmac('sha256', getSigningKey()).update(payload).digest();
+    const actual = Buffer.from(signature, 'base64url');
+    if (expected.length !== actual.length) return false;
+    return timingSafeEqual(expected, actual);
+}
 
 /**
- * Generate a new confirmation token with 15-minute expiry
+ * Generate a stateless confirmation token with 15-minute expiry.
+ * All data is encoded in the token itself — no server-side storage needed.
  */
 export function generateConfirmationToken(
     clerkUserId: string,
@@ -130,54 +151,84 @@ export function generateConfirmationToken(
     candidateId: string,
     preScreenAnswers?: ConfirmationToken['preScreenAnswers'],
     coverLetter?: string,
+    resumeData?: GptResumeDataInput,
+    existingApplicationId?: string,
 ): ConfirmationToken {
-    const tokenId = `gpt_confirm_${randomUUID()}`;
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    const token: ConfirmationToken = {
+    // Truncate raw_text to prevent oversized tokens
+    const truncatedResumeData = resumeData ? {
+        ...resumeData,
+        raw_text: resumeData.raw_text?.slice(0, 10_000),
+    } : undefined;
+
+    const payload = JSON.stringify({
+        clerkUserId,
+        jobId,
+        candidateId,
+        preScreenAnswers,
+        coverLetter,
+        resumeData: truncatedResumeData,
+        existingApplicationId,
+        exp: expiresAt.getTime(),
+    });
+
+    const encodedPayload = Buffer.from(payload).toString('base64url');
+    const signature = hmacSign(encodedPayload);
+    const tokenId = `${encodedPayload}.${signature}`;
+
+    return {
         token: tokenId,
         clerkUserId,
         jobId,
         candidateId,
         preScreenAnswers,
         coverLetter,
+        resumeData: truncatedResumeData,
+        existingApplicationId,
         expiresAt,
     };
-
-    confirmationTokens.set(tokenId, token);
-    return token;
 }
 
 /**
- * Store a confirmation token
- */
-export function storeConfirmationToken(token: ConfirmationToken): void {
-    confirmationTokens.set(token.token, token);
-}
-
-/**
- * Retrieve a confirmation token, checks expiry, deletes if expired
+ * Retrieve and verify a confirmation token. Returns undefined if invalid or expired.
  */
 export function getConfirmationToken(
     tokenId: string,
 ): ConfirmationToken | undefined {
-    const token = confirmationTokens.get(tokenId);
-    if (!token) {
+    const dotIndex = tokenId.lastIndexOf('.');
+    if (dotIndex === -1) return undefined;
+
+    const encodedPayload = tokenId.substring(0, dotIndex);
+    const signature = tokenId.substring(dotIndex + 1);
+
+    if (!hmacVerify(encodedPayload, signature)) return undefined;
+
+    try {
+        const data = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString());
+
+        if (data.exp < Date.now()) return undefined;
+
+        return {
+            token: tokenId,
+            clerkUserId: data.clerkUserId,
+            jobId: data.jobId,
+            candidateId: data.candidateId,
+            preScreenAnswers: data.preScreenAnswers,
+            coverLetter: data.coverLetter,
+            resumeData: data.resumeData,
+            existingApplicationId: data.existingApplicationId,
+            expiresAt: new Date(data.exp),
+        };
+    } catch {
         return undefined;
     }
-
-    // Check expiry
-    if (token.expiresAt < new Date()) {
-        confirmationTokens.delete(tokenId);
-        return undefined;
-    }
-
-    return token;
 }
 
 /**
- * Delete a confirmation token
+ * No-op — stateless tokens don't need deletion.
+ * Kept for API compatibility with existing callers.
  */
-export function deleteConfirmationToken(tokenId: string): void {
-    confirmationTokens.delete(tokenId);
+export function deleteConfirmationToken(_tokenId: string): void {
+    // Stateless token — nothing to delete
 }

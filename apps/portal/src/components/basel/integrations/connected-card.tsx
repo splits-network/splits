@@ -1,7 +1,10 @@
 "use client";
 
 import { BaselStatusPill } from "@splits-network/basel-ui";
-import type { IntegrationProvider, OAuthConnectionPublic } from "@splits-network/shared-types";
+import type {
+    IntegrationProvider,
+    OAuthConnectionPublic,
+} from "@splits-network/shared-types";
 
 interface ConnectedCardProps {
     provider: IntegrationProvider;
@@ -35,7 +38,9 @@ export function ConnectedCard({
                 <div className="flex items-start gap-4">
                     {/* Provider icon */}
                     <div className="w-10 h-10 bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                        <i className={`${provider.icon || "fa-duotone fa-regular fa-plug"} text-lg text-primary`} />
+                        <i
+                            className={`${provider.icon || "fa-duotone fa-regular fa-plug"} text-lg text-primary`}
+                        />
                     </div>
 
                     {/* Info */}
@@ -56,7 +61,7 @@ export function ConnectedCard({
                         )}
 
                         {/* Metadata row */}
-                        <div className="flex items-center gap-4 mt-2 text-[11px] text-base-content/40">
+                        <div className="flex items-center gap-4 mt-2 text-sm text-base-content/40">
                             {lastSynced && (
                                 <span>
                                     <i className="fa-duotone fa-regular fa-clock mr-1" />
@@ -66,7 +71,10 @@ export function ConnectedCard({
                             {connection.scopes_granted && (
                                 <span>
                                     <i className="fa-duotone fa-regular fa-key mr-1" />
-                                    {connection.scopes_granted.length} scope{connection.scopes_granted.length !== 1 ? "s" : ""}
+                                    {connection.scopes_granted.length} scope
+                                    {connection.scopes_granted.length !== 1
+                                        ? "s"
+                                        : ""}
                                 </span>
                             )}
                         </div>
@@ -74,7 +82,9 @@ export function ConnectedCard({
                         {/* Error display */}
                         {connection.last_error && (
                             <div className="mt-2 bg-error/5 border border-error/20 px-3 py-1.5">
-                                <p className="text-xs text-error font-medium">{connection.last_error}</p>
+                                <p className="text-xs text-error font-medium">
+                                    {connection.last_error}
+                                </p>
                             </div>
                         )}
                     </div>
@@ -83,7 +93,7 @@ export function ConnectedCard({
                     <button
                         onClick={onDisconnect}
                         disabled={disconnecting}
-                        className="btn btn-outline btn-error btn-sm rounded-none font-bold uppercase tracking-wider text-[11px] shrink-0"
+                        className="btn btn-outline btn-error btn-sm rounded-none font-bold uppercase tracking-wider text-sm shrink-0"
                     >
                         {disconnecting ? (
                             <span className="loading loading-spinner loading-xs" />

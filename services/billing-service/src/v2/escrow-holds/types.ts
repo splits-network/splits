@@ -15,7 +15,7 @@ export interface EscrowHold {
     updated_at: string;
 }
 
-export type EscrowHoldStatus = 'active' | 'released' | 'expired' | 'cancelled';
+export type EscrowHoldStatus = 'active' | 'released' | 'cancelled';
 
 export interface EscrowHoldCreate {
     placement_id: string;

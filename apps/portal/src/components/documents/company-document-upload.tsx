@@ -39,7 +39,6 @@ const ALLOWED_TYPES = [
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "text/plain",
 ];
 
 interface UploadedDocument {
@@ -99,7 +98,7 @@ export default function CompanyDocumentUpload({
         }
 
         if (!ALLOWED_TYPES.includes(file.type)) {
-            return "Only PDF, DOC, DOCX, and TXT files are allowed";
+            return "Please upload a PDF or Word document (.pdf, .doc, .docx)";
         }
 
         return null;
@@ -390,7 +389,7 @@ export default function CompanyDocumentUpload({
                             ref={fileInputRef}
                             type="file"
                             className={`file-input w-full ${compact ? "file-input-sm" : ""}`}
-                            accept=".pdf,.doc,.docx,.txt"
+                            accept=".pdf,.doc,.docx"
                             onChange={handleFileSelect}
                             disabled={disabled}
                         />
@@ -442,7 +441,7 @@ export default function CompanyDocumentUpload({
                                 ref={fileInputRef}
                                 type="file"
                                 className={`file-input w-full ${compact ? "file-input-sm" : ""}`}
-                                accept=".pdf,.doc,.docx,.txt"
+                                accept=".pdf,.doc,.docx"
                                 onChange={handleFileSelect}
                                 disabled={disabled || isUploading}
                                 required

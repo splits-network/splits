@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { IEventPublisher } from './shared/events';
 import { Logger } from '@splits-network/shared-logging';
+import { CryptoService } from '@splits-network/shared-config/src/crypto';
 import { registerProviderRoutes } from './providers/routes';
 import { registerConnectionRoutes } from './connections/routes';
 import { registerCalendarRoutes } from './calendar/routes';
@@ -14,6 +15,7 @@ interface RegisterConfig {
     rabbitMqUrl: string;
     eventPublisher: IEventPublisher;
     logger: Logger;
+    crypto: CryptoService;
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
@@ -27,6 +29,7 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,
         logger: config.logger,
+        crypto: config.crypto,
     });
 
     await registerCalendarRoutes(app, {
@@ -34,6 +37,7 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,
         logger: config.logger,
+        crypto: config.crypto,
     });
 
     await registerEmailRoutes(app, {
@@ -41,6 +45,7 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,
         logger: config.logger,
+        crypto: config.crypto,
     });
 
     await registerLinkedInRoutes(app, {
@@ -48,6 +53,7 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,
         logger: config.logger,
+        crypto: config.crypto,
     });
 
     await registerATSRoutes(app, {
@@ -55,5 +61,6 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,
         logger: config.logger,
+        crypto: config.crypto,
     });
 }

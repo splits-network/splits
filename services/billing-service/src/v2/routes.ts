@@ -5,7 +5,6 @@ import { PlanRepository } from './plans/repository';
 import { PlanServiceV2 } from './plans/service';
 import { SubscriptionRepository } from './subscriptions/repository';
 import { SubscriptionServiceV2 } from './subscriptions/service';
-import { PayoutRepository } from './payouts/repository';
 import { PayoutServiceV2 } from './payouts/service';
 import { PayoutScheduleServiceV2 } from './payout-schedules/service';
 import { EscrowHoldServiceV2 } from './escrow-holds/service';
@@ -31,6 +30,7 @@ import { companyBillingProfileRoutes } from './company-billing/routes';
 import { PlacementInvoiceRepository } from './placement-invoices/repository';
 import { PlacementInvoiceService } from './placement-invoices/service';
 import { placementInvoiceRoutes } from './placement-invoices/routes';
+import { placementPayoutAuditRoutes } from './audit/routes';
 import { resolveAccessContext } from './shared/access';
 
 interface BillingV2Config {
@@ -42,7 +42,6 @@ interface BillingV2Config {
 export async function registerV2Routes(app: FastifyInstance, config: BillingV2Config) {
     const planRepository = new PlanRepository(config.supabaseUrl, config.supabaseKey);
     const subscriptionRepository = new SubscriptionRepository(config.supabaseUrl, config.supabaseKey);
-    const payoutRepository = new PayoutRepository(config.supabaseUrl, config.supabaseKey);
     const accessClient = createClient(config.supabaseUrl, config.supabaseKey);
     const accessResolver = (clerkUserId: string) => resolveAccessContext(accessClient, clerkUserId);
 
@@ -96,10 +95,9 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         accessResolver
     );
     const payoutService = new PayoutServiceV2(
-        payoutRepository,
-        snapshotRepository,  // Phase 6: Wire in PlacementSnapshotRepository
-        splitRepository,     // Phase 6: Wire in PlacementSplitRepository
-        transactionRepository, // Phase 6: Wire in PlacementPayoutTransactionRepository
+        snapshotRepository,
+        splitRepository,
+        transactionRepository,
         recruiterConnectRepository,
         accessResolver,
         config.eventPublisher
@@ -130,8 +128,9 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     placementInvoiceRoutes(app, placementInvoiceService);
 
     // Register automation routes
-    await payoutScheduleRoutes(app, payoutScheduleService);
-    await escrowHoldRoutes(app, escrowHoldService);
+    await payoutScheduleRoutes(app, payoutScheduleService, accessClient);
+    await escrowHoldRoutes(app, escrowHoldService, accessClient);
+    await placementPayoutAuditRoutes(app, auditRepository);
 
     // Phase 6: Return services for use by event consumers
     return {

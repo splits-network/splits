@@ -8,15 +8,18 @@ import {
 interface PipelineProgressProps {
     currentStage: string;
     hasRecruiter: boolean;
+    expiredAt?: string | null;
 }
 
-const TERMINAL_STAGES = ["rejected", "withdrawn", "expired"];
+const TERMINAL_STAGES = ["rejected", "withdrawn"];
 
 export function PipelineProgress({
     currentStage,
     hasRecruiter,
+    expiredAt,
 }: PipelineProgressProps) {
     const isTerminal = TERMINAL_STAGES.includes(currentStage);
+    const isExpired = !!expiredAt;
     const stages = hasRecruiter
         ? [...RECRUITER_PIPELINE_STAGES]
         : [...DIRECT_PIPELINE_STAGES];
@@ -60,12 +63,20 @@ export function PipelineProgress({
             {isTerminal && (
                 <div className="flex justify-center mt-2">
                     <span
-                        className={`badge ${currentStage === "rejected" ? "badge-error" : currentStage === "withdrawn" ? "badge-warning" : "badge-neutral"} badge-sm gap-1`}
+                        className={`badge ${currentStage === "rejected" ? "badge-error" : "badge-warning"} badge-sm gap-1`}
                     >
                         <i
-                            className={`fa-duotone fa-regular ${currentStage === "rejected" ? "fa-times-circle" : currentStage === "withdrawn" ? "fa-undo" : "fa-clock"}`}
+                            className={`fa-duotone fa-regular ${currentStage === "rejected" ? "fa-times-circle" : "fa-undo"}`}
                         />
                         {STAGE_DISPLAY_NAMES[currentStage] || currentStage}
+                    </span>
+                </div>
+            )}
+            {isExpired && !isTerminal && (
+                <div className="flex justify-center mt-2">
+                    <span className="badge badge-warning badge-sm gap-1">
+                        <i className="fa-duotone fa-regular fa-clock" />
+                        Expired
                     </span>
                 </div>
             )}

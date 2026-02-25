@@ -72,6 +72,10 @@ spec:
                             secretKeyRef:
                                 name: internal-service-secrets
                                 key: internal-service-key
+                      - name: PUBLIC_BASE_URL
+                        value: "${PUBLIC_BASE_URL}"
+                      - name: CANDIDATE_APP_URL
+                        value: "${CANDIDATE_APP_URL}"
                   resources:
                       requests:
                           cpu: 100m

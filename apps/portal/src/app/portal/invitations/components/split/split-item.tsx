@@ -79,7 +79,7 @@ export function SplitItem({
                     )}
                 </span>
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-0.5 ${statusColor(invitation)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-0.5 ${statusColor(invitation)}`}
                 >
                     <i
                         className={`fa-duotone fa-regular ${status.icon} mr-1`}
@@ -97,7 +97,10 @@ export function SplitItem({
             )}
 
             {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="absolute bottom-2 right-2"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <ActionsToolbar
                     invitation={invitation}
                     variant="icon-only"

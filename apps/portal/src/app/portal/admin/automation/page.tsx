@@ -58,14 +58,14 @@ export default function AutomationControlsPage() {
 
             // Load automation rules
             const rulesResponse = await client.get<{ data: AutomationRule[] }>(
-                "/admin/automation/rules",
+                "/automation-rules",
             );
             setRules(rulesResponse.data || []);
 
             // Load pending executions requiring approval
             const execResponse = await client.get<{
                 data: AutomationExecution[];
-            }>("/admin/automation/executions", {
+            }>("/automation-executions", {
                 params: { status: "pending", requires_approval: "true" },
             });
             setPendingExecutions(execResponse.data || []);
@@ -84,7 +84,7 @@ export default function AutomationControlsPage() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/admin/automation/rules/${ruleId}`, {
+            await client.patch(`/automation-rules/${ruleId}`, {
                 status: newStatus,
             });
             await loadData();
@@ -103,7 +103,7 @@ export default function AutomationControlsPage() {
 
             const client = createAuthenticatedClient(token);
             await client.post(
-                `/admin/automation/executions/${executionId}/approve`,
+                `/automation-executions/${executionId}/approve`,
             );
             await loadData();
         } catch (error) {
@@ -122,7 +122,7 @@ export default function AutomationControlsPage() {
 
             const client = createAuthenticatedClient(token);
             await client.post(
-                `/admin/automation/executions/${executionId}/reject`,
+                `/automation-executions/${executionId}/reject`,
                 { reason },
             );
             await loadData();

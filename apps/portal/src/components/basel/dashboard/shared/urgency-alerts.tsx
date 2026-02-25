@@ -33,7 +33,7 @@ export function UrgencyAlerts({ alerts, className }: UrgencyAlertsProps) {
                     key={alert.label}
                     className={`inline-flex items-center gap-2 px-3 py-1.5 border text-xs font-semibold ${colorMap[alert.color]}`}
                 >
-                    <i className={`${alert.icon} text-[10px]`} />
+                    <i className={`${alert.icon} text-sm`} />
                     <span>{alert.count}</span>
                     <span className="opacity-70">{alert.label}</span>
                 </div>

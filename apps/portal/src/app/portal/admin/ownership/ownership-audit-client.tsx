@@ -82,9 +82,8 @@ export default function OwnershipAuditClient() {
             if (params.sort_by) queryParams.set('sort_by', params.sort_by);
             if (params.sort_order) queryParams.set('sort_order', params.sort_order);
 
-            // TODO: Backend enhancement needed - add ?include=candidate to avoid N+1 queries
-            // Currently the endpoint returns sourcers without candidate data
-            const response = await apiClient.get(`/candidates/sourcers?${queryParams.toString()}`);
+            queryParams.set('include', 'candidate');
+            const response = await apiClient.get(`/candidate-sourcers?${queryParams.toString()}`);
             return response;
         },
         defaultFilters,

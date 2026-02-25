@@ -224,7 +224,7 @@ export default function ReferralCodesBaselPage() {
                         {loading && codes.length === 0 ? (
                             <div className="py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                                <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                     Loading referral codes...
                                 </p>
                             </div>

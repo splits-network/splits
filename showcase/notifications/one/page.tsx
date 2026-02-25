@@ -304,7 +304,7 @@ export default function NotificationsOne() {
                                 >
                                     {f.label}
                                     <span
-                                        className={`text-[10px] px-1.5 py-0.5 font-bold ${filter === f.value ? "bg-primary/10 text-primary" : "bg-base-300 text-base-content/30"}`}
+                                        className={`text-sm px-1.5 py-0.5 font-bold ${filter === f.value ? "bg-primary/10 text-primary" : "bg-base-300 text-base-content/30"}`}
                                     >
                                         {count}
                                     </span>
@@ -355,7 +355,7 @@ export default function NotificationsOne() {
                                                 {n.title}
                                             </h3>
                                             <div className="flex items-center gap-2 flex-shrink-0">
-                                                <span className="text-[10px] text-base-content/30 whitespace-nowrap">
+                                                <span className="text-sm text-base-content/30 whitespace-nowrap">
                                                     {n.time}
                                                 </span>
                                                 {!n.read && (
@@ -379,7 +379,7 @@ export default function NotificationsOne() {
                                                         onClick={() =>
                                                             markAsRead(n.id)
                                                         }
-                                                        className="btn btn-ghost btn-xs text-[10px]"
+                                                        className="btn btn-ghost btn-xs text-sm"
                                                     >
                                                         <i className="fa-duotone fa-regular fa-check" />{" "}
                                                         Mark read
@@ -389,7 +389,7 @@ export default function NotificationsOne() {
                                                     onClick={() =>
                                                         deleteNotification(n.id)
                                                     }
-                                                    className="btn btn-ghost btn-xs text-[10px] text-error"
+                                                    className="btn btn-ghost btn-xs text-sm text-error"
                                                 >
                                                     <i className="fa-duotone fa-regular fa-trash" />{" "}
                                                     Delete

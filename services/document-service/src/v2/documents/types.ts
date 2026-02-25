@@ -8,18 +8,19 @@ export type ProcessingStatus =
     | "processing"
     | "processed"
     | "failed";
+export type ScanStatus = "pending" | "clean" | "infected" | "error";
 
 export interface Document {
     id: string;
     entity_type:
-        | "candidate"
-        | "job"
-        | "application"
-        | "company"
-        | "contract"
-        | "placement"
-        | "profile_image"
-        | "system";
+    | "candidate"
+    | "job"
+    | "application"
+    | "company"
+    | "contract"
+    | "placement"
+    | "profile_image"
+    | "system";
     entity_id: string;
     document_type?: string | null;
     file_name: string;
@@ -30,6 +31,7 @@ export interface Document {
     uploaded_by?: string | null;
     status: DocumentStatus;
     processing_status?: ProcessingStatus;
+    scan_status?: ScanStatus;
     metadata?: Record<string, any> | null;
     created_at: string;
     updated_at: string;

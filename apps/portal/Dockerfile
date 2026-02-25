@@ -1,6 +1,6 @@
 # Base stage with Node.js and pnpm
 # Force rebuild: 2025-12-21-001
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 
@@ -61,6 +61,8 @@ COPY packages/basel-ui ./packages/basel-ui
 COPY packages/chat-ui ./packages/chat-ui
 COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/portal ./apps/portal
+# Reinstall to ensure workspace links are properly established after copying source
+RUN pnpm install --frozen-lockfile
 # Build shared packages first (in dependency order - types/config first, then api-client which depends on them)
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-config build
@@ -73,7 +75,7 @@ RUN pnpm --filter @splits-network/memphis-ui build
 RUN pnpm --filter @splits-network/portal build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production

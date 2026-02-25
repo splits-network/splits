@@ -42,7 +42,9 @@ export default function ComposeEmailModal({
 
     /* ── State ── */
     const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
-    const [selectedConnectionId, setSelectedConnectionId] = useState(presetConnectionId || "");
+    const [selectedConnectionId, setSelectedConnectionId] = useState(
+        presetConnectionId || "",
+    );
     const [loading, setLoading] = useState(!presetConnectionId);
     const [sending, setSending] = useState(false);
     const [error, setError] = useState("");
@@ -70,7 +72,14 @@ export default function ComposeEmailModal({
             gsap.fromTo(
                 panelRef.current,
                 { x: "100%", opacity: 0 },
-                { x: 0, opacity: 1, duration: 0.4, ease: "power3.out", delay: 0.1, clearProps: "transform" },
+                {
+                    x: 0,
+                    opacity: 1,
+                    duration: 0.4,
+                    ease: "power3.out",
+                    delay: 0.1,
+                    clearProps: "transform",
+                },
             );
         },
         { dependencies: [] },
@@ -88,7 +97,8 @@ export default function ComposeEmailModal({
             };
             const emailConns = (res.data ?? []).filter(
                 (c) =>
-                    (c.provider_slug.includes("email") || c.provider_slug.includes("gmail")) &&
+                    (c.provider_slug.includes("email") ||
+                        c.provider_slug.includes("gmail")) &&
                     c.status === "active",
             );
             setConnections(emailConns);
@@ -117,8 +127,16 @@ export default function ComposeEmailModal({
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            const toEmails = to.split(",").map((e) => e.trim()).filter(Boolean);
-            const ccEmails = cc ? cc.split(",").map((e) => e.trim()).filter(Boolean) : undefined;
+            const toEmails = to
+                .split(",")
+                .map((e) => e.trim())
+                .filter(Boolean);
+            const ccEmails = cc
+                ? cc
+                      .split(",")
+                      .map((e) => e.trim())
+                      .filter(Boolean)
+                : undefined;
 
             await client.post(
                 `/integrations/email/${selectedConnectionId}/messages/send`,
@@ -142,7 +160,8 @@ export default function ComposeEmailModal({
         }
     };
 
-    const noConnections = !loading && connections.length === 0 && !presetConnectionId;
+    const noConnections =
+        !loading && connections.length === 0 && !presetConnectionId;
 
     return (
         <ModalPortal>
@@ -162,7 +181,7 @@ export default function ComposeEmailModal({
                 {/* Header */}
                 <div className="bg-primary px-6 py-5 flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary-content/60">
+                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-primary-content/60">
                             {inReplyTo ? "Reply" : "Compose"}
                         </p>
                         <h2 className="text-lg font-black text-primary-content mt-0.5">
@@ -181,7 +200,9 @@ export default function ComposeEmailModal({
                 <div className="flex-1 overflow-y-auto px-6 py-5">
                     {error && (
                         <div className="bg-error/5 border-l-4 border-error px-4 py-3 mb-4">
-                            <p className="text-sm font-semibold text-error">{error}</p>
+                            <p className="text-sm font-semibold text-error">
+                                {error}
+                            </p>
                         </div>
                     )}
 
@@ -200,7 +221,8 @@ export default function ComposeEmailModal({
                                 No email connected
                             </p>
                             <p className="text-xs text-base-content/40 mb-4">
-                                Connect Gmail or Outlook to send emails from Splits.
+                                Connect Gmail or Outlook to send emails from
+                                Splits.
                             </p>
                             <a
                                 href="/portal/integrations"
@@ -223,14 +245,25 @@ export default function ComposeEmailModal({
                                     </legend>
                                     <select
                                         value={selectedConnectionId}
-                                        onChange={(e) => setSelectedConnectionId(e.target.value)}
+                                        onChange={(e) =>
+                                            setSelectedConnectionId(
+                                                e.target.value,
+                                            )
+                                        }
                                         className="select select-bordered w-full"
                                         style={{ borderRadius: 0 }}
                                     >
-                                        <option value="">Select account...</option>
+                                        <option value="">
+                                            Select account...
+                                        </option>
                                         {connections.map((conn) => (
-                                            <option key={conn.id} value={conn.id}>
-                                                {conn.provider_account_name || conn.provider_slug} ({conn.provider_account_id})
+                                            <option
+                                                key={conn.id}
+                                                value={conn.id}
+                                            >
+                                                {conn.provider_account_name ||
+                                                    conn.provider_slug}{" "}
+                                                ({conn.provider_account_id})
                                             </option>
                                         ))}
                                     </select>
@@ -313,7 +346,13 @@ export default function ComposeEmailModal({
 
                         <button
                             onClick={handleSend}
-                            disabled={sending || !selectedConnectionId || !to || !subject || !body}
+                            disabled={
+                                sending ||
+                                !selectedConnectionId ||
+                                !to ||
+                                !subject ||
+                                !body
+                            }
                             className="btn btn-primary btn-sm"
                             style={{ borderRadius: 0 }}
                         >

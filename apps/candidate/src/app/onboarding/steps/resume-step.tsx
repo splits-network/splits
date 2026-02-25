@@ -13,7 +13,7 @@ import type {
     CandidateOnboardingActions,
 } from "../types";
 
-const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.txt";
+const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 interface ResumeStepProps {
@@ -37,10 +37,9 @@ export function ResumeStep({ state, actions }: ResumeStepProps) {
             "application/pdf",
             "application/msword",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "text/plain",
         ];
         if (!validTypes.includes(file.type)) {
-            setUploadError("Please upload a PDF, DOC, DOCX, or TXT file");
+            setUploadError("Please upload a PDF or Word document (.pdf, .doc, .docx)");
             return;
         }
 

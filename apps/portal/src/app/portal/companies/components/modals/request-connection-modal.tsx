@@ -88,15 +88,13 @@ export default function RequestConnectionModal({
                     {error && (
                         <div className="p-3 mb-4 border-l-4 border-error bg-error/10">
                             <i className="fa-duotone fa-regular fa-circle-exclamation text-error mr-2" />
-                            <span className="text-sm font-bold">
-                                {error}
-                            </span>
+                            <span className="text-sm font-bold">{error}</span>
                         </div>
                     )}
 
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
+                            <label className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
                                 Message (optional)
                             </label>
                             <textarea

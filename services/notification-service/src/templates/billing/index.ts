@@ -117,6 +117,49 @@ ${paragraph('You can update your billing details, payment method, or billing ter
     });
 }
 
+export interface PayoutConnectRequiredData {
+    recruiterName: string;
+    amount: number;
+    connectUrl: string;
+    reason: 'no_connect_account' | 'not_onboarded';
+    source?: EmailSource;
+}
+
+export function payoutConnectRequiredEmail(data: PayoutConnectRequiredData): string {
+    const isNoAccount = data.reason === 'no_connect_account';
+    const reasonText = isNoAccount
+        ? 'You don\'t have a payout account set up yet. Connect your bank account through Stripe to start receiving commissions.'
+        : 'Your Stripe account setup is not yet complete. Please finish the onboarding process to receive your commissions.';
+
+    const content = `
+${heading({ level: 1, text: 'Set Up Your Payout Account' })}
+
+${alert({
+        type: 'warning',
+        title: 'You have a commission waiting',
+        message: `A $${data.amount.toLocaleString()} commission is ready to be paid out, but we can't send it until your payout account is set up.`,
+    })}
+
+${paragraph(reasonText)}
+
+${button({
+        href: data.connectUrl,
+        text: isNoAccount ? 'Set Up Payouts →' : 'Complete Setup →',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph('Setup takes about 5 minutes. Once complete, your pending commission will be processed automatically.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        content,
+        preheader: `You have a $${data.amount.toLocaleString()} commission waiting — set up your payout account to receive it.`,
+        source: data.source || 'portal',
+    });
+}
+
 export function stripeConnectDisabledEmail(data: StripeConnectDisabledData): string {
     const content = `
 ${heading({ level: 1, text: 'Action Required: Update Your Payment Info' })}

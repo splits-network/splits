@@ -515,7 +515,7 @@ export class ChartServiceV2 {
 
         const { data: splits } = await this.supabase
             .from('placement_splits')
-            .select('role, split_amount')
+            .select('role, split_amount, split_percentage')
             .eq('recruiter_id', filters.recruiter_id);
 
         if (!splits || splits.length === 0) {
@@ -526,13 +526,37 @@ export class ChartServiceV2 {
         const roleMap = new Map<string, number>();
         for (const s of splits) {
             const role = s.role || 'unknown';
-            roleMap.set(role, (roleMap.get(role) || 0) + Number(s.split_amount || 0));
+            const amount = Number(s.split_amount || 0);
+            const percentage = Number(s.split_percentage || 0);
+
+            if (role === 'candidate_sourcer' || role === 'company_sourcer') {
+                // Base is 6%, bonus is the rest
+                const basePercentage = 6;
+                const bonusPercentage = Math.max(0, percentage - basePercentage);
+
+                const baseAmount = percentage > 0 ? amount * (basePercentage / percentage) : 0;
+                const bonusAmount = percentage > 0 ? amount * (bonusPercentage / percentage) : 0;
+
+                const baseKey = `${role}_base`;
+                const bonusKey = `${role}_bonus`;
+
+                roleMap.set(baseKey, (roleMap.get(baseKey) || 0) + baseAmount);
+                if (bonusAmount > 0) {
+                    roleMap.set(bonusKey, (roleMap.get(bonusKey) || 0) + bonusAmount);
+                }
+            } else {
+                roleMap.set(role, (roleMap.get(role) || 0) + amount);
+            }
         }
 
         const roleLabels: Record<string, string> = {
             candidate_recruiter: 'Closer',
             company_recruiter: 'BD',
             job_owner: 'Specs Owner',
+            candidate_sourcer_base: 'Discovery (Base)',
+            candidate_sourcer_bonus: 'Discovery (Bonus)',
+            company_sourcer_base: 'Company Sourcer (Base)',
+            company_sourcer_bonus: 'Company Sourcer (Bonus)',
             candidate_sourcer: 'Discovery',
             company_sourcer: 'Company Sourcer',
         };
@@ -543,6 +567,8 @@ export class ChartServiceV2 {
             'rgb(255, 206, 86)',   // Yellow
             'rgb(153, 102, 255)', // Purple
             'rgb(255, 159, 64)',   // Orange
+            'rgb(231, 76, 60)',    // Red
+            'rgb(46, 204, 113)',   // Emerald
         ];
 
         const labels = Array.from(roleMap.keys()).map(r => roleLabels[r] || r);

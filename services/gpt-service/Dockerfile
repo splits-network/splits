@@ -1,5 +1,5 @@
 # Base stage with Node.js and pnpm
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 
@@ -28,6 +28,9 @@ FROM base AS build
 COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/gpt-service ./services/gpt-service
+# Reinstall to ensure workspace links are properly established after copying source
+RUN pnpm install --frozen-lockfile
+# Build shared packages first
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-logging build
@@ -36,7 +39,7 @@ RUN pnpm --filter @splits-network/shared-access-context build
 RUN pnpm --filter @splits-network/gpt-service build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production
@@ -58,6 +61,7 @@ COPY --from=build /app/packages/shared-fastify/dist ./packages/shared-fastify/di
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 COPY --from=build /app/services/gpt-service/dist ./services/gpt-service/dist
 COPY --from=build /app/services/gpt-service/src/openapi.yaml ./services/gpt-service/dist/openapi.yaml
+COPY --from=build /app/services/gpt-service/src/v2/mcp/widgets/*.html ./services/gpt-service/dist/v2/mcp/widgets/
 
 EXPOSE 3014
 CMD ["node", "services/gpt-service/dist/index.js"]

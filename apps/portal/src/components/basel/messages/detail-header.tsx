@@ -135,10 +135,10 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                         {meta && (
                             <>
                                 <i
-                                    className={`${meta.icon} text-[10px] ${meta.textClass}`}
+                                    className={`${meta.icon} text-sm ${meta.textClass}`}
                                 />
                                 <span
-                                    className={`text-[10px] font-semibold uppercase tracking-wider ${meta.textClass}`}
+                                    className={`text-sm font-semibold uppercase tracking-wider ${meta.textClass}`}
                                 >
                                     {meta.label}
                                 </span>

@@ -16,9 +16,11 @@ export interface PaginationResponse {
 }
 
 export type ProcessingStatus = 'pending' | 'processing' | 'processed' | 'failed';
+export type ScanStatus = 'pending' | 'clean' | 'infected' | 'error';
 
 export interface DocumentFilters extends PaginationParams {
     processing_status?: ProcessingStatus;
+    scan_status?: ScanStatus;
     entity_type?: 'application' | 'candidate' | 'job' | 'company';
     entity_id?: string;
     search?: string;
@@ -27,6 +29,7 @@ export interface DocumentFilters extends PaginationParams {
 
 export interface DocumentUpdate {
     processing_status?: ProcessingStatus;
+    scan_status?: ScanStatus;
     extracted_text?: string;
     metadata?: {
         extracted_text?: string;
@@ -47,6 +50,7 @@ export interface DocumentRecord {
     entity_type: 'application' | 'candidate' | 'job' | 'company';
     entity_id: string;
     processing_status: ProcessingStatus;
+    scan_status: ScanStatus;
     metadata: any;
     text_length?: number;
     processing_started_at?: string;

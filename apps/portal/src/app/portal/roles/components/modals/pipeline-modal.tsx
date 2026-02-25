@@ -21,11 +21,27 @@ import type { ApplicationStage } from "@splits-network/shared-types";
 /* ─── Stage definitions ──────────────────────────────────────────────────── */
 
 const stages: Array<{ key: ApplicationStage; label: string; color: string }> = [
-    { key: "recruiter_proposed", label: "Proposed", color: "bg-secondary/15 text-secondary" },
+    {
+        key: "recruiter_proposed",
+        label: "Proposed",
+        color: "bg-secondary/15 text-secondary",
+    },
     { key: "screen", label: "Screen", color: "bg-info/15 text-info" },
-    { key: "submitted", label: "Submitted", color: "bg-base-300 text-base-content" },
-    { key: "company_review", label: "Company Review", color: "bg-accent/15 text-accent" },
-    { key: "interview", label: "Interview", color: "bg-primary/15 text-primary" },
+    {
+        key: "submitted",
+        label: "Submitted",
+        color: "bg-base-300 text-base-content",
+    },
+    {
+        key: "company_review",
+        label: "Company Review",
+        color: "bg-accent/15 text-accent",
+    },
+    {
+        key: "interview",
+        label: "Interview",
+        color: "bg-primary/15 text-primary",
+    },
     { key: "offer", label: "Offer", color: "bg-warning/15 text-warning" },
     { key: "hired", label: "Hired", color: "bg-success/15 text-success" },
     { key: "rejected", label: "Rejected", color: "bg-error/15 text-error" },
@@ -54,7 +70,9 @@ export default function PipelineModal({
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("all");
-    const [expandedCandidate, setExpandedCandidate] = useState<string | null>(null);
+    const [expandedCandidate, setExpandedCandidate] = useState<string | null>(
+        null,
+    );
 
     useEffect(() => {
         if (isOpen) {
@@ -114,7 +132,8 @@ export default function PipelineModal({
     const filteredApplications =
         activeTab === "needs_prescreen"
             ? applications.filter(
-                  (app) => !app.candidate_recruiter_id && app.stage === "submitted",
+                  (app) =>
+                      !app.candidate_recruiter_id && app.stage === "submitted",
               )
             : activeTab !== "all"
               ? applications.filter((app) => app.stage === activeTab)
@@ -125,7 +144,13 @@ export default function PipelineModal({
     const tabs = [
         { label: "All", value: "all", count: applications.length },
         ...(needsPreScreenCount > 0
-            ? [{ label: "Needs Pre-Screen", value: "needs_prescreen", count: needsPreScreenCount }]
+            ? [
+                  {
+                      label: "Needs Pre-Screen",
+                      value: "needs_prescreen",
+                      count: needsPreScreenCount,
+                  },
+              ]
             : []),
         ...stages.map((s) => ({
             label: s.label,
@@ -165,7 +190,7 @@ export default function PipelineModal({
                         <div className="flex items-center justify-center py-20">
                             <div className="text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                     Loading pipeline...
                                 </span>
                             </div>
@@ -194,26 +219,32 @@ export default function PipelineModal({
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-base-200 border-b border-base-300">
-                                    <th className="px-6 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 w-8" />
-                                    <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    <th className="px-6 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 w-8" />
+                                    <th className="px-4 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Candidate
                                     </th>
-                                    <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    <th className="px-4 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Stage
                                     </th>
-                                    <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    <th className="px-4 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Submitted
                                     </th>
-                                    <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    <th className="px-4 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredApplications.map((application) => {
-                                    const stage = stages.find((s) => s.key === application.stage);
-                                    const isExpanded = expandedCandidate === application.candidate_id;
-                                    const candidateName = application.candidate?.full_name ?? "Unknown";
+                                    const stage = stages.find(
+                                        (s) => s.key === application.stage,
+                                    );
+                                    const isExpanded =
+                                        expandedCandidate ===
+                                        application.candidate_id;
+                                    const candidateName =
+                                        application.candidate?.full_name ??
+                                        "Unknown";
                                     const initials = candidateName
                                         .split(" ")
                                         .filter(Boolean)
@@ -230,7 +261,9 @@ export default function PipelineModal({
                                                         className="btn btn-ghost btn-xs btn-square"
                                                         onClick={() =>
                                                             setExpandedCandidate(
-                                                                isExpanded ? null : application.candidate_id,
+                                                                isExpanded
+                                                                    ? null
+                                                                    : application.candidate_id,
                                                             )
                                                         }
                                                     >
@@ -252,57 +285,84 @@ export default function PipelineModal({
                                                 <td className="px-4 py-3">
                                                     {isAdmin ? (
                                                         <select
-                                                            className="select select-xs text-[10px] uppercase tracking-[0.15em] font-bold bg-base-200 border-0"
-                                                            style={{ borderRadius: 0 }}
-                                                            value={application.stage || ""}
+                                                            className="select select-xs text-sm uppercase tracking-[0.15em] font-bold bg-base-200 border-0"
+                                                            style={{
+                                                                borderRadius: 0,
+                                                            }}
+                                                            value={
+                                                                application.stage ||
+                                                                ""
+                                                            }
                                                             onChange={(e) =>
                                                                 handleStageChange(
                                                                     application.id,
-                                                                    e.target.value as ApplicationStage,
+                                                                    e.target
+                                                                        .value as ApplicationStage,
                                                                 )
                                                             }
                                                         >
                                                             {stages.map((s) => (
-                                                                <option key={s.key} value={s.key}>
+                                                                <option
+                                                                    key={s.key}
+                                                                    value={
+                                                                        s.key
+                                                                    }
+                                                                >
                                                                     {s.label}
                                                                 </option>
                                                             ))}
                                                         </select>
                                                     ) : (
                                                         <span
-                                                            className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${stage?.color || "bg-base-200 text-base-content/50"}`}
+                                                            className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${stage?.color || "bg-base-200 text-base-content/50"}`}
                                                         >
-                                                            {stage?.label || application.stage}
+                                                            {stage?.label ||
+                                                                application.stage}
                                                         </span>
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-base-content/60">
                                                     {application.created_at
-                                                        ? new Date(application.created_at).toLocaleDateString()
+                                                        ? new Date(
+                                                              application.created_at,
+                                                          ).toLocaleDateString()
                                                         : "-"}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <ActionsToolbar
-                                                        application={application}
+                                                        application={
+                                                            application
+                                                        }
                                                         variant="icon-only"
                                                         size="xs"
-                                                        showActions={{ viewDetails: false }}
-                                                        onRefresh={fetchApplications}
+                                                        showActions={{
+                                                            viewDetails: false,
+                                                        }}
+                                                        onRefresh={
+                                                            fetchApplications
+                                                        }
                                                     />
                                                 </td>
                                             </tr>
                                             {isExpanded && (
                                                 <tr>
-                                                    <td colSpan={5} className="bg-base-200/50 border-b border-base-300">
+                                                    <td
+                                                        colSpan={5}
+                                                        className="bg-base-200/50 border-b border-base-300"
+                                                    >
                                                         <div className="px-6 py-4">
-                                                            <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-3 flex items-center gap-2">
+                                                            <h4 className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 mb-3 flex items-center gap-2">
                                                                 <i className="fa-duotone fa-regular fa-paperclip" />
                                                                 Documents
                                                             </h4>
                                                             <DocumentList
                                                                 entityType="candidate"
-                                                                entityId={application.candidate_id!}
-                                                                showUpload={true}
+                                                                entityId={
+                                                                    application.candidate_id!
+                                                                }
+                                                                showUpload={
+                                                                    true
+                                                                }
                                                             />
                                                         </div>
                                                     </td>

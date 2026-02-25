@@ -249,12 +249,12 @@ The header transitions from transparent to frosted glass on scroll:
 Small labels use this pattern — no decorative styling:
 
 ```tsx
-<span className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-base-content/10 text-base-content/60">
+<span className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-base-content/10 text-base-content/60">
     Feature Label
 </span>
 
 {/* Or with semantic color */}
-<span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary">
+<span className="px-2 py-0.5 text-sm font-semibold uppercase tracking-wider bg-primary/10 text-primary">
     Tag
 </span>
 ```

@@ -11,12 +11,14 @@ export class CandidateSourcerRepository {
         params: StandardListParams & CandidateSourcerFilters
     ): Promise<StandardListResponse<CandidateSourcer>> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
-        const { page = 1, limit = 25, search, filters = {}, sort_by = 'sourced_at', sort_order = 'desc' } = params;
+        const { page = 1, limit = 25, search, filters = {}, sort_by = 'sourced_at', sort_order = 'desc', include } = params;
         const offset = (page - 1) * limit;
+
+        const selectClause = this.buildSelectClause(include);
 
         let query = this.supabase
             .from('candidate_sourcers')
-            .select('*', { count: 'exact' });
+            .select(selectClause, { count: 'exact' });
 
         // Role-based filtering
         if (context.recruiterId) {
@@ -71,7 +73,7 @@ export class CandidateSourcerRepository {
         }
 
         return {
-            data: data || [],
+            data: (data as unknown as CandidateSourcer[]) || [],
             pagination: {
                 total: count || 0,
                 page,
@@ -79,6 +81,31 @@ export class CandidateSourcerRepository {
                 total_pages: Math.ceil((count || 0) / limit),
             },
         };
+    }
+
+    /**
+     * Build select clause with optional includes
+     * Supports: candidate (joins with candidates table)
+     */
+    private buildSelectClause(include?: string): string {
+        const baseFields = '*';
+
+        if (!include) {
+            return baseFields;
+        }
+
+        const includes = include.split(',').map(i => i.trim());
+        const selectParts: string[] = [baseFields];
+
+        for (const inc of includes) {
+            switch (inc) {
+                case 'candidate':
+                    selectParts.push('candidates!candidate_id(id, email, full_name, linkedin_url)');
+                    break;
+            }
+        }
+
+        return selectParts.join(', ');
     }
 
     async findById(id: string, clerkUserId: string): Promise<CandidateSourcer | null> {

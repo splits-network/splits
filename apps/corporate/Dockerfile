@@ -1,5 +1,5 @@
 # Base stage with Node.js and pnpm
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 
@@ -32,6 +32,8 @@ COPY packages/shared-ui ./packages/shared-ui
 COPY packages/basel-ui ./packages/basel-ui
 COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/corporate ./apps/corporate
+# Reinstall to ensure workspace links are properly established after copying source
+RUN pnpm install --frozen-lockfile
 # Build shared packages first
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-ui build
@@ -41,7 +43,7 @@ RUN pnpm --filter @splits-network/memphis-ui build
 RUN pnpm --filter @splits-network/corporate build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production

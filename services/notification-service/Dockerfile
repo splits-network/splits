@@ -1,5 +1,5 @@
 # Base stage with Node.js and pnpm
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 
@@ -29,6 +29,8 @@ FROM base AS build
 COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/notification-service ./services/notification-service
+# Reinstall to ensure workspace links are properly established after copying source
+RUN pnpm install --frozen-lockfile
 # Build shared packages first
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-types build
@@ -40,7 +42,7 @@ RUN pnpm --filter @splits-network/shared-job-queue build
 RUN pnpm --filter @splits-network/notification-service build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production

@@ -11,6 +11,7 @@ import * as amqp from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { ReputationService } from './service';
+import { CompanyReputationService } from './company-service';
 
 export class ReputationEventConsumer {
     private connection: amqp.ChannelModel | null = null;
@@ -21,6 +22,7 @@ export class ReputationEventConsumer {
     constructor(
         private rabbitMqUrl: string,
         private reputationService: ReputationService,
+        private companyReputationService: CompanyReputationService,
         private logger: Logger
     ) {}
 
@@ -55,6 +57,11 @@ export class ReputationEventConsumer {
                 this.queue,
                 this.exchange,
                 'application.stage_changed'
+            );
+            await this.channel.bindQueue(
+                this.queue,
+                this.exchange,
+                'application.expired'
             );
 
             this.logger.info(
@@ -107,6 +114,10 @@ export class ReputationEventConsumer {
                 await this.handleStageChangeEvent(event);
                 break;
 
+            case 'application.expired':
+                await this.handleExpirationEvent(event);
+                break;
+
             default:
                 this.logger.debug(
                     { event_type: event.event_type },
@@ -127,6 +138,7 @@ export class ReputationEventConsumer {
         }
 
         await this.reputationService.handlePlacementEvent(placementId);
+        await this.companyReputationService.handlePlacementEvent(placementId);
     }
 
     private async handleStageChangeEvent(event: DomainEvent): Promise<void> {
@@ -149,6 +161,26 @@ export class ReputationEventConsumer {
         }
 
         await this.reputationService.handleHireEvent(recruiterId);
+
+        // Also recalculate company reputation on hire
+        const jobId = event.payload?.job_id;
+        if (jobId) {
+            await this.companyReputationService.handleHireEvent(jobId);
+        }
+    }
+
+    private async handleExpirationEvent(event: DomainEvent): Promise<void> {
+        const jobId = event.payload?.job_id;
+
+        if (!jobId) {
+            this.logger.warn(
+                { event_type: event.event_type },
+                'Expiration event missing job_id'
+            );
+            return;
+        }
+
+        await this.companyReputationService.handleExpirationEvent(jobId);
     }
 
     async close(): Promise<void> {

@@ -74,6 +74,42 @@ export class BillingEventConsumer {
         }
     }
 
+    async handlePayoutConnectRequired(event: DomainEvent): Promise<void> {
+        try {
+            const { recruiterId, placementId, transactionId, amount, reason } = event.payload;
+
+            this.logger.info(
+                { recruiter_id: recruiterId, placement_id: placementId, amount, reason },
+                'Handling payout Connect required notification'
+            );
+
+            const recruiterContact = await this.contactLookup.getRecruiterContact(recruiterId);
+            if (!recruiterContact) {
+                throw new Error(`Recruiter contact not found: ${recruiterId}`);
+            }
+
+            await this.emailService.sendPayoutConnectRequired(recruiterContact.email, {
+                recruiterName: recruiterContact.name,
+                amount,
+                connectUrl: `${this.portalUrl}/portal/billing/connect`,
+                reason,
+                recruiterId,
+                userId: recruiterContact.user_id || undefined,
+            });
+
+            this.logger.info(
+                { recruiter_id: recruiterId, recipient: recruiterContact.email, amount },
+                'Payout Connect required notification sent successfully'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send payout Connect required notification'
+            );
+            throw error;
+        }
+    }
+
     async handleStripeConnectDisabled(event: DomainEvent): Promise<void> {
         try {
             const { recruiter_id, account_id, disabled_reason } = event.payload;

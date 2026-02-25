@@ -90,7 +90,7 @@ export function DetailLoader({
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                         Loading profile...
                     </span>
                 </div>
@@ -176,12 +176,12 @@ export function CandidateDetail({
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                                 {isNew(candidate) && (
-                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
+                                    <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
                                         New
                                     </span>
                                 )}
                                 <span
-                                    className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
+                                    className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
                                 >
                                     {formatVerificationStatus(
                                         candidate.verification_status,
@@ -384,7 +384,7 @@ function OverviewTab({
                 </h3>
                 <div className="grid grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Desired Salary
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -392,7 +392,7 @@ function OverviewTab({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Job Type
                         </p>
                         <p className="text-lg font-black tracking-tight capitalize">
@@ -400,7 +400,7 @@ function OverviewTab({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Availability
                         </p>
                         <p className="text-lg font-black tracking-tight capitalize">
@@ -408,17 +408,17 @@ function OverviewTab({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Work Mode
                         </p>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                             {candidate.open_to_remote && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-success/15 text-success">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-success/15 text-success">
                                     Remote
                                 </span>
                             )}
                             {candidate.open_to_relocation && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-info/15 text-info">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-info/15 text-info">
                                     Relocation
                                 </span>
                             )}
@@ -463,7 +463,7 @@ function OverviewTab({
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Representation
                         </p>
                         {candidate.has_active_relationship ? (
@@ -489,7 +489,7 @@ function OverviewTab({
                         )}
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Verification
                         </p>
                         <p className="font-bold text-sm">
@@ -499,7 +499,7 @@ function OverviewTab({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Marketplace
                         </p>
                         <p className="font-bold text-sm capitalize">
@@ -509,7 +509,7 @@ function OverviewTab({
                     </div>
                     {candidate.onboarding_status && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Onboarding
                             </p>
                             <p className="font-bold text-sm capitalize">
@@ -519,7 +519,7 @@ function OverviewTab({
                     )}
                     {candidate.created_at && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Profile Created
                             </p>
                             <p className="font-bold text-sm">
@@ -601,7 +601,7 @@ function ApplicationsTab({
                                 {app.job?.company?.name || "Company not listed"}
                             </p>
                         </div>
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/60">
+                        <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/60">
                             {app.status_id || "Applied"}
                         </span>
                     </div>

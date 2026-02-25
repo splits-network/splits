@@ -1,9 +1,9 @@
 /**
  * Billing Service Domain Types
- * 
+ *
  * Generated from Supabase database schema.
- * Includes: plans, subscriptions, payouts, payout_schedules, payout_splits, 
- * escrow_holds, payout_audit_log
+ * Includes: plans, subscriptions, payout_schedules, escrow_holds,
+ * placement_payout_audit_log, placement_snapshot
  */
 
 import type { Database, Tables, TablesInsert, TablesUpdate } from '../supabase/database.types';
@@ -30,14 +30,6 @@ export type SubscriptionInsert = DbTableInsert<'subscriptions'>;
 export type SubscriptionUpdate = DbTableUpdate<'subscriptions'>;
 
 // ============================================================================
-// PAYOUTS
-// ============================================================================
-
-export type Payout = DbTable<'payouts'>;
-export type PayoutInsert = DbTableInsert<'payouts'>;
-export type PayoutUpdate = DbTableUpdate<'payouts'>;
-
-// ============================================================================
 // PAYOUT SCHEDULES
 // ============================================================================
 
@@ -46,28 +38,12 @@ export type PayoutScheduleInsert = DbTableInsert<'payout_schedules'>;
 export type PayoutScheduleUpdate = DbTableUpdate<'payout_schedules'>;
 
 // ============================================================================
-// PAYOUT SPLITS
-// ============================================================================
-
-export type PayoutSplit = DbTable<'payout_splits'>;
-export type PayoutSplitInsert = DbTableInsert<'payout_splits'>;
-export type PayoutSplitUpdate = DbTableUpdate<'payout_splits'>;
-
-// ============================================================================
 // ESCROW HOLDS
 // ============================================================================
 
 export type EscrowHold = DbTable<'escrow_holds'>;
 export type EscrowHoldInsert = DbTableInsert<'escrow_holds'>;
 export type EscrowHoldUpdate = DbTableUpdate<'escrow_holds'>;
-
-// ============================================================================
-// PAYOUT AUDIT LOG
-// ============================================================================
-
-export type PayoutAuditLog = DbTable<'payout_audit_log'>;
-export type PayoutAuditLogInsert = DbTableInsert<'payout_audit_log'>;
-export type PayoutAuditLogUpdate = DbTableUpdate<'payout_audit_log'>;
 
 // ============================================================================
 // PLACEMENT SNAPSHOT (IMMUTABLE MONEY ATTRIBUTION)

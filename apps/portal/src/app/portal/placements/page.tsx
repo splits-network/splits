@@ -26,9 +26,9 @@ export default function PlacementsBaselPage() {
         const v = searchParams.get("view");
         return v === "table" || v === "grid" || v === "split" ? v : "grid";
     });
-    const [selectedPlacementId, setSelectedPlacementId] = useState<string | null>(
-        () => searchParams.get("placementId"),
-    );
+    const [selectedPlacementId, setSelectedPlacementId] = useState<
+        string | null
+    >(() => searchParams.get("placementId"));
 
     /* ── URL sync ── */
     const searchParamsRef = useRef(searchParams);
@@ -152,7 +152,7 @@ export default function PlacementsBaselPage() {
                     {loading && placements.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
                             <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                            <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                 Loading placements...
                             </p>
                         </div>

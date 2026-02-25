@@ -14,7 +14,10 @@ import {
 
 interface SearchFilterPanelProps {
     filters: SearchFilters;
-    setFilter: <K extends keyof SearchFilters>(key: K, value: SearchFilters[K]) => void;
+    setFilter: <K extends keyof SearchFilters>(
+        key: K,
+        value: SearchFilters[K],
+    ) => void;
     removeFilter: (key: keyof SearchFilters) => void;
     clearAllFilters: () => void;
     activeFilterCount: number;
@@ -47,7 +50,7 @@ function FilterSection({
                     {title}
                 </h4>
                 <i
-                    className={`fa-solid fa-chevron-down text-[10px] text-base-content/30 transition-transform ${
+                    className={`fa-solid fa-chevron-down text-sm text-base-content/30 transition-transform ${
                         open ? "rotate-180" : ""
                     }`}
                 />
@@ -81,7 +84,9 @@ function FilterCheckboxGroup({
                         type="checkbox"
                         checked={value === opt.value}
                         onChange={() =>
-                            onChange(value === opt.value ? undefined : opt.value)
+                            onChange(
+                                value === opt.value ? undefined : opt.value,
+                            )
                         }
                         className="checkbox checkbox-primary checkbox-xs"
                     />
@@ -144,7 +149,13 @@ function FilterToggle({
 }) {
     return (
         <label className="flex items-center justify-between px-2 py-1.5 cursor-pointer text-sm">
-            <span className={value ? "text-base-content font-semibold" : "text-base-content/60"}>
+            <span
+                className={
+                    value
+                        ? "text-base-content font-semibold"
+                        : "text-base-content/60"
+                }
+            >
                 {label}
             </span>
             <input
@@ -176,17 +187,22 @@ function FilterSalaryRange({
     return (
         <div className="flex items-center gap-2 px-2">
             <div className="flex-1">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-base-content/40 mb-0.5 block">
+                <label className="text-sm font-semibold uppercase tracking-wider text-base-content/40 mb-0.5 block">
                     Min
                 </label>
                 <div className="relative">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm text-base-content/30">$</span>
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm text-base-content/30">
+                        $
+                    </span>
                     <input
                         type="text"
                         inputMode="numeric"
                         value={formatDisplay(minValue)}
                         onChange={(e) => {
-                            const num = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10);
+                            const num = parseInt(
+                                e.target.value.replace(/[^0-9]/g, ""),
+                                10,
+                            );
                             onMinChange(isNaN(num) ? undefined : num);
                         }}
                         placeholder="0"
@@ -196,17 +212,22 @@ function FilterSalaryRange({
             </div>
             <span className="text-base-content/30 mt-4">-</span>
             <div className="flex-1">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-base-content/40 mb-0.5 block">
+                <label className="text-sm font-semibold uppercase tracking-wider text-base-content/40 mb-0.5 block">
                     Max
                 </label>
                 <div className="relative">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm text-base-content/30">$</span>
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm text-base-content/30">
+                        $
+                    </span>
                     <input
                         type="text"
                         inputMode="numeric"
                         value={formatDisplay(maxValue)}
                         onChange={(e) => {
-                            const num = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10);
+                            const num = parseInt(
+                                e.target.value.replace(/[^0-9]/g, ""),
+                                10,
+                            );
                             onMaxChange(isNaN(num) ? undefined : num);
                         }}
                         placeholder="Any"
@@ -287,7 +308,7 @@ export function SearchFilterPanel({
                     <FilterSection title="Roles" icon="fa-briefcase">
                         <div className="space-y-3">
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
+                                <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
                                     Employment Type
                                 </p>
                                 <FilterCheckboxGroup
@@ -302,7 +323,7 @@ export function SearchFilterPanel({
                             </div>
 
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
+                                <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
                                     Job Level
                                 </p>
                                 <FilterCheckboxGroup
@@ -317,7 +338,7 @@ export function SearchFilterPanel({
                             </div>
 
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
+                                <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
                                     Commute Type
                                 </p>
                                 <FilterMultiCheckboxGroup
@@ -332,7 +353,7 @@ export function SearchFilterPanel({
                             </div>
 
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
+                                <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
                                     Salary Range
                                 </p>
                                 <FilterSalaryRange
@@ -352,7 +373,7 @@ export function SearchFilterPanel({
                             </div>
 
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
+                                <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
                                     Status
                                 </p>
                                 <FilterSelect
@@ -385,7 +406,7 @@ export function SearchFilterPanel({
                 <FilterSection title="Companies" icon="fa-building">
                     <div className="space-y-3">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
+                            <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
                                 Industry
                             </p>
                             <input
@@ -402,7 +423,7 @@ export function SearchFilterPanel({
                         </div>
 
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
+                            <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 px-2 mb-1">
                                 Company Size
                             </p>
                             <FilterSelect

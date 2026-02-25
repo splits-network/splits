@@ -522,7 +522,7 @@ export default function AIReviewPanel({
                         }
                         icon="fa-duotone fa-regular fa-list-check"
                         color={getFitScoreColor(
-                            aiReview.skills_match_percentage,
+                            aiReview.skills_match_percentage ?? null,
                         )}
                         description="Job skills match percentage"
                     />

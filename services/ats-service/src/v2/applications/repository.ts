@@ -341,14 +341,34 @@ export class ApplicationRepository {
     // }
 
     /**
+     * Get company sourcer for a given company.
+     * company_sourcers table was replaced by recruiter_companies with relationship_type='sourcer'.
+     */
+    async getCompanySourcer(companyId: string): Promise<any | null> {
+        if (!companyId) return null;
+
+        const { data, error } = await this.supabase
+            .from('recruiter_companies')
+            .select('recruiter_id, recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email))')
+            .eq('company_id', companyId)
+            .eq('relationship_type', 'sourcer')
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (error) return null;
+        return data ?? null;
+    }
+
+    /**
      * Build select clause with optional includes
      * Supports: candidate, job, recruiter, documents, pre_screen_answers, audit_log, job_requirements, ai_review
      */
     private buildSelectClause(include?: string): string {
-        // Base fields - always include related candidate and job with company
+        // Base fields - always include related candidate (with sourcer) and job with company
+        // Note: company_sourcers table no longer exists — company sourcer data not joined here
         const baseFields = `*,
-            candidate:candidates(id, full_name, email, phone, location, user_id),
-            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id), job_requirements:job_requirements(*))`;
+            candidate:candidates(id, full_name, email, phone, location, user_id, candidate_sourcer:candidate_sourcers(sourcer_recruiter_id, recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))),
+            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id), job_requirements:job_requirements(*), company_recruiter:recruiters!fk_jobs_company_recruiter_id(id, bio, phone, status, user_id, user:users!recruiters_user_id_fkey(name, email)))`;
 
         if (!include) {
             return baseFields;
@@ -361,7 +381,7 @@ export class ApplicationRepository {
             switch (inc) {
                 case 'recruiter':
                     // Join with network schema recruiters table and identity users for contact info
-                    selectClause += `,recruiter:recruiters(id, bio, phone, specialties, status, user_id, user:users!recruiters_user_id_fkey(name, email))`;
+                    selectClause += `,recruiter:recruiters(id, bio, phone, tagline, specialties, status, user_id, user:users!recruiters_user_id_fkey(name, email))`;
                     break;
                 case 'documents':
                 case 'document':
@@ -703,7 +723,7 @@ export class ApplicationRepository {
         recruiterId: string,
         candidateId: string
     ): Promise<any[]> {
-        const terminalStages = ['rejected', 'withdrawn', 'hired', 'expired'];
+        const terminalStages = ['rejected', 'withdrawn', 'hired'];
 
         const { data, error } = await this.supabase
             .from('applications')
@@ -720,6 +740,7 @@ export class ApplicationRepository {
             .eq('candidate_recruiter_id', recruiterId)
             .eq('candidate_id', candidateId)
             .not('stage', 'in', `(${terminalStages.join(',')})`)
+            .is('expired_at', null)
             .order('created_at', { ascending: false });
 
         if (error) throw error;

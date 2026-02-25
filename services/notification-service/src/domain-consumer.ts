@@ -131,7 +131,8 @@ export class DomainEventConsumer {
             notificationService.reputation,
             logger,
             portalUrl,
-            contactLookup
+            contactLookup,
+            dataLookup
         );
         this.healthConsumer = new HealthEventConsumer(
             notificationService.health,
@@ -235,6 +236,12 @@ export class DomainEventConsumer {
 
             // Reputation tier change events
             await this.channel.bindQueue(this.queue, this.exchange, 'reputation.tier_changed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'company_reputation.tier_changed');
+
+            // Application expiration events
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.expired');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.expiration_warning');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.reactivated');
 
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
@@ -250,6 +257,9 @@ export class DomainEventConsumer {
 
             // Billing events - Company billing setup
             await this.channel.bindQueue(this.queue, this.exchange, 'company.billing_profile_completed');
+
+            // Billing events - Payout processing failures
+            await this.channel.bindQueue(this.queue, this.exchange, 'payout_transaction.connect_required');
 
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
@@ -497,6 +507,11 @@ export class DomainEventConsumer {
                 await this.billingConsumer.handleCompanyBillingProfileCompleted(event);
                 break;
 
+            // Billing domain - Payout Connect required
+            case 'payout_transaction.connect_required':
+                await this.billingConsumer.handlePayoutConnectRequired(event);
+                break;
+
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
                 break;
@@ -507,6 +522,20 @@ export class DomainEventConsumer {
             // Reputation tier changes
             case 'reputation.tier_changed':
                 await this.reputationConsumer.handleTierChanged(event);
+                break;
+            case 'company_reputation.tier_changed':
+                await this.reputationConsumer.handleCompanyTierChanged(event);
+                break;
+
+            // Application expiration events
+            case 'application.expired':
+                await this.applicationsConsumer.handleApplicationExpired(event);
+                break;
+            case 'application.expiration_warning':
+                await this.applicationsConsumer.handleExpirationWarning(event);
+                break;
+            case 'application.reactivated':
+                await this.applicationsConsumer.handleApplicationReactivated(event);
                 break;
 
             // Health monitoring

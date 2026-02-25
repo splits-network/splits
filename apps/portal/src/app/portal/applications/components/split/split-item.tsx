@@ -9,7 +9,7 @@ import {
     aiScore,
     isNew,
 } from "../shared/helpers";
-import { getStageDisplay, getAIScoreBadge } from "../shared/status-color";
+import { getStageDisplayWithExpired, getAIScoreBadge } from "../shared/status-color";
 import ActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
@@ -23,7 +23,7 @@ export function SplitItem({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const stage = getStageDisplay(application.stage);
+    const stage = getStageDisplayWithExpired(application.stage, (application as any).expired_at);
     const score = aiScore(application);
 
     return (
@@ -67,7 +67,7 @@ export function SplitItem({
                     className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold ${stage.badge}`}
                 >
                     <i
-                        className={`fa-duotone fa-regular ${stage.icon} text-[10px]`}
+                        className={`fa-duotone fa-regular ${stage.icon} text-sm`}
                     />
                     {stage.label}
                 </span>
@@ -75,7 +75,7 @@ export function SplitItem({
                     <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold ${getAIScoreBadge(score)}`}
                     >
-                        <i className="fa-duotone fa-regular fa-robot text-[10px]" />
+                        <i className="fa-duotone fa-regular fa-robot text-sm" />
                         {score}%
                     </span>
                 )}

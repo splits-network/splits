@@ -77,9 +77,7 @@ export function BaselCalculator({
         () => {
             if (!shouldAnimate || !containerRef.current || !contentRef.current)
                 return;
-            if (
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 gsap.set(contentRef.current, { opacity: 1 });
                 return;
             }
@@ -120,9 +118,7 @@ export function BaselCalculator({
                             className="grow"
                             placeholder="100000"
                             value={state.salary || ""}
-                            onChange={(e) =>
-                                setSalary(Number(e.target.value))
-                            }
+                            onChange={(e) => setSalary(Number(e.target.value))}
                             min={0}
                             step={5000}
                         />
@@ -264,9 +260,7 @@ export function BaselCalculator({
                             {fmt(paidPayout.monthlyPrice)}/mo
                         </p>
                         <p className="text-3xl font-black text-primary-content mb-1">
-                            <AnimatedPayout
-                                value={paidPayout.payout}
-                            />
+                            <AnimatedPayout value={paidPayout.payout} />
                         </p>
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary-content/50">
                             Your Payout
@@ -274,7 +268,7 @@ export function BaselCalculator({
                         {upgradeValue.paidVsFree > 0 && (
                             <div className="mt-3 pt-3 border-t border-primary-content/20">
                                 <span className="inline-block px-2 py-0.5 text-xs font-black uppercase bg-success text-success-content">
-                                    <i className="fa-duotone fa-regular fa-arrow-up mr-1 text-[10px]" />
+                                    <i className="fa-duotone fa-regular fa-arrow-up mr-1 text-sm" />
                                     +{fmt(upgradeValue.paidVsFree)}
                                 </span>
                                 <p className="text-xs text-primary-content/50 mt-1">
@@ -313,7 +307,7 @@ export function BaselCalculator({
                         {upgradeValue.premiumVsFree > 0 && (
                             <div className="mt-3 pt-3 border-t border-base-300">
                                 <span className="inline-block px-2 py-0.5 text-xs font-black uppercase bg-success text-success-content">
-                                    <i className="fa-duotone fa-regular fa-arrow-up mr-1 text-[10px]" />
+                                    <i className="fa-duotone fa-regular fa-arrow-up mr-1 text-sm" />
                                     +{fmt(upgradeValue.premiumVsFree)}
                                 </span>
                                 <p className="text-xs text-base-content/50 mt-1">
@@ -440,10 +434,7 @@ export function BaselCalculator({
 
     return (
         <div ref={containerRef} className={className}>
-            <div
-                ref={contentRef}
-                className={shouldAnimate ? "opacity-0" : ""}
-            >
+            <div ref={contentRef} className={shouldAnimate ? "opacity-0" : ""}>
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
                     {/* Input panel — 2 of 5 cols */}
                     <div className="lg:col-span-2 space-y-6">

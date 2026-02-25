@@ -40,11 +40,7 @@ function highlightQuery(text: string, query: string) {
 
 /* ─── Entity-specific metadata renderer ──────────────────────────────────── */
 
-function EntityMetadata({
-    result,
-}: {
-    result: SearchResult;
-}) {
+function EntityMetadata({ result }: { result: SearchResult }) {
     const m = result.metadata || {};
 
     switch (result.entity_type) {
@@ -184,7 +180,7 @@ function SkillsTags({ skills }: { skills?: string }) {
             {tags.map((tag) => (
                 <span
                     key={tag}
-                    className="px-2 py-0.5 bg-base-100 text-[10px] font-semibold text-base-content/40"
+                    className="px-2 py-0.5 bg-base-100 text-sm font-semibold text-base-content/40"
                 >
                     {tag}
                 </span>
@@ -282,7 +278,9 @@ export function SearchResultCard({
 
                 {/* Entity type badge */}
                 <div className="flex-shrink-0 ml-4 text-right">
-                    <BaselStatusPill color={color}>{config.label}</BaselStatusPill>
+                    <BaselStatusPill color={color}>
+                        {config.label}
+                    </BaselStatusPill>
                 </div>
             </div>
         </div>

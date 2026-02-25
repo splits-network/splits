@@ -37,9 +37,14 @@ export default function EmailThreadPanel({
 
     /* ── State ── */
     const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
-    const [selectedConnection, setSelectedConnection] = useState<OAuthConnectionPublic | null>(null);
-    const [messages, setMessages] = useState<Array<{ id: string; threadId: string }>>([]);
-    const [expandedMessage, setExpandedMessage] = useState<EmailMessage | null>(null);
+    const [selectedConnection, setSelectedConnection] =
+        useState<OAuthConnectionPublic | null>(null);
+    const [messages, setMessages] = useState<
+        Array<{ id: string; threadId: string }>
+    >([]);
+    const [expandedMessage, setExpandedMessage] = useState<EmailMessage | null>(
+        null,
+    );
     const [thread, setThread] = useState<EmailThread | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState(false);
@@ -61,7 +66,14 @@ export default function EmailThreadPanel({
                 gsap.fromTo(
                     items,
                     { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: "power3.out", clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.3,
+                        stagger: 0.05,
+                        ease: "power3.out",
+                        clearProps: "transform",
+                    },
                 );
             }
         },
@@ -79,7 +91,8 @@ export default function EmailThreadPanel({
             };
             const emailConns = (res.data ?? []).filter(
                 (c) =>
-                    (c.provider_slug.includes("email") || c.provider_slug.includes("gmail")) &&
+                    (c.provider_slug.includes("email") ||
+                        c.provider_slug.includes("gmail")) &&
                     c.status === "active",
             );
             setConnections(emailConns);
@@ -103,7 +116,9 @@ export default function EmailThreadPanel({
             if (!t) return;
             const client = createAuthenticatedClient(t);
 
-            const query = contactEmail ? `from:${contactEmail} OR to:${contactEmail}` : undefined;
+            const query = contactEmail
+                ? `from:${contactEmail} OR to:${contactEmail}`
+                : undefined;
             const res = (await client.get(
                 `/integrations/email/${connectionId}/messages`,
                 { params: { q: query, max_results: "15" } },
@@ -112,7 +127,9 @@ export default function EmailThreadPanel({
             setMessages(res.data.messages ?? []);
             setNextPageToken(res.data.next_page_token);
         } catch (err: any) {
-            setError("Failed to load messages. Your connection may have expired.");
+            setError(
+                "Failed to load messages. Your connection may have expired.",
+            );
         } finally {
             setLoading(false);
         }
@@ -243,31 +260,35 @@ export default function EmailThreadPanel({
             )}
 
             {/* Connection selector (if multiple) */}
-            {!loading && !noConnections && connections.length > 1 && !thread && (
-                <div className="flex items-center gap-2 px-4 py-2 border-b border-base-300">
-                    {connections.map((conn) => (
-                        <button
-                            key={conn.id}
-                            onClick={() => handleSelectConnection(conn)}
-                            className={`btn btn-xs ${
-                                selectedConnection?.id === conn.id
-                                    ? "btn-primary"
-                                    : "btn-ghost"
-                            }`}
-                            style={{ borderRadius: 0 }}
-                        >
-                            <i
-                                className={
-                                    conn.provider_slug.startsWith("google_")
-                                        ? "fa-brands fa-google mr-1"
-                                        : "fa-brands fa-microsoft mr-1"
-                                }
-                            />
-                            {conn.provider_account_name || conn.provider_slug}
-                        </button>
-                    ))}
-                </div>
-            )}
+            {!loading &&
+                !noConnections &&
+                connections.length > 1 &&
+                !thread && (
+                    <div className="flex items-center gap-2 px-4 py-2 border-b border-base-300">
+                        {connections.map((conn) => (
+                            <button
+                                key={conn.id}
+                                onClick={() => handleSelectConnection(conn)}
+                                className={`btn btn-xs ${
+                                    selectedConnection?.id === conn.id
+                                        ? "btn-primary"
+                                        : "btn-ghost"
+                                }`}
+                                style={{ borderRadius: 0 }}
+                            >
+                                <i
+                                    className={
+                                        conn.provider_slug.startsWith("google_")
+                                            ? "fa-brands fa-google mr-1"
+                                            : "fa-brands fa-microsoft mr-1"
+                                    }
+                                />
+                                {conn.provider_account_name ||
+                                    conn.provider_slug}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
             {/* Message list */}
             {!loading && !noConnections && !thread && (
@@ -336,34 +357,44 @@ export default function EmailThreadPanel({
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
                                         <div className="w-7 h-7 bg-primary/10 flex items-center justify-center">
-                                            <span className="text-[10px] font-black text-primary uppercase">
-                                                {(msg.from?.name || msg.from?.email || "?")[0]}
+                                            <span className="text-sm font-black text-primary uppercase">
+                                                {
+                                                    (msg.from?.name ||
+                                                        msg.from?.email ||
+                                                        "?")[0]
+                                                }
                                             </span>
                                         </div>
                                         <div>
                                             <p className="text-xs font-bold">
-                                                {msg.from?.name || msg.from?.email}
+                                                {msg.from?.name ||
+                                                    msg.from?.email}
                                             </p>
                                             {msg.from?.name && (
-                                                <p className="text-[10px] text-base-content/40">
+                                                <p className="text-sm text-base-content/40">
                                                     {msg.from.email}
                                                 </p>
                                             )}
                                         </div>
                                     </div>
-                                    <time className="text-[10px] text-base-content/40">
-                                        {new Date(msg.date).toLocaleDateString("en-US", {
-                                            month: "short",
-                                            day: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        })}
+                                    <time className="text-sm text-base-content/40">
+                                        {new Date(msg.date).toLocaleDateString(
+                                            "en-US",
+                                            {
+                                                month: "short",
+                                                day: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            },
+                                        )}
                                     </time>
                                 </div>
 
                                 {/* Subject (first message only) */}
                                 {i === 0 && msg.subject && (
-                                    <p className="text-sm font-bold mb-2">{msg.subject}</p>
+                                    <p className="text-sm font-bold mb-2">
+                                        {msg.subject}
+                                    </p>
                                 )}
 
                                 {/* Body */}
@@ -371,13 +402,17 @@ export default function EmailThreadPanel({
                                     {msg.bodyText ? (
                                         <pre className="whitespace-pre-wrap font-sans">
                                             {msg.bodyText.substring(0, 1000)}
-                                            {(msg.bodyText.length ?? 0) > 1000 && "..."}
+                                            {(msg.bodyText.length ?? 0) >
+                                                1000 && "..."}
                                         </pre>
                                     ) : msg.bodyHtml ? (
                                         <div
                                             className="prose prose-xs max-w-none"
                                             dangerouslySetInnerHTML={{
-                                                __html: msg.bodyHtml.substring(0, 3000),
+                                                __html: msg.bodyHtml.substring(
+                                                    0,
+                                                    3000,
+                                                ),
                                             }}
                                         />
                                     ) : (
@@ -388,13 +423,19 @@ export default function EmailThreadPanel({
                                 </div>
 
                                 {/* To/CC */}
-                                <div className="flex items-center gap-2 mt-2 text-[10px] text-base-content/30">
+                                <div className="flex items-center gap-2 mt-2 text-sm text-base-content/30">
                                     <span>
-                                        To: {msg.to.map((t) => t.name || t.email).join(", ")}
+                                        To:{" "}
+                                        {msg.to
+                                            .map((t) => t.name || t.email)
+                                            .join(", ")}
                                     </span>
                                     {msg.cc && msg.cc.length > 0 && (
                                         <span>
-                                            CC: {msg.cc.map((c) => c.name || c.email).join(", ")}
+                                            CC:{" "}
+                                            {msg.cc
+                                                .map((c) => c.name || c.email)
+                                                .join(", ")}
                                         </span>
                                     )}
                                 </div>

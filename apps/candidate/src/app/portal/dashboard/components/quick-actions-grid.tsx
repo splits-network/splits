@@ -167,7 +167,7 @@ export default function QuickActionsGrid({
                     >
                         {badge?.show && (
                             <span
-                                className="absolute top-2 right-2 badge badge-sm badge-error text-[10px] font-bold"
+                                className="absolute top-2 right-2 badge badge-sm badge-error text-sm font-bold"
                                 style={{ borderRadius: 0 }}
                             >
                                 {badge.value}
@@ -183,7 +183,7 @@ export default function QuickActionsGrid({
                         <span className="text-xs font-bold uppercase tracking-wider text-base-content">
                             {action.label}
                         </span>
-                        <span className="text-[10px] text-base-content/40">
+                        <span className="text-sm text-base-content/40">
                             {badge?.show && action.badgeKey === "messages"
                                 ? `${messageCount} unread`
                                 : badge?.show && action.badgeKey === "profile"

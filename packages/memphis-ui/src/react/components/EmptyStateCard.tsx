@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface EmptyStateCardAction {
     /** Button label */
@@ -9,7 +9,7 @@ export interface EmptyStateCardAction {
     /** Whether this is the primary action */
     primary: boolean;
     /** Accent color for the button */
-    accent: AccentColor | 'dark';
+    accent: AccentColor | "dark";
     /** Click handler */
     onClick?: () => void;
 }
@@ -32,11 +32,11 @@ export interface EmptyStateCardProps {
 }
 
 /** Map accent name to CSS var (supports 'dark') */
-function accentVar(name: AccentColor | 'dark'): string {
+function accentVar(name: AccentColor | "dark"): string {
     return `var(--color-${name})`;
 }
 
-function accentContentVar(name: AccentColor | 'dark'): string {
+function accentContentVar(name: AccentColor | "dark"): string {
     return `var(--color-${name}-content)`;
 }
 
@@ -53,19 +53,27 @@ export function EmptyStateCard({
     description,
     illustration,
     actions = [],
-    accent = 'coral',
-    className = '',
+    accent = "coral",
+    className = "",
 }: EmptyStateCardProps) {
     return (
         <div
-            className={[`accent-${accent}`, 'card overflow-hidden rounded-none border-4 border-solid border-accent', className].filter(Boolean).join(' ')}
+            className={[
+                `accent-${accent}`,
+                "card overflow-hidden rounded-none border-4 border-solid border-accent",
+                className,
+            ]
+                .filter(Boolean)
+                .join(" ")}
         >
             {/* Top color strip */}
             <div className="h-1.5 bg-accent" />
 
             {/* Badge */}
             <div className="pt-6 px-8">
-                <span className={`badge badge-${accent} font-black text-[10px] uppercase tracking-[0.2em]`}>
+                <span
+                    className={`badge badge-${accent} font-black text-sm uppercase tracking-[0.2em]`}
+                >
                     {subtitle}
                 </span>
             </div>
@@ -73,13 +81,9 @@ export function EmptyStateCard({
             <div className="card-body items-center text-center">
                 {illustration}
 
-                <h3 className="card-title justify-center mb-3">
-                    {title}
-                </h3>
+                <h3 className="card-title justify-center mb-3">{title}</h3>
 
-                <p
-                    className="text-sm leading-relaxed mb-8 max-w-sm text-dark opacity-60"
-                >
+                <p className="text-sm leading-relaxed mb-8 max-w-sm text-dark opacity-60">
                     {description}
                 </p>
 

@@ -10,7 +10,7 @@ import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { DomainEventConsumer } from "./v2/shared/domain-consumer";
-import { ReputationRepository, ReputationService, ReputationEventConsumer } from "./v2/reputation";
+import { ReputationRepository, ReputationService, ReputationEventConsumer, CompanyReputationRepository, CompanyReputationService } from "./v2/reputation";
 
 async function main() {
     const baseConfig = loadBaseConfig("automation-service");
@@ -69,24 +69,30 @@ async function main() {
         );
         await v2EventPublisher.connect();
 
-        // Initialize V2 domain event consumer to trigger automated workflows (AI reviews, etc)
-        const aiServiceUrl =
-            process.env.AI_SERVICE_URL || "http://localhost:3009";
-        domainConsumer = new DomainEventConsumer(
-            rabbitConfig.url,
-            aiServiceUrl,
-            logger,
-        );
-        await domainConsumer.connect();
-        logger.info(
-            "V2 domain event consumer connected - listening for automation triggers",
-        );
-
-        // Create Supabase client (needed for outbox + health check)
+        // Create Supabase client (needed for outbox + health check + domain consumer)
         const { createClient } = await import('@supabase/supabase-js');
         const supabaseClient = createClient(
             dbConfig.supabaseUrl,
             dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        );
+
+        // Import access context resolver for domain consumer
+        const { resolveAccessContext } = await import('./v2/shared/access');
+        const accessResolver = (clerkUserId: string) =>
+            resolveAccessContext(supabaseClient, clerkUserId);
+
+        // Initialize V2 domain event consumer to evaluate automation rules on events
+        domainConsumer = new DomainEventConsumer({
+            rabbitMqUrl: rabbitConfig.url,
+            supabaseUrl: dbConfig.supabaseUrl,
+            supabaseKey: dbConfig.supabaseServiceRoleKey!,
+            eventPublisher: v2EventPublisher!,
+            resolveAccessContext: accessResolver,
+            logger,
+        });
+        await domainConsumer.connect();
+        logger.info(
+            "V2 domain event consumer connected - evaluating automation rules on events",
         );
 
         // Set up transactional outbox for durable event delivery
@@ -105,9 +111,19 @@ async function main() {
             outboxPublisher,
             logger,
         );
+        const companyReputationRepository = new CompanyReputationRepository(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey!,
+        );
+        const companyReputationService = new CompanyReputationService(
+            companyReputationRepository,
+            outboxPublisher,
+            logger,
+        );
         reputationConsumer = new ReputationEventConsumer(
             rabbitConfig.url,
             reputationService,
+            companyReputationService,
             logger,
         );
         await reputationConsumer.connect();

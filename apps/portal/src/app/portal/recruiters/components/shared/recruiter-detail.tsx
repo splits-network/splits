@@ -64,18 +64,18 @@ export function RecruiterDetail({
                             {/* Status + NEW */}
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <span
-                                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
+                                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
                                 >
                                     {formatStatus(status)}
                                 </span>
                                 {isNew(recruiter) && (
-                                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                                         New
                                     </span>
                                 )}
                                 {experienceDisplay(recruiter) && (
-                                    <span className="text-[10px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                                    <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                                         {experienceDisplay(recruiter)} exp
                                     </span>
                                 )}
@@ -152,7 +152,7 @@ export function RecruiterDetail({
                         <div className="text-lg font-black text-primary">
                             {stat.value}
                         </div>
-                        <div className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 font-bold">
+                        <div className="text-sm uppercase tracking-[0.2em] text-base-content/40 font-bold">
                             {stat.label}
                         </div>
                     </div>

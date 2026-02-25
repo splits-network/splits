@@ -25,8 +25,11 @@ export default function LinkedInVerificationBadge({
 }: LinkedInVerificationBadgeProps) {
     const { getToken } = useAuth();
 
-    const [connection, setConnection] = useState<OAuthConnectionPublic | null>(null);
-    const [verification, setVerification] = useState<LinkedInVerificationStatus | null>(null);
+    const [connection, setConnection] = useState<OAuthConnectionPublic | null>(
+        null,
+    );
+    const [verification, setVerification] =
+        useState<LinkedInVerificationStatus | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [connecting, setConnecting] = useState(false);
@@ -82,10 +85,13 @@ export default function LinkedInVerificationBadge({
             const client = createAuthenticatedClient(token);
             const redirectUri = `${window.location.origin}/portal/integrations/callback`;
 
-            const res = (await client.post("/integrations/connections/initiate", {
-                provider_slug: "linkedin",
-                redirect_uri: redirectUri,
-            })) as { data: { authorization_url: string; state: string } };
+            const res = (await client.post(
+                "/integrations/connections/initiate",
+                {
+                    provider_slug: "linkedin",
+                    redirect_uri: redirectUri,
+                },
+            )) as { data: { authorization_url: string; state: string } };
 
             sessionStorage.setItem("oauth_state", res.data.state);
             window.location.href = res.data.authorization_url;
@@ -104,7 +110,10 @@ export default function LinkedInVerificationBadge({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.post(`/integrations/linkedin/${connection.id}/refresh-profile`, {});
+            await client.post(
+                `/integrations/linkedin/${connection.id}/refresh-profile`,
+                {},
+            );
             await fetchStatus();
         } catch (err: any) {
             setError("Failed to refresh profile");
@@ -148,7 +157,7 @@ export default function LinkedInVerificationBadge({
                     title={`LinkedIn verified: ${verification.profile?.name || "Connected"}`}
                 >
                     <i className="fa-brands fa-linkedin" />
-                    <i className="fa-solid fa-badge-check text-[10px]" />
+                    <i className="fa-solid fa-badge-check text-sm" />
                     <span>Verified</span>
                 </span>
             );
@@ -184,14 +193,17 @@ export default function LinkedInVerificationBadge({
 
                 {error && (
                     <div className="bg-error/5 border-l-4 border-error px-3 py-2 mb-3">
-                        <p className="text-xs font-semibold text-error">{error}</p>
+                        <p className="text-xs font-semibold text-error">
+                            {error}
+                        </p>
                     </div>
                 )}
 
                 {!loading && !connection && (
                     <div className="text-center py-4">
                         <p className="text-xs text-base-content/50 mb-3">
-                            Connect your LinkedIn account to verify your professional identity.
+                            Connect your LinkedIn account to verify your
+                            professional identity.
                         </p>
                         <button
                             onClick={handleConnect}
@@ -224,7 +236,10 @@ export default function LinkedInVerificationBadge({
                                 {verification.profile.picture ? (
                                     <img
                                         src={verification.profile.picture}
-                                        alt={verification.profile.name || "LinkedIn"}
+                                        alt={
+                                            verification.profile.name ||
+                                            "LinkedIn"
+                                        }
                                         className="w-10 h-10 object-cover"
                                     />
                                 ) : (
@@ -279,9 +294,11 @@ export default function LinkedInVerificationBadge({
 
                         {/* Last synced */}
                         {verification.last_synced_at && (
-                            <p className="text-[10px] text-base-content/30">
+                            <p className="text-sm text-base-content/30">
                                 Last synced:{" "}
-                                {new Date(verification.last_synced_at).toLocaleDateString("en-US", {
+                                {new Date(
+                                    verification.last_synced_at,
+                                ).toLocaleDateString("en-US", {
                                     month: "short",
                                     day: "numeric",
                                     hour: "2-digit",

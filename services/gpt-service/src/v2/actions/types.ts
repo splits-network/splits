@@ -91,6 +91,44 @@ export interface GptApplicationListParams {
 // Application Submission Types
 // ============================================================================
 
+export interface GptResumeDataInput {
+    contact?: {
+        name?: string;
+        email?: string;
+        phone?: string;
+        location?: string;
+        linkedin_url?: string;
+        website?: string;
+    };
+    summary?: string;
+    experience?: Array<{
+        title: string;
+        company: string;
+        location?: string;
+        start_date?: string;
+        end_date?: string | null;
+        is_current?: boolean;
+        description?: string;
+        highlights?: string[];
+    }>;
+    education?: Array<{
+        institution: string;
+        degree?: string;
+        field_of_study?: string;
+        start_date?: string;
+        end_date?: string;
+        gpa?: string;
+    }>;
+    skills?: Array<{ name: string; category?: string }>;
+    certifications?: Array<{
+        name: string;
+        issuer?: string;
+        date_obtained?: string;
+        expiry_date?: string;
+    }>;
+    raw_text?: string;
+}
+
 export interface GptSubmitApplicationRequest {
     job_id: string;
     confirmed?: boolean;
@@ -100,6 +138,7 @@ export interface GptSubmitApplicationRequest {
         answer: string;
     }[];
     cover_letter?: string;
+    resume_data?: GptResumeDataInput;
 }
 
 export interface GptConfirmationSummary {
@@ -182,5 +221,7 @@ export interface ConfirmationToken {
         answer: string;
     }[];
     coverLetter?: string;
+    resumeData?: GptResumeDataInput;
+    existingApplicationId?: string;
     expiresAt: Date;
 }

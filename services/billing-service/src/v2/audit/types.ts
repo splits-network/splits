@@ -1,8 +1,10 @@
-// Payout Audit Types for V2 Domain
+// Placement Payout Audit Types for V2 Domain
 
-export interface PayoutAuditLog {
+export interface PlacementPayoutAuditLog {
     id: string;
-    payout_id: string;
+    placement_id: string;
+    schedule_id?: string;
+    transaction_id?: string;
     event_type: string;
     action?: string;
     old_status?: string;
@@ -14,11 +16,12 @@ export interface PayoutAuditLog {
     changed_by?: string;
     changed_by_role?: string;
     created_at: string;
-    created_by?: string;
 }
 
-export interface PayoutAuditCreate {
-    payout_id: string;
+export interface PlacementPayoutAuditCreate {
+    placement_id: string;
+    schedule_id?: string;
+    transaction_id?: string;
     event_type: string;
     action?: string;
     old_status?: string;
@@ -29,14 +32,20 @@ export interface PayoutAuditCreate {
     metadata?: Record<string, any>;
     changed_by?: string;
     changed_by_role?: string;
-    created_by?: string;
 }
 
-export interface PayoutAuditFilters {
-    payout_id?: string;
+export interface PlacementPayoutAuditFilters {
+    placement_id?: string;
+    schedule_id?: string;
+    transaction_id?: string;
     event_type?: string;
     action?: string;
     changed_by?: string;
     date_from?: string;
     date_to?: string;
 }
+
+// Keep old names as aliases for backward compatibility during transition
+export type PayoutAuditLog = PlacementPayoutAuditLog;
+export type PayoutAuditCreate = PlacementPayoutAuditCreate;
+export type PayoutAuditFilters = PlacementPayoutAuditFilters;

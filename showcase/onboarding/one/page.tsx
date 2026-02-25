@@ -430,7 +430,7 @@ export default function OnboardingOne() {
                                         ].map((item) => (
                                             <span
                                                 key={item}
-                                                className="px-2 py-1 bg-primary text-primary-content text-[10px] font-bold"
+                                                className="px-2 py-1 bg-primary text-primary-content text-sm font-bold"
                                             >
                                                 {item}
                                             </span>
@@ -590,7 +590,7 @@ export default function OnboardingOne() {
                                         <div className="text-lg font-black">
                                             {stat.value}
                                         </div>
-                                        <div className="text-[10px] uppercase tracking-widest text-base-content/40">
+                                        <div className="text-sm uppercase tracking-widest text-base-content/40">
                                             {stat.label}
                                         </div>
                                     </div>

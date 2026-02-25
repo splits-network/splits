@@ -30,6 +30,7 @@ interface Placement {
     created_at: string;
     application_id: string;
     application?: {
+        submitted_at?: string;
         created_at: string;
     };
 }
@@ -101,11 +102,12 @@ export default function TimeToHireTrendsChart({
 
         // Calculate average time to hire per month
         placements.forEach((placement) => {
-            if (!placement.application?.created_at) return;
+            const applicationDate = placement.application?.submitted_at || placement.application?.created_at;
+            if (!applicationDate) return;
 
             const hiredDate = new Date(placement.created_at);
-            const appliedDate = new Date(placement.application.created_at);
-            const daysToHire = daysBetween(placement.application.created_at, placement.created_at);
+            const appliedDate = new Date(applicationDate);
+            const daysToHire = daysBetween(applicationDate, placement.created_at);
 
             const monthDiff = (now.getFullYear() - hiredDate.getFullYear()) * 12 +
                 (now.getMonth() - hiredDate.getMonth());

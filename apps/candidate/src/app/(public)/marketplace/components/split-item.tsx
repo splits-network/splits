@@ -27,7 +27,7 @@ export default function SplitItem({
             {/* Row 1: Avatar + Name + Rating */}
             <div className="flex items-start justify-between mb-1">
                 <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary font-bold text-[10px] flex-shrink-0">
+                    <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary font-bold text-sm flex-shrink-0">
                         {initials}
                     </div>
                     <h3 className="font-bold text-sm tracking-tight truncate">
@@ -36,7 +36,7 @@ export default function SplitItem({
                 </div>
                 {recruiter.reputation_score && (
                     <span
-                        className={`text-[9px] uppercase tracking-[0.15em] font-bold px-1.5 py-0.5 flex-shrink-0 ml-2 ${reputationColor(recruiter.reputation_score)}`}
+                        className={`text-sm uppercase tracking-[0.15em] font-bold px-1.5 py-0.5 flex-shrink-0 ml-2 ${reputationColor(recruiter.reputation_score)}`}
                     >
                         {recruiter.reputation_score.toFixed(1)}
                     </span>

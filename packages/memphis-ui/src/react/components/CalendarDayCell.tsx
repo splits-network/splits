@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface CalendarDayEvent {
     /** Unique event ID */
@@ -43,41 +43,51 @@ export function CalendarDayCell({
     isSelected = false,
     maxEvents = 2,
     onClick,
-    className = '',
+    className = "",
 }: CalendarDayCellProps) {
     return (
         <div
             onClick={onClick}
             className={[
-                'p-2 min-h-[80px] cursor-pointer transition-colors relative',
-                isSelected ? 'bg-dark' : isToday ? 'bg-yellow/25' : 'bg-white',
-                isToday ? 'border-3 border-coral' : 'border border-[#e5e5e5]',
+                "p-2 min-h-[80px] cursor-pointer transition-colors relative",
+                isSelected ? "bg-dark" : isToday ? "bg-yellow/25" : "bg-white",
+                isToday ? "border-3 border-coral" : "border border-[#e5e5e5]",
                 className,
-            ].filter(Boolean).join(' ')}
+            ]
+                .filter(Boolean)
+                .join(" ")}
         >
             <span
                 className={[
-                    'font-black text-sm',
-                    isSelected ? 'text-white' : isToday ? 'text-coral' : 'text-dark',
-                ].join(' ')}
+                    "font-black text-sm",
+                    isSelected
+                        ? "text-white"
+                        : isToday
+                          ? "text-coral"
+                          : "text-dark",
+                ].join(" ")}
             >
                 {day}
             </span>
             <div className="mt-1 space-y-0.5">
                 {events.slice(0, maxEvents).map((ev) => {
-                    const eventColor = ev.color || 'teal';
+                    const eventColor = ev.color || "teal";
                     return (
                         <div
                             key={ev.id}
-                            className={`accent-${eventColor} px-1.5 py-0.5 text-[10px] font-bold truncate bg-accent text-dark`}
+                            className={`accent-${eventColor} px-1.5 py-0.5 text-sm font-bold truncate bg-accent text-dark`}
                         >
-                            {ev.icon && <i className={`fa-duotone fa-solid ${ev.icon} mr-1`} />}
+                            {ev.icon && (
+                                <i
+                                    className={`fa-duotone fa-solid ${ev.icon} mr-1`}
+                                />
+                            )}
                             {ev.title}
                         </div>
                     );
                 })}
                 {events.length > maxEvents && (
-                    <span className="text-[10px] font-black text-purple">
+                    <span className="text-sm font-black text-purple">
                         +{events.length - maxEvents} more
                     </span>
                 )}

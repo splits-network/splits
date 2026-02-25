@@ -164,23 +164,23 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                         {/* Badges */}
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <span
-                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
+                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
                             >
                                 {formatStatusLabel(job.status)}
                             </span>
                             {isNew(job) && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
                                     <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                                     New
                                 </span>
                             )}
                             {job.employment_type && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
                                     {formatEmploymentType(job.employment_type)}
                                 </span>
                             )}
                             {level && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
                                     {level}
                                 </span>
                             )}
@@ -267,7 +267,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                 {/* Stats grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="border-l-4 border-primary pl-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Compensation
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -279,7 +279,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                         </p>
                     </div>
                     <div className="border-l-4 border-secondary pl-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Work Style
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -291,7 +291,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                         </p>
                     </div>
                     <div className="border-l-4 border-accent pl-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Department
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -323,7 +323,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     {level && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Level
                             </p>
                             <p className="font-bold text-sm">{level}</p>
@@ -331,7 +331,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                     )}
                     {job.open_to_relocation && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Relocation
                             </p>
                             <p className="font-bold text-sm">
@@ -509,7 +509,7 @@ export function JobDetailLoader({ jobId, onClose }: JobDetailLoaderProps) {
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                         Loading role...
                     </span>
                 </div>

@@ -13,7 +13,12 @@ interface NavItemCardProps {
     onDelete: () => void;
 }
 
-export function NavItemCard({ id, item, onChange, onDelete }: NavItemCardProps) {
+export function NavItemCard({
+    id,
+    item,
+    onChange,
+    onDelete,
+}: NavItemCardProps) {
     const [expanded, setExpanded] = useState(false);
     const hasSubItems = (item.subItems?.length ?? 0) > 0;
 
@@ -47,22 +52,34 @@ export function NavItemCard({ id, item, onChange, onDelete }: NavItemCardProps) 
                                 type="text"
                                 className="input input-bordered input-sm"
                                 value={item.label}
-                                onChange={(e) => update({ label: e.target.value })}
+                                onChange={(e) =>
+                                    update({ label: e.target.value })
+                                }
                                 placeholder="Label"
                             />
                             <input
                                 type="text"
                                 className="input input-bordered input-sm"
                                 value={item.icon || ""}
-                                onChange={(e) => update({ icon: e.target.value || undefined })}
+                                onChange={(e) =>
+                                    update({
+                                        icon: e.target.value || undefined,
+                                    })
+                                }
                                 placeholder="Icon (optional)"
                             />
                             <input
                                 type="text"
                                 className="input input-bordered input-sm"
                                 value={item.href || ""}
-                                onChange={(e) => update({ href: e.target.value || null })}
-                                placeholder={hasSubItems ? "No link (has dropdown)" : "/path"}
+                                onChange={(e) =>
+                                    update({ href: e.target.value || null })
+                                }
+                                placeholder={
+                                    hasSubItems
+                                        ? "No link (has dropdown)"
+                                        : "/path"
+                                }
                             />
                         </div>
 
@@ -70,11 +87,17 @@ export function NavItemCard({ id, item, onChange, onDelete }: NavItemCardProps) 
                             type="button"
                             onClick={() => setExpanded(!expanded)}
                             className={`btn btn-ghost btn-xs ${hasSubItems ? "text-primary" : ""}`}
-                            title={hasSubItems ? "Edit sub-items" : "Add sub-items"}
+                            title={
+                                hasSubItems ? "Edit sub-items" : "Add sub-items"
+                            }
                         >
-                            <i className={`fa-duotone fa-regular ${expanded ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                            <i
+                                className={`fa-duotone fa-regular ${expanded ? "fa-chevron-up" : "fa-chevron-down"}`}
+                            ></i>
                             {hasSubItems && (
-                                <span className="text-[10px] ml-0.5">{item.subItems!.length}</span>
+                                <span className="text-sm ml-0.5">
+                                    {item.subItems!.length}
+                                </span>
                             )}
                         </button>
 
@@ -97,7 +120,12 @@ export function NavItemCard({ id, item, onChange, onDelete }: NavItemCardProps) 
                             <RepeatingListEditor<NavSubItem>
                                 items={item.subItems || []}
                                 onChange={handleSubItemsChange}
-                                defaultItem={() => ({ icon: "", label: "", desc: "", href: "" })}
+                                defaultItem={() => ({
+                                    icon: "",
+                                    label: "",
+                                    desc: "",
+                                    href: "",
+                                })}
                                 addLabel="Add Sub-item"
                                 renderItem={(sub, _index, updateSub) => (
                                     <div className="grid grid-cols-4 gap-2">
@@ -105,28 +133,44 @@ export function NavItemCard({ id, item, onChange, onDelete }: NavItemCardProps) 
                                             type="text"
                                             className="input input-bordered input-xs"
                                             value={sub.icon}
-                                            onChange={(e) => updateSub({ icon: e.target.value })}
+                                            onChange={(e) =>
+                                                updateSub({
+                                                    icon: e.target.value,
+                                                })
+                                            }
                                             placeholder="Icon"
                                         />
                                         <input
                                             type="text"
                                             className="input input-bordered input-xs"
                                             value={sub.label}
-                                            onChange={(e) => updateSub({ label: e.target.value })}
+                                            onChange={(e) =>
+                                                updateSub({
+                                                    label: e.target.value,
+                                                })
+                                            }
                                             placeholder="Label"
                                         />
                                         <input
                                             type="text"
                                             className="input input-bordered input-xs"
                                             value={sub.desc}
-                                            onChange={(e) => updateSub({ desc: e.target.value })}
+                                            onChange={(e) =>
+                                                updateSub({
+                                                    desc: e.target.value,
+                                                })
+                                            }
                                             placeholder="Description"
                                         />
                                         <input
                                             type="text"
                                             className="input input-bordered input-xs"
                                             value={sub.href}
-                                            onChange={(e) => updateSub({ href: e.target.value })}
+                                            onChange={(e) =>
+                                                updateSub({
+                                                    href: e.target.value,
+                                                })
+                                            }
                                             placeholder="/path"
                                         />
                                     </div>

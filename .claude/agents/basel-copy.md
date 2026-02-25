@@ -67,7 +67,7 @@ Every content section follows the Basel typographic hierarchy:
    - 2-3 sentences that explain or support the headline
 
 4. SUPPORTING ELEMENTS
-   - Feature badges: text-[10px] uppercase tracking-wider
+   - Feature badges: text-sm uppercase tracking-wider
    - Stats: big number + short label
    - Cards: title + short description
 ```

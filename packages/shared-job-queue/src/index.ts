@@ -601,6 +601,37 @@ export class OutboxWorker {
         this.logger.info({ sourceService: this.sourceService }, 'OutboxWorker stopped');
     }
 
+    private formatSupabaseError(error: unknown): { message: string; isGatewayError: boolean } {
+        const msg = error && typeof error === 'object' && 'message' in error ? String((error as any).message) : String(error);
+        const details = error && typeof error === 'object' && 'details' in error ? String((error as any).details) : '';
+        const fullMsg = details ? `${msg}\n${details}` : msg;
+
+        const htmlMatch = fullMsg.match(/<title>\s*\|?\s*(\d{3}:\s*[^<]+)<\/title>/i);
+        if (htmlMatch) {
+            return { message: `Supabase gateway error: ${htmlMatch[1].trim()}`, isGatewayError: true };
+        }
+        if (fullMsg.includes('<!DOCTYPE') || fullMsg.includes('<html')) {
+            return { message: 'Supabase returned an HTML error page (likely a gateway/proxy issue)', isGatewayError: true };
+        }
+
+        const transientPatterns = [
+            'fetch failed',
+            'UND_ERR_SOCKET',
+            'other side closed',
+            'ECONNRESET',
+            'ECONNREFUSED',
+            'ETIMEDOUT',
+            'socket hang up',
+            'network error',
+        ];
+        const lowerFull = fullMsg.toLowerCase();
+        if (transientPatterns.some(p => lowerFull.includes(p.toLowerCase()))) {
+            return { message: `Supabase transient network error: ${msg}`, isGatewayError: true };
+        }
+
+        return { message: msg, isGatewayError: false };
+    }
+
     private async poll(): Promise<void> {
         if (this.processing) return;
         this.processing = true;
@@ -615,7 +646,13 @@ export class OutboxWorker {
                 .limit(this.batchSize);
 
             if (error) {
-                this.logger.error({ err: error }, 'OutboxWorker failed to fetch pending events');
+                const formatted = this.formatSupabaseError(error);
+                this.logger[formatted.isGatewayError ? 'warn' : 'error'](
+                    { err: { message: formatted.message, code: (error as any).code } },
+                    formatted.isGatewayError
+                        ? 'OutboxWorker: Supabase temporarily unavailable, will retry next poll'
+                        : 'OutboxWorker failed to fetch pending events'
+                );
                 return;
             }
 
@@ -646,9 +683,12 @@ export class OutboxWorker {
             if (error) {
                 // RabbitMQ publish succeeded but we couldn't mark it — log and move on.
                 // Event will be delivered again on next poll (duplicate delivery is acceptable).
-                this.logger.error(
-                    { err: error, event_id: event.id },
-                    'OutboxWorker delivered event but failed to mark as published (will re-deliver)'
+                const formatted = this.formatSupabaseError(error);
+                this.logger[formatted.isGatewayError ? 'warn' : 'error'](
+                    { err: { message: formatted.message, code: (error as any).code }, event_id: event.id },
+                    formatted.isGatewayError
+                        ? 'OutboxWorker: Supabase unavailable after publish — event will re-deliver'
+                        : 'OutboxWorker delivered event but failed to mark as published (will re-deliver)'
                 );
             } else {
                 this.logger.debug({ event_id: event.id, event_type: event.event_type }, 'OutboxWorker delivered event');
@@ -656,19 +696,20 @@ export class OutboxWorker {
         } catch (err) {
             const attempts = (event.attempts ?? 0) + 1;
             const exhausted = attempts >= this.maxAttempts;
+            const formatted = this.formatSupabaseError(err);
 
             await this.supabase
                 .from('outbox_events')
                 .update({
                     status: exhausted ? 'failed' : 'pending',
                     attempts,
-                    error: err instanceof Error ? err.message : String(err),
+                    error: formatted.message,
                     error_at: new Date().toISOString(),
                 })
                 .eq('id', event.id);
 
             this.logger.error(
-                { err, event_id: event.id, event_type: event.event_type, attempts, exhausted },
+                { err: { message: formatted.message }, event_id: event.id, event_type: event.event_type, attempts, exhausted },
                 exhausted
                     ? 'OutboxWorker exhausted retries — event marked failed'
                     : 'OutboxWorker failed to deliver event, will retry'

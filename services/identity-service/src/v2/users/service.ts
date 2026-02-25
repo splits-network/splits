@@ -207,9 +207,31 @@ export class UserServiceV2 {
         }
 
         // Check if user already exists - return existing user for idempotency
+        // An existing user may have been created by the accept-invitation flow
+        // with incomplete profile data. Merge in any new data from registration.
         const existingUser = await this.repository.findUserByClerkId(clerkUserId);
-        // TODO: this is where i'm at.  we need to check if an existing user is returned.  for instance, this should have been created by accept invitation flow
         if (existingUser) {
+            const mergeUpdates: Record<string, any> = {};
+
+            if ((!existingUser.name || existingUser.name.trim() === '') && userData.name) {
+                mergeUpdates.name = userData.name;
+            }
+
+            if (!existingUser.profile_image_url && userData.profile_image_url) {
+                mergeUpdates.profile_image_url = userData.profile_image_url;
+            }
+
+            if (Object.keys(mergeUpdates).length > 0) {
+                mergeUpdates.updated_at = new Date().toISOString();
+                const updatedUser = await this.repository.updateUser(existingUser.id, mergeUpdates);
+                this.logger.info({
+                    id: existingUser.id,
+                    clerkUserId,
+                    mergedFields: Object.keys(mergeUpdates).filter(k => k !== 'updated_at'),
+                }, 'UserService.registerUser - existing user updated with registration data');
+                return updatedUser;
+            }
+
             this.logger.info({ id: existingUser.id, clerkUserId }, 'UserService.registerUser - user already exists, returning existing');
             return existingUser;
         }

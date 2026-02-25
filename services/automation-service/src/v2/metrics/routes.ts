@@ -1,14 +1,11 @@
-import { FastifyInstance } from "fastify";
-import { createClient } from "@supabase/supabase-js";
-import { MarketplaceMetricsServiceV2 } from "./service";
-import { MarketplaceMetricsRepository, CreateMetricInput } from "./repository";
-import { MetricFilters, MetricUpdate } from "./types";
-import {
-    requireUserContext,
-    validatePaginationParams,
-} from "../shared/helpers";
-import { EventPublisher, IEventPublisher } from "../shared/events";
-import { resolveAccessContext } from "../shared/access";
+import { FastifyInstance } from 'fastify';
+import { createClient } from '@supabase/supabase-js';
+import { MarketplaceMetricsServiceV2 } from './service';
+import { MarketplaceMetricsRepository, CreateMetricInput } from './repository';
+import { MetricFilters, MetricUpdate } from './types';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers';
+import { IEventPublisher } from '../shared/events';
+import { resolveAccessContext } from '../shared/access';
 
 interface RegisterMetricRoutesConfig {
     supabaseUrl: string;
@@ -33,22 +30,21 @@ export async function registerMetricRoutes(
         config.eventPublisher,
     );
 
-    app.get("/api/v2/marketplace-metrics", async (request, reply) => {
+    app.get('/api/v2/marketplace-metrics', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
             const pagination = validatePaginationParams(query);
 
-            // Parse filters object if present (comes as JSON string from query params)
             let parsedFilters: Record<string, any> = {};
             if (query.filters) {
                 try {
                     parsedFilters =
-                        typeof query.filters === "string"
+                        typeof query.filters === 'string'
                             ? JSON.parse(query.filters)
                             : query.filters;
                 } catch (e) {
-                    console.error("Failed to parse filters:", e);
+                    console.error('Failed to parse filters:', e);
                 }
             }
 
@@ -62,72 +58,53 @@ export async function registerMetricRoutes(
             const result = await service.listMetrics(clerkUserId, filters);
             return reply.send(result);
         } catch (error: any) {
-            return reply
-                .code(400)
-                .send({
-                    error: {
-                        message:
-                            error.message ||
-                            "Failed to fetch marketplace metrics",
-                    },
-                });
+            return reply.code(400).send({
+                error: { message: error.message || 'Failed to fetch marketplace metrics' },
+            });
         }
     });
 
-    app.get("/api/v2/marketplace-metrics/:id", async (request, reply) => {
+    app.get('/api/v2/marketplace-metrics/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const metric = await service.getMetric(clerkUserId, id);
             return reply.send({ data: metric });
         } catch (error: any) {
-            return reply
-                .code(404)
-                .send({
-                    error: {
-                        message:
-                            error.message || "Marketplace metric not found",
-                    },
-                });
+            return reply.code(404).send({
+                error: { message: error.message || 'Marketplace metric not found' },
+            });
         }
     });
 
-    app.post("/api/v2/marketplace-metrics", async (request, reply) => {
+    app.post('/api/v2/marketplace-metrics', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as CreateMetricInput;
             if (
-                !body?.date ||
-                typeof body.total_placements === "undefined" ||
-                typeof body.total_applications === "undefined" ||
-                typeof body.total_earnings_cents === "undefined" ||
-                typeof body.active_recruiters === "undefined" ||
-                typeof body.active_jobs === "undefined" ||
-                typeof body.health_score === "undefined"
+                !body?.metric_date ||
+                typeof body.active_recruiters === 'undefined' ||
+                typeof body.active_companies === 'undefined' ||
+                typeof body.active_jobs === 'undefined' ||
+                typeof body.total_applications === 'undefined' ||
+                typeof body.total_placements === 'undefined'
             ) {
                 return reply.code(400).send({
                     error: {
-                        message:
-                            "date, totals, activity, and health_score are required",
+                        message: 'metric_date, active_recruiters, active_companies, active_jobs, total_applications, and total_placements are required',
                     },
                 });
             }
             const metric = await service.createMetric(clerkUserId, body);
             return reply.code(201).send({ data: metric });
         } catch (error: any) {
-            return reply
-                .code(400)
-                .send({
-                    error: {
-                        message:
-                            error.message ||
-                            "Failed to create marketplace metric",
-                    },
-                });
+            return reply.code(400).send({
+                error: { message: error.message || 'Failed to create marketplace metric' },
+            });
         }
     });
 
-    app.patch("/api/v2/marketplace-metrics/:id", async (request, reply) => {
+    app.patch('/api/v2/marketplace-metrics/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -135,34 +112,22 @@ export async function registerMetricRoutes(
             const metric = await service.updateMetric(clerkUserId, id, updates);
             return reply.send({ data: metric });
         } catch (error: any) {
-            return reply
-                .code(400)
-                .send({
-                    error: {
-                        message:
-                            error.message ||
-                            "Failed to update marketplace metric",
-                    },
-                });
+            return reply.code(400).send({
+                error: { message: error.message || 'Failed to update marketplace metric' },
+            });
         }
     });
 
-    app.delete("/api/v2/marketplace-metrics/:id", async (request, reply) => {
+    app.delete('/api/v2/marketplace-metrics/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             await service.deleteMetric(clerkUserId, id);
             return reply.code(204).send();
         } catch (error: any) {
-            return reply
-                .code(400)
-                .send({
-                    error: {
-                        message:
-                            error.message ||
-                            "Failed to delete marketplace metric",
-                    },
-                });
+            return reply.code(400).send({
+                error: { message: error.message || 'Failed to delete marketplace metric' },
+            });
         }
     });
 }

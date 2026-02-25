@@ -284,7 +284,7 @@ export default function SearchOne() {
                                         {f.type}:
                                     </span>{" "}
                                     {f.value}{" "}
-                                    <i className="fa-solid fa-xmark text-[9px] ml-1 hover:opacity-70" />
+                                    <i className="fa-solid fa-xmark text-sm ml-1 hover:opacity-70" />
                                 </button>
                             ))}
                             <button
@@ -475,7 +475,7 @@ export default function SearchOne() {
                                                         {r.title}
                                                     </h3>
                                                     {idx === 0 && (
-                                                        <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase">
+                                                        <span className="px-2 py-0.5 bg-primary/10 text-primary text-sm font-bold uppercase">
                                                             Best Match
                                                         </span>
                                                     )}
@@ -509,7 +509,7 @@ export default function SearchOne() {
                                                     {r.tags.map((t) => (
                                                         <span
                                                             key={t}
-                                                            className="px-2 py-0.5 bg-base-100 text-[10px] font-semibold text-base-content/40"
+                                                            className="px-2 py-0.5 bg-base-100 text-sm font-semibold text-base-content/40"
                                                         >
                                                             {t}
                                                         </span>
@@ -521,7 +521,7 @@ export default function SearchOne() {
                                             <div className="text-2xl font-black text-primary">
                                                 {r.match}%
                                             </div>
-                                            <div className="text-[9px] uppercase tracking-wider text-base-content/40">
+                                            <div className="text-sm uppercase tracking-wider text-base-content/40">
                                                 Match
                                             </div>
                                         </div>

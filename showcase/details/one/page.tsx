@@ -522,7 +522,7 @@ export default function DetailsOne() {
                                                     <p className="text-sm text-base-content/60">
                                                         {item.action}
                                                     </p>
-                                                    <p className="text-[10px] text-base-content/30 mt-1">
+                                                    <p className="text-sm text-base-content/30 mt-1">
                                                         {item.time}
                                                     </p>
                                                 </div>
@@ -646,7 +646,7 @@ export default function DetailsOne() {
                                             {sj.tags.map((t) => (
                                                 <span
                                                     key={t}
-                                                    className="px-2 py-0.5 bg-base-200 text-[10px] font-semibold text-base-content/50"
+                                                    className="px-2 py-0.5 bg-base-200 text-sm font-semibold text-base-content/50"
                                                 >
                                                     {t}
                                                 </span>

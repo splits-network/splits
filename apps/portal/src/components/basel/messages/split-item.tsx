@@ -149,7 +149,7 @@ export default function SplitItem({
                                 </span>
                             )}
                         </div>
-                        <span className="text-[11px] text-base-content/40 flex-shrink-0 ml-2">
+                        <span className="text-sm text-base-content/40 flex-shrink-0 ml-2">
                             {formatMessageDate(convo.last_message_at)}
                         </span>
                     </div>
@@ -158,10 +158,10 @@ export default function SplitItem({
                     {meta && (
                         <div className="flex items-center gap-1.5 mb-1">
                             <i
-                                className={`${meta.icon} text-[10px] ${meta.textClass}`}
+                                className={`${meta.icon} text-sm ${meta.textClass}`}
                             />
                             <span
-                                className={`text-[10px] font-semibold uppercase tracking-wider ${meta.textClass}`}
+                                className={`text-sm font-semibold uppercase tracking-wider ${meta.textClass}`}
                             >
                                 {meta.label}
                             </span>
@@ -198,7 +198,7 @@ export default function SplitItem({
                             )}
                         </p>
                         {participant.unread_count > 0 && (
-                            <span className="flex-shrink-0 w-5 h-5 bg-accent text-accent-content text-[10px] font-bold flex items-center justify-center rounded-full">
+                            <span className="flex-shrink-0 w-5 h-5 bg-accent text-accent-content text-sm font-bold flex items-center justify-center rounded-full">
                                 {participant.unread_count > 99
                                     ? "99+"
                                     : participant.unread_count}

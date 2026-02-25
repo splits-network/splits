@@ -114,7 +114,7 @@ function NavDropdown({
             >
                 {label}
                 <i
-                    className={`fa-solid fa-chevron-down text-[9px] transition-transform ${
+                    className={`fa-solid fa-chevron-down text-sm transition-transform ${
                         activeDropdown === label ? "rotate-180" : ""
                     }`}
                 />
@@ -127,7 +127,7 @@ function NavDropdown({
                     }`}
                 >
                     <div className="px-4 py-2 border-b border-base-300 mb-1">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
+                        <span className="text-sm font-semibold uppercase tracking-widest text-base-content/40">
                             {label}
                         </span>
                     </div>

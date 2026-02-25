@@ -58,7 +58,7 @@ export function TableRow({
                                 className="w-8 h-8 shrink-0 object-contain bg-base-200 border border-base-300 p-0.5"
                             />
                         ) : (
-                            <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-[10px] font-bold text-base-content/60">
+                            <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
                                 {companyInitials(name)}
                             </div>
                         )}
@@ -81,7 +81,7 @@ export function TableRow({
                 {/* Status */}
                 <td className="px-4 py-3">
                     <span
-                        className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${stageColor(app.stage)}`}
+                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${stageColor(app.stage)}`}
                     >
                         {formatStage(app.stage)}
                     </span>

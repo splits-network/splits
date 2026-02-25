@@ -3,8 +3,8 @@
 export * from './database';
 
 // DTOs, events, and other non-database types
-// NOTE: models.ts, teams.ts, ats-integrations.ts still contain legacy duplicate types
-// TODO: Clean those up to remove table type definitions that now exist in ./database
+// models.ts contains enriched DTO types (with joined fields like candidate?, job?) that extend beyond raw DB types.
+// ats-integrations.ts contains ATS platform-specific types (Greenhouse, Lever, etc.) used by integration-service.
 export * from './dtos';
 export * from './events';
 export * from './list-params';
@@ -27,6 +27,12 @@ export type {
     ApplicationFeedbackType,
     ApplicationFeedbackCreatorType,
     ApplicationFeedback,
+    // Core model types
+    Application,
+    Candidate,
+    Job,
+    Company,
+    AIReview,
     // Other model types
     MarketplaceProfile,
     ApplicationStage,
@@ -55,6 +61,10 @@ export type {
     DegreeLevel,
     JobPreScreenQuestion,
     PreScreenQuestionType,
+    // Application resume data types
+    ApplicationResumeData,
+    ApplicationResumeContact,
+    ApplicationResumeSource,
 } from './models';
 
 // Content CMS block types and page structure

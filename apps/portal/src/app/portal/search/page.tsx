@@ -303,7 +303,7 @@ function SearchPageInner() {
                                         {pill.label}:
                                     </span>{" "}
                                     {pill.value}
-                                    <i className="fa-solid fa-xmark text-[9px] ml-1 hover:opacity-70" />
+                                    <i className="fa-solid fa-xmark text-sm ml-1 hover:opacity-70" />
                                 </button>
                             ))}
                             <button

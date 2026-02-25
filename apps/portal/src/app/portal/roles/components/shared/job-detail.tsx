@@ -76,7 +76,7 @@ function RecruiterBriefTab({ job }: { job: Job }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                 {commute && (
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Commute
                         </p>
                         <p className="font-bold text-sm">{commute}</p>
@@ -84,7 +84,7 @@ function RecruiterBriefTab({ job }: { job: Job }) {
                 )}
                 {job.department && (
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Department
                         </p>
                         <p className="font-bold text-sm">{job.department}</p>
@@ -93,7 +93,7 @@ function RecruiterBriefTab({ job }: { job: Job }) {
                 {job.guarantee_days !== undefined &&
                     job.guarantee_days !== null && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Guarantee
                             </p>
                             <p className="font-bold text-sm">
@@ -103,7 +103,7 @@ function RecruiterBriefTab({ job }: { job: Job }) {
                     )}
                 {level && (
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Level
                         </p>
                         <p className="font-bold text-sm">{level}</p>
@@ -111,7 +111,7 @@ function RecruiterBriefTab({ job }: { job: Job }) {
                 )}
                 {job.open_to_relocation && (
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Relocation
                         </p>
                         <p className="font-bold text-sm text-secondary">
@@ -214,7 +214,7 @@ function FinancialsTab({ job }: { job: Job }) {
             {/* Quick stats */}
             <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                 <div className="bg-base-100 p-4">
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                    <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                         Compensation
                     </p>
                     <p className="text-lg font-black tracking-tight">
@@ -222,7 +222,7 @@ function FinancialsTab({ job }: { job: Job }) {
                     </p>
                 </div>
                 <div className="bg-base-100 p-4">
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                    <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                         Fee
                     </p>
                     <p className="text-lg font-black tracking-tight">
@@ -232,7 +232,7 @@ function FinancialsTab({ job }: { job: Job }) {
                 {job.guarantee_days !== undefined &&
                     job.guarantee_days !== null && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Guarantee
                             </p>
                             <p className="text-lg font-black tracking-tight">
@@ -432,7 +432,7 @@ function CompanyTab({ job }: { job: Job }) {
                                         </p>
                                     )}
                                 </div>
-                                <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-base-200 text-base-content/50 shrink-0">
+                                <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-base-200 text-base-content/50 shrink-0">
                                     {member.roles?.display_name ||
                                         formatRoleName(member.role_name)}
                                 </span>
@@ -474,22 +474,22 @@ export function JobDetail({
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                             <span
-                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
+                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
                             >
                                 {formatStatus(job.status)}
                             </span>
                             {isNew(job) && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
                                     New
                                 </span>
                             )}
                             {job.employment_type && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
                                     {formatEmploymentType(job.employment_type)}
                                 </span>
                             )}
                             {level && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
                                     {level}
                                 </span>
                             )}
@@ -538,7 +538,7 @@ export function JobDetail({
                 {/* Stats row */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300 mt-4">
                     <div className="bg-base-100 p-3">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-0.5">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-0.5">
                             Compensation
                         </p>
                         <p className="text-sm font-black tracking-tight">
@@ -546,7 +546,7 @@ export function JobDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-3">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-0.5">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-0.5">
                             Fee
                         </p>
                         <p className="text-sm font-black tracking-tight">
@@ -554,7 +554,7 @@ export function JobDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-3">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-0.5">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-0.5">
                             Candidates
                         </p>
                         <p className="text-sm font-black tracking-tight">
@@ -657,7 +657,7 @@ export function DetailLoader({
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                         Loading role...
                     </span>
                 </div>

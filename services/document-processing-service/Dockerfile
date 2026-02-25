@@ -1,5 +1,5 @@
 # Development stage
-FROM node:20-slim AS development
+FROM node:22-slim AS development
 
 # Install system dependencies for pdf-parse and pnpm
 RUN apt-get update && apt-get install -y \
@@ -29,7 +29,7 @@ EXPOSE 3008
 CMD ["pnpm", "--filter", "@splits-network/document-processing-service", "dev"]
 
 # Production stage
-FROM node:20-slim AS production
+FROM node:22-slim AS production
 
 # Install system dependencies for pdf-parse
 RUN apt-get update && apt-get install -y \

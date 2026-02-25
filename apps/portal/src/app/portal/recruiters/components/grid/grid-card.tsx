@@ -39,13 +39,13 @@ export function GridCard({
             {/* Status + NEW */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
                 >
                     {formatStatus(status)}
                 </span>
 
                 {isNew(recruiter) && (
-                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
                     </span>
@@ -102,20 +102,20 @@ export function GridCard({
             {/* Specialties + Experience */}
             <div className="flex flex-wrap gap-1 mb-4">
                 {experienceDisplay(recruiter) && (
-                    <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                         {experienceDisplay(recruiter)}
                     </span>
                 )}
                 {(recruiter.specialties || []).slice(0, 2).map((s, i) => (
                     <span
                         key={`specialty-${i}`}
-                        className="text-[9px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-1"
+                        className="text-sm uppercase tracking-wider bg-primary/10 text-primary px-2 py-1"
                     >
                         {s}
                     </span>
                 ))}
                 {(recruiter.specialties || []).length > 2 && (
-                    <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                         +{(recruiter.specialties || []).length - 2}
                     </span>
                 )}

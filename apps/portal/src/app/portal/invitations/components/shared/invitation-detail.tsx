@@ -24,11 +24,13 @@ export function InvitationDetail({
     return (
         <div>
             {/* Header */}
-            <div className={`p-6 border-b-2 border-base-300 border-l-4 ${borderClass}`}>
+            <div
+                className={`p-6 border-b-2 border-base-300 border-l-4 ${borderClass}`}
+            >
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <span
-                            className={`inline-block text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 mb-3 ${statusColor(invitation)}`}
+                            className={`inline-block text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 mb-3 ${statusColor(invitation)}`}
                         >
                             <i
                                 className={`fa-duotone fa-regular ${status.icon} mr-1`}
@@ -87,7 +89,7 @@ export function InvitationDetail({
                     <div className="text-lg font-black text-primary">
                         {status.label}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40">
+                    <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40">
                         Status
                     </div>
                 </div>
@@ -95,7 +97,7 @@ export function InvitationDetail({
                     <div className="text-lg font-black text-primary">
                         {formatInvitationDate(invitation.invited_at)}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40">
+                    <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40">
                         Invited
                     </div>
                 </div>
@@ -103,7 +105,7 @@ export function InvitationDetail({
                     <div className="text-lg font-black text-primary">
                         {formatInvitationDate(invitation.invitation_expires_at)}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40">
+                    <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40">
                         Expires
                     </div>
                 </div>
@@ -114,7 +116,7 @@ export function InvitationDetail({
                 {/* Candidate Info */}
                 {candidate && (
                     <div className="p-4 border-2 border-base-300 mb-6">
-                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                             Candidate Information
                         </h3>
                         <div className="flex items-center gap-3 mb-4">
@@ -130,9 +132,7 @@ export function InvitationDetail({
                                 </div>
                             )}
                             <div>
-                                <div className="font-bold text-sm">
-                                    {name}
-                                </div>
+                                <div className="font-bold text-sm">{name}</div>
                                 <div className="text-sm text-base-content/50">
                                     {candidate.email}
                                 </div>
@@ -141,7 +141,7 @@ export function InvitationDetail({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {candidate.current_title && (
                                 <div className="p-3 border border-base-200">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
+                                    <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
                                         Title
                                     </div>
                                     <div className="text-sm font-semibold">
@@ -151,7 +151,7 @@ export function InvitationDetail({
                             )}
                             {candidate.current_company && (
                                 <div className="p-3 border border-base-200">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
+                                    <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
                                         Company
                                     </div>
                                     <div className="text-sm font-semibold">
@@ -161,7 +161,7 @@ export function InvitationDetail({
                             )}
                             {candidate.location && (
                                 <div className="p-3 border border-base-200">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
+                                    <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
                                         Location
                                     </div>
                                     <div className="text-sm font-semibold">
@@ -171,7 +171,7 @@ export function InvitationDetail({
                             )}
                             {candidate.phone && (
                                 <div className="p-3 border border-base-200">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
+                                    <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
                                         Phone
                                     </div>
                                     <div className="text-sm font-semibold">
@@ -185,13 +185,13 @@ export function InvitationDetail({
 
                 {/* Invitation Timeline */}
                 <div className="mb-6">
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3 flex items-center gap-2">
                         <i className="fa-duotone fa-regular fa-clock text-primary" />
                         Timeline
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="p-3 border border-base-200">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
+                            <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
                                 Invited
                             </div>
                             <div className="text-sm font-semibold">
@@ -199,7 +199,7 @@ export function InvitationDetail({
                             </div>
                         </div>
                         <div className="p-3 border border-base-200">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
+                            <div className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 mb-1">
                                 Expires
                             </div>
                             <div className="text-sm font-semibold">
@@ -210,7 +210,7 @@ export function InvitationDetail({
                         </div>
                         {invitation.consent_given_at && (
                             <div className="p-3 border border-success/30 bg-success/5">
-                                <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-success mb-1">
+                                <div className="text-sm font-bold uppercase tracking-[0.15em] text-success mb-1">
                                     Accepted
                                 </div>
                                 <div className="text-sm font-semibold">
@@ -222,7 +222,7 @@ export function InvitationDetail({
                         )}
                         {invitation.declined_at && (
                             <div className="p-3 border border-error/30 bg-error/5">
-                                <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-error mb-1">
+                                <div className="text-sm font-bold uppercase tracking-[0.15em] text-error mb-1">
                                     Declined
                                 </div>
                                 <div className="text-sm font-semibold">
@@ -238,7 +238,7 @@ export function InvitationDetail({
                 {/* Decline Reason */}
                 {isDeclined && invitation.declined_reason && (
                     <div className="mb-6">
-                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3 flex items-center gap-2">
+                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3 flex items-center gap-2">
                             <i className="fa-duotone fa-regular fa-times-circle text-error" />
                             Decline Reason
                         </h3>
@@ -251,7 +251,7 @@ export function InvitationDetail({
                 {/* Verification Status */}
                 {candidate?.verification_status && (
                     <div className="mb-6">
-                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3 flex items-center gap-2">
+                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3 flex items-center gap-2">
                             <i className="fa-duotone fa-regular fa-badge-check text-success" />
                             Verification
                         </h3>

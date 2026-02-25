@@ -44,7 +44,7 @@ export function TableView({
                         {COLUMNS.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 ${i === 0 ? "w-8" : ""}`}
+                                className={`px-4 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 ${i === 0 ? "w-8" : ""}`}
                             >
                                 {h}
                             </th>
@@ -112,7 +112,7 @@ export function TableView({
                                     {/* Status */}
                                     <td className="px-4 py-3">
                                         <span
-                                            className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(state)}`}
+                                            className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(state)}`}
                                         >
                                             {formatStatus(state)}
                                         </span>

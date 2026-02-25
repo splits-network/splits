@@ -186,11 +186,11 @@ export function UserDropdown({
                                 )}
                                 {role && (
                                     <span
-                                        className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${badgeClassName}`}
+                                        className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-sm font-semibold uppercase tracking-wider ${badgeClassName}`}
                                     >
                                         {role.icon && (
                                             <i
-                                                className={`fa-duotone fa-regular ${role.icon} text-[9px]`}
+                                                className={`fa-duotone fa-regular ${role.icon} text-sm`}
                                             />
                                         )}
                                         {role.label}

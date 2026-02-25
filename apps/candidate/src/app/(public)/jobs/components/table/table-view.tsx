@@ -40,7 +40,7 @@ export function TableView({ jobs, selectedId, onSelect }: TableViewProps) {
                         {COLUMNS.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-4 py-3 text-left text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 ${
+                                className={`px-4 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 ${
                                     i === 0 ? "w-8" : ""
                                 } ${RESPONSIVE_CLASSES[i]}`}
                             >

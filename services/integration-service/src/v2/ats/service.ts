@@ -1,4 +1,5 @@
 import { Logger } from '@splits-network/shared-logging';
+import { CryptoService } from '@splits-network/shared-config/src/crypto';
 import { ATSRepository } from './repository';
 import { GreenhouseClient } from './greenhouse-client';
 import { LeverClient } from './lever-client';
@@ -36,6 +37,7 @@ export class ATSService {
         private repo: ATSRepository,
         private eventPublisher: IEventPublisher,
         private logger: Logger,
+        private crypto: CryptoService,
     ) {}
 
     /* ── CRUD ─────────────────────────────────────────────────────────── */
@@ -63,7 +65,7 @@ export class ATSService {
         const integration = await this.repo.create({
             company_id: params.company_id,
             platform: params.platform,
-            api_key_encrypted: params.api_key, // TODO: encrypt at rest
+            api_key_encrypted: this.crypto.encrypt(params.api_key),
             api_base_url: params.api_base_url ?? null,
             webhook_url: null,
             webhook_secret: null,
@@ -207,8 +209,10 @@ export class ATSService {
         try {
             let externalId: string | null = null;
 
+            const decryptedKey = this.crypto.decrypt(integration.api_key_encrypted);
+
             if (integration.platform === 'greenhouse') {
-                const client = new GreenhouseClient(integration.api_key_encrypted, this.logger, integration.api_base_url || undefined);
+                const client = new GreenhouseClient(decryptedKey, this.logger, integration.api_base_url || undefined);
                 const candidate = await client.createCandidate({
                     first_name: candidateData.first_name,
                     last_name: candidateData.last_name,
@@ -223,7 +227,7 @@ export class ATSService {
                 }
             } else if (integration.platform === 'lever') {
                 const config = integration.config as LeverConfig;
-                const client = new LeverClient(integration.api_key_encrypted, this.logger, config.environment);
+                const client = new LeverClient(decryptedKey, this.logger, config.environment);
                 const opportunity = await client.createOpportunity({
                     name: `${candidateData.first_name} ${candidateData.last_name}`,
                     emails: [candidateData.email],

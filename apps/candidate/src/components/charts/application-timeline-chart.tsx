@@ -241,7 +241,7 @@ export default function ApplicationTimelineChart({
         return (
             <div className="space-y-2">
                 {/* Legend */}
-                <div className="flex items-center gap-4 text-[11px]">
+                <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-1.5">
                         <span
                             className="w-2 h-2 rounded-full"
@@ -297,7 +297,7 @@ export default function ApplicationTimelineChart({
                     >
                         {TIME_PERIODS.find((p) => p.value === trendPeriod)
                             ?.label || "6M"}
-                        <i className="fa-duotone fa-regular fa-chevron-down text-[10px]"></i>
+                        <i className="fa-duotone fa-regular fa-chevron-down text-sm"></i>
                     </div>
                     <ul
                         tabIndex={0}

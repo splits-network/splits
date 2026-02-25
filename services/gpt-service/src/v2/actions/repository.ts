@@ -7,6 +7,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
+import { GptResumeDataInput } from './types';
 
 export interface RepositoryListResponse<T> {
     data: T[];
@@ -221,17 +222,66 @@ export class GptActionRepository {
     async createApplication(
         candidateId: string,
         jobId: string,
-        coverLetter?: string
+        coverLetter?: string,
+        resumeData?: GptResumeDataInput,
+        resumeSource?: 'mcp_tool' | 'custom_gpt' | 'portal_backfill',
     ): Promise<any> {
+        const insertPayload: Record<string, unknown> = {
+            candidate_id: candidateId,
+            job_id: jobId,
+            cover_letter: coverLetter,
+            stage: 'ai_review',
+        };
+
+        if (resumeData) {
+            insertPayload.resume_data = {
+                ...resumeData,
+                source: resumeSource || 'mcp_tool',
+                created_at: new Date().toISOString(),
+            };
+        }
+
         const { data, error } = await this.supabase
             .from('applications')
-            .insert({
-                candidate_id: candidateId,
-                job_id: jobId,
-                cover_letter: coverLetter,
-                stage: 'submitted',
-                submitted_at: new Date().toISOString(),
-            })
+            .insert(insertPayload)
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+
+        return data;
+    }
+
+    /**
+     * Accept a recruiter proposal and transition to AI review.
+     * Updates an existing recruiter_proposed application with candidate-provided data.
+     */
+    async acceptProposalForReview(
+        applicationId: string,
+        coverLetter?: string,
+        resumeData?: GptResumeDataInput,
+        resumeSource?: 'mcp_tool' | 'custom_gpt',
+    ): Promise<any> {
+        const updatePayload: Record<string, unknown> = {
+            stage: 'ai_review',
+            cover_letter: coverLetter,
+        };
+
+        if (resumeData) {
+            updatePayload.resume_data = {
+                ...resumeData,
+                source: resumeSource || 'mcp_tool',
+                created_at: new Date().toISOString(),
+            };
+        }
+
+        const { data, error } = await this.supabase
+            .from('applications')
+            .update(updatePayload)
+            .eq('id', applicationId)
+            .eq('stage', 'recruiter_proposed')
             .select()
             .single();
 

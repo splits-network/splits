@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface RecruiterCardProps {
     /** Recruiter name */
@@ -33,45 +33,39 @@ export function RecruiterCard({
     title,
     specialties = [],
     stats = [],
-    accent = 'coral',
-    actionLabel = 'View Profile',
+    accent = "coral",
+    actionLabel = "View Profile",
     onAction,
     onClick,
-    className = '',
+    className = "",
 }: RecruiterCardProps) {
     const initials = name
-        .split(' ')
+        .split(" ")
         .map((n) => n[0])
-        .join('');
+        .join("");
 
     return (
         <div
             className={[
                 `accent-${accent}`,
-                'border-4 p-6 text-center transition-transform hover:-translate-y-1 cursor-pointer border-accent bg-white',
+                "border-4 p-6 text-center transition-transform hover:-translate-y-1 cursor-pointer border-accent bg-white",
                 className,
             ]
                 .filter(Boolean)
-                .join(' ')}
+                .join(" ")}
             onClick={onClick}
         >
             {/* Avatar */}
-            <div
-                className="w-16 h-16 mx-auto mb-4 border-4 rounded-full flex items-center justify-center border-accent bg-accent"
-            >
+            <div className="w-16 h-16 mx-auto mb-4 border-4 rounded-full flex items-center justify-center border-accent bg-accent">
                 <span className="text-lg font-black text-on-accent">
                     {initials}
                 </span>
             </div>
 
-            <h3
-                className="text-sm font-black uppercase tracking-wide mb-0.5 text-dark"
-            >
+            <h3 className="text-sm font-black uppercase tracking-wide mb-0.5 text-dark">
                 {name}
             </h3>
-            <p className="text-sm font-semibold mb-3 text-accent">
-                {title}
-            </p>
+            <p className="text-sm font-semibold mb-3 text-accent">{title}</p>
 
             {/* Specialties */}
             {specialties.length > 0 && (
@@ -79,7 +73,7 @@ export function RecruiterCard({
                     {specialties.map((s) => (
                         <span
                             key={s}
-                            className="px-2 py-0.5 text-[10px] font-bold uppercase border-2 border-accent text-dark"
+                            className="px-2 py-0.5 text-sm font-bold uppercase border-2 border-accent text-dark"
                         >
                             {s}
                         </span>
@@ -95,9 +89,7 @@ export function RecruiterCard({
                             <p className="text-lg font-black text-accent">
                                 {stat.value}
                             </p>
-                            <p
-                                className="text-[10px] font-bold uppercase text-dark/40"
-                            >
+                            <p className="text-sm font-bold uppercase text-dark/40">
                                 {stat.label}
                             </p>
                         </div>

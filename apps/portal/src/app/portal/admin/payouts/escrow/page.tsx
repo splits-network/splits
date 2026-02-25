@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -21,12 +21,10 @@ interface EscrowHold {
     payout_id?: string;
     placement_id: string;
     hold_amount: number;
-    holdback_percentage?: number;
     hold_reason: 'guarantee_period' | 'dispute' | 'verification' | 'other';
-    release_date: string;
+    release_scheduled_date: string;
     status: 'active' | 'released' | 'cancelled';
     released_at?: string;
-    cancelled_at?: string;
     created_at: string;
     updated_at: string;
 }
@@ -88,31 +86,15 @@ export default function EscrowHoldsPage() {
     });
 
     // Load stats on mount
-    useMemo(() => {
+    useEffect(() => {
         async function loadStats() {
             try {
                 const token = await getToken();
                 if (!token) return;
                 const apiClient = createAuthenticatedClient(token);
 
-                // Get counts and totals
-                const [active, released] = await Promise.all([
-                    apiClient.get('/escrow-holds?status=active&limit=1'),
-                    apiClient.get('/escrow-holds?status=released&limit=1'),
-                ]);
-
-                // Calculate total held amount (would need aggregation endpoint)
-                const totalHeld = (active.data || []).reduce(
-                    (sum: number, hold: EscrowHold) => sum + hold.hold_amount,
-                    0
-                );
-
-                setStats({
-                    active_holds: active.pagination?.total || 0,
-                    total_held: totalHeld,
-                    due_for_release: 0, // TODO: Add date filter
-                    released_today: 0, // TODO: Add date filter
-                });
+                const response = await apiClient.get('/escrow-holds/stats');
+                setStats(response.data);
             } catch (error) {
                 console.error('Failed to load stats:', error);
             } finally {
@@ -377,15 +359,15 @@ export default function EscrowHoldsPage() {
                                                         <span
                                                             className={
                                                                 hold.status === 'active' &&
-                                                                    isDueForRelease(hold.release_date)
+                                                                    isDueForRelease(hold.release_scheduled_date)
                                                                     ? 'text-warning font-semibold'
                                                                     : ''
                                                             }
                                                         >
-                                                            {new Date(hold.release_date).toLocaleDateString()}
+                                                            {new Date(hold.release_scheduled_date).toLocaleDateString()}
                                                         </span>
                                                         {hold.status === 'active' &&
-                                                            isDueForRelease(hold.release_date) && (
+                                                            isDueForRelease(hold.release_scheduled_date) && (
                                                                 <span className="badge badge-warning badge-xs mt-1">
                                                                     Due now
                                                                 </span>
@@ -428,10 +410,10 @@ export default function EscrowHoldsPage() {
                                                                 {new Date(hold.released_at).toLocaleDateString()}
                                                             </span>
                                                         )}
-                                                        {hold.status === 'cancelled' && hold.cancelled_at && (
+                                                        {hold.status === 'cancelled' && (
                                                             <span className="text-xs text-base-content/60">
                                                                 Cancelled{' '}
-                                                                {new Date(hold.cancelled_at).toLocaleDateString()}
+                                                                {new Date(hold.updated_at).toLocaleDateString()}
                                                             </span>
                                                         )}
                                                     </div>

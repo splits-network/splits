@@ -99,6 +99,15 @@ export class ApplicationServiceV2 {
             application.ai_review = await this.repository.getAIReviewForApplication(id);
         }
 
+        // Enrich company sourcer (company_sourcers table replaced by recruiter_companies)
+        const companyId = application.job?.company?.id;
+        if (companyId) {
+            const companySourcer = await this.repository.getCompanySourcer(companyId);
+            if (companySourcer) {
+                application.company_sourcer = companySourcer;
+            }
+        }
+
         return application;
     }
 
@@ -258,8 +267,16 @@ export class ApplicationServiceV2 {
         if (updates.stage && updates.stage !== currentApplication.stage) {
             await this.validateStageTransition(
                 currentApplication.stage,
-                updates.stage
+                updates.stage,
+                currentApplication
             );
+        }
+
+        // Auto-set submitted_at when transitioning to a submission stage for the first time
+        // Note: recruiter_proposed is excluded — that's a recruiter suggesting a role TO the candidate, not a submission
+        const SUBMISSION_STAGES = ['submitted', 'recruiter_review'];
+        if (updates.stage && SUBMISSION_STAGES.includes(updates.stage) && !currentApplication.submitted_at) {
+            persistedUpdates.submitted_at = new Date().toISOString();
         }
 
         // Validate rejection has decline reason or details
@@ -387,8 +404,13 @@ export class ApplicationServiceV2 {
      */
     private async validateStageTransition(
         fromStage: string,
-        toStage: string
+        toStage: string,
+        application?: { expired_at?: string | null }
     ): Promise<void> {
+        // Block transitions on expired applications
+        if (application?.expired_at) {
+            throw new Error('Cannot transition an expired application. Reactivate it first.');
+        }
         // Withdrawn is always allowed from active stages (candidate self-service)
         if (toStage === 'withdrawn') {
             return;
@@ -397,7 +419,7 @@ export class ApplicationServiceV2 {
         // Draft is allowed from most active stages (candidate back-to-draft, recruiter request changes)
         if (toStage === 'draft') {
             // Cannot go back to draft from terminal stages
-            if (['hired', 'withdrawn', 'expired'].includes(fromStage)) {
+            if (['hired', 'withdrawn'].includes(fromStage)) {
                 throw new Error(
                     `Invalid stage transition: ${fromStage} -> ${toStage}`
                 );
@@ -409,7 +431,7 @@ export class ApplicationServiceV2 {
         // Recruiter can request changes/info from candidate at any active stage
         if (toStage === 'recruiter_request') {
             // Cannot request from terminal stages
-            if (['hired', 'rejected', 'withdrawn', 'expired'].includes(fromStage)) {
+            if (['hired', 'rejected', 'withdrawn'].includes(fromStage)) {
                 throw new Error(
                     `Invalid stage transition: ${fromStage} -> ${toStage}`
                 );
@@ -441,7 +463,6 @@ export class ApplicationServiceV2 {
             hired: [], // Terminal state - cannot transition further
             rejected: [], // Terminal state - cannot transition further
             withdrawn: [], // Terminal state - cannot transition further
-            expired: [], // Terminal state - cannot transition further
         };
 
         if (!allowedTransitions[fromStage]?.includes(toStage)) {
@@ -660,6 +681,7 @@ export class ApplicationServiceV2 {
         // Update to appropriate stage
         const updated = await this.repository.updateApplication(applicationId, {
             stage: nextStage,
+            submitted_at: new Date().toISOString(),
         });
 
         // Resolve user context early (needed for proposed_by UUID)
@@ -1085,6 +1107,61 @@ export class ApplicationServiceV2 {
                 candidate_recruiter_id: application.candidate_recruiter_id,
                 declined_by: userContext.identityUserId,
                 reason: reason || null,
+            });
+        }
+
+        return updated;
+    }
+
+    /**
+     * Reactivate an expired application.
+     * Clears expired_at and last_warning_sent_at, publishes reactivated event.
+     * Only the owning recruiter or a platform admin can reactivate.
+     */
+    async reactivateApplication(applicationId: string, clerkUserId: string): Promise<any> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        if (!application.expired_at) {
+            throw new Error('Application is not expired');
+        }
+
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+
+        // Access control: owning recruiter or platform admin
+        const isOwningRecruiter = userContext.recruiterId && userContext.recruiterId === application.candidate_recruiter_id;
+        if (!isOwningRecruiter && !userContext.isPlatformAdmin) {
+            throw new Error('Only the owning recruiter or a platform admin can reactivate this application');
+        }
+
+        const updated = await this.repository.updateApplication(applicationId, {
+            expired_at: null,
+            last_warning_sent_at: null,
+        } as any);
+
+        // Create audit log entry
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'reactivated',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: userContext.isPlatformAdmin ? 'admin' : 'recruiter',
+            old_value: { expired_at: application.expired_at },
+            new_value: { expired_at: null },
+            metadata: {
+                reactivated_from_stage: application.stage,
+            },
+        });
+
+        // Publish reactivated event
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('application.reactivated', {
+                application_id: applicationId,
+                job_id: application.job_id,
+                candidate_id: application.candidate_id,
+                candidate_recruiter_id: application.candidate_recruiter_id,
+                reactivated_from_stage: application.stage,
             });
         }
 

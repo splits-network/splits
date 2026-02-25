@@ -118,14 +118,14 @@ export function MembersSection({
 
                             {/* Role badge */}
                             <span
-                                className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberRoleColor(member.role)}`}
+                                className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberRoleColor(member.role)}`}
                             >
                                 {formatMemberRole(member.role)}
                             </span>
 
                             {/* Status badge */}
                             <span
-                                className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberStatusColor(member.status)}`}
+                                className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberStatusColor(member.status)}`}
                             >
                                 {formatMemberStatus(member.status)}
                             </span>

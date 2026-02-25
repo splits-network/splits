@@ -38,20 +38,22 @@ export function SplitItem({
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                     {isNew(candidate) && (
-                        <i className="fa-duotone fa-regular fa-star text-primary text-[10px] flex-shrink-0" />
+                        <i className="fa-duotone fa-regular fa-star text-primary text-sm flex-shrink-0" />
                     )}
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {candidateName(candidate)}
                     </h4>
                     <span
-                        className={`inline-flex items-center px-1.5 py-px text-[10px] font-semibold flex-shrink-0 ${statusColor(
+                        className={`inline-flex items-center px-1.5 py-px text-sm font-semibold flex-shrink-0 ${statusColor(
                             candidate.verification_status,
                         )}`}
                     >
-                        {formatVerificationStatus(candidate.verification_status)}
+                        {formatVerificationStatus(
+                            candidate.verification_status,
+                        )}
                     </span>
                 </div>
-                <span className="text-[10px] font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
+                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {addedAgo(candidate)}
                 </span>
             </div>
@@ -62,7 +64,7 @@ export function SplitItem({
                     {title || "No title"}
                 </span>
                 {candidate.location && (
-                    <span className="text-[10px] text-base-content/40 flex-shrink-0 truncate max-w-[40%]">
+                    <span className="text-sm text-base-content/40 flex-shrink-0 truncate max-w-[40%]">
                         <i className="fa-duotone fa-regular fa-location-dot mr-0.5" />
                         {candidate.location}
                     </span>
@@ -74,11 +76,11 @@ export function SplitItem({
                 <span className="text-xs font-bold text-base-content/60">
                     {salaryDisplay(candidate) || "Not specified"}
                 </span>
-                <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                <span className="text-sm font-bold text-accent uppercase tracking-wider">
                     {formatJobType(candidate.desired_job_type)}
                 </span>
                 {candidate.open_to_remote && (
-                    <span className="text-[10px] text-base-content/40">
+                    <span className="text-sm text-base-content/40">
                         <i className="fa-duotone fa-regular fa-wifi mr-0.5" />
                         Remote
                     </span>
@@ -86,7 +88,10 @@ export function SplitItem({
             </div>
 
             {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="absolute bottom-2 right-2"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <CandidateActionsToolbar
                     candidate={candidate}
                     variant="icon-only"

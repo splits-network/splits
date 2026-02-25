@@ -105,7 +105,7 @@ export function RoleStep({ selectedRole, actions }: RoleStepProps) {
                                             {role.title}
                                         </h3>
                                         {role.badge && (
-                                            <span className="badge badge-primary badge-sm text-[10px]">
+                                            <span className="badge badge-primary badge-sm text-sm">
                                                 {role.badge}
                                             </span>
                                         )}
@@ -119,7 +119,7 @@ export function RoleStep({ selectedRole, actions }: RoleStepProps) {
                                                 key={b}
                                                 className="flex items-center gap-2 text-xs text-base-content/60"
                                             >
-                                                <i className="fa-solid fa-check text-success text-[10px]" />
+                                                <i className="fa-solid fa-check text-success text-sm" />
                                                 {b}
                                             </li>
                                         ))}

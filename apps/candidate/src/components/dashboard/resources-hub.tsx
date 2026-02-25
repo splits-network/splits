@@ -64,7 +64,7 @@ export default function ResourcesHub({ compact = false }: ResourcesHubProps) {
                                     {resource.title}
                                 </div>
                             </div>
-                            <i className="fa-duotone fa-regular fa-chevron-right text-[10px] text-base-content/30"></i>
+                            <i className="fa-duotone fa-regular fa-chevron-right text-sm text-base-content/30"></i>
                         </div>
                     </Link>
                 ))}

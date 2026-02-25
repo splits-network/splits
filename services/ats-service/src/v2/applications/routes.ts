@@ -246,6 +246,29 @@ export function registerApplicationRoutes(
     });
 
     /**
+     * POST /api/v2/applications/:id/reactivate
+     * Reactivate an expired application (clears expired_at)
+     */
+    app.post('/api/v2/applications/:id/reactivate', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+
+            request.log.info({ applicationId: id, clerkUserId }, 'Reactivating expired application');
+
+            const application = await config.applicationService.reactivateApplication(id, clerkUserId);
+            return reply.send({ data: application });
+        } catch (error: any) {
+            request.log.error({ error: error.message, applicationId: request.params }, 'Failed to reactivate application');
+            const code = error.message.includes('not found') ? 404
+                : error.message.includes('not expired') ? 400
+                : error.message.includes('Only the owning') ? 403
+                : 400;
+            return reply.code(code).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
      * POST /api/v2/applications/:id/hire
      * Hire a candidate — updates application to 'hired' and creates placement record
      */

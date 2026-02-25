@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: clamav
+    namespace: splits-network
+    labels:
+        app: clamav
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: clamav
+    template:
+        metadata:
+            labels:
+                app: clamav
+        spec:
+            containers:
+                - name: clamav
+                  image: clamav/clamav:latest
+                  ports:
+                      - containerPort: 3310
+                        name: clamd
+                  resources:
+                      requests:
+                          memory: "1Gi"
+                          cpu: "500m"
+                      limits:
+                          memory: "2Gi"
+                          cpu: "1000m"
+                  livenessProbe:
+                      exec:
+                          command:
+                              - clamdscan
+                              - --ping
+                              - "1"
+                      initialDelaySeconds: 60
+                      periodSeconds: 30
+                  readinessProbe:
+                      exec:
+                          command:
+                              - clamdscan
+                              - --ping
+                              - "1"
+                      initialDelaySeconds: 30
+                      periodSeconds: 10

@@ -8,12 +8,10 @@ interface EscrowHold {
     payout_id?: string;
     placement_id: string;
     hold_amount: number;
-    holdback_percentage?: number;
     hold_reason: "guarantee_period" | "dispute" | "verification" | "other";
-    release_date: string;
+    release_scheduled_date: string;
     status: "active" | "released" | "cancelled";
     released_at?: string;
-    cancelled_at?: string;
     created_at: string;
     updated_at: string;
 }
@@ -102,19 +100,11 @@ export function ReleaseModal({ hold, onClose, onConfirm }: ReleaseModalProps) {
                                     </div>
                                     <div>
                                         <p className="text-sm text-base-content/60">
-                                            Holdback Percentage
-                                        </p>
-                                        <p className="font-semibold">
-                                            {hold.holdback_percentage}%
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-base-content/60">
                                             Scheduled Release
                                         </p>
                                         <p>
                                             {new Date(
-                                                hold.release_date,
+                                                hold.release_scheduled_date,
                                             ).toLocaleDateString()}
                                         </p>
                                     </div>

@@ -27,17 +27,19 @@ export function aiScore(application: Application): number | null {
 }
 
 export function submittedDateLabel(application: Application): string {
-    if (!application.created_at) return "";
-    return new Date(application.created_at).toLocaleDateString(undefined, {
+    const date = application.submitted_at || application.created_at;
+    if (!date) return "";
+    return new Date(date).toLocaleDateString(undefined, {
         month: "short",
         day: "numeric",
     });
 }
 
 export function addedAgo(application: Application): string {
-    if (!application.created_at) return "Recently";
+    const date = application.submitted_at || application.created_at;
+    if (!date) return "Recently";
 
-    const created = new Date(application.created_at).getTime();
+    const created = new Date(date).getTime();
     const diffMs = Date.now() - created;
     const dayMs = 1000 * 60 * 60 * 24;
     const days = Math.max(0, Math.floor(diffMs / dayMs));
@@ -55,8 +57,9 @@ export function addedAgo(application: Application): string {
 }
 
 export function isNew(application: Application): boolean {
-    if (!application.created_at) return false;
-    const created = new Date(application.created_at).getTime();
+    const date = application.submitted_at || application.created_at;
+    if (!date) return false;
+    const created = new Date(date).getTime();
     const diffMs = Date.now() - created;
     return diffMs < 1000 * 60 * 60 * 24 * 7;
 }

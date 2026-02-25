@@ -26,12 +26,16 @@ export class ReputationRepository {
             placementsResult,
             collaborationsResult,
             responseTimeResult,
+            expiredInRecruiterStages,
+            reachedScreen,
         ] = await Promise.all([
             this.countSubmissions(recruiterId),
             this.countHires(recruiterId),
             this.getPlacementCounts(recruiterId),
             this.countCollaborations(recruiterId),
             this.calculateAvgResponseTime(recruiterId),
+            this.countExpiredInRecruiterStages(recruiterId),
+            this.countReachedScreen(recruiterId),
         ]);
 
         return {
@@ -40,6 +44,8 @@ export class ReputationRepository {
             ...placementsResult,
             total_collaborations: collaborationsResult,
             avg_response_time_hours: responseTimeResult,
+            total_expired_in_recruiter_stages: expiredInRecruiterStages,
+            total_reached_screen: reachedScreen,
         };
     }
 
@@ -237,6 +243,53 @@ export class ReputationRepository {
     }
 
     /**
+     * Count applications that expired while in recruiter-owned stages (screen).
+     */
+    private async countExpiredInRecruiterStages(recruiterId: string): Promise<number> {
+        const { count, error } = await this.supabase
+            .from('applications')
+            .select('*', { count: 'exact', head: true })
+            .eq('candidate_recruiter_id', recruiterId)
+            .not('expired_at', 'is', null)
+            .eq('stage', 'screen');
+
+        if (error) throw error;
+        return count || 0;
+    }
+
+    /**
+     * Count applications that reached the 'screen' stage at some point.
+     * Uses application_audit_log to find stage transitions to 'screen'.
+     */
+    private async countReachedScreen(recruiterId: string): Promise<number> {
+        // Get application IDs for this recruiter
+        const { data: applications, error: appError } = await this.supabase
+            .from('applications')
+            .select('id')
+            .eq('candidate_recruiter_id', recruiterId);
+
+        if (appError) throw appError;
+        if (!applications || applications.length === 0) return 0;
+
+        const applicationIds = applications.map((a) => a.id);
+
+        // Count distinct applications that had a stage change to 'screen'
+        const { data: auditLogs, error: auditError } = await this.supabase
+            .from('application_audit_log')
+            .select('application_id')
+            .in('application_id', applicationIds)
+            .eq('action', 'stage_changed')
+            .filter('new_value->>stage', 'eq', 'screen');
+
+        if (auditError) throw auditError;
+        if (!auditLogs) return 0;
+
+        // Count distinct application IDs
+        const uniqueApplicationIds = new Set(auditLogs.map((l) => l.application_id));
+        return uniqueApplicationIds.size;
+    }
+
+    /**
      * Get the current reputation record for a recruiter.
      */
     async getReputation(recruiterId: string): Promise<RecruiterReputation | null> {
@@ -282,6 +335,11 @@ export class ReputationRepository {
                 ? (metrics.total_collaborations / metrics.total_placements) * 100
                 : null;
 
+        const pipelineReliabilityRate =
+            metrics.total_reached_screen > 0
+                ? ((1 - metrics.total_expired_in_recruiter_stages / metrics.total_reached_screen) * 100)
+                : null;
+
         const { data, error } = await this.supabase
             .from('recruiter_reputation')
             .upsert(
@@ -297,6 +355,8 @@ export class ReputationRepository {
                     total_collaborations: metrics.total_collaborations,
                     collaboration_rate: collaborationRate,
                     avg_response_time_hours: metrics.avg_response_time_hours,
+                    total_expired_in_recruiter_stages: metrics.total_expired_in_recruiter_stages,
+                    pipeline_reliability_rate: pipelineReliabilityRate,
                     reputation_score: finalScore,
                     last_calculated_at: now,
                     updated_at: now,

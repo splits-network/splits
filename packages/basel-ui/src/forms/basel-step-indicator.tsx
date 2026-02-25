@@ -85,7 +85,7 @@ export function BaselStepIndicator({
                                 }`}
                             >
                                 {i < currentStep ? (
-                                    <i className="fa-duotone fa-regular fa-check text-[10px]" />
+                                    <i className="fa-duotone fa-regular fa-check text-sm" />
                                 ) : (
                                     step.num
                                 )}

@@ -97,7 +97,7 @@ export function useAdminStats(): UseAdminStatsReturn {
                 client.get("/stats?scope=platform&range=all"),
                 client.get("/recruiters?status=pending&limit=1"),
                 client.get("/fraud-signals?status=active&limit=1"),
-                client.get("/payouts?status=pending&limit=1"),
+                client.get("/payout-transactions?status=pending&limit=1"),
                 client.get("/escrow-holds?status=active&limit=1"),
             ]);
 

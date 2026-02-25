@@ -4,17 +4,19 @@ import { ATSService, SetupATSParams } from './service';
 import { IEventPublisher } from '../shared/events';
 import { requireUserContext } from '../shared/helpers';
 import { Logger } from '@splits-network/shared-logging';
+import { CryptoService } from '@splits-network/shared-config/src/crypto';
 
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
     eventPublisher: IEventPublisher;
     logger: Logger;
+    crypto: CryptoService;
 }
 
 export async function registerATSRoutes(app: FastifyInstance, config: RegisterConfig) {
     const repo = new ATSRepository(config.supabaseUrl, config.supabaseKey);
-    const service = new ATSService(repo, config.eventPublisher, config.logger);
+    const service = new ATSService(repo, config.eventPublisher, config.logger, config.crypto);
 
     // GET /api/v2/integrations/ats?company_id=...
     app.get('/api/v2/integrations/ats', async (request, reply) => {

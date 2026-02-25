@@ -126,7 +126,7 @@ export default function CreateInvitationModal({
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
-                    <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-secondary mb-1">
+                    <p className="text-sm uppercase tracking-[0.2em] font-bold text-secondary mb-1">
                         {createdInvitation ? "Success" : "New Invitation"}
                     </p>
                     <h3 className="text-xl font-black tracking-tight">
@@ -155,7 +155,7 @@ export default function CreateInvitationModal({
 
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <fieldset className="fieldset">
-                                    <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Company Name
                                     </legend>
                                     <input
@@ -175,7 +175,7 @@ export default function CreateInvitationModal({
                                 </fieldset>
 
                                 <fieldset className="fieldset">
-                                    <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Email Address
                                     </legend>
                                     <input
@@ -195,7 +195,7 @@ export default function CreateInvitationModal({
                                 </fieldset>
 
                                 <fieldset className="fieldset">
-                                    <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                    <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                                         Personal Message
                                     </legend>
                                     <textarea
@@ -264,7 +264,7 @@ export default function CreateInvitationModal({
 
                             {/* Invite Code */}
                             <div className="bg-base-200 border-2 border-base-300 p-4 mb-4">
-                                <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
+                                <label className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
                                     Invite Code
                                 </label>
                                 <div className="flex items-center gap-2">
@@ -284,7 +284,7 @@ export default function CreateInvitationModal({
 
                             {/* Invite Link */}
                             <div className="bg-base-200 border-2 border-base-300 p-4 mb-6">
-                                <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
+                                <label className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
                                     Invite Link
                                 </label>
                                 <div className="flex items-center gap-2">

@@ -67,7 +67,7 @@ export function BaselTimelineItem({
                     )}
                 </div>
                 <p className="text-sm text-base-content/60">{action}</p>
-                <p className="text-[10px] text-base-content/30 mt-1">{time}</p>
+                <p className="text-sm text-base-content/30 mt-1">{time}</p>
             </div>
         </div>
     );

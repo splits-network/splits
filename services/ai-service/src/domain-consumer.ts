@@ -74,26 +74,34 @@ export class DomainEventConsumer {
                 }
 
                 try {
-                    const event: DomainEvent = JSON.parse(msg.content.toString());
+                    const rawEvent = JSON.parse(msg.content.toString());
+                    const payload = rawEvent.payload ?? rawEvent;
+                    const normalizedEvent: DomainEvent = {
+                        event_type: rawEvent.event_type ?? msg.fields.routingKey,
+                        event_id: rawEvent.event_id ?? rawEvent.id ?? msg.properties.messageId ?? 'unknown',
+                        timestamp: rawEvent.timestamp ?? new Date().toISOString(),
+                        source_service: rawEvent.source_service ?? 'unknown',
+                        payload
+                    };
 
                     this.logger.info({
-                        event_type: event.event_type,
-                        event_id: event.event_id,
+                        event_type: normalizedEvent.event_type,
+                        event_id: normalizedEvent.event_id,
                         payload_summary: {
-                            application_id: event.payload.application_id,
-                            document_id: event.payload.document_id,
-                            stage: event.payload.stage || event.payload.new_stage,
+                            application_id: payload?.application_id,
+                            document_id: payload?.document_id,
+                            stage: payload?.stage || payload?.new_stage,
                         }
                     }, 'Received event');
 
-                    await this.handleEvent(event);
+                    await this.handleEvent(normalizedEvent);
 
                     // Acknowledge message after successful processing
                     this.channel?.ack(msg);
 
                     this.logger.info({
-                        event_type: event.event_type,
-                        event_id: event.event_id
+                        event_type: normalizedEvent.event_type,
+                        event_id: normalizedEvent.event_id
                     }, 'Event processed successfully');
 
                 } catch (error) {

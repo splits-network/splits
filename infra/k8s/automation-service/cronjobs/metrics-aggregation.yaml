@@ -1,0 +1,94 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: metrics-aggregation
+  namespace: splits-network
+  labels:
+    app: automation-service
+    component: cron
+    feature: metrics
+    managed-by: splits-network
+spec:
+  # Run daily at 3 AM UTC (before reputation recalculation at 4 AM)
+  schedule: "0 3 * * *"
+
+  # Keep history of successful/failed jobs for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+
+  # Prevent overlapping runs
+  concurrencyPolicy: Forbid
+
+  suspend: false
+
+  jobTemplate:
+    metadata:
+      labels:
+        app: automation-service
+        component: cron-job
+        feature: metrics
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 600
+
+      template:
+        metadata:
+          labels:
+            app: automation-service
+            component: cron-job
+            feature: metrics
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "9090"
+            prometheus.io/path: "/metrics"
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: automation-service
+
+          containers:
+          - name: metrics-aggregator
+            image: splits-network/automation-service:latest
+            imagePullPolicy: Always
+
+            command: ["node"]
+            args: ["dist/jobs/metrics-aggregation.js"]
+
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "256Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
+
+            env:
+              - name: NODE_ENV
+                value: "production"
+
+              - name: SUPABASE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: supabase-credentials
+                    key: url
+
+              - name: SUPABASE_SERVICE_ROLE_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: supabase-credentials
+                    key: service-role-key
+
+              - name: SERVICE_NAME
+                value: "automation-service"
+
+              - name: SERVICE_VERSION
+                value: "1.0.0"
+
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL

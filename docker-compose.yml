@@ -1,5 +1,18 @@
 services:
   # Infrastructure Services
+  clamav:
+    image: clamav/clamav:latest
+    container_name: splits-clamav
+    ports:
+      - "3310:3310"
+    networks:
+      - splits-network
+    healthcheck:
+      test: ["CMD", "clamdscan", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   redis:
     image: redis:7-alpine
     container_name: splits-redis
@@ -162,6 +175,7 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      SYSTEM_USER_ID: "00000000-0000-0000-0000-000000000000"
     volumes:
       - ./services/billing-service/src:/app/services/billing-service/src
       - ./packages:/app/packages

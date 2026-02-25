@@ -191,6 +191,13 @@ const navItems: NavItemData[] = [
         shortcut: "U",
     },
     {
+        href: "/portal/integrations",
+        label: "Integrations",
+        icon: "fa-duotone fa-regular fa-plug",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "settings",
+    },
+    {
         href: "/portal/company/settings",
         label: "Company",
         icon: "fa-duotone fa-regular fa-building",
@@ -449,7 +456,7 @@ export function Sidebar() {
             className="flex items-center gap-2 text-neutral-content/30 hover:text-neutral-content/50 transition-colors"
         >
             <i className="fa-duotone fa-regular fa-keyboard text-xs" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.15em]">
+            <span className="text-sm font-bold uppercase tracking-[0.15em]">
                 Keyboard Shortcuts
             </span>
         </button>

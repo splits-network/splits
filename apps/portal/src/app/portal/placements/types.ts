@@ -9,7 +9,7 @@ export interface Collaborator {
     id: string;
     placement_id: string;
     recruiter_user_id: string;
-    role: "sourcer" | "submitter" | "closer" | "support";
+    role: "candidate_sourcer" | "company_sourcer" | "candidate_recruiter" | "company_recruiter" | "job_owner" | "sourcer" | "submitter" | "closer" | "support";
     split_percentage: number;
     split_amount: number;
     notes?: string;

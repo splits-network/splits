@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Applications</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
+    padding: 16px;
+    line-height: 1.5;
+  }
+  .loading { text-align: center; padding: 40px; color: var(--color-text-secondary, #666); }
+  .empty { text-align: center; padding: 40px; color: var(--color-text-secondary, #666); }
+  .app-list { display: flex; flex-direction: column; gap: 8px; }
+  .app-card {
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid var(--color-border-primary, #e5e5e5);
+    border-radius: var(--border-radius-md, 8px);
+    padding: 12px 16px;
+  }
+  .app-info { flex: 1; min-width: 0; }
+  .app-title {
+    font-size: var(--font-text-md-size, 15px);
+    font-weight: var(--font-weight-semibold, 600);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .app-company {
+    font-size: var(--font-text-sm-size, 13px);
+    color: var(--color-text-secondary, #666);
+  }
+  .app-dates {
+    font-size: var(--font-text-xs-size, 11px);
+    color: var(--color-text-tertiary, #999);
+    margin-top: 2px;
+  }
+  .status-badge {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: var(--border-radius-sm, 4px);
+    font-size: var(--font-text-xs-size, 11px);
+    font-weight: var(--font-weight-semibold, 600);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .status-submitted { background: var(--color-background-info, #dbeafe); color: var(--color-text-info, #1e40af); }
+  .status-review { background: var(--color-background-warning, #fef3c7); color: var(--color-text-warning, #92400e); }
+  .status-interview { background: #f0fdf4; color: #166534; }
+  .status-offer { background: var(--color-background-success, #dcfce7); color: var(--color-text-success, #166534); }
+  .status-hired { background: var(--color-background-success, #dcfce7); color: var(--color-text-success, #166534); }
+  .status-rejected { background: var(--color-background-danger, #fef2f2); color: var(--color-text-danger, #991b1b); }
+  .status-withdrawn { background: var(--color-background-secondary, #f5f5f5); color: var(--color-text-secondary, #666); }
+  .pagination {
+    display: flex; justify-content: center; align-items: center; gap: 12px;
+    margin-top: 16px;
+    font-size: var(--font-text-sm-size, 13px);
+    color: var(--color-text-secondary, #666);
+  }
+  .page-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--color-border-primary, #e5e5e5);
+    border-radius: var(--border-radius-sm, 4px);
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
+    cursor: pointer;
+    font-size: var(--font-text-sm-size, 13px);
+  }
+  .page-btn:hover { background: var(--color-background-secondary, #f5f5f5); }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading">Loading applications...</div></div>
+
+<script>
+(function() {
+  const root = document.getElementById('root');
+
+  const STATUS_CLASS = {
+    'Submitted': 'status-submitted',
+    'Under Review': 'status-review',
+    'Screening': 'status-review',
+    'Interviewing': 'status-interview',
+    'Offer Received': 'status-offer',
+    'Hired': 'status-hired',
+    'Not Selected': 'status-rejected',
+    'Withdrawn': 'status-withdrawn',
+    'Draft': 'status-withdrawn',
+    'Recruiter Proposed': 'status-review',
+    'Changes Requested': 'status-review',
+  };
+
+  window.addEventListener('message', (event) => {
+    const msg = event.data;
+    if (!msg || typeof msg !== 'object') return;
+
+    if (msg.method === 'ui/notifications/tool-result' && msg.params?.structuredContent) {
+      render(msg.params.structuredContent);
+    }
+
+    if (msg.method === 'ui/notifications/tool-input') {
+      root.innerHTML = '<div class="loading">Loading applications...</div>';
+    }
+  });
+
+  function render(data) {
+    if (!data?.applications) {
+      root.innerHTML = '<div class="empty">No application data.</div>';
+      return;
+    }
+
+    const { applications, pagination } = data;
+
+    if (applications.length === 0) {
+      root.innerHTML = '<div class="empty">No applications found. Search for jobs to get started!</div>';
+      return;
+    }
+
+    let html = '<div class="app-list">';
+    for (const app of applications) {
+      const statusClass = STATUS_CLASS[app.status_label] || 'status-submitted';
+      html += `
+        <div class="app-card">
+          <div class="app-info">
+            <div class="app-title">${esc(app.job_title)}</div>
+            <div class="app-company">${esc(app.company_name)}</div>
+            <div class="app-dates">Applied ${esc(app.applied_date)} &middot; Updated ${esc(app.last_updated)}</div>
+          </div>
+          <span class="status-badge ${statusClass}">${esc(app.status_label)}</span>
+        </div>`;
+    }
+    html += '</div>';
+
+    if (pagination && pagination.total_pages > 1) {
+      html += `
+        <div class="pagination">
+          <button class="page-btn" onclick="loadPage(${pagination.page - 1})" ${pagination.page <= 1 ? 'disabled' : ''}>Previous</button>
+          <span>Page ${pagination.page} of ${pagination.total_pages}</span>
+          <button class="page-btn" onclick="loadPage(${pagination.page + 1})" ${pagination.page >= pagination.total_pages ? 'disabled' : ''}>Next</button>
+        </div>`;
+    }
+
+    root.innerHTML = html;
+  }
+
+  window.loadPage = function(page) {
+    window.parent.postMessage({
+      jsonrpc: '2.0', id: Date.now(),
+      method: 'tools/call',
+      params: { name: 'get_applications', arguments: { page } },
+    }, '*');
+  };
+
+  function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+})();
+</script>
+</body>
+</html>

@@ -91,8 +91,7 @@ export default function AcceptInvitationClient({
                 const invitation = response.data;
 
                 if (
-                    userEmail.toLowerCase() !==
-                    invitation.email?.toLowerCase()
+                    userEmail.toLowerCase() !== invitation.email?.toLowerCase()
                 ) {
                     setEmailMismatch(true);
                 }
@@ -309,13 +308,13 @@ export default function AcceptInvitationClient({
     const invitationDetails = (
         <div className="space-y-3 mb-6">
             <div className="bg-base-200 p-4">
-                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                <span className="text-sm uppercase tracking-widest text-base-content/40">
                     Organization
                 </span>
                 <p className="text-lg font-bold mt-1">{orgName}</p>
             </div>
             <div className="bg-base-200 p-4">
-                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                <span className="text-sm uppercase tracking-widest text-base-content/40">
                     Your Role
                 </span>
                 <p className="mt-1">
@@ -323,7 +322,7 @@ export default function AcceptInvitationClient({
                 </p>
             </div>
             <div className="bg-base-200 p-4">
-                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                <span className="text-sm uppercase tracking-widest text-base-content/40">
                     Invitation Expires
                 </span>
                 <p className="text-sm font-semibold mt-1">
@@ -406,8 +405,9 @@ export default function AcceptInvitationClient({
                     Wrong Account
                 </h1>
                 <p className="text-base-content/60 mb-8 leading-relaxed max-w-sm mx-auto">
-                    This invitation was sent to a different email address. Please
-                    sign in with the account that received the invitation.
+                    This invitation was sent to a different email address.
+                    Please sign in with the account that received the
+                    invitation.
                 </p>
                 <div className="flex flex-col gap-3 max-w-xs mx-auto">
                     <a

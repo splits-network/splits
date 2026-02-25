@@ -18,7 +18,7 @@ export function BaselTooltip({
     return (
         <div className="bg-base-100 border border-base-content/15 px-4 py-3">
             {label && (
-                <p className="text-[11px] font-semibold text-base-content/50 mb-2 uppercase tracking-wider">
+                <p className="text-sm font-semibold text-base-content/50 mb-2 uppercase tracking-wider">
                     {label}
                 </p>
             )}

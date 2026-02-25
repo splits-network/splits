@@ -98,7 +98,13 @@ export default function CandidateDashboard({
                 gsap.fromTo(
                     urgency,
                     { opacity: 0, y: -20 },
-                    { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        ease: "power3.out",
+                        clearProps: "transform",
+                    },
                 );
             }
 
@@ -261,7 +267,8 @@ export default function CandidateDashboard({
                                     : `You have ${pendingInvitations.length} pending recruiter invitations`}
                             </p>
                             <p className="text-xs text-base-content/60 mt-0.5">
-                                Review and respond to get started with your recruiter
+                                Review and respond to get started with your
+                                recruiter
                             </p>
                         </div>
                         <div className="flex gap-2 flex-shrink-0">
@@ -273,7 +280,8 @@ export default function CandidateDashboard({
                                 >
                                     {pendingInvitations.length === 1
                                         ? "Review Invitation"
-                                        : inv.recruiter_name?.split(" ")[0] || "Review"}
+                                        : inv.recruiter_name?.split(" ")[0] ||
+                                          "Review"}
                                 </Link>
                             ))}
                         </div>
@@ -335,7 +343,7 @@ export default function CandidateDashboard({
                                             {kpi.label}
                                         </div>
                                         {kpi.description && (
-                                            <div className="text-[10px] text-base-content/30 mt-1">
+                                            <div className="text-sm text-base-content/30 mt-1">
                                                 {kpi.description}
                                             </div>
                                         )}
@@ -539,7 +547,7 @@ export default function CandidateDashboard({
                                                         <div className="font-semibold text-base-content truncate">
                                                             {rel.recruiter_name}
                                                         </div>
-                                                        <div className="text-[10px] text-base-content/40">
+                                                        <div className="text-sm text-base-content/40">
                                                             Since{" "}
                                                             {formatDate(
                                                                 rel.relationship_start_date,
@@ -547,7 +555,7 @@ export default function CandidateDashboard({
                                                         </div>
                                                     </div>
                                                     <span
-                                                        className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ${statusClasses}`}
+                                                        className={`text-sm font-bold uppercase tracking-wider px-2 py-0.5 ${statusClasses}`}
                                                     >
                                                         {expiresSoon
                                                             ? "Expires Soon"

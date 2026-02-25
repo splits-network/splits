@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useRef, useMemo, useCallback, useEffect, Suspense } from "react";
+import {
+    useState,
+    useRef,
+    useMemo,
+    useCallback,
+    useEffect,
+    Suspense,
+} from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useStandardList } from "@/hooks/use-standard-list";
 import { PaginationControls } from "@/components/standard-lists/pagination-controls";
@@ -119,14 +126,9 @@ function JobsPageInner() {
 
     /* -- Handlers -- */
 
-    const handleSelect = useCallback(
-        (job: Job) => {
-            setSelectedJobId((prev) =>
-                prev === job.id ? null : job.id,
-            );
-        },
-        [],
-    );
+    const handleSelect = useCallback((job: Job) => {
+        setSelectedJobId((prev) => (prev === job.id ? null : job.id));
+    }, []);
 
     const handleViewModeChange = useCallback(
         (mode: ViewMode) => {
@@ -254,7 +256,7 @@ export default function JobsBaselPage() {
                 <div className="min-h-screen bg-base-100 flex items-center justify-center">
                     <div className="text-center">
                         <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                        <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                             Loading opportunities...
                         </span>
                     </div>

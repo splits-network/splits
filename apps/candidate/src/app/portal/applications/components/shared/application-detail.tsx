@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import {
     ApplicationNotesPanel,
@@ -9,6 +11,8 @@ import {
     type CreateNoteData,
 } from "@splits-network/shared-ui";
 import type { ApplicationNote } from "@splits-network/shared-types";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
 import { formatDate } from "@/lib/utils";
 import type { Application, ApplicationDocument } from "../../types";
 import { stageColor } from "./status-color";
@@ -38,6 +42,9 @@ export function ApplicationDetail({
 }) {
     const { user } = useUser();
     const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
 
     const name = companyName(application);
     const salary = salaryDisplay(application);
@@ -138,7 +145,7 @@ export function ApplicationDetail({
                         {/* Stage pill */}
                         <div className="flex items-center gap-2 mb-2">
                             <span
-                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${stageColor(application.stage)}`}
+                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${stageColor(application.stage)}`}
                             >
                                 {formatStage(application.stage)}
                             </span>
@@ -202,7 +209,7 @@ export function ApplicationDetail({
                 {/* Stats grid */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -210,28 +217,93 @@ export function ApplicationDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Applied
                         </p>
                         <p className="text-lg font-black tracking-tight">
                             {ago}
                         </p>
-                        <p className="text-xs text-base-content/40">
-                            {formatDate(application.created_at)}
+                        <p className="text-sm text-base-content/40">
+                            {formatDate(application.submitted_at || application.created_at)}
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Recruiter
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Your Recruiter
                         </p>
                         <p className="text-lg font-black tracking-tight">
                             {recName}
                         </p>
                         {application.recruiter?.tagline && (
-                            <p className="text-xs text-base-content/40 italic">
+                            <p className="text-sm text-base-content/40 italic">
                                 {application.recruiter.tagline}
                             </p>
                         )}
+
+                        {/* Contact links */}
+                        <div className="flex flex-col gap-1 mt-2">
+                            {(application.recruiter?.user?.email || application.recruiter?.email) && (
+                                <a
+                                    href={`mailto:${application.recruiter?.user?.email || application.recruiter?.email}`}
+                                    className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary transition-colors truncate"
+                                >
+                                    <i className="fa-duotone fa-regular fa-envelope w-3.5 text-center flex-shrink-0" />
+                                    <span className="truncate">{application.recruiter?.user?.email || application.recruiter?.email}</span>
+                                </a>
+                            )}
+                            {application.recruiter?.phone && (
+                                <a
+                                    href={`tel:${application.recruiter.phone}`}
+                                    className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary transition-colors"
+                                >
+                                    <i className="fa-duotone fa-regular fa-phone w-3.5 text-center flex-shrink-0" />
+                                    {application.recruiter.phone}
+                                </a>
+                            )}
+                            {application.recruiter?.id && (
+                                <Link
+                                    href={`/marketplace/${application.recruiter.id}`}
+                                    className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary transition-colors"
+                                >
+                                    <i className="fa-duotone fa-regular fa-user w-3.5 text-center flex-shrink-0" />
+                                    View Profile
+                                </Link>
+                            )}
+                            {application.recruiter?.user?.id && (
+                                <button
+                                    className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary transition-colors disabled:opacity-50"
+                                    disabled={startingChat}
+                                    onClick={async () => {
+                                        const recruiterUserId = application.recruiter?.user?.id;
+                                        if (!recruiterUserId) return;
+                                        try {
+                                            setStartingChat(true);
+                                            const conversationId = await startChatConversation(
+                                                getToken,
+                                                recruiterUserId,
+                                                {
+                                                    application_id: application.id,
+                                                    job_id: application.job?.id ?? application.job_id,
+                                                    company_id: application.job?.company?.id ?? application.company?.id ?? null,
+                                                },
+                                            );
+                                            router.push(`/portal/messages?conversationId=${conversationId}`);
+                                        } catch (err: any) {
+                                            toast.error(err?.message || "Failed to start chat");
+                                        } finally {
+                                            setStartingChat(false);
+                                        }
+                                    }}
+                                >
+                                    {startingChat ? (
+                                        <span className="loading loading-spinner loading-xs w-3.5" />
+                                    ) : (
+                                        <i className="fa-duotone fa-regular fa-comment w-3.5 text-center flex-shrink-0" />
+                                    )}
+                                    Send a Message
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -259,7 +331,7 @@ export function ApplicationDetail({
                         </h3>
                         {application.recruiter_notes && (
                             <div className="mt-3 p-3 bg-base-100 border-2 border-base-300">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Recruiter's Message
                                 </p>
                                 <p className="whitespace-pre-wrap text-sm text-base-content/70">
@@ -419,7 +491,7 @@ export function ApplicationDetail({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {doc.metadata?.is_primary && (
-                                            <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-primary/15 text-primary">
+                                            <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-primary/15 text-primary">
                                                 Primary
                                             </span>
                                         )}
@@ -609,7 +681,7 @@ export function DetailLoader({
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                         Loading application...
                     </span>
                 </div>

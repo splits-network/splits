@@ -34,7 +34,6 @@ type Section =
     | "subscription"
     | "payouts"
     | "notifications"
-    | "integrations"
     | "admin";
 
 interface NavItem {
@@ -60,7 +59,6 @@ const MARKETPLACE_SECTIONS: Section[] = [
 
 const COMING_SOON_DESCRIPTIONS: Record<string, string> = {
     notifications: "Configure email and in-app notification preferences",
-    integrations: "Connect to external services and ATS platforms",
     admin: "Platform-wide settings, user management, and analytics",
 };
 
@@ -85,7 +83,6 @@ export default function ProfileBaselPage() {
         "subscription",
         "payouts",
         "notifications",
-        "integrations",
         "admin",
     ];
     const urlSection = searchParams.get("section") as Section | null;
@@ -175,15 +172,6 @@ export default function ProfileBaselPage() {
                 icon: "fa-duotone fa-regular fa-bell",
             },
         ];
-
-        if (isRecruiter || isCompanyAdmin || isPlatformAdmin) {
-            systemItems.push({
-                key: "integrations",
-                label: "Integrations",
-                icon: "fa-duotone fa-regular fa-plug",
-                href: "/portal/integrations",
-            });
-        }
 
         if (isPlatformAdmin) {
             systemItems.push({
@@ -328,7 +316,7 @@ export default function ProfileBaselPage() {
                             <div
                                 className={`flex items-center gap-3 pb-2 ${gi > 0 ? "pt-4" : ""}`}
                             >
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-base-content/30">
+                                <span className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/30">
                                     {group.title}
                                 </span>
                                 <div className="flex-1 h-px bg-base-300" />
@@ -347,7 +335,7 @@ export default function ProfileBaselPage() {
                                                 className={`${item.icon} w-4 text-center`}
                                             />
                                             {item.label}
-                                            <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-[10px] ml-auto text-base-content/30" />
+                                            <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-sm ml-auto text-base-content/30" />
                                         </Link>
                                     ) : (
                                         <button

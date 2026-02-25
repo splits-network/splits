@@ -34,8 +34,12 @@ export function IntegrationsSection() {
 
             const client = createAuthenticatedClient(token);
             const [providersRes, connectionsRes] = await Promise.all([
-                client.get("/integrations/providers") as Promise<{ data: IntegrationProvider[] }>,
-                client.get("/integrations/connections") as Promise<{ data: OAuthConnectionPublic[] }>,
+                client.get("/integrations/providers") as Promise<{
+                    data: IntegrationProvider[];
+                }>,
+                client.get("/integrations/connections") as Promise<{
+                    data: OAuthConnectionPublic[];
+                }>,
             ]);
 
             setProviders(providersRes.data ?? []);
@@ -63,12 +67,19 @@ export function IntegrationsSection() {
                 return;
             }
 
-            const cards = containerRef.current.querySelectorAll(".integration-card");
+            const cards =
+                containerRef.current.querySelectorAll(".integration-card");
             if (cards.length) {
                 gsap.fromTo(
                     cards,
                     { opacity: 0, y: 24 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power3.out" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        stagger: 0.08,
+                        ease: "power3.out",
+                    },
                 );
             }
         },
@@ -88,10 +99,13 @@ export function IntegrationsSection() {
             const client = createAuthenticatedClient(token);
             const redirectUri = `${window.location.origin}/portal/integrations/callback`;
 
-            const res = await client.post("/integrations/connections/initiate", {
-                provider_slug: providerSlug,
-                redirect_uri: redirectUri,
-            }) as { data: { authorization_url: string; state: string } };
+            const res = (await client.post(
+                "/integrations/connections/initiate",
+                {
+                    provider_slug: providerSlug,
+                    redirect_uri: redirectUri,
+                },
+            )) as { data: { authorization_url: string; state: string } };
 
             // Store state for CSRF verification on callback
             sessionStorage.setItem("oauth_state", res.data.state);
@@ -126,7 +140,9 @@ export function IntegrationsSection() {
 
     /* ── Helpers ──────────────────────────────────────────────────────── */
 
-    const getConnectionForProvider = (slug: string): OAuthConnectionPublic | undefined =>
+    const getConnectionForProvider = (
+        slug: string,
+    ): OAuthConnectionPublic | undefined =>
         connections.find((c) => c.provider_slug === slug);
 
     const connectedProviders = providers.filter((p) => {
@@ -150,8 +166,13 @@ export function IntegrationsSection() {
         return labels[status] ?? status;
     };
 
-    const statusColor = (status: OAuthConnectionStatus): "success" | "warning" | "error" | "neutral" => {
-        const colors: Record<OAuthConnectionStatus, "success" | "warning" | "error" | "neutral"> = {
+    const statusColor = (
+        status: OAuthConnectionStatus,
+    ): "success" | "warning" | "error" | "neutral" => {
+        const colors: Record<
+            OAuthConnectionStatus,
+            "success" | "warning" | "error" | "neutral"
+        > = {
             active: "success",
             pending: "warning",
             expired: "warning",
@@ -167,7 +188,9 @@ export function IntegrationsSection() {
         return (
             <div className="flex items-center gap-3 py-16">
                 <span className="loading loading-spinner loading-md" />
-                <span className="text-base-content/50 font-semibold">Loading integrations...</span>
+                <span className="text-base-content/50 font-semibold">
+                    Loading integrations...
+                </span>
             </div>
         );
     }
@@ -179,7 +202,7 @@ export function IntegrationsSection() {
             {/* Section header */}
             <div className="mb-8">
                 <div className="flex items-center gap-3 mb-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
                         Integrations
                     </p>
                     <div className="flex-1 h-px bg-base-300" />
@@ -188,8 +211,9 @@ export function IntegrationsSection() {
                     Connected services
                 </h2>
                 <p className="text-sm text-base-content/50 max-w-lg">
-                    Connect your calendar and email accounts to streamline interview
-                    scheduling, track conversations, and keep everything in sync.
+                    Connect your calendar and email accounts to streamline
+                    interview scheduling, track conversations, and keep
+                    everything in sync.
                 </p>
             </div>
 
@@ -208,7 +232,9 @@ export function IntegrationsSection() {
                     </h3>
                     <div className="grid gap-4">
                         {connectedProviders.map((provider) => {
-                            const conn = getConnectionForProvider(provider.slug)!;
+                            const conn = getConnectionForProvider(
+                                provider.slug,
+                            )!;
                             return (
                                 <ConnectedCard
                                     key={provider.slug}
@@ -217,7 +243,9 @@ export function IntegrationsSection() {
                                     statusLabel={statusLabel(conn.status)}
                                     statusColor={statusColor(conn.status)}
                                     disconnecting={disconnecting === conn.id}
-                                    onDisconnect={() => handleDisconnect(conn.id)}
+                                    onDisconnect={() =>
+                                        handleDisconnect(conn.id)
+                                    }
                                 />
                             );
                         })}

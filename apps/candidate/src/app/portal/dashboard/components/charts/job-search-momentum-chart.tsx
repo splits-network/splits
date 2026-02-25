@@ -1,18 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-    PieChart,
-    Pie,
-    Cell,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import {
-    useBaselChartColors,
-    BaselTooltip,
-} from "@/components/basel/charts";
+import { useBaselChartColors, BaselTooltip } from "@/components/basel/charts";
 
 interface JobSearchMomentumChartProps {
     recentActivityCount: number;
@@ -182,10 +173,7 @@ export default function JobSearchMomentumChart({
                                     cornerRadius={0}
                                 >
                                     {chartData.map((entry, i) => (
-                                        <Cell
-                                            key={i}
-                                            fill={entry.color}
-                                        />
+                                        <Cell key={i} fill={entry.color} />
                                     ))}
                                 </Pie>
                                 <Tooltip
@@ -203,7 +191,7 @@ export default function JobSearchMomentumChart({
                             <div className="text-3xl font-black text-base-content">
                                 {totalScore}
                             </div>
-                            <div className="text-[10px] text-base-content/40 font-bold uppercase tracking-widest">
+                            <div className="text-sm text-base-content/40 font-bold uppercase tracking-widest">
                                 / 100
                             </div>
                         </div>
@@ -220,7 +208,7 @@ export default function JobSearchMomentumChart({
                                     className={`w-6 h-6 ${SEGMENT_BG_COLORS[idx]} flex items-center justify-center shrink-0`}
                                 >
                                     <i
-                                        className={`fa-duotone fa-regular ${seg.icon} text-[10px] ${SEGMENT_TEXT_COLORS[idx]}`}
+                                        className={`fa-duotone fa-regular ${seg.icon} text-sm ${SEGMENT_TEXT_COLORS[idx]}`}
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0">

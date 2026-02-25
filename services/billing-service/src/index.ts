@@ -1,16 +1,15 @@
-import { loadBaseConfig, loadDatabaseConfig, loadStripeConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, loadStripeConfig, loadRabbitMQConfig, getEnvOrThrow } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerWebhookRoutes } from './routes/webhooks/routes';
-import { BillingService } from './service'; // V1 - Keep for webhook compatibility until V2 migration
-import { BillingRepository } from './repository'; // V1 - Keep for webhook compatibility until V2 migration
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import { BillingEventConsumer } from './events/placement-consumer';
 import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository';
 import { PlacementSnapshotService } from './v2/placement-snapshot/service';
+import { WebhookServiceV2 } from './v2/webhooks/service';
 import { createClient } from '@supabase/supabase-js';
 import { WebhookEventRepository } from './v2/webhook-events/repository';
 import * as Sentry from '@sentry/node';
@@ -121,12 +120,6 @@ async function main() {
         }
     );
 
-    // Initialize V1 repository (for webhook compatibility only)
-    const repository = new BillingRepository(
-        dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
-    );
-
     // Initialize V2 event publisher
     const v2EventPublisher = new V2EventPublisher(
         rabbitConfig.url,
@@ -140,9 +133,6 @@ async function main() {
     } catch (error) {
         logger.warn({ err: error }, 'Failed to connect Billing V2 event publisher - continuing without events');
     }
-
-    // Initialize V1 service with event publisher for webhook domain events
-    const service = new BillingService(repository, stripeConfig.secretKey, logger, v2EventPublisher);
 
     // Initialize placement snapshot domain and event consumer
     const supabase = createClient(
@@ -167,8 +157,7 @@ async function main() {
     });
 
     // Phase 6: Initialize billing event consumer with payout service
-    // System user ID for automated operations (use a service account or system admin)
-    const systemUserId = process.env.SYSTEM_USER_ID || 'system'; // TODO: Create proper system user
+    const systemUserId = getEnvOrThrow('SYSTEM_USER_ID');
     const billingEventConsumer = new BillingEventConsumer(
         rabbitConfig.url,
         snapshotService,
@@ -190,15 +179,17 @@ async function main() {
         logger.error({ err: error }, 'CRITICAL: Billing event consumer failed to connect - commission processing DISABLED');
     }
 
-    // Register webhook routes with event storage
+    // Initialize V2 webhook service with outbox publisher for durable domain events
+    const webhookService = new WebhookServiceV2(supabase, logger, outboxPublisher, stripeConfig.secretKey);
     const webhookEventRepository = new WebhookEventRepository(supabase);
-    registerWebhookRoutes(app, service, stripeConfig.webhookSecret, webhookEventRepository);
+    registerWebhookRoutes(app, webhookService, stripeConfig.webhookSecret, webhookEventRepository);
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {
         try {
             // Check database connectivity
-            await repository.healthCheck();
+            const { error: healthError } = await supabase.from('plans').select('id').limit(1);
+            if (healthError) throw new Error(`Database health check failed: ${healthError.message}`);
             return reply.status(200).send({
                 status: billingEventConsumerConnected ? 'healthy' : 'degraded',
                 service: 'billing-service',

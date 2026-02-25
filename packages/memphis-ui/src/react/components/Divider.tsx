@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export interface DividerProps {
     /** Text displayed in the center of the divider (e.g. "or") */
@@ -14,11 +14,11 @@ export interface DividerProps {
  * The CSS handles lines via ::before/::after pseudo-elements.
  * When the divider has content (:not(:empty)), it adds gap-4.
  */
-export function Divider({ text, className = '' }: DividerProps) {
+export function Divider({ text, className = "" }: DividerProps) {
     return (
-        <div className={['divider', className].filter(Boolean).join(' ')}>
+        <div className={["divider", className].filter(Boolean).join(" ")}>
             {text && (
-                <span className="text-[10px] font-bold uppercase tracking-wider opacity-30">
+                <span className="text-sm font-bold uppercase tracking-wider opacity-30">
                     {text}
                 </span>
             )}

@@ -121,10 +121,12 @@ export default function ActionsToolbar({
             isCompanyUser || false,
             isAdmin || false,
             application.candidate_recruiter_id,
+            (application as any).expired_at,
         );
     }, [
         application.stage,
         application.candidate_recruiter_id,
+        (application as any).expired_at,
         isRecruiter,
         isCompanyUser,
         isAdmin,

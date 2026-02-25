@@ -217,7 +217,7 @@ export function PressListing({ articles }: PressListingProps) {
                                         {article.tags.map((tag) => (
                                             <span
                                                 key={tag}
-                                                className="px-2 py-0.5 bg-base-300 text-[10px] font-semibold text-base-content/50 uppercase tracking-wider"
+                                                className="px-2 py-0.5 bg-base-300 text-sm font-semibold text-base-content/50 uppercase tracking-wider"
                                             >
                                                 {tag}
                                             </span>

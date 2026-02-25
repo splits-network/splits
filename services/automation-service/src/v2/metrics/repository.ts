@@ -2,14 +2,20 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { MarketplaceMetric, MetricFilters, MetricUpdate } from './types';
 
 export interface CreateMetricInput {
-    date: string;
-    total_placements: number;
-    total_applications: number;
-    total_earnings_cents: number;
-    avg_placement_duration_days?: number | null;
+    metric_date: string;
     active_recruiters: number;
+    active_companies: number;
     active_jobs: number;
-    health_score: number;
+    total_applications: number;
+    total_placements: number;
+    avg_time_to_hire_days?: number | null;
+    hire_rate?: number | null;
+    placement_completion_rate?: number | null;
+    avg_recruiter_response_time_hours?: number | null;
+    total_fees_generated?: number | null;
+    total_payouts_processed?: number | null;
+    fraud_signals_raised?: number;
+    disputes_opened?: number;
 }
 
 export class MarketplaceMetricsRepository {
@@ -22,16 +28,21 @@ export class MarketplaceMetricsRepository {
     private mapRow(row: any): MarketplaceMetric {
         return {
             id: row.id,
-            date: row.metric_date,
-            total_placements: row.total_placements,
-            total_applications: row.total_applications,
-            total_earnings_cents: row.total_earnings_cents,
-            avg_placement_duration_days: row.avg_placement_duration_days,
-            active_recruiters: row.active_recruiters,
-            active_jobs: row.active_jobs,
-            health_score: row.health_score,
+            metric_date: row.metric_date,
+            active_recruiters: row.active_recruiters ?? 0,
+            active_companies: row.active_companies ?? 0,
+            active_jobs: row.active_jobs ?? 0,
+            total_applications: row.total_applications ?? 0,
+            total_placements: row.total_placements ?? 0,
+            avg_time_to_hire_days: row.avg_time_to_hire_days != null ? Number(row.avg_time_to_hire_days) : null,
+            hire_rate: row.hire_rate != null ? Number(row.hire_rate) : null,
+            placement_completion_rate: row.placement_completion_rate != null ? Number(row.placement_completion_rate) : null,
+            avg_recruiter_response_time_hours: row.avg_recruiter_response_time_hours != null ? Number(row.avg_recruiter_response_time_hours) : null,
+            total_fees_generated: row.total_fees_generated != null ? Number(row.total_fees_generated) : null,
+            total_payouts_processed: row.total_payouts_processed != null ? Number(row.total_payouts_processed) : null,
+            fraud_signals_raised: row.fraud_signals_raised ?? 0,
+            disputes_opened: row.disputes_opened ?? 0,
             created_at: row.created_at,
-            updated_at: row.updated_at,
         };
     }
 
@@ -44,7 +55,6 @@ export class MarketplaceMetricsRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            
             .from('marketplace_metrics_daily')
             .select('*', { count: 'exact' });
 
@@ -71,7 +81,6 @@ export class MarketplaceMetricsRepository {
 
     async findMetric(id: string): Promise<MarketplaceMetric | null> {
         const { data, error } = await this.supabase
-            
             .from('marketplace_metrics_daily')
             .select('*')
             .eq('id', id)
@@ -89,17 +98,22 @@ export class MarketplaceMetricsRepository {
 
     async createMetric(input: CreateMetricInput): Promise<MarketplaceMetric> {
         const { data, error } = await this.supabase
-            
             .from('marketplace_metrics_daily')
             .insert({
-                metric_date: input.date,
-                total_placements: input.total_placements,
-                total_applications: input.total_applications,
-                total_earnings_cents: input.total_earnings_cents,
-                avg_placement_duration_days: input.avg_placement_duration_days ?? null,
+                metric_date: input.metric_date,
                 active_recruiters: input.active_recruiters,
+                active_companies: input.active_companies,
                 active_jobs: input.active_jobs,
-                health_score: input.health_score,
+                total_applications: input.total_applications,
+                total_placements: input.total_placements,
+                avg_time_to_hire_days: input.avg_time_to_hire_days ?? null,
+                hire_rate: input.hire_rate ?? null,
+                placement_completion_rate: input.placement_completion_rate ?? null,
+                avg_recruiter_response_time_hours: input.avg_recruiter_response_time_hours ?? null,
+                total_fees_generated: input.total_fees_generated ?? null,
+                total_payouts_processed: input.total_payouts_processed ?? null,
+                fraud_signals_raised: input.fraud_signals_raised ?? 0,
+                disputes_opened: input.disputes_opened ?? 0,
             })
             .select()
             .single();
@@ -112,34 +126,23 @@ export class MarketplaceMetricsRepository {
     }
 
     async updateMetric(id: string, updates: MetricUpdate): Promise<MarketplaceMetric> {
-        const payload: Record<string, any> = {
-            updated_at: new Date().toISOString(),
-        };
+        const payload: Record<string, any> = {};
 
-        if (typeof updates.total_placements !== 'undefined') {
-            payload.total_placements = updates.total_placements;
-        }
-        if (typeof updates.total_applications !== 'undefined') {
-            payload.total_applications = updates.total_applications;
-        }
-        if (typeof updates.total_earnings_cents !== 'undefined') {
-            payload.total_earnings_cents = updates.total_earnings_cents;
-        }
-        if (typeof updates.avg_placement_duration_days !== 'undefined') {
-            payload.avg_placement_duration_days = updates.avg_placement_duration_days;
-        }
-        if (typeof updates.active_recruiters !== 'undefined') {
-            payload.active_recruiters = updates.active_recruiters;
-        }
-        if (typeof updates.active_jobs !== 'undefined') {
-            payload.active_jobs = updates.active_jobs;
-        }
-        if (typeof updates.health_score !== 'undefined') {
-            payload.health_score = updates.health_score;
-        }
+        if (typeof updates.active_recruiters !== 'undefined') payload.active_recruiters = updates.active_recruiters;
+        if (typeof updates.active_companies !== 'undefined') payload.active_companies = updates.active_companies;
+        if (typeof updates.active_jobs !== 'undefined') payload.active_jobs = updates.active_jobs;
+        if (typeof updates.total_applications !== 'undefined') payload.total_applications = updates.total_applications;
+        if (typeof updates.total_placements !== 'undefined') payload.total_placements = updates.total_placements;
+        if (typeof updates.avg_time_to_hire_days !== 'undefined') payload.avg_time_to_hire_days = updates.avg_time_to_hire_days;
+        if (typeof updates.hire_rate !== 'undefined') payload.hire_rate = updates.hire_rate;
+        if (typeof updates.placement_completion_rate !== 'undefined') payload.placement_completion_rate = updates.placement_completion_rate;
+        if (typeof updates.avg_recruiter_response_time_hours !== 'undefined') payload.avg_recruiter_response_time_hours = updates.avg_recruiter_response_time_hours;
+        if (typeof updates.total_fees_generated !== 'undefined') payload.total_fees_generated = updates.total_fees_generated;
+        if (typeof updates.total_payouts_processed !== 'undefined') payload.total_payouts_processed = updates.total_payouts_processed;
+        if (typeof updates.fraud_signals_raised !== 'undefined') payload.fraud_signals_raised = updates.fraud_signals_raised;
+        if (typeof updates.disputes_opened !== 'undefined') payload.disputes_opened = updates.disputes_opened;
 
         const { data, error } = await this.supabase
-            
             .from('marketplace_metrics_daily')
             .update(payload)
             .eq('id', id)
@@ -155,7 +158,6 @@ export class MarketplaceMetricsRepository {
 
     async deleteMetric(id: string): Promise<void> {
         const { error } = await this.supabase
-            
             .from('marketplace_metrics_daily')
             .delete()
             .eq('id', id);

@@ -4,29 +4,33 @@
  * Implements the scoring algorithm for recruiter reputation.
  *
  * Score components:
- * - Completion Rate: 35% - completed / (completed + failed), penalize failures
+ * - Completion Rate: 30% - completed / (completed + failed), penalize failures
  * - Hire Rate: 25% - hires / submissions, scaled where 25%+ = 100
  * - Collaboration: 15% - Bonus for split placements
  * - Responsiveness: 15% - Based on avg response hours, <4h = 100
+ * - Pipeline Reliability: 10% - % of screen-stage apps advanced vs expired
  * - Volume Bonus: +0-10 - Additive bonus based on placement count
  *
  * Thresholds:
  * - Min 5 submissions for hire rate (else neutral 50)
  * - Min 3 placements for completion rate (else neutral 50)
+ * - Min 3 screen-stage apps for pipeline reliability (else neutral 50)
  * - New recruiters start at 50 (neutral)
  */
 
 import { ReputationMetrics, CalculationResult } from './types';
 
 // Weight constants
-const WEIGHT_COMPLETION = 0.35;
+const WEIGHT_COMPLETION = 0.30;
 const WEIGHT_HIRE = 0.25;
 const WEIGHT_COLLABORATION = 0.15;
 const WEIGHT_RESPONSIVENESS = 0.15;
+const WEIGHT_PIPELINE = 0.10;
 
 // Threshold constants
 const MIN_SUBMISSIONS_FOR_HIRE_RATE = 5;
 const MIN_PLACEMENTS_FOR_COMPLETION_RATE = 3;
+const MIN_SCREEN_FOR_PIPELINE = 3;
 const NEUTRAL_SCORE = 50;
 
 // Hire rate scaling - 25% hire rate = 100 score
@@ -56,6 +60,7 @@ export function calculateReputationScore(
     const hireScore = calculateHireScore(metrics);
     const collaborationScore = calculateCollaborationScore(metrics);
     const responsivenessScore = calculateResponsivenessScore(metrics);
+    const pipelineScore = calculatePipelineReliabilityScore(metrics);
     const volumeBonus = calculateVolumeBonus(metrics);
 
     // Calculate weighted base score (0-100)
@@ -63,7 +68,8 @@ export function calculateReputationScore(
         completionScore * WEIGHT_COMPLETION +
         hireScore * WEIGHT_HIRE +
         collaborationScore * WEIGHT_COLLABORATION +
-        responsivenessScore * WEIGHT_RESPONSIVENESS;
+        responsivenessScore * WEIGHT_RESPONSIVENESS +
+        pipelineScore * WEIGHT_PIPELINE;
 
     // Add volume bonus and cap at 100
     const finalScore = Math.min(100, Math.max(0, baseScore + volumeBonus));
@@ -193,6 +199,21 @@ function calculateResponsivenessScore(metrics: ReputationMetrics): number {
 
     // Beyond 48 hours, score drops further
     return Math.max(0, 30 - (avg_response_time_hours - POOR_RESPONSE_HOURS) * 0.5);
+}
+
+/**
+ * Calculate pipeline reliability score (0-100).
+ * Measures what % of applications reaching screen stage get advanced vs expire.
+ */
+function calculatePipelineReliabilityScore(metrics: ReputationMetrics): number {
+    const { total_reached_screen, total_expired_in_recruiter_stages } = metrics;
+
+    if (total_reached_screen < MIN_SCREEN_FOR_PIPELINE) {
+        return NEUTRAL_SCORE;
+    }
+
+    const reliabilityRate = (1 - total_expired_in_recruiter_stages / total_reached_screen);
+    return Math.max(0, Math.min(100, reliabilityRate * 100));
 }
 
 /**

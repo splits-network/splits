@@ -1,64 +1,68 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: document-processing-service
-  namespace: splits-network
-  labels:
-    app: document-processing-service
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: document-processing-service
-  template:
-    metadata:
-      labels:
+    name: document-processing-service
+    namespace: splits-network
+    labels:
         app: document-processing-service
-    spec:
-      containers:
-      - name: document-processing-service
-        image: ${ACR_SERVER}/document-processing-service:${IMAGE_TAG}
-        ports:
-        - containerPort: 3008
-          name: http
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: PORT
-          value: "3008"
-        - name: SUPABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: supabase-secrets
-              key: supabase-url
-        - name: SUPABASE_ANON_KEY
-          valueFrom:
-            secretKeyRef:
-              name: supabase-secrets
-              key: supabase-anon-key
-        - name: SUPABASE_SERVICE_ROLE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: supabase-secrets
-              key: supabase-service-role-key
-        - name: RABBITMQ_URL
-          value: "amqp://splits:splits_production@rabbitmq:5672"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "200m"
-          limits:
-            memory: "2Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3008
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3008
-          initialDelaySeconds: 10
-          periodSeconds: 5
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: document-processing-service
+    template:
+        metadata:
+            labels:
+                app: document-processing-service
+        spec:
+            containers:
+                - name: document-processing-service
+                  image: ${ACR_SERVER}/document-processing-service:${IMAGE_TAG}
+                  ports:
+                      - containerPort: 3008
+                        name: http
+                  env:
+                      - name: NODE_ENV
+                        value: "production"
+                      - name: PORT
+                        value: "3008"
+                      - name: SUPABASE_URL
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-url
+                      - name: SUPABASE_ANON_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-anon-key
+                      - name: SUPABASE_SERVICE_ROLE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-service-role-key
+                      - name: RABBITMQ_URL
+                        value: "amqp://splits:splits_production@rabbitmq:5672"
+                      - name: CLAMAV_HOST
+                        value: "clamav"
+                      - name: CLAMAV_PORT
+                        value: "3310"
+                  resources:
+                      requests:
+                          memory: "512Mi"
+                          cpu: "200m"
+                      limits:
+                          memory: "2Gi"
+                          cpu: "1000m"
+                  livenessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3008
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3008
+                      initialDelaySeconds: 10
+                      periodSeconds: 5

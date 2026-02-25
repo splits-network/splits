@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface FilterCheckboxGroupProps {
     /** Group label */
@@ -27,8 +27,8 @@ export function FilterCheckboxGroup({
     options,
     selected,
     onChange,
-    accent = 'coral',
-    className = '',
+    accent = "coral",
+    className = "",
 }: FilterCheckboxGroupProps) {
     const toggle = (opt: string) => {
         onChange(
@@ -39,10 +39,12 @@ export function FilterCheckboxGroup({
     };
 
     return (
-        <div className={['mb-6', `accent-${accent}`, className].filter(Boolean).join(' ')}>
-            <h4
-                className="text-sm font-black uppercase tracking-[0.15em] mb-3 flex items-center gap-2 text-dark"
-            >
+        <div
+            className={["mb-6", `accent-${accent}`, className]
+                .filter(Boolean)
+                .join(" ")}
+        >
+            <h4 className="text-sm font-black uppercase tracking-[0.15em] mb-3 flex items-center gap-2 text-dark">
                 <div className="w-1.5 h-4 bg-accent" />
                 {label}
             </h4>
@@ -58,18 +60,20 @@ export function FilterCheckboxGroup({
                         >
                             <div
                                 className={[
-                                    'w-5 h-5 flex-shrink-0 border-2 flex items-center justify-center transition-all',
-                                    isSelected ? 'border-accent bg-accent' : 'border-dark/20',
-                                ].filter(Boolean).join(' ')}
+                                    "w-5 h-5 flex-shrink-0 border-2 flex items-center justify-center transition-all",
+                                    isSelected
+                                        ? "border-accent bg-accent"
+                                        : "border-dark/20",
+                                ]
+                                    .filter(Boolean)
+                                    .join(" ")}
                             >
                                 {isSelected && (
-                                    <i
-                                        className="fa-solid fa-check text-[9px] text-on-accent"
-                                    />
+                                    <i className="fa-solid fa-check text-sm text-on-accent" />
                                 )}
                             </div>
                             <span
-                                className={`text-sm font-semibold text-dark ${isSelected ? 'opacity-100' : 'opacity-60'}`}
+                                className={`text-sm font-semibold text-dark ${isSelected ? "opacity-100" : "opacity-60"}`}
                             >
                                 {opt}
                             </span>

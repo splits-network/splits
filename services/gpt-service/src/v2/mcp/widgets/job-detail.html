@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Details</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
+    padding: 16px;
+    line-height: 1.5;
+  }
+  .loading { text-align: center; padding: 40px; color: var(--color-text-secondary, #666); }
+  h1 { font-size: var(--font-heading-md-size, 20px); font-weight: var(--font-weight-bold, 700); margin-bottom: 4px; }
+  .company { font-size: var(--font-text-md-size, 15px); color: var(--color-text-secondary, #666); margin-bottom: 12px; }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+  }
+  .badge {
+    display: inline-flex; align-items: center; padding: 3px 10px;
+    border-radius: var(--border-radius-sm, 4px);
+    background: var(--color-background-secondary, #f5f5f5);
+    font-size: var(--font-text-xs-size, 11px);
+    font-weight: var(--font-weight-medium, 500);
+  }
+  .salary { color: var(--color-text-success, #16a34a); font-weight: var(--font-weight-semibold, 600); }
+  .section { margin-bottom: 16px; }
+  .section-title {
+    font-size: var(--font-text-sm-size, 13px);
+    font-weight: var(--font-weight-semibold, 600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary, #666);
+    margin-bottom: 8px;
+  }
+  .description { font-size: var(--font-text-sm-size, 14px); white-space: pre-wrap; }
+  .req-list { list-style: none; }
+  .req-item {
+    padding: 6px 0;
+    font-size: var(--font-text-sm-size, 13px);
+    border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
+  }
+  .req-item:last-child { border-bottom: none; }
+  .req-type {
+    font-size: var(--font-text-xs-size, 11px);
+    font-weight: var(--font-weight-medium, 500);
+    padding: 1px 6px;
+    border-radius: var(--border-radius-xs, 2px);
+    margin-left: 6px;
+  }
+  .req-mandatory { background: var(--color-background-warning, #fef3c7); color: var(--color-text-warning, #92400e); }
+  .req-preferred { background: var(--color-background-info, #dbeafe); color: var(--color-text-info, #1e40af); }
+  .company-info {
+    background: var(--color-background-secondary, #f9fafb);
+    border-radius: var(--border-radius-md, 8px);
+    padding: 12px;
+    font-size: var(--font-text-sm-size, 13px);
+  }
+  .company-info p { margin-bottom: 4px; }
+  .company-label { color: var(--color-text-secondary, #666); }
+  .actions { display: flex; gap: 8px; margin-top: 16px; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: var(--border-radius-md, 8px);
+    border: 1px solid var(--color-border-primary, #e5e5e5);
+    background: var(--color-background-primary, #fff);
+    color: var(--color-text-primary, #1a1a1a);
+    font-size: var(--font-text-sm-size, 13px);
+    font-weight: var(--font-weight-medium, 500);
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--color-background-secondary, #f5f5f5); }
+  .btn-primary {
+    background: var(--color-background-info, #3b82f6);
+    color: var(--color-text-inverse, #fff);
+    border-color: transparent;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading">Loading job details...</div></div>
+
+<script>
+(function() {
+  const root = document.getElementById('root');
+
+  window.addEventListener('message', (event) => {
+    const msg = event.data;
+    if (!msg || typeof msg !== 'object') return;
+
+    if (msg.method === 'ui/notifications/tool-result' && msg.params?.structuredContent) {
+      render(msg.params.structuredContent);
+    }
+
+    if (msg.method === 'ui/notifications/tool-input') {
+      root.innerHTML = '<div class="loading">Loading job details...</div>';
+    }
+  });
+
+  function render(job) {
+    if (!job || !job.title) {
+      root.innerHTML = '<div class="loading">No job data available.</div>';
+      return;
+    }
+
+    let html = `
+      <h1>${esc(job.title)}</h1>
+      <div class="company">${esc(job.company?.name || job.company_name || 'Unknown Company')}</div>
+      <div class="meta-row">
+        <span class="badge">${esc(job.location || 'Location N/A')}</span>
+        ${(job.commute_types || []).map(t => `<span class="badge">${esc(t)}</span>`).join('')}
+        ${job.job_level ? `<span class="badge">${esc(job.job_level)}</span>` : ''}
+        ${job.employment_type ? `<span class="badge">${esc(job.employment_type.replace('_', ' '))}</span>` : ''}
+        ${job.salary_range ? `<span class="salary">${esc(job.salary_range)}</span>` : ''}
+      </div>`;
+
+    // Description
+    if (job.description) {
+      html += `
+        <div class="section">
+          <div class="section-title">Description</div>
+          <div class="description">${esc(job.description)}</div>
+        </div>`;
+    }
+
+    // Requirements
+    if (job.requirements?.length) {
+      html += `
+        <div class="section">
+          <div class="section-title">Requirements</div>
+          <ul class="req-list">
+            ${job.requirements.map(r => `
+              <li class="req-item">
+                ${esc(r.text)}
+                <span class="req-type ${r.type === 'mandatory' ? 'req-mandatory' : 'req-preferred'}">${esc(r.type)}</span>
+              </li>`).join('')}
+          </ul>
+        </div>`;
+    }
+
+    // Company info
+    if (job.company) {
+      html += `
+        <div class="section">
+          <div class="section-title">Company</div>
+          <div class="company-info">
+            ${job.company.industry ? `<p><span class="company-label">Industry:</span> ${esc(job.company.industry)}</p>` : ''}
+            ${job.company.location ? `<p><span class="company-label">HQ:</span> ${esc(job.company.location)}</p>` : ''}
+            ${job.company.description ? `<p>${esc(job.company.description)}</p>` : ''}
+          </div>
+        </div>`;
+    }
+
+    // Action buttons
+    html += `
+      <div class="actions">
+        <button class="btn btn-primary" onclick="applyToJob('${esc(job.id)}')">Apply Now</button>
+        <button class="btn" onclick="analyzeResume('${esc(job.id)}')">Analyze Resume</button>
+        ${job.view_url ? `<button class="btn" onclick="openLink('${esc(job.view_url)}')">View on Site</button>` : ''}
+      </div>`;
+
+    root.innerHTML = html;
+  }
+
+  function callTool(name, args) {
+    window.parent.postMessage({
+      jsonrpc: '2.0', id: Date.now(),
+      method: 'tools/call',
+      params: { name, arguments: args },
+    }, '*');
+  }
+
+  window.applyToJob = (jobId) => callTool('submit_application', { job_id: jobId });
+  window.analyzeResume = (jobId) => callTool('analyze_resume', { job_id: jobId });
+  window.openLink = (url) => {
+    window.parent.postMessage({
+      jsonrpc: '2.0', id: Date.now(),
+      method: 'ui/open-link',
+      params: { url },
+    }, '*');
+  };
+
+  function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+})();
+</script>
+</body>
+</html>

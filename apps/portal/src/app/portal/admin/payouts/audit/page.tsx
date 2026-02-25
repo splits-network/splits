@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -16,20 +16,25 @@ import {
 
 interface AuditLogEntry {
     id: string;
-    action: string;
-    entity_type: "payout_schedule" | "escrow_hold";
-    entity_id: string;
+    placement_id: string;
+    schedule_id?: string;
+    transaction_id?: string;
+    event_type: string;
+    action?: string;
+    old_status?: string;
+    new_status?: string;
+    old_amount?: number;
+    new_amount?: number;
+    reason?: string;
+    metadata?: Record<string, any>;
     changed_by?: string;
     changed_by_role?: string;
-    before_state?: Record<string, any>;
-    after_state?: Record<string, any>;
-    metadata?: Record<string, any>;
     created_at: string;
 }
 
 interface AuditFilters {
+    event_type?: string;
     action?: string;
-    entity_type?: AuditLogEntry["entity_type"];
     date_from?: string;
     date_to?: string;
 }
@@ -38,6 +43,21 @@ const ACTION_LABELS: Record<
     string,
     { label: string; color: string; icon: string }
 > = {
+    schedule_processing: {
+        label: "Schedule Processing",
+        color: "badge-info",
+        icon: "fa-play",
+    },
+    schedule_completed: {
+        label: "Schedule Completed",
+        color: "badge-success",
+        icon: "fa-check",
+    },
+    schedule_failed: {
+        label: "Schedule Failed",
+        color: "badge-error",
+        icon: "fa-xmark",
+    },
     create_schedule: {
         label: "Schedule Created",
         color: "badge-success",
@@ -49,40 +69,67 @@ const ACTION_LABELS: Record<
         icon: "fa-pen",
     },
     trigger_processing: {
-        label: "Processing Triggered",
+        label: "Manual Trigger",
         color: "badge-warning",
         icon: "fa-play",
     },
-    retry_schedule: {
-        label: "Schedule Retried",
-        color: "badge-warning",
-        icon: "fa-rotate",
+    delete_schedule: {
+        label: "Schedule Deleted",
+        color: "badge-error",
+        icon: "fa-trash",
     },
-    cancel_schedule: {
-        label: "Schedule Cancelled",
+    transfer_processing: {
+        label: "Transfer Processing",
+        color: "badge-info",
+        icon: "fa-arrow-right",
+    },
+    transfer_sent: {
+        label: "Transfer Sent",
+        color: "badge-success",
+        icon: "fa-check",
+    },
+    transfer_failed: {
+        label: "Transfer Failed",
         color: "badge-error",
         icon: "fa-xmark",
     },
-    create_hold: {
+    create_escrow_hold: {
         label: "Hold Created",
         color: "badge-success",
         icon: "fa-lock",
     },
-    release_hold: {
+    release_escrow_hold: {
         label: "Hold Released",
         color: "badge-success",
         icon: "fa-lock-open",
     },
-    cancel_hold: {
+    auto_release_escrow_hold: {
+        label: "Auto-Released",
+        color: "badge-success",
+        icon: "fa-clock",
+    },
+    cancel_escrow_hold: {
         label: "Hold Cancelled",
         color: "badge-error",
         icon: "fa-xmark",
     },
-    process_batch: {
-        label: "Batch Processed",
+    update_escrow_hold: {
+        label: "Hold Updated",
         color: "badge-info",
-        icon: "fa-list",
+        icon: "fa-pen",
     },
+    delete_escrow_hold: {
+        label: "Hold Deleted",
+        color: "badge-error",
+        icon: "fa-trash",
+    },
+};
+
+const EVENT_TYPE_LABELS: Record<string, { label: string; color: string }> = {
+    processing: { label: "Processing", color: "badge-info" },
+    completed: { label: "Completed", color: "badge-success" },
+    failed: { label: "Failed", color: "badge-error" },
+    action: { label: "Action", color: "badge-warning" },
 };
 
 export default function AuditLogPage() {
@@ -111,10 +158,10 @@ export default function AuditLogPage() {
             queryParams.set("page", String(params.page));
             queryParams.set("limit", String(params.limit));
             if (params.search) queryParams.set("search", params.search);
+            if (params.filters?.event_type)
+                queryParams.set("event_type", params.filters.event_type);
             if (params.filters?.action)
                 queryParams.set("action", params.filters.action);
-            if (params.filters?.entity_type)
-                queryParams.set("entity_type", params.filters.entity_type);
             if (params.filters?.date_from)
                 queryParams.set("date_from", params.filters.date_from);
             if (params.filters?.date_to)
@@ -123,7 +170,7 @@ export default function AuditLogPage() {
             queryParams.set("sort_order", "desc");
 
             const response = await apiClient.get(
-                `/payout-audit-log?${queryParams.toString()}`,
+                `/placement-payout-audit-log?${queryParams.toString()}`,
             );
             return response;
         },
@@ -146,6 +193,15 @@ export default function AuditLogPage() {
         );
     }
 
+    function EventTypeBadge({ eventType }: { eventType: string }) {
+        const config = EVENT_TYPE_LABELS[eventType] || {
+            label: eventType,
+            color: "badge-ghost",
+        };
+
+        return <span className={`badge ${config.color}`}>{config.label}</span>;
+    }
+
     function formatDateTime(dateString: string): string {
         const date = new Date(dateString);
         return date.toLocaleString("en-US", {
@@ -157,20 +213,8 @@ export default function AuditLogPage() {
         });
     }
 
-    function getActionDescription(entry: AuditLogEntry): string {
-        const config = ACTION_LABELS[entry.action];
-        if (!config) return "Action performed";
-
-        // Build description from metadata
-        let desc = config.label;
-        if (entry.metadata?.payout_id) {
-            desc += ` for payout ${entry.metadata.payout_id.substring(0, 8)}...`;
-        }
-        if (entry.metadata?.placement_id) {
-            desc += ` on placement ${entry.metadata.placement_id.substring(0, 8)}...`;
-        }
-
-        return desc;
+    function truncateId(id: string): string {
+        return id ? `${id.substring(0, 8)}...` : "N/A";
     }
 
     function toggleExpanded(entryId: string) {
@@ -179,64 +223,59 @@ export default function AuditLogPage() {
 
     async function exportToCSV() {
         try {
-            // Fetch all entries (without pagination) for export
             const token = await getToken();
             if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
 
             const queryParams = new URLSearchParams();
             queryParams.set("page", "1");
-            queryParams.set("limit", "10000"); // Get all entries
+            queryParams.set("limit", "10000");
             if (search) queryParams.set("search", search);
+            if (filters.event_type) queryParams.set("event_type", filters.event_type);
             if (filters.action) queryParams.set("action", filters.action);
-            if (filters.entity_type)
-                queryParams.set("entity_type", filters.entity_type);
-            if (filters.date_from)
-                queryParams.set("date_from", filters.date_from);
+            if (filters.date_from) queryParams.set("date_from", filters.date_from);
             if (filters.date_to) queryParams.set("date_to", filters.date_to);
             queryParams.set("sort_by", "created_at");
             queryParams.set("sort_order", "desc");
 
             const response = await apiClient.get(
-                `/payout-audit-log?${queryParams.toString()}`,
+                `/placement-payout-audit-log?${queryParams.toString()}`,
             );
             const allEntries = response.data;
 
-            // Create CSV content
             const headers = [
                 "Timestamp",
+                "Event Type",
                 "Action",
-                "Entity Type",
-                "Entity ID",
+                "Placement ID",
+                "Schedule ID",
+                "Transaction ID",
+                "Reason",
                 "Actor",
                 "Role",
-                "Changes",
                 "Metadata",
             ];
             const rows = allEntries.map((entry: AuditLogEntry) => {
-                const changes =
-                    entry.before_state || entry.after_state
-                        ? `"${JSON.stringify({ before: entry.before_state, after: entry.after_state }).replace(/"/g, '""')}"`
-                        : "";
                 const metadata = entry.metadata
                     ? `"${JSON.stringify(entry.metadata).replace(/"/g, '""')}"`
                     : "";
 
                 return [
                     formatDateTime(entry.created_at),
-                    ACTION_LABELS[entry.action]?.label || entry.action,
-                    entry.entity_type,
-                    entry.entity_id,
+                    entry.event_type,
+                    entry.action || "",
+                    entry.placement_id,
+                    entry.schedule_id || "",
+                    entry.transaction_id || "",
+                    entry.reason || "",
                     entry.changed_by || "System",
-                    entry.changed_by_role || "N/A",
-                    changes,
+                    entry.changed_by_role || "automated",
                     metadata,
                 ].join(",");
             });
 
             const csvContent = [headers.join(","), ...rows].join("\n");
 
-            // Download CSV file
             const blob = new Blob([csvContent], {
                 type: "text/csv;charset=utf-8;",
             });
@@ -299,8 +338,28 @@ export default function AuditLogPage() {
                         <SearchInput
                             value={search}
                             onChange={setSearch}
-                            placeholder="Search by entity ID..."
+                            placeholder="Search audit log..."
                         />
+
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Event Type</legend>
+                            <select
+                                className="select w-full md:w-48"
+                                value={filters.event_type || ""}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        event_type: e.target.value,
+                                    })
+                                }
+                            >
+                                <option value="">All Types</option>
+                                <option value="processing">Processing</option>
+                                <option value="completed">Completed</option>
+                                <option value="failed">Failed</option>
+                                <option value="action">Action</option>
+                            </select>
+                        </fieldset>
 
                         <fieldset className="fieldset">
                             <legend className="fieldset-legend">Action</legend>
@@ -315,62 +374,28 @@ export default function AuditLogPage() {
                                 }
                             >
                                 <option value="">All Actions</option>
-                                <option value="create_schedule">
-                                    Schedule Created
-                                </option>
-                                <option value="update_schedule">
-                                    Schedule Updated
-                                </option>
-                                <option value="trigger_processing">
-                                    Processing Triggered
-                                </option>
-                                <option value="retry_schedule">
-                                    Schedule Retried
-                                </option>
-                                <option value="cancel_schedule">
-                                    Schedule Cancelled
-                                </option>
-                                <option value="create_hold">
-                                    Hold Created
-                                </option>
-                                <option value="release_hold">
-                                    Hold Released
-                                </option>
-                                <option value="cancel_hold">
-                                    Hold Cancelled
-                                </option>
-                                <option value="process_batch">
-                                    Batch Processed
-                                </option>
+                                <optgroup label="Schedules">
+                                    <option value="schedule_processing">Schedule Processing</option>
+                                    <option value="schedule_completed">Schedule Completed</option>
+                                    <option value="schedule_failed">Schedule Failed</option>
+                                    <option value="create_schedule">Schedule Created</option>
+                                    <option value="trigger_processing">Manual Trigger</option>
+                                </optgroup>
+                                <optgroup label="Transfers">
+                                    <option value="transfer_sent">Transfer Sent</option>
+                                    <option value="transfer_failed">Transfer Failed</option>
+                                </optgroup>
+                                <optgroup label="Escrow Holds">
+                                    <option value="create_escrow_hold">Hold Created</option>
+                                    <option value="release_escrow_hold">Hold Released</option>
+                                    <option value="auto_release_escrow_hold">Auto-Released</option>
+                                    <option value="cancel_escrow_hold">Hold Cancelled</option>
+                                </optgroup>
                             </select>
                         </fieldset>
 
                         <fieldset className="fieldset">
-                            <legend className="fieldset-legend">
-                                Entity Type
-                            </legend>
-                            <select
-                                className="select w-full md:w-48"
-                                value={filters.entity_type || ""}
-                                onChange={(e) =>
-                                    setFilters({
-                                        ...filters,
-                                        entity_type: e.target.value as any,
-                                    })
-                                }
-                            >
-                                <option value="">All Types</option>
-                                <option value="payout_schedule">
-                                    Payout Schedule
-                                </option>
-                                <option value="escrow_hold">Escrow Hold</option>
-                            </select>
-                        </fieldset>
-
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">
-                                Date From
-                            </legend>
+                            <legend className="fieldset-legend">Date From</legend>
                             <input
                                 type="date"
                                 className="input w-full md:w-48"
@@ -399,8 +424,8 @@ export default function AuditLogPage() {
                             />
                         </fieldset>
 
-                        {(filters.action ||
-                            filters.entity_type ||
+                        {(filters.event_type ||
+                            filters.action ||
                             filters.date_from ||
                             filters.date_to ||
                             search) && (
@@ -431,9 +456,9 @@ export default function AuditLogPage() {
                             icon="fa-clock-rotate-left"
                             title="No audit entries found"
                             description={
-                                filters.action || search
+                                filters.action || filters.event_type || search
                                     ? "Try adjusting your filters"
-                                    : "Audit entries will appear here as actions are performed"
+                                    : "Audit entries will appear here as payouts are processed"
                             }
                         />
                     ) : (
@@ -449,12 +474,10 @@ export default function AuditLogPage() {
                                         {/* Timeline entry */}
                                         <div className="flex gap-4">
                                             {/* Timeline dot */}
-                                            <div className="shrink-0 w-8 h-8 rounded-full bg-base-200 flex items-center justify-center ">
+                                            <div className="shrink-0 w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
                                                 <i
                                                     className={`fa-duotone fa-regular ${
-                                                        ACTION_LABELS[
-                                                            entry.action
-                                                        ]?.icon || "fa-circle"
+                                                        ACTION_LABELS[entry.action || ""]?.icon || "fa-circle"
                                                     } text-sm`}
                                                 ></i>
                                             </div>
@@ -465,58 +488,52 @@ export default function AuditLogPage() {
                                                     <div className="card-body p-4">
                                                         <div className="flex items-start justify-between">
                                                             <div className="flex-1">
-                                                                <div className="flex items-center gap-2 mb-2">
-                                                                    <ActionBadge
-                                                                        action={
-                                                                            entry.action
-                                                                        }
-                                                                    />
-                                                                    <span className="badge badge-ghost">
-                                                                        {
-                                                                            entry.entity_type
-                                                                        }
-                                                                    </span>
+                                                                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                                                    <EventTypeBadge eventType={entry.event_type} />
+                                                                    {entry.action && <ActionBadge action={entry.action} />}
                                                                     <span className="text-sm text-base-content/60">
-                                                                        {formatDateTime(
-                                                                            entry.created_at,
-                                                                        )}
+                                                                        {formatDateTime(entry.created_at)}
                                                                     </span>
                                                                 </div>
-                                                                <p className="text-sm mb-2">
-                                                                    {getActionDescription(
-                                                                        entry,
+
+                                                                {/* Reference IDs */}
+                                                                <div className="flex items-center gap-3 text-sm mb-2">
+                                                                    <span className="text-base-content/60">
+                                                                        Placement: <code className="text-base-content">{truncateId(entry.placement_id)}</code>
+                                                                    </span>
+                                                                    {entry.schedule_id && (
+                                                                        <span className="text-base-content/60">
+                                                                            Schedule: <code className="text-base-content">{truncateId(entry.schedule_id)}</code>
+                                                                        </span>
                                                                     )}
-                                                                </p>
-                                                                {(entry.changed_by ||
-                                                                    entry.changed_by_role) && (
-                                                                    <div className="text-xs text-base-content/60">
-                                                                        By:{" "}
-                                                                        {entry.changed_by ||
-                                                                            "System"}{" "}
-                                                                        (
-                                                                        {entry.changed_by_role ||
-                                                                            "automated"}
-                                                                        )
+                                                                    {entry.transaction_id && (
+                                                                        <span className="text-base-content/60">
+                                                                            Transaction: <code className="text-base-content">{truncateId(entry.transaction_id)}</code>
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+
+                                                                {entry.reason && (
+                                                                    <p className="text-sm text-base-content/80 mb-2">
+                                                                        {entry.reason}
+                                                                    </p>
+                                                                )}
+
+                                                                {(entry.changed_by || entry.changed_by_role) && (
+                                                                    <div className="text-sm text-base-content/60">
+                                                                        By: {entry.changed_by || "System"}{" "}
+                                                                        ({entry.changed_by_role || "automated"})
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                            {(entry.before_state ||
-                                                                entry.after_state ||
-                                                                entry.metadata) && (
+                                                            {entry.metadata && (
                                                                 <button
-                                                                    onClick={() =>
-                                                                        toggleExpanded(
-                                                                            entry.id,
-                                                                        )
-                                                                    }
+                                                                    onClick={() => toggleExpanded(entry.id)}
                                                                     className="btn btn-sm btn-ghost"
                                                                 >
                                                                     <i
                                                                         className={`fa-duotone fa-regular fa-chevron-${
-                                                                            expandedEntry ===
-                                                                            entry.id
-                                                                                ? "up"
-                                                                                : "down"
+                                                                            expandedEntry === entry.id ? "up" : "down"
                                                                         }`}
                                                                     ></i>
                                                                     Details
@@ -525,54 +542,18 @@ export default function AuditLogPage() {
                                                         </div>
 
                                                         {/* Expanded details */}
-                                                        {expandedEntry ===
-                                                            entry.id && (
+                                                        {expandedEntry === entry.id && entry.metadata && (
                                                             <div className="mt-4 pt-4 border-t border-base-300 space-y-3">
-                                                                {entry.before_state && (
-                                                                    <div>
-                                                                        <h4 className="text-xs font-semibold text-base-content/60 mb-1">
-                                                                            Before:
-                                                                        </h4>
-                                                                        <pre className="bg-base-100 p-2 rounded text-xs overflow-x-auto">
-                                                                            {JSON.stringify(
-                                                                                entry.before_state,
-                                                                                null,
-                                                                                2,
-                                                                            )}
-                                                                        </pre>
-                                                                    </div>
-                                                                )}
-                                                                {entry.after_state && (
-                                                                    <div>
-                                                                        <h4 className="text-xs font-semibold text-base-content/60 mb-1">
-                                                                            After:
-                                                                        </h4>
-                                                                        <pre className="bg-base-100 p-2 rounded text-xs overflow-x-auto">
-                                                                            {JSON.stringify(
-                                                                                entry.after_state,
-                                                                                null,
-                                                                                2,
-                                                                            )}
-                                                                        </pre>
-                                                                    </div>
-                                                                )}
-                                                                {entry.metadata && (
-                                                                    <div>
-                                                                        <h4 className="text-xs font-semibold text-base-content/60 mb-1">
-                                                                            Metadata:
-                                                                        </h4>
-                                                                        <pre className="bg-base-100 p-2 rounded text-xs overflow-x-auto">
-                                                                            {JSON.stringify(
-                                                                                entry.metadata,
-                                                                                null,
-                                                                                2,
-                                                                            )}
-                                                                        </pre>
-                                                                    </div>
-                                                                )}
-                                                                <div className="text-xs text-base-content/60">
-                                                                    Entry ID:{" "}
-                                                                    {entry.id}
+                                                                <div>
+                                                                    <h4 className="text-sm font-semibold text-base-content/60 mb-1">
+                                                                        Metadata:
+                                                                    </h4>
+                                                                    <pre className="bg-base-100 p-2 rounded text-sm overflow-x-auto">
+                                                                        {JSON.stringify(entry.metadata, null, 2)}
+                                                                    </pre>
+                                                                </div>
+                                                                <div className="text-sm text-base-content/60">
+                                                                    Entry ID: {entry.id}
                                                                 </div>
                                                             </div>
                                                         )}

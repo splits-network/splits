@@ -18,7 +18,7 @@ export default function ReputationDisplay({
                 <span className="text-sm font-black tracking-tight">
                     {score ? score.toFixed(1) : "N/A"}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-base-content/40">
+                <span className="text-sm uppercase tracking-wider text-base-content/40">
                     Rating
                 </span>
             </div>
@@ -28,7 +28,7 @@ export default function ReputationDisplay({
                 <span className="text-sm font-black tracking-tight">
                     {placements ?? 0}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-base-content/40">
+                <span className="text-sm uppercase tracking-wider text-base-content/40">
                     Placements
                 </span>
             </div>

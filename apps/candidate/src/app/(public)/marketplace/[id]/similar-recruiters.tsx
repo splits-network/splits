@@ -96,7 +96,7 @@ export default function SimilarRecruiters({
                                     <p className="text-xs font-bold truncate">
                                         {name}
                                     </p>
-                                    <p className="text-[10px] text-base-content/50 truncate">
+                                    <p className="text-sm text-base-content/50 truncate">
                                         {r.tagline || "Recruiter"}
                                     </p>
                                 </div>

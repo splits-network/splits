@@ -4,6 +4,24 @@
     "private": true,
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./src/crypto": {
+            "types": "./dist/crypto.d.ts",
+            "default": "./dist/crypto.js"
+        },
+        "./src/vault": {
+            "types": "./dist/vault.d.ts",
+            "default": "./dist/vault.js"
+        },
+        "./src/vault-server": {
+            "types": "./dist/vault-server.d.ts",
+            "default": "./dist/vault-server.js"
+        }
+    },
     "scripts": {
         "build": "tsc -b",
         "clean": "rm -rf dist *.tsbuildinfo",

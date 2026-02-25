@@ -55,18 +55,18 @@ export function CompanyDetail({
                         <div className="flex flex-wrap gap-2 mt-2">
                             {relationship && (
                                 <span
-                                    className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(relationship.status)}`}
+                                    className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(relationship.status)}`}
                                 >
                                     {formatStatus(relationship.status)}
                                 </span>
                             )}
                             {company.company_size && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
                                     {formatCompanySize(company.company_size)}
                                 </span>
                             )}
                             {company.headquarters_location && (
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
                                     <i className="fa-duotone fa-regular fa-location-dot mr-1" />
                                     {company.headquarters_location}
                                 </span>
@@ -100,7 +100,7 @@ export function CompanyDetail({
                 {/* Stats grid */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Size
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -108,7 +108,7 @@ export function CompanyDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Relationship
                         </p>
                         <p className="text-lg font-black tracking-tight capitalize">
@@ -116,7 +116,7 @@ export function CompanyDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Manage Jobs
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -145,7 +145,7 @@ export function CompanyDetail({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     {company.headquarters_location && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Location
                             </p>
                             <p className="font-bold text-sm">
@@ -156,7 +156,7 @@ export function CompanyDetail({
                     )}
                     {company.website && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Website
                             </p>
                             <a
@@ -175,7 +175,7 @@ export function CompanyDetail({
                     )}
                     {company.industry && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Industry
                             </p>
                             <p className="font-bold text-sm">
@@ -185,7 +185,7 @@ export function CompanyDetail({
                     )}
                     {company.company_size && (
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Company Size
                             </p>
                             <p className="font-bold text-sm">
@@ -203,17 +203,17 @@ export function CompanyDetail({
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                             <div className="bg-base-100 p-4">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Status
                                 </p>
                                 <span
-                                    className={`inline-flex items-center px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] font-bold ${statusColor(relationship.status)}`}
+                                    className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(relationship.status)}`}
                                 >
                                     {formatStatus(relationship.status)}
                                 </span>
                             </div>
                             <div className="bg-base-100 p-4">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Type
                                 </p>
                                 <p className="font-bold text-sm capitalize">
@@ -222,7 +222,7 @@ export function CompanyDetail({
                             </div>
                             {relationship.relationship_start_date && (
                                 <div className="bg-base-100 p-4">
-                                    <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                    <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                         Start Date
                                     </p>
                                     <p className="font-bold text-sm">
@@ -233,7 +233,7 @@ export function CompanyDetail({
                                 </div>
                             )}
                             <div className="bg-base-100 p-4">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Can Manage Jobs
                                 </p>
                                 <p
@@ -332,7 +332,7 @@ export function CompanyDetailLoader({
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                         Loading details...
                     </span>
                 </div>

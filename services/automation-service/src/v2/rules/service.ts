@@ -47,7 +47,7 @@ export class AutomationRuleServiceV2 {
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.rules.created', {
                 rule_id: rule.id,
-                trigger_type: rule.trigger_type,
+                rule_type: rule.rule_type,
             });
         }
         return rule;

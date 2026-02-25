@@ -131,13 +131,8 @@ export default function NextStepsFeed({
             // P4: Stale applications (14+ days)
             if (
                 app.updated_at &&
-                ![
-                    "rejected",
-                    "withdrawn",
-                    "hired",
-                    "expired",
-                    "draft",
-                ].includes(app.stage)
+                !app.expired_at &&
+                !["rejected", "withdrawn", "hired", "draft"].includes(app.stage)
             ) {
                 const daysSinceUpdate = Math.floor(
                     (now.getTime() - new Date(app.updated_at).getTime()) /
@@ -162,13 +157,8 @@ export default function NextStepsFeed({
 
             // P6: Recent submissions
             if (
-                ![
-                    "rejected",
-                    "withdrawn",
-                    "hired",
-                    "expired",
-                    "draft",
-                ].includes(app.stage)
+                !app.expired_at &&
+                !["rejected", "withdrawn", "hired", "draft"].includes(app.stage)
             ) {
                 result.push({
                     id: `recent-${app.id}`,
@@ -262,10 +252,10 @@ export default function NextStepsFeed({
                             </div>
 
                             <div className="flex items-center gap-2 shrink-0">
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-base-content/30 hidden sm:block">
+                                <span className="text-sm font-semibold uppercase tracking-wider text-base-content/30 hidden sm:block">
                                     {item.timeLabel}
                                 </span>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="text-sm font-bold uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                                     {item.cta}
                                     <i className="fa-duotone fa-regular fa-chevron-right text-[8px] ml-0.5" />
                                 </span>

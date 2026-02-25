@@ -33,6 +33,7 @@ import {
     candidateAIReviewedEmail,
     candidateRecruiterReviewEmail,
     candidateApplicationExpiredEmail,
+    candidateExpirationWarningEmail,
     jobProposalToCandidateEmail,
     recruiterRequestChangesEmail,
 } from '../../templates/applications/candidate-emails';
@@ -43,7 +44,13 @@ import {
     recruiterOfferExtendedEmail,
     recruiterCandidateHiredEmail,
     recruiterCandidateRejectedEmail,
+    recruiterApplicationExpiredEmail,
+    recruiterExpirationWarningEmail,
 } from '../../templates/applications/recruiter-emails';
+import {
+    companyApplicationExpiredEmail,
+    companyExpirationWarningEmail,
+} from '../../templates/applications/company-emails';
 
 export class ApplicationsEmailService {
     constructor(
@@ -1486,6 +1493,220 @@ export class ApplicationsEmailService {
             actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
             actionLabel: 'View Details',
             priority: 'normal',
+            category: 'application',
+        });
+    }
+
+    // ============================================================================
+    // Stage-Aware Expiration Notifications
+    // ============================================================================
+
+    async sendCandidateApplicationExpiredStageAware(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            hasRecruiter: boolean;
+            recruiterName?: string;
+            expiredFromStage?: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Application Expired - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+
+        const html = candidateApplicationExpiredEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            hasRecruiter: data.hasRecruiter,
+            recruiterName: data.recruiterName,
+            expiredFromStage: data.expiredFromStage,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.expired',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
+            actionLabel: 'View Application',
+            priority: 'normal',
+            category: 'application',
+        });
+    }
+
+    async sendRecruiterApplicationExpired(
+        recipientEmail: string,
+        data: {
+            recruiterName: string;
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            expiredFromStage?: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Application Expired: ${data.candidateName} - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+
+        const html = recruiterApplicationExpiredEmail({
+            recruiterName: data.recruiterName,
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            expiredFromStage: data.expiredFromStage,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.expired',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
+            actionLabel: 'View Application',
+            priority: 'normal',
+            category: 'application',
+        });
+    }
+
+    async sendCompanyApplicationExpired(
+        recipientEmail: string,
+        data: {
+            jobTitle: string;
+            candidateName: string;
+            expiredFromStage: string;
+            daysWaited: number;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Application Lost: ${data.jobTitle}`;
+        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications`;
+
+        const html = companyApplicationExpiredEmail({
+            jobTitle: data.jobTitle,
+            candidateName: data.candidateName,
+            expiredFromStage: data.expiredFromStage,
+            daysWaited: data.daysWaited,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.expired',
+            userId: data.userId,
+            payload: data,
+            actionUrl: '/portal/applications',
+            actionLabel: 'Review Applications',
+            priority: 'high',
+            category: 'application',
+        });
+    }
+
+    async sendCandidateExpirationWarning(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            recruiterName?: string;
+            stage: string;
+            daysRemaining: number;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Action Required: Application for ${data.jobTitle} expiring soon`;
+        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+
+        const html = candidateExpirationWarningEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            recruiterName: data.recruiterName,
+            stage: data.stage,
+            daysRemaining: data.daysRemaining,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.expiration_warning',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
+            actionLabel: 'Respond Now',
+            priority: 'high',
+            category: 'application',
+        });
+    }
+
+    async sendRecruiterExpirationWarning(
+        recipientEmail: string,
+        data: {
+            recruiterName: string;
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            stage: string;
+            daysRemaining: number;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Application Expiring: ${data.candidateName} - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+
+        const html = recruiterExpirationWarningEmail({
+            recruiterName: data.recruiterName,
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            stage: data.stage,
+            daysRemaining: data.daysRemaining,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.expiration_warning',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
+            actionLabel: 'Review Application',
+            priority: 'high',
+            category: 'application',
+        });
+    }
+
+    async sendCompanyExpirationWarning(
+        recipientEmail: string,
+        data: {
+            companyName: string;
+            daysRemaining: number;
+            applications: Array<{ jobTitle: string; candidateName: string }>;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const appCount = data.applications.length;
+        const subject = `${appCount} application${appCount === 1 ? '' : 's'} expiring in ${data.daysRemaining} days`;
+        const dashboardUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications`;
+
+        const html = companyExpirationWarningEmail({
+            companyName: data.companyName,
+            daysRemaining: data.daysRemaining,
+            applications: data.applications,
+            dashboardUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.expiration_warning',
+            userId: data.userId,
+            payload: data,
+            actionUrl: '/portal/applications',
+            actionLabel: 'Review Applications',
+            priority: 'high',
             category: 'application',
         });
     }

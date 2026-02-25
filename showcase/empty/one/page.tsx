@@ -218,7 +218,7 @@ export default function EmptyOne() {
                     <div key={state.id} className="empty-card opacity-0">
                         {/* Label */}
                         <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-base-200 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
+                            <span className="px-3 py-1 bg-base-200 text-sm font-semibold uppercase tracking-widest text-base-content/40">
                                 {state.id.replace("-", " ")}
                             </span>
                             <div className="flex-1 h-px bg-base-300" />

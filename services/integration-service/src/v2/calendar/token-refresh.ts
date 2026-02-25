@@ -1,4 +1,5 @@
 import { Logger } from '@splits-network/shared-logging';
+import { CryptoService } from '@splits-network/shared-config/src/crypto';
 import { ConnectionRepository } from '../connections/repository';
 import { IEventPublisher } from '../shared/events';
 import { getOAuthClientId, getOAuthClientSecret } from '../shared/helpers';
@@ -19,10 +20,11 @@ export class TokenRefreshService {
         private connectionRepo: ConnectionRepository,
         private eventPublisher: IEventPublisher,
         private logger: Logger,
+        private crypto: CryptoService,
     ) {}
 
     /**
-     * Returns a valid access token for the given connection.
+     * Returns a valid (decrypted) access token for the given connection.
      * Refreshes the token if it's expired or about to expire (within 5 minutes).
      */
     async getValidToken(connectionId: string): Promise<string> {
@@ -36,7 +38,7 @@ export class TokenRefreshService {
             new Date(connection.token_expires_at).getTime() < Date.now() + 5 * 60_000;
 
         if (!needsRefresh) {
-            return connection.access_token_enc;
+            return this.crypto.decrypt(connection.access_token_enc);
         }
 
         if (!connection.refresh_token_enc) {
@@ -46,8 +48,9 @@ export class TokenRefreshService {
             throw new Error('Token expired and no refresh token available');
         }
 
-        // Refresh the token
-        return this.refreshToken(connectionId, connection.provider_slug, connection.refresh_token_enc);
+        // Decrypt refresh token and use it to get new tokens
+        const decryptedRefreshToken = this.crypto.decrypt(connection.refresh_token_enc);
+        return this.refreshToken(connectionId, connection.provider_slug, decryptedRefreshToken);
     }
 
     private async refreshToken(
@@ -86,9 +89,9 @@ export class TokenRefreshService {
 
         const tokens = await res.json() as TokenResponse;
 
-        // Update the stored tokens
+        // Encrypt and store the refreshed tokens
         await this.connectionRepo.update(connectionId, {
-            access_token_enc: tokens.access_token,
+            access_token_enc: this.crypto.encrypt(tokens.access_token),
             token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
         });
 

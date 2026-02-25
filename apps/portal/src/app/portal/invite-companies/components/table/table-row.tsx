@@ -65,7 +65,7 @@ export function TableRow({
                 </td>
                 <td className="px-4 py-3">
                     <span
-                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
+                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
                     >
                         <i
                             className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`}

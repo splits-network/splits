@@ -34,13 +34,13 @@ export function GridCard({
             {/* Top row: status pill + NEW badge */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span
-                    className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(state)}`}
+                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(state)}`}
                 >
                     {formatStatus(state)}
                 </span>
 
                 {isNew(placement) && (
-                    <span className="text-[10px] uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
+                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
                         <i className="fa-duotone fa-regular fa-sparkles mr-1" />
                         New
                     </span>
@@ -84,7 +84,7 @@ export function GridCard({
             {placement.guarantee_days !== undefined &&
                 placement.guarantee_days !== null && (
                     <div className="flex flex-wrap gap-1 mb-4">
-                        <span className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                             {placement.guarantee_days}d guarantee
                         </span>
                     </div>

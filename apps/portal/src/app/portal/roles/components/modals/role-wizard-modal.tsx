@@ -19,7 +19,10 @@ const WIZARD_STEPS = [
     { label: "Compensation", icon: "fa-duotone fa-regular fa-money-bill-wave" },
     { label: "Descriptions", icon: "fa-duotone fa-regular fa-file-lines" },
     { label: "Requirements", icon: "fa-duotone fa-regular fa-list-check" },
-    { label: "Pre-Screen", icon: "fa-duotone fa-regular fa-clipboard-question" },
+    {
+        label: "Pre-Screen",
+        icon: "fa-duotone fa-regular fa-clipboard-question",
+    },
 ];
 
 const COMMUTE_OPTIONS = [
@@ -193,7 +196,9 @@ function PreScreenQuestionCard({
                                 )
                             }
                         />
-                        <span className="text-sm font-semibold">Disclaimer</span>
+                        <span className="text-sm font-semibold">
+                            Disclaimer
+                        </span>
                     </div>
                 </div>
             </div>
@@ -208,7 +213,11 @@ function PreScreenQuestionCard({
                         className="textarea textarea-bordered w-full"
                         style={{ borderRadius: 0 }}
                         rows={3}
-                        value={question.disclaimer.trim() ? question.disclaimer : ""}
+                        value={
+                            question.disclaimer.trim()
+                                ? question.disclaimer
+                                : ""
+                        }
                         onChange={(e) =>
                             onUpdate(index, "disclaimer", e.target.value || " ")
                         }
@@ -802,7 +811,10 @@ export default function RoleWizardModal({
 
     return (
         <dialog className={`modal ${isOpen ? "modal-open" : ""}`}>
-            <div className="modal-box max-w-3xl p-0" style={{ borderRadius: 0 }}>
+            <div
+                className="modal-box max-w-3xl p-0"
+                style={{ borderRadius: 0 }}
+            >
                 <div className="p-6">
                     {/* ── Header ── */}
                     <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-base-300">
@@ -838,7 +850,7 @@ export default function RoleWizardModal({
                                 key={i}
                                 className={`step ${i <= currentStep ? "step-primary" : ""}`}
                             >
-                                <span className="hidden sm:inline text-[10px] uppercase tracking-[0.15em] font-bold">
+                                <span className="hidden sm:inline text-sm uppercase tracking-[0.15em] font-bold">
                                     {step.label}
                                 </span>
                             </li>
@@ -887,7 +899,7 @@ export default function RoleWizardModal({
                                 {currentStep === 0 && (
                                     <div className="space-y-4">
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                            <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                 Job Title *
                                             </legend>
                                             <input
@@ -906,7 +918,7 @@ export default function RoleWizardModal({
 
                                         {showCompanySelect ? (
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Company *
                                                 </legend>
                                                 <select
@@ -940,7 +952,7 @@ export default function RoleWizardModal({
                                             </fieldset>
                                         ) : (
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Company *
                                                 </legend>
                                                 <input
@@ -958,7 +970,7 @@ export default function RoleWizardModal({
 
                                         <div className="grid grid-cols-2 gap-4">
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Location
                                                 </legend>
                                                 <input
@@ -976,7 +988,7 @@ export default function RoleWizardModal({
                                                 />
                                             </fieldset>
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Department
                                                 </legend>
                                                 <input
@@ -996,7 +1008,7 @@ export default function RoleWizardModal({
                                         </div>
 
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                            <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                 Status *
                                             </legend>
                                             <select
@@ -1029,7 +1041,7 @@ export default function RoleWizardModal({
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Min Salary (USD)
                                                 </legend>
                                                 <input
@@ -1048,7 +1060,7 @@ export default function RoleWizardModal({
                                                 />
                                             </fieldset>
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Max Salary (USD)
                                                 </legend>
                                                 <input
@@ -1090,7 +1102,7 @@ export default function RoleWizardModal({
 
                                         <div className="grid grid-cols-2 gap-4">
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Fee Percentage *
                                                 </legend>
                                                 <input
@@ -1112,7 +1124,7 @@ export default function RoleWizardModal({
                                                 />
                                             </fieldset>
                                             <fieldset className="fieldset">
-                                                <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Guarantee Period *
                                                 </legend>
                                                 <select
@@ -1151,7 +1163,7 @@ export default function RoleWizardModal({
                                         </div>
 
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                            <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                 Employment Type *
                                             </legend>
                                             <select
@@ -1209,7 +1221,7 @@ export default function RoleWizardModal({
                                                             }`}
                                                         >
                                                             {selected && (
-                                                                <i className="fa-solid fa-check mr-1 text-[10px]" />
+                                                                <i className="fa-solid fa-check mr-1 text-sm" />
                                                             )}
                                                             {opt.label}
                                                         </button>
@@ -1219,7 +1231,7 @@ export default function RoleWizardModal({
                                         </div>
 
                                         <fieldset className="fieldset">
-                                            <legend className="fieldset-legend text-[10px] uppercase tracking-[0.2em] font-bold">
+                                            <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                 Job Level
                                             </legend>
                                             <select
@@ -1272,7 +1284,10 @@ export default function RoleWizardModal({
                                 {/* Step 3: Descriptions */}
                                 {currentStep === 2 && (
                                     <div className="space-y-5">
-                                        <div role="alert" className="alert alert-info">
+                                        <div
+                                            role="alert"
+                                            className="alert alert-info"
+                                        >
                                             <i className="fa-duotone fa-regular fa-circle-info" />
                                             <span className="text-sm">
                                                 Two descriptions for different
@@ -1330,7 +1345,10 @@ export default function RoleWizardModal({
                                 {/* Step 4: Requirements */}
                                 {currentStep === 3 && (
                                     <div className="space-y-6">
-                                        <div role="alert" className="alert alert-info">
+                                        <div
+                                            role="alert"
+                                            className="alert alert-info"
+                                        >
                                             <i className="fa-duotone fa-regular fa-circle-info" />
                                             <span className="text-sm">
                                                 Mandatory requirements are
@@ -1365,8 +1383,8 @@ export default function RoleWizardModal({
                                                 {formData.mandatory_requirements
                                                     .length === 0 ? (
                                                     <p className="text-base-content/40 text-sm font-semibold py-6 text-center border-2 border-dashed border-base-300">
-                                                        No mandatory requirements
-                                                        added yet
+                                                        No mandatory
+                                                        requirements added yet
                                                     </p>
                                                 ) : (
                                                     formData.mandatory_requirements.map(
@@ -1437,8 +1455,8 @@ export default function RoleWizardModal({
                                                 {formData.preferred_requirements
                                                     .length === 0 ? (
                                                     <p className="text-base-content/40 text-sm font-semibold py-6 text-center border-2 border-dashed border-base-300">
-                                                        No preferred requirements
-                                                        added yet
+                                                        No preferred
+                                                        requirements added yet
                                                     </p>
                                                 ) : (
                                                     formData.preferred_requirements.map(
@@ -1488,7 +1506,10 @@ export default function RoleWizardModal({
                                 {/* Step 5: Pre-Screen Questions */}
                                 {currentStep === 4 && (
                                     <div className="space-y-4">
-                                        <div role="alert" className="alert alert-info">
+                                        <div
+                                            role="alert"
+                                            className="alert alert-info"
+                                        >
                                             <i className="fa-duotone fa-regular fa-circle-info" />
                                             <span className="text-sm">
                                                 Screen candidates upfront with
@@ -1522,8 +1543,8 @@ export default function RoleWizardModal({
                                             {formData.pre_screen_questions
                                                 .length === 0 ? (
                                                 <p className="text-base-content/40 text-sm font-semibold py-10 text-center border-2 border-dashed border-base-300">
-                                                    No pre-screen questions added
-                                                    yet
+                                                    No pre-screen questions
+                                                    added yet
                                                 </p>
                                             ) : (
                                                 formData.pre_screen_questions.map(

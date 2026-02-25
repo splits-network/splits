@@ -79,7 +79,11 @@ function EntityMetadata({ result }: { result: SearchResult }) {
                     )}
                     {m.status && (
                         <BaselStatusPill
-                            color={m.status === "open" || m.status === "active" ? "success" : "warning"}
+                            color={
+                                m.status === "open" || m.status === "active"
+                                    ? "success"
+                                    : "warning"
+                            }
                         >
                             {m.status}
                         </BaselStatusPill>
@@ -162,7 +166,7 @@ function CommuteTags({ commuteTypes }: { commuteTypes?: string[] }) {
             {commuteTypes.map((tag) => (
                 <span
                     key={tag}
-                    className="px-2 py-0.5 bg-base-100 text-[10px] font-semibold text-base-content/40"
+                    className="px-2 py-0.5 bg-base-100 text-sm font-semibold text-base-content/40"
                 >
                     {tag}
                 </span>
@@ -246,7 +250,9 @@ export function SearchResultCard({
 
                         {/* Commute tags for jobs */}
                         {result.entity_type === "job" && (
-                            <CommuteTags commuteTypes={result.metadata?.commute_types} />
+                            <CommuteTags
+                                commuteTypes={result.metadata?.commute_types}
+                            />
                         )}
 
                         {/* Context */}
@@ -260,7 +266,9 @@ export function SearchResultCard({
 
                 {/* Entity type badge */}
                 <div className="flex-shrink-0 ml-4 text-right">
-                    <BaselStatusPill color={color}>{config.label}</BaselStatusPill>
+                    <BaselStatusPill color={color}>
+                        {config.label}
+                    </BaselStatusPill>
                 </div>
             </div>
         </div>

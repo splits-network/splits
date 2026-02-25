@@ -261,7 +261,7 @@ export default function PricingOne() {
                             Annual
                         </span>
                         {billing === "annual" && (
-                            <span className="px-2 py-0.5 bg-success/10 text-success text-[10px] font-bold uppercase">
+                            <span className="px-2 py-0.5 bg-success/10 text-success text-sm font-bold uppercase">
                                 Save 20%
                             </span>
                         )}
@@ -278,7 +278,7 @@ export default function PricingOne() {
                             className={`pricing-card opacity-0 bg-base-100 border border-base-300 p-8 lg:p-10 relative ${plan.popular ? "border-coral border-2 lg:-mt-4 lg:mb-0 lg:pb-14 " : ""}`}
                         >
                             {plan.popular && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-content text-[10px] font-bold uppercase tracking-wider">
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-content text-sm font-bold uppercase tracking-wider">
                                     Most Popular
                                 </div>
                             )}

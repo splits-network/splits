@@ -57,7 +57,7 @@ export default function NotificationListItem({
                     )}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] text-base-content/50">
+                    <span className="text-sm text-base-content/50">
                         {formatNotificationTime(item.created_at)}
                     </span>
                     {item.category && (

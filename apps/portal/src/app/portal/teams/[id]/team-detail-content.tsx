@@ -8,7 +8,11 @@ import { LoadingState } from "@splits-network/shared-ui";
 import type { Team, TeamMember } from "../types";
 import { formatCurrency } from "../types";
 import { statusColor } from "../components/shared/status-color";
-import { formatStatus, teamInitials, memberCountDisplay } from "../components/shared/helpers";
+import {
+    formatStatus,
+    teamInitials,
+    memberCountDisplay,
+} from "../components/shared/helpers";
 import { TeamDetailAnimator } from "./team-detail-animator";
 import { MembersSection } from "../components/detail/members-section";
 import { SettingsSection } from "../components/detail/settings-section";
@@ -131,7 +135,7 @@ export default function TeamDetailContent({ teamId }: TeamDetailContentProps) {
                         {/* Status badge */}
                         <div className="mb-4">
                             <span
-                                className={`detail-badge text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 opacity-0 ${statusColor(team.status)}`}
+                                className={`detail-badge text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 opacity-0 ${statusColor(team.status)}`}
                             >
                                 {formatStatus(team.status)}
                             </span>
@@ -226,10 +230,7 @@ export default function TeamDetailContent({ teamId }: TeamDetailContentProps) {
                     />
                 )}
                 {activeTab === "settings" && (
-                    <SettingsSection
-                        team={team}
-                        onRefresh={loadTeamData}
-                    />
+                    <SettingsSection team={team} onRefresh={loadTeamData} />
                 )}
             </div>
         </TeamDetailAnimator>

@@ -203,7 +203,7 @@ export default function ProfilesOne() {
                                 )}
                                 {profile.verified && (
                                     <div className="absolute -top-1 -right-1 w-6 h-6 bg-secondary text-secondary-content flex items-center justify-center rounded-full">
-                                        <i className="fa-solid fa-check text-[10px]" />
+                                        <i className="fa-solid fa-check text-sm" />
                                     </div>
                                 )}
                             </div>
@@ -270,7 +270,7 @@ export default function ProfilesOne() {
                                     <div className="text-xl font-black">
                                         {stat.value}
                                     </div>
-                                    <div className="text-[10px] uppercase tracking-widest opacity-40">
+                                    <div className="text-sm uppercase tracking-widest opacity-40">
                                         {stat.label}
                                     </div>
                                 </div>
@@ -361,7 +361,7 @@ export default function ProfilesOne() {
                                                     <p className="text-sm">
                                                         {a.action}
                                                     </p>
-                                                    <p className="text-[10px] text-base-content/30">
+                                                    <p className="text-sm text-base-content/30">
                                                         {a.time}
                                                     </p>
                                                 </div>
@@ -482,7 +482,7 @@ export default function ProfilesOne() {
                                             />
                                         </div>
                                         <div>
-                                            <div className="text-[10px] uppercase tracking-widest text-base-content/40">
+                                            <div className="text-sm uppercase tracking-widest text-base-content/40">
                                                 {c.label}
                                             </div>
                                             <div className="text-sm font-semibold">

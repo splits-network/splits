@@ -11,13 +11,21 @@ interface BaselTooltipProps {
  * Basel editorial tooltip for Recharts.
  * Sharp corners, light border, left-accent bar per series.
  */
-export function BaselTooltip({ active, payload, label, formatter }: BaselTooltipProps) {
+export function BaselTooltip({
+    active,
+    payload,
+    label,
+    formatter,
+}: BaselTooltipProps) {
     if (!active || !payload?.length) return null;
 
     return (
-        <div className="bg-base-100 border border-base-content/15 px-3.5 py-2.5" style={{ minWidth: 120 }}>
+        <div
+            className="bg-base-100 border border-base-content/15 px-3.5 py-2.5"
+            style={{ minWidth: 120 }}
+        >
             {label && (
-                <p className="text-[10px] font-semibold text-base-content/50 mb-1.5 uppercase tracking-wider">
+                <p className="text-sm font-semibold text-base-content/50 mb-1.5 uppercase tracking-wider">
                     {label}
                 </p>
             )}
@@ -30,15 +38,15 @@ export function BaselTooltip({ active, payload, label, formatter }: BaselTooltip
                         marginBottom: i < payload.length - 1 ? 4 : 0,
                     }}
                 >
-                    <span className="text-[11px] text-base-content/70">
+                    <span className="text-sm text-base-content/70">
                         {entry.name}:
                     </span>
                     <span className="text-xs font-bold text-base-content">
                         {formatter
                             ? formatter(entry.value, entry.name)
                             : typeof entry.value === "number"
-                                ? entry.value.toLocaleString()
-                                : entry.value}
+                              ? entry.value.toLocaleString()
+                              : entry.value}
                     </span>
                 </div>
             ))}

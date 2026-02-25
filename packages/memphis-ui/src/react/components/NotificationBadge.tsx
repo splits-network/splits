@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface NotificationBadgeProps {
     /** Badge label */
@@ -23,24 +23,24 @@ export interface NotificationBadgeProps {
 export function NotificationBadge({
     label,
     count,
-    color = 'coral',
-    className = '',
+    color = "coral",
+    className = "",
 }: NotificationBadgeProps) {
     return (
         <span
             className={[
                 `accent-${color}`,
-                'badge bg-accent',
-                'font-black tracking-wider',
-                'border-dark text-dark',
+                "badge bg-accent",
+                "font-black tracking-wider",
+                "border-dark text-dark",
                 className,
-            ].filter(Boolean).join(' ')}
+            ]
+                .filter(Boolean)
+                .join(" ")}
         >
             {label}
             {count !== undefined && (
-                <span
-                    className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-black ml-2 bg-dark text-white"
-                >
+                <span className="inline-flex items-center justify-center w-5 h-5 text-sm font-black ml-2 bg-dark text-white">
                     {count}
                 </span>
             )}

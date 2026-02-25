@@ -1,6 +1,9 @@
 "use client";
 
-import type { ContentBlock, ContentBlockType } from "@splits-network/shared-types";
+import type {
+    ContentBlock,
+    ContentBlockType,
+} from "@splits-network/shared-types";
 import { SortableItemWrapper } from "../shared/sortable-item-wrapper";
 
 interface SortableBlockCardProps {
@@ -12,17 +15,20 @@ interface SortableBlockCardProps {
 }
 
 const BLOCK_META: Record<ContentBlockType, { icon: string; label: string }> = {
-    "hero": { icon: "fa-rocket-launch", label: "Hero" },
-    "full-bleed-image": { icon: "fa-image-landscape", label: "Full Bleed Image" },
+    hero: { icon: "fa-rocket-launch", label: "Hero" },
+    "full-bleed-image": {
+        icon: "fa-image-landscape",
+        label: "Full Bleed Image",
+    },
     "article-body": { icon: "fa-paragraph", label: "Article Body" },
     "split-editorial": { icon: "fa-columns-3", label: "Split Editorial" },
     "pull-quote": { icon: "fa-quote-left", label: "Pull Quote" },
     "stats-bar": { icon: "fa-chart-simple", label: "Stats Bar" },
     "inline-image": { icon: "fa-image", label: "Inline Image" },
-    "cta": { icon: "fa-bullhorn", label: "Call to Action" },
+    cta: { icon: "fa-bullhorn", label: "Call to Action" },
     "feature-grid": { icon: "fa-grid-2", label: "Feature Grid" },
-    "timeline": { icon: "fa-timeline", label: "Timeline" },
-    "faq": { icon: "fa-circle-question", label: "FAQ" },
+    timeline: { icon: "fa-timeline", label: "Timeline" },
+    faq: { icon: "fa-circle-question", label: "FAQ" },
     "benefits-cards": { icon: "fa-cards-blank", label: "Benefits Cards" },
 };
 
@@ -37,7 +43,9 @@ function getBlockSummary(block: ContentBlock): string {
         case "split-editorial":
             return block.heading;
         case "pull-quote":
-            return block.quote.length > 50 ? block.quote.slice(0, 50) + "..." : block.quote;
+            return block.quote.length > 50
+                ? block.quote.slice(0, 50) + "..."
+                : block.quote;
         case "stats-bar":
             return `${block.stats.length} stat${block.stats.length !== 1 ? "s" : ""}`;
         case "inline-image":
@@ -45,20 +53,41 @@ function getBlockSummary(block: ContentBlock): string {
         case "cta":
             return block.heading;
         case "feature-grid":
-            return block.heading || `${block.items.length} feature${block.items.length !== 1 ? "s" : ""}`;
+            return (
+                block.heading ||
+                `${block.items.length} feature${block.items.length !== 1 ? "s" : ""}`
+            );
         case "timeline":
-            return block.heading || `${block.steps.length} step${block.steps.length !== 1 ? "s" : ""}`;
+            return (
+                block.heading ||
+                `${block.steps.length} step${block.steps.length !== 1 ? "s" : ""}`
+            );
         case "faq":
-            return block.heading || `${block.items.length} FAQ${block.items.length !== 1 ? "s" : ""}`;
+            return (
+                block.heading ||
+                `${block.items.length} FAQ${block.items.length !== 1 ? "s" : ""}`
+            );
         case "benefits-cards":
-            return block.heading || `${block.cards.length} card${block.cards.length !== 1 ? "s" : ""}`;
+            return (
+                block.heading ||
+                `${block.cards.length} card${block.cards.length !== 1 ? "s" : ""}`
+            );
         default:
             return (block as unknown as { type: string }).type;
     }
 }
 
-export function SortableBlockCard({ id, block, index, onEdit, onDelete }: SortableBlockCardProps) {
-    const meta = BLOCK_META[block.type] || { icon: "fa-cube", label: block.type };
+export function SortableBlockCard({
+    id,
+    block,
+    index,
+    onEdit,
+    onDelete,
+}: SortableBlockCardProps) {
+    const meta = BLOCK_META[block.type] || {
+        icon: "fa-cube",
+        label: block.type,
+    };
     const summary = getBlockSummary(block);
 
     return (
@@ -80,7 +109,9 @@ export function SortableBlockCard({ id, block, index, onEdit, onDelete }: Sortab
                     {/* Block info */}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-7 h-7 flex items-center justify-center bg-primary/10 text-primary text-xs flex-shrink-0">
-                            <i className={`fa-duotone fa-regular ${meta.icon}`}></i>
+                            <i
+                                className={`fa-duotone fa-regular ${meta.icon}`}
+                            ></i>
                         </div>
                         <div className="min-w-0">
                             <div className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
@@ -113,7 +144,7 @@ export function SortableBlockCard({ id, block, index, onEdit, onDelete }: Sortab
                     </div>
 
                     {/* Index badge */}
-                    <span className="text-[10px] font-mono text-base-content/20">
+                    <span className="text-sm font-mono text-base-content/20">
                         {index + 1}
                     </span>
                 </div>

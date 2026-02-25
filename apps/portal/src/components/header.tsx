@@ -281,7 +281,7 @@ function SearchPanel() {
                         />
                     </div>
                     <div className="mt-2 pt-2 border-t border-base-300">
-                        <p className="text-[10px] uppercase tracking-widest text-base-content/30 mb-2">
+                        <p className="text-sm uppercase tracking-widest text-base-content/30 mb-2">
                             Quick Actions
                         </p>
                         {[
@@ -360,7 +360,7 @@ function MobileMenuContent({
                                         {item.label}
                                     </span>
                                     <i
-                                        className={`fa-solid fa-chevron-down text-[9px] transition-transform ${
+                                        className={`fa-solid fa-chevron-down text-sm transition-transform ${
                                             activeAccordion === item.label
                                                 ? "rotate-180"
                                                 : ""

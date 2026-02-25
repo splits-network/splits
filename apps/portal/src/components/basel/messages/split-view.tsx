@@ -10,7 +10,11 @@
 import { useCallback, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useFilter } from "@/app/portal/messages/contexts/filter-context";
-import { getOtherUserId, getOtherParticipant, getInitials } from "@/app/portal/messages/types";
+import {
+    getOtherUserId,
+    getOtherParticipant,
+    getInitials,
+} from "@/app/portal/messages/types";
 import type { Mailbox } from "@/app/portal/messages/types";
 import SplitItem from "./split-item";
 import SplitDetailPanel from "./split-detail-panel";
@@ -45,9 +49,8 @@ export default function SplitView() {
     const selectedItem = useMemo(
         () =>
             selectedId
-                ? (data.find(
-                      (row) => row.conversation.id === selectedId,
-                  ) ?? null)
+                ? (data.find((row) => row.conversation.id === selectedId) ??
+                  null)
                 : null,
         [selectedId, data],
     );
@@ -129,11 +132,14 @@ export default function SplitView() {
                                 }`}
                             >
                                 {opt.label}
-                                {opt.value === "requests" && requestCount > 0 && (
-                                    <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 bg-accent text-accent-content text-[9px] font-bold rounded-full">
-                                        {requestCount > 99 ? "99+" : requestCount}
-                                    </span>
-                                )}
+                                {opt.value === "requests" &&
+                                    requestCount > 0 && (
+                                        <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 bg-accent text-accent-content text-sm font-bold rounded-full">
+                                            {requestCount > 99
+                                                ? "99+"
+                                                : requestCount}
+                                        </span>
+                                    )}
                             </button>
                         ))}
                     </div>
@@ -144,7 +150,9 @@ export default function SplitView() {
                     {loading && data.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full">
                             <span className="loading loading-spinner loading-md text-primary" />
-                            <p className="text-sm text-base-content/50 mt-3">Loading conversations...</p>
+                            <p className="text-sm text-base-content/50 mt-3">
+                                Loading conversations...
+                            </p>
                         </div>
                     ) : data.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full opacity-40">
@@ -156,18 +164,29 @@ export default function SplitView() {
                             const convo = row.conversation;
                             if (!convo) return null;
 
-                            const otherId = getOtherUserId(convo, currentUserId);
+                            const otherId = getOtherUserId(
+                                convo,
+                                currentUserId,
+                            );
                             const presenceStatus = otherId
                                 ? presenceMap[otherId]?.status
                                 : undefined;
 
-                            const other = getOtherParticipant(convo, currentUserId);
+                            const other = getOtherParticipant(
+                                convo,
+                                currentUserId,
+                            );
                             const otherUserRole = other?.user_role || null;
-                            const initials = getInitials(other?.name || other?.email);
+                            const initials = getInitials(
+                                other?.name || other?.email,
+                            );
 
                             return (
                                 <SplitItem
-                                    key={row.participant?.conversation_id || convo.id}
+                                    key={
+                                        row.participant?.conversation_id ||
+                                        convo.id
+                                    }
                                     row={row}
                                     isSelected={selectedId === convo.id}
                                     currentUserId={currentUserId}
@@ -207,7 +226,8 @@ export default function SplitView() {
                                 Select a Conversation
                             </h3>
                             <p className="text-sm text-base-content/50">
-                                Click a conversation on the left to view messages
+                                Click a conversation on the left to view
+                                messages
                             </p>
                         </div>
                     </div>

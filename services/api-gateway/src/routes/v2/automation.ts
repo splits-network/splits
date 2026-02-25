@@ -1,6 +1,8 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
-import { ResourceDefinition, registerResourceRoutes } from './common';
+import { ResourceDefinition, registerResourceRoutes, getCorrelationId } from './common';
+import { requireAuth } from '../../middleware/auth';
+import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 const AUTOMATION_RESOURCES: ResourceDefinition[] = [
     {
@@ -8,6 +10,13 @@ const AUTOMATION_RESOURCES: ResourceDefinition[] = [
         service: 'automation',
         basePath: '/automation-rules',
         serviceBasePath: '/api/v2/automation-rules',
+        tag: 'automation',
+    },
+    {
+        name: 'automation-executions',
+        service: 'automation',
+        basePath: '/automation-executions',
+        serviceBasePath: '/api/v2/automation-executions',
         tag: 'automation',
     },
     {
@@ -28,4 +37,39 @@ const AUTOMATION_RESOURCES: ResourceDefinition[] = [
 
 export function registerAutomationRoutes(app: FastifyInstance, services: ServiceRegistry) {
     AUTOMATION_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
+
+    // Custom execution action routes (approve/reject)
+    const serviceClient = () => services.get('automation');
+
+    app.post(
+        '/api/v2/automation-executions/:id/approve',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const data = await serviceClient().post(
+                `/api/v2/automation-executions/${id}/approve`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request),
+            );
+            return reply.send(data);
+        },
+    );
+
+    app.post(
+        '/api/v2/automation-executions/:id/reject',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const data = await serviceClient().post(
+                `/api/v2/automation-executions/${id}/reject`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request),
+            );
+            return reply.send(data);
+        },
+    );
 }

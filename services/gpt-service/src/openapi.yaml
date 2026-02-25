@@ -247,23 +247,129 @@ paths:
                                 pre_screen_answers:
                                     type: array
                                     description: >-
-                                        Answers to required pre-screen questions. Each answer pairs a question_id with
-                                        the candidate's response.
+                                        Answers to required pre-screen questions. Each answer pairs the question text
+                                        with the candidate's response.
                                     items:
                                         type: object
                                         required:
-                                            - question_id
+                                            - question
                                             - answer
                                         properties:
-                                            question_id:
+                                            question:
                                                 type: string
-                                                description: ID of the pre-screen question
+                                                description: The pre-screen question text (must match exactly)
                                             answer:
                                                 type: string
                                                 description: Candidate's answer to the question
                                 cover_letter:
                                     type: string
                                     description: Optional cover letter text
+                                resume_data:
+                                    type: object
+                                    description: >-
+                                        Structured resume data. If the candidate attaches a resume file, extract and
+                                        structure its content into this field. Include raw_text with the full text
+                                        plus structured sections for best results.
+                                    required:
+                                        - raw_text
+                                    properties:
+                                        raw_text:
+                                            type: string
+                                            description: Full plain-text content of the resume
+                                        contact:
+                                            type: object
+                                            description: Contact information extracted from resume
+                                            properties:
+                                                name:
+                                                    type: string
+                                                email:
+                                                    type: string
+                                                phone:
+                                                    type: string
+                                                location:
+                                                    type: string
+                                                linkedin_url:
+                                                    type: string
+                                                website:
+                                                    type: string
+                                        summary:
+                                            type: string
+                                            description: Professional summary or objective
+                                        experience:
+                                            type: array
+                                            description: Work experience entries
+                                            items:
+                                                type: object
+                                                required:
+                                                    - title
+                                                    - company
+                                                properties:
+                                                    title:
+                                                        type: string
+                                                    company:
+                                                        type: string
+                                                    location:
+                                                        type: string
+                                                    start_date:
+                                                        type: string
+                                                    end_date:
+                                                        type: string
+                                                    is_current:
+                                                        type: boolean
+                                                    description:
+                                                        type: string
+                                                    highlights:
+                                                        type: array
+                                                        items:
+                                                            type: string
+                                        education:
+                                            type: array
+                                            description: Education entries
+                                            items:
+                                                type: object
+                                                required:
+                                                    - institution
+                                                properties:
+                                                    institution:
+                                                        type: string
+                                                    degree:
+                                                        type: string
+                                                    field_of_study:
+                                                        type: string
+                                                    start_date:
+                                                        type: string
+                                                    end_date:
+                                                        type: string
+                                                    gpa:
+                                                        type: string
+                                        skills:
+                                            type: array
+                                            description: Skills with optional category grouping
+                                            items:
+                                                type: object
+                                                required:
+                                                    - name
+                                                properties:
+                                                    name:
+                                                        type: string
+                                                    category:
+                                                        type: string
+                                        certifications:
+                                            type: array
+                                            description: Professional certifications
+                                            items:
+                                                type: object
+                                                required:
+                                                    - name
+                                                properties:
+                                                    name:
+                                                        type: string
+                                                    issuer:
+                                                        type: string
+                                                    date_obtained:
+                                                        type: string
+                                                    expiry_date:
+                                                        type: string
             responses:
                 "200":
                     description: Confirmation required (first call)
@@ -277,7 +383,10 @@ paths:
                                     data:
                                         $ref: "#/components/schemas/GptConfirmationSummary"
                 "201":
-                    description: Application submitted successfully (second call)
+                    description: >-
+                        Application submitted for AI review (second call). The application enters AI Review
+                        stage where it is automatically analyzed. The candidate will be notified when the
+                        review is complete and can then review the AI feedback before final submission.
                     content:
                         application/json:
                             schema:
@@ -288,15 +397,30 @@ paths:
                                     data:
                                         type: object
                                         properties:
-                                            application_id:
+                                            status:
                                                 type: string
-                                                description: ID of the created application
-                                            status_label:
-                                                type: string
-                                                description: Current status of the application
+                                                description: >-
+                                                    Status code. Will be 'AI_REVIEW' indicating the application
+                                                    is being analyzed by AI before going to the recruiter/company.
                                             message:
                                                 type: string
-                                                description: Success message
+                                                description: Success message explaining next steps
+                                            application:
+                                                type: object
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        description: ID of the application
+                                                    job_title:
+                                                        type: string
+                                                    company_name:
+                                                        type: string
+                                                    applied_date:
+                                                        type: string
+                                                        format: date
+                                                    status_label:
+                                                        type: string
+                                                        description: Human-readable status (e.g. 'AI Review')
                 "400":
                     description: Missing pre-screen answers or invalid token
                     content:
@@ -577,9 +701,9 @@ components:
                 status_label:
                     type: string
                     description: >-
-                        Current application status. Possible values: Submitted, Under Review, Interviewing,
-                        Offer Received, Hired, Not Selected, Withdrawn, Screening, Recruiter Proposed,
-                        Changes Requested
+                        Current application status. Possible values: AI Review, AI Reviewed, Submitted,
+                        Under Review, Interviewing, Offer Received, Hired, Not Selected, Withdrawn,
+                        Screening, Recruiter Proposed, Changes Requested
                 applied_date:
                     type: string
                     format: date

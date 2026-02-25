@@ -223,7 +223,7 @@ export default function FormsOne() {
     const FieldError = ({ field }: { field: string }) =>
         errors[field] ? (
             <p className="text-error text-xs mt-1 flex items-center gap-1">
-                <i className="fa-duotone fa-regular fa-circle-exclamation text-[10px]" />
+                <i className="fa-duotone fa-regular fa-circle-exclamation text-sm" />
                 {errors[field]}
             </p>
         ) : null;
@@ -249,13 +249,13 @@ export default function FormsOne() {
                     <div className="bg-base-200 p-6 mb-8 text-left">
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                                <span className="text-sm uppercase tracking-widest text-base-content/40">
                                     Department
                                 </span>
                                 <p className="font-bold">{department}</p>
                             </div>
                             <div>
-                                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                                <span className="text-sm uppercase tracking-widest text-base-content/40">
                                     Type
                                 </span>
                                 <p className="font-bold capitalize">
@@ -263,7 +263,7 @@ export default function FormsOne() {
                                 </p>
                             </div>
                             <div>
-                                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                                <span className="text-sm uppercase tracking-widest text-base-content/40">
                                     Salary
                                 </span>
                                 <p className="font-bold">
@@ -272,7 +272,7 @@ export default function FormsOne() {
                                 </p>
                             </div>
                             <div>
-                                <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                                <span className="text-sm uppercase tracking-widest text-base-content/40">
                                     Split Fee
                                 </span>
                                 <p className="font-bold">{splitFee}%</p>
@@ -363,7 +363,7 @@ export default function FormsOne() {
                                     }`}
                                 >
                                     {i < currentStep ? (
-                                        <i className="fa-duotone fa-regular fa-check text-[10px]" />
+                                        <i className="fa-duotone fa-regular fa-check text-sm" />
                                     ) : (
                                         step.num
                                     )}
@@ -570,7 +570,7 @@ export default function FormsOne() {
                                         <div className="flex justify-between mt-1">
                                             <FieldError field="description" />
                                             <span
-                                                className={`text-[10px] ${description.length >= 50 ? "text-success" : "text-base-content/30"}`}
+                                                className={`text-sm ${description.length >= 50 ? "text-success" : "text-base-content/30"}`}
                                             >
                                                 {description.length}/50 min
                                             </span>
@@ -694,7 +694,7 @@ export default function FormsOne() {
                                                         Click to upload or drag
                                                         and drop
                                                     </p>
-                                                    <p className="text-[10px] text-base-content/30 mt-1">
+                                                    <p className="text-sm text-base-content/30 mt-1">
                                                         PDF, DOC up to 10MB
                                                     </p>
                                                 </>
@@ -737,7 +737,7 @@ export default function FormsOne() {
                                                             }
                                                             className="hover:opacity-70"
                                                         >
-                                                            <i className="fa-solid fa-xmark text-[9px]" />
+                                                            <i className="fa-solid fa-xmark text-sm" />
                                                         </button>
                                                     </span>
                                                 ))}
@@ -813,7 +813,7 @@ export default function FormsOne() {
                                                 {splitFee}%
                                             </span>
                                         </div>
-                                        <div className="flex justify-between text-[10px] text-base-content/30 mt-1 px-1">
+                                        <div className="flex justify-between text-sm text-base-content/30 mt-1 px-1">
                                             <span>10%</span>
                                             <span>20% standard</span>
                                             <span>30%</span>
@@ -1025,7 +1025,7 @@ export default function FormsOne() {
                                             <div className="p-4 grid grid-cols-2 gap-3">
                                                 {sec.items.map((it) => (
                                                     <div key={it.label}>
-                                                        <span className="text-[10px] uppercase tracking-widest text-base-content/40">
+                                                        <span className="text-sm uppercase tracking-widest text-base-content/40">
                                                             {it.label}
                                                         </span>
                                                         <p className="text-sm font-semibold truncate">
@@ -1123,7 +1123,7 @@ export default function FormsOne() {
                                         className="flex items-center gap-3"
                                     >
                                         <div
-                                            className={`w-6 h-6 flex items-center justify-center text-[10px] font-bold ${
+                                            className={`w-6 h-6 flex items-center justify-center text-sm font-bold ${
                                                 i < currentStep
                                                     ? "bg-success text-success-content"
                                                     : i === currentStep

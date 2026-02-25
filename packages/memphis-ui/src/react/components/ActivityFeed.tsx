@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AccentColor } from '../utils/accent-cycle';
+import React from "react";
+import type { AccentColor } from "../utils/accent-cycle";
 
 export interface ActivityItem {
     /** Action description */
@@ -27,18 +27,16 @@ export interface ActivityFeedProps {
  * Memphis compliant activity feed with icon badges, descriptions, and timestamps.
  * Extracted from profiles-six showcase.
  */
-export function ActivityFeed({ items, className = '' }: ActivityFeedProps) {
+export function ActivityFeed({ items, className = "" }: ActivityFeedProps) {
     return (
-        <div className={['space-y-4', className].filter(Boolean).join(' ')}>
+        <div className={["space-y-4", className].filter(Boolean).join(" ")}>
             {items.map((item, i) => {
                 return (
                     <div
                         key={i}
                         className={`accent-${item.accent} flex items-start gap-4 p-4 border-3 border-accent transition-transform hover:-translate-y-0.5`}
                     >
-                        <div
-                            className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-accent"
-                        >
+                        <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-accent">
                             <i
                                 className={`${item.icon} text-sm text-on-accent`}
                             />
@@ -51,9 +49,7 @@ export function ActivityFeed({ items, className = '' }: ActivityFeedProps) {
                                 {item.detail}
                             </p>
                         </div>
-                        <span
-                            className="text-[10px] font-bold uppercase tracking-wider flex-shrink-0 text-dark opacity-30"
-                        >
+                        <span className="text-sm font-bold uppercase tracking-wider flex-shrink-0 text-dark opacity-30">
                             {item.time}
                         </span>
                     </div>

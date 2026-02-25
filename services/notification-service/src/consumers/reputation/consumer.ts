@@ -7,6 +7,7 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { ReputationEmailService } from '../../services/reputation/service';
 import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { DataLookupHelper } from '../../helpers/data-lookup';
 
 // Tier ordering for determining promotion vs demotion
 const tierOrder: Record<string, number> = {
@@ -21,7 +22,8 @@ export class ReputationEventConsumer {
         private emailService: ReputationEmailService,
         private logger: Logger,
         private portalUrl: string,
-        private contactLookup: ContactLookupHelper
+        private contactLookup: ContactLookupHelper,
+        private dataLookup?: DataLookupHelper
     ) {}
 
     async handleTierChanged(event: DomainEvent): Promise<void> {
@@ -99,6 +101,83 @@ export class ReputationEventConsumer {
             this.logger.error(
                 { error, event_payload: event.payload },
                 'Failed to send tier change notification'
+            );
+            throw error;
+        }
+    }
+
+    async handleCompanyTierChanged(event: DomainEvent): Promise<void> {
+        try {
+            const {
+                company_id,
+                old_tier,
+                new_tier,
+                old_score,
+                new_score,
+            } = event.payload;
+
+            this.logger.info(
+                { company_id, old_tier, new_tier },
+                'Handling company tier change notification'
+            );
+
+            // Look up company to get org ID and name
+            const company = this.dataLookup
+                ? await this.dataLookup.getCompany(company_id)
+                : null;
+
+            if (!company) {
+                throw new Error(`Company not found: ${company_id}`);
+            }
+
+            if (!company.identity_organization_id) {
+                this.logger.warn({ company_id }, 'Company has no identity_organization_id, cannot send tier change notification');
+                return;
+            }
+
+            const companyAdmins = await this.contactLookup.getCompanyAdminContacts(company.identity_organization_id);
+            if (companyAdmins.length === 0) {
+                this.logger.warn({ company_id }, 'No company admins found');
+                return;
+            }
+
+            const dashboardUrl = `${this.portalUrl}/portal/dashboard`;
+
+            const commonData = {
+                companyName: company.name,
+                oldTier: old_tier,
+                newTier: new_tier,
+                oldScore: old_score,
+                newScore: new_score,
+                dashboardUrl,
+                companyId: company_id,
+            };
+
+            const oldRank = tierOrder[old_tier] ?? 0;
+            const newRank = tierOrder[new_tier] ?? 0;
+
+            for (const admin of companyAdmins) {
+                if (newRank > oldRank) {
+                    await this.emailService.sendCompanyTierPromotion(admin.email, {
+                        ...commonData,
+                        userId: admin.user_id || undefined,
+                    });
+                } else {
+                    await this.emailService.sendCompanyTierDemotion(admin.email, {
+                        ...commonData,
+                        userId: admin.user_id || undefined,
+                    });
+                }
+            }
+
+            this.logger.info(
+                { company_id, old_tier, new_tier, adminCount: companyAdmins.length },
+                'Company tier change notifications sent'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send company tier change notification'
             );
             throw error;
         }

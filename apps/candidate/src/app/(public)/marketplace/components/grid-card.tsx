@@ -32,19 +32,19 @@ export default function GridCard({
             <div className="flex items-center justify-between mb-4">
                 {recruiter.reputation_score ? (
                     <span
-                        className={`text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 ${reputationColor(recruiter.reputation_score)}`}
+                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${reputationColor(recruiter.reputation_score)}`}
                     >
                         <i className="fa-duotone fa-regular fa-star mr-1" />
                         {recruiter.reputation_score.toFixed(1)} Rating
                     </span>
                 ) : (
-                    <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-base-content/10 text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-base-content/10 text-base-content/40">
                         New
                     </span>
                 )}
                 {recruiter.years_experience &&
                     recruiter.years_experience >= 5 && (
-                        <span className="text-[10px] uppercase tracking-[0.15em] font-bold px-2 py-1 bg-accent/15 text-accent">
+                        <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-accent/15 text-accent">
                             {recruiter.years_experience}+ yrs
                         </span>
                     )}
@@ -102,13 +102,13 @@ export default function GridCard({
                     {recruiter.industries.slice(0, 3).map((industry, i) => (
                         <span
                             key={i}
-                            className="text-[9px] uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
+                            className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
                         >
                             {industry}
                         </span>
                     ))}
                     {recruiter.industries.length > 3 && (
-                        <span className="text-[9px] uppercase tracking-wider text-base-content/30 px-2 py-1">
+                        <span className="text-sm uppercase tracking-wider text-base-content/30 px-2 py-1">
                             +{recruiter.industries.length - 3}
                         </span>
                     )}

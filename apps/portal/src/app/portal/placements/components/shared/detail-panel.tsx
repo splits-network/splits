@@ -28,7 +28,7 @@ export function DetailPanel({
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                             <span
-                                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(state)}`}
+                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(state)}`}
                             >
                                 {formatStatus(state)}
                             </span>
@@ -68,7 +68,7 @@ export function DetailPanel({
                 {/* Financial stats grid */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Salary
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -76,7 +76,7 @@ export function DetailPanel({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Fee Rate
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -84,7 +84,7 @@ export function DetailPanel({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Your Share
                         </p>
                         <p className="text-lg font-black tracking-tight text-primary">
@@ -100,7 +100,7 @@ export function DetailPanel({
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                         <div className="bg-base-100 p-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                 Hired
                             </p>
                             <p className="font-bold text-sm">
@@ -109,7 +109,7 @@ export function DetailPanel({
                         </div>
                         {placement.start_date && (
                             <div className="bg-base-100 p-4">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Start Date
                                 </p>
                                 <p className="font-bold text-sm">
@@ -119,7 +119,7 @@ export function DetailPanel({
                         )}
                         {placement.end_date && (
                             <div className="bg-base-100 p-4">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     End Date
                                 </p>
                                 <p className="font-bold text-sm">
@@ -129,7 +129,7 @@ export function DetailPanel({
                         )}
                         {placement.guarantee_expires_at && (
                             <div className="bg-base-100 p-4">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                                     Guarantee Expires
                                 </p>
                                 <p className="font-bold text-sm">
@@ -148,7 +148,7 @@ export function DetailPanel({
                                 Guarantee Period
                             </h3>
                             <div className="bg-primary/5 p-4">
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-primary/60 mb-1">
+                                <p className="text-sm uppercase tracking-[0.2em] text-primary/60 mb-1">
                                     Duration
                                 </p>
                                 <p className="text-base font-bold text-primary">
@@ -165,23 +165,81 @@ export function DetailPanel({
                             Your Splits
                         </h3>
                         <ul className="space-y-2">
-                            {placement.your_splits.map((split, i) => (
-                                <li
-                                    key={i}
-                                    className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-duotone fa-regular fa-circle-check text-primary text-xs" />
-                                        <span className="text-sm font-semibold capitalize">
-                                            {split.role}
+                            {placement.your_splits.flatMap((split, i) => {
+                                const isSourcer =
+                                    split.role === "candidate_sourcer" ||
+                                    split.role === "company_sourcer";
+                                const basePercentage = 6;
+                                const bonusPercentage =
+                                    split.split_percentage - basePercentage;
+
+                                if (isSourcer && bonusPercentage > 0) {
+                                    const baseAmount =
+                                        (split.split_amount * basePercentage) /
+                                        split.split_percentage;
+                                    const bonusAmount =
+                                        split.split_amount - baseAmount;
+
+                                    return [
+                                        <li
+                                            key={`${i}-base`}
+                                            className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-duotone fa-regular fa-circle-check text-primary text-xs" />
+                                                <span className="text-sm font-semibold capitalize">
+                                                    {split.role.replace(
+                                                        "_",
+                                                        " ",
+                                                    )}{" "}
+                                                    (Base)
+                                                </span>
+                                            </span>
+                                            <span className="text-sm font-bold">
+                                                {basePercentage}% &middot;{" "}
+                                                {formatCurrency(baseAmount)}
+                                            </span>
+                                        </li>,
+                                        <li
+                                            key={`${i}-bonus`}
+                                            className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-duotone fa-regular fa-circle-check text-primary text-xs" />
+                                                <span className="text-sm font-semibold capitalize">
+                                                    {split.role.replace(
+                                                        "_",
+                                                        " ",
+                                                    )}{" "}
+                                                    (Bonus)
+                                                </span>
+                                            </span>
+                                            <span className="text-sm font-bold">
+                                                {bonusPercentage}% &middot;{" "}
+                                                {formatCurrency(bonusAmount)}
+                                            </span>
+                                        </li>,
+                                    ];
+                                }
+
+                                return [
+                                    <li
+                                        key={i}
+                                        className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            <i className="fa-duotone fa-regular fa-circle-check text-primary text-xs" />
+                                            <span className="text-sm font-semibold capitalize">
+                                                {split.role.replace("_", " ")}
+                                            </span>
                                         </span>
-                                    </span>
-                                    <span className="text-sm font-bold">
-                                        {split.split_percentage}% &middot;{" "}
-                                        {formatCurrency(split.split_amount)}
-                                    </span>
-                                </li>
-                            ))}
+                                        <span className="text-sm font-bold">
+                                            {split.split_percentage}% &middot;{" "}
+                                            {formatCurrency(split.split_amount)}
+                                        </span>
+                                    </li>,
+                                ];
+                            })}
                         </ul>
                     </div>
                 )}
@@ -194,25 +252,91 @@ export function DetailPanel({
                                 Collaborators
                             </h3>
                             <ul className="space-y-2">
-                                {placement.collaborators.map((collab) => (
-                                    <li
-                                        key={collab.id}
-                                        className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
-                                    >
-                                        <span className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-user text-secondary text-xs" />
-                                            <span className="text-sm font-semibold capitalize">
-                                                {collab.role}
+                                {placement.collaborators.flatMap((collab) => {
+                                    const isSourcer =
+                                        collab.role === "candidate_sourcer" ||
+                                        collab.role === "company_sourcer";
+                                    const basePercentage = 6;
+                                    const bonusPercentage =
+                                        collab.split_percentage -
+                                        basePercentage;
+
+                                    if (isSourcer && bonusPercentage > 0) {
+                                        const baseAmount =
+                                            (collab.split_amount *
+                                                basePercentage) /
+                                            collab.split_percentage;
+                                        const bonusAmount =
+                                            collab.split_amount - baseAmount;
+
+                                        return [
+                                            <li
+                                                key={`${collab.id}-base`}
+                                                className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
+                                            >
+                                                <span className="flex items-center gap-2">
+                                                    <i className="fa-duotone fa-regular fa-user text-secondary text-xs" />
+                                                    <span className="text-sm font-semibold capitalize">
+                                                        {collab.role.replace(
+                                                            "_",
+                                                            " ",
+                                                        )}{" "}
+                                                        (Base)
+                                                    </span>
+                                                </span>
+                                                <span className="text-sm font-bold">
+                                                    {basePercentage}% &middot;{" "}
+                                                    {formatCurrency(baseAmount)}
+                                                </span>
+                                            </li>,
+                                            <li
+                                                key={`${collab.id}-bonus`}
+                                                className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
+                                            >
+                                                <span className="flex items-center gap-2">
+                                                    <i className="fa-duotone fa-regular fa-user text-secondary text-xs" />
+                                                    <span className="text-sm font-semibold capitalize">
+                                                        {collab.role.replace(
+                                                            "_",
+                                                            " ",
+                                                        )}{" "}
+                                                        (Bonus)
+                                                    </span>
+                                                </span>
+                                                <span className="text-sm font-bold">
+                                                    {bonusPercentage}% &middot;{" "}
+                                                    {formatCurrency(
+                                                        bonusAmount,
+                                                    )}
+                                                </span>
+                                            </li>,
+                                        ];
+                                    }
+
+                                    return [
+                                        <li
+                                            key={collab.id}
+                                            className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-duotone fa-regular fa-user text-secondary text-xs" />
+                                                <span className="text-sm font-semibold capitalize">
+                                                    {collab.role.replace(
+                                                        "_",
+                                                        " ",
+                                                    )}
+                                                </span>
                                             </span>
-                                        </span>
-                                        <span className="text-sm font-bold">
-                                            {collab.split_percentage}% &middot;{" "}
-                                            {formatCurrency(
-                                                collab.split_amount,
-                                            )}
-                                        </span>
-                                    </li>
-                                ))}
+                                            <span className="text-sm font-bold">
+                                                {collab.split_percentage}%
+                                                &middot;{" "}
+                                                {formatCurrency(
+                                                    collab.split_amount,
+                                                )}
+                                            </span>
+                                        </li>,
+                                    ];
+                                })}
                             </ul>
                         </div>
                     )}

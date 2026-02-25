@@ -6,62 +6,84 @@ const logger = createLogger('document-service');
 const config = loadConfig();
 
 export interface DocumentDownloadResult {
-  buffer: Buffer;
-  size: number;
-  contentType: string;
-  downloadTimeMs: number;
+    buffer: Buffer;
+    size: number;
+    contentType: string;
+    downloadTimeMs: number;
 }
 
 export class DocumentService {
-  private supabase: SupabaseClient;
+    private supabase: SupabaseClient;
 
-  constructor() {
-    this.supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY! // Service key for server-side access
-    );
-  }
-
-  /**
-   * Download document from Supabase Storage for processing
-   */
-  async downloadDocument(bucket: string, filePath: string): Promise<DocumentDownloadResult> {
-    logger.debug(`Downloading document for processing: ${bucket}/${filePath}`);
-    
-    const startTime = Date.now();
-    
-    try {
-      // Download file data
-      const { data, error } = await this.supabase.storage
-        .from(bucket)
-        .download(filePath);
-      
-      if (error) {
-        // Log comprehensive error details to debug Supabase Storage issues
-        throw new Error(`Failed to download document: ${error.message || JSON.stringify(error) || 'Unknown storage error'}`);
-      }
-      
-      if (!data) {
-        throw new Error('No file data returned from storage');
-      }
-      
-      // Convert blob to buffer
-      const arrayBuffer = await data.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const downloadTime = Date.now() - startTime;
-      
-      logger.info(`Document downloaded successfully: ${bucket}/${filePath} (${buffer.length} bytes, ${data.type}, ${downloadTime}ms)`);
-      
-      return {
-        buffer,
-        size: buffer.length,
-        contentType: data.type,
-        downloadTimeMs: downloadTime
-      };
-      
-    } catch (error) {
-      logger.error(`Failed to download document: ${bucket}/${filePath} - ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
+    constructor() {
+        this.supabase = createClient(
+            process.env.SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY! // Service key for server-side access
+        );
     }
-  }
+
+    /**
+     * Download document from Supabase Storage for processing
+     */
+    async downloadDocument(bucket: string, filePath: string): Promise<DocumentDownloadResult> {
+        logger.debug(`Downloading document for processing: ${bucket}/${filePath}`);
+
+        const startTime = Date.now();
+
+        try {
+            // Download file data
+            const { data, error } = await this.supabase.storage
+                .from(bucket)
+                .download(filePath);
+
+            if (error) {
+                // Log comprehensive error details to debug Supabase Storage issues
+                throw new Error(`Failed to download document: ${error.message || JSON.stringify(error) || 'Unknown storage error'}`);
+            }
+
+            if (!data) {
+                throw new Error('No file data returned from storage');
+            }
+
+            // Convert blob to buffer
+            const arrayBuffer = await data.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const downloadTime = Date.now() - startTime;
+
+            logger.info(`Document downloaded successfully: ${bucket}/${filePath} (${buffer.length} bytes, ${data.type}, ${downloadTime}ms)`);
+
+            return {
+                buffer,
+                size: buffer.length,
+                contentType: data.type,
+                downloadTimeMs: downloadTime
+            };
+
+        } catch (error) {
+            logger.error(`Failed to download document: ${bucket}/${filePath} - ${error instanceof Error ? error.message : String(error)}`);
+            throw error;
+        }
+    }
+
+    /**
+     * Delete document from Supabase Storage
+     */
+    async deleteDocument(bucket: string, filePath: string): Promise<void> {
+        logger.debug(`Deleting document from storage: ${bucket}/${filePath}`);
+
+        try {
+            const { error } = await this.supabase.storage
+                .from(bucket)
+                .remove([filePath]);
+
+            if (error) {
+                throw new Error(`Failed to delete document: ${error.message || JSON.stringify(error) || 'Unknown storage error'}`);
+            }
+
+            logger.info(`Document deleted successfully: ${bucket}/${filePath}`);
+        } catch (error) {
+            logger.error(`Failed to delete document: ${bucket}/${filePath} - ${error instanceof Error ? error.message : String(error)}`);
+            throw error;
+        }
+    }
 }

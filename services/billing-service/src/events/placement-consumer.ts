@@ -31,6 +31,12 @@ interface InvoicePaidEvent {
     paid_at: string;
 }
 
+interface EscrowHoldReleasedEvent {
+    holdId: string;
+    placementId: string;
+    holdAmount: number;
+}
+
 type SubscriptionTier = 'free' | 'paid' | 'premium';
 type RoleTierMap = {
     candidate_recruiter_tier: SubscriptionTier | null;
@@ -75,6 +81,9 @@ export class BillingEventConsumer {
             // Bind to invoice.paid events for immediate payout processing
             await this.channel.bindQueue(this.queue, this.exchange, 'invoice.paid');
 
+            // Bind to escrow hold releases for payout scheduling
+            await this.channel.bindQueue(this.queue, this.exchange, 'escrow_hold.auto_released');
+
             // Start consuming
             await this.channel.consume(
                 this.queue,
@@ -82,7 +91,7 @@ export class BillingEventConsumer {
                 { noAck: false }
             );
 
-            this.logger.info('Billing event consumer connected and listening for placement and invoice events');
+            this.logger.info('Billing event consumer connected and listening for placement, invoice, and escrow events');
         } catch (error) {
             this.logger.error({ err: error }, 'Failed to connect billing event consumer');
             throw error;
@@ -106,6 +115,8 @@ export class BillingEventConsumer {
                 await this.handlePlacementCreated(content.payload);
             } else if (routingKey === 'invoice.paid') {
                 await this.handleInvoicePaid(content.payload);
+            } else if (routingKey === 'escrow_hold.auto_released') {
+                await this.handleEscrowHoldReleased(content.payload);
             }
 
             // Acknowledge message
@@ -178,16 +189,23 @@ export class BillingEventConsumer {
                     event.placement_id
                 );
 
-                this.logger.info(
-                    {
-                        placement_id: event.placement_id,
-                        split_count: splits.length,
-                        transaction_count: transactions.length,
-                        total_amount: splits.reduce((sum, s) => sum + (s.split_amount || 0), 0),
-                        roles_paid: splits.map(s => s.role),
-                    },
-                    'Phase 6: Created placement splits and payout transactions'
-                );
+                if (splits.length === 0) {
+                    this.logger.info(
+                        { placement_id: event.placement_id },
+                        'No recruiter roles on placement — skipping split/transaction creation'
+                    );
+                } else {
+                    this.logger.info(
+                        {
+                            placement_id: event.placement_id,
+                            split_count: splits.length,
+                            transaction_count: transactions.length,
+                            total_amount: splits.reduce((sum, s) => sum + (s.split_amount || 0), 0),
+                            roles_paid: splits.map(s => s.role),
+                        },
+                        'Created placement splits and payout transactions'
+                    );
+                }
             } catch (payoutError) {
                 // Log payout creation failure but don't throw
                 // Snapshot is already created - payouts can be retried manually
@@ -288,16 +306,63 @@ export class BillingEventConsumer {
                 return;
             }
 
-            // Trigger immediate payout processing for this placement
-            // TODO: Create PayoutScheduleServiceV2 instance for immediate processing
-            // For now, this enables faster processing via existing scheduled jobs
+            const placementId = placementInvoice.placement_id;
+
+            // Check if a payout schedule already exists for this placement
+            const { data: existingSchedule } = await this.supabase
+                .from('payout_schedules')
+                .select('id')
+                .eq('placement_id', placementId)
+                .limit(1)
+                .maybeSingle();
+
+            if (existingSchedule) {
+                this.logger.info(
+                    { placement_id: placementId, schedule_id: existingSchedule.id },
+                    'Payout schedule already exists for placement — skipping creation'
+                );
+                return;
+            }
+
+            // Get the invoice's collectible_at date (settlement buffer)
+            const { data: invoiceDetails } = await this.supabase
+                .from('placement_invoices')
+                .select('collectible_at')
+                .eq('stripe_invoice_id', event.stripe_invoice_id)
+                .single();
+
+            const scheduledDate = invoiceDetails?.collectible_at || new Date().toISOString();
+
+            // Create payout schedule so cron jobs can process it
+            const { data: schedule, error: scheduleError } = await this.supabase
+                .from('payout_schedules')
+                .insert({
+                    placement_id: placementId,
+                    scheduled_date: scheduledDate,
+                    trigger_event: 'invoice.paid',
+                    status: 'scheduled',
+                    retry_count: 0,
+                })
+                .select()
+                .single();
+
+            if (scheduleError) {
+                this.logger.error(
+                    { err: scheduleError, placement_id: placementId },
+                    'Failed to create payout schedule for paid invoice'
+                );
+                throw scheduleError;
+            }
+
             this.logger.info(
                 {
-                    placement_id: placementInvoice.placement_id,
+                    placement_id: placementId,
+                    schedule_id: schedule.id,
+                    scheduled_date: scheduledDate,
                     stripe_invoice_id: event.stripe_invoice_id,
                     amount_paid: event.amount_paid,
                 },
-                'Invoice paid - placement eligible for immediate payout processing'
+                'Created payout schedule for paid invoice'
             );
 
         } catch (error) {
@@ -306,6 +371,91 @@ export class BillingEventConsumer {
                 'Failed to process invoice.paid event'
             );
             throw error; // Re-throw to trigger message requeue
+        }
+    }
+
+    /**
+     * Handle escrow_hold.auto_released event — schedule payouts for the released placement.
+     * When an escrow hold is released, the held funds become available for payout.
+     */
+    private async handleEscrowHoldReleased(event: EscrowHoldReleasedEvent): Promise<void> {
+        this.logger.info({ placement_id: event.placementId, hold_id: event.holdId }, 'Processing escrow_hold.auto_released event');
+
+        try {
+            // Check if remaining active holds exist for this placement
+            const { data: activeHolds, error: holdError } = await this.supabase
+                .from('escrow_holds')
+                .select('id')
+                .eq('placement_id', event.placementId)
+                .eq('status', 'active')
+                .limit(1);
+
+            if (holdError) {
+                this.logger.error({ err: holdError, placement_id: event.placementId }, 'Failed to check active holds');
+                throw holdError;
+            }
+
+            if (activeHolds && activeHolds.length > 0) {
+                this.logger.info(
+                    { placement_id: event.placementId, remaining_holds: activeHolds.length },
+                    'Placement still has active escrow holds — deferring payout scheduling'
+                );
+                return;
+            }
+
+            // No remaining holds — check if a payout schedule already exists
+            const { data: existingSchedule } = await this.supabase
+                .from('payout_schedules')
+                .select('id')
+                .eq('placement_id', event.placementId)
+                .eq('trigger_event', 'escrow_hold.released')
+                .limit(1)
+                .maybeSingle();
+
+            if (existingSchedule) {
+                this.logger.info(
+                    { placement_id: event.placementId, schedule_id: existingSchedule.id },
+                    'Payout schedule for escrow release already exists — skipping'
+                );
+                return;
+            }
+
+            // Schedule payout immediately (all holds released, funds available)
+            const { data: schedule, error: scheduleError } = await this.supabase
+                .from('payout_schedules')
+                .insert({
+                    placement_id: event.placementId,
+                    scheduled_date: new Date().toISOString(),
+                    trigger_event: 'escrow_hold.released',
+                    status: 'scheduled',
+                    retry_count: 0,
+                })
+                .select()
+                .single();
+
+            if (scheduleError) {
+                this.logger.error(
+                    { err: scheduleError, placement_id: event.placementId },
+                    'Failed to create payout schedule after escrow release'
+                );
+                throw scheduleError;
+            }
+
+            this.logger.info(
+                {
+                    placement_id: event.placementId,
+                    schedule_id: schedule.id,
+                    hold_id: event.holdId,
+                    hold_amount: event.holdAmount,
+                },
+                'Created payout schedule after all escrow holds released'
+            );
+        } catch (error) {
+            this.logger.error(
+                { err: error, placement_id: event.placementId, hold_id: event.holdId },
+                'Failed to process escrow_hold.auto_released event'
+            );
+            throw error;
         }
     }
 

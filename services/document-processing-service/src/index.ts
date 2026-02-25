@@ -7,6 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import { DocumentRepositoryV2 } from "./v2/documents/repository";
 import { DocumentServiceV2 } from "./v2/documents/service";
 import { registerV2Routes } from "./v2/routes";
+import { EventPublisher } from "@splits-network/shared-job-queue";
 
 // Processing imports (to be updated to use V2)
 import { DomainConsumer } from "./domain-consumer";
@@ -99,8 +100,16 @@ async function main() {
             "document.uploaded",
         );
 
+        // Initialize EventPublisher
+        const eventPublisher = new EventPublisher(
+            process.env.RABBITMQ_URL || "amqp://localhost:5672",
+            logger,
+            "document-processing-service"
+        );
+        await eventPublisher.connect();
+
         // Initialize domain consumer (will be updated to use V2)
-        const consumer = new DomainConsumer(channel);
+        const consumer = new DomainConsumer(channel, eventPublisher);
         await consumer.initialize();
 
         logger.info("Document Processing Service started successfully");
@@ -145,6 +154,7 @@ async function main() {
             await server.close();
             await channel.close();
             await connection.close();
+            if (eventPublisher) await eventPublisher.close();
             process.exit(0);
         });
 
@@ -153,6 +163,7 @@ async function main() {
             await server.close();
             await channel.close();
             await connection.close();
+            if (eventPublisher) await eventPublisher.close();
             process.exit(0);
         });
     } catch (error) {
