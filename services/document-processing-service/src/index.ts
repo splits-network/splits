@@ -114,39 +114,44 @@ async function main() {
 
         logger.info("Document Processing Service started successfully");
 
-        // Get initial processing statistics
-        const pendingDocs = await repository.getPendingDocuments(1000);
-        const pendingCount = pendingDocs.length;
+        // Process pending documents in the background (non-blocking)
+        setImmediate(async () => {
+            try {
+                const pendingDocs = await repository.getPendingDocuments(1000);
+                const pendingCount = pendingDocs.length;
 
-        logger.info(
-            `Initial processing statistics: ${pendingCount} pending documents`,
-        );
+                logger.info(
+                    `Initial processing statistics: ${pendingCount} pending documents`,
+                );
 
-        // Process any existing pending documents on startup
-        if (pendingCount > 0) {
-            logger.info(
-                `Found ${pendingCount} pending documents, starting retroactive processing`,
-            );
-
-            // Process in small batches to avoid overwhelming the system
-            const batchSize = 5;
-            let remainingPending = pendingCount;
-
-            while (remainingPending > 0) {
-                await consumer.processPendingDocuments(batchSize);
-                remainingPending -= batchSize;
-
-                if (remainingPending > 0) {
-                    // Wait 10 seconds between batches
+                if (pendingCount > 0) {
                     logger.info(
-                        `Processed batch, waiting before next batch. Remaining: ${remainingPending}`,
+                        `Found ${pendingCount} pending documents, starting retroactive processing`,
                     );
-                    await new Promise((resolve) => setTimeout(resolve, 10000));
-                }
-            }
 
-            logger.info("Retroactive processing completed");
-        }
+                    const batchSize = 5;
+                    let remainingPending = pendingCount;
+
+                    while (remainingPending > 0) {
+                        await consumer.processPendingDocuments(batchSize);
+                        remainingPending -= batchSize;
+
+                        if (remainingPending > 0) {
+                            logger.info(
+                                `Processed batch, waiting before next batch. Remaining: ${remainingPending}`,
+                            );
+                            await new Promise((resolve) => setTimeout(resolve, 10000));
+                        }
+                    }
+
+                    logger.info("Retroactive processing completed");
+                }
+            } catch (error) {
+                logger.error(
+                    `Retroactive document processing failed: ${error instanceof Error ? error.message : String(error)}`,
+                );
+            }
+        });
 
         // Graceful shutdown handling
         process.on("SIGTERM", async () => {
