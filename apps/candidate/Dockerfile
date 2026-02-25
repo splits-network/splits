@@ -54,6 +54,8 @@ COPY packages/basel-ui ./packages/basel-ui
 COPY packages/chat-ui ./packages/chat-ui
 COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/candidate ./apps/candidate
+# Reinstall to ensure workspace links are properly established after copying source
+RUN pnpm install --frozen-lockfile
 # Build shared packages first (in dependency order - types/config first, then api-client which depends on them)
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-config build

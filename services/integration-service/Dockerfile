@@ -29,12 +29,16 @@ FROM base AS build
 COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/integration-service ./services/integration-service
+# Reinstall to ensure workspace links are properly established after copying source
+RUN pnpm install --frozen-lockfile
+# Build shared packages first
 RUN pnpm --filter @splits-network/shared-config build
-RUN pnpm --filter @splits-network/shared-types build
+RUN pnpm --filter @splits-network/shared-types build  
 RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
 RUN pnpm --filter @splits-network/shared-access-context build
 RUN pnpm --filter @splits-network/shared-job-queue build
+# Then build service
 RUN pnpm --filter @splits-network/integration-service build
 
 # Production stage

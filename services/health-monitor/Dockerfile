@@ -27,6 +27,8 @@ FROM base AS build
 COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/health-monitor ./services/health-monitor
+# Reinstall to ensure workspace links are properly established after copying source
+RUN pnpm install --frozen-lockfile
 # Build shared packages first
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-types build
