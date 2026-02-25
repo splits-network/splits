@@ -6,7 +6,8 @@ metadata:
     labels:
         app: document-processing-service
 spec:
-    replicas: 2
+    replicas: 1
+    progressDeadlineSeconds: 900
     selector:
         matchLabels:
             app: document-processing-service
