@@ -60,7 +60,8 @@ export class CompanyInvitationsConsumer {
                 }
             }
 
-            const invitationLink = `${this.portalUrl}/join/${invite_link_token}`;
+            const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
+            const invitationLink = `${portalUrl}/join/${invite_link_token}`;
             const expiresDate = new Date(expires_at).toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',

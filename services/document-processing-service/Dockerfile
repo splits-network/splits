@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy monorepo files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.base.json ./
 
 # Copy service and packages
 COPY services/document-processing-service/ ./services/document-processing-service/
@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy monorepo files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.base.json ./
 
 # Copy service and packages
 COPY services/document-processing-service/ ./services/document-processing-service/

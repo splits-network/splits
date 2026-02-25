@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Dependencies stage
 FROM base AS dependencies
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY tsconfig.base.json ./
 COPY packages/shared-api-client/package.json ./packages/shared-api-client/
 COPY packages/shared-config/package.json ./packages/shared-config/
@@ -66,6 +66,8 @@ RUN pnpm --filter @splits-network/chat-ui build
 RUN pnpm --filter @splits-network/memphis-ui build
 # Then build candidate (will transpile packages from source)
 RUN pnpm --filter @splits-network/candidate build
+# Prune to production dependencies (uses local store, no network)
+RUN pnpm install --prod --frozen-lockfile
 
 # Production stage
 FROM node:22-alpine AS production
@@ -73,28 +75,16 @@ RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copy package files for production install
-COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
-COPY --from=build /app/packages/shared-api-client/package.json ./packages/shared-api-client/
-COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
-COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
-COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
-COPY --from=build /app/packages/basel-ui/package.json ./packages/basel-ui/
-COPY --from=build /app/packages/chat-ui/package.json ./packages/chat-ui/
-COPY --from=build /app/packages/memphis-ui/package.json ./packages/memphis-ui/
+# Workspace config for pnpm
+COPY --from=build /app/package.json /app/pnpm-workspace.yaml ./
+
+# Production dependencies from build stage (no network install needed)
+COPY --from=build /app/node_modules ./node_modules
+
+# App package.json for pnpm filter
 COPY --from=build /app/apps/candidate/package.json ./apps/candidate/
 
-# Production install (only dependencies, no devDependencies)
-RUN pnpm install --prod --frozen-lockfile
-
 # Copy built artifacts
-COPY --from=build /app/packages/shared-api-client/dist ./packages/shared-api-client/dist
-COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
-COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
-COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
-COPY --from=build /app/packages/basel-ui/dist ./packages/basel-ui/dist
-COPY --from=build /app/packages/chat-ui/dist ./packages/chat-ui/dist
-COPY --from=build /app/packages/memphis-ui/dist ./packages/memphis-ui/dist
 COPY --from=build /app/apps/candidate/.next ./apps/candidate/.next
 COPY --from=build /app/apps/candidate/public ./apps/candidate/public
 COPY --from=build /app/apps/candidate/next.config.mjs ./apps/candidate/
