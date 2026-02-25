@@ -48,6 +48,18 @@ ENV NODE_ENV=production
 # Production dependencies from build stage (no network install needed)
 COPY --from=build /app/node_modules ./node_modules
 
+# Workspace packages (symlinked from node_modules)
+COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
+COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
+COPY --from=build /app/packages/shared-fastify/package.json ./packages/shared-fastify/
+COPY --from=build /app/packages/shared-fastify/dist ./packages/shared-fastify/dist
+COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-logging/
+COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
+COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
+COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
+COPY --from=build /app/packages/shared-access-context/package.json ./packages/shared-access-context/
+COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
+
 # Copy built service
 COPY --from=build /app/services/gpt-service/dist ./services/gpt-service/dist
 COPY --from=build /app/services/gpt-service/src/openapi.yaml ./services/gpt-service/dist/openapi.yaml

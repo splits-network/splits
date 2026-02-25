@@ -55,6 +55,14 @@ COPY --from=build /app/package.json /app/pnpm-workspace.yaml ./
 # Production dependencies from build stage (no network install needed)
 COPY --from=build /app/node_modules ./node_modules
 
+# Workspace packages (symlinked from node_modules)
+COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
+COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
+COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
+COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
+COPY --from=build /app/packages/basel-ui/package.json ./packages/basel-ui/
+COPY --from=build /app/packages/basel-ui/dist ./packages/basel-ui/dist
+
 # App package.json for pnpm filter
 COPY --from=build /app/apps/status/package.json ./apps/status/
 

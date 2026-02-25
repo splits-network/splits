@@ -42,6 +42,12 @@ ENV NODE_ENV=production
 # Production dependencies from build stage (no network install needed)
 COPY --from=build /app/node_modules ./node_modules
 
+# Workspace packages (symlinked from node_modules)
+COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
+COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
+COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-logging/
+COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
+
 # Copy built service
 COPY --from=build /app/services/analytics-gateway/dist ./services/analytics-gateway/dist
 
