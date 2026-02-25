@@ -76,6 +76,8 @@ spec:
                         value: "${PUBLIC_BASE_URL}"
                       - name: CANDIDATE_APP_URL
                         value: "${CANDIDATE_APP_URL}"
+                      - name: GPT_API_BASE_URL
+                        value: "${GPT_API_BASE_URL}"
                   resources:
                       requests:
                           cpu: 100m

@@ -86,7 +86,7 @@ export function formatJobForGpt(job: any): GptJobSearchResult {
         department: job.department || null,
         open_to_relocation: job.open_to_relocation ?? null,
         summary,
-        view_url: `https://applicant.network/jobs/${job.id}`,
+        view_url: `${process.env.CANDIDATE_APP_URL || 'https://applicant.network'}/jobs/${job.id}`,
     };
 }
 
