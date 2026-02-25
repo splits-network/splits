@@ -43,6 +43,8 @@ spec:
                                 key: supabase-service-role-key
                       - name: RABBITMQ_URL
                         value: "amqp://splits:splits_production@rabbitmq:5672"
+                      - name: INTEGRATION_ENCRYPTION_KEY
+                        value: "oW8XRW2E9GIz6qxWNvaq5M6xOy4KP9Xr+YOOQtn6TsI="
                       - name: GOOGLE_CLIENT_ID
                         valueFrom:
                             secretKeyRef:

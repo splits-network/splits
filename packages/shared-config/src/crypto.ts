@@ -74,18 +74,24 @@ export class CryptoService {
     }
 }
 
-/** Singleton instance, initialized lazily from Vault */
+const CRYPTO_KEY_ENV_VAR = 'INTEGRATION_ENCRYPTION_KEY';
+
+/** Singleton instance, initialized lazily */
 let cryptoServiceInstance: CryptoService | null = null;
 
 /**
- * Get a CryptoService instance with the encryption key loaded from Supabase Vault.
+ * Get a CryptoService instance with the encryption key loaded from environment variable.
  * Caches the instance after first call.
  */
-export async function getCryptoService(): Promise<CryptoService> {
+export function getCryptoService(): CryptoService {
     if (cryptoServiceInstance) return cryptoServiceInstance;
 
-    const { getSecret } = await import('./vault');
-    const key = await getSecret('integration_encryption_key');
+    const key = process.env[CRYPTO_KEY_ENV_VAR];
+
+    if (!key) {
+        throw new Error(`Environment variable ${CRYPTO_KEY_ENV_VAR} is required for encryption service`);
+    }
+
     cryptoServiceInstance = new CryptoService(key);
     return cryptoServiceInstance;
 }

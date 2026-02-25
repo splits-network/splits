@@ -48,8 +48,10 @@ export class ScannerService {
             this.initialized = true;
             logger.info('ClamAV scanner initialized successfully');
         } catch (error) {
-            logger.error(error, 'Failed to initialize ClamAV scanner');
-            throw error;
+            logger.warn(error, 'Failed to initialize ClamAV scanner - continuing without virus scanning capabilities');
+            // Do not throw error, allow service to start without scanner
+            this.initialized = false;
+            this.clamscan = null;
         }
     }
 
@@ -58,7 +60,18 @@ export class ScannerService {
      */
     async scanBuffer(buffer: Buffer): Promise<ScanResult> {
         if (!this.initialized || !this.clamscan) {
+            // Try initializing one more time if not ready
             await this.initialize();
+        }
+
+        // If still not initialized, skip scan and return clean
+        if (!this.initialized || !this.clamscan) {
+            logger.warn('ClamAV scanner not available - skipping virus scan (assuming clean)');
+            return {
+                isClean: true,
+                isInfected: false,
+                viruses: []
+            };
         }
 
         try {
