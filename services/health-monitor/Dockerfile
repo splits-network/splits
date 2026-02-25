@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Dependencies stage
 FROM base AS dependencies
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY tsconfig.base.json ./
 COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-fastify/package.json ./packages/shared-fastify/
@@ -36,17 +36,18 @@ RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
 # Then build service
 RUN pnpm --filter @splits-network/health-monitor build
+# Prune to production dependencies (uses local store, no network)
+RUN pnpm install --prod --frozen-lockfile
 
 # Production stage
 FROM node:22-alpine AS production
-RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Copy workspace config
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY tsconfig.base.json ./
+# Production dependencies from build stage (no network install needed)
+COPY --from=build /app/node_modules ./node_modules
 
-# Copy built shared packages
+# Workspace packages (symlinked from node_modules)
 COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
 COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
 COPY --from=build /app/packages/shared-fastify/package.json ./packages/shared-fastify/
@@ -57,11 +58,7 @@ COPY --from=build /app/packages/shared-types/package.json ./packages/shared-type
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 
 # Copy built service
-COPY --from=build /app/services/health-monitor/package.json ./services/health-monitor/
 COPY --from=build /app/services/health-monitor/dist ./services/health-monitor/dist
-
-# Install only production dependencies
-RUN pnpm install --frozen-lockfile --prod
 
 EXPOSE 3012
 CMD ["node", "services/health-monitor/dist/index.js"]

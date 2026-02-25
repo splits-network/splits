@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Dependencies stage
 FROM base AS dependencies
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY tsconfig.base.json ./
 COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-fastify/package.json ./packages/shared-fastify/
@@ -40,17 +40,18 @@ RUN pnpm --filter @splits-network/shared-job-queue build
 RUN pnpm --filter @splits-network/shared-access-context build
 # Then build service
 RUN pnpm --filter @splits-network/automation-service build
+# Prune to production dependencies (uses local store, no network)
+RUN pnpm install --prod --frozen-lockfile
 
 # Production stage
 FROM node:22-alpine AS production
-RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Copy workspace config
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY tsconfig.base.json ./
+# Production dependencies from build stage (no network install needed)
+COPY --from=build /app/node_modules ./node_modules
 
-# Copy built shared packages
+# Workspace packages (symlinked from node_modules)
 COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
 COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
 COPY --from=build /app/packages/shared-fastify/package.json ./packages/shared-fastify/
@@ -65,11 +66,7 @@ COPY --from=build /app/packages/shared-access-context/package.json ./packages/sh
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 
 # Copy built service
-COPY --from=build /app/services/automation-service/package.json ./services/automation-service/
 COPY --from=build /app/services/automation-service/dist ./services/automation-service/dist
-
-# Install only production dependencies
-RUN pnpm install --frozen-lockfile --prod
 
 EXPOSE 3007
 CMD ["node", "services/automation-service/dist/index.js"]

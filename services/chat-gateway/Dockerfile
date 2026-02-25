@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Dependencies stage
 FROM base AS dependencies
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY tsconfig.base.json ./
 COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-logging/package.json ./packages/shared-logging/
@@ -31,22 +31,24 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/chat-gateway build
+# Prune to production dependencies (uses local store, no network)
+RUN pnpm install --prod --frozen-lockfile
 
 # Production stage
 FROM node:22-alpine AS production
-RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production
 
-COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+# Production dependencies from build stage (no network install needed)
+COPY --from=build /app/node_modules ./node_modules
+
+# Workspace packages (symlinked from node_modules)
 COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
-COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-logging/
-COPY --from=build /app/services/chat-gateway/package.json ./services/chat-gateway/
-
-RUN pnpm install --prod --frozen-lockfile
-
 COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
+COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-logging/
 COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
+
+# Copy built service
 COPY --from=build /app/services/chat-gateway/dist ./services/chat-gateway/dist
 
 EXPOSE 3020
