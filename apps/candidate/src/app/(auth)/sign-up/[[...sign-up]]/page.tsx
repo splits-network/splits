@@ -1,16 +1,17 @@
 "use client";
 
 import { useSignUp, useAuth, useClerk } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState, useEffect, useRef } from "react";
+import { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
 export default function SignUpPage() {
-    const { getToken } = useAuth();
-    const { isLoaded, signUp, setActive } = useSignUp();
-    const { isSignedIn } = useAuth();
+    const { getToken, isLoaded, isSignedIn } = useAuth();
+    const { signUp, setActive } = useSignUp();
+    const { user } = useUser();
     const { signOut } = useClerk();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -30,6 +31,46 @@ export default function SignUpPage() {
 
     const stepRef = useRef<HTMLDivElement>(null);
 
+    // Redirect if already signed in (matches sign-in page pattern)
+    useEffect(() => {
+        if (isLoaded && isSignedIn) {
+            router.push(redirectUrl || "/onboarding");
+        }
+    }, [isLoaded, isSignedIn, router, redirectUrl]);
+
+    // Shared post-signup handler: activate session, init backend, redirect
+    const finalizeSignUp = useCallback(
+        async (sessionId: string | null) => {
+            await setActive!({ session: sessionId });
+
+            // Best-effort backend init — webhook + onboarding page serve as fallbacks
+            try {
+                const token = await getToken();
+                if (token) {
+                    const client = createAuthenticatedClient(token);
+                    await client.post("/onboarding/init", {
+                        email:
+                            user?.primaryEmailAddress?.emailAddress || email,
+                        name:
+                            user?.fullName ||
+                            `${firstName} ${lastName}`.trim(),
+                        image_url: user?.imageUrl,
+                        source_app: "candidate",
+                    });
+                }
+            } catch (initError) {
+                console.error(
+                    "Failed to init backend (webhook will handle):",
+                    initError,
+                );
+            }
+
+            router.push(redirectUrl || "/onboarding");
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [redirectUrl, email, firstName, lastName, router],
+    );
+
     const handleSignOut = async () => {
         setIsLoading(true);
         await signOut();
@@ -38,19 +79,26 @@ export default function SignUpPage() {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!isLoaded) return;
+        if (!isLoaded || !signUp) return;
 
         setError("");
         setIsLoading(true);
 
         try {
-            await signUp.create({
+            const result = await signUp.create({
                 emailAddress: email,
                 password,
                 firstName,
                 lastName,
             });
 
+            if (result.status === "complete") {
+                // No verification needed — activate session and redirect
+                await finalizeSignUp(result.createdSessionId);
+                return;
+            }
+
+            // Verification required — show code form
             await signUp.prepareEmailAddressVerification({
                 strategy: "email_code",
             });
@@ -65,91 +113,17 @@ export default function SignUpPage() {
 
     const handleVerification = async (e: FormEvent) => {
         e.preventDefault();
-        if (!isLoaded) return;
+        if (!isLoaded || !signUp) return;
 
         setError("");
         setIsLoading(true);
 
         try {
-            const completeSignUp = await signUp.attemptEmailAddressVerification(
-                { code },
-            );
+            const completeSignUp =
+                await signUp.attemptEmailAddressVerification({ code });
 
             if (completeSignUp.status === "complete") {
-                await setActive({ session: completeSignUp.createdSessionId });
-
-                try {
-                    const user = {
-                        id: completeSignUp.createdUserId,
-                        email: completeSignUp.emailAddress,
-                        firstName: completeSignUp.firstName,
-                        lastName: completeSignUp.lastName,
-                    };
-
-                    if (user) {
-                        const token = await getToken();
-                        if (!token) {
-                            throw new Error("Failed to get auth token");
-                        }
-
-                        const apiClient = createAuthenticatedClient(token);
-
-                        await apiClient.post("/users/register", {
-                            clerk_user_id: user.id,
-                            email: user.email,
-                            name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
-                        });
-
-                        const candidateResponse = await apiClient.get(
-                            `/candidates`,
-                            {
-                                params: {
-                                    limit: 1,
-                                    filters: { email: email },
-                                },
-                            },
-                        );
-
-                        const existingCandidates =
-                            candidateResponse.data || candidateResponse;
-                        const candidatesArray = Array.isArray(
-                            existingCandidates,
-                        )
-                            ? existingCandidates
-                            : [];
-
-                        if (
-                            candidatesArray.length > 0 &&
-                            candidatesArray[0]?.id
-                        ) {
-                            const existingCandidate = candidatesArray[0];
-                            await apiClient.patch(
-                                `/candidates/${existingCandidate.id}`,
-                                {
-                                    user_id: (
-                                        await apiClient.post(
-                                            "/users/register",
-                                            {},
-                                        )
-                                    ).data.id,
-                                },
-                            );
-                        } else {
-                            await apiClient.post("/candidates", {
-                                email: user.email,
-                                full_name:
-                                    `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
-                            });
-                        }
-                    }
-                } catch (userCreationError) {
-                    console.error(
-                        "Failed to create user in database (webhook will handle):",
-                        userCreationError,
-                    );
-                }
-
-                router.push(redirectUrl || "/onboarding");
+                await finalizeSignUp(completeSignUp.createdSessionId);
             } else {
                 setError("Verification incomplete. Please try again.");
             }
@@ -163,7 +137,7 @@ export default function SignUpPage() {
     const signUpWithOAuth = (
         provider: "oauth_google" | "oauth_github" | "oauth_microsoft",
     ) => {
-        if (!isLoaded) return;
+        if (!isLoaded || !signUp) return;
         signUp.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: "/sso-callback",
@@ -184,11 +158,6 @@ export default function SignUpPage() {
             { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" },
         );
     }, [pendingVerification]);
-
-    // Already signed in state
-    if (isLoaded && isSignedIn) {
-        router.push(redirectUrl || "/onboarding");
-    }
 
     // Verification step
     if (pendingVerification) {
