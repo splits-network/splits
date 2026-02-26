@@ -45,10 +45,11 @@ export function ControlsBar({
         <div className="controls-bar mb-4 flex flex-wrap items-center gap-2 opacity-0">
             {/* Search — native DaisyUI input with icon */}
             <label className="input input-sm flex-1 min-w-64">
-                <i className="fa-duotone fa-regular fa-magnifying-glass" />
+                <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50" />
                 <input
                     type="text"
                     placeholder="Search conversations..."
+                    className="grow"
                     value={searchInput}
                     onChange={(e) => onSearchChange(e.target.value)}
                     disabled={loading}

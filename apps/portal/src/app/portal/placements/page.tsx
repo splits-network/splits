@@ -144,6 +144,8 @@ export default function PlacementsBaselPage() {
                 onViewModeChange={handleViewModeChange}
                 placementCount={placements.length}
                 totalCount={pagination?.total ?? placements.length}
+                loading={loading}
+                refresh={refresh}
             />
 
             {/* Content Area */}

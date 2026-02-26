@@ -173,6 +173,8 @@ export default function CompanyInvitationsBaselPage() {
                 onViewModeChange={handleViewModeChange}
                 invitationCount={invitations.length}
                 totalCount={pagination?.total ?? invitations.length}
+                loading={loading}
+                refresh={refresh}
             />
 
             {/* Content Area */}

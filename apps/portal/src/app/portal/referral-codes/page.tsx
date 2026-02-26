@@ -216,6 +216,8 @@ export default function ReferralCodesBaselPage() {
                     onCreateCode={() => setShowCreateModal(true)}
                     codeCount={codes.length}
                     totalCount={pagination?.total ?? codes.length}
+                    loading={loading}
+                    refresh={refresh}
                 />
 
                 {/* Content Area */}

@@ -169,6 +169,8 @@ function JobsPageInner() {
                 onViewModeChange={handleViewModeChange}
                 resultCount={jobs.length}
                 totalCount={total}
+                loading={loading}
+                refresh={refresh}
             />
 
             {/* Content */}

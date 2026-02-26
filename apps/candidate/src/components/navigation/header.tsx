@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
 import { useChatSidebarOptional } from "@splits-network/chat-ui";
-import type { NavItem, NavSubItem } from "@splits-network/shared-types";
+import type { NavItem } from "@splits-network/shared-types";
 import UserDropdown from "./user-dropdown";
 import NotificationBell from "./notification-bell";
 import Image from "next/image";
@@ -91,69 +91,6 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
     },
 ];
 
-// ─── Nav Dropdown ───────────────────────────────────────────────────────────
-
-function NavDropdown({
-    label,
-    items,
-    columns,
-    activeDropdown,
-    onToggle,
-}: {
-    label: string;
-    items: NavSubItem[];
-    columns?: boolean;
-    activeDropdown: string | null;
-    onToggle: (label: string) => void;
-}) {
-    return (
-        <div className="relative">
-            <button
-                onClick={() => onToggle(label)}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
-            >
-                {label}
-                <i
-                    className={`fa-solid fa-chevron-down text-sm transition-transform ${
-                        activeDropdown === label ? "rotate-180" : ""
-                    }`}
-                />
-            </button>
-
-            {activeDropdown === label && (
-                <div
-                    className={`absolute top-full left-0 mt-1 bg-base-100 border border-base-300 shadow-lg py-2 z-50 ${
-                        columns ? "w-80" : "w-64"
-                    }`}
-                >
-                    <div className="px-4 py-2 border-b border-base-300 mb-1">
-                        <span className="text-sm font-semibold uppercase tracking-widest text-base-content/40">
-                            {label}
-                        </span>
-                    </div>
-                    <div className={columns ? "grid grid-cols-2 gap-0" : ""}>
-                        {items.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => onToggle("")}
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
-                            >
-                                <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
-                                    <i
-                                        className={`${link.icon} text-primary text-xs`}
-                                    />
-                                </div>
-                                {link.label}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
-
 // ─── Chat Trigger ────────────────────────────────────────────────────────────
 
 function ChatTrigger() {
@@ -183,14 +120,9 @@ function ChatTrigger() {
 
 export default function Header({ navItems }: { navItems?: NavItem[] }) {
     const { isSignedIn } = useAuth();
-    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const items = navItems ?? DEFAULT_NAV_ITEMS;
-
-    const toggleDropdown = (label: string) => {
-        setActiveDropdown(activeDropdown === label ? null : label);
-    };
 
     // Publish header height as CSS variable for banner/sidebar positioning
     useEffect(() => {
@@ -230,14 +162,53 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
                 <>
                     {items.map((item) =>
                         item.subItems?.length ? (
-                            <NavDropdown
-                                key={item.label}
-                                label={item.label}
-                                items={item.subItems}
-                                columns={item.subItems.length > 3}
-                                activeDropdown={activeDropdown}
-                                onToggle={toggleDropdown}
-                            />
+                            <div key={item.label} className="dropdown">
+                                <div
+                                    tabIndex={0}
+                                    role="button"
+                                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                                >
+                                    {item.label}
+                                    <i className="fa-solid fa-chevron-down text-sm" />
+                                </div>
+                                <div
+                                    tabIndex={0}
+                                    className={`dropdown-content bg-base-100 border border-base-300 shadow-lg py-2 z-50 ${
+                                        item.subItems.length > 3
+                                            ? "w-80"
+                                            : "w-64"
+                                    }`}
+                                >
+                                    <div className="px-4 py-2 border-b border-base-300 mb-1">
+                                        <span className="menu-title text-sm font-semibold uppercase tracking-widest text-base-content/40">
+                                            {item.label}
+                                        </span>
+                                    </div>
+                                    <ul
+                                        className={`menu p-0 ${
+                                            item.subItems.length > 3
+                                                ? "grid grid-cols-2"
+                                                : ""
+                                        }`}
+                                    >
+                                        {item.subItems.map((link) => (
+                                            <li key={link.href}>
+                                                <Link
+                                                    href={link.href}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200 hover:text-base-content"
+                                                >
+                                                    <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
+                                                        <i
+                                                            className={`${link.icon} text-primary text-sm`}
+                                                        />
+                                                    </div>
+                                                    {link.label}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
                         ) : (
                             <Link
                                 key={item.label}
@@ -290,51 +261,60 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
             }
             mobileMenu={
                 <>
-                    <nav className="space-y-1">
+                    <ul className="menu p-0">
                         {items
                             .filter((item) => !item.subItems?.length)
                             .map((item) => (
-                                <Link
-                                    key={item.label}
-                                    href={item.href || "#"}
-                                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
-                                >
-                                    {item.icon && (
-                                        <i
-                                            className={`${item.icon} text-xs text-primary`}
-                                        />
-                                    )}
-                                    {item.label}
-                                </Link>
+                                <li key={item.label}>
+                                    <Link
+                                        href={item.href || "#"}
+                                        className="text-sm font-semibold text-base-content/70"
+                                    >
+                                        {item.icon && (
+                                            <i
+                                                className={`${item.icon} text-sm text-primary`}
+                                            />
+                                        )}
+                                        {item.label}
+                                    </Link>
+                                </li>
                             ))}
 
                         {isSignedIn && (
                             <>
-                                <div className="border-t border-base-300 my-3" />
-                                <Link
-                                    href="/portal/dashboard"
-                                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
-                                >
-                                    <i className="fa-duotone fa-regular fa-gauge text-xs text-primary" />
-                                    Dashboard
-                                </Link>
-                                <Link
-                                    href="/portal/search"
-                                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
-                                >
-                                    <i className="fa-duotone fa-regular fa-magnifying-glass text-xs text-primary" />
-                                    Search
-                                </Link>
-                                <Link
-                                    href="/portal/applications"
-                                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
-                                >
-                                    <i className="fa-duotone fa-regular fa-file-lines text-xs text-primary" />
-                                    Applications
-                                </Link>
+                                <li className="menu-title border-t border-base-300 mt-3 pt-3">
+                                    Portal
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/portal/dashboard"
+                                        className="text-sm font-semibold text-base-content/70"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-gauge text-sm text-primary" />
+                                        Dashboard
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/portal/search"
+                                        className="text-sm font-semibold text-base-content/70"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-magnifying-glass text-sm text-primary" />
+                                        Search
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/portal/applications"
+                                        className="text-sm font-semibold text-base-content/70"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-file-lines text-sm text-primary" />
+                                        Applications
+                                    </Link>
+                                </li>
                             </>
                         )}
-                    </nav>
+                    </ul>
 
                     {!isSignedIn && (
                         <div className="space-y-2 pt-4 border-t border-base-300 mt-4">

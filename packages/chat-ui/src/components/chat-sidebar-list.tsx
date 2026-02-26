@@ -91,16 +91,16 @@ export function ChatSidebarList({ currentUserId }: ChatSidebarListProps) {
         <div className="flex flex-col h-full">
             {/* Search */}
             <div className="px-3 py-2 border-b border-base-300">
-                <div className="relative">
-                    <i className="fa-duotone fa-regular fa-search absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm" />
+                <label className="input w-full bg-base-200 border-none">
+                    <i className="fa-duotone fa-regular fa-search opacity-50" />
                     <input
                         type="text"
                         placeholder="Search conversations..."
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
-                        className="input input-sm w-full pl-9 bg-base-200 border-none rounded-none text-sm"
+                        className="grow"
                     />
-                </div>
+                </label>
             </div>
 
             {/* Mailbox tabs */}

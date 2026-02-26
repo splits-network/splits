@@ -137,6 +137,8 @@ export default function TeamsPage() {
                     onAddTeam={() => setShowAddModal(true)}
                     teamCount={teams.length}
                     totalCount={pagination?.total ?? teams.length}
+                    loading={loading}
+                    refresh={refresh}
                 />
 
                 {/* Content Area */}

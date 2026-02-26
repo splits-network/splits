@@ -144,6 +144,8 @@ export default function RolesPage() {
                     onAddRole={() => setShowAddModal(true)}
                     jobCount={jobs.length}
                     totalCount={pagination?.total ?? jobs.length}
+                    loading={loading}
+                    refresh={refresh}
                 />
 
                 {/* Content Area */}

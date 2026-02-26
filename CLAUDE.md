@@ -35,7 +35,7 @@ Design standards: in the root /showcase directory
 
 ## Architecture Rules
 
-1. **Small files** — max ~200 lines; split into multiple files/components if larger
+1. **MANDATORY: Small files** — max ~200 lines; split into multiple files/components if larger
 1. **No backend logic in `apps/`** — all APIs go in `services/*`
 1. **No HTTP calls between services** — use direct DB queries or RabbitMQ events
 1. **Single Supabase Postgres database** — only `public`, `search`, and `analytics` schemas
@@ -52,7 +52,7 @@ Design standards: in the root /showcase directory
 3. **Understand the full data flow first** — Before making changes, trace the path: frontend → gateway → service → repository → database. Identify where data actually lives and how it gets there. Don't guess.
 4. **Extend enums/types properly** — When a new concept needs a new type value (e.g., a new note type, status, or role), add it to the database constraint via migration AND the TypeScript type. Never repurpose an existing value.
 5. **Follow existing patterns** — Look at how similar features were built. If notes use `application_notes`, new note-like data goes there too. If events use RabbitMQ, new events do too. Don't invent a new pattern when one exists.
-6. **Use the framework before writing custom code** — DaisyUI and TailwindCSS provide components, classes, and patterns for nearly every UI need. NEVER build custom implementations (click-outside listeners, open/close state, dropdowns, modals, tooltips, etc.) when the framework already handles it. Check the DaisyUI docs first. If a DaisyUI component exists for the pattern, use it. When modifying a component that uses a custom implementation where DaisyUI provides the pattern, refactor it to use DaisyUI as part of the change.
+6. **MANDATORY: Use the framework before writing custom code** — DaisyUI and TailwindCSS provide components, classes, and patterns for nearly every UI need. NEVER build custom implementations (click-outside listeners, open/close state, dropdowns, modals, tooltips, etc.) when the framework already handles it. Check the DaisyUI docs first. If a DaisyUI component exists for the pattern, use it. When modifying a component that uses a custom implementation where DaisyUI provides the pattern, refactor it to use DaisyUI as part of the change.
 
 ## Tech Stack
 

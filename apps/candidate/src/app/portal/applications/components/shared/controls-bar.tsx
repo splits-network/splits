@@ -16,6 +16,8 @@ interface ControlsBarProps {
     onViewModeChange: (mode: ViewMode) => void;
     appCount: number;
     totalCount: number;
+    loading: boolean;
+    refresh: () => void;
 }
 
 export function ControlsBar({
@@ -27,6 +29,8 @@ export function ControlsBar({
     onViewModeChange,
     appCount,
     totalCount,
+    loading,
+    refresh,
 }: ControlsBarProps) {
     return (
         <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
@@ -66,6 +70,17 @@ export function ControlsBar({
                                 </option>
                             ))}
                         </select>
+
+                        {/* Refresh */}
+                        <button
+                            onClick={refresh}
+                            className="btn btn-sm btn-ghost"
+                            disabled={loading}
+                        >
+                            <i
+                                className={`fa-duotone fa-regular fa-arrows-rotate ${loading ? "animate-spin" : ""}`}
+                            />
+                        </button>
                     </div>
 
                     {/* View Toggle + Results */}

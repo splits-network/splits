@@ -14,6 +14,7 @@ import type { RoleBreakdown } from "@/app/portal/dashboard/hooks/use-role-breakd
 import { useCompanyActivity } from "@/app/portal/dashboard/hooks/use-company-activity";
 import type { CompanyActivity } from "@/app/portal/dashboard/hooks/use-company-activity";
 import { useDashboardRealtime } from "@/app/portal/dashboard/hooks/use-dashboard-realtime";
+import { useApplicationVolume } from "@/app/portal/dashboard/hooks/use-application-volume";
 import {
     BaselKpiCard,
     BaselChartCard,
@@ -133,6 +134,7 @@ export default function CompanyView() {
         useCompanyHealth();
     const { roles, loading: rolesLoading } = useRoleBreakdown();
     const { activities, loading: activityLoading } = useCompanyActivity();
+    const { data: applicationVolumeData, loading: applicationVolumeLoading } = useApplicationVolume(trendPeriod);
 
     /* Realtime */
     const handleStatsUpdate = useCallback(() => {
@@ -352,8 +354,8 @@ export default function CompanyView() {
                             className="lg:col-span-3"
                         >
                             <ApplicationVolumeChart
-                                data={[]}
-                                loading={statsLoading}
+                                data={applicationVolumeData}
+                                loading={applicationVolumeLoading}
                                 height={200}
                             />
                         </BaselChartCard>

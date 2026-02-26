@@ -31,7 +31,15 @@ export function ApplicationVolumeChart({
     }
 
     if (!data.length) {
-        return <ChartLoadingState height={height} message="No application data" />;
+        const heightStyle = typeof height === "number" ? `${height}px` : height;
+        return (
+            <div
+                className="flex items-center justify-center text-base-content/50 text-sm"
+                style={{ height: heightStyle }}
+            >
+                No application data available
+            </div>
+        );
     }
 
     const axisTick = {

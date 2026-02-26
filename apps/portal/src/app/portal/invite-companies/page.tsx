@@ -131,6 +131,8 @@ export default function InviteCompaniesBaselPage() {
                     invitationCount={invitations.length}
                     totalCount={pagination?.total ?? invitations.length}
                     onCreateInvitation={() => setShowCreateModal(true)}
+                    loading={loading}
+                    refresh={refresh}
                 />
 
                 {/* Content Area */}

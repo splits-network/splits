@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchInput } from "@/components/standard-lists/search-input";
 import type { ViewMode } from "./status-color";
 import type { PlacementFilters } from "../../types";
 
@@ -15,6 +16,8 @@ interface ControlsBarProps {
     onViewModeChange: (mode: ViewMode) => void;
     placementCount: number;
     totalCount: number;
+    loading: boolean;
+    refresh: () => void;
 }
 
 export function ControlsBar({
@@ -26,6 +29,8 @@ export function ControlsBar({
     onViewModeChange,
     placementCount,
     totalCount,
+    loading,
+    refresh,
 }: ControlsBarProps) {
     return (
         <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
@@ -34,17 +39,12 @@ export function ControlsBar({
                     {/* Search + Filters */}
                     <div className="flex flex-wrap gap-3 items-center flex-1">
                         {/* Search */}
-                        <div className="relative flex-1 min-w-[200px] max-w-md">
-                            <i className="fa-duotone fa-regular fa-search absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 text-sm" />
-                            <input
-                                type="text"
-                                placeholder="Search placements, candidates, companies..."
-                                value={searchInput}
-                                onChange={(e) => onSearchChange(e.target.value)}
-                                className="input input-bordered w-full pl-9 bg-base-200 border-base-300 text-sm font-medium focus:border-primary focus:outline-none"
-                                style={{ borderRadius: 0 }}
-                            />
-                        </div>
+                        <SearchInput
+                            value={searchInput}
+                            onChange={onSearchChange}
+                            placeholder="Search placements, candidates, companies..."
+                            className="flex-1 min-w-[200px] max-w-md"
+                        />
 
                         {/* Status filter */}
                         <select
@@ -64,6 +64,17 @@ export function ControlsBar({
                             <option value="completed">Completed</option>
                             <option value="failed">Failed</option>
                         </select>
+
+                        {/* Refresh */}
+                        <button
+                            onClick={refresh}
+                            className="btn btn-sm btn-ghost"
+                            disabled={loading}
+                        >
+                            <i
+                                className={`fa-duotone fa-regular fa-arrows-rotate ${loading ? "animate-spin" : ""}`}
+                            />
+                        </button>
                     </div>
 
                     {/* View Toggle + Results */}

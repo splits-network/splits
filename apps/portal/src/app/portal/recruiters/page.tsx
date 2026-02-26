@@ -163,6 +163,8 @@ function RecruitersContent() {
                 }}
                 recruiterCount={recruiters.length}
                 totalCount={pagination?.total ?? recruiters.length}
+                loading={loading}
+                refresh={refresh}
             />
 
             <section className="min-h-screen">

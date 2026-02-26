@@ -179,6 +179,8 @@ export default function CandidatesPage() {
                     onAddCandidate={() => setShowAddModal(true)}
                     candidateCount={candidates.length}
                     totalCount={pagination?.total ?? candidates.length}
+                    loading={loading}
+                    refresh={refresh}
                 />
 
                 {/* Content Area */}

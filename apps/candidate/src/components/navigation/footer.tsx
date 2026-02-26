@@ -139,14 +139,14 @@ export default function Footer({
                     <div className="lg:col-span-2 flex flex-col sm:flex-row gap-3 lg:justify-end">
                         <Link
                             href="/sign-up"
-                            className="btn btn-lg bg-white text-primary hover:bg-white/90 border-0 shadow-lg"
+                            className="btn btn-lg bg-base-100 text-primary hover:bg-base-100/90 border-0 shadow-lg"
                         >
                             <i className="fa-duotone fa-regular fa-rocket" />
                             Get Started Free
                         </Link>
                         <Link
                             href="/jobs"
-                            className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                            className="btn btn-lg btn-outline border-primary-content/30 text-primary-content hover:bg-primary-content/10 hover:border-primary-content/50"
                         >
                             <i className="fa-duotone fa-regular fa-briefcase" />
                             Browse Jobs
@@ -236,38 +236,34 @@ export default function Footer({
                 </>
             }
             columns={
-                <>
+                <div className="grid grid-flow-col gap-4">
                     {sections.map((section) => (
-                        <div key={section.title}>
-                            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4">
-                                {section.title}
-                            </h4>
-                            <ul className="space-y-2.5">
-                                {section.links.map((link) => (
-                                    <li key={link.label}>
-                                        {"external" in link && link.external ? (
-                                            <a
-                                                href={link.href}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
-                                            >
-                                                {link.label}
-                                            </a>
-                                        ) : (
-                                            <Link
-                                                href={link.href}
-                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
-                                            >
-                                                {link.label}
-                                            </Link>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        <nav key={section.title}>
+                            <h6 className="footer-title">{section.title}</h6>
+                            {section.links.map((link) =>
+                                "external" in link && link.external ? (
+                                    <a
+                                        key={link.label}
+                                        href={link.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="link link-hover"
+                                    >
+                                        {link.label}
+                                    </a>
+                                ) : (
+                                    <Link
+                                        key={link.label}
+                                        href={link.href}
+                                        className="link link-hover"
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ),
+                            )}
+                        </nav>
                     ))}
-                </>
+                </div>
             }
             stats={
                 <>
@@ -297,7 +293,7 @@ export default function Footer({
                             <Link
                                 key={link.label}
                                 href={link.href}
-                                className="text-sm opacity-30 hover:opacity-60 transition-opacity"
+                                className="link link-hover text-sm opacity-30 hover:opacity-60"
                             >
                                 {link.label}
                             </Link>

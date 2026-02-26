@@ -207,6 +207,8 @@ export default function InvitationsBaselPage() {
                     onInviteCandidate={() => setShowAddModal(true)}
                     invitationCount={invitations.length}
                     totalCount={pagination?.total ?? invitations.length}
+                    loading={loading}
+                    refresh={refresh}
                 />
 
                 {/* Content Area */}
