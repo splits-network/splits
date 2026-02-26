@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
     readConsentCookie,
     writeConsentCookie,
@@ -72,17 +73,18 @@ export function BaselCookieConsent({
     if (!showBanner) return null;
 
     if (showPreferences) {
-        return (
+        return createPortal(
             <CookiePreferencesPanel
                 cookiePolicyHref={cookiePolicyHref}
                 privacyPolicyHref={privacyPolicyHref}
                 onSave={saveConsent}
                 onClose={() => setShowPreferences(false)}
-            />
+            />,
+            document.body,
         );
     }
 
-    return (
+    return createPortal(
         <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-base-100 shadow-md border-t-4 border-primary">
             <div className="container mx-auto max-w-6xl">
                 <div className="flex flex-col md:flex-row gap-4 items-center">
@@ -141,7 +143,8 @@ export function BaselCookieConsent({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 }
 
