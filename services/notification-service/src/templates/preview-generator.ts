@@ -31,6 +31,7 @@ import {
     placementCompletedEmail,
     placementFailedEmail,
     guaranteeExpiringEmail,
+    firstPlacementEmail,
 } from './placements';
 import {
     candidateSourcedEmail,
@@ -88,6 +89,7 @@ import {
     jobCreatedConfirmationEmail,
     jobStatusChangedEmail,
     jobExpiredEmail,
+    firstJobPostedEmail,
 } from './jobs';
 import {
     connectionRequestedEmail,
@@ -98,6 +100,12 @@ import { fraudAlertEmail, securityReplayAlertEmail } from './security';
 import { invitationAcceptedEmail } from './invitations';
 import { referralCodeRedeemedEmail } from './recruiter-codes';
 import { resumeProcessedEmail } from './documents';
+import {
+    weeklyActivityDigestEmail,
+    monthlyHiringReportEmail,
+    candidateProfileReminderEmail,
+    recruiterInactivityReminderEmail,
+} from './engagement';
 import {
     payoutProcessedEmail,
     payoutFailedEmail,
@@ -654,6 +662,64 @@ const resumeProcessedData = {
     viewUrl: 'https://splits.network/portal/candidates/sarah123',
 };
 
+// ── Milestone sample data ──────────────────────────────────────────
+
+const firstJobPostedData = {
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    jobUrl: 'https://splits.network/portal/jobs/abc123',
+};
+
+const firstPlacementData = {
+    candidateName: 'Brandon Test2',
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    recruiterShare: 18750,
+    placementUrl: 'https://splits.network/placements/xyz789',
+};
+
+// ── Engagement sample data ─────────────────────────────────────────
+
+const weeklyDigestData = {
+    recruiterName: 'Jane Smith',
+    weekStartDate: 'Feb 17, 2026',
+    weekEndDate: 'Feb 23, 2026',
+    applicationsSubmitted: 8,
+    applicationsAdvanced: 3,
+    placementsCreated: 1,
+    placementsActivated: 1,
+    totalEarnings: 18750,
+    dashboardUrl: 'https://splits.network/portal/dashboard',
+};
+
+const monthlyReportData = {
+    companyName: 'TechCorp Inc',
+    monthName: 'January',
+    year: 2026,
+    totalApplications: 42,
+    applicationsReviewing: 12,
+    applicationsInterviewing: 8,
+    applicationsHired: 3,
+    applicationsRejected: 15,
+    activeJobs: 6,
+    placementsCompleted: 2,
+    dashboardUrl: 'https://splits.network/portal/dashboard',
+};
+
+const candidateReminderData = {
+    candidateName: 'Sarah Johnson',
+    daysSinceActivity: 35,
+    profileUrl: 'https://applicant.network/portal/profile',
+};
+
+const recruiterReminderData = {
+    recruiterName: 'Jane Smith',
+    daysSinceActivity: 18,
+    pendingApplications: 5,
+    activeJobs: 12,
+    dashboardUrl: 'https://splits.network/portal/dashboard',
+};
+
 // ── Payout & financial sample data ──────────────────────────────────
 
 const payoutProcessedData = {
@@ -805,6 +871,16 @@ function generatePreviews() {
 
         // Documents
         { name: 'resume-processed', html: resumeProcessedEmail(resumeProcessedData) },
+
+        // Milestones
+        { name: 'first-job-posted', html: firstJobPostedEmail(firstJobPostedData) },
+        { name: 'first-placement', html: firstPlacementEmail(firstPlacementData) },
+
+        // Engagement
+        { name: 'weekly-activity-digest', html: weeklyActivityDigestEmail(weeklyDigestData) },
+        { name: 'monthly-hiring-report', html: monthlyHiringReportEmail(monthlyReportData) },
+        { name: 'candidate-profile-reminder', html: candidateProfileReminderEmail(candidateReminderData) },
+        { name: 'recruiter-inactivity-reminder', html: recruiterInactivityReminderEmail(recruiterReminderData) },
 
         // Payout & Financial
         { name: 'payout-processed', html: payoutProcessedEmail(payoutProcessedData) },
@@ -982,6 +1058,16 @@ function generatePreviews() {
 
             <h3 style="color: #18181b; margin: 24px 0 12px;">Document Processing Emails</h3>
             <a href="resume-processed.html">Resume Processed <span class="badge">New</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Milestone Emails</h3>
+            <a href="first-job-posted.html">First Job Posted <span class="badge">Milestone</span></a>
+            <a href="first-placement.html">First Placement <span class="badge">Milestone</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Engagement Emails</h3>
+            <a href="weekly-activity-digest.html">Weekly Activity Digest <span class="badge">Digest</span></a>
+            <a href="monthly-hiring-report.html">Monthly Hiring Report <span class="badge">Report</span></a>
+            <a href="candidate-profile-reminder.html">Candidate Profile Reminder <span class="badge">Reminder</span></a>
+            <a href="recruiter-inactivity-reminder.html">Recruiter Inactivity Reminder <span class="badge">Reminder</span></a>
 
             <h3 style="color: #18181b; margin: 24px 0 12px;">Payout & Financial Emails</h3>
             <a href="payout-processed.html">Payout Processed <span class="badge">New</span></a>

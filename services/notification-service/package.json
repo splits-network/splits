@@ -9,6 +9,10 @@
         "start": "node dist/index.js",
         "clean": "rm -rf dist *.tsbuildinfo",
         "preview:emails": "tsx src/templates/preview-generator.ts",
+        "job:weekly-digest": "tsx src/jobs/send-weekly-digest.ts",
+        "job:monthly-report": "tsx src/jobs/send-monthly-report.ts",
+        "job:candidate-reminders": "tsx src/jobs/send-candidate-reminders.ts",
+        "job:recruiter-reminders": "tsx src/jobs/send-recruiter-reminders.ts",
         "test": "vitest"
     },
     "dependencies": {

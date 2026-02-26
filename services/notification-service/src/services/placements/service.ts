@@ -7,6 +7,7 @@ import {
     placementCompletedEmail,
     placementFailedEmail,
     guaranteeExpiringEmail,
+    firstPlacementEmail,
 } from '../../templates/placements';
 
 export class PlacementsEmailService {
@@ -285,6 +286,39 @@ export class PlacementsEmailService {
             actionLabel: 'View Details',
             priority: 'high',
             category: 'placement',
+        });
+    }
+
+    async sendFirstPlacement(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            recruiterShare: number;
+            placementId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Congratulations on your first placement!`;
+        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+
+        const html = firstPlacementEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            recruiterShare: data.recruiterShare,
+            placementUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'milestone.first_placement',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/placements?placementId=${data.placementId}`,
+            actionLabel: 'View Placement',
+            priority: 'high',
+            category: 'milestone',
         });
     }
 

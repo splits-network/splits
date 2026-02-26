@@ -54,12 +54,56 @@ export class PlacementsEventConsumer {
                 { placement_id, recipient: recruiterContact.email, recruiter_share: placementData.recruiter_share_amount },
                 'Placement created notification sent successfully'
             );
+
+            // Milestone: Check if this is the recruiter's first placement
+            await this.checkFirstPlacementMilestone(
+                placement_id,
+                placementData.recruiter_id || recruiter_id,
+                recruiterContact,
+                candidateContact,
+                job,
+                placementData.recruiter_share_amount || recruiter_share || 0
+            );
         } catch (error) {
             this.logger.error(
                 { error, event_payload: event.payload },
                 'Failed to send placement created notification'
             );
             throw error;
+        }
+    }
+
+    private async checkFirstPlacementMilestone(
+        placementId: string,
+        recruiterId: string,
+        recruiterContact: { email: string; name: string; user_id: string | null },
+        candidateContact: { name: string },
+        job: { id: string; title: string; company?: { name: string } },
+        recruiterShare: number
+    ): Promise<void> {
+        try {
+            const isFirst = await this.dataLookup.isFirstPlacementForRecruiter(recruiterId, placementId);
+            if (!isFirst) return;
+
+            const alreadySent = await this.dataLookup.wasMilestoneSent(
+                'milestone.first_placement',
+                recruiterContact.email
+            );
+            if (alreadySent) return;
+
+            this.logger.info({ placementId, recruiterId }, 'First placement milestone detected');
+
+            await this.emailService.sendFirstPlacement(recruiterContact.email, {
+                candidateName: candidateContact.name,
+                jobTitle: job.title,
+                companyName: job.company?.name || 'Unknown Company',
+                recruiterShare,
+                placementId,
+                userId: recruiterContact.user_id || undefined,
+            });
+        } catch (error) {
+            // Milestone failures are non-fatal
+            this.logger.error({ error, placementId }, 'Failed to send first placement milestone (non-fatal)');
         }
     }
 

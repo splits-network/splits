@@ -518,12 +518,37 @@ export class DomainEventConsumer {
         }
 
         try {
-            // Check if this document is the primary resume for the candidate
             const supabase = this.candidateRepository.getSupabase();
 
+            // Fetch document to check if it's the primary resume (via metadata flag)
+            const { data: doc, error: docError } = await supabase
+                .from('documents')
+                .select('metadata')
+                .eq('id', document_id)
+                .single();
+
+            if (docError || !doc?.metadata) {
+                this.logger.warn({ document_id }, 'Could not read document for resume metadata sync');
+                return;
+            }
+
+            if (!doc.metadata.is_primary_for_candidate) {
+                this.logger.debug(
+                    { document_id, entity_id },
+                    'Document is not primary resume, skipping sync'
+                );
+                return;
+            }
+
+            if (!doc.metadata.structured_data) {
+                this.logger.warn({ document_id }, 'No structured data on primary resume document');
+                return;
+            }
+
+            // Verify candidate exists
             const { data: candidate, error: candidateError } = await supabase
                 .from('candidates')
-                .select('id, primary_resume_id')
+                .select('id')
                 .eq('id', entity_id)
                 .single();
 
@@ -532,27 +557,7 @@ export class DomainEventConsumer {
                 return;
             }
 
-            if (candidate.primary_resume_id !== document_id) {
-                this.logger.debug(
-                    { document_id, candidate_id: candidate.id, primary_resume_id: candidate.primary_resume_id },
-                    'Document is not primary resume, skipping sync'
-                );
-                return;
-            }
-
-            // Fetch structured data from the document
-            const { data: doc, error: docError } = await supabase
-                .from('documents')
-                .select('metadata')
-                .eq('id', document_id)
-                .single();
-
-            if (docError || !doc?.metadata?.structured_data) {
-                this.logger.warn({ document_id }, 'Could not read structured data from document');
-                return;
-            }
-
-            // Sync to candidate
+            // Sync structured data to candidate
             const { error: updateError } = await supabase
                 .from('candidates')
                 .update({ resume_metadata: doc.metadata.structured_data })

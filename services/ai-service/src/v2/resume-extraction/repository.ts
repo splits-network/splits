@@ -69,23 +69,4 @@ export class ResumeExtractionRepository {
 
         this.logger.debug({ document_id: documentId }, 'Structured data written to document metadata');
     }
-
-    /**
-     * Check if a document is the primary resume for its candidate entity.
-     * Returns the candidate_id if it is primary, null otherwise.
-     */
-    async isPrimaryResumeForCandidate(documentId: string): Promise<string | null> {
-        const { data, error } = await this.supabase
-            .from('candidates')
-            .select('id')
-            .eq('primary_resume_id', documentId)
-            .single();
-
-        if (error) {
-            if (error.code === 'PGRST116') return null; // Not found - not primary
-            throw error;
-        }
-
-        return data?.id || null;
-    }
 }

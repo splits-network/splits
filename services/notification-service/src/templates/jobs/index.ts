@@ -96,6 +96,60 @@ ${paragraph('If this change was unexpected, contact the job owner or visit the j
     });
 }
 
+// ─── First Job Posted (Milestone) ───────────────────────────────────────────
+
+export interface FirstJobPostedData {
+    jobTitle: string;
+    companyName: string;
+    jobUrl: string;
+    source?: EmailSource;
+}
+
+export function firstJobPostedEmail(data: FirstJobPostedData): string {
+    const content = `
+${heading({ level: 1, text: 'Your first job is live!' })}
+
+${alert({
+        type: 'success',
+        title: 'Milestone achieved',
+        message: `Congratulations! ${data.companyName} just posted its first job on Splits Network.`,
+    })}
+
+${infoCard({
+        title: 'Your First Posting',
+        items: [
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+            { label: 'Status', value: 'Active and accepting candidates', highlight: true },
+        ],
+    })}
+
+${paragraph('<strong>What happens next?</strong>')}
+
+${paragraph('Recruiters in your network can now discover this job and submit qualified candidates. Here are a few tips to get quality submissions faster:')}
+
+${paragraph('1. <strong>Complete the job description</strong> — detailed requirements help recruiters match the right candidates.')}
+${paragraph('2. <strong>Invite preferred recruiters</strong> — connect with recruiters who specialize in your industry.')}
+${paragraph('3. <strong>Review applications promptly</strong> — fast responses attract better candidates.')}
+
+${button({
+        href: data.jobUrl,
+        text: 'View Your Job Listing →',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph('Welcome to the Splits Network recruiting marketplace. We\'re excited to help you find great talent.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        content,
+        preheader: `Your first job is live! ${data.jobTitle} at ${data.companyName} is now accepting candidates.`,
+        source: data.source || 'portal',
+    });
+}
+
 // ─── Job Expired ─────────────────────────────────────────────────────────────
 
 export interface JobExpiredData {
