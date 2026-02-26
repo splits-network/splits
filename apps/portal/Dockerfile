@@ -61,6 +61,8 @@ COPY packages/basel-ui ./packages/basel-ui
 COPY packages/chat-ui ./packages/chat-ui
 COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/portal ./apps/portal
+# Copy press content (MDX articles read at runtime by server components)
+COPY content ./content
 # Reinstall to ensure workspace links are properly established after copying source
 RUN pnpm install --frozen-lockfile
 # Build shared packages first (in dependency order - types/config first, then api-client which depends on them)
@@ -111,6 +113,9 @@ COPY --from=build /app/apps/portal/package.json ./apps/portal/
 COPY --from=build /app/apps/portal/.next ./apps/portal/.next
 COPY --from=build /app/apps/portal/public ./apps/portal/public
 COPY --from=build /app/apps/portal/next.config.mjs ./apps/portal/
+
+# Press content (MDX articles read at runtime by server components)
+COPY --from=build /app/content ./content
 
 EXPOSE 3100
 CMD ["pnpm", "--filter", "@splits-network/portal", "start"]
