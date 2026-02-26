@@ -76,7 +76,7 @@ export function BaselHeader({
             >
                 {accentLine && <div className="h-1 bg-primary w-full" />}
 
-                <div className="navbar container mx-auto px-4 sm:px-6 lg:px-12 min-h-0 h-14 lg:h-16 xl:h-18 justify-between">
+                <div className="navbar container mx-auto px-4 sm:px-6 lg:px-12 min-h-0 h-14 lg:h-16 xl:h-18 flex justify-between">
                     {/* ── Left: Logo + Nav ──────────────────────── */}
                     <div className="navbar-start flex items-center">
                         {logo}
