@@ -134,7 +134,8 @@ export default function CompanyView() {
         useCompanyHealth();
     const { roles, loading: rolesLoading } = useRoleBreakdown();
     const { activities, loading: activityLoading } = useCompanyActivity();
-    const { data: applicationVolumeData, loading: applicationVolumeLoading } = useApplicationVolume(trendPeriod);
+    const { data: applicationVolumeData, loading: applicationVolumeLoading } =
+        useApplicationVolume(trendPeriod);
 
     /* Realtime */
     const handleStatsUpdate = useCallback(() => {
@@ -410,7 +411,7 @@ export default function CompanyView() {
                                                 >
                                                     <td>
                                                         <Link
-                                                            href={`/portal/roles/${role.id}`}
+                                                            href={`/portal/roles?roleId=${role.id}`}
                                                             className="text-sm font-semibold hover:text-primary transition-colors"
                                                         >
                                                             {role.title}

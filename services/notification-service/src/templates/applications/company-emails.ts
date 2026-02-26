@@ -28,7 +28,7 @@ export function companyApplicationExpiredEmail(data: CompanyApplicationExpiredDa
     const stageLabel = stageLabels[data.expiredFromStage] || data.expiredFromStage;
 
     const content = `
-${heading({ level: 1, text: 'Application Lost' })}
+${heading({ level: 1, text: 'Application lost to inaction' })}
 
 ${alert({
         type: 'error',
@@ -89,7 +89,7 @@ export function companyExpirationWarningEmail(data: CompanyExpirationWarningData
         .join('<br>');
 
     const content = `
-${heading({ level: 1, text: 'Applications Expiring Soon' })}
+${heading({ level: 1, text: 'Applications expiring soon' })}
 
 ${alert({
         type: 'warning',

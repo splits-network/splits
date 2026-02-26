@@ -66,11 +66,9 @@ ${list([
 
 ${divider()}
 
-${paragraph('Click the button below to create your company account:')}
-
 ${button({
         href: data.invitationLink,
-        text: 'Join Splits Network',
+        text: 'Join Splits Network →',
         variant: 'primary',
     })}
 
@@ -111,7 +109,7 @@ export interface CompanyInvitationAcceptedData {
 
 export function companyInvitationAcceptedEmail(data: CompanyInvitationAcceptedData): string {
     const content = `
-${heading({ level: 1, text: 'Invitation Accepted!' })}
+${heading({ level: 1, text: 'Invitation accepted' })}
 
 ${alert({
         type: 'success',
@@ -142,7 +140,7 @@ ${list([
 
 ${button({
         href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/dashboard`,
-        text: 'View Dashboard',
+        text: 'View Dashboard →',
         variant: 'secondary',
     })}
 

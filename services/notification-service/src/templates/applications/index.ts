@@ -17,7 +17,7 @@ export interface ApplicationCreatedData {
 
 export function applicationCreatedEmail(data: ApplicationCreatedData): string {
     const content = `
-${heading({ level: 1, text: 'New Candidate Application' })}
+${heading({ level: 1, text: 'New candidate application' })}
 
 ${paragraph(`Your candidate <strong>${data.candidateName}</strong> has submitted an application for review.`)}
 
@@ -67,7 +67,7 @@ export interface ApplicationStageChangedData {
 
 export function applicationStageChangedEmail(data: ApplicationStageChangedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Status Update' })}
+${heading({ level: 1, text: 'Application stage updated' })}
 
 ${paragraph(
         `The application for <strong>${data.candidateName}</strong> has moved to a new stage in the hiring process.`
@@ -84,7 +84,7 @@ ${infoCard({
         ],
     })}
 
-${paragraph('Continue tracking the application progress and prepare for the next steps.')}
+${paragraph('No action needed. You\'ll be notified if the company requests additional information or schedules an interview.')}
 
 ${button({
         href: data.applicationUrl,
@@ -116,11 +116,11 @@ export interface ApplicationAcceptedData {
 
 export function applicationAcceptedEmail(data: ApplicationAcceptedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Accepted!' })}
+${heading({ level: 1, text: 'Application accepted' })}
 
 ${alert({
         type: 'success',
-        title: 'Great News!',
+        title: 'Application accepted',
         message: `The company has accepted your candidate ${data.candidateName} for the ${data.jobTitle} position.`,
     })}
 
@@ -134,12 +134,12 @@ ${infoCard({
     })}
 
 ${paragraph(
-        'The candidate has moved forward in the hiring process. Continue to monitor progress and coordinate next steps with the company.'
+        'No action needed right now. The company will continue their interview process, and you\'ll be notified of any status changes.'
     )}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Application Details →',
+        text: 'View Application →',
         variant: 'primary',
     })}
 
@@ -148,7 +148,7 @@ ${divider()}
 ${paragraph('<strong>What happens next?</strong>')}
 
 ${paragraph(
-        'The company will continue their interview process. Stay engaged and be prepared to support your candidate through the hiring journey. When an offer is extended and accepted, a placement will be automatically created.'
+        'The company will proceed with interviews. Stay available to support your candidate if the company has questions. When an offer is extended and accepted, a placement record is created automatically.'
     )}
     `.trim();
 
@@ -170,7 +170,7 @@ export interface ApplicationRejectedData {
 
 export function applicationRejectedEmail(data: ApplicationRejectedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Update' })}
+${heading({ level: 1, text: 'Application not moved forward' })}
 
 ${alert({
         type: 'warning',
@@ -187,7 +187,7 @@ ${infoCard({
         ],
     })}
 
-${paragraph('While this opportunity didn\'t work out, there are many more roles available on the platform.')}
+${paragraph('This application is no longer active. No action is required on your part.')}
 
 ${button({
         href: 'https://splits.network/portal/roles',
@@ -198,7 +198,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        '<strong>Keep Moving Forward:</strong> Every "no" brings you closer to a "yes". Continue submitting quality candidates to build your placement success rate.'
+        '<strong>Next steps:</strong> Review the feedback if provided, and continue submitting quality candidates to other open roles.'
     )}
     `.trim();
 
@@ -221,7 +221,7 @@ export interface ApplicationWithdrawnData {
 
 export function applicationWithdrawnEmail(data: ApplicationWithdrawnData): string {
     const content = `
-${heading({ level: 1, text: 'Application Withdrawn' })}
+${heading({ level: 1, text: 'Application withdrawn' })}
 
 ${alert({
         type: 'info',
@@ -240,7 +240,7 @@ ${infoCard({
     })}
 
 ${paragraph(
-        'This application has been removed from consideration. The candidate can no longer be considered for this position through this submission.'
+        'This application has been removed from consideration. No further action is needed.'
     )}
 
 ${button({
@@ -275,7 +275,7 @@ export interface CandidateApplicationSubmittedData {
 
 export function candidateApplicationSubmittedEmail(data: CandidateApplicationSubmittedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Received' })}
+${heading({ level: 1, text: 'Application received' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -306,7 +306,7 @@ ${button({
 
 ${divider()}
 
-${paragraph('<strong>Good luck!</strong> We\'re here to support you throughout the hiring process.')}
+${paragraph('You\'ll receive an email at each stage of the process. No further action is needed right now.')}
     `.trim();
 
     return baseEmailTemplate({
@@ -327,7 +327,7 @@ export interface CompanyApplicationReceivedData {
 
 export function companyApplicationReceivedEmail(data: CompanyApplicationReceivedData): string {
     const content = `
-${heading({ level: 1, text: 'New Candidate Application' })}
+${heading({ level: 1, text: 'New candidate application' })}
 
 ${paragraph(`A new candidate has applied for <strong>${data.jobTitle}</strong>.`)}
 
@@ -388,7 +388,7 @@ export interface PreScreenRequestedData {
 
 export function preScreenRequestedEmail(data: PreScreenRequestedData): string {
     const content = `
-${heading({ level: 1, text: 'Pre-Screen Request' })}
+${heading({ level: 1, text: 'Pre-screen request' })}
 
 ${paragraph(
         `<strong>${data.requestedBy}</strong> from <strong>${data.companyName}</strong> has requested your help reviewing a candidate application.`
@@ -451,7 +451,7 @@ export interface PreScreenRequestConfirmationData {
 
 export function preScreenRequestConfirmationEmail(data: PreScreenRequestConfirmationData): string {
     const content = `
-${heading({ level: 1, text: 'Pre-Screen Request Submitted' })}
+${heading({ level: 1, text: 'Pre-screen request submitted' })}
 
 ${alert({
         type: 'success',
@@ -524,7 +524,7 @@ export interface ApplicationSubmittedToCompanyData {
 
 export function applicationSubmittedToCompanyEmail(data: ApplicationSubmittedToCompanyData): string {
     const content = `
-${heading({ level: 1, text: 'Application Submitted to Company' })}
+${heading({ level: 1, text: 'Application submitted to company' })}
 
 ${paragraph(
         `The application for <strong>${data.candidateName}</strong> has been submitted to <strong>${data.companyName}</strong> for review.`
@@ -542,9 +542,9 @@ ${infoCard({
 
 ${alert({
         type: 'info',
-        title: 'What\'s Next?',
+        title: 'What happens next',
         message:
-            'The company will review the application and provide feedback. You\'ll be notified of any status changes.',
+            'The company will review the application and respond with feedback, an interview request, or a decision. No action needed from you right now.',
     })}
 
 ${button({
@@ -590,7 +590,7 @@ export function aiReviewCompletedCandidateEmail(data: AIReviewCompletedCandidate
     const alertType = isGoodMatch ? 'success' : 'info';
 
     const content = `
-${heading({ level: 1, text: 'Your Application Has Been Reviewed' })}
+${heading({ level: 1, text: 'Your application has been reviewed' })}
 
 ${paragraph(
         `Hi <strong>${data.candidateName}</strong>, good news! Your application for <strong>${data.jobTitle}</strong> has been reviewed by our AI system.`
@@ -623,13 +623,13 @@ ${alert({
         type: alertType,
         title: 'Next Steps',
         message: isGoodMatch
-            ? 'Your application shows strong potential! A recruiter will be in touch soon to discuss the next steps in the process.'
-            : 'We\'ll keep you updated on your application status. Continue building your skills in the areas identified above.',
+            ? 'Your application looks great! Review the AI analysis and accept the opportunity to move forward in the hiring process.'
+            : 'Review the AI feedback and decide if you\'d like to proceed with this application. You can update your application based on the suggestions above.',
     })}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Full Analysis →',
+        text: 'Review & Accept Your Application →',
         variant: 'primary',
     })}
 
@@ -676,7 +676,7 @@ export function aiReviewCompletedRecruiterEmail(data: AIReviewCompletedRecruiter
     const alertType = isStrongCandidate ? 'success' : 'info';
 
     const content = `
-${heading({ level: 1, text: 'AI Review Complete' })}
+${heading({ level: 1, text: 'AI review complete' })}
 
 ${paragraph(
         `Hi <strong>${data.recruiterName}</strong>, the AI review for <strong>${data.candidateName}</strong>'s application to <strong>${data.jobTitle}</strong> is now complete.`
@@ -727,8 +727,8 @@ ${alert({
         type: alertType,
         title: 'Recommended Action',
         message: isStrongCandidate
-            ? 'This candidate shows strong potential for the role. Consider scheduling a phone screen to discuss their qualifications further.'
-            : 'Review the detailed analysis carefully to determine if this candidate is worth pursuing. Consider their growth potential and transferable skills.',
+            ? 'This candidate shows strong potential. Review the AI analysis, enhance the application with your insights, and submit it to the company.'
+            : 'Review the detailed analysis to determine if this candidate should move forward. You can enhance the application or request changes from the candidate before submitting.',
     })}
 
 ${button({
@@ -767,12 +767,12 @@ export interface RecruiterProposedData {
 
 export function recruiterProposedEmail(data: RecruiterProposedData): string {
     const content = `
-${heading({ level: 1, text: `${data.recruiterName} Has Proposed a Job for You!` })}
+${heading({ level: 1, text: 'New job proposal for you' })}
 
 ${alert({
         type: 'info',
         title: 'New Job Opportunity',
-        message: `A recruiter thinks you'd be a great fit for the ${data.jobTitle} position at ${data.companyName}.`,
+        message: `${data.recruiterName} thinks you'd be a strong fit for the ${data.jobTitle} position at ${data.companyName}.`,
     })}
 
 ${data.pitch ? `
@@ -830,11 +830,11 @@ export interface ApplicationProposalAcceptedData {
 
 export function proposalAcceptedByApplicationEmail(data: ApplicationProposalAcceptedData): string {
     const content = `
-${heading({ level: 1, text: 'Your Job Proposal Was Accepted!' })}
+${heading({ level: 1, text: 'Your job proposal was accepted' })}
 
 ${alert({
         type: 'success',
-        title: 'Great News!',
+        title: 'Proposal accepted',
         message: `${data.candidateName} has accepted your job proposal and is working on their application.`,
     })}
 
@@ -860,7 +860,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        '<strong>Next Steps:</strong> Wait for the candidate to submit their application, then review and provide feedback.'
+        '<strong>Next steps:</strong> The candidate is completing their application. You\'ll be notified when it\'s ready for your review and enhancement before submission to the company.'
     )}
 
 ${paragraph(
@@ -903,7 +903,7 @@ export interface ApplicationNoteCreatedData {
 
 export function applicationNoteCreatedEmail(data: ApplicationNoteCreatedData): string {
     const content = `
-${heading({ level: 1, text: 'New Note on Application' })}
+${heading({ level: 1, text: 'New note on application' })}
 
 ${paragraph(`Hi <strong>${data.recipientName}</strong>,`)}
 
@@ -945,7 +945,7 @@ ${paragraph(
 
 export function proposalDeclinedByApplicationEmail(data: ApplicationProposalDeclinedData): string {
     const content = `
-${heading({ level: 1, text: 'Proposal Update' })}
+${heading({ level: 1, text: 'Proposal declined' })}
 
 ${alert({
         type: 'warning',
@@ -970,7 +970,7 @@ ${infoCard({
     })}
 
 ${paragraph(
-        'Don\'t worry! You can continue exploring other opportunities with this candidate or find other great matches.'
+        'No action required. You can continue exploring other opportunities with this candidate or identify other matches for this role.'
     )}
 
 ${button({
@@ -982,7 +982,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        '<strong>Next Steps:</strong> Consider proposing other positions that might be a better fit, or continue your search for the perfect candidate.'
+        '<strong>Next steps:</strong> Consider proposing other positions that may be a better fit, or continue sourcing candidates for this role.'
     )}
 
 ${paragraph(

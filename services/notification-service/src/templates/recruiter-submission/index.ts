@@ -24,7 +24,7 @@ export interface NewOpportunityData {
 
 export function newOpportunityEmail(data: NewOpportunityData): string {
     const content = `
-${heading({ level: 1, text: 'New Opportunity for You!' })}
+${heading({ level: 1, text: 'New opportunity for you' })}
 
 ${alert({
     type: 'success',
@@ -67,18 +67,18 @@ ${button({
 ${divider()}
 
 ${paragraph(
-    '<strong>What happens next?</strong> If you approve this opportunity, your profile and contact information will be shared with the company, and they may reach out to schedule interviews.'
+    '<strong>What happens next?</strong> If you approve this opportunity, you\'ll complete your application and your recruiter will review it before submitting to the company.'
 )}
 
 ${paragraph(
-    'If this role isn\'t the right fit, you can decline and we\'ll notify the recruiter. No worries—there will be more opportunities in the future!'
+    'If this role isn\'t the right fit, you can decline and the recruiter will be notified. No action needed beyond that.'
 )}
     `.trim();
 
     return baseEmailTemplate({
         preheader: `${data.recruiterName} has a new opportunity for you: ${data.jobTitle}`,
         content,
-        source: data.source || 'portal',
+        source: data.source || 'candidate',
     });
 }
 
@@ -98,11 +98,11 @@ export interface CandidateApprovedData {
 
 export function candidateApprovedEmail(data: CandidateApprovedData): string {
     const content = `
-${heading({ level: 1, text: 'Opportunity Approved!' })}
+${heading({ level: 1, text: 'Opportunity approved' })}
 
 ${alert({
     type: 'success',
-    title: 'Great News!',
+    title: 'Opportunity accepted',
     message: `${data.candidateName} has approved your proposed opportunity for ${data.jobTitle} at ${data.companyName}.`,
 })}
 
@@ -117,14 +117,14 @@ ${infoCard({
 })}
 
 ${paragraph(
-    'The candidate has approved the opportunity and is ready to move forward. You can now:'
+    'The candidate has approved the opportunity. Your next steps:'
 )}
 
 ${paragraph(`
 <ul style="margin: 12px 0; padding-left: 20px;">
-  <li><strong>Review their full application</strong> and application timeline</li>
-  <li><strong>Coordinate with the company</strong> to schedule interviews</li>
-  <li><strong>Keep the candidate informed</strong> of next steps in the process</li>
+  <li><strong>Review the application</strong> and add your professional insights</li>
+  <li><strong>Enhance and submit</strong> the application to the company when ready</li>
+  <li><strong>Keep the candidate informed</strong> of progress through the process</li>
 </ul>
 `)}
 
@@ -165,7 +165,7 @@ export interface CandidateDeclinedData {
 
 export function candidateDeclinedEmail(data: CandidateDeclinedData): string {
     const content = `
-${heading({ level: 1, text: 'Opportunity Declined' })}
+${heading({ level: 1, text: 'Opportunity declined' })}
 
 ${alert({
     type: 'warning',
@@ -203,7 +203,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-    '<strong>Don\'t give up!</strong> Keep sourcing candidates and refining your approach. Every decline is a learning opportunity to improve your submissions for future roles.'
+    'No action required. If the candidate provided a reason, review it to refine your approach for future proposals.'
 )}
 
 ${paragraph(
@@ -233,11 +233,11 @@ export interface OpportunityExpiredData {
 
 export function opportunityExpiredEmail(data: OpportunityExpiredData): string {
     const content = `
-${heading({ level: 1, text: 'Opportunity Expired' })}
+${heading({ level: 1, text: 'Opportunity expired' })}
 
 ${alert({
     type: 'info',
-    message: 'The opportunity proposed by ${data.recruiterName} has expired. You no longer need to respond.',
+    message: `The opportunity proposed by ${data.recruiterName} has expired. No response is needed.`,
 })}
 
 ${infoCard({
@@ -262,13 +262,13 @@ ${button({
 ${divider()}
 
 ${paragraph(
-    '<strong>Keep your options open!</strong> Check back regularly for new opportunities that match your skills and career goals.'
+    'If you\'re still interested in this type of role, reach out to your recruiter directly.'
 )}
     `.trim();
 
     return baseEmailTemplate({
         preheader: `The opportunity for ${data.jobTitle} has expired`,
         content,
-        source: data.source || 'portal',
+        source: data.source || 'candidate',
     });
 }

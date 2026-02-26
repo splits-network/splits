@@ -16,7 +16,7 @@ export interface CandidateSourcedData {
 
 export function candidateSourcedEmail(data: CandidateSourcedData): string {
     const content = `
-${heading({ level: 1, text: 'Candidate Successfully Sourced' })}
+${heading({ level: 1, text: 'Candidate successfully sourced' })}
 
 ${alert({
         type: 'success',
@@ -65,7 +65,7 @@ export interface OwnershipConflictData {
 
 export function ownershipConflictEmail(data: OwnershipConflictData): string {
     const content = `
-${heading({ level: 1, text: 'Ownership Conflict Detected' })}
+${heading({ level: 1, text: 'Ownership conflict detected' })}
 
 ${alert({
         type: 'warning',
@@ -94,7 +94,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'This notification is for your awareness. No action is required - your rights are automatically protected by the platform.'
+        'No action required. Your ownership rights are automatically protected by the platform.'
     )}
     `.trim();
 
@@ -114,7 +114,7 @@ export interface OwnershipConflictRejectionData {
 
 export function ownershipConflictRejectionEmail(data: OwnershipConflictRejectionData): string {
     const content = `
-${heading({ level: 1, text: 'Candidate Already Claimed' })}
+${heading({ level: 1, text: 'Candidate already claimed' })}
 
 ${alert({
         type: 'error',

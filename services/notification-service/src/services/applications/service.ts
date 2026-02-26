@@ -714,7 +714,7 @@ export class ApplicationsEmailService {
     ): Promise<void> {
         const subject = `Proposal Update: ${data.candidateName} - ${data.jobTitle}`;
         const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
-        const candidateProfileUrl = `${portalUrl}/portal/candidates/${data.candidateId}`;
+        const candidateProfileUrl = `${portalUrl}/portal/candidates?candidateId=${data.candidateId}`;
 
         const html = proposalDeclinedByApplicationEmail({
             recruiterName: data.recruiterName,

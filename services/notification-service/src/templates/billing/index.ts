@@ -1,6 +1,7 @@
 /**
  * Billing Email Templates
- * Templates for Stripe Connect onboarding and company billing notifications
+ * Templates for Stripe Connect onboarding, company billing, payouts, escrow,
+ * invoices, and subscription notifications
  */
 
 import { baseEmailTemplate, EmailSource } from '../base';
@@ -14,11 +15,11 @@ export interface StripeConnectOnboardedData {
 
 export function stripeConnectOnboardedEmail(data: StripeConnectOnboardedData): string {
     const content = `
-${heading({ level: 1, text: 'Your Payouts Are Set Up' })}
+${heading({ level: 1, text: 'Your payouts are set up' })}
 
 ${alert({
         type: 'success',
-        title: 'You\'re all set!',
+        title: 'Setup complete',
         message: 'Your bank account has been verified and connected. You can now receive placement commissions directly to your account.',
     })}
 
@@ -78,11 +79,11 @@ export function companyBillingSetupCompleteEmail(data: CompanyBillingSetupComple
     };
 
     const content = `
-${heading({ level: 1, text: 'Company Billing Is Set Up' })}
+${heading({ level: 1, text: 'Company billing is set up' })}
 
 ${alert({
         type: 'success',
-        title: 'You\'re all set!',
+        title: 'Setup complete',
         message: 'Your company billing profile is configured and ready for placement invoicing.',
     })}
 
@@ -132,7 +133,7 @@ export function payoutConnectRequiredEmail(data: PayoutConnectRequiredData): str
         : 'Your Stripe account setup is not yet complete. Please finish the onboarding process to receive your commissions.';
 
     const content = `
-${heading({ level: 1, text: 'Set Up Your Payout Account' })}
+${heading({ level: 1, text: 'Set up your payout account' })}
 
 ${alert({
         type: 'warning',
@@ -162,7 +163,7 @@ ${paragraph('Setup takes about 5 minutes. Once complete, your pending commission
 
 export function stripeConnectDisabledEmail(data: StripeConnectDisabledData): string {
     const content = `
-${heading({ level: 1, text: 'Action Required: Update Your Payment Info' })}
+${heading({ level: 1, text: 'Action required: update your payment info' })}
 
 ${alert({
         type: 'warning',
@@ -193,3 +194,11 @@ ${paragraph('This is typically a quick process. Once you provide the required in
         source: data.source || 'portal',
     });
 }
+
+// Re-export Phase 4 templates
+export { payoutProcessedEmail, type PayoutProcessedData } from './payout-emails';
+export { payoutFailedEmail, type PayoutFailedData } from './payout-emails';
+export { escrowReleasedEmail, type EscrowReleasedData } from './escrow-emails';
+export { escrowAutoReleasedEmail, type EscrowAutoReleasedData } from './escrow-emails';
+export { invoicePaidEmail, type InvoicePaidData } from './invoice-emails';
+export { subscriptionCancelledEmail, type SubscriptionCancelledData } from './subscription-emails';

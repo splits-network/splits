@@ -10,6 +10,18 @@ import {
     CompanyBillingSetupCompleteData,
     payoutConnectRequiredEmail,
     PayoutConnectRequiredData,
+    payoutProcessedEmail,
+    PayoutProcessedData,
+    payoutFailedEmail,
+    PayoutFailedData,
+    escrowReleasedEmail,
+    EscrowReleasedData,
+    escrowAutoReleasedEmail,
+    EscrowAutoReleasedData,
+    invoicePaidEmail,
+    InvoicePaidData,
+    subscriptionCancelledEmail,
+    SubscriptionCancelledData,
 } from '../../templates/billing';
 
 export class BillingEmailService {
@@ -144,5 +156,101 @@ export class BillingEmailService {
                 payload: { recruiter_id: data.recruiterId, amount: data.amount, reason: data.reason },
             }
         );
+    }
+
+    async sendPayoutProcessed(
+        email: string,
+        data: PayoutProcessedData & { userId?: string; recruiterId?: string }
+    ): Promise<void> {
+        const html = payoutProcessedEmail(data);
+
+        await this.sendEmail(email, `Payout Sent — ${data.amount}`, html, {
+            eventType: 'payout.processed',
+            userId: data.userId,
+            category: 'billing',
+            actionUrl: data.payoutUrl,
+            actionLabel: 'View Payout Details',
+            payload: { recruiter_id: data.recruiterId, amount: data.amount },
+        });
+    }
+
+    async sendPayoutFailed(
+        email: string,
+        data: PayoutFailedData & { userId?: string; recruiterId?: string }
+    ): Promise<void> {
+        const html = payoutFailedEmail(data);
+
+        await this.sendEmail(email, 'Payout Failed — Action Required', html, {
+            eventType: 'payout.failed',
+            userId: data.userId,
+            channel: 'both',
+            priority: 'high',
+            category: 'billing',
+            actionUrl: data.payoutUrl,
+            actionLabel: 'Update Payment Info',
+            payload: { recruiter_id: data.recruiterId, amount: data.amount, reason: data.reason },
+        });
+    }
+
+    async sendEscrowReleased(
+        email: string,
+        data: EscrowReleasedData & { userId?: string; recruiterId?: string }
+    ): Promise<void> {
+        const html = escrowReleasedEmail(data);
+
+        await this.sendEmail(email, `Escrow Released — ${data.amount}`, html, {
+            eventType: 'escrow.released',
+            userId: data.userId,
+            category: 'billing',
+            actionUrl: data.billingUrl,
+            actionLabel: 'View Billing Dashboard',
+            payload: { recruiter_id: data.recruiterId, amount: data.amount },
+        });
+    }
+
+    async sendEscrowAutoReleased(
+        email: string,
+        data: EscrowAutoReleasedData & { userId?: string }
+    ): Promise<void> {
+        const html = escrowAutoReleasedEmail(data);
+
+        await this.sendEmail(email, `Guarantee Complete — Escrow of ${data.amount} Released`, html, {
+            eventType: 'escrow.auto_released',
+            userId: data.userId,
+            category: 'billing',
+            actionUrl: data.billingUrl,
+            actionLabel: 'View Details',
+            payload: { amount: data.amount, is_recruiter: data.isRecruiter },
+        });
+    }
+
+    async sendInvoicePaid(
+        email: string,
+        data: InvoicePaidData & { companyId?: string }
+    ): Promise<void> {
+        const html = invoicePaidEmail(data);
+
+        await this.sendEmail(email, `Payment Received — ${data.amount}`, html, {
+            eventType: 'invoice.paid',
+            category: 'billing',
+            actionUrl: data.billingUrl,
+            actionLabel: 'View Billing Dashboard',
+            payload: { company_id: data.companyId, amount: data.amount, invoice_number: data.invoiceNumber },
+        });
+    }
+
+    async sendSubscriptionCancelled(
+        email: string,
+        data: SubscriptionCancelledData & { companyId?: string }
+    ): Promise<void> {
+        const html = subscriptionCancelledEmail(data);
+
+        await this.sendEmail(email, 'Subscription Cancelled', html, {
+            eventType: 'subscription.cancelled',
+            category: 'billing',
+            actionUrl: data.billingUrl,
+            actionLabel: 'Manage Subscription',
+            payload: { company_id: data.companyId, plan_name: data.planName },
+        });
     }
 }

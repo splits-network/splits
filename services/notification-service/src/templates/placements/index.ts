@@ -18,7 +18,7 @@ export interface PlacementCreatedData {
 
 export function placementCreatedEmail(data: PlacementCreatedData): string {
     const content = `
-${heading({ level: 1, text: 'Placement Confirmed' })}
+${heading({ level: 1, text: 'Placement confirmed' })}
 
 ${alert({
         type: 'success',
@@ -56,7 +56,7 @@ ${alert({
             'Most placements have a 90-day guarantee period. If the candidate leaves during this time, fees may be adjusted according to your agreement.',
     })}
 
-${paragraph('Keep up the great work! Every successful placement builds your reputation on the platform.')}
+${paragraph('This placement is now reflected in your dashboard and reputation score.')}
     `.trim();
 
     return baseEmailTemplate({
@@ -78,7 +78,7 @@ export interface PlacementActivatedData {
 
 export function placementActivatedEmail(data: PlacementActivatedData): string {
     const content = `
-${heading({ level: 1, text: 'Placement Activated' })}
+${heading({ level: 1, text: 'Placement activated' })}
 
 ${paragraph(
         `<strong>${data.candidateName}</strong> has started their new role at <strong>${data.companyName}</strong>. The guarantee period is now active.`
@@ -133,7 +133,7 @@ export interface PlacementCompletedData {
 
 export function placementCompletedEmail(data: PlacementCompletedData): string {
     const content = `
-${heading({ level: 1, text: 'Placement Completed Successfully' })}
+${heading({ level: 1, text: 'Placement completed successfully' })}
 
 ${alert({
         type: 'success',
@@ -164,7 +164,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        '<strong>Keep the momentum going!</strong> Successful placements improve your reputation and increase your opportunities on the platform.'
+        'This placement has been added to your track record and is reflected in your reputation score.'
     )}
 
 ${button({
@@ -175,7 +175,7 @@ ${button({
     `.trim();
 
     return baseEmailTemplate({
-        preheader: `🎊 Placement completed: ${data.candidateName} at ${data.companyName}`,
+        preheader: `Placement completed: ${data.candidateName} at ${data.companyName}`,
         content,
         source: data.source || 'portal',
     });
@@ -192,7 +192,7 @@ export interface PlacementFailedData {
 
 export function placementFailedEmail(data: PlacementFailedData): string {
     const content = `
-${heading({ level: 1, text: 'Placement Status Update' })}
+${heading({ level: 1, text: 'Placement did not complete' })}
 
 ${alert({
         type: 'warning',
@@ -222,7 +222,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        '<strong>Moving Forward:</strong> While this didn\'t work out, your continued success on the platform is important to us. If you have questions about the guarantee process, please reach out.'
+        '<strong>Questions?</strong> If you have questions about the guarantee adjustment or fee impact, contact support for a detailed breakdown.'
     )}
 
 ${button({
@@ -251,7 +251,7 @@ export interface GuaranteeExpiringData {
 
 export function guaranteeExpiringEmail(data: GuaranteeExpiringData): string {
     const content = `
-${heading({ level: 1, text: 'Guarantee Period Ending Soon' })}
+${heading({ level: 1, text: 'Guarantee period ending soon' })}
 
 ${paragraph(
         `The guarantee period for <strong>${data.candidateName}</strong> at <strong>${data.companyName}</strong> is ending in <strong>${data.daysRemaining} days</strong>.`

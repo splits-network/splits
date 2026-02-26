@@ -406,7 +406,7 @@ export default function CandidateActionsToolbar({
                             </button>
                         ) : (
                             <Link
-                                href={`/portal/candidates/${candidate.id}`}
+                                href={`/portal/candidates?candidateId=${candidate.id}`}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
                                 style={{ borderRadius: 0 }}
                                 title="View Details"

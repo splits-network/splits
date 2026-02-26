@@ -17,6 +17,12 @@ import { ChatEventConsumer } from './consumers/chat/consumer';
 import { BillingEventConsumer } from './consumers/billing/consumer';
 import { ReputationEventConsumer } from './consumers/reputation/consumer';
 import { HealthEventConsumer } from './consumers/health/consumer';
+import { OnboardingEventConsumer } from './consumers/onboarding/consumer';
+import { JobsEventConsumer } from './consumers/jobs/consumer';
+import { RelationshipsEventConsumer } from './consumers/relationships/consumer';
+import { SecurityEventConsumer } from './consumers/security/consumer';
+import { RecruiterCodesEventConsumer } from './consumers/recruiter-codes/consumer';
+import { DocumentsEventConsumer } from './consumers/documents/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -45,6 +51,12 @@ export class DomainEventConsumer {
     private billingConsumer: BillingEventConsumer;
     private reputationConsumer: ReputationEventConsumer;
     private healthConsumer: HealthEventConsumer;
+    private onboardingConsumer: OnboardingEventConsumer;
+    private jobsConsumer: JobsEventConsumer;
+    private relationshipsConsumer: RelationshipsEventConsumer;
+    private securityConsumer: SecurityEventConsumer;
+    private recruiterCodesConsumer: RecruiterCodesEventConsumer;
+    private documentsConsumer: DocumentsEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -134,7 +146,8 @@ export class DomainEventConsumer {
             notificationService.billing,
             logger,
             portalUrl,
-            contactLookup
+            contactLookup,
+            dataLookup
         );
         this.reputationConsumer = new ReputationEventConsumer(
             notificationService.reputation,
@@ -147,6 +160,46 @@ export class DomainEventConsumer {
             notificationService.health,
             logger,
             portalUrl,
+        );
+        this.onboardingConsumer = new OnboardingEventConsumer(
+            notificationService.onboarding,
+            logger,
+            portalUrl,
+            contactLookup
+        );
+        this.jobsConsumer = new JobsEventConsumer(
+            notificationService.jobs,
+            logger,
+            portalUrl,
+            contactLookup,
+            dataLookup
+        );
+        this.relationshipsConsumer = new RelationshipsEventConsumer(
+            notificationService.relationships,
+            logger,
+            portalUrl,
+            candidateWebsiteUrl,
+            contactLookup,
+            dataLookup
+        );
+        this.securityConsumer = new SecurityEventConsumer(
+            notificationService.security,
+            logger,
+            process.env.OPS_EMAIL || 'ops@splits.network'
+        );
+        this.recruiterCodesConsumer = new RecruiterCodesEventConsumer(
+            notificationService.recruiterCodes,
+            logger,
+            portalUrl,
+            contactLookup,
+            dataLookup
+        );
+        this.documentsConsumer = new DocumentsEventConsumer(
+            notificationService.documents,
+            logger,
+            portalUrl,
+            contactLookup,
+            dataLookup
         );
     }
 
@@ -255,6 +308,7 @@ export class DomainEventConsumer {
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.revoked');
+            await this.channel.bindQueue(this.queue, this.exchange, 'invitation.accepted');
 
             // Company platform invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.created');
@@ -275,9 +329,42 @@ export class DomainEventConsumer {
             // Billing events - Payout processing failures
             await this.channel.bindQueue(this.queue, this.exchange, 'payout_transaction.connect_required');
 
+            // Billing events - Payout & financial lifecycle
+            await this.channel.bindQueue(this.queue, this.exchange, 'payout.processed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'payout.failed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'escrow.released');
+            await this.channel.bindQueue(this.queue, this.exchange, 'escrow.auto_released');
+            await this.channel.bindQueue(this.queue, this.exchange, 'invoice.paid');
+            await this.channel.bindQueue(this.queue, this.exchange, 'subscription.cancelled');
+
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
             await this.channel.bindQueue(this.queue, this.exchange, 'chat.message.created');
+
+            // Onboarding events
+            await this.channel.bindQueue(this.queue, this.exchange, 'user.registered');
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'company.created');
+
+            // Job lifecycle events
+            await this.channel.bindQueue(this.queue, this.exchange, 'job.created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'job.status_changed');
+
+            // Relationship management events
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter_company.connection_requested');
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter_company.terminated');
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter_candidate.terminated');
+            await this.channel.bindQueue(this.queue, this.exchange, 'candidate.invitation_cancelled');
+
+            // Security & fraud events
+            await this.channel.bindQueue(this.queue, this.exchange, 'fraud_signal.created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'gpt.oauth.replay_detected');
+
+            // Recruiter code events
+            await this.channel.bindQueue(this.queue, this.exchange, 'recruiter_code.used');
+
+            // Document processing events
+            await this.channel.bindQueue(this.queue, this.exchange, 'resume.metadata.extracted');
 
             // Health monitoring events
             await this.channel.bindQueue(this.queue, this.exchange, 'system.health.service_unhealthy');
@@ -499,6 +586,9 @@ export class DomainEventConsumer {
             case 'invitation.revoked':
                 await this.invitationsConsumer.handleInvitationRevoked(event);
                 break;
+            case 'invitation.accepted':
+                await this.invitationsConsumer.handleInvitationAccepted(event);
+                break;
 
             // Company platform invitations domain
             case 'company_invitation.created':
@@ -537,6 +627,26 @@ export class DomainEventConsumer {
                 await this.billingConsumer.handlePayoutConnectRequired(event);
                 break;
 
+            // Billing domain - Payout & financial lifecycle
+            case 'payout.processed':
+                await this.billingConsumer.handlePayoutProcessed(event);
+                break;
+            case 'payout.failed':
+                await this.billingConsumer.handlePayoutFailed(event);
+                break;
+            case 'escrow.released':
+                await this.billingConsumer.handleEscrowReleased(event);
+                break;
+            case 'escrow.auto_released':
+                await this.billingConsumer.handleEscrowAutoReleased(event);
+                break;
+            case 'invoice.paid':
+                await this.billingConsumer.handleInvoicePaid(event);
+                break;
+            case 'subscription.cancelled':
+                await this.billingConsumer.handleSubscriptionCancelled(event);
+                break;
+
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
                 break;
@@ -561,6 +671,57 @@ export class DomainEventConsumer {
                 break;
             case 'application.reactivated':
                 await this.applicationsConsumer.handleApplicationReactivated(event);
+                break;
+
+            // Onboarding domain
+            case 'user.registered':
+                await this.onboardingConsumer.handleUserRegistered(event);
+                break;
+            case 'recruiter.created':
+                await this.onboardingConsumer.handleRecruiterCreated(event);
+                break;
+            case 'company.created':
+                await this.onboardingConsumer.handleCompanyCreated(event);
+                break;
+
+            // Jobs domain
+            case 'job.created':
+                await this.jobsConsumer.handleJobCreated(event);
+                break;
+            case 'job.status_changed':
+                await this.jobsConsumer.handleJobStatusChanged(event);
+                break;
+
+            // Relationships domain
+            case 'recruiter_company.connection_requested':
+                await this.relationshipsConsumer.handleConnectionRequested(event);
+                break;
+            case 'recruiter_company.terminated':
+                await this.relationshipsConsumer.handleRecruiterCompanyTerminated(event);
+                break;
+            case 'recruiter_candidate.terminated':
+                await this.relationshipsConsumer.handleRecruiterCandidateTerminated(event);
+                break;
+            case 'candidate.invitation_cancelled':
+                await this.relationshipsConsumer.handleInvitationCancelled(event);
+                break;
+
+            // Security domain
+            case 'fraud_signal.created':
+                await this.securityConsumer.handleFraudSignalCreated(event);
+                break;
+            case 'gpt.oauth.replay_detected':
+                await this.securityConsumer.handleReplayDetected(event);
+                break;
+
+            // Recruiter codes domain
+            case 'recruiter_code.used':
+                await this.recruiterCodesConsumer.handleRecruiterCodeUsed(event);
+                break;
+
+            // Documents domain
+            case 'resume.metadata.extracted':
+                await this.documentsConsumer.handleResumeMetadataExtracted(event);
                 break;
 
             // Health monitoring
