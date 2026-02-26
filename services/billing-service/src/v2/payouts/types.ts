@@ -64,6 +64,17 @@ export interface PlacementPayoutTransaction {
     failed_at?: string | null;
     failure_reason?: string | null;
     retry_count: number;
+    // Joined fields (available on list queries)
+    recruiter_name?: string | null;
+    recruiter_email?: string | null;
+    candidate_name?: string | null;
+    company_name?: string | null;
+    job_title?: string | null;
+    salary?: number | null;
+    fee_amount?: number | null;
+    placement_state?: string | null;
+    split_role?: PayoutRole | null;
+    split_percentage?: number | null;
 }
 
 export interface PlacementPayoutTransactionInsert {

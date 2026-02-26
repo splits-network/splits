@@ -39,7 +39,25 @@ export class PlacementPayoutTransactionRepository {
 
         let query = this.supabase
             .from('placement_payout_transactions')
-            .select('*', { count: 'exact' });
+            .select(`
+                *,
+                recruiters!recruiter_id (
+                    id,
+                    users!user_id ( name, email )
+                ),
+                placements!placement_id (
+                    candidate_name,
+                    company_name,
+                    job_title,
+                    salary,
+                    fee_amount,
+                    state
+                ),
+                placement_splits!placement_split_id (
+                    role,
+                    split_percentage
+                )
+            `, { count: 'exact' });
 
         if (filters.status) {
             query = query.eq('status', filters.status);
@@ -66,7 +84,37 @@ export class PlacementPayoutTransactionRepository {
             throw new Error(`Failed to list payout transactions: ${error.message}`);
         }
 
-        return { data: (data || []) as PlacementPayoutTransaction[], total: count || 0 };
+        // Flatten joined data into transaction records
+        const flattenedData = (data || []).map((row: any) => ({
+            id: row.id,
+            placement_split_id: row.placement_split_id,
+            placement_id: row.placement_id,
+            recruiter_id: row.recruiter_id,
+            amount: row.amount,
+            status: row.status,
+            stripe_transfer_id: row.stripe_transfer_id,
+            stripe_payout_id: row.stripe_payout_id,
+            stripe_connect_account_id: row.stripe_connect_account_id,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            processing_started_at: row.processing_started_at,
+            completed_at: row.completed_at,
+            failed_at: row.failed_at,
+            failure_reason: row.failure_reason,
+            retry_count: row.retry_count,
+            recruiter_name: row.recruiters?.users?.name || null,
+            recruiter_email: row.recruiters?.users?.email || null,
+            candidate_name: row.placements?.candidate_name || null,
+            company_name: row.placements?.company_name || null,
+            job_title: row.placements?.job_title || null,
+            salary: row.placements?.salary || null,
+            fee_amount: row.placements?.fee_amount || null,
+            placement_state: row.placements?.state || null,
+            split_role: row.placement_splits?.role || null,
+            split_percentage: row.placement_splits?.split_percentage || null,
+        }));
+
+        return { data: flattenedData as PlacementPayoutTransaction[], total: count || 0 };
     }
 
     /**

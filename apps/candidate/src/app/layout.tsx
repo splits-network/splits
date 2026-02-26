@@ -182,7 +182,7 @@ export default async function RootLayout({
                                     </main>
                                     <Footer footerNav={footerNav} />
                                 </CandidateChatSidebar>
-                                {/* <CookieConsent /> */}
+                                <CookieConsent />
                             </ToastProvider>
                         </UserProfileProvider>
                     </ThemeProvider>

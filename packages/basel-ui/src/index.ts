@@ -145,6 +145,15 @@ export {
     useArticleAnimations,
 } from './content';
 
+// Consent components
+export {
+    BaselCookieConsent,
+    type BaselCookieConsentProps,
+    readConsentCookie,
+    writeConsentCookie,
+    type ConsentPreferences,
+} from './consent';
+
 // Color utilities
 export {
     type BaselSemanticColor,
