@@ -11,7 +11,7 @@ export default function PublicNav() {
                     </Link>
                 </div>
                 <div className="flex-none">
-                    <ul className="menu menu-horizontal px-1">
+                    <ul className="menu w-full menu-horizontal px-1">
                         <li>
                             <Link href="/jobs">Browse Jobs</Link>
                         </li>

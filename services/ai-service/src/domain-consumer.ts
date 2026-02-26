@@ -263,11 +263,11 @@ export class DomainEventConsumer {
                 return;
             }
 
-            // Only extract from resume documents attached to candidates
-            if (document.document_type !== 'resume' || document.entity_type !== 'candidate') {
+            // Only extract from resume documents attached to candidates or applications
+            if (document.document_type !== 'resume' || (document.entity_type !== 'candidate' && document.entity_type !== 'application')) {
                 this.logger.debug(
                     { document_id, document_type: document.document_type, entity_type: document.entity_type },
-                    'Not a candidate resume, skipping structured extraction'
+                    'Not a candidate/application resume, skipping structured extraction'
                 );
                 return;
             }
@@ -279,7 +279,7 @@ export class DomainEventConsumer {
             }
 
             // Check if structured data already exists (avoid re-processing)
-            if (document.metadata?.structured_data) {
+            if (document.structured_metadata) {
                 this.logger.debug({ document_id }, 'Structured data already exists, skipping');
                 return;
             }

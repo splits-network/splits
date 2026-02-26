@@ -258,7 +258,15 @@ export class DocumentRepositoryV2 {
             updateData.document_type = updates.document_type;
         }
         if (typeof updates.metadata !== 'undefined') {
-            updateData.metadata = updates.metadata;
+            // Merge with existing metadata to preserve fields like extracted_text.
+            // Keys explicitly set to null are removed (used for flag deletion).
+            const merged = {
+                ...(existing.metadata || {}),
+                ...updates.metadata,
+            };
+            updateData.metadata = Object.fromEntries(
+                Object.entries(merged).filter(([_, v]) => v !== null)
+            );
         }
         if (typeof updates.processing_status !== 'undefined') {
             updateData.processing_status = updates.processing_status;

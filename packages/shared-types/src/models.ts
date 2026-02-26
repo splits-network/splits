@@ -290,7 +290,7 @@ export interface ResumeMetadata {
 // Application Resume Data (stored on applications.resume_data jsonb)
 // ============================================================================
 
-export type ApplicationResumeSource = 'mcp_tool' | 'custom_gpt' | 'portal_backfill';
+export type ApplicationResumeSource = 'mcp_tool' | 'custom_gpt' | 'document_extraction';
 
 export interface ApplicationResumeContact {
     name?: string;
