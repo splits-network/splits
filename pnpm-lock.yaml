@@ -1142,6 +1142,9 @@ importers:
 
   services/content-service:
     dependencies:
+      '@fastify/multipart':
+        specifier: ^9.3.0
+        version: 9.3.0
       '@fastify/swagger':
         specifier: ^9.5.0
         version: 9.6.1

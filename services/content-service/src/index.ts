@@ -3,6 +3,7 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import multipart from '@fastify/multipart';
 import { EventPublisher } from './v2/shared/events';
 import { registerV2Routes } from './v2/routes';
 import * as Sentry from '@sentry/node';
@@ -81,6 +82,13 @@ async function main() {
         uiConfig: {
             docExpansion: 'list',
             deepLinking: true,
+        },
+    });
+
+    // Register multipart support for image uploads
+    await app.register(multipart, {
+        limits: {
+            fileSize: 10 * 1024 * 1024, // 10MB
         },
     });
 

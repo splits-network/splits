@@ -209,6 +209,11 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
                 label: "Navigation",
                 icon: "fa-compass",
             },
+            {
+                href: "/portal/admin/content/images",
+                label: "Images",
+                icon: "fa-image",
+            },
         ],
     },
     {

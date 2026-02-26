@@ -11,6 +11,10 @@ import { PageServiceV2 } from './pages/service';
 import { registerPageRoutes } from './pages/routes';
 import { NavigationRepository } from './navigation/repository';
 import { registerNavigationRoutes } from './navigation/routes';
+import { ImageRepository } from './images/repository';
+import { ContentImageStorage } from './images/storage';
+import { ImageServiceV2 } from './images/service';
+import { registerImageRoutes } from './images/routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -30,4 +34,16 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
 
     const navigationRepository = new NavigationRepository(pageRepository.getSupabase());
     registerNavigationRoutes(app, { navigationRepository });
+
+    // Content Images
+    const supabase = pageRepository.getSupabase();
+    const imageRepository = new ImageRepository(supabase);
+    const imageStorage = new ContentImageStorage(supabase);
+    const imageService = new ImageServiceV2(
+        imageRepository,
+        imageStorage,
+        config.eventPublisher,
+    );
+
+    registerImageRoutes(app, { imageService });
 }

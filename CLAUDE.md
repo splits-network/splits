@@ -29,6 +29,10 @@ packages/             # Shared code (NOT directly deployable)
 Design standards: in the root /showcase directory
 ```
 
+## Database Principles
+
+1. **Migrations** - All schema changes must be made via migrations; never manual DB changes. A migration file must be created to support multiple environments and ensure consistency.
+
 ## Architecture Rules
 
 1. **Small files** — max ~200 lines; split into multiple files/components if larger
