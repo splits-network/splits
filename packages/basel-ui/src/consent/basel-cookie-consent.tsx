@@ -88,35 +88,32 @@ export function BaselCookieConsent({
         <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-base-100 shadow-md border-t-4 border-primary">
             <div className="container mx-auto max-w-6xl">
                 <div className="flex flex-col md:flex-row gap-4 items-center">
-                    <div className="flex-1">
-                        <div className="flex items-start gap-3 mb-2">
-                            <i className="fa-duotone fa-regular fa-cookie-bite text-3xl text-primary shrink-0 mt-1" />
-                            <div>
-                                <h3 className="font-bold text-lg mb-1">
-                                    We Value Your Privacy
-                                </h3>
-                                <p className="text-sm text-base-content/80">
-                                    We use cookies to enhance your experience,
-                                    analyze traffic, and personalize content. By
-                                    clicking &ldquo;Accept All&rdquo;, you
-                                    consent to our use of cookies. Learn more in
-                                    our{" "}
-                                    <a
-                                        href={cookiePolicyHref}
-                                        className="link link-primary"
-                                    >
-                                        Cookie Policy
-                                    </a>{" "}
-                                    and{" "}
-                                    <a
-                                        href={privacyPolicyHref}
-                                        className="link link-primary"
-                                    >
-                                        Privacy Policy
-                                    </a>
-                                    .
-                                </p>
-                            </div>
+                    <div className="flex items-start gap-3 mb-2">
+                        <i className="fa-duotone fa-regular fa-cookie-bite text-3xl text-primary shrink-0 mt-1" />
+                        <div>
+                            <h3 className="font-bold text-lg mb-1">
+                                We Value Your Privacy
+                            </h3>
+                            <p className="text-sm text-base-content/80">
+                                We use cookies to enhance your experience,
+                                analyze traffic, and personalize content. By
+                                clicking &ldquo;Accept All&rdquo;, you consent
+                                to our use of cookies. Learn more in our{" "}
+                                <a
+                                    href={cookiePolicyHref}
+                                    className="link link-primary"
+                                >
+                                    Cookie Policy
+                                </a>{" "}
+                                and{" "}
+                                <a
+                                    href={privacyPolicyHref}
+                                    className="link link-primary"
+                                >
+                                    Privacy Policy
+                                </a>
+                                .
+                            </p>
                         </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
@@ -175,10 +172,7 @@ function CookiePreferencesPanel({
 
     return (
         <div className="modal modal-open" role="dialog">
-            <div
-                className="modal-backdrop bg-neutral/60"
-                onClick={onClose}
-            />
+            <div className="modal-backdrop bg-neutral/60" onClick={onClose} />
             <div
                 className="modal-box max-w-2xl bg-base-100 p-0 overflow-hidden max-h-[90vh] flex flex-col"
                 style={{ borderRadius: 0 }}
