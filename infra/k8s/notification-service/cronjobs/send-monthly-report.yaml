@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+    name: notification-service-monthly-report
+    namespace: splits-network
+    labels:
+        app: notification-service
+        component: cron
+        job-type: monthly-report
+spec:
+    # 1st of every month at 9 AM UTC
+    schedule: "0 9 1 * *"
+
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 3
+
+    jobTemplate:
+        metadata:
+            labels:
+                app: notification-service
+                component: cron
+                job-type: monthly-report
+        spec:
+            activeDeadlineSeconds: 600
+            backoffLimit: 0
+
+            template:
+                metadata:
+                    labels:
+                        app: notification-service
+                        component: cron
+                        job-type: monthly-report
+                spec:
+                    restartPolicy: Never
+
+                    containers:
+                        - name: monthly-report
+                          image: ${ACR_SERVER}/notification-service:${IMAGE_TAG}
+                          imagePullPolicy: Always
+
+                          command: ["node"]
+                          args:
+                              [
+                                  "services/notification-service/dist/jobs/send-monthly-report.js",
+                              ]
+
+                          env:
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-url
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-service-role-key
+                              - name: RESEND_API_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: resend-secrets
+                                        key: resend-api-key
+                              - name: FROM_EMAIL
+                                value: "Splits Network <notifications@splits.network>"
+                              - name: NEXT_PUBLIC_PORTAL_URL
+                                value: "https://splits.network"
+                              - name: NODE_ENV
+                                value: "production"
+                              - name: LOG_LEVEL
+                                value: "info"
+
+                          resources:
+                              requests:
+                                  memory: "256Mi"
+                                  cpu: "250m"
+                              limits:
+                                  memory: "512Mi"
+                                  cpu: "500m"

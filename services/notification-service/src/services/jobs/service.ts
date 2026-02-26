@@ -8,6 +8,8 @@ import {
     JobStatusChangedData,
     jobExpiredEmail,
     JobExpiredData,
+    firstJobPostedEmail,
+    FirstJobPostedData,
 } from '../../templates/jobs';
 
 export class JobsEmailService {
@@ -116,6 +118,22 @@ export class JobsEmailService {
             category: 'jobs',
             actionUrl: data.jobUrl,
             actionLabel: 'View Job Details',
+        });
+    }
+
+    async sendFirstJobPosted(
+        email: string,
+        data: FirstJobPostedData & { userId?: string }
+    ): Promise<void> {
+        const html = firstJobPostedEmail(data);
+
+        await this.sendEmail(email, `Your first job is live: ${data.jobTitle}`, html, {
+            eventType: 'milestone.first_job',
+            userId: data.userId,
+            payload: { jobTitle: data.jobTitle, companyName: data.companyName },
+            category: 'milestone',
+            actionUrl: data.jobUrl,
+            actionLabel: 'View Job Listing',
         });
     }
 

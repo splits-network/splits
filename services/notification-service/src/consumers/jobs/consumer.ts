@@ -41,12 +41,45 @@ export class JobsEventConsumer {
                 { jobId, recipientCount: adminContacts.length },
                 'Job created notifications sent successfully'
             );
+
+            // Milestone: Check if this is the company's first job
+            await this.checkFirstJobMilestone(job, adminContacts);
         } catch (error) {
             this.logger.error(
                 { error, event_payload: event.payload },
                 'Failed to send job created notification'
             );
             throw error;
+        }
+    }
+
+    private async checkFirstJobMilestone(
+        job: { id: string; title: string; company_id: string; company?: { id: string; name: string; identity_organization_id: string | null } },
+        adminContacts: Array<{ email: string; name: string; user_id: string | null }>
+    ): Promise<void> {
+        try {
+            const isFirst = await this.dataLookup.isFirstJobForCompany(job.company_id, job.id);
+            if (!isFirst) return;
+
+            const alreadySent = await this.dataLookup.wasMilestoneSent(
+                'milestone.first_job',
+                adminContacts[0]?.email || ''
+            );
+            if (alreadySent) return;
+
+            this.logger.info({ jobId: job.id, companyId: job.company_id }, 'First job milestone detected');
+
+            for (const admin of adminContacts) {
+                await this.emailService.sendFirstJobPosted(admin.email, {
+                    jobTitle: job.title,
+                    companyName: job.company?.name || 'your company',
+                    jobUrl: `${this.portalUrl}/portal/jobs/${job.id}`,
+                    userId: admin.user_id || undefined,
+                });
+            }
+        } catch (error) {
+            // Milestone failures are non-fatal — don't break the main notification flow
+            this.logger.error({ error, jobId: job.id }, 'Failed to send first job milestone (non-fatal)');
         }
     }
 

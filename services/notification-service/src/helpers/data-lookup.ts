@@ -466,6 +466,62 @@ export class DataLookupHelper {
     }
 
     /**
+     * Check if this is the first job for a company (milestone detection)
+     */
+    async isFirstJobForCompany(companyId: string, excludeJobId: string): Promise<boolean> {
+        const { count, error } = await this.supabase
+            .from('jobs')
+            .select('id', { count: 'exact', head: true })
+            .eq('company_id', companyId)
+            .neq('id', excludeJobId);
+
+        if (error) {
+            this.logger.error({ error, companyId }, 'Failed to check first job for company');
+            return false; // Fail safe — don't send milestone if query fails
+        }
+
+        return (count ?? 0) === 0;
+    }
+
+    /**
+     * Check if this is the first placement for a recruiter (milestone detection)
+     */
+    async isFirstPlacementForRecruiter(recruiterId: string, excludePlacementId: string): Promise<boolean> {
+        const { count, error } = await this.supabase
+            .from('placement_collaborators')
+            .select('id', { count: 'exact', head: true })
+            .eq('recruiter_id', recruiterId)
+            .neq('placement_id', excludePlacementId);
+
+        if (error) {
+            this.logger.error({ error, recruiterId }, 'Failed to check first placement for recruiter');
+            return false;
+        }
+
+        return (count ?? 0) === 0;
+    }
+
+    /**
+     * Check if a milestone notification was already sent (deduplication)
+     * Uses event_type + recipient_email to find prior milestone sends
+     */
+    async wasMilestoneSent(eventType: string, recipientEmail: string): Promise<boolean> {
+        const { count, error } = await this.supabase
+            .from('notification_log')
+            .select('id', { count: 'exact', head: true })
+            .eq('event_type', eventType)
+            .eq('recipient_email', recipientEmail)
+            .eq('status', 'sent');
+
+        if (error) {
+            this.logger.error({ error, eventType, recipientEmail }, 'Failed to check milestone dedup');
+            return true; // Fail safe — assume already sent if query fails
+        }
+
+        return (count ?? 0) > 0;
+    }
+
+    /**
      * Get document by ID
      */
     async getDocument(documentId: string): Promise<{

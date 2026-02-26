@@ -25,6 +25,7 @@ import { RelationshipsEmailService } from './services/relationships/service';
 import { SecurityEmailService } from './services/security/service';
 import { RecruiterCodesEmailService } from './services/recruiter-codes/service';
 import { DocumentsEmailService } from './services/documents/service';
+import { EngagementEmailService } from './services/engagement/service';
 
 export class NotificationService {
     public readonly applications: ApplicationsEmailService;
@@ -46,6 +47,7 @@ export class NotificationService {
     public readonly security: SecurityEmailService;
     public readonly recruiterCodes: RecruiterCodesEmailService;
     public readonly documents: DocumentsEmailService;
+    public readonly engagement: EngagementEmailService;
 
     constructor(
         repository: NotificationRepository,
@@ -74,6 +76,7 @@ export class NotificationService {
         this.security = new SecurityEmailService(resend, repository, fromEmail, logger);
         this.recruiterCodes = new RecruiterCodesEmailService(resend, repository, fromEmail, logger);
         this.documents = new DocumentsEmailService(resend, repository, fromEmail, logger);
+        this.engagement = new EngagementEmailService(resend, repository, fromEmail, logger);
     }
 
     // Legacy compatibility methods - delegate to domain services

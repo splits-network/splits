@@ -239,6 +239,63 @@ ${button({
     });
 }
 
+// ─── First Placement (Milestone) ────────────────────────────────────────────
+
+export interface FirstPlacementData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    recruiterShare: number;
+    placementUrl: string;
+    source?: EmailSource;
+}
+
+export function firstPlacementEmail(data: FirstPlacementData): string {
+    const content = `
+${heading({ level: 1, text: 'Congratulations on your first placement!' })}
+
+${alert({
+        type: 'success',
+        title: 'Milestone achieved',
+        message: 'You\'ve successfully completed your first placement on Splits Network. This is a major accomplishment!',
+    })}
+
+${infoCard({
+        title: 'Your First Placement',
+        items: [
+            { label: 'Candidate', value: data.candidateName },
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+            { label: 'Your Fee', value: `$${data.recruiterShare.toLocaleString()}`, highlight: true },
+        ],
+    })}
+
+${paragraph('<strong>Keep the momentum going!</strong>')}
+
+${paragraph('Your first placement builds your track record and reputation on the platform. Here\'s how to keep growing:')}
+
+${paragraph('1. <strong>Source more candidates</strong> — a strong candidate pipeline leads to more placements.')}
+${paragraph('2. <strong>Connect with companies</strong> — expand your network to access more job opportunities.')}
+${paragraph('3. <strong>Maintain quality</strong> — successful guarantee completions boost your reputation score.')}
+
+${button({
+        href: data.placementUrl,
+        text: 'View Placement Details →',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph('This placement is now reflected in your dashboard and contributes to your reputation score. Great work!')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `Congratulations on your first placement! ${data.candidateName} at ${data.companyName}.`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
 export interface GuaranteeExpiringData {
     candidateName: string;
     jobTitle: string;
