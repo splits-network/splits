@@ -223,7 +223,11 @@ function DesktopNavContent({ items }: { items: NavItem[] }) {
 function SearchPanel() {
     return (
         <div className="header-right-item opacity-0 dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-ghost btn-square">
+            <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-square"
+            >
                 <i className="fa-duotone fa-regular fa-magnifying-glass text-base-content/60" />
             </div>
             <div
@@ -290,11 +294,7 @@ function MobileMenuContent({
             {/* Search */}
             <label className="input input-sm w-full mb-4">
                 <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50" />
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    className="grow"
-                />
+                <input type="text" placeholder="Search..." className="grow" />
             </label>
 
             {/* Navigation using DaisyUI menu + details for collapsible sub-items */}
@@ -528,7 +528,7 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
             position="sticky"
             frosted
             logo={
-                <span className="mr-10 ml-20">
+                <span className="mx-4">
                     <Link
                         href="/"
                         className="header-logo flex-shrink-0 opacity-0"

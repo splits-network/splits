@@ -86,8 +86,8 @@ export function BaselCookieConsent({
 
     return createPortal(
         <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-base-100 shadow-md border-t-4 border-primary">
-            <div className="container mx-auto max-w-6xl">
-                <div className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="">
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                     <div className="flex items-start gap-3 mb-2">
                         <i className="fa-duotone fa-regular fa-cookie-bite text-3xl text-primary shrink-0 mt-1" />
                         <div>

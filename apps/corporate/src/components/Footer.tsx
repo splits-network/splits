@@ -22,7 +22,7 @@ const PRODUCT_LINKS = [
 const COMPANY_LINKS = [
     { label: "About Us", href: "#about" },
     { label: "Contact", href: "/contact" },
-    { label: "System Status", href: "https://status.splits.network" },
+    { label: "System Status", href: "/status" },
 ];
 
 const LEGAL_LINKS = [
@@ -298,7 +298,7 @@ export function Footer() {
             }
             bottomBar={
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 opacity-0">
-                    <div className="flex items-center gap-1 text-sm opacity-30">
+                    <div className="flex items-center gap-1 text-[11px] opacity-30">
                         <i className="fa-duotone fa-regular fa-copyright" />
                         <span>
                             {new Date().getFullYear()} Employment Networks LLC.
@@ -310,7 +310,7 @@ export function Footer() {
                             <Link
                                 key={link.label}
                                 href={link.href}
-                                className="text-sm opacity-30 hover:opacity-60 transition-opacity"
+                                className="text-[11px] opacity-30 hover:opacity-60 transition-opacity"
                             >
                                 {link.label}
                             </Link>

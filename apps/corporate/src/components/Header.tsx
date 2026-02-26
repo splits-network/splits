@@ -56,7 +56,9 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                         <a
                             key={link.label}
                             href={link.href || "#"}
-                            onClick={(e) => handleSmoothScroll(e, link.href || "#")}
+                            onClick={(e) =>
+                                handleSmoothScroll(e, link.href || "#")
+                            }
                             className="px-3 py-2 text-md font-semibold uppercase tracking-wider text-base-content/70 hover:text-primary transition-colors"
                         >
                             {link.label}
@@ -71,7 +73,7 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                         href="https://splits.network"
                         className="hidden md:inline-flex btn btn-ghost text-md font-semibold uppercase tracking-wider"
                     >
-                        Sign In
+                        Post a Job
                     </a>
                     <a
                         href="https://applicant.network"
@@ -79,38 +81,6 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                     >
                         Find Jobs
                     </a>
-                </div>
-            }
-            mobileMenu={
-                <div className="space-y-4">
-                    <nav className="space-y-1">
-                        {links.map((link) => (
-                            <a
-                                key={link.href}
-                                href={link.href || "#"}
-                                onClick={(e) =>
-                                    handleSmoothScroll(e, link.href || "#")
-                                }
-                                className="block px-4 py-2.5 text-sm font-semibold text-base-content/70 hover:text-primary hover:bg-base-200 transition-colors"
-                            >
-                                {link.label}
-                            </a>
-                        ))}
-                    </nav>
-                    <div className="border-t border-base-300 pt-4 flex flex-col gap-2">
-                        <a
-                            href="https://applicant.network"
-                            className="btn btn-primary w-full"
-                        >
-                            Find Jobs
-                        </a>
-                        <a
-                            href="https://splits.network"
-                            className="btn btn-ghost w-full"
-                        >
-                            Sign In
-                        </a>
-                    </div>
                 </div>
             }
         />
