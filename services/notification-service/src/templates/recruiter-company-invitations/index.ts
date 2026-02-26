@@ -28,7 +28,7 @@ ${paragraph(`"${data.personalMessage}"`)}
         : '';
 
     const content = `
-${heading({ level: 1, text: 'Company Invitation' })}
+${heading({ level: 1, text: 'Company invitation' })}
 
 ${paragraph(`<strong>${data.inviterName}</strong> from <strong>${data.companyName}</strong> has invited you to join their recruiting network on Splits Network.`)}
 
@@ -48,7 +48,7 @@ ${paragraph('Review and respond to this invitation from your portal:')}
 
 ${button({
         href: data.invitationsLink,
-        text: 'View Invitation',
+        text: 'Review Invitation →',
         variant: 'primary',
     })}
 
@@ -78,7 +78,7 @@ export interface RecruiterCompanyAcceptedData {
 
 export function recruiterCompanyAcceptedEmail(data: RecruiterCompanyAcceptedData): string {
     const content = `
-${heading({ level: 1, text: 'Invitation Accepted' })}
+${heading({ level: 1, text: 'Invitation accepted' })}
 
 ${alert({
         type: 'success',
@@ -99,7 +99,7 @@ ${paragraph(`You can now collaborate with ${data.recruiterName} on open roles an
 
 ${button({
         href: data.portalLink,
-        text: 'View Network',
+        text: 'View Network →',
         variant: 'secondary',
     })}
     `.trim();
@@ -122,7 +122,7 @@ export interface RecruiterCompanyDeclinedData {
 
 export function recruiterCompanyDeclinedEmail(data: RecruiterCompanyDeclinedData): string {
     const content = `
-${heading({ level: 1, text: 'Invitation Declined' })}
+${heading({ level: 1, text: 'Invitation declined' })}
 
 ${alert({
         type: 'warning',
@@ -142,7 +142,7 @@ ${paragraph('You can invite other recruiters to join your network from the porta
 
 ${button({
         href: data.portalLink,
-        text: 'View Network',
+        text: 'View Network →',
         variant: 'secondary',
     })}
     `.trim();

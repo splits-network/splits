@@ -464,5 +464,31 @@ export class DataLookupHelper {
 
         return data;
     }
+
+    /**
+     * Get document by ID
+     */
+    async getDocument(documentId: string): Promise<{
+        id: string;
+        entity_type: string;
+        entity_id: string;
+        document_type: string | null;
+        file_name: string | null;
+        uploaded_by: string | null;
+        created_at: string;
+    } | null> {
+        const { data, error } = await this.supabase
+            .from('documents')
+            .select('id, entity_type, entity_id, document_type, file_name, uploaded_by, created_at')
+            .eq('id', documentId)
+            .single();
+
+        if (error) {
+            this.logger.error({ error, documentId }, 'Failed to fetch document');
+            return null;
+        }
+
+        return data;
+    }
 }
 

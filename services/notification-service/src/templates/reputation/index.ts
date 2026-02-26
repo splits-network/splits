@@ -56,7 +56,7 @@ export function tierPromotionEmail(data: TierChangeData): string {
     const newTierInfo = tierConfig[data.newTier] || tierConfig.active;
 
     const content = `
-${heading({ level: 1, text: 'Congratulations on Your Tier Upgrade!' })}
+${heading({ level: 1, text: 'Your reputation tier has been upgraded' })}
 
 ${alert({
         type: 'success',
@@ -84,7 +84,7 @@ ${paragraph(
 
 ${button({
         href: data.profileUrl,
-        text: 'View Your Profile',
+        text: 'View Your Profile →',
         variant: 'primary',
     })}
 
@@ -110,7 +110,7 @@ export function tierDemotionEmail(data: TierChangeData): string {
     const oldTierInfo = tierConfig[data.oldTier] || tierConfig.active;
 
     const content = `
-${heading({ level: 1, text: 'Your Reputation Tier Has Changed' })}
+${heading({ level: 1, text: 'Your reputation tier has changed' })}
 
 ${alert({
         type: 'info',
@@ -146,7 +146,7 @@ ${paragraph(
 
 ${button({
         href: data.profileUrl,
-        text: 'View Your Profile',
+        text: 'View Your Profile →',
         variant: 'secondary',
     })}
 

@@ -42,7 +42,7 @@ export function companyTierPromotionEmail(data: CompanyTierChangeData): string {
     const newTierInfo = tierConfig[data.newTier] || tierConfig.active;
 
     const content = `
-${heading({ level: 1, text: 'Congratulations on Your Company Tier Upgrade!' })}
+${heading({ level: 1, text: 'Your company tier has been upgraded' })}
 
 ${alert({
         type: 'success',
@@ -93,7 +93,7 @@ export function companyTierDemotionEmail(data: CompanyTierChangeData): string {
     const oldTierInfo = tierConfig[data.oldTier] || tierConfig.active;
 
     const content = `
-${heading({ level: 1, text: 'Your Company Reputation Tier Has Changed' })}
+${heading({ level: 1, text: 'Your company reputation tier has changed' })}
 
 ${alert({
         type: 'info',

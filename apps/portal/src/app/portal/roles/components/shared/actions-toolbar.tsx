@@ -443,7 +443,9 @@ export default function RoleActionsToolbar({
                 label: "View Details",
                 variant: "btn-primary",
                 onClick: onViewDetails ? handleViewDetails : undefined,
-                href: !onViewDetails ? `/portal/roles/${job.id}` : undefined,
+                href: !onViewDetails
+                    ? `/portal/roles?roleId=${job.id}`
+                    : undefined,
             });
         }
 
@@ -542,7 +544,7 @@ export default function RoleActionsToolbar({
                             </button>
                         ) : (
                             <Link
-                                href={`/portal/roles/${job.id}`}
+                                href={`/portal/roles?roleId=${job.id}`}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
                                 style={{ borderRadius: 0 }}
                                 title="View Details"

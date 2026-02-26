@@ -295,7 +295,7 @@ export default function CandidatesAdminPage() {
                                             <td>
                                                 <div className="flex gap-1">
                                                     <Link
-                                                        href={`/portal/admin/candidates/${candidate.id}`}
+                                                        href={`/portal/admin/candidates?candidateId=${candidate.id}`}
                                                         className="btn btn-xs btn-ghost"
                                                         title="View details"
                                                     >

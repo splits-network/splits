@@ -33,11 +33,9 @@ ${infoCard({
     ],
 })}
 
-${paragraph('Click the button below to accept this invitation and get started:')}
-
 ${button({
     href: data.invitationLink,
-    text: 'Accept Invitation',
+    text: 'Accept Invitation →',
     variant: 'primary',
 })}
 
@@ -56,6 +54,52 @@ ${alert({
     });
 }
 
+// ─── Invitation Accepted ───────────────────────────────────────────────────
+
+export interface InvitationAcceptedData {
+    organizationName: string;
+    newMemberName: string;
+    role: string;
+    source?: EmailSource;
+}
+
+export function invitationAcceptedEmail(data: InvitationAcceptedData): string {
+    const content = `
+${heading({ level: 1, text: 'New team member joined' })}
+
+${alert({
+    type: 'success',
+    message: `${data.newMemberName} has accepted your invitation and joined ${data.organizationName} as a ${data.role}.`,
+})}
+
+${infoCard({
+    title: 'New Member Details',
+    items: [
+        { label: 'Name', value: data.newMemberName },
+        { label: 'Organization', value: data.organizationName },
+        { label: 'Role', value: data.role },
+        { label: 'Status', value: 'Active', highlight: true },
+    ],
+})}
+
+${paragraph(
+    'The new member now has access to your organization based on their assigned role. You can manage team members and permissions from your organization settings.'
+)}
+
+${divider()}
+
+${paragraph('This is an automated notification. No action is required.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.newMemberName} has joined ${data.organizationName}`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
+// ─── Invitation Revoked ────────────────────────────────────────────────────
+
 export interface InvitationRevokedData {
     organizationName: string;
     source?: EmailSource;
@@ -63,7 +107,7 @@ export interface InvitationRevokedData {
 
 export function invitationRevokedEmail(data: InvitationRevokedData): string {
     const content = `
-${heading({ level: 1, text: 'Invitation Withdrawn' })}
+${heading({ level: 1, text: 'Invitation withdrawn' })}
 
 ${alert({
     type: 'warning',

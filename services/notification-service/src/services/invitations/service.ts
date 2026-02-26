@@ -6,7 +6,7 @@
 import { Resend } from 'resend';
 import { NotificationRepository } from '../../repository';
 import { Logger } from '@splits-network/shared-logging';
-import { teamInvitationEmail, invitationRevokedEmail } from '../../templates/invitations';
+import { teamInvitationEmail, invitationRevokedEmail, invitationAcceptedEmail } from '../../templates/invitations';
 
 export class InvitationsEmailService {
     constructor(
@@ -261,6 +261,53 @@ export class InvitationsEmailService {
                 'Failed to send revoked email'
             );
             // Don't throw - revocation already happened
+        }
+    }
+
+    /**
+     * Send invitation accepted confirmation to company admins
+     */
+    async sendInvitationAccepted(payload: {
+        email: string;
+        organization_name: string;
+        new_member_name: string;
+        role: string;
+        userId?: string;
+    }): Promise<void> {
+        const { email, organization_name, new_member_name, role, userId } = payload;
+
+        this.logger.info({ email, organization_name, new_member_name }, 'Sending invitation accepted email');
+
+        const roleLabel = this.getRoleLabel(role);
+        const subject = `${new_member_name} has joined ${organization_name}`;
+        const html = invitationAcceptedEmail({
+            organizationName: organization_name,
+            newMemberName: new_member_name,
+            role: roleLabel,
+        });
+
+        try {
+            await this.sendDualNotification(email, subject, html, {
+                eventType: 'invitation.accepted',
+                userId,
+                payload: {
+                    organization_name,
+                    new_member_name,
+                    role,
+                },
+                actionUrl: '/portal/settings/team',
+                actionLabel: 'View Team',
+                priority: 'normal',
+                category: 'invitation',
+            });
+
+            this.logger.info({ email, new_member_name }, 'Invitation accepted email sent successfully');
+        } catch (error) {
+            this.logger.error(
+                { error, email, new_member_name },
+                'Failed to send invitation accepted email'
+            );
+            // Don't throw - acceptance already happened
         }
     }
 

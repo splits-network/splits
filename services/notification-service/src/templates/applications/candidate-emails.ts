@@ -17,7 +17,7 @@ export interface CandidateApplicationWithRecruiterData {
 
 export function candidateApplicationWithRecruiterEmail(data: CandidateApplicationWithRecruiterData): string {
     const content = `
-${heading({ level: 1, text: 'Application Submitted for Review' })}
+${heading({ level: 1, text: 'Application submitted for review' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -67,7 +67,7 @@ export interface CandidateDirectApplicationData {
 
 export function candidateDirectApplicationEmail(data: CandidateDirectApplicationData): string {
     const content = `
-${heading({ level: 1, text: 'Application Submitted Successfully' })}
+${heading({ level: 1, text: 'Application submitted successfully' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -96,7 +96,7 @@ ${button({
         theme: defaultTheme,
     })}
 
-${paragraph('We\'ll notify you of any status updates. Good luck!')}
+${paragraph('No action needed. You\'ll receive an email when the company responds.')}
     `.trim();
 
     return baseEmailTemplate({
@@ -119,17 +119,17 @@ export interface CandidateInterviewInviteData {
 
 export function candidateInterviewInviteEmail(data: CandidateInterviewInviteData): string {
     const content = `
-${heading({ level: 1, text: 'Interview Request!' })}
+${heading({ level: 1, text: 'Interview request' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
 ${alert({
         type: 'success',
-        title: 'Great news!',
+        title: 'Interview requested',
         message: `${data.companyName} would like to interview you for the ${data.jobTitle} position.`,
     })}
 
-${paragraph('The company was impressed with your application and wants to learn more about you.')}
+${paragraph('The company reviewed your application and wants to learn more about your qualifications.')}
 
 ${data.hasRecruiter && data.recruiterName ? `
 ${infoCard({
@@ -160,7 +160,7 @@ ${button({
         theme: defaultTheme,
     })}
 
-${paragraph('Congratulations on this exciting opportunity!')}
+${paragraph('You\'ll hear from the company or your recruiter about scheduling details.')}
     `.trim();
 
     return baseEmailTemplate({
@@ -183,17 +183,17 @@ export interface CandidateOfferReceivedData {
 
 export function candidateOfferReceivedEmail(data: CandidateOfferReceivedData): string {
     const content = `
-${heading({ level: 1, text: 'Job Offer Received!' })}
+${heading({ level: 1, text: 'Job offer received' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
 ${alert({
         type: 'success',
-        title: 'Congratulations!',
-        message: `${data.companyName} has extended an offer for the ${data.jobTitle} position!`,
+        title: 'Congratulations',
+        message: `${data.companyName} has extended an offer for the ${data.jobTitle} position.`,
     })}
 
-${paragraph('After careful consideration, the company has decided you\'re the perfect fit for their team.')}
+${paragraph('The company has reviewed your qualifications and would like you to join their team.')}
 
 ${data.hasRecruiter && data.recruiterName ? `
 ${infoCard({
@@ -224,11 +224,11 @@ ${button({
         theme: defaultTheme,
     })}
 
-${paragraph('This is a significant milestone - congratulations on your success!')}
+${paragraph('Review the offer details and respond within the specified timeline.')}
     `.trim();
 
     return baseEmailTemplate({
-        preheader: `Job offer from ${data.companyName}! 🎉`,
+        preheader: `Job offer from ${data.companyName} for ${data.jobTitle}`,
         content,
         source: 'candidate',
         theme: defaultTheme,
@@ -247,17 +247,17 @@ export interface CandidateHiredData {
 
 export function candidateHiredEmail(data: CandidateHiredData): string {
     const content = `
-${heading({ level: 1, text: '🎉 Welcome to Your New Role!' })}
+${heading({ level: 1, text: 'Welcome to your new role' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
 ${alert({
         type: 'success',
-        title: 'Congratulations!',
-        message: `You've officially been hired as ${data.jobTitle} at ${data.companyName}!`,
+        title: 'Congratulations',
+        message: `You've officially been hired as ${data.jobTitle} at ${data.companyName}.`,
     })}
 
-${paragraph('Your journey with Applicant Network has led to this amazing opportunity. We\'re thrilled to have been part of your success story.')}
+${paragraph('Your placement is confirmed. No further action is needed on the platform.')}
 
 ${data.startDate ? `
 ${infoCard({
@@ -275,10 +275,7 @@ ${data.hasRecruiter && data.recruiterName ? `
 ${paragraph(`Special thanks to your recruiter <strong>${data.recruiterName}</strong> for their support throughout this process.`)}
 ` : ''}
 
-${paragraph('As you begin this new chapter:')}
-${paragraph('• Stay connected with the Applicant Network community<br>• Share your experience to help other candidates<br>• Remember us for future career moves')}
-
-${paragraph('We wish you tremendous success in your new role!')}
+${paragraph('We wish you success in your new role.')}
     `.trim();
 
     return baseEmailTemplate({
@@ -301,7 +298,7 @@ export interface CandidateApplicationRejectedData {
 
 export function candidateApplicationRejectedEmail(data: CandidateApplicationRejectedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Update' })}
+${heading({ level: 1, text: 'Application update' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -339,7 +336,7 @@ ${infoCard({
     })}
 `}
 
-${paragraph('Remember, finding the right role is often about timing and fit. Stay positive and keep pursuing opportunities that align with your goals.')}
+${paragraph('No action needed. Your profile remains active for other opportunities.')}
     `.trim();
 
     return baseEmailTemplate({
@@ -362,16 +359,16 @@ export interface RecruiterJobProposalData {
 
 export function recruiterJobProposalEmail(data: RecruiterJobProposalData): string {
     const content = `
-${heading({ level: 1, text: 'New Job Opportunity!' })}
+${heading({ level: 1, text: 'New job opportunity' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
-${paragraph(`Your recruiter <strong>${data.recruiterName}</strong> has identified an exciting opportunity that matches your profile and career goals.`)}
+${paragraph(`Your recruiter <strong>${data.recruiterName}</strong> has identified an opportunity that matches your profile.`)}
 
 ${alert({
         type: 'info',
-        title: 'Opportunity Match',
-        message: `${data.recruiterName} believes this ${data.jobTitle} role at ${data.companyName} would be a great fit for you.`,
+        title: 'Action required',
+        message: `Review this ${data.jobTitle} role at ${data.companyName} and let ${data.recruiterName} know if you'd like to proceed.`,
     })}
 
 ${infoCard({
@@ -394,7 +391,7 @@ ${button({
         theme: defaultTheme,
     })}
 
-${paragraph('Take your time to review the details. If you\'re interested, your recruiter will guide you through the application process.')}
+${paragraph('<strong>Action required:</strong> Review the role details and respond to your recruiter. If you\'re interested, they\'ll guide you through the application process.')}
     `.trim();
 
     return baseEmailTemplate({
@@ -416,11 +413,11 @@ export interface CandidateAIReviewData {
 
 export function candidateAIReviewEmail(data: CandidateAIReviewData): string {
     const nextSteps = data.hasRecruiter
-        ? 'Once our AI review is complete, your recruiter will review and submit it to the company.'
-        : 'Once our AI review is complete, your application will be submitted directly to the company.';
+        ? 'No action needed right now. Once the AI review is complete, your recruiter will review the results and guide you on next steps.'
+        : 'No action needed right now. We\'ll notify you as soon as the review is complete with your next steps.';
 
     const content = `
-${heading({ level: 1, text: 'Application Under AI Review' })}
+${heading({ level: 1, text: 'Application under AI review' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -474,7 +471,7 @@ export interface CandidateApplicationSubmittedByRecruiterData {
 
 export function candidateApplicationSubmittedByRecruiterEmail(data: CandidateApplicationSubmittedByRecruiterData): string {
     const content = `
-${heading({ level: 1, text: 'Application Submitted to Company!' })}
+${heading({ level: 1, text: 'Application submitted to company' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -536,7 +533,7 @@ export function candidateCompanyReviewEmail(data: CandidateCompanyReviewData): s
         : 'The hiring team is reviewing your application details and will contact you directly if they would like to move forward.';
 
     const content = `
-${heading({ level: 1, text: 'Your Application is Under Review!' })}
+${heading({ level: 1, text: 'Your application is under review' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -602,7 +599,7 @@ export function candidateCompanyFeedbackEmail(data: CandidateCompanyFeedbackData
         : `We'll review the company's feedback and update you on the next steps within 24 hours. This could include interview scheduling, additional information requests, or status updates.`;
 
     const content = `
-${heading({ level: 1, text: 'Company Feedback Received!' })}
+${heading({ level: 1, text: 'Company feedback received' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -634,7 +631,7 @@ ${button({
         theme: defaultTheme,
     })}
 
-${paragraph('This is an encouraging sign - companies that provide feedback are usually seriously considering candidates!')}
+${paragraph('You\'ll receive an update once the feedback has been reviewed and next steps are determined.')}
     `.trim();
 
     return baseEmailTemplate({
@@ -656,11 +653,11 @@ export interface CandidateRecruiterProposedData {
 
 export function candidateRecruiterProposedEmail(data: CandidateRecruiterProposedData): string {
     const content = `
-${heading({ level: 1, text: 'You\'ve Been Proposed for a Role!' })}
+${heading({ level: 1, text: 'You\'ve been proposed for a role' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
-${paragraph(`Exciting news! Your recruiter <strong>${data.recruiterName}</strong> has officially proposed you for the <strong>${data.jobTitle}</strong> position at <strong>${data.companyName}</strong>.`)}
+${paragraph(`Your recruiter <strong>${data.recruiterName}</strong> has proposed you for the <strong>${data.jobTitle}</strong> position at <strong>${data.companyName}</strong>.`)}
 
 ${alert({
         type: 'success',
@@ -713,11 +710,11 @@ export interface CandidateAIReviewedData {
 export function candidateAIReviewedEmail(data: CandidateAIReviewedData): string {
     const scoreText = data.aiScore ? ` with a match score of ${data.aiScore}%` : '';
     const nextStepsMessage = data.hasRecruiter
-        ? `${data.recruiterName} will review the AI analysis and guide you on any optimizations or next steps before submitting to the company.`
-        : 'Based on the analysis, your application will either be submitted to the company or you may receive suggestions for improvements.';
+        ? `${data.recruiterName} will review the AI analysis and reach out to discuss next steps. You may need to accept or update your application before it's submitted.`
+        : 'Review the AI feedback and complete your application submission when you\'re ready. Your action is needed to move forward.';
 
     const content = `
-${heading({ level: 1, text: 'AI Analysis Complete!' })}
+${heading({ level: 1, text: 'AI analysis complete' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -744,14 +741,14 @@ ${paragraph(`<strong>What happens next:</strong> ${nextStepsMessage}`)}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View AI Analysis Results →',
+        text: 'Review Analysis & Continue →',
         variant: 'primary',
         theme: defaultTheme,
     })}
 
 ${data.hasRecruiter
-            ? paragraph(`Your recruiter <strong>${data.recruiterName}</strong> will use this analysis to ensure your application is perfectly positioned for success.`)
-            : paragraph('The AI analysis helps ensure your application is optimally presented to maximize your chances of success.')
+            ? paragraph(`Your recruiter <strong>${data.recruiterName}</strong> will be in touch to discuss the analysis and help you finalize your application.`)
+            : paragraph('Review the analysis and take the next step to keep your application moving forward.')
         }
     `.trim();
 
@@ -774,7 +771,7 @@ export interface CandidateRecruiterReviewData {
 
 export function candidateRecruiterReviewEmail(data: CandidateRecruiterReviewData): string {
     const content = `
-${heading({ level: 1, text: 'Recruiter Review in Progress' })}
+${heading({ level: 1, text: 'Recruiter review in progress' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -828,7 +825,7 @@ export interface JobProposalToCandidateData {
 
 export function jobProposalToCandidateEmail(data: JobProposalToCandidateData): string {
     const content = `
-${heading({ level: 1, text: 'New Job Opportunity' })}
+${heading({ level: 1, text: 'New job opportunity' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -843,19 +840,19 @@ ${infoCard({
         theme: defaultTheme,
     })}
 
-${paragraph('Your recruiter believes this role could be a great fit for your background and career goals. Review the full job details and take the next step in your application.')}
+${paragraph('<strong>Action required:</strong> Review the job details and accept or decline this proposal. If you accept, you\'ll be guided through completing your application.')}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Job Details →',
+        text: 'Review & Respond →',
         variant: 'primary',
         theme: defaultTheme,
     })}
 
 ${divider()}
 
-${heading({ level: 3, text: 'Next Steps' })}
-${paragraph('1. Review the job description and requirements<br>2. If interested, proceed with your application<br>3. Your recruiter will guide you through the process')}
+${heading({ level: 3, text: 'Next steps' })}
+${paragraph('1. Review the job description and requirements<br>2. Accept or decline the proposal<br>3. If accepted, complete your application — your recruiter will guide you')}
 
 ${paragraph('Questions? Reply to this email or contact your recruiter directly.')}
     `.trim();
@@ -880,11 +877,11 @@ export interface RecruiterRequestChangesData {
 
 export function recruiterRequestChangesEmail(data: RecruiterRequestChangesData): string {
     const content = `
-${heading({ level: 1, text: 'Updates Requested' })}
+${heading({ level: 1, text: 'Updates requested on your application' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
-${paragraph(`Your recruiter, <strong>${data.recruiterName}</strong>, has reviewed your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> and has requested some updates or additional information.`)}
+${paragraph(`Your recruiter <strong>${data.recruiterName}</strong> has reviewed your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> and needs you to make some updates before it can be submitted.`)}
 
 ${data.recruiterNotes ? alert({
         type: 'warning',
@@ -1045,11 +1042,11 @@ export function candidateExpirationWarningEmail(data: CandidateExpirationWarning
         : `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> will expire in <strong>${data.daysRemaining} day${data.daysRemaining === 1 ? '' : 's'}</strong> if no action is taken.`;
 
     const content = `
-${heading({ level: 1, text: 'Application Expiring Soon' })}
+${heading({ level: 1, text: 'Application expiring soon' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
-${alert({ type: 'warning', title: 'Action Required', message })}
+${alert({ type: 'warning', title: 'Action required', message })}
 
 ${isActionRequired
             ? button({
@@ -1066,7 +1063,7 @@ ${isActionRequired
             })
         }
 
-${paragraph('Don\'t miss out on this opportunity. Take action now to keep your application active.')}
+${paragraph('If the deadline passes without a response, the application will expire automatically.')}
     `.trim();
 
     return baseEmailTemplate({

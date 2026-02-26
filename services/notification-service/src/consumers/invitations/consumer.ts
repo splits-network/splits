@@ -89,6 +89,66 @@ export class InvitationsConsumer {
     }
 
     /**
+     * Handle invitation.accepted event
+     */
+    async handleInvitationAccepted(event: any): Promise<void> {
+        const { invitation_id, user_id, organization_id, company_id, role } = event.payload;
+
+        this.logger.info(
+            { invitation_id, user_id, organization_id },
+            'Processing invitation.accepted event'
+        );
+
+        try {
+            // Fetch organization details
+            const organization = await this.dataLookup.getOrganization(organization_id);
+            if (!organization) {
+                throw new Error(`Organization not found: ${organization_id}`);
+            }
+
+            // Use company name if available
+            let organizationName = organization.name;
+            if (company_id) {
+                const company = await this.dataLookup.getCompany(company_id);
+                if (company) {
+                    organizationName = company.name;
+                }
+            }
+
+            // Get new member's contact info
+            const newMemberContact = await this.contactLookup.getContactByUserId(user_id);
+            const newMemberName = newMemberContact?.name || 'A new member';
+
+            // Get company admin contacts to notify
+            const adminContacts = organization_id
+                ? await this.contactLookup.getCompanyAdminContacts(organization_id)
+                : [];
+
+            for (const admin of adminContacts) {
+                if (admin.email) {
+                    await this.notificationService.invitations.sendInvitationAccepted({
+                        email: admin.email,
+                        organization_name: organizationName,
+                        new_member_name: newMemberName,
+                        role,
+                        userId: admin.user_id ?? undefined,
+                    });
+                }
+            }
+
+            this.logger.info(
+                { invitation_id, admins_notified: adminContacts.length },
+                'Invitation accepted notifications sent'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, invitation_id, user_id },
+                'Failed to process invitation.accepted event'
+            );
+        }
+    }
+
+    /**
      * Handle invitation.revoked event
      */
     async handleInvitationRevoked(event: any): Promise<void> {

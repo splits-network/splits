@@ -20,7 +20,7 @@ export interface RecruiterCompanyReviewData {
 
 export function recruiterCompanyReviewEmail(data: RecruiterCompanyReviewData): string {
     const content = `
-${heading({ level: 1, text: 'Company Is Reviewing Your Candidate' })}
+${heading({ level: 1, text: 'Company is reviewing your candidate' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 
@@ -76,7 +76,7 @@ export interface RecruiterCompanyFeedbackData {
 
 export function recruiterCompanyFeedbackEmail(data: RecruiterCompanyFeedbackData): string {
     const content = `
-${heading({ level: 1, text: 'Company Feedback Received' })}
+${heading({ level: 1, text: 'Company feedback received' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 
@@ -132,7 +132,7 @@ export interface RecruiterInterviewScheduledData {
 
 export function recruiterInterviewScheduledEmail(data: RecruiterInterviewScheduledData): string {
     const content = `
-${heading({ level: 1, text: 'Interview Scheduled!' })}
+${heading({ level: 1, text: 'Interview scheduled' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 
@@ -196,13 +196,13 @@ export interface RecruiterOfferExtendedData {
 
 export function recruiterOfferExtendedEmail(data: RecruiterOfferExtendedData): string {
     const content = `
-${heading({ level: 1, text: 'Offer Extended to Your Candidate!' })}
+${heading({ level: 1, text: 'Offer extended to your candidate' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 
 ${alert({
         type: 'success',
-        title: 'Outstanding News!',
+        title: 'Offer extended',
         message: `${data.companyName} has extended a job offer to ${data.candidateName} for the ${data.jobTitle} position.`,
     })}
 
@@ -256,13 +256,13 @@ export interface RecruiterCandidateHiredData {
 
 export function recruiterCandidateHiredEmail(data: RecruiterCandidateHiredData): string {
     const content = `
-${heading({ level: 1, text: 'Congratulations \u2014 Placement Made!' })}
+${heading({ level: 1, text: 'Placement confirmed' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 
 ${alert({
         type: 'success',
-        title: 'Placement Confirmed!',
+        title: 'Placement confirmed',
         message: `${data.candidateName} has been hired for the ${data.jobTitle} position at ${data.companyName}. A placement record has been created.`,
     })}
 
@@ -314,7 +314,7 @@ export interface RecruiterCandidateRejectedData {
 
 export function recruiterCandidateRejectedEmail(data: RecruiterCandidateRejectedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Not Moving Forward' })}
+${heading({ level: 1, text: 'Application not moving forward' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 
@@ -485,7 +485,7 @@ export function recruiterExpirationWarningEmail(data: RecruiterExpirationWarning
         : `<strong>${data.companyName}</strong> hasn't acted on <strong>${data.candidateName}</strong>'s application for <strong>${data.jobTitle}</strong> \u2014 it expires in <strong>${data.daysRemaining} day${data.daysRemaining === 1 ? '' : 's'}</strong>.`;
 
     const content = `
-${heading({ level: 1, text: 'Application Expiring Soon' })}
+${heading({ level: 1, text: 'Application expiring soon' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 

@@ -79,6 +79,33 @@ import {
     recruiterCompanyAcceptedEmail,
     recruiterCompanyDeclinedEmail,
 } from './recruiter-company-invitations';
+import {
+    welcomeEmail,
+    recruiterOnboardingEmail,
+    companyWelcomeEmail,
+} from './onboarding';
+import {
+    jobCreatedConfirmationEmail,
+    jobStatusChangedEmail,
+    jobExpiredEmail,
+} from './jobs';
+import {
+    connectionRequestedEmail,
+    relationshipTerminatedEmail,
+    invitationCancelledEmail,
+} from './relationships';
+import { fraudAlertEmail, securityReplayAlertEmail } from './security';
+import { invitationAcceptedEmail } from './invitations';
+import { referralCodeRedeemedEmail } from './recruiter-codes';
+import { resumeProcessedEmail } from './documents';
+import {
+    payoutProcessedEmail,
+    payoutFailedEmail,
+    escrowReleasedEmail,
+    escrowAutoReleasedEmail,
+    invoicePaidEmail,
+    subscriptionCancelledEmail,
+} from './billing';
 
 const OUTPUT_DIR = path.join(__dirname, '../../email-previews');
 
@@ -516,6 +543,163 @@ const recruiterCompanyDeclinedData = {
     portalLink: 'https://splits.network/portal',
 };
 
+// ── Onboarding sample data ──────────────────────────────────────────
+
+const welcomeData = {
+    userName: 'Brandon Test2',
+    dashboardUrl: 'https://splits.network/portal',
+};
+
+const recruiterOnboardingData = {
+    recruiterName: 'Jane Smith',
+    dashboardUrl: 'https://splits.network/portal',
+};
+
+const companyWelcomeData = {
+    companyName: 'TechCorp Inc',
+    adminName: 'Alex Director',
+    dashboardUrl: 'https://splits.network/portal',
+};
+
+// ── Job lifecycle sample data ───────────────────────────────────────
+
+const jobCreatedConfirmationData = {
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    jobUrl: 'https://splits.network/portal/jobs/abc123',
+};
+
+const jobStatusChangedData = {
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    previousStatus: 'active',
+    newStatus: 'paused',
+    jobUrl: 'https://splits.network/portal/jobs/abc123',
+    recipientName: 'Alex Director',
+};
+
+const jobExpiredData = {
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    jobUrl: 'https://splits.network/portal/jobs/abc123',
+};
+
+// ── Relationship sample data ────────────────────────────────────────
+
+const connectionRequestedData = {
+    companyName: 'TechCorp Inc',
+    recruiterName: 'Jane Smith',
+    message: 'I specialize in backend engineering placements and would love to work with your team.',
+    connectionUrl: 'https://splits.network/portal/network',
+};
+
+const relationshipTerminatedData = {
+    recipientName: 'Jane Smith',
+    otherPartyName: 'TechCorp Inc',
+    relationshipType: 'recruiter-company' as const,
+    reason: 'Company has decided to work with a different recruiting firm.',
+    dashboardUrl: 'https://splits.network/portal/network',
+};
+
+const invitationCancelledData = {
+    candidateName: 'Sarah Johnson',
+    recruiterName: 'Jane Smith',
+    dashboardUrl: 'https://applicant.network/dashboard',
+};
+
+// ── Security sample data ────────────────────────────────────────────
+
+const fraudAlertData = {
+    signalType: 'Duplicate Application Pattern',
+    severity: 'high',
+    description: 'Multiple applications submitted from the same IP address within a short time frame, using different candidate profiles.',
+    entityType: 'candidate',
+    entityId: 'cand_abc123',
+    detectedAt: '2026-02-26T14:30:00Z',
+    reviewUrl: 'https://splits.network/portal/admin/fraud',
+};
+
+const securityReplayAlertData = {
+    clerkUserId: 'user_2abc123def456',
+    tokenId: 'tok_replay_789xyz',
+    detectedAt: '2026-02-26T14:45:00Z',
+    reviewUrl: 'https://splits.network/portal/admin/security',
+};
+
+// ── Invitation accepted sample data ────────────────────────────────
+
+const invitationAcceptedData = {
+    organizationName: 'TechCorp Inc',
+    newMemberName: 'Sarah Johnson',
+    role: 'Hiring Manager',
+};
+
+// ── Recruiter code sample data ─────────────────────────────────────
+
+const referralCodeRedeemedData = {
+    recruiterName: 'Jane Smith',
+    newUserName: 'Alex Director',
+    code: 'JANESMITH2026',
+    dashboardUrl: 'https://splits.network/portal/referrals',
+};
+
+// ── Document processing sample data ─────────────────────────────────
+
+const resumeProcessedData = {
+    candidateName: 'Sarah Johnson',
+    fileName: 'Sarah_Johnson_Resume_2026.pdf',
+    skillsCount: 12,
+    experienceCount: 4,
+    educationCount: 2,
+    viewUrl: 'https://splits.network/portal/candidates/sarah123',
+};
+
+// ── Payout & financial sample data ──────────────────────────────────
+
+const payoutProcessedData = {
+    recruiterName: 'Jane Smith',
+    amount: '$18,750.00',
+    placementTitle: 'Backend Engineer (Go) at TechCorp Inc',
+    payoutUrl: 'https://splits.network/portal/billing/payouts',
+};
+
+const payoutFailedData = {
+    recruiterName: 'Jane Smith',
+    amount: '$18,750.00',
+    reason: 'Bank account details are invalid or outdated',
+    payoutUrl: 'https://splits.network/portal/billing/payouts',
+};
+
+const escrowReleasedData = {
+    recruiterName: 'Jane Smith',
+    amount: '$18,750.00',
+    placementTitle: 'Backend Engineer (Go) at TechCorp Inc',
+    billingUrl: 'https://splits.network/portal/billing',
+};
+
+const escrowAutoReleasedData = {
+    recipientName: 'Jane Smith',
+    amount: '$18,750.00',
+    placementTitle: 'Backend Engineer (Go) at TechCorp Inc',
+    billingUrl: 'https://splits.network/portal/billing',
+    isRecruiter: true,
+};
+
+const invoicePaidData = {
+    companyName: 'TechCorp Inc',
+    amount: '$18,750.00',
+    invoiceNumber: 'INV-2026-0042',
+    placementTitle: 'Backend Engineer (Go)',
+    billingUrl: 'https://splits.network/portal/company/billing',
+};
+
+const subscriptionCancelledData = {
+    companyName: 'TechCorp Inc',
+    planName: 'Professional',
+    endDate: 'March 26, 2026',
+    billingUrl: 'https://splits.network/portal/company/billing',
+};
+
 // ── Generate all previews ────────────────────────────────────────────
 
 function generatePreviews() {
@@ -593,6 +777,42 @@ function generatePreviews() {
         { name: 'recruiter-company-invitation', html: recruiterCompanyInvitationEmail(recruiterCompanyInvitationData) },
         { name: 'recruiter-company-accepted', html: recruiterCompanyAcceptedEmail(recruiterCompanyAcceptedData) },
         { name: 'recruiter-company-declined', html: recruiterCompanyDeclinedEmail(recruiterCompanyDeclinedData) },
+
+        // Onboarding & Welcome
+        { name: 'welcome', html: welcomeEmail(welcomeData) },
+        { name: 'recruiter-onboarding', html: recruiterOnboardingEmail(recruiterOnboardingData) },
+        { name: 'company-welcome', html: companyWelcomeEmail(companyWelcomeData) },
+
+        // Job Lifecycle
+        { name: 'job-created-confirmation', html: jobCreatedConfirmationEmail(jobCreatedConfirmationData) },
+        { name: 'job-status-changed', html: jobStatusChangedEmail(jobStatusChangedData) },
+        { name: 'job-expired', html: jobExpiredEmail(jobExpiredData) },
+
+        // Relationships
+        { name: 'connection-requested', html: connectionRequestedEmail(connectionRequestedData) },
+        { name: 'relationship-terminated', html: relationshipTerminatedEmail(relationshipTerminatedData) },
+        { name: 'invitation-cancelled', html: invitationCancelledEmail(invitationCancelledData) },
+
+        // Security
+        { name: 'fraud-alert', html: fraudAlertEmail(fraudAlertData) },
+        { name: 'security-replay-alert', html: securityReplayAlertEmail(securityReplayAlertData) },
+
+        // Invitation Accepted
+        { name: 'invitation-accepted', html: invitationAcceptedEmail(invitationAcceptedData) },
+
+        // Recruiter Codes
+        { name: 'referral-code-redeemed', html: referralCodeRedeemedEmail(referralCodeRedeemedData) },
+
+        // Documents
+        { name: 'resume-processed', html: resumeProcessedEmail(resumeProcessedData) },
+
+        // Payout & Financial
+        { name: 'payout-processed', html: payoutProcessedEmail(payoutProcessedData) },
+        { name: 'payout-failed', html: payoutFailedEmail(payoutFailedData) },
+        { name: 'escrow-released', html: escrowReleasedEmail(escrowReleasedData) },
+        { name: 'escrow-auto-released', html: escrowAutoReleasedEmail(escrowAutoReleasedData) },
+        { name: 'invoice-paid', html: invoicePaidEmail(invoicePaidData) },
+        { name: 'subscription-cancelled', html: subscriptionCancelledEmail(subscriptionCancelledData) },
     ];
 
     previews.forEach(({ name, html }) => {
@@ -712,6 +932,7 @@ function generatePreviews() {
 
             <h3 style="color: #18181b; margin: 24px 0 12px;">Team Invitation Emails</h3>
             <a href="team-invitation.html">Team Invitation <span class="badge">Invite</span></a>
+            <a href="invitation-accepted.html">Invitation Accepted <span class="badge">New</span></a>
             <a href="invitation-revoked.html">Invitation Revoked <span class="badge">Revoked</span></a>
 
             <h3 style="color: #18181b; margin: 24px 0 12px;">Recruiter Submission Emails</h3>
@@ -736,6 +957,39 @@ function generatePreviews() {
             <a href="recruiter-company-invitation.html">Recruiter Invitation <span class="badge">Invite</span></a>
             <a href="recruiter-company-accepted.html">Recruiter Accepted <span class="badge">Success</span></a>
             <a href="recruiter-company-declined.html">Recruiter Declined <span class="badge">Declined</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Onboarding & Welcome Emails</h3>
+            <a href="welcome.html">Welcome Email <span class="badge">New</span></a>
+            <a href="recruiter-onboarding.html">Recruiter Onboarding <span class="badge">New</span></a>
+            <a href="company-welcome.html">Company Welcome <span class="badge">New</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Job Lifecycle Emails</h3>
+            <a href="job-created-confirmation.html">Job Created Confirmation <span class="badge">New</span></a>
+            <a href="job-status-changed.html">Job Status Changed <span class="badge">New</span></a>
+            <a href="job-expired.html">Job Expired <span class="badge">New</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Relationship Emails</h3>
+            <a href="connection-requested.html">Connection Requested <span class="badge">New</span></a>
+            <a href="relationship-terminated.html">Relationship Terminated <span class="badge">New</span></a>
+            <a href="invitation-cancelled.html">Invitation Cancelled <span class="badge">New</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Security Emails</h3>
+            <a href="fraud-alert.html">Fraud Alert <span class="badge">New</span></a>
+            <a href="security-replay-alert.html">Replay Attack Alert <span class="badge">New</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Recruiter Codes</h3>
+            <a href="referral-code-redeemed.html">Referral Code Redeemed <span class="badge">New</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Document Processing Emails</h3>
+            <a href="resume-processed.html">Resume Processed <span class="badge">New</span></a>
+
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Payout & Financial Emails</h3>
+            <a href="payout-processed.html">Payout Processed <span class="badge">New</span></a>
+            <a href="payout-failed.html">Payout Failed <span class="badge">New</span></a>
+            <a href="escrow-released.html">Escrow Released <span class="badge">New</span></a>
+            <a href="escrow-auto-released.html">Escrow Auto-Released <span class="badge">New</span></a>
+            <a href="invoice-paid.html">Invoice Paid <span class="badge">New</span></a>
+            <a href="subscription-cancelled.html">Subscription Cancelled <span class="badge">New</span></a>
         </div>
     </div>
 </body>

@@ -521,7 +521,7 @@ export default function RecruiterView() {
                                         {roles.slice(0, 5).map((role, i) => (
                                             <Link
                                                 key={role.id}
-                                                href={`/portal/roles/${role.id}`}
+                                                href={`/portal/roles?roledId=${role.id}`}
                                                 className="flex items-center gap-3 py-2 border-b border-base-300 last:border-0 hover:bg-base-300/50 transition-colors group"
                                             >
                                                 <span className="w-6 h-6 bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">

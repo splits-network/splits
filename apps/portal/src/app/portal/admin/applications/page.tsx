@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { useMemo } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import {
     useStandardList,
     PaginationControls,
@@ -11,16 +11,23 @@ import {
     EmptyState,
     LoadingState,
     ErrorState,
-} from '@/hooks/use-standard-list';
-import { AdminPageHeader } from '../components';
+} from "@/hooks/use-standard-list";
+import { AdminPageHeader } from "../components";
 
 interface Application {
     id: string;
     job_id: string;
     candidate_id: string;
     recruiter_id?: string;
-    stage: 'submitted' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
-    status: 'active' | 'archived';
+    stage:
+        | "submitted"
+        | "screening"
+        | "interview"
+        | "offer"
+        | "hired"
+        | "rejected"
+        | "withdrawn";
+    status: "active" | "archived";
     submitted_at: string;
     created_at: string;
     updated_at: string;
@@ -42,8 +49,8 @@ interface Application {
 }
 
 interface ApplicationFilters {
-    stage?: Application['stage'];
-    status?: 'active' | 'archived';
+    stage?: Application["stage"];
+    status?: "active" | "archived";
 }
 
 export default function ApplicationsAdminPage() {
@@ -65,49 +72,56 @@ export default function ApplicationsAdminPage() {
     } = useStandardList<Application, ApplicationFilters>({
         fetchFn: async (params) => {
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
 
             const queryParams = new URLSearchParams();
-            queryParams.set('page', String(params.page));
-            queryParams.set('limit', String(params.limit));
-            if (params.search) queryParams.set('search', params.search);
-            if (params.filters?.stage) queryParams.set('stage', params.filters.stage);
-            if (params.filters?.status) queryParams.set('status', params.filters.status);
-            if (params.sort_by) queryParams.set('sort_by', params.sort_by);
-            if (params.sort_order) queryParams.set('sort_order', params.sort_order);
+            queryParams.set("page", String(params.page));
+            queryParams.set("limit", String(params.limit));
+            if (params.search) queryParams.set("search", params.search);
+            if (params.filters?.stage)
+                queryParams.set("stage", params.filters.stage);
+            if (params.filters?.status)
+                queryParams.set("status", params.filters.status);
+            if (params.sort_by) queryParams.set("sort_by", params.sort_by);
+            if (params.sort_order)
+                queryParams.set("sort_order", params.sort_order);
 
-            const response = await apiClient.get(`/applications?${queryParams.toString()}`);
+            const response = await apiClient.get(
+                `/applications?${queryParams.toString()}`,
+            );
             return response;
         },
         defaultFilters,
-        defaultSortBy: 'created_at',
-        defaultSortOrder: 'desc',
+        defaultSortBy: "created_at",
+        defaultSortOrder: "desc",
         syncToUrl: true,
     });
 
-    function StageBadge({ stage }: { stage: Application['stage'] }) {
+    function StageBadge({ stage }: { stage: Application["stage"] }) {
         const colors: Record<string, string> = {
-            submitted: 'badge-neutral',
-            screening: 'badge-info',
-            interview: 'badge-warning',
-            offer: 'badge-accent',
-            hired: 'badge-success',
-            rejected: 'badge-error',
-            withdrawn: 'badge-ghost',
+            submitted: "badge-neutral",
+            screening: "badge-info",
+            interview: "badge-warning",
+            offer: "badge-accent",
+            hired: "badge-success",
+            rejected: "badge-error",
+            withdrawn: "badge-ghost",
         };
         const icons: Record<string, string> = {
-            submitted: 'fa-inbox',
-            screening: 'fa-magnifying-glass',
-            interview: 'fa-comments',
-            offer: 'fa-file-signature',
-            hired: 'fa-check',
-            rejected: 'fa-xmark',
-            withdrawn: 'fa-arrow-left',
+            submitted: "fa-inbox",
+            screening: "fa-magnifying-glass",
+            interview: "fa-comments",
+            offer: "fa-file-signature",
+            hired: "fa-check",
+            rejected: "fa-xmark",
+            withdrawn: "fa-arrow-left",
         };
         return (
-            <span className={`badge ${colors[stage] || 'badge-ghost'} gap-1`}>
-                <i className={`fa-duotone fa-regular ${icons[stage]} text-xs`}></i>
+            <span className={`badge ${colors[stage] || "badge-ghost"} gap-1`}>
+                <i
+                    className={`fa-duotone fa-regular ${icons[stage]} text-xs`}
+                ></i>
                 {stage}
             </span>
         );
@@ -123,7 +137,7 @@ export default function ApplicationsAdminPage() {
             hired: 0,
             rejected: 0,
         };
-        applications.forEach(app => {
+        applications.forEach((app) => {
             if (counts[app.stage] !== undefined) {
                 counts[app.stage]++;
             }
@@ -136,7 +150,7 @@ export default function ApplicationsAdminPage() {
             <AdminPageHeader
                 title="Application Oversight"
                 subtitle="Monitor all applications across the platform"
-                breadcrumbs={[{ label: 'Applications' }]}
+                breadcrumbs={[{ label: "Applications" }]}
             />
 
             {/* Stats */}
@@ -144,37 +158,37 @@ export default function ApplicationsAdminPage() {
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-xs">Submitted</div>
                     <div className="stat-value text-xl text-neutral">
-                        {loading ? '...' : stageCounts.submitted}
+                        {loading ? "..." : stageCounts.submitted}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-xs">Screening</div>
                     <div className="stat-value text-xl text-info">
-                        {loading ? '...' : stageCounts.screening}
+                        {loading ? "..." : stageCounts.screening}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-xs">Interview</div>
                     <div className="stat-value text-xl text-warning">
-                        {loading ? '...' : stageCounts.interview}
+                        {loading ? "..." : stageCounts.interview}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-xs">Offer</div>
                     <div className="stat-value text-xl text-accent">
-                        {loading ? '...' : stageCounts.offer}
+                        {loading ? "..." : stageCounts.offer}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-xs">Hired</div>
                     <div className="stat-value text-xl text-success">
-                        {loading ? '...' : stageCounts.hired}
+                        {loading ? "..." : stageCounts.hired}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-xs">Rejected</div>
                     <div className="stat-value text-xl text-error">
-                        {loading ? '...' : stageCounts.rejected}
+                        {loading ? "..." : stageCounts.rejected}
                     </div>
                 </div>
             </div>
@@ -188,8 +202,16 @@ export default function ApplicationsAdminPage() {
                 />
                 <select
                     className="select select-sm"
-                    value={filters.stage || ''}
-                    onChange={(e) => setFilters({ ...filters, stage: e.target.value as ApplicationFilters['stage'] || undefined })}
+                    value={filters.stage || ""}
+                    onChange={(e) =>
+                        setFilters({
+                            ...filters,
+                            stage:
+                                (e.target
+                                    .value as ApplicationFilters["stage"]) ||
+                                undefined,
+                        })
+                    }
                 >
                     <option value="">All Stages</option>
                     <option value="submitted">Submitted</option>
@@ -202,8 +224,16 @@ export default function ApplicationsAdminPage() {
                 </select>
                 <select
                     className="select select-sm"
-                    value={filters.status || ''}
-                    onChange={(e) => setFilters({ ...filters, status: e.target.value as ApplicationFilters['status'] || undefined })}
+                    value={filters.status || ""}
+                    onChange={(e) =>
+                        setFilters({
+                            ...filters,
+                            status:
+                                (e.target
+                                    .value as ApplicationFilters["status"]) ||
+                                undefined,
+                        })
+                    }
                 >
                     <option value="">All Status</option>
                     <option value="active">Active</option>
@@ -220,7 +250,11 @@ export default function ApplicationsAdminPage() {
                 <EmptyState
                     icon="fa-file-lines"
                     title="No applications found"
-                    description={search || filters.stage || filters.status ? 'Try adjusting your search or filters' : 'Applications will appear here once submitted'}
+                    description={
+                        search || filters.stage || filters.status
+                            ? "Try adjusting your search or filters"
+                            : "Applications will appear here once submitted"
+                    }
                 />
             ) : (
                 <div className="card bg-base-100 shadow">
@@ -246,55 +280,82 @@ export default function ApplicationsAdminPage() {
                                                 {app.candidate ? (
                                                     <div>
                                                         <div className="font-semibold">
-                                                            {app.candidate.full_name || 'Unknown'}
+                                                            {app.candidate
+                                                                .full_name ||
+                                                                "Unknown"}
                                                         </div>
                                                         <div className="text-xs text-base-content/50">
-                                                            {app.candidate.email}
+                                                            {
+                                                                app.candidate
+                                                                    .email
+                                                            }
                                                         </div>
                                                     </div>
                                                 ) : (
                                                     <span className="font-mono text-sm text-base-content/50">
-                                                        {app.candidate_id.substring(0, 8)}...
+                                                        {app.candidate_id.substring(
+                                                            0,
+                                                            8,
+                                                        )}
+                                                        ...
                                                     </span>
                                                 )}
                                             </td>
                                             <td>
                                                 {app.job ? (
-                                                    <Link href={`/portal/admin/jobs/${app.job.id}`} className="link link-hover text-sm">
+                                                    <Link
+                                                        href={`/portal/admin/jobs/${app.job.id}`}
+                                                        className="link link-hover text-sm"
+                                                    >
                                                         {app.job.title}
                                                     </Link>
                                                 ) : (
                                                     <span className="font-mono text-sm text-base-content/50">
-                                                        {app.job_id.substring(0, 8)}...
+                                                        {app.job_id.substring(
+                                                            0,
+                                                            8,
+                                                        )}
+                                                        ...
                                                     </span>
                                                 )}
                                             </td>
                                             <td>
                                                 {app.company ? (
-                                                    <span className="text-sm">{app.company.name}</span>
+                                                    <span className="text-sm">
+                                                        {app.company.name}
+                                                    </span>
                                                 ) : (
-                                                    <span className="text-base-content/50">-</span>
+                                                    <span className="text-base-content/50">
+                                                        -
+                                                    </span>
                                                 )}
                                             </td>
                                             <td>
-                                                <span className="text-sm">{app.recruiter_name || '-'}</span>
+                                                <span className="text-sm">
+                                                    {app.recruiter_name || "-"}
+                                                </span>
                                             </td>
                                             <td>
                                                 <StageBadge stage={app.stage} />
                                             </td>
                                             <td>
-                                                <span className={`badge badge-sm ${app.status === 'active' ? 'badge-success' : 'badge-ghost'}`}>
+                                                <span
+                                                    className={`badge badge-sm ${app.status === "active" ? "badge-success" : "badge-ghost"}`}
+                                                >
                                                     {app.status}
                                                 </span>
                                             </td>
                                             <td>
                                                 <span className="text-sm">
-                                                    {new Date(app.submitted_at || app.created_at).toLocaleDateString()}
+                                                    {new Date(
+                                                        app.submitted_at ||
+                                                            app.created_at,
+                                                    ).toLocaleDateString()}
                                                 </span>
                                             </td>
                                             <td>
                                                 <Link
-                                                    href={`/portal/admin/applications/${app.id}`}
+                                                    href={`/portal/admin/applications?applicationId=${app.id}`}
                                                     className="btn btn-xs btn-ghost"
                                                     title="View details"
                                                 >

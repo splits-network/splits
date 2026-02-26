@@ -19,6 +19,12 @@ import { ChatEmailService } from './services/chat/service';
 import { BillingEmailService } from './services/billing/service';
 import { ReputationEmailService } from './services/reputation/service';
 import { HealthEmailService } from './services/health/service';
+import { OnboardingEmailService } from './services/onboarding/service';
+import { JobsEmailService } from './services/jobs/service';
+import { RelationshipsEmailService } from './services/relationships/service';
+import { SecurityEmailService } from './services/security/service';
+import { RecruiterCodesEmailService } from './services/recruiter-codes/service';
+import { DocumentsEmailService } from './services/documents/service';
 
 export class NotificationService {
     public readonly applications: ApplicationsEmailService;
@@ -34,6 +40,12 @@ export class NotificationService {
     public readonly billing: BillingEmailService;
     public readonly reputation: ReputationEmailService;
     public readonly health: HealthEmailService;
+    public readonly onboarding: OnboardingEmailService;
+    public readonly jobs: JobsEmailService;
+    public readonly relationships: RelationshipsEmailService;
+    public readonly security: SecurityEmailService;
+    public readonly recruiterCodes: RecruiterCodesEmailService;
+    public readonly documents: DocumentsEmailService;
 
     constructor(
         repository: NotificationRepository,
@@ -56,6 +68,12 @@ export class NotificationService {
         this.billing = new BillingEmailService(resend, repository, fromEmail, logger);
         this.reputation = new ReputationEmailService(resend, repository, fromEmail, logger);
         this.health = new HealthEmailService(resend, repository, fromEmail, logger);
+        this.onboarding = new OnboardingEmailService(resend, repository, fromEmail, logger);
+        this.jobs = new JobsEmailService(resend, repository, fromEmail, logger);
+        this.relationships = new RelationshipsEmailService(resend, repository, fromEmail, logger);
+        this.security = new SecurityEmailService(resend, repository, fromEmail, logger);
+        this.recruiterCodes = new RecruiterCodesEmailService(resend, repository, fromEmail, logger);
+        this.documents = new DocumentsEmailService(resend, repository, fromEmail, logger);
     }
 
     // Legacy compatibility methods - delegate to domain services
