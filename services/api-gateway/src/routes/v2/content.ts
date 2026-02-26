@@ -148,7 +148,7 @@ export function registerContentRoutes(app: FastifyInstance, services: ServiceReg
 
         const contentServiceUrl = process.env.CONTENT_SERVICE_URL || 'http://localhost:3015';
 
-        const proxyHeaders: Record<string, string | undefined> = {
+        const proxyHeaders = {
             ...authHeaders,
             'x-correlation-id': correlationId,
             'content-type': request.headers['content-type'],
@@ -158,7 +158,7 @@ export function registerContentRoutes(app: FastifyInstance, services: ServiceReg
         const response = await fetch(`${contentServiceUrl}${imgServiceBase}`, {
             method: 'POST',
             body: request.raw,
-            headers: proxyHeaders as HeadersInit,
+            headers: proxyHeaders,
             duplex: 'half',
         } as RequestInit);
 

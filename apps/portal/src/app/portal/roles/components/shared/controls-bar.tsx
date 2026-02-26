@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchInput } from "@/components/standard-lists/search-input";
 import type { ViewMode } from "./status-color";
 import type { UnifiedJobFilters } from "../../types";
 
@@ -65,17 +66,12 @@ export function ControlsBar({
                         </div>
 
                         {/* Search */}
-                        <div className="relative flex-1 min-w-[200px] max-w-md">
-                            <i className="fa-duotone fa-regular fa-search absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 text-sm" />
-                            <input
-                                type="text"
-                                placeholder="Search roles, companies, skills..."
-                                value={searchInput}
-                                onChange={(e) => onSearchChange(e.target.value)}
-                                className="input input-bordered w-full pl-9 bg-base-200 border-base-300 text-sm font-medium focus:border-primary focus:outline-none"
-                                style={{ borderRadius: 0 }}
-                            />
-                        </div>
+                        <SearchInput
+                            value={searchInput}
+                            onChange={onSearchChange}
+                            placeholder="Search roles, companies, skills..."
+                            className="flex-1 min-w-[200px] max-w-md"
+                        />
 
                         {/* Status filter */}
                         <select
