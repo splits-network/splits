@@ -2,6 +2,13 @@
 
 import { useState, FormEvent } from "react";
 import { MarkdownEditor } from "@splits-network/shared-ui";
+import {
+    BaselModal,
+    BaselModalHeader,
+    BaselModalBody,
+    BaselModalFooter,
+    BaselAlertBox,
+} from "@splits-network/basel-ui";
 
 interface RequestChangesModalProps {
     isOpen: boolean;
@@ -26,7 +33,6 @@ export default function RequestChangesModal({
         e.preventDefault();
         setError(null);
 
-        // Validation: notes are required
         if (!notes.trim()) {
             setError("Please provide specific feedback for the candidate.");
             return;
@@ -61,87 +67,80 @@ export default function RequestChangesModal({
     if (!isOpen) return null;
 
     return (
-        <dialog className="modal modal-open" open>
-            <div className="modal-box">
-                <h3 className="font-bold text-lg mb-4">
-                    <i className="fa-duotone fa-regular fa-comment-edit text-warning mr-2"></i>
-                    Request Changes
-                </h3>
+        <BaselModal isOpen={isOpen} onClose={handleClose} maxWidth="max-w-2xl">
+            <BaselModalHeader
+                title="Request Changes"
+                subtitle="Application Feedback"
+                icon="fa-comment-edit"
+                iconColor="warning"
+                onClose={handleClose}
+                closeDisabled={submitting}
+            />
 
-                <div className="mb-4">
-                    <p className="text-sm text-base-content/70 mb-2">
-                        You are requesting changes to this application:
-                    </p>
-                    <div className="bg-base-200 p-3 rounded">
-                        <p className="font-semibold">{candidateName}</p>
-                        <p className="text-sm text-base-content/70">
-                            {jobTitle}
-                        </p>
+            <form onSubmit={handleSubmit}>
+                <BaselModalBody>
+                    <div className="space-y-5">
+                        {/* Candidate Summary */}
+                        <div className="bg-base-200 p-4 border-l-4 border-warning">
+                            <p className="font-semibold text-base-content">
+                                {candidateName}
+                            </p>
+                            <p className="text-sm text-base-content/70">
+                                {jobTitle}
+                            </p>
+                        </div>
+
+                        <BaselAlertBox variant="info" title="What happens next">
+                            The candidate will be notified of your feedback and can
+                            make improvements before resubmitting.
+                        </BaselAlertBox>
+
+                        {error && (
+                            <BaselAlertBox variant="error">{error}</BaselAlertBox>
+                        )}
+
+                        <div>
+                            <MarkdownEditor
+                                label="Feedback for Candidate *"
+                                value={notes}
+                                onChange={setNotes}
+                                placeholder="Please provide specific feedback about what changes are needed. For example: skills to highlight, experience to clarify, documents to attach, or sections to improve..."
+                                height={200}
+                            />
+                        </div>
                     </div>
-                </div>
+                </BaselModalBody>
 
-                <div className="alert alert-info mb-4">
-                    <i className="fa-duotone fa-regular fa-circle-info"></i>
-                    <div>
-                        <p className="font-semibold">What happens next</p>
-                        <p className="text-sm">
-                            The candidate will be notified of your feedback and
-                            can make improvements before resubmitting.
-                        </p>
-                    </div>
-                </div>
-
-                {error && (
-                    <div className="alert alert-error mb-4">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                        <span>{error}</span>
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit}>
-                    <MarkdownEditor
-                        className="fieldset mb-4"
-                        label="Feedback for Candidate *"
-                        value={notes}
-                        onChange={setNotes}
-                        placeholder="Please provide specific feedback about what changes are needed. For example: skills to highlight, experience to clarify, documents to attach, or sections to improve..."
-                        height={200}
-                    />
-
-                    <div className="modal-action">
-                        <button
-                            type="button"
-                            onClick={handleClose}
-                            className="btn btn-outline"
-                            disabled={submitting}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-warning"
-                            disabled={submitting || !notes.trim()}
-                        >
-                            {submitting ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    Sending...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-paper-plane"></i>
-                                    Request Changes
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <form method="dialog" className="modal-backdrop">
-                <button type="button" onClick={handleClose}>
-                    Close
-                </button>
+                <BaselModalFooter>
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        className="btn btn-ghost"
+                        style={{ borderRadius: 0 }}
+                        disabled={submitting}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        className="btn btn-warning"
+                        style={{ borderRadius: 0 }}
+                        disabled={submitting || !notes.trim()}
+                    >
+                        {submitting ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm"></span>
+                                Sending...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-paper-plane"></i>
+                                Request Changes
+                            </>
+                        )}
+                    </button>
+                </BaselModalFooter>
             </form>
-        </dialog>
+        </BaselModal>
     );
 }

@@ -17,11 +17,11 @@ export function SearchInput({
 }: SearchInputProps) {
     return (
         <label className="input">
-            <i className="fa-duotone fa-regular fa-search"></i>
+            <i className="fa-duotone fa-regular fa-search opacity-50"></i>
             <input
                 type="text"
                 placeholder={placeholder}
-                className=""
+                className="grow"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             />

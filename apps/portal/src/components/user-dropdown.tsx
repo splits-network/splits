@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -7,24 +8,9 @@ import { useUserProfile } from "@/contexts/user-profile-context";
 import { getRoleStyle } from "@/lib/utils/color-styles";
 import { UserDropdown as BaselUserDropdown } from "@splits-network/basel-ui";
 
-const MENU_ITEMS = [
-    {
-        href: "/portal/profile",
-        icon: "fa-duotone fa-regular fa-user-pen",
-        label: "Profile",
-        description: "Manage your account",
-    },
-    {
-        href: "/portal/billing",
-        icon: "fa-duotone fa-regular fa-credit-card",
-        label: "Billing",
-        description: "Plans & payments",
-    },
-];
-
 export function UserDropdown() {
     const { user } = useUser();
-    const { logout, isAdmin, isRecruiter, isCompanyUser, isCandidate } =
+    const { logout, isAdmin, isRecruiter, isCompanyUser, isCandidate, hasRole } =
         useUserProfile();
     const router = useRouter();
 
@@ -46,14 +32,18 @@ export function UserDropdown() {
             : rawUserEmail
         : undefined;
 
+    const companyRoleLabel = hasRole("company_admin")
+        ? "Company Admin"
+        : "Hiring Manager";
+
     const roleDisplay = isAdmin
         ? "Administrator"
         : isRecruiter && isCompanyUser
-          ? "Recruiter & Company"
+          ? `Recruiter & ${companyRoleLabel}`
           : isRecruiter
             ? "Recruiter"
             : isCompanyUser
-              ? "Company User"
+              ? companyRoleLabel
               : isCandidate
                 ? "Candidate"
                 : "User";
@@ -70,6 +60,46 @@ export function UserDropdown() {
 
     const roleStyle = getRoleStyle(roleDisplay);
 
+    const menuItems = useMemo(() => {
+        const items = [
+            {
+                href: "/portal/profile",
+                icon: "fa-duotone fa-regular fa-user-pen",
+                label: "Profile",
+                description: "Manage your account",
+            },
+        ];
+
+        if (isRecruiter) {
+            items.push({
+                href: "/portal/billing",
+                icon: "fa-duotone fa-regular fa-credit-card",
+                label: "Billing",
+                description: "Plans & payments",
+            });
+        }
+
+        if (isCompanyUser) {
+            items.push({
+                href: "/portal/company/settings",
+                icon: "fa-duotone fa-regular fa-building-gear",
+                label: "Company Settings",
+                description: "Manage your company",
+            });
+        }
+
+        if (isAdmin) {
+            items.push({
+                href: "/portal/admin",
+                icon: "fa-duotone fa-regular fa-gauge-high",
+                label: "Admin Dashboard",
+                description: "Platform administration",
+            });
+        }
+
+        return items;
+    }, [isRecruiter, isCompanyUser, isAdmin]);
+
     const handleSignOut = async () => {
         await logout();
         router.refresh();
@@ -83,7 +113,7 @@ export function UserDropdown() {
             userInitials={userInitials}
             userImageUrl={user.imageUrl}
             role={{ label: roleDisplay, icon: roleIcon }}
-            menuItems={MENU_ITEMS}
+            menuItems={menuItems}
             onSignOut={handleSignOut}
             avatarClassName={`${roleStyle.bg} ${roleStyle.text}`}
             badgeClassName={roleStyle.badgeBg}

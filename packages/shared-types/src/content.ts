@@ -187,6 +187,26 @@ export const VALID_BLOCK_TYPES: ContentBlockType[] = [
     'benefits-cards',
 ];
 
+/* ─── Content Image types ──────────────────────────────────────────────── */
+
+export interface ContentImage {
+    id: string;
+    filename: string;
+    original_filename: string;
+    storage_path: string;
+    public_url: string;
+    alt_text: string;
+    mime_type: string;
+    file_size: number;
+    width?: number;
+    height?: number;
+    tags: string[];
+    uploaded_by: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string;
+}
+
 /* ─── Navigation types ─────────────────────────────────────────────────── */
 
 export interface NavSubItem {

@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { MarkdownEditor } from "@splits-network/shared-ui";
+import {
+    BaselModal,
+    BaselModalHeader,
+    BaselModalBody,
+    BaselModalFooter,
+    BaselAlertBox,
+} from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
@@ -100,7 +107,7 @@ export default function HireModal({
             const client = createAuthenticatedClient(token);
             await client.post(`/applications/${application.id}/hire`, {
                 salary: salaryNumber,
-                start_date: startDate || undefined,
+                start_date: startDate,
                 notes: notes.trim() || undefined,
             });
 
@@ -112,172 +119,177 @@ export default function HireModal({
         }
     };
 
-    const hasFeePercentage = jobFeeData && jobFeeData.fee_percentage !== null && jobFeeData.fee_percentage > 0;
+    const hasFeePercentage =
+        jobFeeData &&
+        jobFeeData.fee_percentage !== null &&
+        jobFeeData.fee_percentage > 0;
 
     return (
-        <dialog className="modal modal-open" open>
-            <div className="modal-box max-w-lg">
-                <h3 className="font-bold text-lg mb-4">
-                    <i className="fa-duotone fa-regular fa-check-circle text-success mr-2"></i>
-                    Mark as Hired
-                </h3>
+        <BaselModal isOpen onClose={onClose} maxWidth="max-w-lg">
+            <BaselModalHeader
+                title="Mark as Hired"
+                subtitle="Placement Record"
+                icon="fa-check-circle"
+                iconColor="success"
+                onClose={onClose}
+                closeDisabled={submitting}
+            />
 
-                {/* Candidate/Job Summary */}
-                <div className="bg-base-200 p-3 rounded-lg mb-4">
-                    <p className="font-semibold">
-                        {application.candidate?.full_name || "Unknown Candidate"}
-                    </p>
-                    <p className="text-sm text-base-content/70">
-                        {application.job?.title || "Unknown Position"}
-                        {application.job?.company?.name &&
-                            ` at ${application.job.company.name}`}
-                    </p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && (
-                        <div className="alert alert-error">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">
-                            Annual Salary (USD) *
-                        </legend>
-                        <input
-                            type="number"
-                            className="input w-full"
-                            value={salary}
-                            onChange={(e) => setSalary(e.target.value)}
-                            placeholder="150000"
-                            required
-                            min="0"
-                            step="any"
-                            disabled={submitting}
-                        />
-                        <p className="fieldset-label">
-                            The candidate's agreed annual salary
-                        </p>
-                    </fieldset>
-
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Start Date</legend>
-                        <input
-                            type="date"
-                            className="input w-full"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            disabled={submitting}
-                        />
-                        <p className="fieldset-label">
-                            Leave blank to use today's date
-                        </p>
-                    </fieldset>
-
-                    {/* Fee Breakdown */}
-                    {loadingJob ? (
-                        <div className="flex items-center gap-2 py-2">
-                            <span className="loading loading-spinner loading-sm"></span>
-                            <span className="text-sm opacity-70">
-                                Loading fee details...
-                            </span>
-                        </div>
-                    ) : (
-                        <div className="bg-base-200 rounded-lg p-4 space-y-2">
-                            <p className="font-semibold text-sm mb-2">
-                                <i className="fa-duotone fa-regular fa-calculator mr-2"></i>
-                                Placement Fee Breakdown
+            <form onSubmit={handleSubmit}>
+                <BaselModalBody>
+                    <div className="space-y-5">
+                        {/* Candidate/Job Summary */}
+                        <div className="bg-base-200 p-4 border-l-4 border-success">
+                            <p className="font-semibold text-base-content">
+                                {application.candidate?.full_name ||
+                                    "Unknown Candidate"}
                             </p>
-                            {!hasFeePercentage && (
-                                <div className="alert alert-warning py-2">
-                                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
-                                    <span className="text-sm">
-                                        No fee percentage configured on this
-                                        job. The placement fee will default to
-                                        $0.
-                                    </span>
-                                </div>
-                            )}
-                            <div className="grid grid-cols-2 gap-1 text-sm">
-                                <span className="text-base-content/70">
-                                    Fee Percentage:
-                                </span>
-                                <span className="font-medium text-right">
-                                    {feePercentage}%
-                                </span>
+                            <p className="text-sm text-base-content/70">
+                                {application.job?.title || "Unknown Position"}
+                                {application.job?.company?.name &&
+                                    ` at ${application.job.company.name}`}
+                            </p>
+                        </div>
 
-                                <span className="text-base-content/70">
-                                    Placement Fee:
-                                </span>
-                                <span className="font-medium text-right">
-                                    {salaryNumber > 0
-                                        ? `$${placementFee.toLocaleString()}`
-                                        : "Enter salary"}
-                                </span>
+                        {error && (
+                            <BaselAlertBox variant="error">{error}</BaselAlertBox>
+                        )}
 
-                                <span className="text-base-content/70">
-                                    Guarantee Period:
-                                </span>
-                                <span className="font-medium text-right">
-                                    {guaranteeDays} days
-                                </span>
+                        <fieldset>
+                            <label className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-2 block">
+                                Annual Salary (USD) *
+                            </label>
+                            <input
+                                type="number"
+                                className="input w-full bg-base-100 border-base-300 font-medium focus:border-primary focus:outline-none"
+                                style={{ borderRadius: 0 }}
+                                value={salary}
+                                onChange={(e) => setSalary(e.target.value)}
+                                placeholder="150000"
+                                required
+                                min="0"
+                                step="any"
+                                disabled={submitting}
+                            />
+                            <p className="text-sm text-base-content/40 mt-2">
+                                The candidate's agreed annual salary
+                            </p>
+                        </fieldset>
 
-                                <span className="text-base-content/70">
-                                    Guarantee Expires:
-                                </span>
-                                <span className="font-medium text-right">
-                                    {guaranteeExpires}
+                        <fieldset>
+                            <label className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-2 block">
+                                Start Date *
+                            </label>
+                            <input
+                                type="date"
+                                className="input w-full bg-base-100 border-base-300 font-medium focus:border-primary focus:outline-none"
+                                style={{ borderRadius: 0 }}
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                required
+                                disabled={submitting}
+                            />
+                            <p className="text-sm text-base-content/40 mt-2">
+                                The candidate's first day of employment
+                            </p>
+                        </fieldset>
+
+                        {/* Fee Breakdown */}
+                        {loadingJob ? (
+                            <div className="flex items-center gap-2 py-2">
+                                <span className="loading loading-spinner loading-sm"></span>
+                                <span className="text-sm text-base-content/70">
+                                    Loading fee details...
                                 </span>
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="bg-base-200 p-4 space-y-3">
+                                <p className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/50">
+                                    <i className="fa-duotone fa-regular fa-calculator mr-2"></i>
+                                    Placement Fee Breakdown
+                                </p>
+                                {!hasFeePercentage && (
+                                    <BaselAlertBox variant="warning">
+                                        No fee percentage configured on this job.
+                                        The placement fee will default to $0.
+                                    </BaselAlertBox>
+                                )}
+                                <div className="grid grid-cols-2 gap-1 text-sm">
+                                    <span className="text-base-content/70">
+                                        Fee Percentage:
+                                    </span>
+                                    <span className="font-medium text-right">
+                                        {feePercentage}%
+                                    </span>
 
-                    <MarkdownEditor
-                        className="fieldset"
-                        label="Notes (Optional)"
-                        value={notes}
-                        onChange={setNotes}
-                        placeholder="Add any notes about the hire..."
-                        helperText="These notes will be visible in the placement record."
-                        height={120}
-                        preview="edit"
-                        disabled={submitting}
-                    />
+                                    <span className="text-base-content/70">
+                                        Placement Fee:
+                                    </span>
+                                    <span className="font-medium text-right">
+                                        {salaryNumber > 0
+                                            ? `$${placementFee.toLocaleString()}`
+                                            : "Enter salary"}
+                                    </span>
 
-                    <div className="modal-action">
-                        <button
-                            type="button"
-                            className="btn"
-                            onClick={onClose}
+                                    <span className="text-base-content/70">
+                                        Guarantee Period:
+                                    </span>
+                                    <span className="font-medium text-right">
+                                        {guaranteeDays} days
+                                    </span>
+
+                                    <span className="text-base-content/70">
+                                        Guarantee Expires:
+                                    </span>
+                                    <span className="font-medium text-right">
+                                        {guaranteeExpires}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        <MarkdownEditor
+                            label="Notes (Optional)"
+                            value={notes}
+                            onChange={setNotes}
+                            placeholder="Add any notes about the hire..."
+                            height={120}
+                            preview="edit"
                             disabled={submitting}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-success"
-                            disabled={submitting || loadingJob}
-                        >
-                            {submitting ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    Creating Placement...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-check"></i>
-                                    Confirm Hire
-                                </>
-                            )}
-                        </button>
+                        />
                     </div>
-                </form>
-            </div>
-            <form method="dialog" className="modal-backdrop" onClick={onClose}>
-                <button type="button">close</button>
+                </BaselModalBody>
+
+                <BaselModalFooter>
+                    <button
+                        type="button"
+                        className="btn btn-ghost"
+                        style={{ borderRadius: 0 }}
+                        onClick={onClose}
+                        disabled={submitting}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        className="btn btn-success"
+                        style={{ borderRadius: 0 }}
+                        disabled={submitting || loadingJob || !startDate}
+                    >
+                        {submitting ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm"></span>
+                                Creating Placement...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-check"></i>
+                                Confirm Hire
+                            </>
+                        )}
+                    </button>
+                </BaselModalFooter>
             </form>
-        </dialog>
+        </BaselModal>
     );
 }

@@ -91,7 +91,7 @@ export class BillingEventConsumer {
             await this.emailService.sendPayoutConnectRequired(recruiterContact.email, {
                 recruiterName: recruiterContact.name,
                 amount,
-                connectUrl: `${this.portalUrl}/portal/billing/connect`,
+                connectUrl: `${this.portalUrl}/portal/profile`,
                 reason,
                 recruiterId,
                 userId: recruiterContact.user_id || undefined,
@@ -124,7 +124,7 @@ export class BillingEventConsumer {
             await this.emailService.sendStripeConnectDisabled(recruiterContact.email, {
                 recruiterName: recruiterContact.name,
                 reason: disabled_reason,
-                connectUrl: `${this.portalUrl}/portal/billing/connect`,
+                connectUrl: `${this.portalUrl}/portal/profile`,
                 recruiterId: recruiter_id,
                 userId: recruiterContact.user_id || undefined,
             });

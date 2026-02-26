@@ -14,8 +14,16 @@ import {
     ErrorState,
 } from '@/hooks/use-standard-list';
 import { AdminPageHeader, useAdminConfirm } from '../components';
+import { PayoutDetailModal } from './payout-detail-modal';
 
 type TransactionStatus = 'pending' | 'processing' | 'paid' | 'failed' | 'reversed' | 'on_hold';
+
+type PayoutRole =
+    | 'candidate_recruiter'
+    | 'company_recruiter'
+    | 'job_owner'
+    | 'candidate_sourcer'
+    | 'company_sourcer';
 
 interface PayoutTransaction {
     id: string;
@@ -34,6 +42,16 @@ interface PayoutTransaction {
     failed_at?: string;
     failure_reason?: string;
     retry_count: number;
+    recruiter_name?: string;
+    recruiter_email?: string;
+    candidate_name?: string;
+    company_name?: string;
+    job_title?: string;
+    salary?: number;
+    fee_amount?: number;
+    placement_state?: string;
+    split_role?: PayoutRole;
+    split_percentage?: number;
 }
 
 interface TransactionFilters {
@@ -43,6 +61,7 @@ interface TransactionFilters {
 export default function PayoutsAdminPage() {
     const { getToken } = useAuth();
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const [selectedTransaction, setSelectedTransaction] = useState<PayoutTransaction | null>(null);
     const toast = useToast();
     const confirm = useAdminConfirm();
     const [badgeCounts, setBadgeCounts] = useState({
@@ -333,27 +352,42 @@ export default function PayoutsAdminPage() {
                             <table className="table table-zebra">
                                 <thead>
                                     <tr>
-                                        <th>Placement</th>
                                         <th>Recruiter</th>
+                                        <th>Placement</th>
+                                        <th>Role</th>
                                         <th>Amount</th>
                                         <th>Status</th>
-                                        <th>Retries</th>
                                         <th>Created</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {transactions.map((txn) => (
-                                        <tr key={txn.id}>
+                                        <tr key={txn.id} className="hover cursor-pointer" onClick={() => setSelectedTransaction(txn)}>
                                             <td>
-                                                <span className="font-mono text-sm">
-                                                    {txn.placement_id?.substring(0, 8) || '-'}...
-                                                </span>
+                                                <div>
+                                                    <div className="font-medium">{txn.recruiter_name || 'Unknown'}</div>
+                                                    {txn.recruiter_email && (
+                                                        <div className="text-sm text-base-content/50">{txn.recruiter_email}</div>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td>
-                                                <span className="font-mono text-sm">
-                                                    {txn.recruiter_id?.substring(0, 8) || '-'}...
-                                                </span>
+                                                <div>
+                                                    <div className="text-sm">{txn.candidate_name || txn.placement_id?.substring(0, 8) + '...'}</div>
+                                                    {txn.company_name && (
+                                                        <div className="text-sm text-base-content/50">{txn.company_name}</div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {txn.split_role ? (
+                                                    <span className="badge badge-ghost badge-sm">
+                                                        {txn.split_role.replace(/_/g, ' ')}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-base-content/40">—</span>
+                                                )}
                                             </td>
                                             <td className="font-semibold">
                                                 ${(txn.amount || 0).toLocaleString()}
@@ -362,17 +396,10 @@ export default function PayoutsAdminPage() {
                                                 <StatusBadge status={txn.status} />
                                             </td>
                                             <td>
-                                                {txn.retry_count > 0 ? (
-                                                    <span className="badge badge-ghost badge-sm">{txn.retry_count}</span>
-                                                ) : (
-                                                    <span className="text-base-content/40">-</span>
-                                                )}
-                                            </td>
-                                            <td>
                                                 {new Date(txn.created_at).toLocaleDateString()}
                                             </td>
                                             <td>
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                                                     {txn.status === 'pending' && (
                                                         <button
                                                             className="btn btn-primary btn-xs"
@@ -389,6 +416,12 @@ export default function PayoutsAdminPage() {
                                                             )}
                                                         </button>
                                                     )}
+                                                    <button
+                                                        className="btn btn-ghost btn-xs"
+                                                        onClick={() => setSelectedTransaction(txn)}
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-eye"></i>
+                                                    </button>
                                                     {txn.failure_reason && (
                                                         <div className="tooltip" data-tip={txn.failure_reason}>
                                                             <button className="btn btn-ghost btn-xs text-error">
@@ -414,6 +447,14 @@ export default function PayoutsAdminPage() {
                     setPage={setPage}
                 />
             )}
+
+            {/* Detail Modal */}
+            <PayoutDetailModal
+                transaction={selectedTransaction}
+                onClose={() => setSelectedTransaction(null)}
+                onProcess={processTransaction}
+                processing={!!processingId}
+            />
         </div>
     );
 }
