@@ -1,7 +1,7 @@
 /**
  * Resume Extraction Repository - V2
  * Handles database operations for resume structured data extraction.
- * Reads extracted text from documents, writes structured_data back to document metadata.
+ * Reads extracted text from documents, writes structured data to the dedicated structured_metadata column.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -23,10 +23,11 @@ export class ResumeExtractionRepository {
         entity_id: string;
         document_type: string;
         metadata: Record<string, any>;
+        structured_metadata: Record<string, any> | null;
     } | null> {
         const { data, error } = await this.supabase
             .from('documents')
-            .select('id, entity_type, entity_id, document_type, metadata')
+            .select('id, entity_type, entity_id, document_type, metadata, structured_metadata')
             .eq('id', documentId)
             .is('deleted_at', null)
             .single();
@@ -40,33 +41,19 @@ export class ResumeExtractionRepository {
     }
 
     /**
-     * Write structured_data to document metadata (merge with existing metadata).
+     * Write structured data to the dedicated structured_metadata column.
      */
     async writeStructuredData(
         documentId: string,
         structuredData: ResumeMetadata
     ): Promise<void> {
-        // First read current metadata to merge
-        const { data: doc, error: readError } = await this.supabase
-            .from('documents')
-            .select('metadata')
-            .eq('id', documentId)
-            .single();
-
-        if (readError) throw readError;
-
-        const updatedMetadata = {
-            ...(doc?.metadata || {}),
-            structured_data: structuredData,
-        };
-
         const { error: updateError } = await this.supabase
             .from('documents')
-            .update({ metadata: updatedMetadata })
+            .update({ structured_metadata: structuredData })
             .eq('id', documentId);
 
         if (updateError) throw updateError;
 
-        this.logger.debug({ document_id: documentId }, 'Structured data written to document metadata');
+        this.logger.debug({ document_id: documentId }, 'Structured data written to document structured_metadata');
     }
 }

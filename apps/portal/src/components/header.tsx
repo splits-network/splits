@@ -180,7 +180,7 @@ function DesktopNavContent({ items }: { items: NavItem[] }) {
                                     </span>
                                 </div>
                                 <ul
-                                    className={`menu p-0 ${
+                                    className={`menu w-full p-0 ${
                                         item.subItems.length > 3
                                             ? "grid grid-cols-2 gap-0.5"
                                             : ""
@@ -246,24 +246,27 @@ function SearchPanel() {
                     <p className="text-sm uppercase tracking-widest text-base-content/30 mb-2">
                         Quick Actions
                     </p>
-                    <ul className="menu menu-sm p-0">
+                    <ul className="menu p-0 w-full">
                         {[
                             {
-                                label: "Browse open jobs",
+                                label: "Browse roles",
                                 icon: "fa-duotone fa-regular fa-briefcase",
+                                link: "/portal/roles",
                             },
                             {
                                 label: "View my candidates",
                                 icon: "fa-duotone fa-regular fa-users",
+                                link: "/portal/candidates",
                             },
                             {
                                 label: "Check placements",
                                 icon: "fa-duotone fa-regular fa-trophy",
+                                link: "/portal/placements",
                             },
                         ].map((action) => (
                             <li key={action.label}>
                                 <a
-                                    href="#"
+                                    href={action.link}
                                     className="text-sm text-base-content/60 hover:text-base-content"
                                 >
                                     <i
@@ -298,7 +301,7 @@ function MobileMenuContent({
             </label>
 
             {/* Navigation using DaisyUI menu + details for collapsible sub-items */}
-            <ul className="menu p-0 mb-4">
+            <ul className="menu w-full p-0 mb-4">
                 {items.map((item) => (
                     <li key={item.label}>
                         {item.subItems?.length ? (

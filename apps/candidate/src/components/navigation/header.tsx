@@ -185,7 +185,7 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
                                         </span>
                                     </div>
                                     <ul
-                                        className={`menu p-0 ${
+                                        className={`menu w-full p-0 ${
                                             item.subItems.length > 3
                                                 ? "grid grid-cols-2"
                                                 : ""

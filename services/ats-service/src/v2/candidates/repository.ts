@@ -639,7 +639,7 @@ export class CandidateRepository {
         const { data: resume, error: resumeError } = await this.supabase
 
             .from('documents')
-            .select('id, metadata')
+            .select('id, metadata, structured_metadata')
             .eq('id', resumeId)
             .eq('entity_type', 'candidate')
             .eq('entity_id', candidateId)
@@ -672,11 +672,10 @@ export class CandidateRepository {
         }
 
         // If the resume has structured data from AI extraction, sync it to the candidate
-        const structuredData = updatedResume.metadata?.structured_data;
-        if (structuredData) {
+        if (resume.structured_metadata) {
             await this.supabase
                 .from('candidates')
-                .update({ resume_metadata: structuredData })
+                .update({ resume_metadata: resume.structured_metadata })
                 .eq('id', candidateId);
         }
 

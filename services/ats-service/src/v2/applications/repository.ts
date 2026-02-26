@@ -613,6 +613,8 @@ export class ApplicationRepository {
                 file_size: originalDoc.file_size,
                 uploaded_by_user_id: originalDoc.uploaded_by_user_id,
                 processing_status: originalDoc.processing_status,
+                scan_status: originalDoc.scan_status,
+                structured_metadata: originalDoc.structured_metadata,
                 processing_started_at: originalDoc.processing_started_at,
                 processing_completed_at: originalDoc.processing_completed_at,
                 processing_error: originalDoc.processing_error,
@@ -624,6 +626,24 @@ export class ApplicationRepository {
             });
 
         if (insertError) throw insertError;
+
+        // If the original document has structured resume data, sync it to the application
+        if (originalDoc.document_type === 'resume' && originalDoc.structured_metadata) {
+            const resumeData = {
+                source: 'document_extraction' as const,
+                created_at: new Date().toISOString(),
+                summary: originalDoc.structured_metadata.professional_summary,
+                experience: originalDoc.structured_metadata.experience,
+                education: originalDoc.structured_metadata.education,
+                skills: originalDoc.structured_metadata.skills,
+                certifications: originalDoc.structured_metadata.certifications,
+            };
+
+            await this.supabase
+                .from('applications')
+                .update({ resume_data: resumeData })
+                .eq('id', applicationId);
+        }
     }
 
     async unlinkApplicationDocuments(applicationId: string): Promise<void> {

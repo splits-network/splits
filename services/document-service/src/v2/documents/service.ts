@@ -249,11 +249,8 @@ export class DocumentServiceV2 {
                 resume.id !== documentId &&
                 resume.metadata?.is_primary_for_candidate
             ) {
-                const clearedMetadata = { ...resume.metadata };
-                delete clearedMetadata.is_primary_for_candidate;
-
                 await this.repository.updateDocument(resume.id, clerkUserId, {
-                    metadata: clearedMetadata,
+                    metadata: { is_primary_for_candidate: null },
                 });
             }
         }

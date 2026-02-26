@@ -507,10 +507,10 @@ export class DomainEventConsumer {
 
     /**
      * Handle resume.metadata.extracted event from AI service
-     * If the document is the candidate's primary resume, sync structured data to candidate
+     * Routes by entity_type: syncs structured data to the candidate or application
      */
     private async handleResumeMetadataExtracted(event: DomainEvent): Promise<void> {
-        const { document_id, entity_id, structured_data_available } = event.payload;
+        const { document_id, entity_type, entity_id, structured_data_available } = event.payload;
 
         if (!structured_data_available) {
             this.logger.debug({ document_id }, 'Structured data not available, skipping sync');
@@ -518,66 +518,109 @@ export class DomainEventConsumer {
         }
 
         try {
-            const supabase = this.candidateRepository.getSupabase();
-
-            // Fetch document to check if it's the primary resume (via metadata flag)
-            const { data: doc, error: docError } = await supabase
-                .from('documents')
-                .select('metadata')
-                .eq('id', document_id)
-                .single();
-
-            if (docError || !doc?.metadata) {
-                this.logger.warn({ document_id }, 'Could not read document for resume metadata sync');
-                return;
+            if (entity_type === 'application') {
+                await this.syncResumeDataToApplication(document_id, entity_id);
+            } else if (entity_type === 'candidate') {
+                await this.syncResumeDataToCandidate(document_id, entity_id);
+            } else {
+                this.logger.debug({ document_id, entity_type }, 'Unhandled entity type for resume metadata sync');
             }
-
-            if (!doc.metadata.is_primary_for_candidate) {
-                this.logger.debug(
-                    { document_id, entity_id },
-                    'Document is not primary resume, skipping sync'
-                );
-                return;
-            }
-
-            if (!doc.metadata.structured_data) {
-                this.logger.warn({ document_id }, 'No structured data on primary resume document');
-                return;
-            }
-
-            // Verify candidate exists
-            const { data: candidate, error: candidateError } = await supabase
-                .from('candidates')
-                .select('id')
-                .eq('id', entity_id)
-                .single();
-
-            if (candidateError || !candidate) {
-                this.logger.debug({ document_id, entity_id }, 'Candidate not found for resume metadata sync');
-                return;
-            }
-
-            // Sync structured data to candidate
-            const { error: updateError } = await supabase
-                .from('candidates')
-                .update({ resume_metadata: doc.metadata.structured_data })
-                .eq('id', candidate.id);
-
-            if (updateError) {
-                throw updateError;
-            }
-
-            this.logger.info(
-                { candidate_id: candidate.id, document_id },
-                'Synced resume structured data to candidate from extracted event'
-            );
         } catch (error: any) {
             this.logger.error(
-                { err: error, document_id, entity_id, error_message: error.message },
-                'Failed to sync resume metadata to candidate'
+                { err: error, document_id, entity_type, entity_id, error_message: error.message },
+                'Failed to sync resume metadata'
             );
             // Don't rethrow - this is a non-critical sync operation
         }
+    }
+
+    /**
+     * Sync AI-extracted structured data from a primary resume to candidates.resume_metadata
+     */
+    private async syncResumeDataToCandidate(documentId: string, candidateId: string): Promise<void> {
+        const supabase = this.candidateRepository.getSupabase();
+
+        const { data: doc, error: docError } = await supabase
+            .from('documents')
+            .select('metadata, structured_metadata')
+            .eq('id', documentId)
+            .single();
+
+        if (docError || !doc) {
+            this.logger.warn({ document_id: documentId }, 'Could not read document for candidate resume sync');
+            return;
+        }
+
+        if (!doc.metadata?.is_primary_for_candidate) {
+            this.logger.debug({ document_id: documentId, candidate_id: candidateId }, 'Document is not primary resume, skipping candidate sync');
+            return;
+        }
+
+        if (!doc.structured_metadata) {
+            this.logger.warn({ document_id: documentId }, 'No structured data on primary resume document');
+            return;
+        }
+
+        const { data: candidate, error: candidateError } = await supabase
+            .from('candidates')
+            .select('id')
+            .eq('id', candidateId)
+            .single();
+
+        if (candidateError || !candidate) {
+            this.logger.debug({ document_id: documentId, candidate_id: candidateId }, 'Candidate not found for resume metadata sync');
+            return;
+        }
+
+        const { error: updateError } = await supabase
+            .from('candidates')
+            .update({ resume_metadata: doc.structured_metadata })
+            .eq('id', candidate.id);
+
+        if (updateError) {
+            throw updateError;
+        }
+
+        this.logger.info({ candidate_id: candidate.id, document_id: documentId }, 'Synced resume structured data to candidate');
+    }
+
+    /**
+     * Sync AI-extracted structured data from an application resume to applications.resume_data
+     */
+    private async syncResumeDataToApplication(documentId: string, applicationId: string): Promise<void> {
+        const supabase = this.candidateRepository.getSupabase();
+
+        const { data: doc, error: docError } = await supabase
+            .from('documents')
+            .select('structured_metadata')
+            .eq('id', documentId)
+            .single();
+
+        if (docError || !doc?.structured_metadata) {
+            this.logger.warn({ document_id: documentId }, 'No structured data on document for application sync');
+            return;
+        }
+
+        const resumeData = {
+            source: 'document_extraction',
+            created_at: new Date().toISOString(),
+            summary: doc.structured_metadata.professional_summary,
+            experience: doc.structured_metadata.experience,
+            education: doc.structured_metadata.education,
+            skills: doc.structured_metadata.skills,
+            certifications: doc.structured_metadata.certifications,
+        };
+
+        const { error: updateError } = await supabase
+            .from('applications')
+            .update({ resume_data: resumeData })
+            .eq('id', applicationId);
+
+        if (updateError) {
+            throw updateError;
+        }
+
+        this.logger.info({ application_id: applicationId, document_id: documentId }, 'Synced resume structured data to application');
     }
 
     /**

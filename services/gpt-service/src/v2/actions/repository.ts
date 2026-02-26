@@ -224,7 +224,7 @@ export class GptActionRepository {
         jobId: string,
         coverLetter?: string,
         resumeData?: GptResumeDataInput,
-        resumeSource?: 'mcp_tool' | 'custom_gpt' | 'portal_backfill',
+        resumeSource?: 'mcp_tool' | 'custom_gpt' | 'document_extraction',
     ): Promise<any> {
         const insertPayload: Record<string, unknown> = {
             candidate_id: candidateId,

@@ -14,7 +14,7 @@ interface ResumeTabProps {
 const SOURCE_LABELS: Record<string, string> = {
     mcp_tool: "Submitted via ChatGPT App",
     custom_gpt: "Submitted via ChatGPT",
-    portal_backfill: "Extracted from uploaded document",
+    document_extraction: "Extracted from uploaded document",
 };
 
 export default function ResumeTab({ resumeData }: ResumeTabProps) {
