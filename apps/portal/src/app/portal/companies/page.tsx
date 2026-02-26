@@ -157,6 +157,8 @@ export default function CompaniesBaselPage() {
                 isMyCompanies={!isMarketplace}
                 companyCount={active.data.length}
                 totalCount={active.pagination?.total ?? active.data.length}
+                loading={marketplace.loading || myCompanies.loading}
+                refresh={handleRefresh}
             />
 
             {/* Content Area */}

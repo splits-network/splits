@@ -162,6 +162,7 @@ export default function MarketplaceClient({
                 viewMode={viewMode}
                 onViewModeChange={handleViewModeChange}
                 loading={loading}
+                refresh={refresh}
             />
 
             {/* Content Area */}

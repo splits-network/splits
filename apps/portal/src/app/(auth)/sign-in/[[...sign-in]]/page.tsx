@@ -306,8 +306,8 @@ export default function SignInPage() {
                     <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
                         Email Address
                     </label>
-                    <div className="relative">
-                        <i className="fa-duotone fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30  pointer-events-none" />
+                    <label className={`input input-bordered w-full ${errorType === "account_not_found" ? "input-error" : ""}`}>
+                        <i className="fa-duotone fa-regular fa-envelope opacity-50" />
                         <input
                             type="email"
                             value={email}
@@ -316,10 +316,10 @@ export default function SignInPage() {
                                 setError("");
                             }}
                             placeholder="you@company.com"
-                            className={`input input-bordered w-full pl-10 ${errorType === "account_not_found" ? "input-error" : ""}`}
+                            className="grow"
                             required
                         />
-                    </div>
+                    </label>
                 </fieldset>
 
                 <fieldset>
@@ -334,8 +334,8 @@ export default function SignInPage() {
                             Forgot?
                         </Link>
                     </div>
-                    <div className="relative">
-                        <i className="fa-duotone fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30  pointer-events-none" />
+                    <label className={`input input-bordered w-full ${errorType === "incorrect_password" ? "input-error" : ""}`}>
+                        <i className="fa-duotone fa-regular fa-lock opacity-50" />
                         <input
                             type={showPassword ? "text" : "password"}
                             value={password}
@@ -344,19 +344,19 @@ export default function SignInPage() {
                                 setError("");
                             }}
                             placeholder="Enter your password"
-                            className={`input input-bordered w-full pl-10 pr-10 ${errorType === "incorrect_password" ? "input-error" : ""}`}
+                            className="grow"
                             required
                         />
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content/60"
+                            className="text-base-content/30 hover:text-base-content/60"
                         >
                             <i
                                 className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`}
                             />
                         </button>
-                    </div>
+                    </label>
                 </fieldset>
 
                 <button

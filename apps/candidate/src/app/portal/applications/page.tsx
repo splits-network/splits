@@ -137,6 +137,8 @@ export default function ApplicationsBaselPage() {
                 onViewModeChange={handleViewModeChange}
                 appCount={applications.length}
                 totalCount={pagination?.total ?? applications.length}
+                loading={loading}
+                refresh={refresh}
             />
 
             {/* Content Area */}

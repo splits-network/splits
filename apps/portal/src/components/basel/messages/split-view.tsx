@@ -99,25 +99,25 @@ export default function SplitView() {
                     </div>
 
                     {/* Search */}
-                    <div className="relative mb-3">
-                        <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm" />
+                    <label className="input input-sm w-full bg-base-100 border-base-300 mb-3">
+                        <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50" />
                         <input
                             type="text"
                             placeholder="Search conversations..."
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             disabled={loading}
-                            className="input input-sm w-full pl-9 bg-base-100 border-base-300 focus:outline-none"
+                            className="grow"
                         />
                         {searchInput && (
                             <button
                                 onClick={clearSearch}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs btn-square"
+                                className="btn btn-ghost btn-xs btn-square"
                             >
                                 <i className="fa-duotone fa-regular fa-xmark" />
                             </button>
                         )}
-                    </div>
+                    </label>
 
                     {/* Mailbox filter pills */}
                     <div className="flex gap-1.5 flex-wrap">

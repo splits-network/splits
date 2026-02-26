@@ -9,6 +9,7 @@ interface ControlsBarProps {
     viewMode: ViewMode;
     onViewModeChange: (mode: ViewMode) => void;
     loading?: boolean;
+    refresh?: () => void;
 }
 
 const VIEW_ICONS: Record<ViewMode, string> = {
@@ -24,6 +25,7 @@ export default function ControlsBar({
     viewMode,
     onViewModeChange,
     loading,
+    refresh,
 }: ControlsBarProps) {
     return (
         <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
@@ -42,6 +44,18 @@ export default function ControlsBar({
                             <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-primary/10 text-primary">
                                 Filtered: &ldquo;{searchInput}&rdquo;
                             </span>
+                        )}
+                        {/* Refresh */}
+                        {refresh && (
+                            <button
+                                onClick={refresh}
+                                className="btn btn-sm btn-ghost"
+                                disabled={loading}
+                            >
+                                <i
+                                    className={`fa-duotone fa-regular fa-arrows-rotate ${loading ? "animate-spin" : ""}`}
+                                />
+                            </button>
                         )}
                     </div>
 

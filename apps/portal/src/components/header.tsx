@@ -135,93 +135,62 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
     },
 ];
 
-/* ─── Desktop Nav Content ────────────────────────────────────────────────── */
+/* ─── Desktop Nav Content (DaisyUI dropdown + menu) ──────────────────────── */
 
 function DesktopNavContent({ items }: { items: NavItem[] }) {
-    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-    const navRef = useRef<HTMLDivElement>(null);
-
-    // Close dropdowns when clicking outside the nav
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (navRef.current && !navRef.current.contains(e.target as Node)) {
-                setActiveDropdown(null);
-            }
-        };
-        document.addEventListener("click", handleClickOutside);
-        return () => document.removeEventListener("click", handleClickOutside);
-    }, []);
-
-    const toggleDropdown = (label: string) => {
-        setActiveDropdown(activeDropdown === label ? null : label);
-    };
-
     return (
-        <div ref={navRef} className="flex items-center gap-1">
+        <div className="flex items-center gap-1">
             {items.map((item) => {
                 const hasDropdown = !!item.subItems?.length;
-                return (
-                    <div key={item.label} className="relative">
-                        {item.href && !hasDropdown ? (
-                            <Link
-                                href={item.href}
-                                className="nav-link-item opacity-0 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
-                            >
-                                {item.label}
-                            </Link>
-                        ) : (
-                            <button
-                                onClick={() =>
-                                    hasDropdown && toggleDropdown(item.label)
-                                }
-                                className="nav-link-item opacity-0 flex items-center gap-1.5 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
-                            >
-                                {item.label}
-                                {hasDropdown && (
-                                    <i
-                                        className={`fa-solid fa-chevron-down text-sm transition-transform ${
-                                            activeDropdown === item.label
-                                                ? "rotate-180"
-                                                : ""
-                                        }`}
-                                    />
-                                )}
-                            </button>
-                        )}
 
-                        {/* Dropdown */}
-                        {hasDropdown &&
-                            item.subItems &&
-                            activeDropdown === item.label && (
-                                <div
-                                    className="absolute top-full left-0 mt-1 bg-base-100 border border-base-300 shadow-lg py-2 z-50"
-                                    style={{
-                                        width:
-                                            item.subItems.length > 3
-                                                ? "520px"
-                                                : "300px",
-                                    }}
+                if (item.href && !hasDropdown) {
+                    return (
+                        <Link
+                            key={item.label}
+                            href={item.href}
+                            className="nav-link-item opacity-0 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                        >
+                            {item.label}
+                        </Link>
+                    );
+                }
+
+                return (
+                    <div key={item.label} className="dropdown">
+                        <div
+                            tabIndex={0}
+                            role="button"
+                            className="nav-link-item opacity-0 flex items-center gap-1.5 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                        >
+                            {item.label}
+                            <i className="fa-solid fa-chevron-down text-sm" />
+                        </div>
+                        {item.subItems && (
+                            <div
+                                tabIndex={0}
+                                className={`dropdown-content bg-base-100 border border-base-300 shadow-lg py-2 z-50 ${
+                                    item.subItems.length > 3
+                                        ? "w-[520px]"
+                                        : "w-[300px]"
+                                }`}
+                            >
+                                <div className="px-4 py-2 border-b border-base-300 mb-1">
+                                    <span className="menu-title text-sm font-semibold uppercase tracking-widest text-base-content/40">
+                                        {item.label}
+                                    </span>
+                                </div>
+                                <ul
+                                    className={`menu p-0 ${
+                                        item.subItems.length > 3
+                                            ? "grid grid-cols-2 gap-0.5"
+                                            : ""
+                                    }`}
                                 >
-                                    <div className="px-4 py-2 border-b border-base-300 mb-1">
-                                        <span className="text-sm font-semibold uppercase tracking-widest text-base-content/40">
-                                            {item.label}
-                                        </span>
-                                    </div>
-                                    <div
-                                        className={
-                                            item.subItems.length > 3
-                                                ? "grid grid-cols-2 gap-0.5"
-                                                : ""
-                                        }
-                                    >
-                                        {item.subItems.map((sub, i) => (
+                                    {item.subItems.map((sub, i) => (
+                                        <li key={i}>
                                             <Link
-                                                key={i}
                                                 href={sub.href || "#"}
-                                                onClick={() =>
-                                                    setActiveDropdown(null)
-                                                }
-                                                className="flex items-center gap-3 px-4 py-2.5 text-md text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
+                                                className="flex items-center gap-3 px-4 py-2.5 text-md text-base-content/70 hover:bg-base-200 hover:text-base-content"
                                             >
                                                 <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
                                                     <i
@@ -237,10 +206,11 @@ function DesktopNavContent({ items }: { items: NavItem[] }) {
                                                     </div>
                                                 </div>
                                             </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 );
             })}
@@ -248,42 +218,31 @@ function DesktopNavContent({ items }: { items: NavItem[] }) {
     );
 }
 
-/* ─── Search Panel ───────────────────────────────────────────────────────── */
+/* ─── Search Panel (DaisyUI dropdown) ────────────────────────────────────── */
 
 function SearchPanel() {
-    const [searchOpen, setSearchOpen] = useState(false);
-    const searchInputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        if (searchOpen && searchInputRef.current) {
-            searchInputRef.current.focus();
-        }
-    }, [searchOpen]);
-
     return (
-        <div className="header-right-item opacity-0 relative">
-            <button
-                onClick={() => setSearchOpen(!searchOpen)}
-                className="btn btn-ghost btn-square"
-            >
+        <div className="header-right-item opacity-0 dropdown dropdown-end">
+            <div tabIndex={0} role="button" className="btn btn-ghost btn-square">
                 <i className="fa-duotone fa-regular fa-magnifying-glass text-base-content/60" />
-            </button>
-
-            {searchOpen && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-base-100 border border-base-300 shadow-lg p-3 z-50">
-                    <div className="relative">
-                        <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-md" />
-                        <input
-                            ref={searchInputRef}
-                            type="text"
-                            placeholder="Search jobs, candidates, companies..."
-                            className="input input-sm w-full pl-9 bg-base-200 border-base-300 focus:border-primary focus:outline-none"
-                        />
-                    </div>
-                    <div className="mt-2 pt-2 border-t border-base-300">
-                        <p className="text-sm uppercase tracking-widest text-base-content/30 mb-2">
-                            Quick Actions
-                        </p>
+            </div>
+            <div
+                tabIndex={0}
+                className="dropdown-content w-80 bg-base-100 border border-base-300 shadow-lg p-3 z-50 mt-2"
+            >
+                <label className="input input-sm w-full">
+                    <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50" />
+                    <input
+                        type="text"
+                        placeholder="Search jobs, candidates, companies..."
+                        className="grow"
+                    />
+                </label>
+                <div className="mt-2 pt-2 border-t border-base-300">
+                    <p className="text-sm uppercase tracking-widest text-base-content/30 mb-2">
+                        Quick Actions
+                    </p>
+                    <ul className="menu menu-sm p-0">
                         {[
                             {
                                 label: "Browse open jobs",
@@ -298,23 +257,26 @@ function SearchPanel() {
                                 icon: "fa-duotone fa-regular fa-trophy",
                             },
                         ].map((action) => (
-                            <a
-                                key={action.label}
-                                href="#"
-                                className="flex items-center gap-2 px-2 py-1.5 text-xs text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors"
-                            >
-                                <i className={`${action.icon} text-primary`} />
-                                {action.label}
-                            </a>
+                            <li key={action.label}>
+                                <a
+                                    href="#"
+                                    className="text-sm text-base-content/60 hover:text-base-content"
+                                >
+                                    <i
+                                        className={`${action.icon} text-primary`}
+                                    />
+                                    {action.label}
+                                </a>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 </div>
-            )}
+            </div>
         </div>
     );
 }
 
-/* ─── Mobile Menu Content ────────────────────────────────────────────────── */
+/* ─── Mobile Menu Content (DaisyUI collapse/details) ─────────────────────── */
 
 function MobileMenuContent({
     items,
@@ -323,81 +285,60 @@ function MobileMenuContent({
     items: NavItem[];
     isSignedIn: boolean;
 }) {
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-
     return (
         <>
             {/* Search */}
-            <div className="relative mb-4">
-                <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-md" />
+            <label className="input input-sm w-full mb-4">
+                <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50" />
                 <input
                     type="text"
                     placeholder="Search..."
-                    className="input input-sm w-full pl-9 bg-base-200 border-base-300"
+                    className="grow"
                 />
-            </div>
+            </label>
 
-            {/* Accordion navigation */}
-            <nav className="space-y-1 mb-4">
+            {/* Navigation using DaisyUI menu + details for collapsible sub-items */}
+            <ul className="menu p-0 mb-4">
                 {items.map((item) => (
-                    <div key={item.label}>
+                    <li key={item.label}>
                         {item.subItems?.length ? (
-                            <div>
-                                <button
-                                    onClick={() =>
-                                        setActiveAccordion(
-                                            activeAccordion === item.label
-                                                ? null
-                                                : item.label,
-                                        )
-                                    }
-                                    className="flex items-center justify-between w-full px-3 py-2.5 text-md font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <i
-                                            className={`${item.icon} text-primary text-xs`}
-                                        />
-                                        {item.label}
-                                    </span>
+                            <details>
+                                <summary className="text-md font-semibold text-base-content/70">
                                     <i
-                                        className={`fa-solid fa-chevron-down text-sm transition-transform ${
-                                            activeAccordion === item.label
-                                                ? "rotate-180"
-                                                : ""
-                                        }`}
+                                        className={`${item.icon} text-primary text-sm`}
                                     />
-                                </button>
-                                {activeAccordion === item.label && (
-                                    <div className="pl-6 space-y-1 mb-2">
-                                        {item.subItems.map((sub) => (
+                                    {item.label}
+                                </summary>
+                                <ul>
+                                    {item.subItems.map((sub) => (
+                                        <li key={sub.label}>
                                             <Link
-                                                key={sub.label}
                                                 href={sub.href || "#"}
-                                                className="flex items-center gap-2 px-3 py-2 text-md text-base-content/60 hover:text-base-content"
+                                                className="text-md text-base-content/60"
                                             >
                                                 <i
-                                                    className={`${sub.icon} text-xs text-primary`}
+                                                    className={`${sub.icon} text-sm text-primary`}
                                                 />
                                                 {sub.label}
                                             </Link>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </details>
                         ) : (
                             <Link
                                 href={item.href || "#"}
-                                className="flex items-center gap-2 px-3 py-2.5 text-md font-semibold text-base-content/70 hover:bg-base-200 transition-colors"
+                                className="text-md font-semibold text-base-content/70"
                             >
                                 <i
-                                    className={`${item.icon} text-primary text-xs`}
+                                    className={`${item.icon} text-primary text-sm`}
                                 />
                                 {item.label}
                             </Link>
                         )}
-                    </div>
+                    </li>
                 ))}
-            </nav>
+            </ul>
 
             {/* CTAs */}
             <div className="border-t border-base-300 pt-4 space-y-3">
@@ -506,11 +447,6 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
         () => {
             if (!containerRef.current) return;
 
-            // Remove opacity-0 CSS class so GSAP has full ownership of opacity.
-            // This runs in useLayoutEffect (before paint) so there is no visible flash.
-            // Without this, a React re-render can recreate a DOM element that still
-            // carries the Tailwind class while the GSAP inline style is gone — leaving
-            // the element permanently invisible.
             const clearOpacity = (els: NodeListOf<Element> | null) => {
                 els?.forEach((el) => el.classList.remove("opacity-0"));
             };
