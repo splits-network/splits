@@ -1,10 +1,19 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import CompanyDocumentUpload, { StagedDocument } from '@/components/documents/company-document-upload';
+import { useState, FormEvent } from "react";
+import { MarkdownEditor } from "@splits-network/shared-ui";
+import {
+    BaselModal,
+    BaselModalHeader,
+    BaselModalBody,
+    BaselModalFooter,
+    BaselAlertBox,
+} from "@splits-network/basel-ui";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import CompanyDocumentUpload, {
+    StagedDocument,
+} from "@/components/documents/company-document-upload";
 
 interface ApproveGateModalProps {
     isOpen: boolean;
@@ -27,7 +36,7 @@ export default function ApproveGateModal({
     applicationId,
     currentStage,
 }: ApproveGateModalProps) {
-    const [notes, setNotes] = useState('');
+    const [notes, setNotes] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showDocumentUpload, setShowDocumentUpload] = useState(false);
@@ -36,28 +45,26 @@ export default function ApproveGateModal({
 
     const { getToken } = useAuth();
 
-    // Check if this is an offer transition (interview → offer)
-    const isOfferTransition = currentStage === 'interview';
+    const isOfferTransition = currentStage === "interview";
 
-    // Modal title builder based on transition type
     const getTitleText = () => {
         switch (currentStage) {
-            case 'screen':
-                return 'Approve & Submit to Company';
-            case 'submitted':
-                return 'Approve & Move to Company Review';
-            case 'company_review':
-                return 'Approve & Move Forward';
-            case 'recruiter_review':
-                return 'Approve & Submit to Company';
-            case 'recruiter_proposed':
-                return 'Approve Proposal for Company Review';
-            case 'company_feedback':
-                return 'Approve & Continue';
-            case 'interview':
-                return 'Extend Offer';
+            case "screen":
+                return "Approve & Submit to Company";
+            case "submitted":
+                return "Approve & Move to Company Review";
+            case "company_review":
+                return "Approve & Move Forward";
+            case "recruiter_review":
+                return "Approve & Submit to Company";
+            case "recruiter_proposed":
+                return "Approve Proposal for Company Review";
+            case "company_feedback":
+                return "Approve & Continue";
+            case "interview":
+                return "Extend Offer";
             default:
-                return 'Approve';
+                return "Approve";
         }
     };
 
@@ -67,18 +74,18 @@ export default function ApproveGateModal({
         setUploadingDocuments(true);
         const token = await getToken();
         if (!token) {
-            throw new Error('Not authenticated');
+            throw new Error("Not authenticated");
         }
 
         const client = createAuthenticatedClient(token);
         const uploadPromises = stagedDocuments.map(async (doc) => {
             const formData = new FormData();
-            formData.append('file', doc.file);
-            formData.append('entity_type', 'application');
-            formData.append('entity_id', applicationId!);
-            formData.append('document_type', doc.document_type);
+            formData.append("file", doc.file);
+            formData.append("entity_type", "application");
+            formData.append("entity_id", applicationId!);
+            formData.append("document_type", doc.document_type);
 
-            return client.post<{ data: any }>('/documents', formData);
+            return client.post<{ data: any }>("/documents", formData);
         });
 
         try {
@@ -94,20 +101,22 @@ export default function ApproveGateModal({
         setSubmitting(true);
 
         try {
-            // Upload documents first if there are any staged
             if (isOfferTransition && stagedDocuments.length > 0) {
                 await uploadStagedDocuments();
             }
 
             await onApprove(notes.trim() || undefined);
 
-            // Reset all state
-            setNotes('');
+            setNotes("");
             setStagedDocuments([]);
             onClose();
         } catch (err) {
-            console.error('Failed to approve gate:', err);
-            setError(err instanceof Error ? err.message : 'Failed to approve application');
+            console.error("Failed to approve gate:", err);
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Failed to approve application",
+            );
         } finally {
             setSubmitting(false);
         }
@@ -115,7 +124,7 @@ export default function ApproveGateModal({
 
     const handleClose = () => {
         if (!submitting) {
-            setNotes('');
+            setNotes("");
             setError(null);
             setShowDocumentUpload(false);
             setStagedDocuments([]);
@@ -126,126 +135,148 @@ export default function ApproveGateModal({
     if (!isOpen) return null;
 
     return (
-        <dialog className="modal modal-open" open>
-            <div className="modal-box">
-                <h3 className="font-bold text-lg mb-4">
-                    <i className="fa-duotone fa-regular fa-circle-check text-success mr-2"></i>
-                    {getTitleText()}
-                </h3>
+        <BaselModal isOpen={isOpen} onClose={handleClose} maxWidth="max-w-2xl">
+            <BaselModalHeader
+                title={getTitleText()}
+                subtitle={`${gateName} Gate`}
+                icon="fa-circle-check"
+                iconColor="success"
+                onClose={handleClose}
+                closeDisabled={submitting}
+            />
 
-                <div className="mb-4">
-                    <p className="text-sm text-base-content/70 mb-2">
-                        You are approving this application at the {gateName} gate:
-                    </p>
-                    <div className="bg-base-200 p-3 rounded">
-                        <p className="font-semibold">{candidateName}</p>
-                        <p className="text-sm text-base-content/70">{jobTitle}</p>
-                    </div>
-                </div>
-
-                {error && (
-                    <div className="alert alert-error mb-4">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                        <span>{error}</span>
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit}>
-                    {/* Document Upload Section for Offer Transitions */}
-                    {isOfferTransition && applicationId && (
-                        <div className="mb-4">
-                            <div className="flex items-center gap-2 mb-3">
-                                <i className="fa-duotone fa-regular fa-file-contract text-primary"></i>
-                                <h4 className="font-semibold">Offer Documents (Optional)</h4>
-                                <button
-                                    type="button"
-                                    className="btn btn-ghost btn-xs"
-                                    onClick={() => setShowDocumentUpload(!showDocumentUpload)}
-                                >
-                                    {showDocumentUpload ? (
-                                        <>
-                                            <i className="fa-duotone fa-regular fa-chevron-up"></i>
-                                            Hide
-                                        </>
-                                    ) : (
-                                        <>
-                                            <i className="fa-duotone fa-regular fa-chevron-down"></i>
-                                            Add Documents
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-
-                            <p className="text-sm text-base-content/70 mb-3">
-                                Upload offer letters, contracts, or other documents to include with your offer.
+            <form onSubmit={handleSubmit}>
+                <BaselModalBody>
+                    <div className="space-y-5">
+                        {/* Candidate Summary */}
+                        <div className="bg-base-200 p-4 border-l-4 border-success">
+                            <p className="text-sm text-base-content/50 mb-1">
+                                Approving at the{" "}
+                                <strong className="text-base-content">
+                                    {gateName}
+                                </strong>{" "}
+                                gate
                             </p>
-
-                            {showDocumentUpload && (
-                                <div className="bg-white border-4 border-dark/20 p-4">
-                                    <CompanyDocumentUpload
-                                        entityType="application"
-                                        entityId={applicationId}
-                                        staged={true}
-                                        onFilesStaged={(files) => setStagedDocuments(files)}
-                                        onError={(error) => {
-                                            console.error('Document staging failed:', error);
-                                            setError(error);
-                                        }}
-                                        compact={true}
-                                        maxSizeKB={5120}
-                                    />
-                                </div>
-                            )}
+                            <p className="font-semibold text-base-content">
+                                {candidateName}
+                            </p>
+                            <p className="text-sm text-base-content/70">
+                                {jobTitle}
+                            </p>
                         </div>
-                    )}
 
-                    <MarkdownEditor
-                        className="fieldset mb-4"
-                        label="Approval Notes (Optional)"
-                        value={notes}
-                        onChange={setNotes}
-                        placeholder="Add any notes or feedback for the next reviewer..."
-                        helperText="These notes will be visible to the next gate reviewer and the candidate."
-                        height={160}
-                        preview="edit"
-                        disabled={submitting}
-                    />
+                        {error && (
+                            <BaselAlertBox variant="error">{error}</BaselAlertBox>
+                        )}
 
-                    <div className="flex gap-2 justify-end">
-                        <button
-                            type="button"
-                            className="btn"
-                            onClick={handleClose}
+                        {/* Document Upload Section for Offer Transitions */}
+                        {isOfferTransition && applicationId && (
+                            <div>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <i className="fa-duotone fa-regular fa-file-contract text-primary"></i>
+                                    <span className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/50">
+                                        Offer Documents (Optional)
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="btn btn-ghost btn-xs"
+                                        style={{ borderRadius: 0 }}
+                                        onClick={() =>
+                                            setShowDocumentUpload(
+                                                !showDocumentUpload,
+                                            )
+                                        }
+                                    >
+                                        {showDocumentUpload ? (
+                                            <>
+                                                <i className="fa-duotone fa-regular fa-chevron-up"></i>
+                                                Hide
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="fa-duotone fa-regular fa-chevron-down"></i>
+                                                Add Documents
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <p className="text-sm text-base-content/40 mb-3">
+                                    Upload offer letters, contracts, or other
+                                    documents to include with your offer.
+                                </p>
+
+                                {showDocumentUpload && (
+                                    <div className="bg-base-100 border border-base-300 p-4">
+                                        <CompanyDocumentUpload
+                                            entityType="application"
+                                            entityId={applicationId}
+                                            staged={true}
+                                            onFilesStaged={(files) =>
+                                                setStagedDocuments(files)
+                                            }
+                                            onError={(error) => {
+                                                console.error(
+                                                    "Document staging failed:",
+                                                    error,
+                                                );
+                                                setError(error);
+                                            }}
+                                            compact={true}
+                                            maxSizeKB={5120}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        <MarkdownEditor
+                            label="Approval Notes (Optional)"
+                            value={notes}
+                            onChange={setNotes}
+                            placeholder="Add any notes or feedback for the next reviewer..."
+                            height={160}
+                            preview="edit"
                             disabled={submitting}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-success"
-                            disabled={submitting || uploadingDocuments}
-                        >
-                            {submitting ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    {uploadingDocuments ? 'Uploading Documents...' : 'Approving...'}
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-check"></i>
-                                    {isOfferTransition && stagedDocuments.length > 0
-                                        ? `Extend Offer (${stagedDocuments.length} document${stagedDocuments.length !== 1 ? 's' : ''})`
-                                        : 'Approve Application'
-                                    }
-                                </>
-                            )}
-                        </button>
+                        />
                     </div>
-                </form>
-            </div>
-            <form method="dialog" className="modal-backdrop" onClick={handleClose}>
-                <button type="button">close</button>
+                </BaselModalBody>
+
+                <BaselModalFooter>
+                    <button
+                        type="button"
+                        className="btn btn-ghost"
+                        style={{ borderRadius: 0 }}
+                        onClick={handleClose}
+                        disabled={submitting}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        className="btn btn-success"
+                        style={{ borderRadius: 0 }}
+                        disabled={submitting || uploadingDocuments}
+                    >
+                        {submitting ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm"></span>
+                                {uploadingDocuments
+                                    ? "Uploading Documents..."
+                                    : "Approving..."}
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-check"></i>
+                                {isOfferTransition &&
+                                stagedDocuments.length > 0
+                                    ? `Extend Offer (${stagedDocuments.length} document${stagedDocuments.length !== 1 ? "s" : ""})`
+                                    : "Approve Application"}
+                            </>
+                        )}
+                    </button>
+                </BaselModalFooter>
             </form>
-        </dialog>
+        </BaselModal>
     );
 }

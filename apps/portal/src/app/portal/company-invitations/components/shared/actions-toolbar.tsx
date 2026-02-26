@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
+import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { RecruiterCompanyRelationship } from "../../types";
@@ -17,6 +18,7 @@ export interface ConnectionActionsToolbarProps {
     showActions?: {
         accept?: boolean;
         decline?: boolean;
+        revoke?: boolean;
         terminate?: boolean;
     };
     onRefresh?: () => void;
@@ -34,18 +36,25 @@ export default function ConnectionActionsToolbar({
 }: ConnectionActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+    const { profile } = useUserProfile();
     const refresh = onRefresh ?? (() => {});
 
     const [accepting, setAccepting] = useState(false);
     const [declining, setDeclining] = useState(false);
+    const [revoking, setRevoking] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
 
     const isPending = invitation.status === "pending";
     const isActive = invitation.status === "active";
 
+    // Direction awareness: did the current user send this invitation?
+    // invited_by stores the internal user ID (from users table)
+    const isOutgoing = invitation.invited_by === profile?.id;
+
     const actions = {
-        accept: showActions.accept !== false && isPending,
-        decline: showActions.decline !== false && isPending,
+        accept: showActions.accept !== false && isPending && !isOutgoing,
+        decline: showActions.decline !== false && isPending && !isOutgoing,
+        revoke: showActions.revoke !== false && isPending && isOutgoing,
         terminate: showActions.terminate !== false && isActive,
     };
 
@@ -102,6 +111,36 @@ export default function ConnectionActionsToolbar({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast]);
 
+    const handleRevoke = useCallback(async () => {
+        if (
+            !confirm(
+                "Are you sure you want to revoke this invitation?",
+            )
+        ) {
+            return;
+        }
+        setRevoking(true);
+        try {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            await client.patch(
+                `/recruiter-companies/${invitation.id}/respond`,
+                { accept: false },
+            );
+            toast.success("Invitation revoked.");
+            refresh();
+        } catch (e: any) {
+            toast.error(
+                e?.response?.data?.error?.message ||
+                    "Failed to revoke invitation",
+            );
+        } finally {
+            setRevoking(false);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [invitation.id, toast]);
+
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
@@ -151,6 +190,18 @@ export default function ConnectionActionsToolbar({
                 disabled: declining,
                 loading: declining,
                 title: "Decline Connection",
+            });
+        }
+        if (actions.revoke) {
+            speedDialActions.push({
+                key: "revoke",
+                icon: "fa-duotone fa-regular fa-ban",
+                label: "Revoke Invitation",
+                variant: "btn-ghost",
+                onClick: handleRevoke,
+                disabled: revoking,
+                loading: revoking,
+                title: "Revoke Invitation",
             });
         }
         if (actions.terminate) {
@@ -211,6 +262,21 @@ export default function ConnectionActionsToolbar({
                             <i className="fa-duotone fa-regular fa-xmark" />
                         )}
                         Decline
+                    </button>
+                )}
+                {actions.revoke && (
+                    <button
+                        onClick={handleRevoke}
+                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
+                        style={{ borderRadius: 0 }}
+                        disabled={revoking}
+                    >
+                        {revoking ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-ban" />
+                        )}
+                        Revoke
                     </button>
                 )}
                 {actions.terminate && (
