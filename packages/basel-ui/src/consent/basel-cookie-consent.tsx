@@ -116,7 +116,7 @@ export function BaselCookieConsent({
                             </p>
                         </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                    <div className="flex flex-col sm:flex-row gap-2">
                         <button
                             onClick={() => setShowPreferences(true)}
                             className="btn btn-ghost btn-sm"
