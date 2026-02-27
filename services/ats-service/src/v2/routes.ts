@@ -19,6 +19,9 @@ import { registerCandidateRoutes } from './candidates/routes';
 import { registerApplicationRoutes } from './applications/routes';
 import { registerPlacementRoutes } from './placements/routes';
 import { candidateSourcerRoutes } from './candidate-sourcers/routes';
+import { savedJobRoutes } from './saved-jobs/routes';
+import { SavedJobRepositoryV2 } from './saved-jobs/repository';
+import { SavedJobServiceV2 } from './saved-jobs/service';
 
 import { JobRequirementRepository } from './job-requirements/repository';
 import { JobRequirementService } from './job-requirements/service';
@@ -46,6 +49,9 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
 
 
     const applicationRepository = new ApplicationRepository(config.supabaseUrl, config.supabaseKey);
+    const savedJobRepository = new SavedJobRepositoryV2(jobRepository.getSupabase());
+    const savedJobService = new SavedJobServiceV2(savedJobRepository, config.eventPublisher as any, jobRepository.getSupabase());
+
     const applicationService = new ApplicationServiceV2(
         applicationRepository,
         applicationRepository.getSupabase(),
@@ -86,6 +92,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerApplicationRoutes(app, { applicationService, placementService, noteService });
     registerPlacementRoutes(app, { placementService });
     candidateSourcerRoutes(app, candidateSourcerService);
+    savedJobRoutes(app, { service: savedJobService, repository: savedJobRepository });
 
     registerJobRequirementRoutes(app, { service: jobRequirementService });
     registerApplicationNoteRoutes(app, noteService);

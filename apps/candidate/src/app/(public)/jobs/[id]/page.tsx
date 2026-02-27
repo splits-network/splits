@@ -74,6 +74,7 @@ export default async function JobDetailPage({ params }: PageProps) {
     const job = await fetchJob(id);
     let hasActiveRecruiter = false;
     let existingApplication: any = null;
+    let initialSavedJobId: string | null = null;
 
     if (!job) {
         notFound();
@@ -131,13 +132,15 @@ export default async function JobDetailPage({ params }: PageProps) {
             const token = await getToken();
             if (token) {
                 const authClient = createAuthenticatedClient(token);
-                const [recruitersResponse, applicationsResponse] =
-                    await Promise.all([
-                        authClient.get<{ data: any[] }>(
-                            "/recruiter-candidates",
-                        ),
-                        authClient.get<{ data: any[] }>("/applications"),
-                    ]);
+                const [
+                    recruitersResponse,
+                    applicationsResponse,
+                    savedJobsResponse,
+                ] = await Promise.all([
+                    authClient.get<{ data: any[] }>("/recruiter-candidates"),
+                    authClient.get<{ data: any[] }>("/applications"),
+                    authClient.get<{ data: any[] }>(`/saved-jobs?job_id=${id}`),
+                ]);
 
                 hasActiveRecruiter =
                     recruitersResponse.data &&
@@ -150,6 +153,12 @@ export default async function JobDetailPage({ params }: PageProps) {
                         app.job_id === id &&
                         !["rejected", "withdrawn"].includes(app.stage),
                 );
+
+                // Check for saved job
+                const savedJobs = savedJobsResponse.data || [];
+                if (savedJobs.length > 0) {
+                    initialSavedJobId = savedJobs[0].id;
+                }
             }
         } catch (error) {
             console.error(
@@ -167,6 +176,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 isAuthenticated={!!userId}
                 hasActiveRecruiter={hasActiveRecruiter}
                 existingApplication={existingApplication}
+                initialSavedJobId={initialSavedJobId}
             />
         </>
     );

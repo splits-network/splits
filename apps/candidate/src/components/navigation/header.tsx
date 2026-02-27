@@ -312,6 +312,15 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
                                         Applications
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link
+                                        href="/portal/jobs/saved"
+                                        className="text-sm font-semibold text-base-content/70"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-bookmark text-sm text-primary" />
+                                        Saved Jobs
+                                    </Link>
+                                </li>
                             </>
                         )}
                     </ul>
