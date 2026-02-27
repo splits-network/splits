@@ -16,6 +16,7 @@ import JobSearchMomentumChart from "./charts/job-search-momentum-chart";
 import CandidateUrgencyBar from "./candidate-urgency-bar";
 import NextStepsFeed from "./next-steps-feed";
 import QuickActionsGrid from "./quick-actions-grid";
+import MatchPreviewWidget from "./match-preview-widget";
 import { relationshipColor } from "./status-color";
 
 interface CandidateDashboardProps {
@@ -32,6 +33,7 @@ export default function CandidateDashboard({
         applications,
         activeRecruiters,
         pendingInvitations,
+        topMatches,
         loading: dataLoading,
         error: dataError,
     } = useCandidateDashboardData();
@@ -103,6 +105,23 @@ export default function CandidateDashboard({
                         y: 0,
                         duration: 0.5,
                         ease: "power3.out",
+                        clearProps: "transform",
+                    },
+                );
+            }
+
+            /* Match preview widget */
+            const matchPreview = $1(".match-preview");
+            if (matchPreview) {
+                gsap.fromTo(
+                    matchPreview,
+                    { opacity: 0, y: 30 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        ease: "power3.out",
+                        delay: 0.15,
                         clearProps: "transform",
                     },
                 );
@@ -375,6 +394,12 @@ export default function CandidateDashboard({
                     )}
                 </div>
             </section>
+
+            {/* ── Section 2b: Match Preview ── */}
+            <MatchPreviewWidget
+                matches={topMatches}
+                loading={dataLoading}
+            />
 
             {/* ── Section 3: Pipeline + Momentum (7/5) ── */}
             <section className="py-12 bg-base-100">

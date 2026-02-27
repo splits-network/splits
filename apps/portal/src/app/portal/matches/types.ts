@@ -1,0 +1,115 @@
+/**
+ * Matches page types and helpers.
+ * Imports the base EnrichedMatch type from shared-types and re-exports.
+ */
+import type {
+    EnrichedMatch,
+    MatchTier,
+    MatchStatus,
+    MatchFactors,
+} from "@splits-network/shared-types";
+
+export type { EnrichedMatch, MatchTier, MatchStatus, MatchFactors };
+
+export type ViewMode = "table" | "grid" | "split";
+
+export interface MatchFilters {
+    match_tier?: MatchTier;
+    status?: MatchStatus;
+    min_score?: number;
+}
+
+/* ── Display helpers ── */
+
+export function candidateDisplayName(match: EnrichedMatch): string {
+    if (!match.candidate) return "Unknown Candidate";
+    return match.candidate.full_name || "Unknown Candidate";
+}
+
+export function candidateInitials(match: EnrichedMatch): string {
+    const name = candidateDisplayName(match);
+    return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+}
+
+export function jobDisplayTitle(match: EnrichedMatch): string {
+    return match.job?.title || "Unknown Job";
+}
+
+export function companyDisplayName(match: EnrichedMatch): string {
+    return match.job?.companies?.name || "N/A";
+}
+
+export function isNewMatch(match: EnrichedMatch): boolean {
+    if (!match.generated_at) return false;
+    const genDate = new Date(match.generated_at);
+    const daysSince = (Date.now() - genDate.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSince <= 7;
+}
+
+export function formatMatchDate(date: string | null | undefined): string {
+    if (!date) return "N/A";
+    return new Date(date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+}
+
+export function timeAgoMatch(date: string | null | undefined): string {
+    if (!date) return "";
+    const diff = Date.now() - new Date(date).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return "Today";
+    if (days === 1) return "1 day ago";
+    if (days < 30) return `${days} days ago`;
+    return `${Math.floor(days / 30)}mo ago`;
+}
+
+/* ── Status color helper ── */
+
+export function matchStatusColor(status?: string): string {
+    switch (status) {
+        case "active":
+            return "bg-success/15 text-success";
+        case "dismissed":
+            return "bg-error/15 text-error";
+        case "applied":
+            return "bg-info/15 text-info";
+        default:
+            return "bg-base-content/15 text-base-content/50";
+    }
+}
+
+export function formatMatchStatus(status?: string): string {
+    if (!status) return "Unknown";
+    return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+/* ── Tier badge helper ── */
+
+export function tierBadgeClass(tier: MatchTier): string {
+    switch (tier) {
+        case "true":
+            return "bg-primary/15 text-primary";
+        case "standard":
+            return "bg-base-content/10 text-base-content/60";
+        default:
+            return "bg-base-content/10 text-base-content/60";
+    }
+}
+
+export function tierLabel(tier: MatchTier): string {
+    switch (tier) {
+        case "true":
+            return "True Score";
+        case "standard":
+            return "Standard";
+        default:
+            return "Standard";
+    }
+}

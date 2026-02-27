@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import { BaselCalculator } from "@/components/basel/pricing/basel-calculator";
+import { useUserProfile } from "@/contexts/user-profile-context";
 import type { Job } from "../../types";
 import { formatCommuteTypes, formatJobLevel } from "../../types";
 import { statusColor } from "./status-color";
@@ -17,10 +18,11 @@ import {
     companyInitials,
 } from "./helpers";
 import RoleActionsToolbar from "./actions-toolbar";
+import { JobMatchesTab } from "./job-matches-tab";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
-type TabKey = "brief" | "candidate" | "financials" | "company";
+type TabKey = "brief" | "candidate" | "financials" | "company" | "matches";
 
 interface CompanyMember {
     id: string;
@@ -43,6 +45,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "candidate", label: "Candidate", icon: "fa-user" },
     { key: "financials", label: "Financials", icon: "fa-calculator" },
     { key: "company", label: "Company", icon: "fa-building" },
+    { key: "matches", label: "Matches", icon: "fa-bullseye" },
 ];
 
 /* ─── Tab Content Components ────────────────────────────────────────────── */
@@ -462,6 +465,7 @@ export function JobDetail({
     accent?: unknown;
 }) {
     const [activeTab, setActiveTab] = useState<TabKey>("brief");
+    const { planTier } = useUserProfile();
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const level = formatJobLevel(job.job_level);
@@ -593,6 +597,7 @@ export function JobDetail({
                 )}
                 {activeTab === "financials" && <FinancialsTab job={job} />}
                 {activeTab === "company" && <CompanyTab job={job} />}
+                {activeTab === "matches" && <JobMatchesTab job={job} isPartner={planTier === "partner"} />}
             </div>
         </div>
     );

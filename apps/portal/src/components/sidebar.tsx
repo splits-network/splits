@@ -161,6 +161,13 @@ const navItems: NavItemData[] = [
         shortcut: "A",
     },
     {
+        href: "/portal/matches",
+        label: "Matches",
+        icon: "fa-duotone fa-regular fa-bullseye",
+        roles: ["recruiter"],
+        section: "management",
+    },
+    {
         href: "/portal/messages",
         label: "Messages",
         icon: "fa-duotone fa-regular fa-messages",

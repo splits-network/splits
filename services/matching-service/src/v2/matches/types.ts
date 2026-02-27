@@ -45,6 +45,31 @@ export interface MatchListFilters {
     limit?: number;
 }
 
+export interface EnrichedCandidate {
+    id: string;
+    full_name: string | null;
+}
+
+export interface EnrichedJob {
+    id: string;
+    title: string;
+    location: string | null;
+    salary_min: number | null;
+    salary_max: number | null;
+    employment_type: string | null;
+    job_level: string | null;
+    companies: {
+        id: string;
+        name: string;
+        logo_url: string | null;
+    } | null;
+}
+
+export interface EnrichedCandidateRoleMatch extends CandidateRoleMatch {
+    candidate: EnrichedCandidate | null;
+    job: EnrichedJob | null;
+}
+
 export interface MatchUpsert {
     candidate_id: string;
     job_id: string;

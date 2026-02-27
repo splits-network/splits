@@ -149,6 +149,11 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         defaultOpen: false,
         items: [
             {
+                href: "/portal/admin/matches",
+                label: "Matches",
+                icon: "fa-bullseye",
+            },
+            {
                 href: "/portal/admin/automation",
                 label: "Automation Rules",
                 icon: "fa-robot",

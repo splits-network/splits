@@ -602,7 +602,7 @@ export class ApplicationServiceV2 {
 
     /**
      * Trigger AI review for application
-     * Candidate clicks "Review My Application"
+     * Candidate clicks "Review My Application" or admin retriggers a stuck review
      */
     async triggerAIReview(applicationId: string, clerkUserId: string): Promise<void> {
         const application = await this.repository.findApplication(applicationId, clerkUserId);
@@ -611,28 +611,36 @@ export class ApplicationServiceV2 {
             throw new Error('Application not found');
         }
 
-        // Only allow AI review from draft or after returning from ai_reviewed
-        if (!['draft'].includes(application.stage)) {
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        const isRetrigger = application.stage === 'ai_review';
+
+        // Candidates can trigger from draft; admins can also retrigger stuck ai_review
+        if (isRetrigger && !userContext.isPlatformAdmin) {
+            throw new Error('Only platform admins can retrigger a stuck AI review');
+        }
+        if (!isRetrigger && !['draft'].includes(application.stage)) {
             throw new Error(`Cannot trigger AI review from stage: ${application.stage}`);
         }
 
-        // Update to ai_review stage
-        await this.repository.updateApplication(applicationId, {
-            stage: 'ai_review',
-        });
+        // Update to ai_review stage (no-op if already ai_review, but re-publishes event)
+        if (!isRetrigger) {
+            await this.repository.updateApplication(applicationId, {
+                stage: 'ai_review',
+            });
+        }
 
         // Create audit log entry
-        const userContext = await this.accessResolver.resolve(clerkUserId);
         await this.repository.createAuditLog({
             application_id: applicationId,
-            action: 'ai_review_started',
+            action: isRetrigger ? 'ai_review_retriggered' : 'ai_review_started',
             performed_by_user_id: userContext.identityUserId || 'system',
-            performed_by_role: userContext.recruiterId ? 'recruiter' : 'candidate',
+            performed_by_role: this.resolveRole(userContext),
             old_value: { stage: application.stage },
             new_value: { stage: 'ai_review' },
             metadata: {
                 job_id: application.job_id,
                 candidate_id: application.candidate_id,
+                ...(isRetrigger && { retrigger: true }),
             },
         });
 
@@ -644,9 +652,9 @@ export class ApplicationServiceV2 {
                     candidate_id: application.candidate_id,
                     job_id: application.job_id,
                     triggeredBy: userContext.identityUserId,
+                    retrigger: isRetrigger,
                 });
             } catch (error) {
-                // Log the error but don't prevent AI review trigger
                 console.error('Failed to publish application.ai_review.triggered event:', error);
             }
         }

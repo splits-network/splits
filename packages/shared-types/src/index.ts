@@ -75,3 +75,6 @@ export * from './integrations';
 
 // ATS integration types
 export * from './ats-integrations';
+
+// Matching types and utilities
+export * from './matching';
