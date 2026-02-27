@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 16 of 19 (Shared Packages)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-27 -- Roadmap created for v6.0 Admin App Extraction
+Plan: 1 of TBD in current phase
+Status: In progress
+Last activity: 2026-02-27 -- Completed 16-01-PLAN.md (shared packages foundation)
 
 Progress: [################..] 83% (15/19 phases complete across all milestones)
 
@@ -39,6 +39,9 @@ Recent decisions affecting current work:
 - [v6.0]: Separate admin app from portal -- admin is a different persona, 59 files is a full app
 - [v6.0]: Separate admin gateway -- api-gateway is 6.6k lines, admin routes have different auth model
 - [v6.0]: User handles Clerk instance setup -- new Clerk app for admin, user will configure
+- [16-01]: createPortalClient/createAdminClient accept token arg -- no Clerk coupling in shared-hooks
+- [16-01]: useStandardList accepts urlSync option -- no next/navigation coupling in shared-hooks
+- [16-01]: StandardListLoadingState alias -- avoids collision with shared-ui's generic LoadingState
 
 ### Pending Todos
 
@@ -51,10 +54,10 @@ See previous STATE.md versions for full list if needed.
 
 ## Session Continuity
 
-Last session: 2026-02-27
-Stopped at: Roadmap created for v6.0 Admin App Extraction
+Last session: 2026-02-27T22:09:00Z
+Stopped at: Completed 16-01-PLAN.md (shared packages foundation)
 Resume file: None
-Next: `/gsd:plan-phase 16` to plan Shared Packages
+Next: Execute 16-02-PLAN.md (portal import switch)
 
 ---
 *Created: 2026-02-12*
