@@ -63,11 +63,11 @@
   3. Both apps can import and render the toast notification provider from a shared package
   4. Both apps can import and render the confirm-dialog component from `@splits-network/shared-ui`
   5. Portal continues to function identically after switching its imports to the shared packages
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 16-01: TBD
-- [ ] 16-02: TBD
+- [ ] 16-01-PLAN.md -- Create shared-hooks package and move UI components to shared-ui
+- [ ] 16-02-PLAN.md -- Switch portal imports to shared packages and delete originals
 
 #### Phase 17: Admin App & Gateway Scaffold
 **Goal**: Admin app and admin gateway are running, authenticated, and connected -- ready to receive migrated pages
