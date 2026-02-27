@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 17 of 19 (Admin App & Gateway Scaffold)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-27 -- Phase 16 Shared Packages complete (2/2 plans)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-27 -- Completed 17-01 admin-gateway service scaffold
 
 Progress: [#################.] 84% (16/19 phases complete across all milestones)
 
@@ -44,6 +44,9 @@ Recent decisions affecting current work:
 - [16-01]: StandardListLoadingState alias -- avoids collision with shared-ui's generic LoadingState
 - [16-02]: ApiClient subclass pattern -- extends AppApiClient with portal base URL + business methods; avoids breaking 42 consumers
 - [16-02]: Portal useStandardList wrapper -- auto-injects Clerk getToken + Next.js urlSync; admin app uses shared hook directly (no wrapper needed)
+- [17-01]: verifyToken only (no createClerkClient) -- admin gateway only verifies JWTs, no Clerk API calls needed
+- [17-01]: ADMIN_CLERK_SECRET_KEY via getEnvOrThrow directly -- no loadAdminClerkConfig added to shared-config (single-use)
+- [17-01]: PORT default 3020 set via process.env before loadBaseConfig -- avoids conflicts with api-gateway (3000) and services (3001-3017)
 
 ### Pending Todos
 
@@ -56,10 +59,10 @@ See previous STATE.md versions for full list if needed.
 
 ## Session Continuity
 
-Last session: 2026-02-27
-Stopped at: Phase 16 complete
+Last session: 2026-02-27T23:17:16Z
+Stopped at: Completed 17-01-PLAN.md (admin-gateway service)
 Resume file: None
-Next: `/gsd:discuss-phase 17` or `/gsd:plan-phase 17` for Admin App & Gateway Scaffold
+Next: Execute 17-02-PLAN.md (admin app scaffold)
 
 ---
 *Created: 2026-02-12*
