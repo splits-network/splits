@@ -27,8 +27,8 @@ export default function DashboardPage() {
                 {/* ═══════════════════════════════════════════════════════
                 HERO HEADER — Editorial Basel pattern
                ═══════════════════════════════════════════════════════ */}
-                <section className="relative py-16 lg:py-20 bg-base-100">
-                    <div className="container mx-auto px-6 lg:px-12">
+                <section className="relative py-10 sm:py-16 lg:py-20 bg-base-100">
+                    <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                         <div className="max-w-3xl">
                             {/* Kicker */}
                             <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">

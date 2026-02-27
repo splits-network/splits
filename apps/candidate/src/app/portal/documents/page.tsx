@@ -27,8 +27,8 @@ function DocumentsLoading() {
     return (
         <div className="min-h-screen bg-base-100">
             {/* Hero skeleton */}
-            <div className="bg-neutral py-16 lg:py-20">
-                <div className="container mx-auto px-6 lg:px-12">
+            <div className="bg-neutral py-10 sm:py-16 lg:py-20">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-12">
                     <div className="max-w-4xl">
                         <div className="h-4 w-32 bg-neutral-content/10 mb-6" />
                         <div className="h-12 w-80 bg-neutral-content/10 mb-4" />
@@ -38,7 +38,7 @@ function DocumentsLoading() {
             </div>
 
             {/* Content skeleton */}
-            <div className="container mx-auto px-6 lg:px-12 py-8">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-8">
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div className="text-center">
                         <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
@@ -425,15 +425,15 @@ function DocumentsContent() {
     return (
         <main ref={mainRef} className="overflow-hidden min-h-screen">
             {/* ── EDITORIAL HERO ── */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
-                <div className="container mx-auto px-6 lg:px-12">
+            <section className="relative bg-neutral text-neutral-content py-10 sm:py-16 lg:py-20">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-12">
                     <div className="max-w-4xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                        <p className="hero-kicker text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 sm:mb-6 opacity-0">
                             {/* COPY: kicker label above the headline */}
                             Document Library
                         </p>
 
-                        <h1 className="text-5xl md:text-6xl font-black leading-[0.92] tracking-tight mb-6">
+                        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black leading-[0.92] tracking-tight mb-4 sm:mb-6">
                             <span className="hero-headline-word inline-block opacity-0">
                                 {/* COPY: headline first segment */}
                                 Every application starts
@@ -444,7 +444,7 @@ function DocumentsContent() {
                             </span>
                         </h1>
 
-                        <p className="hero-body text-lg text-neutral-content/70 leading-relaxed max-w-xl mb-4 opacity-0">
+                        <p className="hero-body text-base sm:text-lg text-neutral-content/70 leading-relaxed max-w-xl mb-4 opacity-0">
                             {/* COPY: hero body paragraph */}
                             Your resumes, cover letters, and portfolios in one
                             place. Upload once, attach to any application, and
@@ -464,7 +464,7 @@ function DocumentsContent() {
             </section>
 
             {/* ── MAIN CONTENT ── */}
-            <div className="container mx-auto px-6 lg:px-12 py-10">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-10">
                 {/* Error Display */}
                 {(error || actionError) && (
                     <div className="border-l-4 border-error bg-error/5 p-4 mb-8 flex items-center gap-3">
@@ -479,13 +479,13 @@ function DocumentsContent() {
                     {/* LEFT COLUMN — Upload + Tabs + Cards */}
                     <div>
                         {/* ── UPLOAD CTA CARD ── */}
-                        <div className="upload-cta border-l-4 border-primary bg-base-100 shadow-sm p-8 mb-8 opacity-0">
-                            <div className="flex items-center gap-6">
-                                <div className="w-14 h-14 bg-primary/10 flex items-center justify-center shrink-0">
-                                    <i className="fa-duotone fa-regular fa-cloud-arrow-up text-primary text-2xl" />
+                        <div className="upload-cta border-l-4 border-primary bg-base-100 shadow-sm p-5 sm:p-8 mb-8 opacity-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary/10 flex items-center justify-center shrink-0">
+                                    <i className="fa-duotone fa-regular fa-cloud-arrow-up text-primary text-xl sm:text-2xl" />
                                 </div>
                                 <div className="flex-1">
-                                    <h2 className="text-xl font-black tracking-tight mb-1">
+                                    <h2 className="text-lg sm:text-xl font-black tracking-tight mb-1">
                                         {/* COPY: upload card heading */}
                                         Add to Your Library
                                     </h2>
@@ -497,7 +497,7 @@ function DocumentsContent() {
                                     </p>
                                 </div>
                                 <button
-                                    className="btn btn-primary btn-sm shrink-0"
+                                    className="btn btn-primary btn-sm w-full sm:w-auto shrink-0"
                                     onClick={handleUploadClick}
                                 >
                                     <i className="fa-duotone fa-regular fa-upload" />
@@ -540,60 +540,63 @@ function DocumentsContent() {
                                 {filteredDocuments.map((doc) => (
                                     <div
                                         key={doc.id}
-                                        className="doc-card border-l-4 border-secondary shadow-sm bg-base-100 p-6"
+                                        className="doc-card border-l-4 border-secondary shadow-sm bg-base-100 p-4 sm:p-6"
                                     >
-                                        <div className="flex items-center gap-5">
-                                            {/* File icon */}
-                                            <div className="w-14 h-14 bg-base-200 flex items-center justify-center shrink-0">
-                                                <i
-                                                    className={`fa-duotone fa-regular ${getFileIcon(doc.file_name)} text-2xl`}
-                                                />
-                                            </div>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5">
+                                            {/* Top row on mobile: icon + file info */}
+                                            <div className="flex items-start sm:items-center gap-4 sm:gap-5 flex-1 min-w-0">
+                                                {/* File icon */}
+                                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-base-200 flex items-center justify-center shrink-0">
+                                                    <i
+                                                        className={`fa-duotone fa-regular ${getFileIcon(doc.file_name)} text-lg sm:text-2xl`}
+                                                    />
+                                                </div>
 
-                                            {/* File info */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-3 mb-1.5">
-                                                    <h3 className="font-bold text-base-content truncate">
-                                                        {doc.file_name}
-                                                    </h3>
-                                                    {isPrimaryResume(doc) && (
-                                                        <span className="bg-primary/10 text-primary px-2 py-0.5 text-xs font-bold shrink-0">
-                                                            <i className="fa-duotone fa-regular fa-star mr-1" />
-                                                            {/* COPY: primary resume badge */}
-                                                            Primary
+                                                {/* File info */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-3 mb-1.5">
+                                                        <h3 className="font-bold text-sm sm:text-base text-base-content truncate">
+                                                            {doc.file_name}
+                                                        </h3>
+                                                        {isPrimaryResume(doc) && (
+                                                            <span className="bg-primary/10 text-primary px-2 py-0.5 text-xs font-bold shrink-0">
+                                                                <i className="fa-duotone fa-regular fa-star mr-1" />
+                                                                {/* COPY: primary resume badge */}
+                                                                Primary
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-base-content/50">
+                                                        <span className="bg-base-200 px-2 py-0.5 font-semibold uppercase tracking-wider">
+                                                            {getDocumentTypeLabel(
+                                                                doc.document_type,
+                                                            )}
                                                         </span>
-                                                    )}
-                                                </div>
-                                                <div className="flex flex-wrap items-center gap-3 text-xs text-base-content/50">
-                                                    <span className="bg-base-200 px-2 py-0.5 font-semibold uppercase tracking-wider">
-                                                        {getDocumentTypeLabel(
-                                                            doc.document_type,
-                                                        )}
-                                                    </span>
-                                                    <span>
-                                                        <i className="fa-duotone fa-regular fa-weight-scale mr-1" />
-                                                        {formatFileSize(
-                                                            doc.file_size,
-                                                        )}
-                                                    </span>
-                                                    <span>
-                                                        <i className="fa-duotone fa-regular fa-calendar mr-1" />
-                                                        {doc.created_at
-                                                            ? formatDate(
-                                                                  doc.created_at,
-                                                              )
-                                                            : "Unknown"}
-                                                    </span>
+                                                        <span>
+                                                            <i className="fa-duotone fa-regular fa-weight-scale mr-1" />
+                                                            {formatFileSize(
+                                                                doc.file_size,
+                                                            )}
+                                                        </span>
+                                                        <span>
+                                                            <i className="fa-duotone fa-regular fa-calendar mr-1" />
+                                                            {doc.created_at
+                                                                ? formatDate(
+                                                                      doc.created_at,
+                                                                  )
+                                                                : "Unknown"}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {/* Actions */}
-                                            <div className="flex items-center gap-2 shrink-0">
+                                            {/* Actions — full-width row on mobile, inline on desktop */}
+                                            <div className="flex items-center gap-2 shrink-0 border-t sm:border-t-0 border-base-200 pt-3 sm:pt-0">
                                                 {doc.document_type ===
                                                     "resume" &&
                                                     !isPrimaryResume(doc) && (
                                                         <button
-                                                            className="btn btn-secondary btn-sm"
+                                                            className="btn btn-secondary btn-sm flex-1 sm:flex-initial"
                                                             onClick={() =>
                                                                 handleSetPrimary(
                                                                     doc.id,
@@ -610,21 +613,25 @@ function DocumentsContent() {
                                                             ) : (
                                                                 <>
                                                                     <i className="fa-duotone fa-regular fa-star" />
-                                                                    {/* COPY: set primary button */}
-                                                                    Set Primary
+                                                                    <span className="sm:inline hidden">
+                                                                        {/* COPY: set primary button */}
+                                                                        Set Primary
+                                                                    </span>
                                                                 </>
                                                             )}
                                                         </button>
                                                     )}
                                                 <button
-                                                    className="btn btn-primary btn-sm"
+                                                    className="btn btn-primary btn-sm flex-1 sm:flex-initial"
                                                     onClick={() =>
                                                         handleDownload(doc)
                                                     }
                                                 >
                                                     <i className="fa-duotone fa-regular fa-download" />
-                                                    {/* COPY: download button */}
-                                                    Download
+                                                    <span className="sm:inline hidden">
+                                                        {/* COPY: download button */}
+                                                        Download
+                                                    </span>
                                                 </button>
                                                 <button
                                                     className="btn btn-ghost btn-sm text-error"
@@ -685,9 +692,9 @@ function DocumentsContent() {
                         )}
                     </div>
 
-                    {/* RIGHT COLUMN — Tips sidebar */}
-                    <div className="hidden lg:block">
-                        <div className="tips-section border-l-4 border-info bg-info/5 p-6 opacity-0 sticky top-6">
+                    {/* RIGHT COLUMN — Tips sidebar (below documents on mobile, sticky sidebar on desktop) */}
+                    <div>
+                        <div className="tips-section border-l-4 border-info bg-info/5 p-5 sm:p-6 opacity-0 lg:sticky lg:top-6">
                             <p className="text-sm font-bold uppercase tracking-[0.2em] text-info mb-4">
                                 <i className="fa-duotone fa-regular fa-lightbulb mr-2" />
                                 {/* COPY: tips section kicker */}
