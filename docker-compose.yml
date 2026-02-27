@@ -536,6 +536,33 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  matching-service:
+    build:
+      context: .
+      dockerfile: services/matching-service/Dockerfile
+      target: development
+    container_name: splits-matching-service
+    ports:
+      - "3017:3017"
+    environment:
+      NODE_ENV: development
+      PORT: 3017
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev_internal_service_key_change_in_production}
+    volumes:
+      - ./services/matching-service/src:/app/services/matching-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   document-service:
     build:
       context: .
@@ -727,6 +754,7 @@ services:
       GPT_SERVICE_URL: http://gpt-service:3014
       CONTENT_SERVICE_URL: http://content-service:3015
       INTEGRATION_SERVICE_URL: http://integration-service:3016
+      MATCHING_SERVICE_URL: http://matching-service:3017
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}

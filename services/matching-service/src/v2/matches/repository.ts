@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { CandidateRoleMatch, MatchListFilters, MatchUpsert } from './types';
+import { CandidateRoleMatch, EnrichedCandidateRoleMatch, MatchListFilters, MatchUpsert } from './types';
 
 export class MatchRepository {
     private supabase: SupabaseClient;
@@ -8,7 +8,13 @@ export class MatchRepository {
         this.supabase = createClient(supabaseUrl, supabaseKey);
     }
 
-    private mapRow(row: any): CandidateRoleMatch {
+    private readonly ENRICHED_SELECT = `
+        *,
+        candidates(id, full_name),
+        jobs(id, title, location, salary_min, salary_max, employment_type, job_level, companies(id, name, logo_url))
+    `;
+
+    private mapRow(row: any): EnrichedCandidateRoleMatch {
         return {
             id: row.id,
             candidate_id: row.candidate_id,
@@ -26,6 +32,8 @@ export class MatchRepository {
             dismissed_at: row.dismissed_at,
             created_at: row.created_at,
             updated_at: row.updated_at,
+            candidate: row.candidates ?? null,
+            job: row.jobs ?? null,
         };
     }
 
@@ -55,12 +63,12 @@ export class MatchRepository {
         return this.mapRow(row);
     }
 
-    async findMatches(filters: MatchListFilters): Promise<{ data: CandidateRoleMatch[]; total: number }> {
+    async findMatches(filters: MatchListFilters): Promise<{ data: EnrichedCandidateRoleMatch[]; total: number }> {
         const page = filters.page ?? 1;
         const limit = filters.limit ?? 25;
         const offset = (page - 1) * limit;
 
-        let query = this.supabase.from('candidate_role_matches').select('*', { count: 'exact' });
+        let query = this.supabase.from('candidate_role_matches').select(this.ENRICHED_SELECT, { count: 'exact' });
         query = this.applyFilters(query, filters);
 
         const { data, error, count } = await query
@@ -75,14 +83,18 @@ export class MatchRepository {
         recruiterId: string,
         filters: MatchListFilters,
         tierLimit?: 'standard',
-    ): Promise<{ data: CandidateRoleMatch[]; total: number }> {
+    ): Promise<{ data: EnrichedCandidateRoleMatch[]; total: number }> {
         const page = filters.page ?? 1;
         const limit = filters.limit ?? 25;
         const offset = (page - 1) * limit;
 
         let query = this.supabase
             .from('candidate_role_matches')
-            .select('*, jobs!inner(job_owner_recruiter_id)', { count: 'exact' })
+            .select(`
+                *,
+                candidates(id, full_name),
+                jobs!inner(id, title, location, salary_min, salary_max, employment_type, job_level, job_owner_recruiter_id, companies(id, name, logo_url))
+            `, { count: 'exact' })
             .eq('jobs.job_owner_recruiter_id', recruiterId);
 
         if (tierLimit) query = query.eq('match_tier', tierLimit);
@@ -99,14 +111,14 @@ export class MatchRepository {
     async findMatchesForCandidate(
         candidateId: string,
         filters: MatchListFilters,
-    ): Promise<{ data: CandidateRoleMatch[]; total: number }> {
+    ): Promise<{ data: EnrichedCandidateRoleMatch[]; total: number }> {
         const page = filters.page ?? 1;
         const limit = filters.limit ?? 25;
         const offset = (page - 1) * limit;
 
         let query = this.supabase
             .from('candidate_role_matches')
-            .select('*', { count: 'exact' })
+            .select(this.ENRICHED_SELECT, { count: 'exact' })
             .eq('candidate_id', candidateId)
             .eq('match_tier', 'standard');
 
@@ -120,10 +132,10 @@ export class MatchRepository {
         return { data: (data || []).map(r => this.mapRow(r)), total: count || 0 };
     }
 
-    async findById(id: string): Promise<CandidateRoleMatch | null> {
+    async findById(id: string): Promise<EnrichedCandidateRoleMatch | null> {
         const { data, error } = await this.supabase
             .from('candidate_role_matches')
-            .select('*')
+            .select(this.ENRICHED_SELECT)
             .eq('id', id)
             .single();
 

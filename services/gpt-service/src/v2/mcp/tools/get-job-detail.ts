@@ -30,7 +30,7 @@ export function registerGetJobDetailTool(
         'get_job_detail',
         {
             title: 'Get Job Details',
-            description: 'Get full details for a specific job listing including description, requirements, pre-screen questions, and company info.',
+            description: 'Get full details for a specific job listing including description, requirements, pre-screen questions, and company info. The response includes a view_url — always use this exact URL when linking to the job. Never construct job URLs yourself.',
             inputSchema: getJobDetailSchema,
             annotations: {
                 readOnlyHint: true,

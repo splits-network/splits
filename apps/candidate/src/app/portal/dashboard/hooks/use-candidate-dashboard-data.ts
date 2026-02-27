@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import type { ApiResponse } from '@splits-network/shared-api-client';
+import type { EnrichedMatch } from '@splits-network/shared-types';
 
 export interface CandidateStats {
     applications: number;
@@ -68,6 +69,7 @@ export function useCandidateDashboardData() {
     const [applications, setApplications] = useState<Application[]>([]);
     const [activeRecruiters, setActiveRecruiters] = useState<ActiveRecruiter[]>([]);
     const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
+    const [topMatches, setTopMatches] = useState<EnrichedMatch[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -79,12 +81,15 @@ export function useCandidateDashboardData() {
 
             const client = createAuthenticatedClient(token);
 
-            // Fetch applications and recruiter relationships in parallel
-            const [appsResult, recruitersResult] = await Promise.allSettled([
+            // Fetch applications, recruiter relationships, and top matches in parallel
+            const [appsResult, recruitersResult, matchesResult] = await Promise.allSettled([
                 client.get<ApiResponse<Application[]>>('/applications', {
                     params: { include: 'job,company,recruiter' },
                 }),
                 client.get<ApiResponse<ActiveRecruiter[]>>('/recruiter-candidates'),
+                client.get<{ data: EnrichedMatch[] }>('/matches', {
+                    params: { limit: 5, status: 'active' },
+                }),
             ]);
 
             // Process applications
@@ -149,6 +154,11 @@ export function useCandidateDashboardData() {
                 setPendingInvitations(pending);
             }
 
+            // Process top matches
+            if (matchesResult.status === 'fulfilled') {
+                setTopMatches(matchesResult.value.data || []);
+            }
+
             setStats(newStats);
         } catch (err: any) {
             console.error('[CandidateDashboard] Failed to load:', err);
@@ -163,5 +173,5 @@ export function useCandidateDashboardData() {
         refresh();
     }, [refresh]);
 
-    return { stats, applications, activeRecruiters, pendingInvitations, loading, error, refresh };
+    return { stats, applications, activeRecruiters, pendingInvitations, topMatches, loading, error, refresh };
 }

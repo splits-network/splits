@@ -12,6 +12,8 @@ import { useReputationData } from "@/app/portal/dashboard/hooks/use-reputation-d
 import { usePipelineActivity } from "@/app/portal/dashboard/hooks/use-pipeline-activity";
 import type { PipelineApplication } from "@/app/portal/dashboard/hooks/use-pipeline-activity";
 import { useTopRoles } from "@/app/portal/dashboard/hooks/use-top-roles";
+import { useTopMatches } from "@/app/portal/dashboard/hooks/use-top-matches";
+import { MatchScoreBadge } from "@/components/matches/match-score-badge";
 import { useDashboardRealtime } from "@/app/portal/dashboard/hooks/use-dashboard-realtime";
 import {
     BaselKpiCard,
@@ -142,6 +144,11 @@ export default function RecruiterView() {
         loading: rolesLoading,
         refresh: refreshRoles,
     } = useTopRoles();
+    const {
+        matches: topMatches,
+        loading: matchesLoading,
+        refresh: refreshMatches,
+    } = useTopMatches();
 
     /* Realtime */
     const handleStatsUpdate = useCallback(() => {
@@ -154,7 +161,8 @@ export default function RecruiterView() {
         refreshStats();
         refreshRoles();
         refreshPipeline();
-    }, [refreshStats, refreshRoles, refreshPipeline]);
+        refreshMatches();
+    }, [refreshStats, refreshRoles, refreshPipeline, refreshMatches]);
 
     useDashboardRealtime({
         enabled: !!userId,
@@ -317,6 +325,12 @@ export default function RecruiterView() {
                             }
                             icon="fa-duotone fa-regular fa-clipboard-check"
                             color="accent"
+                        />
+                        <BaselKpiCard
+                            label="New Matches"
+                            value={matchesLoading ? "--" : String(topMatches.length)}
+                            icon="fa-duotone fa-regular fa-bullseye"
+                            color="info"
                         />
                     </KpiGrid>
                 </section>
@@ -547,6 +561,49 @@ export default function RecruiterView() {
                                         ))}
                                     </div>
                                 )}
+                            </BaselSidebarCard>
+
+                            <BaselSidebarCard title="Top Matches" accentColor="secondary">
+                                {matchesLoading ? (
+                                    <ChartLoadingState height={200} />
+                                ) : topMatches.length === 0 ? (
+                                    <p className="text-sm text-base-content/40 py-4 text-center">
+                                        No matches yet. Matches appear when candidates are scored against roles.
+                                    </p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {topMatches.map((match) => {
+                                            const fullName = match.candidate?.full_name || "Unknown";
+                                            const initials = fullName.split(" ").map(n => n[0]).join("").slice(0, 2) || "?";
+                                            const name = fullName;
+                                            return (
+                                                <Link
+                                                    key={match.id}
+                                                    href={`/portal/matches?matchId=${match.id}`}
+                                                    className="flex items-center gap-3 hover:bg-base-200/50 p-2 -mx-2 rounded transition-colors"
+                                                >
+                                                    <div className="avatar avatar-placeholder">
+                                                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold flex items-center justify-center">
+                                                            {initials.toUpperCase()}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-semibold text-sm truncate">{name}</p>
+                                                        <p className="text-sm text-base-content/60 truncate">
+                                                            {match.job?.title || "Unknown Role"}
+                                                        </p>
+                                                    </div>
+                                                    <MatchScoreBadge score={match.match_score} size="sm" />
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                                <div className="mt-3 pt-3 border-t border-base-200 text-center">
+                                    <Link href="/portal/matches" className="btn btn-sm btn-ghost btn-block">
+                                        View all matches <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
+                                    </Link>
+                                </div>
                             </BaselSidebarCard>
                         </div>
                     </div>

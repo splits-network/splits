@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -12,26 +12,37 @@ import {
     LoadingState,
     ErrorState,
 } from "@/hooks/use-standard-list";
+import { useToast } from "@/lib/toast-context";
 import { AdminPageHeader } from "../components";
+
+type ApplicationStage =
+    | "draft"
+    | "ai_review"
+    | "ai_reviewed"
+    | "recruiter_request"
+    | "recruiter_proposed"
+    | "recruiter_review"
+    | "screen"
+    | "submitted"
+    | "company_review"
+    | "company_feedback"
+    | "interview"
+    | "offer"
+    | "hired"
+    | "rejected"
+    | "withdrawn"
+    | "expired";
 
 interface Application {
     id: string;
     job_id: string;
     candidate_id: string;
     recruiter_id?: string;
-    stage:
-        | "submitted"
-        | "screening"
-        | "interview"
-        | "offer"
-        | "hired"
-        | "rejected"
-        | "withdrawn";
+    stage: ApplicationStage;
     status: "active" | "archived";
     submitted_at: string;
     created_at: string;
     updated_at: string;
-    // Enriched
     job?: {
         id: string;
         title: string;
@@ -49,12 +60,84 @@ interface Application {
 }
 
 interface ApplicationFilters {
-    stage?: Application["stage"];
+    stage?: ApplicationStage;
     status?: "active" | "archived";
 }
 
+const STAGE_CONFIG: Record<
+    string,
+    { color: string; icon: string; label: string }
+> = {
+    draft: { color: "badge-ghost", icon: "fa-pencil", label: "Draft" },
+    ai_review: {
+        color: "badge-info",
+        icon: "fa-robot",
+        label: "AI Review",
+    },
+    ai_reviewed: {
+        color: "badge-info",
+        icon: "fa-robot",
+        label: "AI Reviewed",
+    },
+    recruiter_request: {
+        color: "badge-warning",
+        icon: "fa-user-tie",
+        label: "Recruiter Request",
+    },
+    recruiter_proposed: {
+        color: "badge-warning",
+        icon: "fa-user-tie",
+        label: "Recruiter Proposed",
+    },
+    recruiter_review: {
+        color: "badge-warning",
+        icon: "fa-user-tie",
+        label: "Recruiter Review",
+    },
+    screen: { color: "badge-info", icon: "fa-filter", label: "Screen" },
+    submitted: {
+        color: "badge-neutral",
+        icon: "fa-inbox",
+        label: "Submitted",
+    },
+    company_review: {
+        color: "badge-primary",
+        icon: "fa-building",
+        label: "Company Review",
+    },
+    company_feedback: {
+        color: "badge-primary",
+        icon: "fa-building",
+        label: "Company Feedback",
+    },
+    interview: {
+        color: "badge-warning",
+        icon: "fa-comments",
+        label: "Interview",
+    },
+    offer: {
+        color: "badge-accent",
+        icon: "fa-file-signature",
+        label: "Offer",
+    },
+    hired: { color: "badge-success", icon: "fa-check", label: "Hired" },
+    rejected: {
+        color: "badge-error",
+        icon: "fa-xmark",
+        label: "Rejected",
+    },
+    withdrawn: {
+        color: "badge-ghost",
+        icon: "fa-arrow-left",
+        label: "Withdrawn",
+    },
+    expired: { color: "badge-ghost", icon: "fa-clock", label: "Expired" },
+};
+
 export default function ApplicationsAdminPage() {
     const { getToken } = useAuth();
+    const toast = useToast();
+    const [retriggeringId, setRetriggeringId] = useState<string | null>(null);
 
     const defaultFilters = useMemo<ApplicationFilters>(() => ({}), []);
 
@@ -98,40 +181,46 @@ export default function ApplicationsAdminPage() {
         syncToUrl: true,
     });
 
-    function StageBadge({ stage }: { stage: Application["stage"] }) {
-        const colors: Record<string, string> = {
-            submitted: "badge-neutral",
-            screening: "badge-info",
-            interview: "badge-warning",
-            offer: "badge-accent",
-            hired: "badge-success",
-            rejected: "badge-error",
-            withdrawn: "badge-ghost",
-        };
-        const icons: Record<string, string> = {
-            submitted: "fa-inbox",
-            screening: "fa-magnifying-glass",
-            interview: "fa-comments",
-            offer: "fa-file-signature",
-            hired: "fa-check",
-            rejected: "fa-xmark",
-            withdrawn: "fa-arrow-left",
-        };
+    async function handleRetriggerAIReview(applicationId: string) {
+        setRetriggeringId(applicationId);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const apiClient = createAuthenticatedClient(token);
+            await apiClient.post(
+                `/applications/${applicationId}/trigger-ai-review`,
+                {},
+            );
+            toast.success("AI review retriggered successfully");
+            refresh();
+        } catch (err: any) {
+            toast.error(
+                err?.message || "Failed to retrigger AI review",
+            );
+        } finally {
+            setRetriggeringId(null);
+        }
+    }
+
+    function StageBadge({ stage }: { stage: ApplicationStage }) {
+        const config = STAGE_CONFIG[stage];
         return (
-            <span className={`badge ${colors[stage] || "badge-ghost"} gap-1`}>
+            <span
+                className={`badge ${config?.color || "badge-ghost"} gap-1`}
+            >
                 <i
-                    className={`fa-duotone fa-regular ${icons[stage]} text-xs`}
+                    className={`fa-duotone fa-regular ${config?.icon || "fa-circle-question"} text-xs`}
                 ></i>
-                {stage}
+                {config?.label || stage}
             </span>
         );
     }
 
-    // Calculate stage counts
+    // Calculate stage counts for key stages
     const stageCounts = useMemo(() => {
         const counts: Record<string, number> = {
+            ai_review: 0,
             submitted: 0,
-            screening: 0,
             interview: 0,
             offer: 0,
             hired: 0,
@@ -156,37 +245,37 @@ export default function ApplicationsAdminPage() {
             {/* Stats */}
             <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
-                    <div className="stat-title text-xs">Submitted</div>
+                    <div className="stat-title text-sm">AI Review</div>
+                    <div className="stat-value text-xl text-info">
+                        {loading ? "..." : stageCounts.ai_review}
+                    </div>
+                </div>
+                <div className="stat bg-base-100 shadow rounded-lg p-4">
+                    <div className="stat-title text-sm">Submitted</div>
                     <div className="stat-value text-xl text-neutral">
                         {loading ? "..." : stageCounts.submitted}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
-                    <div className="stat-title text-xs">Screening</div>
-                    <div className="stat-value text-xl text-info">
-                        {loading ? "..." : stageCounts.screening}
-                    </div>
-                </div>
-                <div className="stat bg-base-100 shadow rounded-lg p-4">
-                    <div className="stat-title text-xs">Interview</div>
+                    <div className="stat-title text-sm">Interview</div>
                     <div className="stat-value text-xl text-warning">
                         {loading ? "..." : stageCounts.interview}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
-                    <div className="stat-title text-xs">Offer</div>
+                    <div className="stat-title text-sm">Offer</div>
                     <div className="stat-value text-xl text-accent">
                         {loading ? "..." : stageCounts.offer}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
-                    <div className="stat-title text-xs">Hired</div>
+                    <div className="stat-title text-sm">Hired</div>
                     <div className="stat-value text-xl text-success">
                         {loading ? "..." : stageCounts.hired}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
-                    <div className="stat-title text-xs">Rejected</div>
+                    <div className="stat-title text-sm">Rejected</div>
                     <div className="stat-value text-xl text-error">
                         {loading ? "..." : stageCounts.rejected}
                     </div>
@@ -214,13 +303,30 @@ export default function ApplicationsAdminPage() {
                     }
                 >
                     <option value="">All Stages</option>
+                    <option value="draft">Draft</option>
+                    <option value="ai_review">AI Review</option>
+                    <option value="ai_reviewed">AI Reviewed</option>
+                    <option value="recruiter_request">
+                        Recruiter Request
+                    </option>
+                    <option value="recruiter_proposed">
+                        Recruiter Proposed
+                    </option>
+                    <option value="recruiter_review">
+                        Recruiter Review
+                    </option>
+                    <option value="screen">Screen</option>
                     <option value="submitted">Submitted</option>
-                    <option value="screening">Screening</option>
+                    <option value="company_review">Company Review</option>
+                    <option value="company_feedback">
+                        Company Feedback
+                    </option>
                     <option value="interview">Interview</option>
                     <option value="offer">Offer</option>
                     <option value="hired">Hired</option>
                     <option value="rejected">Rejected</option>
                     <option value="withdrawn">Withdrawn</option>
+                    <option value="expired">Expired</option>
                 </select>
                 <select
                     className="select select-sm"
@@ -284,7 +390,7 @@ export default function ApplicationsAdminPage() {
                                                                 .full_name ||
                                                                 "Unknown"}
                                                         </div>
-                                                        <div className="text-xs text-base-content/50">
+                                                        <div className="text-sm text-base-content/50">
                                                             {
                                                                 app.candidate
                                                                     .email
@@ -354,13 +460,38 @@ export default function ApplicationsAdminPage() {
                                                 </span>
                                             </td>
                                             <td>
-                                                <Link
-                                                    href={`/portal/admin/applications?applicationId=${app.id}`}
-                                                    className="btn btn-xs btn-ghost"
-                                                    title="View details"
-                                                >
-                                                    <i className="fa-duotone fa-regular fa-eye"></i>
-                                                </Link>
+                                                <div className="flex items-center gap-1">
+                                                    <Link
+                                                        href={`/portal/admin/applications?applicationId=${app.id}`}
+                                                        className="btn btn-xs btn-ghost"
+                                                        title="View details"
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-eye"></i>
+                                                    </Link>
+                                                    {app.stage ===
+                                                        "ai_review" && (
+                                                        <button
+                                                            className="btn btn-xs btn-warning"
+                                                            title="Retrigger AI Review"
+                                                            disabled={
+                                                                retriggeringId ===
+                                                                app.id
+                                                            }
+                                                            onClick={() =>
+                                                                handleRetriggerAIReview(
+                                                                    app.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            {retriggeringId ===
+                                                            app.id ? (
+                                                                <span className="loading loading-spinner loading-xs"></span>
+                                                            ) : (
+                                                                <i className="fa-duotone fa-regular fa-rotate-right"></i>
+                                                            )}
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

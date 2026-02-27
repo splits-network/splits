@@ -31,7 +31,7 @@ export function registerSearchJobsTool(
         'search_jobs',
         {
             title: 'Search Jobs',
-            description: 'Search for active job listings. Supports keyword search, location, commute type, and job level filters. Returns 5 results per page with pagination.',
+            description: 'Search for active job listings. Supports keyword search, location, commute type, and job level filters. Returns 5 results per page with pagination. Each result includes a view_url — always use this exact URL when linking to jobs. Never construct job URLs yourself.',
             inputSchema: searchJobsSchema,
             annotations: {
                 readOnlyHint: true,
