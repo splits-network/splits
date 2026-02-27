@@ -13,6 +13,7 @@ export interface SpeedDialAction {
     disabled?: boolean;
     loading?: boolean;
     title?: string;
+    keepOpen?: boolean;
     onClick?: () => void;
     href?: string;
     renderButton?: React.ReactNode;

@@ -1,7 +1,14 @@
 "use client";
 
-import { RecruiterRole } from "./types";
-import { ROLE_META } from "./commission-rates";
+import { RecruiterRole, RoleMeta } from "./types";
+
+const ROLE_META: RoleMeta[] = [
+    { id: 'candidate_recruiter', label: 'Candidate Recruiter', description: 'Found and represents the candidate' },
+    { id: 'job_owner', label: 'Job Owner', description: 'Owns the job requisition relationship' },
+    { id: 'company_recruiter', label: 'Company Recruiter', description: 'Sourced and manages company relationship' },
+    { id: 'candidate_sourcer', label: 'Candidate Sourcer', description: 'Initially sourced the candidate' },
+    { id: 'company_sourcer', label: 'Company Sourcer', description: 'Initially sourced the company' },
+];
 
 interface RoleSelectorProps {
     selectedRoles: RecruiterRole[];

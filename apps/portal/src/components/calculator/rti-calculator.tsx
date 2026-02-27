@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { duration, easing } from '@/components/landing/shared/animation-utils';
 import { useCalculator } from './use-calculator';
+import { useSplitsRates } from './use-splits-rates';
 import { FeeInput } from './fee-input';
 import { RoleSelector } from './role-selector';
 import { TierComparison } from './tier-comparison';
@@ -25,6 +26,8 @@ export function RTICalculator({ animate = false, className = '' }: RTICalculator
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  const { rates, platformTake, tierInfo, loading, error } = useSplitsRates();
+
   const {
     state,
     effectiveFee,
@@ -33,7 +36,7 @@ export function RTICalculator({ animate = false, className = '' }: RTICalculator
     setSalary,
     setFeePercentage,
     toggleRole,
-  } = useCalculator();
+  } = useCalculator({ rates, platformTake, tierInfo });
 
   // Scroll-triggered entrance animation
   useGSAP(
@@ -60,6 +63,27 @@ export function RTICalculator({ animate = false, className = '' }: RTICalculator
     },
     { scope: containerRef, dependencies: [animate] }
   );
+
+  if (loading) {
+    return (
+      <div className={className}>
+        <div className="flex items-center justify-center py-16">
+          <span className="loading loading-spinner loading-lg text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={className}>
+        <div className="alert alert-error">
+          <i className="fa-duotone fa-regular fa-triangle-exclamation" />
+          <span>Unable to load commission rates</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className={className}>

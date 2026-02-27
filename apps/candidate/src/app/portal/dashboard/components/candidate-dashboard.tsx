@@ -247,36 +247,46 @@ export default function CandidateDashboard({
         <div ref={contentRef} className="space-y-0">
             {/* ── Error Alert ── */}
             {dataError && (
-                <div className="bg-error/10 border-l-4 border-error px-6 py-3 text-error text-sm">
-                    <span className="font-semibold">
-                        Failed to load dashboard data
-                    </span>
-                    <span className="ml-2 text-error/70">{dataError}</span>
+                <div className="bg-error/5 border-l-4 border-error px-6 sm:px-8 lg:px-12 py-4">
+                    <div className="container mx-auto flex items-start sm:items-center gap-3">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error text-lg mt-0.5 sm:mt-0 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-error">
+                                Failed to load dashboard data
+                            </p>
+                            <p className="text-sm text-error/70 mt-0.5 break-words">
+                                {dataError}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )}
 
             {/* ── Pending Invitations Banner ── */}
             {!dataLoading && pendingInvitations.length > 0 && (
-                <div className="bg-primary/5 border-l-4 border-primary px-6 py-4">
-                    <div className="container mx-auto flex items-center gap-4">
-                        <i className="fa-duotone fa-regular fa-envelope-open-text text-primary text-lg flex-shrink-0"></i>
-                        <div className="flex-1">
-                            <p className="text-sm font-semibold text-base-content">
-                                {pendingInvitations.length === 1
-                                    ? `${pendingInvitations[0].recruiter_name} has invited you to work together`
-                                    : `You have ${pendingInvitations.length} pending recruiter invitations`}
-                            </p>
-                            <p className="text-xs text-base-content/60 mt-0.5">
-                                Review and respond to get started with your
-                                recruiter
-                            </p>
+                <div className="bg-primary/5 border-l-4 border-primary px-6 sm:px-8 lg:px-12 py-4">
+                    <div className="container mx-auto flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                        <i className="fa-duotone fa-regular fa-envelope-open-text text-primary text-lg shrink-0 hidden sm:block" />
+                        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                            <i className="fa-duotone fa-regular fa-envelope-open-text text-primary text-lg shrink-0 sm:hidden mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-base-content">
+                                    {pendingInvitations.length === 1
+                                        ? `${pendingInvitations[0].recruiter_name} has invited you to work together`
+                                        : `You have ${pendingInvitations.length} pending recruiter invitations`}
+                                </p>
+                                <p className="text-sm text-base-content/60 mt-0.5">
+                                    Review and respond to get started with your
+                                    recruiter
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex gap-2 flex-shrink-0">
+                        <div className="flex gap-2 w-full sm:w-auto shrink-0">
                             {pendingInvitations.slice(0, 2).map((inv) => (
                                 <Link
                                     key={inv.id}
                                     href={`/portal/invitation/${inv.invitation_token}`}
-                                    className="btn btn-primary btn-sm"
+                                    className="btn btn-primary btn-sm flex-1 sm:flex-initial"
                                 >
                                     {pendingInvitations.length === 1
                                         ? "Review Invitation"
@@ -303,7 +313,7 @@ export default function CandidateDashboard({
 
             {/* ── Section 2: KPI Strip ── */}
             <section className="bg-base-200 py-10">
-                <div className="container mx-auto px-6 lg:px-12">
+                <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     {dataLoading ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                             {Array.from({ length: 5 }).map((_, i) => (
@@ -368,7 +378,7 @@ export default function CandidateDashboard({
 
             {/* ── Section 3: Pipeline + Momentum (7/5) ── */}
             <section className="py-12 bg-base-100">
-                <div className="container mx-auto px-6 lg:px-12">
+                <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         <div className="lg:col-span-7 chart-card opacity-0">
                             <CandidatePipelineChart
@@ -393,7 +403,7 @@ export default function CandidateDashboard({
 
             {/* ── Section 4: Trend Charts (3-column) ── */}
             <section className="py-12 bg-base-200">
-                <div className="container mx-auto px-6 lg:px-12">
+                <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     <div className="mb-10">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
                             Analytics
@@ -468,7 +478,7 @@ export default function CandidateDashboard({
 
             {/* ── Section 5: What's Next + Recruiter Sidebar (7/5) ── */}
             <section className="py-12 bg-base-100">
-                <div className="container mx-auto px-6 lg:px-12">
+                <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         {/* Left: Feed */}
                         <div className="lg:col-span-7 feed-panel opacity-0">
@@ -631,7 +641,7 @@ export default function CandidateDashboard({
 
             {/* ── Section 6: Quick Actions (full-width, since no sidebar) ── */}
             <section className="py-12 bg-base-200">
-                <div className="container mx-auto px-6 lg:px-12">
+                <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     <div className="mb-8">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-3">
                             Quick Access

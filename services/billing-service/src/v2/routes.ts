@@ -31,6 +31,9 @@ import { PlacementInvoiceRepository } from './placement-invoices/repository';
 import { PlacementInvoiceService } from './placement-invoices/service';
 import { placementInvoiceRoutes } from './placement-invoices/routes';
 import { placementPayoutAuditRoutes } from './audit/routes';
+import { SplitsRateRepository } from './splits-rates/repository';
+import { SplitsRateService } from './splits-rates/service';
+import { registerSplitsRateRoutes } from './splits-rates/routes';
 import { resolveAccessContext } from './shared/access';
 
 interface BillingV2Config {
@@ -119,7 +122,15 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     );
     const escrowHoldService = new EscrowHoldServiceV2(accessClient, eventPublisher, auditRepository);
 
+    // Initialize splits rates domain
+    const splitsRateRepository = new SplitsRateRepository(accessClient);
+    const splitsRateService = new SplitsRateService(splitsRateRepository, accessResolver, config.eventPublisher);
+
+    // Enrich plan responses with active splits rates
+    planService.setSplitsRateService(splitsRateService);
+
     registerPlanRoutes(app, { planService });
+    registerSplitsRateRoutes(app, { splitsRateService });
     registerSubscriptionRoutes(app, { subscriptionService });
     registerPayoutRoutes(app, { payoutService });
     discountRoutes(app, discountService);
@@ -139,5 +150,6 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         payoutService,
         payoutScheduleService,
         escrowHoldService,
+        splitsRateService,
     };
 }

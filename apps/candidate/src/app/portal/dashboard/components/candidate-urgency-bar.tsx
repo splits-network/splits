@@ -41,14 +41,14 @@ export default function CandidateUrgencyBar({
 
     return (
         <div
-            className={`urgency-bar border-l-4 px-6 py-3 ${colorClasses} opacity-0`}
+            className={`urgency-bar border-l-4 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 ${colorClasses} opacity-0`}
         >
-            <div className="flex items-center justify-between gap-4 w-full">
+            <div className="container mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 w-full">
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                     {items.map((item, idx) => (
                         <span key={item.id}>
                             {idx > 0 && (
-                                <span className="text-current/30 select-none mr-4">
+                                <span className="text-current/30 select-none mr-4 hidden sm:inline">
                                     |
                                 </span>
                             )}
@@ -63,7 +63,7 @@ export default function CandidateUrgencyBar({
                 </div>
                 <Link
                     href={items[0].href}
-                    className="btn btn-sm btn-outline shrink-0"
+                    className="btn btn-sm btn-outline w-full sm:w-auto shrink-0"
                     style={{ borderRadius: 0 }}
                 >
                     Review now

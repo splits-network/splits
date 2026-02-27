@@ -21,7 +21,7 @@ export class PlanRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            
+
             .from('plans')
             .select('*', { count: 'exact' });
 

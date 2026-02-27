@@ -1,33 +1,46 @@
 import { PlacementSnapshotRepository } from './repository';
 import { PlacementSnapshotCreate, PlacementSnapshot } from './types';
-import { COMMISSION_RATES } from '@splits-network/shared-types';
+import { SplitsRateService } from '../splits-rates/service';
 
 export class PlacementSnapshotService {
-    constructor(private repository: PlacementSnapshotRepository) { }
+    constructor(
+        private repository: PlacementSnapshotRepository,
+        private splitsRateService: SplitsRateService,
+    ) { }
 
     /**
-     * Create immutable placement snapshot with commission rates
-     * This captures the attribution and rates at placement time
+     * Resolve the commission rate for a role from the database.
+     * Maps snapshot tier names (free/paid/premium) to plan tiers via SplitsRateService.
+     */
+    private async resolveRate(
+        snapshotTier: string | null,
+        roleKey: 'candidate_recruiter_rate' | 'job_owner_rate' | 'company_recruiter_rate' | 'candidate_sourcer_rate' | 'company_sourcer_rate',
+    ): Promise<number> {
+        const rate = await this.splitsRateService.getActiveRateBySnapshotTier(snapshotTier || 'free');
+        return rate[roleKey];
+    }
+
+    /**
+     * Create immutable placement snapshot with commission rates from database.
+     * Rates are looked up from splits_rates table at snapshot time.
      */
     async createSnapshot(createData: PlacementSnapshotCreate): Promise<PlacementSnapshot> {
-        // Store commission percentages (0-100) in snapshot
-        // Only set rate if role ID is present (null roles get null rates)
         const snapshot = await this.repository.create({
             ...createData,
             candidate_recruiter_rate: createData.candidate_recruiter_id
-                ? COMMISSION_RATES[createData.candidate_recruiter_tier || 'free'].candidate_recruiter
+                ? await this.resolveRate(createData.candidate_recruiter_tier, 'candidate_recruiter_rate')
                 : null,
             company_recruiter_rate: createData.company_recruiter_id
-                ? COMMISSION_RATES[createData.company_recruiter_tier || 'free'].company_recruiter
+                ? await this.resolveRate(createData.company_recruiter_tier, 'company_recruiter_rate')
                 : null,
             job_owner_rate: createData.job_owner_recruiter_id
-                ? COMMISSION_RATES[createData.job_owner_tier || 'free'].job_owner
+                ? await this.resolveRate(createData.job_owner_tier, 'job_owner_rate')
                 : null,
             candidate_sourcer_rate: createData.candidate_sourcer_recruiter_id
-                ? COMMISSION_RATES[createData.candidate_sourcer_tier || 'free'].candidate_sourcer
+                ? await this.resolveRate(createData.candidate_sourcer_tier, 'candidate_sourcer_rate')
                 : null,
             company_sourcer_rate: createData.company_sourcer_recruiter_id
-                ? COMMISSION_RATES[createData.company_sourcer_tier || 'free'].company_sourcer
+                ? await this.resolveRate(createData.company_sourcer_tier, 'company_sourcer_rate')
                 : null,
         });
 
