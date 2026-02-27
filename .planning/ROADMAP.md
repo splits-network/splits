@@ -66,8 +66,8 @@
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md -- Create shared-hooks package and move UI components to shared-ui
-- [ ] 16-02-PLAN.md -- Switch portal imports to shared packages and delete originals
+- [x] 16-01-PLAN.md -- Create shared-hooks package and move UI components to shared-ui
+- [x] 16-02-PLAN.md -- Switch portal imports to shared packages and delete originals
 
 #### Phase 17: Admin App & Gateway Scaffold
 **Goal**: Admin app and admin gateway are running, authenticated, and connected -- ready to receive migrated pages
@@ -139,11 +139,11 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19
 | 13. GPT API Endpoints | v5.0 | 4/4 | Complete | 2026-02-13 |
 | 14. OpenAPI Schema + GPT Config | v5.0 | 2/2 | Complete | 2026-02-13 |
 | 15. Production Hardening | v5.0 | 3/3 | Complete | 2026-02-13 |
-| 16. Shared Packages | v6.0 | 0/TBD | Not started | - |
+| 16. Shared Packages | v6.0 | 2/2 | Complete | 2026-02-27 |
 | 17. Admin App & Gateway Scaffold | v6.0 | 0/TBD | Not started | - |
 | 18. Page Migration | v6.0 | 0/TBD | Not started | - |
 | 19. Portal & Gateway Cleanup | v6.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-27 (v6.0 milestone roadmapped)*
+*Last updated: 2026-02-27 (Phase 16 complete)*

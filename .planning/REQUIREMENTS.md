@@ -9,10 +9,10 @@ Requirements for admin extraction milestone. Each maps to roadmap phases.
 
 ### Shared Packages
 
-- [ ] **PKG-01**: Extract `use-standard-list` hook into `@splits-network/shared-hooks` package usable by both portal and admin apps
-- [ ] **PKG-02**: Extract `api-client` (createAuthenticatedClient) into a shared package usable by both portal and admin apps
-- [ ] **PKG-03**: Extract `toast-context` (toast notifications provider) into a shared package usable by both portal and admin apps
-- [ ] **PKG-04**: Move `confirm-dialog` component into `@splits-network/shared-ui` for use by both apps
+- [x] **PKG-01**: Extract `use-standard-list` hook into `@splits-network/shared-hooks` package usable by both portal and admin apps
+- [x] **PKG-02**: Extract `api-client` (createAuthenticatedClient) into a shared package usable by both portal and admin apps
+- [x] **PKG-03**: Extract `toast-context` (toast notifications provider) into a shared package usable by both portal and admin apps
+- [x] **PKG-04**: Move `confirm-dialog` component into `@splits-network/shared-ui` for use by both apps
 
 ### Admin App
 
@@ -110,10 +110,10 @@ Remaining admin sections to migrate in follow-up milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PKG-01 | Phase 16 | Pending |
-| PKG-02 | Phase 16 | Pending |
-| PKG-03 | Phase 16 | Pending |
-| PKG-04 | Phase 16 | Pending |
+| PKG-01 | Phase 16 | Complete |
+| PKG-02 | Phase 16 | Complete |
+| PKG-03 | Phase 16 | Complete |
+| PKG-04 | Phase 16 | Complete |
 | APP-01 | Phase 17 | Pending |
 | APP-02 | Phase 17 | Pending |
 | APP-03 | Phase 17 | Pending |
