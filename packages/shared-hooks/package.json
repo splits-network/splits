@@ -1,0 +1,28 @@
+{
+    "name": "@splits-network/shared-hooks",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -b",
+        "clean": "rm -rf dist *.tsbuildinfo",
+        "dev": "tsc -b --watch"
+    },
+    "dependencies": {
+        "@splits-network/shared-api-client": "workspace:*",
+        "@splits-network/shared-types": "workspace:*",
+        "@splits-network/shared-ui": "workspace:*"
+    },
+    "peerDependencies": {
+        "@tanstack/react-query": "*",
+        "next": "^16.0.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.1",
+        "@types/react-dom": "^19.0.2",
+        "typescript": "^5.9.3"
+    }
+}
