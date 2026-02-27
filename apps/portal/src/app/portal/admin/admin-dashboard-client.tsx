@@ -226,13 +226,6 @@ export default function AdminDashboardClient() {
                 <h2 className="text-xl font-semibold mb-4">Intelligence & Analytics</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <QuickAction
-                        title="AI Matches"
-                        description="Review AI match suggestions"
-                        icon="fa-wand-magic-sparkles"
-                        href="/portal/admin/ai-matches"
-                        color="secondary"
-                    />
-                    <QuickAction
                         title="Decision Log"
                         description="AI and human decisions"
                         icon="fa-clipboard-list"

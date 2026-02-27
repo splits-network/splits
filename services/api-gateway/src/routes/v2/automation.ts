@@ -20,13 +20,6 @@ const AUTOMATION_RESOURCES: ResourceDefinition[] = [
         tag: 'automation',
     },
     {
-        name: 'matches',
-        service: 'automation',
-        basePath: '/matches',
-        serviceBasePath: '/api/v2/matches',
-        tag: 'automation',
-    },
-    {
         name: 'fraud-signals',
         service: 'automation',
         basePath: '/fraud-signals',

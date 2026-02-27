@@ -159,11 +159,6 @@ const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
                 icon: "fa-user-secret",
             },
             {
-                href: "/portal/admin/ai-matches",
-                label: "AI Matches",
-                icon: "fa-wand-magic-sparkles",
-            },
-            {
                 href: "/portal/admin/decision-log",
                 label: "Decision Log",
                 icon: "fa-clipboard-list",
