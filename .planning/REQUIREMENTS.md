@@ -16,21 +16,21 @@ Requirements for admin extraction milestone. Each maps to roadmap phases.
 
 ### Admin App
 
-- [ ] **APP-01**: Create `apps/admin/` Next.js 16 app with App Router, TailwindCSS, and DaisyUI
-- [ ] **APP-02**: Configure Clerk authentication for admin app (separate Clerk instance, user handles setup)
-- [ ] **APP-03**: Admin layout with `is_platform_admin` gating at server component level (redirect non-admins)
+- [x] **APP-01**: Create `apps/admin/` Next.js 16 app with App Router, TailwindCSS, and DaisyUI
+- [x] **APP-02**: Configure Clerk authentication for admin app (separate Clerk instance, user handles setup)
+- [x] **APP-03**: Admin layout with `is_platform_admin` gating at server component level (redirect non-admins)
 - [ ] **APP-04**: Admin sidebar navigation with collapsible sections and dynamic badge counts
 - [ ] **APP-05**: Admin dashboard page with KPI stat tiles and actionable items
-- [ ] **APP-06**: Dockerfile and K8s deployment manifests for admin app
-- [ ] **APP-07**: GitHub Actions CI/CD workflow for admin app
+- [x] **APP-06**: Dockerfile and K8s deployment manifests for admin app
+- [x] **APP-07**: GitHub Actions CI/CD workflow for admin app
 
 ### Admin Gateway
 
-- [ ] **GW-01**: Create `services/admin-gateway/` Fastify service scaffold (health check, shared-config, shared-logging)
-- [ ] **GW-02**: Admin auth middleware enforcing `is_platform_admin` on all routes via Clerk + resolveAccessContext
-- [ ] **GW-03**: Thin proxy routes forwarding to existing domain services (ats-service, identity-service, network-service, billing-service, etc.)
-- [ ] **GW-04**: Dockerfile and K8s deployment manifests for admin gateway
-- [ ] **GW-05**: GitHub Actions CI/CD workflow for admin gateway
+- [x] **GW-01**: Create `services/admin-gateway/` Fastify service scaffold (health check, shared-config, shared-logging)
+- [x] **GW-02**: Admin auth middleware enforcing `is_platform_admin` on all routes via Clerk + resolveAccessContext
+- [x] **GW-03**: Thin proxy routes forwarding to existing domain services (ats-service, identity-service, network-service, billing-service, etc.)
+- [x] **GW-04**: Dockerfile and K8s deployment manifests for admin gateway
+- [x] **GW-05**: GitHub Actions CI/CD workflow for admin gateway
 
 ### Page Migration — Operations
 
@@ -114,18 +114,18 @@ Remaining admin sections to migrate in follow-up milestone.
 | PKG-02 | Phase 16 | Complete |
 | PKG-03 | Phase 16 | Complete |
 | PKG-04 | Phase 16 | Complete |
-| APP-01 | Phase 17 | Pending |
-| APP-02 | Phase 17 | Pending |
-| APP-03 | Phase 17 | Pending |
+| APP-01 | Phase 17 | Complete |
+| APP-02 | Phase 17 | Complete |
+| APP-03 | Phase 17 | Complete |
 | APP-04 | Phase 18 | Pending |
 | APP-05 | Phase 18 | Pending |
-| APP-06 | Phase 17 | Pending |
-| APP-07 | Phase 17 | Pending |
-| GW-01 | Phase 17 | Pending |
-| GW-02 | Phase 17 | Pending |
-| GW-03 | Phase 17 | Pending |
-| GW-04 | Phase 17 | Pending |
-| GW-05 | Phase 17 | Pending |
+| APP-06 | Phase 17 | Complete |
+| APP-07 | Phase 17 | Complete |
+| GW-01 | Phase 17 | Complete |
+| GW-02 | Phase 17 | Complete |
+| GW-03 | Phase 17 | Complete |
+| GW-04 | Phase 17 | Complete |
+| GW-05 | Phase 17 | Complete |
 | OPS-01 | Phase 18 | Pending |
 | OPS-02 | Phase 18 | Pending |
 | OPS-03 | Phase 18 | Pending |
@@ -149,4 +149,4 @@ Remaining admin sections to migrate in follow-up milestone.
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after roadmap creation*
+*Last updated: 2026-02-27 after Phase 17 complete*

@@ -82,9 +82,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 17-01-PLAN.md -- Admin gateway service with auth middleware and proxy routes
-- [ ] 17-02-PLAN.md -- Admin Next.js app with Clerk auth and admin gating
-- [ ] 17-03-PLAN.md -- Dockerfiles, K8s manifests, ingress, and CI/CD for both services
+- [x] 17-01-PLAN.md -- Admin gateway service with auth middleware and proxy routes
+- [x] 17-02-PLAN.md -- Admin Next.js app with Clerk auth and admin gating
+- [x] 17-03-PLAN.md -- Dockerfiles, K8s manifests, ingress, and CI/CD for both services
 
 #### Phase 18: Page Migration
 **Goal**: All admin pages are live in the admin app with sidebar navigation and dashboard
@@ -140,10 +140,10 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19
 | 14. OpenAPI Schema + GPT Config | v5.0 | 2/2 | Complete | 2026-02-13 |
 | 15. Production Hardening | v5.0 | 3/3 | Complete | 2026-02-13 |
 | 16. Shared Packages | v6.0 | 2/2 | Complete | 2026-02-27 |
-| 17. Admin App & Gateway Scaffold | v6.0 | 0/3 | Not started | - |
+| 17. Admin App & Gateway Scaffold | v6.0 | 3/3 | Complete | 2026-02-27 |
 | 18. Page Migration | v6.0 | 0/TBD | Not started | - |
 | 19. Portal & Gateway Cleanup | v6.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-27 (Phase 17 planned)*
+*Last updated: 2026-02-27 (Phase 17 complete)*
