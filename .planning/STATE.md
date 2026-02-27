@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 16 of 19 (Shared Packages)
-Plan: 1 of TBD in current phase
+Plan: 2 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-27 -- Completed 16-01-PLAN.md (shared packages foundation)
+Last activity: 2026-02-27 -- Completed 16-02-PLAN.md (portal import switch)
 
 Progress: [################..] 83% (15/19 phases complete across all milestones)
 
@@ -42,6 +42,8 @@ Recent decisions affecting current work:
 - [16-01]: createPortalClient/createAdminClient accept token arg -- no Clerk coupling in shared-hooks
 - [16-01]: useStandardList accepts urlSync option -- no next/navigation coupling in shared-hooks
 - [16-01]: StandardListLoadingState alias -- avoids collision with shared-ui's generic LoadingState
+- [16-02]: ApiClient subclass pattern -- extends AppApiClient with portal base URL + business methods; avoids breaking 42 consumers
+- [16-02]: Portal useStandardList wrapper -- auto-injects Clerk getToken + Next.js urlSync; admin app uses shared hook directly (no wrapper needed)
 
 ### Pending Todos
 
@@ -54,10 +56,10 @@ See previous STATE.md versions for full list if needed.
 
 ## Session Continuity
 
-Last session: 2026-02-27T22:09:00Z
-Stopped at: Completed 16-01-PLAN.md (shared packages foundation)
+Last session: 2026-02-27T22:08:38Z
+Stopped at: Completed 16-02-PLAN.md (portal import switch)
 Resume file: None
-Next: Execute 16-02-PLAN.md (portal import switch)
+Next: Execute 16-03-PLAN.md (admin app scaffold) or plan next phase steps
 
 ---
 *Created: 2026-02-12*
