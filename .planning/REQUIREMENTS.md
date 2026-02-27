@@ -110,43 +110,43 @@ Remaining admin sections to migrate in follow-up milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PKG-01 | — | Pending |
-| PKG-02 | — | Pending |
-| PKG-03 | — | Pending |
-| PKG-04 | — | Pending |
-| APP-01 | — | Pending |
-| APP-02 | — | Pending |
-| APP-03 | — | Pending |
-| APP-04 | — | Pending |
-| APP-05 | — | Pending |
-| APP-06 | — | Pending |
-| APP-07 | — | Pending |
-| GW-01 | — | Pending |
-| GW-02 | — | Pending |
-| GW-03 | — | Pending |
-| GW-04 | — | Pending |
-| GW-05 | — | Pending |
-| OPS-01 | — | Pending |
-| OPS-02 | — | Pending |
-| OPS-03 | — | Pending |
-| OPS-04 | — | Pending |
-| OPS-05 | — | Pending |
-| DIR-01 | — | Pending |
-| DIR-02 | — | Pending |
-| DIR-03 | — | Pending |
-| DIR-04 | — | Pending |
-| DIR-05 | — | Pending |
-| SET-01 | — | Pending |
-| CLN-01 | — | Pending |
-| CLN-02 | — | Pending |
-| CLN-03 | — | Pending |
-| CLN-04 | — | Pending |
+| PKG-01 | Phase 16 | Pending |
+| PKG-02 | Phase 16 | Pending |
+| PKG-03 | Phase 16 | Pending |
+| PKG-04 | Phase 16 | Pending |
+| APP-01 | Phase 17 | Pending |
+| APP-02 | Phase 17 | Pending |
+| APP-03 | Phase 17 | Pending |
+| APP-04 | Phase 18 | Pending |
+| APP-05 | Phase 18 | Pending |
+| APP-06 | Phase 17 | Pending |
+| APP-07 | Phase 17 | Pending |
+| GW-01 | Phase 17 | Pending |
+| GW-02 | Phase 17 | Pending |
+| GW-03 | Phase 17 | Pending |
+| GW-04 | Phase 17 | Pending |
+| GW-05 | Phase 17 | Pending |
+| OPS-01 | Phase 18 | Pending |
+| OPS-02 | Phase 18 | Pending |
+| OPS-03 | Phase 18 | Pending |
+| OPS-04 | Phase 18 | Pending |
+| OPS-05 | Phase 18 | Pending |
+| DIR-01 | Phase 18 | Pending |
+| DIR-02 | Phase 18 | Pending |
+| DIR-03 | Phase 18 | Pending |
+| DIR-04 | Phase 18 | Pending |
+| DIR-05 | Phase 18 | Pending |
+| SET-01 | Phase 18 | Pending |
+| CLN-01 | Phase 19 | Pending |
+| CLN-02 | Phase 19 | Pending |
+| CLN-03 | Phase 19 | Pending |
+| CLN-04 | Phase 19 | Pending |
 
 **Coverage:**
 - v6.0 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31 ⚠️
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after initial definition*
+*Last updated: 2026-02-27 after roadmap creation*
