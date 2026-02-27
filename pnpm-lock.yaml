@@ -205,6 +205,9 @@ importers:
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
+      '@splits-network/shared-hooks':
+        specifier: workspace:*
+        version: link:../../packages/shared-hooks
       '@splits-network/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types

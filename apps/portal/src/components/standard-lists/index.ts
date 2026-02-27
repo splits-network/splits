@@ -1,8 +1,12 @@
-// Standard list UI components
-export { SearchInput } from './search-input';
-export { PaginationControls } from './pagination-controls';
-export { EmptyState } from './empty-state';
-export { LoadingState } from './loading-state';
-export { ErrorState } from './error-state';
-export { ViewModeToggle } from './view-mode-toggle';
-export { MobileDetailOverlay } from './mobile-detail-overlay';
+// Thin re-export wrapper — 34 portal consumers import from @/components/standard-lists
+// Individual component files have been moved to @splits-network/shared-ui
+export {
+    SearchInput,
+    PaginationControls,
+    EmptyState,
+    ErrorState,
+    ViewModeToggle,
+    MobileDetailOverlay,
+    // StandardListLoadingState re-exported as LoadingState to preserve backward compat
+    StandardListLoadingState as LoadingState,
+} from '@splits-network/shared-ui';

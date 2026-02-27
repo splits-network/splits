@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { SearchInput } from "@/components/standard-lists/search-input";
+import { SearchInput } from "@/components/standard-lists";
 import type { ApplicationFilters, ViewMode } from "../../types";
 
 interface ControlsBarProps {

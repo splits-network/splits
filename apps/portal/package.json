@@ -20,6 +20,7 @@
         "@splits-network/memphis-ui": "workspace:*",
         "@splits-network/shared-api-client": "workspace:*",
         "@splits-network/shared-config": "workspace:*",
+        "@splits-network/shared-hooks": "workspace:*",
         "@splits-network/shared-types": "workspace:*",
         "@splits-network/shared-ui": "workspace:*",
         "@stripe/react-stripe-js": "^5.5.0",
