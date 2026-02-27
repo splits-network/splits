@@ -5,16 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** Planning next milestone
+**Current focus:** v6.0 Admin App Extraction
 
 ## Current Position
 
-Phase: 15 of 15 (all milestones complete)
-Plan: Not started
-Status: Ready to plan next milestone
-Last activity: 2026-02-13 — v5.0 milestone archived
-
-Progress: [██████████] 100% (v2.0-v5.0 shipped)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-27 — Milestone v6.0 started
 
 ## Performance Metrics
 
@@ -87,11 +85,11 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-13
-Stopped at: v5.0 milestone archived
+Last session: 2026-02-27
+Stopped at: Defining v6.0 requirements
 Resume file: None
-Next: /gsd:new-milestone to start next milestone
+Next: Define requirements, create roadmap
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-13 (v5.0 milestone archived)*
+*Last updated: 2026-02-27 (v6.0 milestone started)*

@@ -10,7 +10,19 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 ## Current State
 
-v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features implemented: OAuth2 authentication, job search, resume analysis, application submission with confirmation safety, and production deployment infrastructure.
+v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features implemented.
+
+## Current Milestone: v6.0 Admin App Extraction
+
+**Goal:** Extract platform administration from portal into a dedicated admin app and admin gateway, reducing complexity in both the portal and api-gateway.
+
+**Target features:**
+- Dedicated `apps/admin/` Next.js app with its own Clerk instance
+- Dedicated `services/admin-gateway/` Fastify service for admin-only API routes
+- Shared hooks/utilities extracted into packages (use-standard-list, api-client, toast)
+- All 30 admin routes moved from portal to admin app
+- Admin-specific gateway routes moved from api-gateway to admin-gateway
+- Portal and api-gateway cleaned up after extraction
 
 ## Requirements
 
@@ -61,7 +73,12 @@ v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features i
 
 ### Active
 
-(No active requirements — next milestone not yet defined)
+- [ ] Dedicated admin Next.js app (`apps/admin/`) with independent Clerk auth
+- [ ] Dedicated admin gateway (`services/admin-gateway/`) for admin-only API routes
+- [ ] Shared frontend packages for hooks/utilities used by both portal and admin
+- [ ] All admin pages extracted from portal to admin app
+- [ ] Admin gateway routes extracted from api-gateway
+- [ ] Portal and api-gateway simplified after extraction
 
 ### Out of Scope
 
@@ -77,18 +94,19 @@ v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features i
 ## Context
 
 **Current codebase:**
-- ~17,000+ lines added across v5.0 milestone
 - Tech stack: Fastify, TypeScript, Supabase Postgres, Next.js 16, jose (ES256 JWT), svix (webhook verification)
 - 16 microservices including gpt-service
-- gpt-service: OAuth2 provider, 5 GPT action endpoints, OpenAPI schema, audit pipeline
+- Portal admin: 59 files, ~15k lines, 30 routes across 8 sections
+- Api-gateway: 22 v2 route files, 6.6k lines, 530-line index.ts
 
-**Key integration points:**
-- `services/gpt-service/` — Custom GPT OAuth2 + action endpoints
-- `services/ats-service/` — Jobs, applications data
-- `services/ai-service/` — AI-powered fit analysis
-- `services/document-service/` — Resume file storage
+**Key integration points for v6.0:**
+- `apps/portal/src/app/portal/admin/` — Admin feature to extract (59 files)
+- `services/api-gateway/src/routes/v2/` — Route files to split (admin vs user)
+- `packages/shared-ui/` — Existing shared UI components
 - `packages/shared-access-context/` — resolveAccessContext for RBAC
-- `services/api-gateway/` — Routes to domain services
+- `@/hooks/use-standard-list` — Portal hook to extract to shared package
+- `@/lib/api-client` — Portal utility to extract to shared package
+- `@/lib/toast-context` — Portal utility to extract to shared package
 
 ## Constraints
 
@@ -125,5 +143,9 @@ v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features i
 | Dual-auth pattern | GPT Bearer tokens for ChatGPT, x-gpt-clerk-user-id header for candidate profile page. Both supported. | ✓ Good |
 | In-memory confirmation token store | 15-min TTL, tokens regenerated easily. Simple for MVP, migrate to Redis if needed later. | ✓ Good |
 
+| Separate admin app from portal | Admin is a different persona with different workflows. 59 files, 15k lines is a full app. Reduces portal complexity. | — Pending |
+| Separate admin gateway | Api-gateway is 6.6k lines across 22 route files. Admin routes have different auth model (is_platform_admin). Reduces gateway complexity. | — Pending |
+| User handles Clerk instance | New Clerk app for admin. User will configure. | — Pending |
+
 ---
-*Last updated: 2026-02-13 after v5.0 milestone complete*
+*Last updated: 2026-02-27 after v6.0 milestone started*
