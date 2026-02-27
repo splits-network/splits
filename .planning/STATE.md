@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 17 of 19 (Admin App & Gateway Scaffold)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-27 -- Completed 17-01 admin-gateway service scaffold
+Last activity: 2026-02-27 -- Completed 17-02 admin app scaffold (Next.js 16 + Clerk + DaisyUI)
 
 Progress: [#################.] 84% (16/19 phases complete across all milestones)
 
@@ -47,6 +47,9 @@ Recent decisions affecting current work:
 - [17-01]: verifyToken only (no createClerkClient) -- admin gateway only verifies JWTs, no Clerk API calls needed
 - [17-01]: ADMIN_CLERK_SECRET_KEY via getEnvOrThrow directly -- no loadAdminClerkConfig added to shared-config (single-use)
 - [17-01]: PORT default 3020 set via process.env before loadBaseConfig -- avoids conflicts with api-gateway (3000) and services (3001-3017)
+- [17-02]: Custom sign-in form over Clerk SignIn component -- matches portal UX pattern
+- [17-02]: user-button-client.tsx extraction -- keeps secure/page.tsx server component while enabling Clerk UserButton
+- [17-02]: postcss.config.mjs uses @tailwindcss/postcss not tailwindcss -- required for TailwindCSS v4
 
 ### Pending Todos
 
@@ -59,10 +62,10 @@ See previous STATE.md versions for full list if needed.
 
 ## Session Continuity
 
-Last session: 2026-02-27T23:17:16Z
-Stopped at: Completed 17-01-PLAN.md (admin-gateway service)
+Last session: 2026-02-27T23:59:00Z
+Stopped at: Completed 17-02-PLAN.md (admin app scaffold)
 Resume file: None
-Next: Execute 17-02-PLAN.md (admin app scaffold)
+Next: Execute 17-03-PLAN.md (Dockerfiles + K8s + CI/CD)
 
 ---
 *Created: 2026-02-12*
