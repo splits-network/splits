@@ -63,6 +63,11 @@ export function SpeedMenu({
         <details
             ref={detailsRef}
             className={`dropdown dropdown-end ${className}`}
+            onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                    close();
+                }
+            }}
         >
             <summary
                 className={`btn ${sizeClass[size]} ${triggerVariant} gap-1.5 list-none`}
@@ -117,7 +122,7 @@ export function SpeedMenu({
                             <button
                                 onClick={() => {
                                     action.onClick?.();
-                                    close();
+                                    if (!action.keepOpen) close();
                                 }}
                                 title={action.title ?? action.label}
                                 disabled={action.disabled || action.loading}

@@ -421,6 +421,7 @@ export default function ActionsToolbar({
                 actions.loading === "back-to-draft" ||
                 actions.loading === "return-to-draft",
             disabled: isLoading,
+            keepOpen: confirmAction !== "back-to-draft",
             onClick: () =>
                 handleConfirmClick("back-to-draft", handleBackToDraft),
         });
@@ -438,6 +439,7 @@ export default function ActionsToolbar({
             loading:
                 actions.loading === "submit" || actions.loading === "submit-ai",
             disabled: isLoading,
+            keepOpen: confirmAction !== "submit",
             onClick: () => handleConfirmClick("submit", handleSubmit),
         });
     }
@@ -453,6 +455,7 @@ export default function ActionsToolbar({
             variant: "btn-error",
             loading: actions.loading === "withdraw",
             disabled: isLoading,
+            keepOpen: confirmAction !== "withdraw",
             onClick: () => handleConfirmClick("withdraw", handleWithdraw),
         });
     }
