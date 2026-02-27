@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 17 of 19 (Admin App & Gateway Scaffold)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-27 -- Completed 17-02 admin app scaffold (Next.js 16 + Clerk + DaisyUI)
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-02-27 -- Completed 17-03 Dockerfiles, K8s manifests, and CI/CD pipeline
 
-Progress: [#################.] 84% (16/19 phases complete across all milestones)
+Progress: [##################] 89% (17/19 phases complete across all milestones)
 
 ## Performance Metrics
 
@@ -50,6 +50,9 @@ Recent decisions affecting current work:
 - [17-02]: Custom sign-in form over Clerk SignIn component -- matches portal UX pattern
 - [17-02]: user-button-client.tsx extraction -- keeps secure/page.tsx server component while enabling Clerk UserButton
 - [17-02]: postcss.config.mjs uses @tailwindcss/postcss not tailwindcss -- required for TailwindCSS v4
+- [17-03]: admin-gateway in ALL_SERVICES (backend service, not app) -- correct change-detection triggers
+- [17-03]: Deploy order gateway before app -- isPlatformAdmin gate calls gateway at startup
+- [17-03]: Ingress appended to existing splits-network-ingress -- keeps TLS certificates consolidated
 
 ### Pending Todos
 
@@ -62,10 +65,10 @@ See previous STATE.md versions for full list if needed.
 
 ## Session Continuity
 
-Last session: 2026-02-27T23:59:00Z
-Stopped at: Completed 17-02-PLAN.md (admin app scaffold)
+Last session: 2026-02-27T23:25:01Z
+Stopped at: Completed 17-03-PLAN.md (Dockerfiles + K8s + CI/CD) -- Phase 17 complete
 Resume file: None
-Next: Execute 17-03-PLAN.md (Dockerfiles + K8s + CI/CD)
+Next: Phase 18 (admin pages migration)
 
 ---
 *Created: 2026-02-12*
