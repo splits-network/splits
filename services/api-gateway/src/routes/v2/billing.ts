@@ -955,6 +955,85 @@ function registerPublicPlansRoute(app: FastifyInstance, services: ServiceRegistr
     );
 }
 
+function registerPublicSplitsRatesRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    // Public access to list splits rates for pricing calculator
+    app.get(
+        '/api/v2/splits-rates',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+
+            try {
+                const data = await billingService().get(
+                    '/api/v2/splits-rates',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    {}
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch splits rates');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch splits rates' } });
+            }
+        }
+    );
+
+    // Public access to get rate for a specific plan
+    app.get(
+        '/api/v2/splits-rates/:planId',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const { planId } = request.params as { planId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/splits-rates/${planId}`,
+                    undefined,
+                    correlationId,
+                    {}
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch splits rate');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch splits rate' } });
+            }
+        }
+    );
+
+    // Admin-only: update splits rates for a plan
+    app.patch(
+        '/api/v2/splits-rates/:planId',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { planId } = request.params as { planId: string };
+
+            try {
+                const data = await billingService().patch(
+                    `/api/v2/splits-rates/${planId}`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to update splits rate');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to update splits rate' } });
+            }
+        }
+    );
+}
+
 function registerEscrowHoldStatsRoute(app: FastifyInstance, services: ServiceRegistry) {
     const billingService = () => services.get('billing');
 
@@ -991,6 +1070,7 @@ export function registerBillingRoutes(app: FastifyInstance, services: ServiceReg
 
     // Register PUBLIC routes FIRST (must be before auth routes that conflict)
     registerPublicPlansRoute(app, services);
+    registerPublicSplitsRatesRoute(app, services);
 
     // Register specific auth-required routes (including /stats sub-routes that must come before generic :id routes)
     registerSubscriptionMeRoute(app, services);

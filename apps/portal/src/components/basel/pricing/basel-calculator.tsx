@@ -5,9 +5,17 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useCalculator } from "@/components/calculator/use-calculator";
-import { ROLE_META } from "@/components/calculator/commission-rates";
+import { useSplitsRates } from "@/components/calculator/use-splits-rates";
 import { AnimatedPayout } from "@/components/calculator/animated-payout";
-import type { Tier, RecruiterRole } from "@/components/calculator/types";
+import type { Tier, RecruiterRole, RoleMeta } from "@/components/calculator/types";
+
+const ROLE_META: RoleMeta[] = [
+    { id: 'candidate_recruiter', label: 'Candidate Recruiter', description: 'Found and represents the candidate' },
+    { id: 'job_owner', label: 'Job Owner', description: 'Owns the job requisition relationship' },
+    { id: 'company_recruiter', label: 'Company Recruiter', description: 'Sourced and manages company relationship' },
+    { id: 'candidate_sourcer', label: 'Candidate Sourcer', description: 'Initially sourced the candidate' },
+    { id: 'company_sourcer', label: 'Company Sourcer', description: 'Initially sourced the company' },
+];
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -52,6 +60,8 @@ export function BaselCalculator({
     const feeId = useId();
     const shouldAnimate = animate ?? variant === "page";
 
+    const { rates, platformTake, tierInfo, loading: ratesLoading, error: ratesError } = useSplitsRates();
+
     const initialState: Record<string, number> = {};
     if (initialSalary !== undefined) initialState.salary = initialSalary;
     if (initialFeePercentage !== undefined)
@@ -66,6 +76,7 @@ export function BaselCalculator({
         setFeePercentage,
         toggleRole,
     } = useCalculator(
+        { rates, platformTake, tierInfo },
         Object.keys(initialState).length > 0 ? initialState : undefined,
     );
 
@@ -405,6 +416,29 @@ export function BaselCalculator({
             </div>
         </div>
     );
+
+    /* ── Loading / Error states ───────────────────────────────────────────── */
+
+    if (ratesLoading) {
+        return (
+            <div className={className}>
+                <div className="flex items-center justify-center py-16">
+                    <span className="loading loading-spinner loading-lg text-primary" />
+                </div>
+            </div>
+        );
+    }
+
+    if (ratesError) {
+        return (
+            <div className={className}>
+                <div className="border-l-4 border-error bg-error/10 rounded-none p-6">
+                    <p className="font-bold text-sm text-base-content mb-1">Unable to load commission rates</p>
+                    <p className="text-sm text-base-content/60">{ratesError}</p>
+                </div>
+            </div>
+        );
+    }
 
     /* ── Compact variant ──────────────────────────────────────────────────── */
 

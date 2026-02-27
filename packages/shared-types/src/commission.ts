@@ -18,6 +18,11 @@ export type SubscriptionTier = 'premium' | 'paid' | 'free';
 /**
  * Commission rates by subscription tier
  * All values are percentages (0-100)
+ *
+ * NOTE: Commission rates are now database-driven via the splits_rates table.
+ * These types are kept for compatibility with code that needs the shape.
+ * The platform remainder is NOT stored — it is computed dynamically as:
+ *   100 - sum(filled role rates) per placement.
  */
 export interface CommissionRatesByTier {
     candidate_recruiter: number;  // Closer
@@ -25,62 +30,7 @@ export interface CommissionRatesByTier {
     company_recruiter: number;    // Client/Hiring Facilitator
     candidate_sourcer: number;    // Discovery (base 6% + tier bonus)
     company_sourcer: number;      // BD (base 6% + tier bonus)
-    platform_remainder: number;   // Platform's share
 }
-
-/**
- * Commission rates for all three subscription tiers
- * 
- * Premium Plan ($249/month):
- * - Candidate Recruiter: 40%
- * - Job Owner: 20%
- * - Company Recruiter: 20%
- * - Company Sourcer: 6% + 4% bonus = 10%
- * - Candidate Sourcer: 6% + 4% bonus = 10%
- * - Platform Remainder: 0%
- * 
- * Paid Plan ($99/month):
- * - Candidate Recruiter: 30%
- * - Job Owner: 15%
- * - Company Recruiter: 15%
- * - Company Sourcer: 6% + 2% bonus = 8%
- * - Candidate Sourcer: 6% + 2% bonus = 8%
- * - Platform Remainder: 24%
- * 
- * Free Plan ($0/month):
- * - Candidate Recruiter: 20%
- * - Job Owner: 10%
- * - Company Recruiter: 10%
- * - Company Sourcer: 6%
- * - Candidate Sourcer: 6%
- * - Platform Remainder: 48%
- */
-export const COMMISSION_RATES: Record<SubscriptionTier, CommissionRatesByTier> = {
-    premium: {
-        candidate_recruiter: 40,
-        job_owner: 20,
-        company_recruiter: 20,
-        candidate_sourcer: 10,  // 6% base + 4% bonus
-        company_sourcer: 10,    // 6% base + 4% bonus
-        platform_remainder: 0,
-    },
-    paid: {
-        candidate_recruiter: 30,
-        job_owner: 15,
-        company_recruiter: 15,
-        candidate_sourcer: 8,   // 6% base + 2% bonus
-        company_sourcer: 8,     // 6% base + 2% bonus
-        platform_remainder: 24,
-    },
-    free: {
-        candidate_recruiter: 20,
-        job_owner: 10,
-        company_recruiter: 10,
-        candidate_sourcer: 6,   // 6% base only
-        company_sourcer: 6,     // 6% base only
-        platform_remainder: 48,
-    },
-};
 
 /**
  * Breakdown of commission amounts for a placement

@@ -140,7 +140,6 @@ async function main() {
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
     const snapshotRepository = new PlacementSnapshotRepository(supabase);
-    const snapshotService = new PlacementSnapshotService(snapshotRepository);
 
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = new OutboxPublisher(supabase, baseConfig.serviceName, logger);
@@ -148,13 +147,15 @@ async function main() {
     outboxWorker.start();
     logger.info('📤 Outbox worker started - events will be durably delivered');
 
-    // Register V2 routes (plans, subscriptions, payouts)
-    // This also initializes PayoutServiceV2
+    // Register V2 routes (plans, subscriptions, payouts, splits-rates)
     const v2Services = await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
         eventPublisher: outboxPublisher,
     });
+
+    // Create snapshot service with DB-driven rates (must be after V2 routes init)
+    const snapshotService = new PlacementSnapshotService(snapshotRepository, v2Services.splitsRateService);
 
     // Phase 6: Initialize billing event consumer with payout service
     const systemUserId = getEnvOrThrow('SYSTEM_USER_ID');

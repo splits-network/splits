@@ -3,24 +3,48 @@ import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers'
 import type { AccessContext } from '../shared/access';
 import { PlanRepository } from './repository';
 import { Plan, PlanCreateInput, PlanListFilters, PlanUpdateInput } from './types';
+import type { SplitsRateService } from '../splits-rates/service';
 
 export class PlanServiceV2 {
+    private splitsRateService?: SplitsRateService;
+
     constructor(
         private repository: PlanRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: IEventPublisher
     ) {}
 
+    /** Inject splits rate service for enriching plan responses */
+    setSplitsRateService(service: SplitsRateService) {
+        this.splitsRateService = service;
+    }
+
     async getPlans(filters: PlanListFilters = {}): Promise<{
-        data: Plan[];
+        data: (Plan & { splits_rate?: any })[];
         pagination: ReturnType<typeof buildPaginationResponse>;
     }> {
         const page = filters.page ?? 1;
         const limit = filters.limit ?? 25;
         const { data, total } = await this.repository.listPlans(filters);
 
+        // Enrich plans with active splits rates
+        let enrichedData = data as (Plan & { splits_rate?: any })[];
+        if (this.splitsRateService) {
+            try {
+                const activeRates = await this.splitsRateService.getActiveRates();
+                const ratesByPlanId = new Map(activeRates.map(r => [r.plan_id, r]));
+
+                enrichedData = data.map(plan => ({
+                    ...plan,
+                    splits_rate: ratesByPlanId.get(plan.id) || null,
+                }));
+            } catch {
+                // If rates fail to load, return plans without rates
+            }
+        }
+
         return {
-            data,
+            data: enrichedData,
             pagination: buildPaginationResponse(page, limit, total),
         };
     }

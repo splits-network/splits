@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { CalculatorState, TierPayout, RecruiterRole, Tier } from './types';
-import { COMMISSION_RATES, PLATFORM_TAKE, TIER_INFO } from './commission-rates';
+import { CalculatorState, TierPayout, RecruiterRole, Tier, CommissionRates } from './types';
 
 const TIERS: Tier[] = ['free', 'paid', 'premium'];
 
@@ -12,7 +11,23 @@ const DEFAULT_STATE: CalculatorState = {
   selectedRoles: ['candidate_recruiter'], // Default to most common role
 };
 
-export function useCalculator(initialState?: Partial<CalculatorState>) {
+const EMPTY_RATES: CommissionRates = {
+  candidate_recruiter: 0, job_owner: 0, company_recruiter: 0,
+  candidate_sourcer: 0, company_sourcer: 0,
+};
+
+export interface UseCalculatorConfig {
+  /** Commission rates by tier (0-1 decimal format). Null while loading. */
+  rates: Record<Tier, CommissionRates> | null;
+  /** Platform take by tier (0-1 decimal format). Null while loading. */
+  platformTake: Record<Tier, number> | null;
+  /** Tier display info. Null while loading. */
+  tierInfo: Record<Tier, { name: string; monthlyPrice: number }> | null;
+}
+
+export function useCalculator(config: UseCalculatorConfig, initialState?: Partial<CalculatorState>) {
+  const { rates, platformTake, tierInfo } = config;
+
   const [state, setState] = useState<CalculatorState>({
     ...DEFAULT_STATE,
     ...initialState,
@@ -25,11 +40,11 @@ export function useCalculator(initialState?: Partial<CalculatorState>) {
 
   // Calculate payout for a given tier based on selected roles
   const calculateTierPayout = (tier: Tier): number => {
-    if (state.selectedRoles.length === 0) return 0;
+    if (!rates || state.selectedRoles.length === 0) return 0;
 
-    const rates = COMMISSION_RATES[tier];
+    const tierRates = rates[tier] || EMPTY_RATES;
     const totalRate = state.selectedRoles.reduce((sum, role) => {
-      return sum + rates[role];
+      return sum + tierRates[role];
     }, 0);
 
     return effectiveFee * totalRate;
@@ -39,13 +54,13 @@ export function useCalculator(initialState?: Partial<CalculatorState>) {
   const payouts = useMemo((): TierPayout[] => {
     return TIERS.map((tier) => ({
       tier,
-      tierName: TIER_INFO[tier].name,
-      monthlyPrice: TIER_INFO[tier].monthlyPrice,
+      tierName: tierInfo?.[tier]?.name || tier,
+      monthlyPrice: tierInfo?.[tier]?.monthlyPrice || 0,
       payout: calculateTierPayout(tier),
-      platformTake: effectiveFee * PLATFORM_TAKE[tier],
+      platformTake: effectiveFee * (platformTake?.[tier] || 0),
     }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveFee, state.selectedRoles]);
+  }, [effectiveFee, state.selectedRoles, rates, platformTake, tierInfo]);
 
   // Calculate upgrade value (difference between paid/premium and free)
   const upgradeValue = useMemo(() => {
