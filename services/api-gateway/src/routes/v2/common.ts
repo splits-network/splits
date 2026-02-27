@@ -15,7 +15,8 @@ export type ServiceName =
     | 'search'
     | 'gpt'
     | 'content'
-    | 'integration';
+    | 'integration'
+    | 'matching';
 
 export interface ResourceDefinition {
     name: string;

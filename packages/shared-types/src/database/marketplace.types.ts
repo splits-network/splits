@@ -13,14 +13,6 @@ type DbTableInsert<T extends keyof Database['public']['Tables']> = TablesInsert<
 type DbTableUpdate<T extends keyof Database['public']['Tables']> = TablesUpdate<T>;
 
 // ============================================================================
-// CANDIDATE ROLE MATCHES
-// ============================================================================
-
-export type CandidateRoleMatch = DbTable<'candidate_role_matches'>;
-export type CandidateRoleMatchInsert = DbTableInsert<'candidate_role_matches'>;
-export type CandidateRoleMatchUpdate = DbTableUpdate<'candidate_role_matches'>;
-
-// ============================================================================
 // FRAUD SIGNALS
 // ============================================================================
 

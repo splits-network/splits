@@ -461,6 +461,7 @@ async function main() {
     services.register('gpt', process.env.GPT_SERVICE_URL || 'http://localhost:3014');
     services.register('content', process.env.CONTENT_SERVICE_URL || 'http://localhost:3015');
     services.register('integration', process.env.INTEGRATION_SERVICE_URL || 'http://localhost:3016');
+    services.register('matching', process.env.MATCHING_SERVICE_URL || 'http://localhost:3017');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(
