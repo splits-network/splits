@@ -40,7 +40,7 @@ function UserCell({ user }: { user: AdminUser }) {
                     {user.avatar_url ? (
                         <img src={user.avatar_url} alt={name} />
                     ) : (
-                        <span className="text-xs font-bold">{name.charAt(0).toUpperCase()}</span>
+                        <span className="text-sm font-bold">{name.charAt(0).toUpperCase()}</span>
                     )}
                 </div>
             </div>
@@ -53,7 +53,6 @@ const COLUMNS: Column<AdminUser>[] = [
     {
         key: 'name',
         label: 'Name',
-        sortable: false,
         render: (user) => <UserCell user={user} />,
     },
     {
@@ -94,30 +93,16 @@ const COLUMNS: Column<AdminUser>[] = [
 
 export function UserTable() {
     const router = useRouter();
-    const {
-        items,
-        loading,
-        filters,
-        total,
-        totalPages,
-        page,
-        setFilter,
-        setPage,
-        sortBy,
-        sortOrder,
-        handleSort,
-    } = useStandardList<AdminUser>({
-        endpoint: '/admin/identity/admin/users',
-        defaultFilters: { search: '' },
-        defaultLimit: 25,
-    });
+    const { data, loading, filters, total, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
+        useStandardList<AdminUser>({
+            endpoint: '/admin/identity/admin/users',
+            defaultFilters: { search: '' },
+            defaultLimit: 25,
+        });
 
     return (
         <div>
-            <AdminPageHeader
-                title="Users"
-                subtitle={`${total} total users`}
-            />
+            <AdminPageHeader title="Users" subtitle={`${total} total users`} />
 
             <div className="flex items-center gap-3 mb-4">
                 <label className="input input-sm flex items-center gap-2 flex-1 max-w-sm">
@@ -135,7 +120,7 @@ export function UserTable() {
             <div className="card bg-base-100 border border-base-200">
                 <AdminDataTable
                     columns={COLUMNS}
-                    data={items}
+                    data={data}
                     loading={loading}
                     sortField={sortBy}
                     sortDir={sortOrder}
@@ -150,11 +135,7 @@ export function UserTable() {
                 <div className="flex justify-center mt-4">
                     <div className="join">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`}
-                                onClick={() => setPage(p)}
-                            >
+                            <button key={p} className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`} onClick={() => goToPage(p)}>
                                 {p}
                             </button>
                         ))}

@@ -7,21 +7,14 @@ import { FraudTable, type FraudSignal } from './components/fraud-table';
 const SEVERITY_OPTIONS = ['all', 'critical', 'high', 'medium', 'low'] as const;
 
 export default function FraudPage() {
-    const {
-        items,
-        loading,
-        sortBy,
-        sortOrder,
-        handleSort,
-        filters,
-        setFilter,
-    } = useStandardList<FraudSignal, { severity: string; resolved: string }>({
-        endpoint: '/admin/fraud/admin/signals',
-        defaultSortBy: 'detected_at',
-        defaultSortOrder: 'desc',
-        defaultFilters: { severity: 'all', resolved: 'false' },
-        syncToUrl: true,
-    });
+    const { data, loading, sortBy, sortOrder, handleSort, filters, setFilter } =
+        useStandardList<FraudSignal, { severity: string; resolved: string }>({
+            endpoint: '/admin/fraud/admin/signals',
+            defaultSortBy: 'detected_at',
+            defaultSortOrder: 'desc',
+            defaultFilters: { severity: 'all', resolved: 'false' },
+            syncToUrl: true,
+        });
 
     return (
         <div className="p-6">
@@ -56,7 +49,7 @@ export default function FraudPage() {
             <div className="card bg-base-100 shadow-sm border border-base-200">
                 <div className="card-body p-0">
                     <FraudTable
-                        data={items}
+                        data={data}
                         loading={loading}
                         sortField={sortBy}
                         sortDir={sortOrder}

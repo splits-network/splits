@@ -26,9 +26,7 @@ function StatusBadge({ status }: { status: string }) {
         hired: 'badge-success',
     };
     return (
-        <span className={`badge badge-sm ${map[status] ?? 'badge-ghost'} capitalize`}>
-            {status}
-        </span>
+        <span className={`badge badge-sm ${map[status] ?? 'badge-ghost'} capitalize`}>{status}</span>
     );
 }
 
@@ -41,7 +39,7 @@ const COLUMNS: Column<JobApplication>[] = [
                 <p className="font-medium text-sm">
                     {app.candidate.first_name} {app.candidate.last_name}
                 </p>
-                <p className="text-xs text-base-content/50">{app.candidate.email}</p>
+                <p className="text-sm text-base-content/50">{app.candidate.email}</p>
             </div>
         ) : (
             <span className="text-base-content/40 text-sm">Unknown</span>
@@ -75,7 +73,7 @@ const COLUMNS: Column<JobApplication>[] = [
 type Props = { jobId: string };
 
 export function JobCandidates({ jobId }: Props) {
-    const { items, loading, total, totalPages, page, setPage } = useStandardList<JobApplication>({
+    const { data, loading, total, totalPages, page, goToPage } = useStandardList<JobApplication>({
         endpoint: '/admin/ats/admin/applications',
         defaultFilters: { job_id: jobId },
         defaultLimit: 25,
@@ -84,14 +82,14 @@ export function JobCandidates({ jobId }: Props) {
 
     return (
         <div>
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-3">
                 <p className="text-sm text-base-content/60">{total} matched candidates</p>
             </div>
 
             <div className="card bg-base-100 border border-base-200">
                 <AdminDataTable
                     columns={COLUMNS}
-                    data={items}
+                    data={data}
                     loading={loading}
                     emptyTitle="No candidates"
                     emptyDescription="No candidates have applied to this job."
@@ -102,11 +100,7 @@ export function JobCandidates({ jobId }: Props) {
                 <div className="flex justify-center mt-4">
                     <div className="join">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`}
-                                onClick={() => setPage(p)}
-                            >
+                            <button key={p} className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`} onClick={() => goToPage(p)}>
                                 {p}
                             </button>
                         ))}

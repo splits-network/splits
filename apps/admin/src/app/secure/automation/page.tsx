@@ -10,7 +10,7 @@ import { RuleTable, type AutomationRule } from './components/rule-table';
 export default function AutomationPage() {
     const { getToken } = useAuth();
     const { success, error } = useAdminToast();
-    const { items, loading, sortBy: sortField, sortOrder: sortDir, handleSort: setSort, refetch } = useStandardList<AutomationRule>({
+    const { data, loading, sortBy, sortOrder, handleSort, refresh } = useStandardList<AutomationRule>({
         endpoint: '/admin/automation/admin/rules',
         defaultSortBy: 'name',
         defaultSortOrder: 'asc',
@@ -26,13 +26,13 @@ export default function AutomationPage() {
                 is_active: !rule.is_active,
             });
             success(`Rule "${rule.name}" ${rule.is_active ? 'disabled' : 'enabled'}`);
-            refetch();
+            refresh();
         } catch {
             error('Failed to update rule status');
         }
     }
 
-    if (!loading && items.length === 0) {
+    if (!loading && data.length === 0) {
         return (
             <div className="p-6">
                 <AdminPageHeader
@@ -58,11 +58,11 @@ export default function AutomationPage() {
             <div className="card bg-base-100 shadow-sm border border-base-200">
                 <div className="card-body p-0">
                     <RuleTable
-                        data={items}
+                        data={data}
                         loading={loading}
-                        sortField={sortField}
-                        sortDir={sortDir}
-                        onSort={setSort}
+                        sortField={sortBy}
+                        sortDir={sortOrder}
+                        onSort={handleSort}
                         onToggle={handleToggle}
                     />
                 </div>

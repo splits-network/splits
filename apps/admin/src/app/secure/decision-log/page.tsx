@@ -7,7 +7,7 @@ import { DecisionTable, type DecisionLogEntry } from './components/decision-tabl
 const DECISION_TYPES = ['all', 'match_scoring', 'fraud_check', 'recruiter_approval', 'payment_hold'] as const;
 
 export default function DecisionLogPage() {
-    const { items, loading, sortBy, sortOrder, handleSort, filters, setFilter } =
+    const { data, loading, sortBy, sortOrder, handleSort, filters, setFilter } =
         useStandardList<DecisionLogEntry, { decision_type: string }>({
             endpoint: '/admin/decisions/admin/log',
             defaultSortBy: 'decided_at',
@@ -42,7 +42,7 @@ export default function DecisionLogPage() {
             <div className="card bg-base-100 shadow-sm border border-base-200">
                 <div className="card-body p-0">
                     <DecisionTable
-                        data={items}
+                        data={data}
                         loading={loading}
                         sortField={sortBy}
                         sortDir={sortOrder}
