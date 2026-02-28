@@ -1,5 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import { RealtimeProvider } from '@/providers/realtime-provider';
+import { ToastProvider } from '@/providers/toast-provider';
+import { SecureShell } from './secure-shell';
 
 export default async function SecureLayout({ children }: { children: React.ReactNode }) {
     const { userId, getToken } = await auth();
@@ -33,5 +36,11 @@ export default async function SecureLayout({ children }: { children: React.React
         redirect('/unauthorized');
     }
 
-    return <>{children}</>;
+    return (
+        <RealtimeProvider>
+            <ToastProvider>
+                <SecureShell>{children}</SecureShell>
+            </ToastProvider>
+        </RealtimeProvider>
+    );
 }
