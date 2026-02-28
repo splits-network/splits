@@ -6,7 +6,7 @@
 - v3.0 Platform Admin Restructure (Phases 4-7) -- shipped 2026-02-13
 - v4.0 Commute Types & Job Levels (Phases 8-10) -- shipped 2026-02-13
 - v5.0 Custom GPT / Applicant Network (Phases 11-15) -- shipped 2026-02-13
-- v6.0 Admin App Extraction (Phases 16-19) -- shipped 2026-02-28
+- v6.0 Admin App Extraction (Phases 16-20) -- in progress
 
 ## Phases
 
@@ -125,10 +125,27 @@ Plans:
 - [x] 19-01-PLAN.md — Remove admin navigation, redirect stubs, dashboard view, and unused hooks from portal
 - [x] 19-02-PLAN.md — Remove admin-specific routes from api-gateway (chat, site-notifications, content)
 
+#### Phase 20: Admin Integration & Deployment Fixes
+**Goal**: Admin app is fully functional end-to-end — login works, sidebar counts load, real-time updates deliver, and Docker builds succeed
+**Depends on**: Phase 19
+**Requirements**: APP-03 (fix), APP-06 (fix)
+**Gap Closure**: Closes all 6 gaps from v6.0-MILESTONE-AUDIT.md
+**Success Criteria** (what must be TRUE):
+  1. Admin app login flow succeeds — secure/layout.tsx isPlatformAdmin check returns true for platform admins
+  2. Sidebar badge counts load via useRealtimeCounts on initial page load
+  3. Activity feed loads via useAdminActivity from identity-service `/admin/activity` route
+  4. WebSocket messages deliver with `{channel, data}` envelope and client callbacks fire
+  5. Admin Dockerfile builds successfully with shared-charts package included
+  6. `docker-compose up` starts admin app alongside all other services
+**Plans**: 1 plan
+
+Plans:
+- [ ] 20-01-PLAN.md — Fix all integration and deployment gaps from milestone audit
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 16 -> 17 -> 18 -> 19
+Phases execute in numeric order: 16 -> 17 -> 18 -> 19 -> 20
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -151,7 +168,8 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19
 | 17. Admin App & Gateway Scaffold | v6.0 | 3/3 | Complete | 2026-02-27 |
 | 18. Page Migration | v6.0 | 10/10 | Complete | 2026-02-28 |
 | 19. Portal & Gateway Cleanup | v6.0 | 2/2 | Complete | 2026-02-28 |
+| 20. Admin Integration & Deployment Fixes | v6.0 | 0/1 | Pending | — |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-28 (Phase 19 complete — v6.0 milestone shipped)*
+*Last updated: 2026-02-28 (Phase 20 added — gap closure from milestone audit)*
