@@ -88,15 +88,6 @@ export function UserDropdown() {
             });
         }
 
-        if (isAdmin) {
-            items.push({
-                href: "/portal/admin",
-                icon: "fa-duotone fa-regular fa-gauge-high",
-                label: "Admin App",
-                description: "Platform administration",
-            });
-        }
-
         return items;
     }, [isRecruiter, isCompanyUser, isAdmin]);
 
