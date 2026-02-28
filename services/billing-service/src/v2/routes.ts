@@ -35,6 +35,9 @@ import { SplitsRateRepository } from './splits-rates/repository';
 import { SplitsRateService } from './splits-rates/service';
 import { registerSplitsRateRoutes } from './splits-rates/routes';
 import { resolveAccessContext } from './shared/access';
+import { AdminBillingRepository } from './admin/repository';
+import { AdminBillingService } from './admin/service';
+import { registerAdminBillingRoutes } from './admin/routes';
 
 interface BillingV2Config {
     supabaseUrl: string;
@@ -142,6 +145,11 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     await payoutScheduleRoutes(app, payoutScheduleService, accessClient);
     await escrowHoldRoutes(app, escrowHoldService, accessClient);
     await placementPayoutAuditRoutes(app, auditRepository);
+
+    // Admin routes (permissive, no access filtering)
+    const adminBillingRepository = new AdminBillingRepository(config.supabaseUrl, config.supabaseKey);
+    const adminBillingService = new AdminBillingService(adminBillingRepository);
+    registerAdminBillingRoutes(app, { adminService: adminBillingService });
 
     // Phase 6: Return services for use by event consumers
     return {

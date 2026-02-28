@@ -22,6 +22,9 @@ import { TeamRepository } from './teams/repository';
 import { TeamServiceV2 } from './teams/service';
 import { registerTeamRoutes } from './teams/routes';
 import { createClient } from '@supabase/supabase-js';
+import { AdminNetworkRepository } from './admin/repository';
+import { AdminNetworkService } from './admin/service';
+import { registerAdminNetworkRoutes } from './admin/routes';
 
 interface V2Config {
     supabaseUrl: string;
@@ -69,4 +72,9 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
 
     // Register recruiter referral code routes
     await recruiterCodeRoutes(app, supabase, config.eventPublisher);
+
+    // Admin routes (permissive, no access filtering)
+    const adminRepository = new AdminNetworkRepository(config.supabaseUrl, config.supabaseKey);
+    const adminService = new AdminNetworkService(adminRepository);
+    registerAdminNetworkRoutes(app, { adminService });
 }
