@@ -2,12 +2,11 @@
 
 import { useUserProfile } from "@/contexts";
 import { LoadingState } from "@splits-network/shared-ui";
-import AdminView from "@/components/basel/dashboard/views/admin-view";
 import RecruiterView from "@/components/basel/dashboard/views/recruiter-view";
 import CompanyView from "@/components/basel/dashboard/views/company-view";
 
 export default function DashboardClient() {
-    const { profile, isLoading, error, isAdmin, isRecruiter, isCompanyUser } =
+    const { profile, isLoading, error, isRecruiter, isCompanyUser } =
         useUserProfile();
 
     if (isLoading || !profile) {
@@ -31,7 +30,6 @@ export default function DashboardClient() {
         );
     }
 
-    if (isAdmin) return <AdminView />;
     if (isCompanyUser) return <CompanyView />;
     if (isRecruiter) return <RecruiterView />;
 
