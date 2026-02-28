@@ -15,6 +15,7 @@ import Redis from 'ioredis';
 import { createClient } from '@supabase/supabase-js';
 import { AdminAuthMiddleware } from './auth';
 import { registerAdminRoutes } from './routes';
+import { setupRealtimeServer } from './realtime';
 
 async function main() {
     // Set PORT default before loadBaseConfig reads it (admin-gateway uses 3020, not the 3000 default)
@@ -126,6 +127,13 @@ async function main() {
     try {
         await app.listen({ port: baseConfig.port, host: '0.0.0.0' });
         logger.info(`Admin Gateway listening on port ${baseConfig.port}`);
+
+        // Attach WebSocket server for real-time admin updates
+        setupRealtimeServer(app.server, {
+            clerkSecretKey: adminClerkSecretKey,
+            supabaseUrl: dbConfig.supabaseUrl,
+            supabaseServiceRoleKey: supabaseServiceRoleKey,
+        }, redis);
     } catch (err) {
         logger.error(err);
         await redis.quit();
