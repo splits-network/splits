@@ -99,16 +99,16 @@ Plans:
 **Plans**: 10 plans
 
 Plans:
-- [ ] 18-01-PLAN.md -- Shared charts package (ECharts components)
-- [ ] 18-02-PLAN.md -- Real-time infrastructure (WebSocket for admin)
-- [ ] 18-03-PLAN.md -- Admin backend routes (/admin/ prefix in domain services)
-- [ ] 18-04-PLAN.md -- Admin layout, sidebar, and shared page components
-- [ ] 18-05-PLAN.md -- Admin dashboard with charts, stats, and activity feed
-- [ ] 18-06-PLAN.md -- Operations pages (Recruiters, Assignments, Placements, Applications, Notifications)
-- [ ] 18-07-PLAN.md -- Directory pages (Users, Organizations, Companies, Jobs, Candidates)
-- [ ] 18-08-PLAN.md -- Intelligence & Trust pages (Matches, Automation, Fraud, Decision Log, Chat, Ownership, Reputation)
-- [ ] 18-09-PLAN.md -- Finance, Content, Analytics, and Settings pages
-- [ ] 18-10-PLAN.md -- Portal admin page removal and redirect stubs
+- [x] 18-01-PLAN.md -- Shared charts package (ECharts components)
+- [x] 18-02-PLAN.md -- Real-time infrastructure (WebSocket for admin)
+- [x] 18-03-PLAN.md -- Admin backend routes (/admin/ prefix in domain services)
+- [x] 18-04-PLAN.md -- Admin layout, sidebar, and shared page components
+- [x] 18-05-PLAN.md -- Admin dashboard with charts, stats, and activity feed
+- [x] 18-06-PLAN.md -- Operations pages (Recruiters, Assignments, Placements, Applications, Notifications)
+- [x] 18-07-PLAN.md -- Directory pages (Users, Organizations, Companies, Jobs, Candidates)
+- [x] 18-08-PLAN.md -- Intelligence & Trust pages (Matches, Automation, Fraud, Decision Log, Chat, Ownership, Reputation)
+- [x] 18-09-PLAN.md -- Finance, Content, Analytics, and Settings pages
+- [x] 18-10-PLAN.md -- Portal admin page removal and redirect stubs
 
 #### Phase 19: Portal & Gateway Cleanup
 **Goal**: Portal and api-gateway are free of admin code, with clean redirects for bookmarked URLs
@@ -148,9 +148,9 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19
 | 15. Production Hardening | v5.0 | 3/3 | Complete | 2026-02-13 |
 | 16. Shared Packages | v6.0 | 2/2 | Complete | 2026-02-27 |
 | 17. Admin App & Gateway Scaffold | v6.0 | 3/3 | Complete | 2026-02-27 |
-| 18. Page Migration | v6.0 | 0/10 | Not started | - |
+| 18. Page Migration | v6.0 | 10/10 | Complete | 2026-02-28 |
 | 19. Portal & Gateway Cleanup | v6.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-27 (Phase 17 complete)*
+*Last updated: 2026-02-28 (Phase 18 complete)*

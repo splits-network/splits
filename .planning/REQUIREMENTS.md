@@ -19,8 +19,8 @@ Requirements for admin extraction milestone. Each maps to roadmap phases.
 - [x] **APP-01**: Create `apps/admin/` Next.js 16 app with App Router, TailwindCSS, and DaisyUI
 - [x] **APP-02**: Configure Clerk authentication for admin app (separate Clerk instance, user handles setup)
 - [x] **APP-03**: Admin layout with `is_platform_admin` gating at server component level (redirect non-admins)
-- [ ] **APP-04**: Admin sidebar navigation with collapsible sections and dynamic badge counts
-- [ ] **APP-05**: Admin dashboard page with KPI stat tiles and actionable items
+- [x] **APP-04**: Admin sidebar navigation with collapsible sections and dynamic badge counts
+- [x] **APP-05**: Admin dashboard page with KPI stat tiles and actionable items
 - [x] **APP-06**: Dockerfile and K8s deployment manifests for admin app
 - [x] **APP-07**: GitHub Actions CI/CD workflow for admin app
 
@@ -34,23 +34,23 @@ Requirements for admin extraction milestone. Each maps to roadmap phases.
 
 ### Page Migration — Operations
 
-- [ ] **OPS-01**: Migrate recruiters management page to admin app
-- [ ] **OPS-02**: Migrate assignments management page to admin app
-- [ ] **OPS-03**: Migrate placements management page to admin app
-- [ ] **OPS-04**: Migrate applications management page to admin app
-- [ ] **OPS-05**: Migrate notifications management page to admin app
+- [x] **OPS-01**: Migrate recruiters management page to admin app
+- [x] **OPS-02**: Migrate assignments management page to admin app
+- [x] **OPS-03**: Migrate placements management page to admin app
+- [x] **OPS-04**: Migrate applications management page to admin app
+- [x] **OPS-05**: Migrate notifications management page to admin app
 
 ### Page Migration — Directory
 
-- [ ] **DIR-01**: Migrate users management page to admin app
-- [ ] **DIR-02**: Migrate organizations management page to admin app
-- [ ] **DIR-03**: Migrate companies management page to admin app
-- [ ] **DIR-04**: Migrate jobs management page (including job detail view) to admin app
-- [ ] **DIR-05**: Migrate candidates management page to admin app
+- [x] **DIR-01**: Migrate users management page to admin app
+- [x] **DIR-02**: Migrate organizations management page to admin app
+- [x] **DIR-03**: Migrate companies management page to admin app
+- [x] **DIR-04**: Migrate jobs management page (including job detail view) to admin app
+- [x] **DIR-05**: Migrate candidates management page to admin app
 
 ### Page Migration — Settings
 
-- [ ] **SET-01**: Migrate settings page to admin app
+- [x] **SET-01**: Migrate settings page to admin app
 
 ### Cleanup
 
@@ -117,8 +117,8 @@ Remaining admin sections to migrate in follow-up milestone.
 | APP-01 | Phase 17 | Complete |
 | APP-02 | Phase 17 | Complete |
 | APP-03 | Phase 17 | Complete |
-| APP-04 | Phase 18 | Pending |
-| APP-05 | Phase 18 | Pending |
+| APP-04 | Phase 18 | Complete |
+| APP-05 | Phase 18 | Complete |
 | APP-06 | Phase 17 | Complete |
 | APP-07 | Phase 17 | Complete |
 | GW-01 | Phase 17 | Complete |
@@ -126,17 +126,17 @@ Remaining admin sections to migrate in follow-up milestone.
 | GW-03 | Phase 17 | Complete |
 | GW-04 | Phase 17 | Complete |
 | GW-05 | Phase 17 | Complete |
-| OPS-01 | Phase 18 | Pending |
-| OPS-02 | Phase 18 | Pending |
-| OPS-03 | Phase 18 | Pending |
-| OPS-04 | Phase 18 | Pending |
-| OPS-05 | Phase 18 | Pending |
-| DIR-01 | Phase 18 | Pending |
-| DIR-02 | Phase 18 | Pending |
-| DIR-03 | Phase 18 | Pending |
-| DIR-04 | Phase 18 | Pending |
-| DIR-05 | Phase 18 | Pending |
-| SET-01 | Phase 18 | Pending |
+| OPS-01 | Phase 18 | Complete |
+| OPS-02 | Phase 18 | Complete |
+| OPS-03 | Phase 18 | Complete |
+| OPS-04 | Phase 18 | Complete |
+| OPS-05 | Phase 18 | Complete |
+| DIR-01 | Phase 18 | Complete |
+| DIR-02 | Phase 18 | Complete |
+| DIR-03 | Phase 18 | Complete |
+| DIR-04 | Phase 18 | Complete |
+| DIR-05 | Phase 18 | Complete |
+| SET-01 | Phase 18 | Complete |
 | CLN-01 | Phase 19 | Pending |
 | CLN-02 | Phase 19 | Pending |
 | CLN-03 | Phase 19 | Pending |
@@ -149,4 +149,4 @@ Remaining admin sections to migrate in follow-up milestone.
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after Phase 17 complete*
+*Last updated: 2026-02-28 after Phase 18 complete*
