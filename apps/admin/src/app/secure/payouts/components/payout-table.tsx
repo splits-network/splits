@@ -52,7 +52,7 @@ const COLUMNS: Column<PayoutTransaction>[] = [
     {
         key: 'id',
         label: 'ID',
-        render: (p) => <span className="font-mono text-xs text-base-content/60">{p.id.slice(0, 8)}</span>,
+        render: (p) => <span className="font-mono text-sm text-base-content/60">{p.id.slice(0, 8)}</span>,
     },
     {
         key: 'recruiter_name',
@@ -61,9 +61,7 @@ const COLUMNS: Column<PayoutTransaction>[] = [
         render: (p) => (
             <div>
                 <p className="text-sm font-medium">{p.recruiter_name ?? '—'}</p>
-                {p.recruiter_email && (
-                    <p className="text-xs text-base-content/50">{p.recruiter_email}</p>
-                )}
+                {p.recruiter_email && <p className="text-sm text-base-content/50">{p.recruiter_email}</p>}
             </div>
         ),
     },
@@ -104,7 +102,7 @@ type Filters = { status?: PayoutStatus; search: string };
 export function PayoutTable() {
     const [selectedPayout, setSelectedPayout] = useState<PayoutTransaction | null>(null);
 
-    const { data: items, loading, filters, page, totalPages, setFilter, setPage, sortBy, sortOrder, handleSort } =
+    const { data: items, loading, filters, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
         useStandardList<PayoutTransaction, Filters>({
             endpoint: '/admin/billing/admin/payouts',
             defaultFilters: { status: 'pending', search: '' },
@@ -113,10 +111,7 @@ export function PayoutTable() {
 
     return (
         <div>
-            <AdminPageHeader
-                title="Payouts"
-                subtitle="Manage payout transactions"
-            />
+            <AdminPageHeader title="Payouts" subtitle="Manage payout transactions" />
 
             <div className="flex items-center gap-3 mb-4 flex-wrap">
                 <label className="input input-sm flex items-center gap-2 flex-1 max-w-sm">
@@ -162,11 +157,7 @@ export function PayoutTable() {
                 <div className="flex justify-center mt-4">
                     <div className="join">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`}
-                                onClick={() => setPage(p)}
-                            >
+                            <button key={p} className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`} onClick={() => goToPage(p)}>
                                 {p}
                             </button>
                         ))}
@@ -174,10 +165,7 @@ export function PayoutTable() {
                 </div>
             )}
 
-            <PayoutDetailModal
-                payout={selectedPayout}
-                onClose={() => setSelectedPayout(null)}
-            />
+            <PayoutDetailModal payout={selectedPayout} onClose={() => setSelectedPayout(null)} />
         </div>
     );
 }

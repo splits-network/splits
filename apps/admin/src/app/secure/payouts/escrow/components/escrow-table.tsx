@@ -34,12 +34,12 @@ const COLUMNS: Column<EscrowHold>[] = [
     {
         key: 'id',
         label: 'Escrow ID',
-        render: (h) => <span className="font-mono text-xs text-base-content/60">{h.id.slice(0, 8)}</span>,
+        render: (h) => <span className="font-mono text-sm text-base-content/60">{h.id.slice(0, 8)}</span>,
     },
     {
         key: 'placement_id',
         label: 'Placement',
-        render: (h) => <span className="font-mono text-xs text-base-content/60">{h.placement_id.slice(0, 8)}</span>,
+        render: (h) => <span className="font-mono text-sm text-base-content/60">{h.placement_id.slice(0, 8)}</span>,
     },
     {
         key: 'hold_amount',
@@ -89,7 +89,7 @@ const COLUMNS: Column<EscrowHold>[] = [
 export function EscrowTable() {
     const [holdToRelease, setHoldToRelease] = useState<EscrowHold | null>(null);
 
-    const { data: holds, loading, filters, page, totalPages, setFilter, setPage, sortBy, sortOrder, handleSort, refresh } =
+    const { data: items, loading, filters, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort, refresh } =
         useStandardList<EscrowHold, Filters>({
             endpoint: '/admin/billing/admin/escrow',
             defaultFilters: { status: 'active', search: '' },
@@ -98,10 +98,7 @@ export function EscrowTable() {
 
     return (
         <div>
-            <AdminPageHeader
-                title="Escrow Holds"
-                subtitle="Manage active escrow holds"
-            />
+            <AdminPageHeader title="Escrow Holds" subtitle="Manage active escrow holds" />
 
             <div className="flex items-center gap-3 mb-4 flex-wrap">
                 <label className="input input-sm flex items-center gap-2 flex-1 max-w-sm">
@@ -114,11 +111,7 @@ export function EscrowTable() {
                         onChange={(e) => setFilter('search', e.target.value)}
                     />
                 </label>
-                <select
-                    className="select select-sm"
-                    value={filters.status ?? ''}
-                    onChange={(e) => setFilter('status', e.target.value || undefined)}
-                >
+                <select className="select select-sm" value={filters.status ?? ''} onChange={(e) => setFilter('status', e.target.value || undefined)}>
                     <option value="">All Statuses</option>
                     <option value="active">Active</option>
                     <option value="released">Released</option>
@@ -129,18 +122,14 @@ export function EscrowTable() {
             <div className="card bg-base-100 border border-base-200">
                 <AdminDataTable
                     columns={COLUMNS}
-                    data={holds}
+                    data={items}
                     loading={loading}
                     sortField={sortBy}
                     sortDir={sortOrder}
                     onSort={handleSort}
                     actions={(hold) =>
                         hold.status === 'active' ? (
-                            <button
-                                type="button"
-                                className="btn btn-xs btn-warning"
-                                onClick={() => setHoldToRelease(hold)}
-                            >
+                            <button type="button" className="btn btn-xs btn-warning" onClick={() => setHoldToRelease(hold)}>
                                 Release
                             </button>
                         ) : null
@@ -154,11 +143,7 @@ export function EscrowTable() {
                 <div className="flex justify-center mt-4">
                     <div className="join">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`}
-                                onClick={() => setPage(p)}
-                            >
+                            <button key={p} className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`} onClick={() => goToPage(p)}>
                                 {p}
                             </button>
                         ))}
