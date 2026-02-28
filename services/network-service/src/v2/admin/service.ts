@@ -22,4 +22,11 @@ export class AdminNetworkService {
     }> {
         return this.repository.getAdminCounts();
     }
+
+    getAdminStats(period: string): Promise<{
+        recruiters: { sparkline: number[]; trend: number; total: number };
+        recruiterStatus: { label: string; value: number }[];
+    }> {
+        return this.repository.getAdminStats(period);
+    }
 }

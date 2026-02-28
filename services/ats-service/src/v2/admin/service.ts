@@ -1,4 +1,6 @@
 import { AdminAtsRepository, AdminListParams, AdminListResponse } from './repository';
+import { AdminAtsStatsResult, getAtsAdminStats } from './stats-repository';
+import { AdminAtsChartDataResult, getAtsAdminChartData } from './chart-repository';
 
 export class AdminAtsService {
     constructor(private repository: AdminAtsRepository) {}
@@ -35,5 +37,13 @@ export class AdminAtsService {
         placements: number;
     }> {
         return this.repository.getAdminCounts();
+    }
+
+    getAdminStats(period: string): Promise<AdminAtsStatsResult> {
+        return getAtsAdminStats(this.repository.getSupabase(), period);
+    }
+
+    getAdminChartData(period: string): Promise<AdminAtsChartDataResult> {
+        return getAtsAdminChartData(this.repository.getSupabase(), period);
     }
 }

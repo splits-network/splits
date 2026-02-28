@@ -1,4 +1,6 @@
 import { AdminIdentityRepository, AdminListParams, AdminListResponse } from './repository';
+import { AdminStatsResult, getIdentityAdminStats } from './stats-repository';
+import { AdminChartDataResult, getIdentityAdminChartData } from './chart-repository';
 
 export class AdminIdentityService {
     constructor(private repository: AdminIdentityRepository) {}
@@ -21,5 +23,13 @@ export class AdminIdentityService {
 
     getAdminActivity(params: { scope?: string; limit?: number }): Promise<any[]> {
         return this.repository.getAdminActivity(params);
+    }
+
+    getAdminStats(period: string): Promise<AdminStatsResult> {
+        return getIdentityAdminStats(this.repository.getSupabase(), period);
+    }
+
+    getAdminChartData(period: string): Promise<AdminChartDataResult> {
+        return getIdentityAdminChartData(this.repository.getSupabase(), period);
     }
 }

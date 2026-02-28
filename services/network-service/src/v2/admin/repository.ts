@@ -116,4 +116,68 @@ export class AdminNetworkRepository {
             recruiter_companies: companiesRes.count || 0,
         };
     }
+
+    private async countRecruiters(from?: string, to?: string, status?: string): Promise<number> {
+        let q = this.supabase.from('recruiters').select('id', { count: 'exact', head: true });
+        if (from) q = q.gte('created_at', from);
+        if (to) q = q.lt('created_at', to);
+        if (status) q = q.eq('status', status);
+        const { count } = await q;
+        return count || 0;
+    }
+
+    async getAdminStats(period: string): Promise<{
+        recruiters: { sparkline: number[]; trend: number; total: number };
+        recruiterStatus: { label: string; value: number }[];
+    }> {
+        const DAY = 86_400_000;
+        const periodConfigMap: Record<string, { buckets: number; bucketMs: number; periodMs: number }> = {
+            '7d': { buckets: 7, bucketMs: DAY, periodMs: 7 * DAY },
+            '90d': { buckets: 10, bucketMs: 9 * DAY, periodMs: 90 * DAY },
+            '1y': { buckets: 12, bucketMs: 30 * DAY, periodMs: 365 * DAY },
+            'all': { buckets: 10, bucketMs: 0, periodMs: 0 },
+        };
+        const config = periodConfigMap[period] ?? { buckets: 10, bucketMs: 3 * DAY, periodMs: 30 * DAY };
+        const now = Date.now();
+
+        const statusCountPromises = ['active', 'pending', 'suspended', 'inactive'].map(async s => ({
+            label: s,
+            value: await this.countRecruiters(undefined, undefined, s),
+        }));
+
+        if (period === 'all') {
+            const [total, recruiterStatus] = await Promise.all([
+                this.countRecruiters(),
+                Promise.all(statusCountPromises),
+            ]);
+            const sparkline = Array(config.buckets).fill(Math.floor(total / config.buckets));
+            return { recruiters: { sparkline, trend: 0, total }, recruiterStatus };
+        }
+
+        const periodStart = new Date(now - config.periodMs).toISOString();
+        const prevPeriodStart = new Date(now - config.periodMs * 2).toISOString();
+
+        const bucketCountPromises = Array.from({ length: config.buckets }, (_, i) => {
+            const start = new Date(now - config.periodMs + i * config.bucketMs).toISOString();
+            const end = new Date(Math.min(now, now - config.periodMs + (i + 1) * config.bucketMs)).toISOString();
+            return this.countRecruiters(start, end);
+        });
+
+        const [sparkline, prevCount, total, recruiterStatus] = await Promise.all([
+            Promise.all(bucketCountPromises),
+            this.countRecruiters(prevPeriodStart, periodStart),
+            this.countRecruiters(),
+            Promise.all(statusCountPromises),
+        ]);
+
+        const currentTotal = sparkline.reduce((a, b) => a + b, 0);
+        const trend = prevCount === 0
+            ? (currentTotal > 0 ? 100 : 0)
+            : Math.round(((currentTotal - prevCount) / prevCount) * 100);
+
+        return {
+            recruiters: { sparkline, trend, total },
+            recruiterStatus,
+        };
+    }
 }

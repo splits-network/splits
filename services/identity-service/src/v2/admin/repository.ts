@@ -38,6 +38,10 @@ export class AdminIdentityRepository {
         });
     }
 
+    getSupabase(): SupabaseClient {
+        return this.supabase;
+    }
+
     async listUsersAdmin(params: AdminListParams): Promise<AdminListResponse<any>> {
         const { page, limit, offset } = paginate(params);
         const sortBy = params.sort_by || 'created_at';

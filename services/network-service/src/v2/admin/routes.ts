@@ -78,4 +78,15 @@ export function registerAdminNetworkRoutes(
             reply.code(500).send({ error: { message: 'Failed to fetch counts' } });
         }
     });
+
+    // GET /admin/stats?period=30d
+    app.get('/admin/stats', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { period } = request.query as { period?: string };
+            const stats = await adminService.getAdminStats(period || '30d');
+            reply.send({ data: stats });
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to fetch admin stats' } });
+        }
+    });
 }
