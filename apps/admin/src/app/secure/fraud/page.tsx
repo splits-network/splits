@@ -9,7 +9,7 @@ const SEVERITY_OPTIONS = ['all', 'critical', 'high', 'medium', 'low'] as const;
 export default function FraudPage() {
     const { data, loading, sortBy, sortOrder, handleSort, filters, setFilter } =
         useStandardList<FraudSignal, { severity: string; resolved: string }>({
-            endpoint: '/admin/fraud/admin/signals',
+            endpoint: '/fraud/admin/signals',
             defaultSortBy: 'detected_at',
             defaultSortOrder: 'desc',
             defaultFilters: { severity: 'all', resolved: 'false' },

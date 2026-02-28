@@ -179,9 +179,15 @@ export default function ProfilePage() {
     useEffect(() => {
         loadSettings();
         loadActiveRecruiters();
-        loadGptSessions();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (userId) {
+            loadGptSessions();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userId]);
 
     const loadActiveRecruiters = async () => {
         try {

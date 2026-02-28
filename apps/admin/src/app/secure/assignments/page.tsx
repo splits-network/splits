@@ -34,7 +34,7 @@ export default function AssignmentsPage() {
         page,
         goToPage,
     } = useStandardList<any, Filters>({
-        endpoint: '/admin/ats/admin/assignments',
+        endpoint: '/ats/admin/assignments',
         defaultFilters: { status: '' },
         defaultLimit: 25,
     });

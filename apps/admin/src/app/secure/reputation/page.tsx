@@ -9,7 +9,7 @@ const TIER_OPTIONS = ['all', 'platinum', 'gold', 'silver', 'bronze', 'new'] as c
 export default function ReputationPage() {
     const { items, loading, sortBy, sortOrder, handleSort, filters, setFilter } =
         useStandardList<ReputationRecord, { tier: string; entity_type: string }>({
-            endpoint: '/admin/trust/admin/reputation',
+            endpoint: '/trust/admin/reputation',
             defaultSortBy: 'score',
             defaultSortOrder: 'desc',
             defaultFilters: { tier: 'all', entity_type: 'all' },

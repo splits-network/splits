@@ -6,7 +6,7 @@ import { MatchTable, type MatchRow } from './components/match-table';
 
 export default function MatchesPage() {
     const { data, loading, sortBy, sortOrder, handleSort } = useStandardList<MatchRow>({
-        endpoint: '/admin/matching/admin/matches',
+        endpoint: '/matching/admin/matches',
         defaultSortBy: 'score',
         defaultSortOrder: 'desc',
         syncToUrl: true,

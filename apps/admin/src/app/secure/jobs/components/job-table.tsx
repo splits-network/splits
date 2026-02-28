@@ -101,7 +101,7 @@ export function JobTable() {
     const router = useRouter();
     const { data, loading, filters, total, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
         useStandardList<AdminJob>({
-            endpoint: '/admin/ats/admin/jobs',
+            endpoint: '/ats/admin/jobs',
             defaultFilters: { search: '', status: '', commute_type: '', job_level: '' },
             defaultLimit: 25,
         });

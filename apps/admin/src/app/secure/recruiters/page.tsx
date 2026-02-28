@@ -34,7 +34,7 @@ export default function RecruitersPage() {
         goToPage,
         refresh,
     } = useStandardList<any, Filters>({
-        endpoint: '/admin/network/admin/recruiters',
+        endpoint: '/network/admin/recruiters',
         defaultFilters: { status: '' },
         defaultLimit: 25,
     });

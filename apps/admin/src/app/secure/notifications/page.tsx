@@ -36,7 +36,7 @@ export default function NotificationsPage() {
         goToPage,
         refresh,
     } = useStandardList<SiteNotification, Filters>({
-        endpoint: '/admin/notification/admin/site-notifications',
+        endpoint: '/notification/admin/site-notifications',
         defaultFilters: { is_active: '', severity: '' },
         defaultLimit: 25,
     });

@@ -104,7 +104,7 @@ export function PayoutTable() {
 
     const { data: items, loading, filters, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
         useStandardList<PayoutTransaction, Filters>({
-            endpoint: '/admin/billing/admin/payouts',
+            endpoint: '/billing/admin/payouts',
             defaultFilters: { status: 'pending', search: '' },
             defaultLimit: 25,
         });

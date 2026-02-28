@@ -644,6 +644,7 @@ services:
       dockerfile: services/gpt-service/Dockerfile
       target: development
     container_name: splits-gpt-service
+    command: ["sh", "-c", "pnpm install --frozen-lockfile && pnpm --filter @splits-network/gpt-service dev"]
     ports:
       - "3014:3014"
     environment:

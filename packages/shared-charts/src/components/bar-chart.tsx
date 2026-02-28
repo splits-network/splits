@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { memo } from 'react';
-import ReactECharts from 'echarts-for-react';
-import { useECharts } from '../hooks/use-echarts';
+import React, { memo } from "react";
+import ReactECharts from "echarts-for-react";
+import { useECharts } from "../hooks/use-echarts";
 
 export interface BarChartDataItem {
     label: string;
@@ -30,31 +30,45 @@ export const BarChart = memo(function BarChart({
 
     if (!data?.length) return null;
 
-    const labels = data.map((d) => d.label);
-    const values = data.map((d) => d.value);
+    // Filter out invalid data points
+    const validData = data.filter(
+        (d) => d && d.label && d.value !== undefined && d.value !== null,
+    );
+    if (validData.length === 0) return null;
+
+    const labels = validData.map((d) => d.label);
+    const values = validData.map((d) => d.value);
 
     const categoryAxis = {
-        type: 'category',
+        type: "category",
         data: labels,
         ...themeOptions.categoryAxis,
     };
     const valueAxis = {
-        type: 'value',
+        type: "value",
         ...themeOptions.valueAxis,
     };
 
     const option = {
         ...themeOptions,
-        legend: showLegend ? { ...themeOptions.legend, show: true } : { show: false },
-        tooltip: { ...themeOptions.tooltip, trigger: 'axis' },
-        grid: { left: 48, right: 16, top: showLegend ? 36 : 16, bottom: 32, containLabel: false },
+        legend: showLegend
+            ? { ...themeOptions.legend, show: true }
+            : { show: false },
+        tooltip: { ...themeOptions.tooltip, trigger: "axis" },
+        grid: {
+            left: 48,
+            right: 16,
+            top: showLegend ? 36 : 16,
+            bottom: 32,
+            containLabel: false,
+        },
         xAxis: horizontal ? valueAxis : categoryAxis,
         yAxis: horizontal ? categoryAxis : valueAxis,
         series: [
             {
-                type: 'bar',
+                type: "bar",
                 data: values,
-                stack: stacked ? 'total' : undefined,
+                stack: stacked ? "total" : undefined,
                 itemStyle: themeOptions.bar?.itemStyle,
             },
         ],

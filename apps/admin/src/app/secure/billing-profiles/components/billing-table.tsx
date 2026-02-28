@@ -68,7 +68,7 @@ const COLUMNS: Column<BillingProfile>[] = [
 export function BillingTable() {
     const { data, loading, filters, page, totalPages, setFilter, setPage, sortBy, sortOrder, handleSort } =
         useStandardList<BillingProfile>({
-            endpoint: '/admin/billing/admin/billing-profiles',
+            endpoint: '/billing/admin/billing-profiles',
             defaultFilters: { search: '' },
             defaultLimit: 25,
         });

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { memo } from 'react';
-import ReactECharts from 'echarts-for-react';
-import { useECharts } from '../hooks/use-echarts';
+import React, { memo } from "react";
+import ReactECharts from "echarts-for-react";
+import { useECharts } from "../hooks/use-echarts";
 
 export interface PieChartDataItem {
     name: string;
@@ -30,34 +30,50 @@ export const PieChart = memo(function PieChart({
 
     if (!data?.length) return null;
 
-    const radius = donut ? ['40%', '70%'] : ['0%', '70%'];
+    // Filter out invalid data points
+    const validData = data.filter(
+        (d) =>
+            d &&
+            d.name &&
+            d.value !== undefined &&
+            d.value !== null &&
+            d.value > 0,
+    );
+    if (validData.length === 0) return null;
+
+    const radius = donut ? ["40%", "70%"] : ["0%", "70%"];
 
     const option = {
         ...themeOptions,
         legend: showLegend
-            ? { ...themeOptions.legend, show: true, orient: 'horizontal', bottom: 0 }
+            ? {
+                  ...themeOptions.legend,
+                  show: true,
+                  orient: "horizontal",
+                  bottom: 0,
+              }
             : { show: false },
         tooltip: {
             ...themeOptions.tooltip,
-            trigger: 'item',
-            formatter: '{b}: {c} ({d}%)',
+            trigger: "item",
+            formatter: "{b}: {c} ({d}%)",
         },
         series: [
             {
-                type: 'pie',
+                type: "pie",
                 radius,
-                data,
+                data: validData,
                 label: {
                     show: showLabels,
                     color: themeOptions.textStyle?.color,
-                    formatter: '{b}: {d}%',
+                    formatter: "{b}: {d}%",
                 },
                 itemStyle: themeOptions.pie?.itemStyle,
                 emphasis: {
                     itemStyle: {
                         shadowBlur: 10,
                         shadowOffsetX: 0,
-                        shadowColor: 'rgba(0, 0, 0, 0.3)',
+                        shadowColor: "rgba(0, 0, 0, 0.3)",
                     },
                 },
             },

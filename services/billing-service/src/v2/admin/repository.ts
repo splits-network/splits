@@ -101,6 +101,19 @@ export class AdminBillingRepository {
         return { data: data || [], pagination: buildPagination(count || 0, page, limit) };
     }
 
+    async releaseEscrowHold(id: string): Promise<any> {
+        const { data, error } = await this.supabase
+            .from('escrow_holds')
+            .update({ status: 'released', released_at: new Date().toISOString() })
+            .eq('id', id)
+            .eq('status', 'active')
+            .select()
+            .single();
+
+        if (error) throw new Error(`Failed to release escrow hold: ${error.message}`);
+        return data;
+    }
+
     async getAdminCounts(): Promise<{
         payouts_pending: number;
         escrow_active: number;

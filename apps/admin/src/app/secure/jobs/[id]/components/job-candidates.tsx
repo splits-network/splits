@@ -74,7 +74,7 @@ type Props = { jobId: string };
 
 export function JobCandidates({ jobId }: Props) {
     const { data, loading, total, totalPages, page, goToPage } = useStandardList<JobApplication>({
-        endpoint: '/admin/ats/admin/applications',
+        endpoint: '/ats/admin/applications',
         defaultFilters: { job_id: jobId },
         defaultLimit: 25,
         syncToUrl: false,

@@ -11,7 +11,7 @@ export default function AutomationPage() {
     const { getToken } = useAuth();
     const { success, error } = useAdminToast();
     const { data, loading, sortBy, sortOrder, handleSort, refresh } = useStandardList<AutomationRule>({
-        endpoint: '/admin/automation/admin/rules',
+        endpoint: '/automation/admin/rules',
         defaultSortBy: 'name',
         defaultSortOrder: 'asc',
         syncToUrl: true,
@@ -22,7 +22,7 @@ export default function AutomationPage() {
             const token = await getToken();
             if (!token) throw new Error('Not authenticated');
             const client = createAuthenticatedClient(token);
-            await client.patch(`/admin/automation/admin/rules/${rule.id}`, {
+            await client.patch(`/automation/admin/rules/${rule.id}`, {
                 is_active: !rule.is_active,
             });
             success(`Rule "${rule.name}" ${rule.is_active ? 'disabled' : 'enabled'}`);

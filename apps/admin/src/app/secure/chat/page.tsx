@@ -9,7 +9,7 @@ const STATUS_OPTIONS = ['all', 'pending', 'reviewed', 'removed', 'cleared'] as c
 export default function ChatModerationPage() {
     const { items, loading, sortBy, sortOrder, handleSort, filters, setFilter } =
         useStandardList<ChatMessage, { status: string }>({
-            endpoint: '/admin/chat/admin/flagged',
+            endpoint: '/chat/admin/flagged',
             defaultSortBy: 'flagged_at',
             defaultSortOrder: 'desc',
             defaultFilters: { status: 'pending' },

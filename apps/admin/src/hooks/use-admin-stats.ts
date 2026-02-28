@@ -96,13 +96,13 @@ export function useAdminStats(timePeriod: TimePeriod = '30d'): AdminStatsResult 
 
         const [identityStats, atsStats, networkStats, identityCounts, billingCounts, notifCounts, networkCounts] =
             await Promise.all([
-                safeFetch(client, `/admin/identity/admin/stats?period=${period}`),
-                safeFetch(client, `/admin/ats/admin/stats?period=${period}`),
-                safeFetch(client, `/admin/network/admin/stats?period=${period}`),
-                safeFetch(client, '/admin/identity/admin/counts'),
-                safeFetch(client, '/admin/billing/admin/counts'),
-                safeFetch(client, '/admin/notification/admin/counts'),
-                safeFetch(client, '/admin/network/admin/counts'),
+                safeFetch(client, `/identity/admin/stats?period=${period}`),
+                safeFetch(client, `/ats/admin/stats?period=${period}`),
+                safeFetch(client, `/network/admin/stats?period=${period}`),
+                safeFetch(client, '/identity/admin/counts'),
+                safeFetch(client, '/billing/admin/counts'),
+                safeFetch(client, '/notification/admin/counts'),
+                safeFetch(client, '/network/admin/counts'),
             ]);
 
         setStats({

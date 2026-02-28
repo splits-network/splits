@@ -59,7 +59,7 @@ const COLUMNS: Column<AuditEntry>[] = [
 
 export default function PayoutAuditPage() {
     const { data, loading, sortBy, sortOrder, handleSort } = useStandardList<AuditEntry>({
-        endpoint: '/admin/billing/admin/payouts/audit',
+        endpoint: '/billing/admin/payouts/audit',
         defaultFilters: {},
         defaultLimit: 50,
     });

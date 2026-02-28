@@ -87,6 +87,11 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
      * Required when `requireAuth` is true and `endpoint` is used.
      */
     getToken?: () => Promise<string | null>;
+    /**
+     * Factory to create the API client used for built-in endpoint fetching.
+     * Defaults to `createPortalClient`. Admin app should pass `createAdminClient`.
+     */
+    clientFactory?: (token: string) => AppApiClient;
 }
 
 export interface UseStandardListReturn<T, F extends Record<string, any> = Record<string, any>> {
@@ -179,6 +184,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         autoFetch = true,
         requireAuth = true,
         getToken,
+        clientFactory,
     } = options;
 
     // Support deprecated storageKey as fallback
@@ -330,7 +336,8 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
                 }
                 const token = await getToken();
                 if (!token) throw new Error('Not authenticated');
-                const client: AppApiClient = createPortalClient(token);
+                const factory = clientFactory ?? createPortalClient;
+                const client: AppApiClient = factory(token);
                 return client.get<StandardListResponse<T>>(endpoint, { params });
             } else {
                 const client: AppApiClient = createUnauthenticatedClient();

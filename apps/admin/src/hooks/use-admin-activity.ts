@@ -22,7 +22,7 @@ export interface AdminActivityResult {
     setMode: (mode: ActivityMode) => void;
 }
 
-const GATEWAY_URL = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://localhost:3020';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://localhost:3030';
 
 export function useAdminActivity(): AdminActivityResult {
     const { getToken } = useAuth();
@@ -45,8 +45,8 @@ export function useAdminActivity(): AdminActivityResult {
             try {
                 const path =
                     currentMode === 'admin'
-                        ? '/admin/identity/admin/activity?scope=admin&limit=20'
-                        : '/admin/identity/admin/activity?scope=all&limit=20';
+                        ? '/identity/admin/activity?scope=admin&limit=20'
+                        : '/identity/admin/activity?scope=all&limit=20';
 
                 const res = await fetch(`${GATEWAY_URL}${path}`, {
                     headers: { Authorization: `Bearer ${token}` },

@@ -15,6 +15,14 @@ COPY packages/shared-access-context/package.json ./packages/shared-access-contex
 COPY services/admin-gateway/package.json ./services/admin-gateway/
 RUN pnpm install --frozen-lockfile
 
+# Development stage
+FROM base AS development
+COPY --from=dependencies /app ./
+COPY packages ./packages
+COPY services/admin-gateway ./services/admin-gateway
+EXPOSE 3030
+CMD ["pnpm", "--filter", "@splits-network/admin-gateway", "dev"]
+
 # Build stage
 FROM base AS build
 COPY --from=dependencies /app ./
@@ -56,5 +64,5 @@ COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-acc
 # Copy built service
 COPY --from=build /app/services/admin-gateway/dist ./services/admin-gateway/dist
 
-EXPOSE 3020
+EXPOSE 3030
 CMD ["node", "services/admin-gateway/dist/index.js"]

@@ -17,13 +17,13 @@ spec:
                 - name: admin-gateway
                   image: ${ACR_SERVER}/admin-gateway:${IMAGE_TAG}
                   ports:
-                      - containerPort: 3020
+                      - containerPort: 3030
                         name: http
                   env:
                       - name: NODE_ENV
                         value: "production"
                       - name: PORT
-                        value: "3020"
+                        value: "3030"
                       - name: CORS_ORIGIN
                         value: "https://admin.employment-networks.com"
                       - name: ADMIN_CLERK_SECRET_KEY
@@ -81,13 +81,13 @@ spec:
                   livenessProbe:
                       httpGet:
                           path: /health
-                          port: 3020
+                          port: 3030
                       initialDelaySeconds: 30
                       periodSeconds: 10
                   readinessProbe:
                       httpGet:
                           path: /health
-                          port: 3020
+                          port: 3030
                       initialDelaySeconds: 10
                       periodSeconds: 5
 ---
@@ -100,7 +100,7 @@ spec:
     type: ClusterIP
     ports:
         - port: 80
-          targetPort: 3020
+          targetPort: 3030
           name: http
     selector:
         app: admin-gateway

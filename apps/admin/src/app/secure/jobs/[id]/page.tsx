@@ -44,7 +44,7 @@ export default function JobDetailPage() {
                 const token = await getToken();
                 if (!token) { setError('Not authenticated'); setLoading(false); return; }
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: JobDetail }>(`/admin/ats/admin/jobs/${id}`);
+                const res = await client.get<{ data: JobDetail }>(`/ats/admin/jobs/${id}`);
                 setJob((res as { data: JobDetail }).data);
             } catch {
                 setError('Failed to load job');

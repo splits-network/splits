@@ -36,7 +36,7 @@ export default function ApplicationsPage() {
         page,
         goToPage,
     } = useStandardList<any, Filters>({
-        endpoint: '/admin/ats/admin/applications',
+        endpoint: '/ats/admin/applications',
         defaultFilters: { status: '' },
         defaultLimit: 25,
     });

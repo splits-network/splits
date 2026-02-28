@@ -35,7 +35,7 @@ export default function MatchDetailPage() {
                 const token = await getToken();
                 if (!token) throw new Error('Not authenticated');
                 const client = createAuthenticatedClient(token);
-                const data = await client.get<{ data: MatchDetail }>(`/admin/matching/admin/matches/${id}`);
+                const data = await client.get<{ data: MatchDetail }>(`/matching/admin/matches/${id}`);
                 setMatch(data.data);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load match');

@@ -53,8 +53,8 @@ export function useAdminChartData(period: TimePeriod): ChartDataResult {
         const client = createAuthenticatedClient(token);
 
         const [identityChart, atsChart] = await Promise.all([
-            safeFetch(client, `/admin/identity/admin/chart-data?period=${period}`),
-            safeFetch(client, `/admin/ats/admin/chart-data?period=${period}`),
+            safeFetch(client, `/identity/admin/chart-data?period=${period}`),
+            safeFetch(client, `/ats/admin/chart-data?period=${period}`),
         ]);
 
         setChartData({

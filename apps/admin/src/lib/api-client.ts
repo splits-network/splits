@@ -2,7 +2,7 @@
  * Admin App API Client
  *
  * Extends shared AppApiClient with the admin gateway base URL.
- * All admin API calls route through admin-gateway (port 3020).
+ * All admin API calls route through admin-gateway (port 3030).
  */
 
 import { AppApiClient } from '@splits-network/shared-hooks';
@@ -22,8 +22,8 @@ export class AdminApiClient extends AppApiClient {
         if (url) return url.replace(/\/+$/, '');
         // Fallback: server-side uses K8s service name, client-side uses localhost
         return typeof window === 'undefined'
-            ? 'http://admin-gateway:3020'
-            : 'http://localhost:3020';
+            ? 'http://admin-gateway:3030'
+            : 'http://localhost:3030';
     }
 }
 

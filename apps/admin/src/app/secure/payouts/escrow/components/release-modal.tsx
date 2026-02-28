@@ -24,8 +24,8 @@ export function ReleaseModal({ hold, onClose, onReleased }: ReleaseModalProps) {
         setLoading(true);
         try {
             const token = await getToken();
-            const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3020';
-            const res = await fetch(`${gatewayUrl}/admin/billing/admin/escrow/${hold.id}/release`, {
+            const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3030';
+            const res = await fetch(`${gatewayUrl}/api/v2/billing/admin/escrow/${hold.id}/release`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,

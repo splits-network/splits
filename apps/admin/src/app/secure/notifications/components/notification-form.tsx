@@ -101,10 +101,10 @@ export function NotificationForm({ isOpen, onClose, onSuccess, initial }: Notifi
                 dismissible: form.dismissible,
             };
             if (initial?.id) {
-                await client.patch(`/admin/notification/admin/site-notifications/${initial.id}`, payload);
+                await client.patch(`/notification/admin/site-notifications/${initial.id}`, payload);
                 toast.success('Notification updated');
             } else {
-                await client.post('/admin/notification/admin/site-notifications', payload);
+                await client.post('/notification/admin/site-notifications', payload);
                 toast.success('Notification created');
             }
             onSuccess();

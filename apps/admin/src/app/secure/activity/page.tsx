@@ -69,7 +69,7 @@ const COLUMNS: Column<ActivityEntry>[] = [
 export default function ActivityPage() {
     const { data, loading, filters, page, totalPages, setFilter, setPage, sortBy, sortOrder, handleSort } =
         useStandardList<ActivityEntry, Filters>({
-            endpoint: '/admin/identity/admin/activity',
+            endpoint: '/identity/admin/activity',
             defaultFilters: { search: '' },
             defaultLimit: 50,
             defaultSortOrder: 'desc',

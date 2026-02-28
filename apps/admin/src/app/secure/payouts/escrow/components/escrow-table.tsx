@@ -91,7 +91,7 @@ export function EscrowTable() {
 
     const { data: items, loading, filters, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort, refresh } =
         useStandardList<EscrowHold, Filters>({
-            endpoint: '/admin/billing/admin/escrow',
+            endpoint: '/billing/admin/escrow',
             defaultFilters: { status: 'active', search: '' },
             defaultLimit: 25,
         });

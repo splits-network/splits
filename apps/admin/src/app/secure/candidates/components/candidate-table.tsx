@@ -99,7 +99,7 @@ export function CandidateTable() {
         sortOrder,
         handleSort,
     } = useStandardList<AdminCandidate>({
-        endpoint: '/admin/ats/admin/candidates',
+        endpoint: '/ats/admin/candidates',
         defaultFilters: { search: '', resume_status: '' },
         defaultLimit: 25,
     });

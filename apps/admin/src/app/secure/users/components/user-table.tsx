@@ -95,7 +95,7 @@ export function UserTable() {
     const router = useRouter();
     const { data, loading, filters, total, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
         useStandardList<AdminUser>({
-            endpoint: '/admin/identity/admin/users',
+            endpoint: '/identity/admin/users',
             defaultFilters: { search: '' },
             defaultLimit: 25,
         });

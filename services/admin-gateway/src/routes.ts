@@ -2,11 +2,11 @@ import { FastifyInstance } from 'fastify';
 import httpProxy from '@fastify/http-proxy';
 
 /**
- * Register proxy routes for all domain services under /admin/{service}/
+ * Register proxy routes for all domain services under /api/v2/{service}/
  *
- * Each route strips the /admin/{service} prefix before forwarding to the
+ * Each route strips the /api/v2/{service} prefix before forwarding to the
  * downstream service (rewritePrefix: '') so domain services receive paths
- * like /users, /jobs — not /admin/identity/users.
+ * like /admin/users, /admin/jobs — matching their registered admin routes.
  */
 export async function registerAdminRoutes(
     app: FastifyInstance,
@@ -31,7 +31,7 @@ export async function registerAdminRoutes(
     for (const [serviceName, serviceUrl] of Object.entries(serviceMap)) {
         await app.register(httpProxy, {
             upstream: serviceUrl,
-            prefix: `/admin/${serviceName}`,
+            prefix: `/api/v2/${serviceName}`,
             rewritePrefix: '',
             replyOptions: {
                 rewriteRequestHeaders: (req, headers) => ({

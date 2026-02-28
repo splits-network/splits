@@ -61,7 +61,7 @@ export default function ContentPagesPage() {
     const router = useRouter();
     const { data, loading, page, totalPages, setPage, sortBy, sortOrder, handleSort } =
         useStandardList<ContentPage>({
-            endpoint: '/admin/content/admin/pages',
+            endpoint: '/content/admin/pages',
             defaultFilters: {},
             defaultLimit: 25,
         });

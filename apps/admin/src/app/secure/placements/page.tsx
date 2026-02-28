@@ -34,7 +34,7 @@ export default function PlacementsPage() {
         page,
         goToPage,
     } = useStandardList<any, Filters>({
-        endpoint: '/admin/ats/admin/placements',
+        endpoint: '/ats/admin/placements',
         defaultFilters: { status: '' },
         defaultLimit: 25,
     });

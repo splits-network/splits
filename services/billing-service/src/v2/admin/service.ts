@@ -15,6 +15,10 @@ export class AdminBillingService {
         return this.repository.listBillingProfilesAdmin(params);
     }
 
+    releaseEscrowHold(id: string): Promise<any> {
+        return this.repository.releaseEscrowHold(id);
+    }
+
     getAdminCounts(): Promise<{
         payouts_pending: number;
         escrow_active: number;

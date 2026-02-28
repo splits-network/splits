@@ -54,7 +54,7 @@ export function NotificationTable({ data, loading, sortField, sortDir, onSort, o
             const token = await getToken();
             if (!token) throw new Error('Not authenticated');
             const client = new AdminApiClient(token);
-            await client.delete(`/admin/notification/admin/site-notifications/${deleteTarget.id}`);
+            await client.delete(`/notification/admin/site-notifications/${deleteTarget.id}`);
             toast.success('Notification deleted');
             onRefresh();
         } catch {
@@ -71,7 +71,7 @@ export function NotificationTable({ data, loading, sortField, sortDir, onSort, o
             const token = await getToken();
             if (!token) throw new Error('Not authenticated');
             const client = new AdminApiClient(token);
-            await client.patch(`/admin/notification/admin/site-notifications/${notification.id}`, {
+            await client.patch(`/notification/admin/site-notifications/${notification.id}`, {
                 is_active: !notification.is_active,
             });
             toast.success(`Notification ${notification.is_active ? 'deactivated' : 'activated'}`);

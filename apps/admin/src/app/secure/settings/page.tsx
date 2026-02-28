@@ -14,8 +14,8 @@ export default function SettingsPage() {
         async function load() {
             try {
                 const token = await getToken();
-                const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3020';
-                const res = await fetch(`${gatewayUrl}/admin/settings`, {
+                const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3030';
+                const res = await fetch(`${gatewayUrl}/api/v2/identity/admin/settings`, {
                     headers: { Authorization: `Bearer ${token ?? ''}` },
                 });
                 if (res.ok) {

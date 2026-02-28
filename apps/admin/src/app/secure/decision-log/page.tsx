@@ -9,7 +9,7 @@ const DECISION_TYPES = ['all', 'match_scoring', 'fraud_check', 'recruiter_approv
 export default function DecisionLogPage() {
     const { data, loading, sortBy, sortOrder, handleSort, filters, setFilter } =
         useStandardList<DecisionLogEntry, { decision_type: string }>({
-            endpoint: '/admin/decisions/admin/log',
+            endpoint: '/decisions/admin/log',
             defaultSortBy: 'decided_at',
             defaultSortOrder: 'desc',
             defaultFilters: { decision_type: 'all' },

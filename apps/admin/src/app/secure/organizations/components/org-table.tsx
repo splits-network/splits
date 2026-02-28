@@ -86,7 +86,7 @@ const STATUS_OPTIONS = [
 export function OrgTable() {
     const { data, loading, filters, total, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
         useStandardList<AdminOrg>({
-            endpoint: '/admin/identity/admin/organizations',
+            endpoint: '/identity/admin/organizations',
             defaultFilters: { search: '', status: '' },
             defaultLimit: 25,
         });

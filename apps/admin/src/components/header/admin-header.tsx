@@ -1,6 +1,7 @@
 'use client';
 
 import { UserButton } from '@clerk/nextjs';
+import { ThemeToggle } from '@splits-network/basel-ui';
 import { Breadcrumbs } from './breadcrumbs';
 
 type AdminHeaderProps = {
@@ -33,6 +34,9 @@ export function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
             <div className="flex-1 min-w-0">
                 <Breadcrumbs />
             </div>
+
+            {/* Theme toggle */}
+            <ThemeToggle size="sm" />
 
             {/* User button */}
             <div className="flex-shrink-0">

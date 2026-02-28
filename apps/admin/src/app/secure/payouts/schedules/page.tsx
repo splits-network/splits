@@ -69,7 +69,7 @@ const COLUMNS: Column<PayoutSchedule>[] = [
 
 export default function PayoutSchedulesPage() {
     const { data, loading, sortBy, sortOrder, handleSort } = useStandardList<PayoutSchedule>({
-        endpoint: '/admin/billing/admin/schedules',
+        endpoint: '/billing/admin/schedules',
         defaultFilters: {},
         defaultLimit: 25,
     });

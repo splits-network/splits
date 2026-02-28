@@ -35,8 +35,8 @@ export default function ContentPageDetailPage() {
         async function load() {
             try {
                 const token = await getToken();
-                const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3020';
-                const res = await fetch(`${gatewayUrl}/admin/content/admin/pages/${id}`, {
+                const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3030';
+                const res = await fetch(`${gatewayUrl}/api/v2/content/admin/pages/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) throw new Error(`Failed to load page: ${res.status}`);

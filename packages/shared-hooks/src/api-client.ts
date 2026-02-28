@@ -49,8 +49,8 @@ function normalizeBaseUrl(url: string): string {
 export class AppApiClient {
     private client: SplitsApiClient;
 
-    constructor(baseUrl: string, token?: string) {
-        this.client = new SplitsApiClient({ baseUrl, authToken: token });
+    constructor(baseUrl: string, token?: string, pathPrefix?: string) {
+        this.client = new SplitsApiClient({ baseUrl, authToken: token, pathPrefix });
     }
 
     setToken(token: string): void {

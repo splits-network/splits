@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { memo } from 'react';
-import ReactECharts from 'echarts-for-react';
-import { useECharts } from '../hooks/use-echarts';
+import React, { memo } from "react";
+import ReactECharts from "echarts-for-react";
+import { useECharts } from "../hooks/use-echarts";
 
 export interface LineChartSeries {
     name: string;
@@ -39,33 +39,54 @@ export const LineChart = memo(function LineChart({
 
     const categories = xLabels ?? data?.map((d) => d.x) ?? [];
     const seriesList = series
-        ? series.map((s) => ({
-              name: s.name,
-              type: 'line',
-              data: s.data,
-              smooth: s.smooth ?? smooth,
-          }))
+        ? series
+              .filter((s) => s && Array.isArray(s.data) && s.data.length > 0)
+              .map((s) => ({
+                  name: s.name,
+                  type: "line",
+                  data: s.data.filter((v) => v !== undefined && v !== null),
+                  smooth: s.smooth ?? smooth,
+              }))
         : [
               {
-                  type: 'line',
-                  data: data?.map((d) => d.y) ?? [],
+                  type: "line",
+                  data:
+                      data
+                          ?.map((d) => d.y)
+                          .filter((v) => v !== undefined && v !== null) ?? [],
                   smooth,
               },
           ];
 
+    // Don't render if all series are empty after filtering
+    if (
+        seriesList.length === 0 ||
+        seriesList.every((s) => !s.data || s.data.length === 0)
+    ) {
+        return null;
+    }
+
     const option = {
         ...themeOptions,
-        legend: showLegend ? { ...themeOptions.legend, show: true } : { show: false },
-        tooltip: { ...themeOptions.tooltip, trigger: 'axis' },
-        grid: { left: 48, right: 16, top: showLegend ? 36 : 16, bottom: 32, containLabel: false },
+        legend: showLegend
+            ? { ...themeOptions.legend, show: true }
+            : { show: false },
+        tooltip: { ...themeOptions.tooltip, trigger: "axis" },
+        grid: {
+            left: 48,
+            right: 16,
+            top: showLegend ? 36 : 16,
+            bottom: 32,
+            containLabel: false,
+        },
         xAxis: {
-            type: 'category',
+            type: "category",
             data: categories,
             name: xAxisLabel,
             ...themeOptions.categoryAxis,
         },
         yAxis: {
-            type: 'value',
+            type: "value",
             name: yAxisLabel,
             ...themeOptions.valueAxis,
         },

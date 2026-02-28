@@ -18,9 +18,9 @@ import { registerAdminRoutes } from './routes';
 import { setupRealtimeServer } from './realtime';
 
 async function main() {
-    // Set PORT default before loadBaseConfig reads it (admin-gateway uses 3020, not the 3000 default)
+    // Set PORT default before loadBaseConfig reads it (admin-gateway uses 3030, not the 3000 default)
     if (!process.env.PORT) {
-        process.env.PORT = '3020';
+        process.env.PORT = '3030';
     }
     const baseConfig = loadBaseConfig('admin-gateway');
     const dbConfig = loadDatabaseConfig();

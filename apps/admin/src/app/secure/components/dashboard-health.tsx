@@ -8,13 +8,13 @@ interface ServiceStatus {
     latencyMs?: number;
 }
 
-const GATEWAY_URL = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://localhost:3020';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://localhost:3030';
 
 const SERVICES: { name: string; path: string }[] = [
     { name: 'Admin Gateway', path: '/health' },
-    { name: 'Identity', path: '/admin/identity/health' },
-    { name: 'ATS', path: '/admin/ats/health' },
-    { name: 'Billing', path: '/admin/billing/health' },
+    { name: 'Identity', path: '/api/v2/identity/health' },
+    { name: 'ATS', path: '/api/v2/ats/health' },
+    { name: 'Billing', path: '/api/v2/billing/health' },
 ];
 
 async function checkService(

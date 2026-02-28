@@ -10,6 +10,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
     useStandardList as useStandardListBase,
+    createAdminClient,
     type UseStandardListOptions,
     type UseStandardListReturn,
 } from '@splits-network/shared-hooks';
@@ -25,6 +26,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     return useStandardListBase<T, F>({
         ...options,
         getToken: options.getToken ?? getToken,
+        clientFactory: options.clientFactory ?? createAdminClient,
         urlSync: options.urlSync ?? (options.syncToUrl !== false ? {
             searchParams: searchParams,
             pathname,

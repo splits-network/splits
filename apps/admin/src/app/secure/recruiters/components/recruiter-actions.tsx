@@ -66,7 +66,7 @@ export function RecruiterActions({ recruiterId, currentStatus, onSuccess }: Recr
             const token = await getToken();
             if (!token) throw new Error('Not authenticated');
             const client = new AdminApiClient(token);
-            await client.patch(`/admin/network/admin/recruiters/${recruiterId}/status`, {
+            await client.patch(`/network/admin/recruiters/${recruiterId}/status`, {
                 status: pending.newStatus,
             });
             toast.success(`Recruiter ${pending.label.toLowerCase()}d successfully`);

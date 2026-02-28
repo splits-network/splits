@@ -67,7 +67,7 @@ const COLUMNS: Column<AdminCompany>[] = [
 export function CompanyTable() {
     const { data, loading, filters, total, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
         useStandardList<AdminCompany>({
-            endpoint: '/admin/network/admin/recruiter-companies',
+            endpoint: '/network/admin/recruiter-companies',
             defaultFilters: { search: '' },
             defaultLimit: 25,
         });

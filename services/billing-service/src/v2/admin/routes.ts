@@ -64,6 +64,17 @@ export function registerAdminBillingRoutes(
         }
     });
 
+    // POST /admin/escrow/:id/release
+    app.post('/admin/escrow/:id/release', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { id } = request.params as { id: string };
+            const result = await adminService.releaseEscrowHold(id);
+            reply.send({ data: result });
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to release escrow hold' } });
+        }
+    });
+
     // GET /admin/counts
     app.get('/admin/counts', async (request: FastifyRequest, reply: FastifyReply) => {
         try {

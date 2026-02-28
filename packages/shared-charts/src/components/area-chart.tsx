@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { memo } from 'react';
-import ReactECharts from 'echarts-for-react';
-import { useECharts } from '../hooks/use-echarts';
+import React, { memo } from "react";
+import ReactECharts from "echarts-for-react";
+import { useECharts } from "../hooks/use-echarts";
 
 export interface AreaChartSeries {
     name: string;
@@ -41,18 +41,19 @@ export const AreaChart = memo(function AreaChart({
     const categories = xLabels ?? data?.map((d) => d.x) ?? [];
 
     const buildAreaStyle = (colorIndex: number) => {
-        const color = themeOptions.color?.[colorIndex] ?? themeOptions.color?.[0];
+        const color =
+            themeOptions.color?.[colorIndex] ?? themeOptions.color?.[0];
         if (!gradient) return { opacity: 0.3 };
         return {
             color: {
-                type: 'linear',
+                type: "linear",
                 x: 0,
                 y: 0,
                 x2: 0,
                 y2: 1,
                 colorStops: [
-                    { offset: 0, color: color ?? 'currentColor' },
-                    { offset: 1, color: 'transparent' },
+                    { offset: 0, color: color ?? "currentColor" },
+                    { offset: 1, color: "transparent" },
                 ],
             },
             opacity: 0.4,
@@ -60,36 +61,57 @@ export const AreaChart = memo(function AreaChart({
     };
 
     const seriesList = series
-        ? series.map((s, i) => ({
-              name: s.name,
-              type: 'line',
-              data: s.data,
-              smooth,
-              areaStyle: buildAreaStyle(i),
-          }))
+        ? series
+              .filter((s) => s && Array.isArray(s.data) && s.data.length > 0)
+              .map((s, i) => ({
+                  name: s.name,
+                  type: "line",
+                  data: s.data.filter((v) => v !== undefined && v !== null),
+                  smooth,
+                  areaStyle: buildAreaStyle(i),
+              }))
         : [
               {
-                  type: 'line',
-                  data: data?.map((d) => d.y) ?? [],
+                  type: "line",
+                  data:
+                      data
+                          ?.map((d) => d.y)
+                          .filter((v) => v !== undefined && v !== null) ?? [],
                   smooth,
                   areaStyle: buildAreaStyle(0),
               },
           ];
 
+    // Don't render if all series are empty after filtering
+    if (
+        seriesList.length === 0 ||
+        seriesList.every((s) => !s.data || s.data.length === 0)
+    ) {
+        return null;
+    }
+
     const option = {
         ...themeOptions,
-        legend: showLegend ? { ...themeOptions.legend, show: true } : { show: false },
-        tooltip: { ...themeOptions.tooltip, trigger: 'axis' },
-        grid: { left: 48, right: 16, top: showLegend ? 36 : 16, bottom: 32, containLabel: false },
+        legend: showLegend
+            ? { ...themeOptions.legend, show: true }
+            : { show: false },
+        tooltip: { ...themeOptions.tooltip, trigger: "axis" },
+        grid: {
+            left: 48,
+            right: 16,
+            top: showLegend ? 36 : 16,
+            bottom: 32,
+            containLabel: false,
+        },
         xAxis: {
-            type: 'category',
+            type: "category",
             data: categories,
             name: xAxisLabel,
             boundaryGap: false,
             ...themeOptions.categoryAxis,
         },
         yAxis: {
-            type: 'value',
+            type: "value",
             name: yAxisLabel,
             ...themeOptions.valueAxis,
         },

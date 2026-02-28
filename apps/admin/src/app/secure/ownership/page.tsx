@@ -9,7 +9,7 @@ const STATUS_OPTIONS = ['all', 'verified', 'pending', 'disputed', 'failed'] as c
 export default function OwnershipPage() {
     const { items, loading, sortBy, sortOrder, handleSort, filters, setFilter } =
         useStandardList<OwnershipRecord, { verification_status: string }>({
-            endpoint: '/admin/trust/admin/ownership',
+            endpoint: '/trust/admin/ownership',
             defaultSortBy: 'created_at',
             defaultSortOrder: 'desc',
             defaultFilters: { verification_status: 'all' },
