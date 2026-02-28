@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@clerk/nextjs": "^6.36.5",
+        "@splits-network/shared-charts": "workspace:*",
         "@splits-network/shared-config": "workspace:*",
         "@splits-network/shared-hooks": "workspace:*",
         "@splits-network/shared-types": "workspace:*",

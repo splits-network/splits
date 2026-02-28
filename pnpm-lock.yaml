@@ -29,6 +29,9 @@ importers:
       '@clerk/nextjs':
         specifier: ^6.36.5
         version: 6.36.5(next@16.1.0(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@splits-network/shared-charts':
+        specifier: workspace:*
+        version: link:../../packages/shared-charts
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
@@ -770,10 +773,16 @@ importers:
       ioredis:
         specifier: ^5.8.2
         version: 5.8.2
+      ws:
+        specifier: ^8.18.3
+        version: 8.18.3
     devDependencies:
       '@types/node':
         specifier: ^24.10.1
         version: 24.10.1
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
