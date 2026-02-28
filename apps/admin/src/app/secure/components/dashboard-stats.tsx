@@ -27,7 +27,7 @@ function StatTile({ icon, label, value, trend, sparkData, colorClass = 'text-pri
                         <i className={`fa-duotone fa-regular ${icon} ${colorClass} text-lg`} />
                         <span className="text-sm text-base-content/60 font-medium">{label}</span>
                     </div>
-                    {sparkData && (
+                    {sparkData && sparkData.length > 0 && (
                         <Sparkline data={sparkData} width={64} height={20} type="line" />
                     )}
                 </div>
@@ -56,47 +56,49 @@ interface DashboardStatsProps {
     loading: boolean;
 }
 
-// Sample sparkline data for visual interest
-const SAMPLE_UP = [12, 15, 11, 18, 14, 20, 22, 19, 25, 28];
-const SAMPLE_DOWN = [30, 28, 25, 22, 20, 18, 15, 14, 12, 10];
-const SAMPLE_FLAT = [10, 12, 11, 13, 12, 14, 13, 15, 14, 16];
-
 export function DashboardStats({ stats, loading }: DashboardStatsProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <StatTile
                 icon="fa-users"
                 label="Total Users"
-                value={stats.totalUsers}
-                trend={8}
-                sparkData={SAMPLE_UP}
+                value={stats.users.total}
+                trend={stats.users.trend}
+                sparkData={stats.users.sparkline}
                 colorClass="text-primary"
                 loading={loading}
             />
             <StatTile
                 icon="fa-briefcase"
                 label="Total Jobs"
-                value={stats.totalJobs}
-                trend={12}
-                sparkData={SAMPLE_UP}
+                value={stats.jobs.total}
+                trend={stats.jobs.trend}
+                sparkData={stats.jobs.sparkline}
                 colorClass="text-secondary"
                 loading={loading}
             />
             <StatTile
                 icon="fa-file-user"
                 label="Applications"
-                value={stats.totalApplications}
-                trend={5}
-                sparkData={SAMPLE_FLAT}
+                value={stats.applications.total}
+                trend={stats.applications.trend}
+                sparkData={stats.applications.sparkline}
                 colorClass="text-accent"
+                loading={loading}
+            />
+            <StatTile
+                icon="fa-user-tie"
+                label="Recruiters"
+                value={stats.recruiters.total}
+                trend={stats.recruiters.trend}
+                sparkData={stats.recruiters.sparkline}
+                colorClass="text-secondary"
                 loading={loading}
             />
             <StatTile
                 icon="fa-user-clock"
                 label="Pending Recruiters"
                 value={stats.pendingRecruiters}
-                trend={-3}
-                sparkData={SAMPLE_DOWN}
                 colorClass="text-warning"
                 loading={loading}
             />
@@ -104,8 +106,6 @@ export function DashboardStats({ stats, loading }: DashboardStatsProps) {
                 icon="fa-shield-exclamation"
                 label="Fraud Flags"
                 value={stats.activeFraud}
-                trend={-8}
-                sparkData={SAMPLE_DOWN}
                 colorClass="text-error"
                 loading={loading}
             />
@@ -113,8 +113,6 @@ export function DashboardStats({ stats, loading }: DashboardStatsProps) {
                 icon="fa-vault"
                 label="Active Escrow"
                 value={stats.activeEscrow}
-                trend={15}
-                sparkData={SAMPLE_UP}
                 colorClass="text-info"
                 loading={loading}
             />
@@ -122,18 +120,7 @@ export function DashboardStats({ stats, loading }: DashboardStatsProps) {
                 icon="fa-money-bill-transfer"
                 label="Pending Payouts"
                 value={stats.pendingPayouts}
-                trend={2}
-                sparkData={SAMPLE_FLAT}
                 colorClass="text-success"
-                loading={loading}
-            />
-            <StatTile
-                icon="fa-bell-ring"
-                label="Active Notifications"
-                value={stats.activeNotifications}
-                trend={0}
-                sparkData={SAMPLE_FLAT}
-                colorClass="text-primary"
                 loading={loading}
             />
         </div>

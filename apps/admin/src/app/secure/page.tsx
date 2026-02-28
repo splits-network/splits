@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useAdminStats, type TimePeriod } from '@/hooks/use-admin-stats';
+import { useAdminChartData } from '@/hooks/use-admin-chart-data';
 import { DashboardStats } from './components/dashboard-stats';
 import { DashboardCharts } from './components/dashboard-charts';
 import { DashboardActivity } from './components/dashboard-activity';
@@ -16,6 +17,7 @@ export default function SecurePage() {
     const [token, setToken] = useState<string | null>(null);
 
     const { stats, loading, error, refetch } = useAdminStats(timePeriod);
+    const chartData = useAdminChartData(timePeriod);
 
     // Fetch token once for health checks
     React.useEffect(() => {
@@ -68,7 +70,7 @@ export default function SecurePage() {
             </div>
 
             {/* Charts */}
-            <DashboardCharts timePeriod={timePeriod} />
+            <DashboardCharts timePeriod={timePeriod} stats={stats} chartData={chartData} />
         </div>
     );
 }

@@ -42,9 +42,9 @@ export function DashboardActions({ stats, loading }: DashboardActionsProps) {
         },
         {
             icon: 'fa-file-slash',
-            label: 'Pending Applications',
-            count: stats.pendingApplications,
-            href: '/secure/applications?status=pending',
+            label: 'Applications',
+            count: stats.applications.total,
+            href: '/secure/applications',
             urgency: 'info',
         },
     ];

@@ -27,20 +27,8 @@ function getIcon(type: string): string {
     return TYPE_ICONS[type] ?? TYPE_ICONS.default;
 }
 
-// Placeholder when no activity data available
-const PLACEHOLDER: { id: string; type: string; description: string; createdAt: string }[] = [
-    { id: '1', type: 'user_created', description: 'New user registered', createdAt: new Date(Date.now() - 300_000).toISOString() },
-    { id: '2', type: 'job_posted', description: 'Job posted: Senior Engineer', createdAt: new Date(Date.now() - 900_000).toISOString() },
-    { id: '3', type: 'recruiter_approved', description: 'Recruiter approved: TechHire LLC', createdAt: new Date(Date.now() - 1_800_000).toISOString() },
-    { id: '4', type: 'payment_processed', description: 'Payout processed: $2,400', createdAt: new Date(Date.now() - 3_600_000).toISOString() },
-    { id: '5', type: 'application_submitted', description: 'Application submitted', createdAt: new Date(Date.now() - 7_200_000).toISOString() },
-];
-
 export function DashboardActivity() {
     const { activities, loading, mode, setMode } = useAdminActivity();
-
-    const displayItems = activities.length > 0 ? activities : PLACEHOLDER;
-    const isPlaceholder = activities.length === 0 && !loading;
 
     return (
         <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
@@ -68,19 +56,18 @@ export function DashboardActivity() {
                     </div>
                 </div>
 
-                {isPlaceholder && (
-                    <div className="badge badge-ghost badge-xs text-base-content/40 self-start">
-                        Sample Data
-                    </div>
-                )}
-
                 <div className="flex flex-col gap-1 overflow-y-auto max-h-72">
                     {loading ? (
                         Array.from({ length: 5 }).map((_, i) => (
                             <div key={i} className="skeleton h-8 w-full" />
                         ))
+                    ) : activities.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-base-content/40">
+                            <i className="fa-duotone fa-regular fa-inbox text-2xl mb-2" />
+                            <p className="text-sm">No recent activity</p>
+                        </div>
                     ) : (
-                        displayItems.map((item) => (
+                        activities.map((item) => (
                             <div
                                 key={item.id}
                                 className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-base-200 transition-colors text-sm"
