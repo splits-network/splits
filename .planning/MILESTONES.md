@@ -1,5 +1,33 @@
 # Project Milestones: Splits Network
 
+## v6.0 Admin App Extraction (Shipped: 2026-02-27)
+
+**Delivered:** Extracted platform administration from portal into a dedicated admin app and admin gateway — 30+ pages, real-time WebSocket infrastructure, shared component packages, and dashboard with live database-backed charts and KPI tiles.
+
+**Phases completed:** 16-21 (20 plans total)
+
+**Key accomplishments:**
+
+- Complete admin app (apps/admin/) with 30+ pages, Clerk auth, isPlatformAdmin server-side gating, collapsible sidebar with live badge counts, and DaisyUI v5 theme
+- Admin gateway (services/admin-gateway/) with Clerk JWT auth, isPlatformAdmin enforcement, proxy routing to all 13 domain services, WebSocket server with Redis pub/sub relay
+- Shared packages ecosystem: shared-hooks (useStandardList, api-client factories), shared-charts (ECharts with DaisyUI theme bridge), shared-ui (confirm dialog, loading states)
+- Dashboard with 8 KPI stat tiles showing real sparklines/trends from database, 7+ ECharts charts with period selector (7d/30d/90d/1y/all), and activity feed
+- Full Docker/K8s deployment: multi-stage Dockerfiles, health probes, ingress rules, CI/CD pipelines for both admin app and admin gateway
+- Portal and api-gateway cleaned of all admin code — 59 portal admin files removed, admin-specific gateway routes stripped
+
+**Stats:**
+
+- 292 files created/modified
+- +34,562 / -16,650 lines of TypeScript + YAML + CSS
+- 6 phases, 20 plans
+- 2026-02-27 (single day execution)
+
+**Git range:** `feat(16-01)` → `docs(21)`
+
+**What's next:** TBD — next milestone
+
+---
+
 ## v5.0 Custom GPT / Applicant Network (Shipped: 2026-02-13)
 
 **Delivered:** Full Custom GPT backend enabling candidates to interact with Applicant.Network via natural language in ChatGPT — OAuth2 authentication, job search, resume analysis, application submission with confirmation safety, and production-ready deployment.

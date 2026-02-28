@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A split-fee recruiting marketplace connecting recruiters, hiring companies, and candidates. The platform includes job management, candidate tracking, role-based access control, global search across all entities, and a Custom GPT backend enabling candidates to interact with Applicant.Network via natural language in ChatGPT.
+A split-fee recruiting marketplace connecting recruiters, hiring companies, and candidates. The platform includes job management, candidate tracking, role-based access control, global search across all entities, a Custom GPT backend enabling candidates to interact with Applicant.Network via natural language in ChatGPT, and a dedicated admin app for platform administration.
 
 ## Core Value
 
@@ -10,19 +10,7 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 ## Current State
 
-v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features implemented.
-
-## Current Milestone: v6.0 Admin App Extraction
-
-**Goal:** Extract platform administration from portal into a dedicated admin app and admin gateway, reducing complexity in both the portal and api-gateway.
-
-**Target features:**
-- Dedicated `apps/admin/` Next.js app with its own Clerk instance
-- Dedicated `services/admin-gateway/` Fastify service for admin-only API routes
-- Shared hooks/utilities extracted into packages (use-standard-list, api-client, toast)
-- All 30 admin routes moved from portal to admin app
-- Admin-specific gateway routes moved from api-gateway to admin-gateway
-- Portal and api-gateway cleaned up after extraction
+v6.0 Admin App Extraction shipped. Platform administration fully extracted into dedicated admin app and admin gateway. Portal simplified to recruiter/company-user focus only.
 
 ## Requirements
 
@@ -71,14 +59,18 @@ v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features i
 - OpenAPI 3.0.1 schema defining all GPT Actions — v5.0
 - GPT Instructions document for Custom GPT configuration — v5.0
 
+<!-- v6.0 -->
+
+- Dedicated admin Next.js app (apps/admin/) with independent Clerk auth — v6.0
+- Dedicated admin gateway (services/admin-gateway/) for admin-only API routes — v6.0
+- Shared frontend packages for hooks/utilities used by both portal and admin — v6.0
+- All admin pages extracted from portal to admin app (30+ pages) — v6.0
+- Admin gateway routes extracted from api-gateway — v6.0
+- Portal and api-gateway simplified after extraction — v6.0
+
 ### Active
 
-- [ ] Dedicated admin Next.js app (`apps/admin/`) with independent Clerk auth
-- [ ] Dedicated admin gateway (`services/admin-gateway/`) for admin-only API routes
-- [ ] Shared frontend packages for hooks/utilities used by both portal and admin
-- [ ] All admin pages extracted from portal to admin app
-- [ ] Admin gateway routes extracted from api-gateway
-- [ ] Portal and api-gateway simplified after extraction
+(No active requirements — next milestone not yet defined)
 
 ### Out of Scope
 
@@ -95,27 +87,30 @@ v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features i
 
 **Current codebase:**
 - Tech stack: Fastify, TypeScript, Supabase Postgres, Next.js 16, jose (ES256 JWT), svix (webhook verification)
-- 16 microservices including gpt-service
-- Portal admin: 59 files, ~15k lines, 30 routes across 8 sections
-- Api-gateway: 22 v2 route files, 6.6k lines, 530-line index.ts
+- 17 microservices including gpt-service and admin-gateway
+- 4 apps: portal, candidate, corporate, admin
+- Shared packages: shared-hooks, shared-charts, shared-ui, shared-types, shared-access-context, shared-config, shared-logging, shared-api-client
+- Portal: recruiter/company-user focused (admin code removed)
+- Api-gateway: user-facing traffic only (admin routes removed)
+- Admin app: 30+ pages with real-time dashboard, WebSocket infrastructure
+- Admin gateway: Clerk JWT auth, isPlatformAdmin enforcement, proxy to 13 domain services
 
-**Key integration points for v6.0:**
-- `apps/portal/src/app/portal/admin/` — Admin feature to extract (59 files)
-- `services/api-gateway/src/routes/v2/` — Route files to split (admin vs user)
-- `packages/shared-ui/` — Existing shared UI components
-- `packages/shared-access-context/` — resolveAccessContext for RBAC
-- `@/hooks/use-standard-list` — Portal hook to extract to shared package
-- `@/lib/api-client` — Portal utility to extract to shared package
-- `@/lib/toast-context` — Portal utility to extract to shared package
+**Known tech debt (from v6.0):**
+- Content Navigation/Images pages show empty state (no backend endpoints)
+- Intelligence pages use speculative endpoints (empty state fallback)
+- No domain service publishes to admin:* Redis channels
+- No platform_settings table (settings page loads defaults only)
+- Network-service missing /admin/chart-data endpoint
 
 ## Constraints
 
-- **Nano-service**: Each service focused on one purpose, routes through api-gateway
+- **Nano-service**: Each service focused on one purpose, routes through api-gateway (or admin-gateway for admin traffic)
 - **No direct DB queries for domain data**: gpt-service uses shared database access patterns
 - **Write-action safety**: All GPT mutations require confirmed flag — no exceptions
 - **Token scoping**: GPT tokens are scoped to candidate actions only, not recruiter/admin
 - **Rate limiting**: Per-user GPT-specific throttle policies (30 reads/min, 10 writes/min)
 - **Tech stack**: Fastify, TypeScript, Supabase Postgres, existing V2 service patterns
+- **Admin isolation**: Admin traffic routes through admin-gateway, never through api-gateway
 
 ## Key Decisions
 
@@ -142,10 +137,13 @@ v5.0 Custom GPT (Applicant Network) shipped. All candidate-facing GPT features i
 | OpenAPI 3.0.1 (not 3.1) | GPT Builder only supports 3.0.x. Avoids compatibility issues. | ✓ Good |
 | Dual-auth pattern | GPT Bearer tokens for ChatGPT, x-gpt-clerk-user-id header for candidate profile page. Both supported. | ✓ Good |
 | In-memory confirmation token store | 15-min TTL, tokens regenerated easily. Simple for MVP, migrate to Redis if needed later. | ✓ Good |
-
-| Separate admin app from portal | Admin is a different persona with different workflows. 59 files, 15k lines is a full app. Reduces portal complexity. | — Pending |
-| Separate admin gateway | Api-gateway is 6.6k lines across 22 route files. Admin routes have different auth model (is_platform_admin). Reduces gateway complexity. | — Pending |
-| User handles Clerk instance | New Clerk app for admin. User will configure. | — Pending |
+| Separate admin app from portal | Admin is a different persona with different workflows. 59 files, 15k lines is a full app. Reduces portal complexity. | ✓ Good |
+| Separate admin gateway | Api-gateway is 6.6k lines across 22 route files. Admin routes have different auth model (is_platform_admin). Reduces gateway complexity. | ✓ Good |
+| User handles Clerk instance | New Clerk app for admin. User will configure. | ✓ Good |
+| ECharts with DaisyUI theme bridge | getSplitsThemeOptions() merges DaisyUI oklch CSS vars into ECharts option objects. SVG renderer for retina. | ✓ Good |
+| WebSocket with Redis pub/sub relay | Separate redisSub client via redis.duplicate(). Admin: prefix applied server-side for isolation. | ✓ Good |
+| Admin routes under /admin/* in domain services | Clean separation from user-scoped /api/v2/* routes. Gateway rewritePrefix strips service prefix. | ✓ Good |
+| useStandardList clientFactory option | Admin wrapper injects createAdminClient. No Clerk coupling in shared-hooks. | ✓ Good |
 
 ---
-*Last updated: 2026-02-27 after v6.0 milestone started*
+*Last updated: 2026-02-28 after v6.0 milestone complete*
