@@ -1,0 +1,130 @@
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { AdminAtsService } from './service';
+
+interface AdminAtsRoutesConfig {
+    adminService: AdminAtsService;
+}
+
+export function registerAdminAtsRoutes(
+    app: FastifyInstance,
+    config: AdminAtsRoutesConfig
+) {
+    const { adminService } = config;
+
+    // GET /admin/jobs
+    app.get('/admin/jobs', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const params = request.query as any;
+            const result = await adminService.listJobsAdmin({
+                page: params.page ? parseInt(params.page, 10) : 1,
+                limit: params.limit ? parseInt(params.limit, 10) : 25,
+                search: params.search,
+                sort_by: params.sort_by,
+                sort_order: params.sort_order,
+                status: params.status,
+                commute_type: params.commute_type,
+                job_level: params.job_level,
+            });
+            reply.send(result);
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to list jobs' } });
+        }
+    });
+
+    // GET /admin/jobs/:id
+    app.get('/admin/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { id } = request.params as { id: string };
+            const job = await adminService.getJobAdmin(id);
+            reply.send({ data: job });
+        } catch (error) {
+            const code = (error as any)?.code;
+            if (code === 'PGRST116') {
+                reply.code(404).send({ error: { message: 'Job not found' } });
+            } else {
+                reply.code(500).send({ error: { message: 'Failed to fetch job' } });
+            }
+        }
+    });
+
+    // GET /admin/applications
+    app.get('/admin/applications', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const params = request.query as any;
+            const result = await adminService.listApplicationsAdmin({
+                page: params.page ? parseInt(params.page, 10) : 1,
+                limit: params.limit ? parseInt(params.limit, 10) : 25,
+                search: params.search,
+                sort_by: params.sort_by,
+                sort_order: params.sort_order,
+                status: params.status,
+            });
+            reply.send(result);
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to list applications' } });
+        }
+    });
+
+    // GET /admin/candidates
+    app.get('/admin/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const params = request.query as any;
+            const result = await adminService.listCandidatesAdmin({
+                page: params.page ? parseInt(params.page, 10) : 1,
+                limit: params.limit ? parseInt(params.limit, 10) : 25,
+                search: params.search,
+                sort_by: params.sort_by,
+                sort_order: params.sort_order,
+            });
+            reply.send(result);
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to list candidates' } });
+        }
+    });
+
+    // GET /admin/assignments
+    app.get('/admin/assignments', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const params = request.query as any;
+            const result = await adminService.listAssignmentsAdmin({
+                page: params.page ? parseInt(params.page, 10) : 1,
+                limit: params.limit ? parseInt(params.limit, 10) : 25,
+                search: params.search,
+                sort_by: params.sort_by,
+                sort_order: params.sort_order,
+                status: params.status,
+            });
+            reply.send(result);
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to list assignments' } });
+        }
+    });
+
+    // GET /admin/placements
+    app.get('/admin/placements', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const params = request.query as any;
+            const result = await adminService.listPlacementsAdmin({
+                page: params.page ? parseInt(params.page, 10) : 1,
+                limit: params.limit ? parseInt(params.limit, 10) : 25,
+                search: params.search,
+                sort_by: params.sort_by,
+                sort_order: params.sort_order,
+                status: params.status,
+            });
+            reply.send(result);
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to list placements' } });
+        }
+    });
+
+    // GET /admin/counts
+    app.get('/admin/counts', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const counts = await adminService.getAdminCounts();
+            reply.send({ data: counts });
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to fetch counts' } });
+        }
+    });
+}

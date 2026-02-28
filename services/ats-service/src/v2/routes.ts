@@ -29,6 +29,9 @@ import { registerJobRequirementRoutes } from './job-requirements/routes';
 import { ApplicationNoteRepository } from './application-notes/repository';
 import { ApplicationNoteServiceV2 } from './application-notes/service';
 import { registerApplicationNoteRoutes } from './application-notes/routes';
+import { AdminAtsRepository } from './admin/repository';
+import { AdminAtsService } from './admin/service';
+import { registerAdminAtsRoutes } from './admin/routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -96,4 +99,9 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
 
     registerJobRequirementRoutes(app, { service: jobRequirementService });
     registerApplicationNoteRoutes(app, noteService);
+
+    // Admin routes (permissive, no access filtering)
+    const adminRepository = new AdminAtsRepository(config.supabaseUrl, config.supabaseKey);
+    const adminService = new AdminAtsService(adminRepository);
+    registerAdminAtsRoutes(app, { adminService });
 }
