@@ -6,7 +6,7 @@
 - v3.0 Platform Admin Restructure (Phases 4-7) -- shipped 2026-02-13
 - v4.0 Commute Types & Job Levels (Phases 8-10) -- shipped 2026-02-13
 - v5.0 Custom GPT / Applicant Network (Phases 11-15) -- shipped 2026-02-13
-- v6.0 Admin App Extraction (Phases 16-21) -- shipped 2026-02-27
+- v6.0 Admin App Extraction (Phases 16-21) -- SHIPPED 2026-02-27
 
 ## Phases
 
@@ -49,7 +49,7 @@
 
 </details>
 
-### v6.0 Admin App Extraction (In Progress)
+### v6.0 Admin App Extraction (SHIPPED 2026-02-27)
 
 **Milestone Goal:** Extract platform administration from portal into a dedicated admin app and admin gateway, reducing complexity in both the portal and api-gateway.
 
@@ -155,8 +155,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Admin stats backend routes (sparklines, trends, breakdowns)
-- [ ] 21-02-PLAN.md — Wire dashboard and metrics frontend to real API data
+- [x] 21-01-PLAN.md — Admin stats backend routes (sparklines, trends, breakdowns)
+- [x] 21-02-PLAN.md — Wire dashboard and metrics frontend to real API data
 
 ## Progress
 
@@ -185,8 +185,8 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19 -> 20 -> 21
 | 18. Page Migration | v6.0 | 10/10 | Complete | 2026-02-28 |
 | 19. Portal & Gateway Cleanup | v6.0 | 2/2 | Complete | 2026-02-28 |
 | 20. Admin Integration & Deployment Fixes | v6.0 | 1/1 | Complete | 2026-02-27 |
-| 21. Admin Dashboard Real Data | v6.0 | 0/2 | In Progress | — |
+| 21. Admin Dashboard Real Data | v6.0 | 2/2 | Complete | 2026-02-27 |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-27 (Phase 21 planned — admin dashboard real data)*
+*Last updated: 2026-02-27 (Phase 21 complete — admin dashboard real data shipped)*
