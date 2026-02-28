@@ -76,6 +76,8 @@ Recent decisions affecting current work:
 - [18-09]: useStandardList canonical API: data/sortBy/sortOrder/handleSort/goToPage (items/sortField/sortDir deprecated aliases)
 - [18-09]: Content Navigation and Images show empty states — content API not yet connected
 - [18-09]: Metrics page uses sample chart data — analytics endpoints not yet available
+- [19-01]: isAdmin kept in portal filterByRole + role display — admins are valid portal users; only admin-specific links/views removed
+- [19-01]: Admin users visiting /portal/dashboard see recruiter/company view — no dedicated admin dashboard in portal
 - [19-02]: Api-gateway = user-facing only; admin-gateway = admin traffic only — clean separation established
 
 ### Pending Todos
@@ -96,4 +98,4 @@ Next: Continue Phase 19 plans
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-28 (Phase 19 in progress — 19-02 complete)*
+*Last updated: 2026-02-28 (Phase 19 in progress — 19-01 and 19-02 complete)*
