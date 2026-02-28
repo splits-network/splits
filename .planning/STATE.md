@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 18 of 19 (Page Migration)
-Plan: 8 of 10 in current phase
+Plan: 9 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-28 -- Completed 18-08 Intelligence & Trust Pages
+Last activity: 2026-02-28 -- Completed 18-09 Finance, Content, Analytics, Settings Pages
 
 Progress: [##################] 89% (17/19 phases complete across all milestones)
 
@@ -71,6 +71,11 @@ Recent decisions affecting current work:
 - [18-07]: Job detail page is 'use client' with useEffect fetch — Clerk token required, syncToUrl:false on nested lists
 - [18-08]: Match detail uses useEffect + createAuthenticatedClient not useStandardList — single entity fetch, not paginated list
 - [18-08]: AdminEmptyState fallback for trust/intelligence pages — backend endpoints speculative, pages show empty not error
+- [18-06]: RecruiterActions isolated from table — action mutation logic separate from presentational table component
+- [18-06]: NotificationForm accepts loose initial prop type — avoids complex Partial<SiteNotification> mapping
+- [18-09]: useStandardList canonical API: data/sortBy/sortOrder/handleSort/goToPage (items/sortField/sortDir deprecated aliases)
+- [18-09]: Content Navigation and Images show empty states — content API not yet connected
+- [18-09]: Metrics page uses sample chart data — analytics endpoints not yet available
 
 ### Pending Todos
 
@@ -84,9 +89,9 @@ See previous STATE.md versions for full list if needed.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 18-08 Intelligence & Trust Pages
+Stopped at: Completed 18-09 Finance, Content, Analytics, Settings Pages
 Resume file: None
-Next: Execute 18-09-PLAN.md
+Next: Execute 18-10-PLAN.md
 
 ---
 *Created: 2026-02-12*
