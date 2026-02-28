@@ -119,10 +119,11 @@ Plans:
   2. Api-gateway no longer contains admin-specific route files
   3. Navigating to portal `/portal/admin/*` redirects to the admin app
   4. Portal sidebar no longer shows admin navigation (or shows an external link to admin app)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 19-01: TBD
+- [ ] 19-01-PLAN.md — Remove admin navigation, redirect stubs, dashboard view, and unused hooks from portal
+- [ ] 19-02-PLAN.md — Remove admin-specific routes from api-gateway (chat, site-notifications, content)
 
 ## Progress
 
