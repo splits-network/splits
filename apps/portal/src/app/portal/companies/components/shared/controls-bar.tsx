@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchInput } from "@/components/standard-lists/search-input";
+import { SearchInput } from "@/components/standard-lists";
 import type { ViewMode } from "./status-color";
 import type { CompanyTab, CompanyFilters } from "../../types";
 

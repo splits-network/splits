@@ -92,7 +92,7 @@ export function UserDropdown() {
             items.push({
                 href: "/portal/admin",
                 icon: "fa-duotone fa-regular fa-gauge-high",
-                label: "Admin Dashboard",
+                label: "Admin",
                 description: "Platform administration",
             });
         }

@@ -38,6 +38,12 @@ export default function AuthenticatedNav() {
                             </Link>
                         </li>
                         <li>
+                            <Link href="/portal/jobs/saved">
+                                <i className="fa-duotone fa-regular fa-bookmark"></i>
+                                Saved Jobs
+                            </Link>
+                        </li>
+                        <li>
                             <Link href="/portal/matches">
                                 <i className="fa-duotone fa-regular fa-bullseye"></i>
                                 Matches

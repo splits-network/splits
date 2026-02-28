@@ -48,6 +48,12 @@ const ATS_RESOURCES: ResourceDefinition[] = [
         basePath: '/job-requirements',
         tag: 'job-requirements',
     },
+    {
+        name: 'saved-jobs',
+        service: 'ats',
+        basePath: '/saved-jobs',
+        tag: 'saved-jobs',
+    },
 ];
 
 export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistry) {

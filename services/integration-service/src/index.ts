@@ -4,12 +4,20 @@ import {
     loadRabbitMQConfig,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
-import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
+import {
+    buildServer,
+    errorHandler,
+    setupProcessErrorHandlers,
+} from "@splits-network/shared-fastify";
 import { getCryptoService } from "@splits-network/shared-config/src/crypto";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
-import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
+import {
+    EventPublisher,
+    OutboxPublisher,
+    OutboxWorker,
+} from "./v2/shared/events";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -26,6 +34,14 @@ async function main() {
     const baseConfig = loadBaseConfig("integration-service");
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
+    const supabaseKey =
+        dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error(
+            "Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY",
+        );
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -67,7 +83,8 @@ async function main() {
         openapi: {
             info: {
                 title: "Integration Service API",
-                description: "OAuth connections and third-party integration management",
+                description:
+                    "OAuth connections and third-party integration management",
                 version: "1.0.0",
             },
             servers: [
@@ -104,23 +121,29 @@ async function main() {
     );
     await eventPublisher.connect();
 
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseClient = createClient(
-        dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-    );
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
 
-    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
-    const outboxWorker = new OutboxWorker(supabaseClient, eventPublisher, baseConfig.serviceName, logger);
+    const outboxPublisher = new OutboxPublisher(
+        supabaseClient,
+        baseConfig.serviceName,
+        logger,
+    );
+    const outboxWorker = new OutboxWorker(
+        supabaseClient,
+        eventPublisher,
+        baseConfig.serviceName,
+        logger,
+    );
     outboxWorker.start();
-    logger.info('Outbox worker started - events will be durably delivered');
+    logger.info("Outbox worker started - events will be durably delivered");
 
     const crypto = await getCryptoService();
-    logger.info('Encryption service initialized from Vault');
+    logger.info("Encryption service initialized from Vault");
 
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         rabbitMqUrl: rabbitConfig.url,
         eventPublisher: outboxPublisher,
         logger,

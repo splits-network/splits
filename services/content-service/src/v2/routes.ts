@@ -15,6 +15,7 @@ import { ImageRepository } from './images/repository';
 import { ContentImageStorage } from './images/storage';
 import { ImageServiceV2 } from './images/service';
 import { registerImageRoutes } from './images/routes';
+import { registerAdminContentRoutes } from './admin/routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -46,4 +47,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     );
 
     registerImageRoutes(app, { imageService });
+
+    // Admin routes (permissive — admin-gateway enforces isPlatformAdmin)
+    registerAdminContentRoutes(app, { supabase });
 }

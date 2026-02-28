@@ -21,6 +21,11 @@ async function main() {
     const baseConfig = loadBaseConfig('identity-service');
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     // Check Clerk configuration for syncing user data back to Clerk
     if (process.env.CLERK_SECRET_KEY) {
@@ -119,7 +124,7 @@ async function main() {
     const { createClient } = await import('@supabase/supabase-js');
     const supabaseClient = createClient(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
 
     // Set up transactional outbox for durable event delivery
@@ -131,7 +136,7 @@ async function main() {
     // Register V2 routes only
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         eventPublisher: outboxPublisher,
         logger,
     });

@@ -51,6 +51,18 @@ export function registerMcpRoutes(app: FastifyInstance, deps: McpServerDeps) {
                 return;
             }
 
+            // Stale session ID — server was restarted, session lost
+            if (sessionId && !sessions.has(sessionId)) {
+                return reply.status(400).send({
+                    jsonrpc: '2.0',
+                    error: {
+                        code: -32600,
+                        message: 'Session expired. Please reconnect.',
+                    },
+                    id: null,
+                });
+            }
+
             // New session — create transport + server
             const transport = new StreamableHTTPServerTransport({
                 sessionIdGenerator: () => `mcp_${crypto.randomUUID()}`,

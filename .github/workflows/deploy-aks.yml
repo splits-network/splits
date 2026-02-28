@@ -17,54 +17,59 @@ jobs:
         strategy:
             matrix:
                 service:
-                    - name: api-gateway
-                      path: services/api-gateway
-                    - name: identity-service
-                      path: services/identity-service
-                    - name: ats-service
-                      path: services/ats-service
-                    - name: network-service
-                      path: services/network-service
-                    - name: billing-service
-                      path: services/billing-service
-                    - name: notification-service
-                      path: services/notification-service
-                    - name: automation-service
-                      path: services/automation-service
-                    - name: document-service
-                      path: services/document-service
-                    - name: ai-service
-                      path: services/ai-service
-                    - name: document-processing-service
-                      path: services/document-processing-service
-                    - name: analytics-service
-                      path: services/analytics-service
-                    - name: chat-gateway
-                      path: services/chat-gateway
-                    - name: analytics-gateway
-                      path: services/analytics-gateway
-                    - name: chat-service
-                      path: services/chat-service
-                    - name: matching-service
-                      path: services/matching-service
-                    - name: search-service
-                      path: services/search-service
-                    - name: gpt-service
-                      path: services/gpt-service
-                    - name: content-service
-                      path: services/content-service
-                    - name: integration-service
-                      path: services/integration-service
-                    - name: health-monitor
-                      path: services/health-monitor
-                    - name: portal
-                      path: apps/portal
-                    - name: candidate
-                      path: apps/candidate
-                    - name: corporate
-                      path: apps/corporate
-                    - name: status
-                      path: apps/status
+                    - { name: api-gateway, path: services/api-gateway }
+                    - { name: admin-gateway, path: services/admin-gateway }
+                    - {
+                          name: identity-service,
+                          path: services/identity-service,
+                      }
+                    - { name: ats-service, path: services/ats-service }
+                    - { name: network-service, path: services/network-service }
+                    - { name: billing-service, path: services/billing-service }
+                    - {
+                          name: notification-service,
+                          path: services/notification-service,
+                      }
+                    - {
+                          name: automation-service,
+                          path: services/automation-service,
+                      }
+                    - {
+                          name: document-service,
+                          path: services/document-service,
+                      }
+                    - { name: ai-service, path: services/ai-service }
+                    - {
+                          name: document-processing-service,
+                          path: services/document-processing-service,
+                      }
+                    - {
+                          name: analytics-service,
+                          path: services/analytics-service,
+                      }
+                    - { name: chat-gateway, path: services/chat-gateway }
+                    - {
+                          name: analytics-gateway,
+                          path: services/analytics-gateway,
+                      }
+                    - { name: chat-service, path: services/chat-service }
+                    - {
+                          name: matching-service,
+                          path: services/matching-service,
+                      }
+                    - { name: search-service, path: services/search-service }
+                    - { name: gpt-service, path: services/gpt-service }
+                    - { name: content-service, path: services/content-service }
+                    - {
+                          name: integration-service,
+                          path: services/integration-service,
+                      }
+                    - { name: health-monitor, path: services/health-monitor }
+                    - { name: portal, path: apps/portal }
+                    - { name: candidate, path: apps/candidate }
+                    - { name: corporate, path: apps/corporate }
+                    - { name: status, path: apps/status }
+                    - { name: admin, path: apps/admin }
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -126,6 +131,14 @@ jobs:
                       --build-arg NEXT_PUBLIC_APP_URL=https://status.splits.network \
                       --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.splits.network \
                       .
+                  elif [ "${{ matrix.service.name }}" = "admin" ]; then
+                    docker build \
+                      -f ${{ matrix.service.path }}/Dockerfile \
+                      -t $IMAGE_TAG \
+                      --target production \
+                      --build-arg NEXT_PUBLIC_ADMIN_GATEWAY_URL=https://admin.api.employment-networks.com \
+                      --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.ADMIN_CLERK_PUBLISHABLE_KEY }} \
+                      .
                   else
                     docker build \
                       -f ${{ matrix.service.path }}/Dockerfile \
@@ -173,6 +186,7 @@ jobs:
         runs-on: ubuntu-latest
         environment: production
         needs: build-and-push
+        if: always() && !failure() && !cancelled()
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -195,7 +209,7 @@ jobs:
                   if ! kubectl get namespace ingress-nginx &>/dev/null; then
                     echo "Installing nginx-ingress controller..."
                     kubectl apply -f infra/k8s/ingress-nginx/deploy.yaml
-                    
+
                     # Wait for ingress-nginx to be ready
                     echo "Waiting for ingress-nginx controller to be ready..."
                     kubectl wait --for=condition=Available deployment/ingress-nginx-controller -n ingress-nginx --timeout=180s
@@ -211,7 +225,7 @@ jobs:
                   if ! kubectl get namespace cert-manager &>/dev/null; then
                     echo "Installing cert-manager..."
                     kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
-                    
+
                     # Wait for cert-manager to be ready
                     echo "Waiting for cert-manager pods to be ready..."
                     kubectl wait --for=condition=Available deployment/cert-manager -n cert-manager --timeout=120s
@@ -248,6 +262,8 @@ jobs:
                     --from-literal=app-clerk-secret-key="${{ secrets.APP_CLERK_SECRET_KEY }}" \
                     --from-literal=app-clerk-jwks-url="${{ secrets.APP_CLERK_JWKS_URL }}" \
                     --from-literal=app-clerk-webhook-secret="${{ secrets.APP_CLERK_WEBHOOK_SECRET }}" \
+                    --from-literal=admin-clerk-publishable-key="${{ secrets.ADMIN_CLERK_PUBLISHABLE_KEY }}" \
+                    --from-literal=admin-clerk-secret-key="${{ secrets.ADMIN_CLERK_SECRET_KEY }}" \
                     --namespace=splits-network \
                     --dry-run=client -o yaml | kubectl apply -f -
 
@@ -313,7 +329,7 @@ jobs:
                     mv "${file}.tmp" "$file"
                   done
 
-                  # 🔧 FIX: Also process cronjobs and jobs files  
+                  # Also process cronjobs and jobs files
                   for file in infra/k8s/*/cronjobs/*.yaml; do
                     if [ -f "$file" ]; then
                       envsubst < "$file" > "${file}.tmp"
@@ -424,6 +440,22 @@ jobs:
             - name: Wait for Status App to be ready
               run: |
                   kubectl rollout status deployment/status --timeout=180s --namespace=splits-network
+
+            - name: Deploy Admin Gateway
+              run: |
+                  kubectl apply -f infra/k8s/admin-gateway/ --namespace=splits-network
+
+            - name: Wait for Admin Gateway
+              run: |
+                  kubectl rollout status deployment/admin-gateway --timeout=180s --namespace=splits-network
+
+            - name: Deploy Admin App
+              run: |
+                  kubectl apply -f infra/k8s/admin/ --namespace=splits-network
+
+            - name: Wait for Admin App
+              run: |
+                  kubectl rollout status deployment/admin --timeout=180s --namespace=splits-network
 
             - name: Deploy Ingress
               run: |

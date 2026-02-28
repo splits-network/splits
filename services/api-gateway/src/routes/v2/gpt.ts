@@ -113,10 +113,14 @@ export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistr
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const authHeader = request.headers['authorization'];
+            const clerkUserIdHeader = request.headers['x-gpt-clerk-user-id'];
 
             const headers: Record<string, string> = {};
             if (authHeader) {
                 headers['authorization'] = authHeader;
+            }
+            if (clerkUserIdHeader) {
+                headers['x-gpt-clerk-user-id'] = clerkUserIdHeader as string;
             }
 
             try {

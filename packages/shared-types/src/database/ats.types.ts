@@ -32,6 +32,13 @@ export type CandidateInsert = DbTableInsert<'candidates'>;
 export type CandidateUpdate = DbTableUpdate<'candidates'>;
 
 // ============================================================================
+// CANDIDATE SAVED JOBS
+// ============================================================================
+export type CandidateSavedJob = DbTable<'candidate_saved_jobs'>;
+export type CandidateSavedJobInsert = DbTableInsert<'candidate_saved_jobs'>;
+export type CandidateSavedJobUpdate = DbTableUpdate<'candidate_saved_jobs'>;
+
+// ============================================================================
 // JOBS
 // ============================================================================
 

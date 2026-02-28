@@ -8,7 +8,7 @@ import {
     ReactNode,
     useRef,
 } from "react";
-import ConfirmDialog from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@splits-network/shared-ui";
 
 export interface ConfirmOptions {
     title: string;

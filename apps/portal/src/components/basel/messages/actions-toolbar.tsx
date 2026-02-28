@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import ConfirmDialog from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@splits-network/shared-ui";
 import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* Inline portal — avoids shared-ui CJS/ESM issue */

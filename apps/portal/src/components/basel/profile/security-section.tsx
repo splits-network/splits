@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { BaselFormField, BaselStatusPill } from "@splits-network/basel-ui";
+import { GptSessionsCard } from "./gpt-sessions-card";
 
 export function SecuritySection() {
     const { getToken } = useAuth();
@@ -241,6 +242,9 @@ export function SecuritySection() {
                         </button>
                     </div>
                 </div>
+
+                {/* Connected Apps */}
+                <GptSessionsCard />
 
                 {/* Danger Zone */}
                 <div className="bg-error/5 border border-error/20 p-6">

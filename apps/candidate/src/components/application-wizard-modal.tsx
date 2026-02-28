@@ -473,7 +473,6 @@ export default function ApplicationWizardModal({
             <div
                 ref={backdropRef}
                 className="modal-backdrop bg-neutral/60"
-                onClick={handleClose}
             />
 
             {/* Modal Box */}

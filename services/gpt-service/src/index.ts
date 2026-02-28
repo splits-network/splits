@@ -1,21 +1,39 @@
-import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig, loadGptConfig } from '@splits-network/shared-config';
-import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from '@splits-network/shared-fastify';
-import formbody from '@fastify/formbody';
-import { EventPublisher } from './v2/shared/events';
-import { AuditEventConsumer } from './v2/shared/audit-consumer';
-import { registerV2Routes } from './v2/routes';
+import {
+    loadBaseConfig,
+    loadDatabaseConfig,
+    loadRabbitMQConfig,
+    loadGptConfig,
+} from "@splits-network/shared-config";
+import { createLogger } from "@splits-network/shared-logging";
+import {
+    buildServer,
+    errorHandler,
+    registerHealthCheck,
+    HealthCheckers,
+} from "@splits-network/shared-fastify";
+import formbody from "@fastify/formbody";
+import { EventPublisher } from "./v2/shared/events";
+import { AuditEventConsumer } from "./v2/shared/audit-consumer";
+import { registerV2Routes } from "./v2/routes";
 
 async function main() {
-    const baseConfig = loadBaseConfig('gpt-service');
+    const baseConfig = loadBaseConfig("gpt-service");
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
     const gptConfig = loadGptConfig();
+    const supabaseKey =
+        dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error(
+            "Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY",
+        );
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
-        level: baseConfig.nodeEnv === 'development' ? 'debug' : 'info',
-        prettyPrint: baseConfig.nodeEnv === 'development',
+        level: baseConfig.nodeEnv === "development" ? "debug" : "info",
+        prettyPrint: baseConfig.nodeEnv === "development",
     });
 
     const app = await buildServer({
@@ -36,14 +54,17 @@ async function main() {
     const eventPublisher = new EventPublisher(
         rabbitConfig.url,
         logger,
-        baseConfig.serviceName
+        baseConfig.serviceName,
     );
 
     try {
         await eventPublisher.connect();
-        logger.info('RabbitMQ EventPublisher connected successfully');
+        logger.info("RabbitMQ EventPublisher connected successfully");
     } catch (error) {
-        logger.error({ err: error }, 'Failed to connect RabbitMQ EventPublisher on startup');
+        logger.error(
+            { err: error },
+            "Failed to connect RabbitMQ EventPublisher on startup",
+        );
         throw error;
     }
 
@@ -51,22 +72,25 @@ async function main() {
     const auditConsumer = new AuditEventConsumer(
         rabbitConfig.url,
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-        logger
+        supabaseKey,
+        logger,
     );
 
     try {
         await auditConsumer.connect();
-        logger.info('RabbitMQ AuditEventConsumer connected successfully');
+        logger.info("RabbitMQ AuditEventConsumer connected successfully");
     } catch (error) {
-        logger.error({ err: error }, 'Failed to connect RabbitMQ AuditEventConsumer on startup');
+        logger.error(
+            { err: error },
+            "Failed to connect RabbitMQ AuditEventConsumer on startup",
+        );
         throw error;
     }
 
     // Register V2 routes
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         gptConfig,
         eventPublisher,
         clerkWebhookSecret: process.env.GPT_CLERK_WEBHOOK_SECRET,
@@ -74,7 +98,7 @@ async function main() {
 
     // Register health check endpoint
     registerHealthCheck(app, {
-        serviceName: 'gpt-service',
+        serviceName: "gpt-service",
         logger,
         checkers: {
             rabbitmq: HealthCheckers.rabbitMqPublisher(eventPublisher),
@@ -82,17 +106,20 @@ async function main() {
     });
 
     // Log GPT config summary (non-sensitive fields only)
-    logger.info({
-        gptClientId: gptConfig.clientId,
-        gptRedirectUri: gptConfig.redirectUri,
-        accessTokenExpiry: gptConfig.accessTokenExpiry,
-        refreshTokenExpiry: gptConfig.refreshTokenExpiry,
-        authCodeExpiry: gptConfig.authCodeExpiry,
-    }, 'GPT OAuth configuration loaded');
+    logger.info(
+        {
+            gptClientId: gptConfig.clientId,
+            gptRedirectUri: gptConfig.redirectUri,
+            accessTokenExpiry: gptConfig.accessTokenExpiry,
+            refreshTokenExpiry: gptConfig.refreshTokenExpiry,
+            authCodeExpiry: gptConfig.authCodeExpiry,
+        },
+        "GPT OAuth configuration loaded",
+    );
 
     // Graceful shutdown
-    process.on('SIGTERM', async () => {
-        logger.info('SIGTERM received, shutting down gracefully');
+    process.on("SIGTERM", async () => {
+        logger.info("SIGTERM received, shutting down gracefully");
         await auditConsumer.disconnect();
         await eventPublisher.close();
         await app.close();
@@ -101,7 +128,7 @@ async function main() {
 
     // Start server
     try {
-        await app.listen({ port: baseConfig.port, host: '0.0.0.0' });
+        await app.listen({ port: baseConfig.port, host: "0.0.0.0" });
         logger.info(`gpt-service listening on port ${baseConfig.port}`);
     } catch (err) {
         logger.error(err);

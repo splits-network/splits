@@ -12,6 +12,7 @@ COPY packages/shared-api-client/package.json ./packages/shared-api-client/
 COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-ui/package.json ./packages/shared-ui/
+COPY packages/shared-hooks/package.json ./packages/shared-hooks/
 COPY packages/basel-ui/package.json ./packages/basel-ui/
 COPY packages/chat-ui/package.json ./packages/chat-ui/
 COPY packages/memphis-ui/package.json ./packages/memphis-ui/
@@ -57,19 +58,19 @@ COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
+COPY packages/shared-hooks ./packages/shared-hooks
 COPY packages/basel-ui ./packages/basel-ui
 COPY packages/chat-ui ./packages/chat-ui
 COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/portal ./apps/portal
 # Copy press content (MDX articles read at runtime by server components)
 COPY content ./content
-# Reinstall to ensure workspace links are properly established after copying source
-RUN pnpm install --frozen-lockfile
 # Build shared packages first (in dependency order - types/config first, then api-client which depends on them)
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-api-client build
 RUN pnpm --filter @splits-network/shared-ui build
+RUN pnpm --filter @splits-network/shared-hooks build
 RUN pnpm --filter @splits-network/basel-ui build
 RUN pnpm --filter @splits-network/chat-ui build
 RUN pnpm --filter @splits-network/memphis-ui build
@@ -99,6 +100,8 @@ COPY --from=build /app/packages/shared-api-client/package.json ./packages/shared
 COPY --from=build /app/packages/shared-api-client/dist ./packages/shared-api-client/dist
 COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
 COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
+COPY --from=build /app/packages/shared-hooks/package.json ./packages/shared-hooks/
+COPY --from=build /app/packages/shared-hooks/dist ./packages/shared-hooks/dist
 COPY --from=build /app/packages/basel-ui/package.json ./packages/basel-ui/
 COPY --from=build /app/packages/basel-ui/dist ./packages/basel-ui/dist
 COPY --from=build /app/packages/chat-ui/package.json ./packages/chat-ui/

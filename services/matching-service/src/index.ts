@@ -13,7 +13,11 @@ import {
 } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
+import {
+    EventPublisher,
+    OutboxPublisher,
+    OutboxWorker,
+} from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
 import { DomainEventConsumer } from "./domain-consumer";
 import { MatchRepository } from "./v2/matches/repository";
@@ -35,6 +39,14 @@ async function main() {
     const baseConfig = loadBaseConfig("matching-service");
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
+    const supabaseKey =
+        dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error(
+            "Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY",
+        );
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -73,11 +85,22 @@ async function main() {
         openapi: {
             info: {
                 title: "Matching Service API",
-                description: "Candidate-job matching engine with rule-based, skills, and AI scoring",
+                description:
+                    "Candidate-job matching engine with rule-based, skills, and AI scoring",
                 version: "1.0.0",
             },
-            servers: [{ url: "http://localhost:3017", description: "Development server" }],
-            tags: [{ name: "matches", description: "Candidate-job match recommendations" }],
+            servers: [
+                {
+                    url: "http://localhost:3017",
+                    description: "Development server",
+                },
+            ],
+            tags: [
+                {
+                    name: "matches",
+                    description: "Candidate-job match recommendations",
+                },
+            ],
         },
     });
 
@@ -89,7 +112,11 @@ async function main() {
     // Initialize event publisher
     let eventPublisher: EventPublisher | null = null;
     try {
-        eventPublisher = new EventPublisher(rabbitConfig.url, logger, baseConfig.serviceName);
+        eventPublisher = new EventPublisher(
+            rabbitConfig.url,
+            logger,
+            baseConfig.serviceName,
+        );
         await eventPublisher.connect();
     } catch (error) {
         logger.error({ err: error }, "Failed to connect event publisher");
@@ -97,22 +124,27 @@ async function main() {
 
     // Create Supabase client
     const { createClient } = await import("@supabase/supabase-js");
-    const supabaseClient = createClient(
-        dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-    );
+    const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
 
     // Set up transactional outbox
     const outboxPublisher = eventPublisher
         ? new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger)
         : null;
     const outboxWorker = eventPublisher
-        ? new OutboxWorker(supabaseClient, eventPublisher, baseConfig.serviceName, logger)
+        ? new OutboxWorker(
+              supabaseClient,
+              eventPublisher,
+              baseConfig.serviceName,
+              logger,
+          )
         : null;
     outboxWorker?.start();
 
     // Initialize core services
-    const matchRepository = new MatchRepository(dbConfig.supabaseUrl, dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey);
+    const matchRepository = new MatchRepository(
+        dbConfig.supabaseUrl,
+        supabaseKey,
+    );
     const embeddingService = new EmbeddingService(logger);
     const embeddingRepository = new EmbeddingRepository(supabaseClient);
 
@@ -128,7 +160,7 @@ async function main() {
     // Register V2 routes
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         eventPublisher: outboxPublisher || undefined,
         logger,
         orchestrator,
@@ -137,7 +169,11 @@ async function main() {
     // Initialize domain event consumer
     let domainConsumer: DomainEventConsumer | null = null;
     try {
-        domainConsumer = new DomainEventConsumer(rabbitConfig.url, orchestrator, logger);
+        domainConsumer = new DomainEventConsumer(
+            rabbitConfig.url,
+            orchestrator,
+            logger,
+        );
         await domainConsumer.connect();
         logger.info("Domain event consumer connected and listening");
     } catch (error) {
@@ -150,8 +186,14 @@ async function main() {
         logger,
         checkers: {
             database: HealthCheckers.database(supabaseClient),
-            ...(eventPublisher && { rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher) }),
-            ...(domainConsumer && { rabbitmq_consumer: HealthCheckers.rabbitMqConsumer(domainConsumer) }),
+            ...(eventPublisher && {
+                rabbitmq_publisher:
+                    HealthCheckers.rabbitMqPublisher(eventPublisher),
+            }),
+            ...(domainConsumer && {
+                rabbitmq_consumer:
+                    HealthCheckers.rabbitMqConsumer(domainConsumer),
+            }),
         },
     });
 

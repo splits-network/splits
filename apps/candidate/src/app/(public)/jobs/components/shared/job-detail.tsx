@@ -29,9 +29,11 @@ interface JobDetailProps {
 
 export function JobDetail({ job, onClose }: JobDetailProps) {
     const { isSignedIn, getToken } = useAuth();
-    const { success: toastSuccess } = useToast();
+    const { success: toastSuccess, error: toastError } = useToast();
 
     const [hasActiveRecruiter, setHasActiveRecruiter] = useState(false);
+    const [savedJobId, setSavedJobId] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
     const [existingApplication, setExistingApplication] = useState<any>(null);
     const [authLoading, setAuthLoading] = useState(false);
     const [showWizard, setShowWizard] = useState(false);
@@ -61,10 +63,16 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                 if (!token || cancelled) return;
 
                 const authClient = createAuthenticatedClient(token);
-                const [recruitersRes, applicationsRes] = await Promise.all([
-                    authClient.get<{ data: any[] }>("/recruiter-candidates"),
-                    authClient.get<{ data: any[] }>("/applications"),
-                ]);
+                const [recruitersRes, applicationsRes, savedJobsRes] =
+                    await Promise.all([
+                        authClient.get<{ data: any[] }>(
+                            "/recruiter-candidates",
+                        ),
+                        authClient.get<{ data: any[] }>("/applications"),
+                        authClient.get<{ data: any[] }>(
+                            `/saved-jobs?job_id=${job.id}`,
+                        ),
+                    ]);
 
                 if (cancelled) return;
 
@@ -79,6 +87,12 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                         !["rejected", "withdrawn"].includes(app.stage),
                 );
                 setExistingApplication(existing || null);
+
+                const savedJobs = Array.isArray(savedJobsRes.data)
+                    ? savedJobsRes.data
+                    : [];
+                const saved = savedJobs.find((s: any) => s.job_id === job.id);
+                setSavedJobId(saved ? saved.id : null);
             } catch (err) {
                 console.error("Failed to fetch auth data for job detail:", err);
             } finally {
@@ -129,6 +143,39 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
     };
 
     const buttonConfig = getButtonConfig();
+
+    const handleSaveToggle = async () => {
+        if (!isSignedIn) {
+            window.location.href = `/sign-in?redirect_url=${encodeURIComponent(`/jobs/${job.id}`)}`;
+            return;
+        }
+
+        if (isSaving) return;
+        setIsSaving(true);
+
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("Could not get auth token");
+            const authClient = createAuthenticatedClient(token);
+
+            if (savedJobId) {
+                await authClient.delete(`/saved-jobs/${savedJobId}`);
+                setSavedJobId(null);
+                toastSuccess("Job removed from saved list");
+            } else {
+                const res = await authClient.post("/saved-jobs", {
+                    job_id: job.id,
+                });
+                setSavedJobId(res.data.id);
+                toastSuccess("Job saved successfully");
+            }
+        } catch (error) {
+            console.error("Failed to toggle saved job:", error);
+            toastError("Failed to update saved job status");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleShare = async () => {
         setIsSharing(true);
@@ -244,11 +291,21 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                         {buttonConfig.text}
                     </button>
                     <button
-                        className="btn btn-outline"
+                        className={`btn ${savedJobId ? "btn-secondary" : "btn-outline"}`}
                         style={{ borderRadius: 0 }}
-                        title="Save for later"
+                        title={
+                            savedJobId ? "Remove from saved" : "Save for later"
+                        }
+                        onClick={handleSaveToggle}
+                        disabled={isSaving}
                     >
-                        <i className="fa-duotone fa-regular fa-bookmark" />
+                        {isSaving ? (
+                            <i className="fa-duotone fa-solid fa-spinner-third animate-spin" />
+                        ) : (
+                            <i
+                                className={`fa-duotone ${savedJobId ? "fa-solid" : "fa-regular"} fa-bookmark`}
+                            />
+                        )}
                     </button>
                     <button
                         className="btn btn-outline"

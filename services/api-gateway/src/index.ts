@@ -29,6 +29,11 @@ async function main() {
     const dbConfig = loadDatabaseConfig();
     const redisConfig = loadRedisConfig();
     const rabbitConfig = loadRabbitMQConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -189,7 +194,6 @@ async function main() {
                 { name: 'billing', description: 'Subscription plans and billing' },
                 { name: 'documents', description: 'Document storage and retrieval' },
                 { name: 'dashboards', description: 'Dashboard stats and insights' },
-                { name: 'admin', description: 'Platform admin and automation' },
                 { name: 'automation', description: 'Automation rules, matches, fraud signals, marketplace metrics' },
                 { name: 'presence', description: 'User presence and activity tracking' },
                 { name: 'status', description: 'System status and support contact' },
@@ -228,7 +232,6 @@ async function main() {
         allowList: async (request: any) => {
             const url = request.raw?.url || request.url || '';
             if (url.startsWith('/api/v2/chat')) return true;
-            if (url.startsWith('/api/v2/admin/chat')) return true;
             return false;
         },
     });
@@ -387,7 +390,6 @@ async function main() {
         }
 
         // Skip auth for public system health and site notification endpoints
-        // Note: /api/v2/site-notifications/all is an admin endpoint and must NOT be skipped
         if (request.method === 'GET' && request.url.startsWith('/api/v2/system-health')) {
             return;
         }
@@ -466,7 +468,7 @@ async function main() {
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
     );
 
     // Register V2 proxy routes only

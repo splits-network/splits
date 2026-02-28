@@ -29,6 +29,11 @@ async function main() {
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
     const stripeConfig = loadStripeConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -137,7 +142,7 @@ async function main() {
     // Initialize placement snapshot domain and event consumer
     const supabase = createClient(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
     const snapshotRepository = new PlacementSnapshotRepository(supabase);
 
@@ -150,7 +155,7 @@ async function main() {
     // Register V2 routes (plans, subscriptions, payouts, splits-rates)
     const v2Services = await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         eventPublisher: outboxPublisher,
     });
 

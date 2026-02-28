@@ -5,6 +5,9 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter, usePathname } from "next/navigation";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { formatSalary, formatRelativeTime } from "@/lib/utils";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
@@ -33,6 +36,7 @@ interface JobDetailClientProps {
     isAuthenticated: boolean;
     hasActiveRecruiter: boolean;
     existingApplication: any;
+    initialSavedJobId: string | null;
 }
 
 export default function JobDetailClient({
@@ -40,12 +44,62 @@ export default function JobDetailClient({
     isAuthenticated,
     hasActiveRecruiter,
     existingApplication,
+    initialSavedJobId,
 }: JobDetailClientProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const { getToken } = useAuth();
+
     const mainRef = useRef<HTMLElement>(null);
     const [showWizard, setShowWizard] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
-    const [saved, setSaved] = useState(false);
-    const { success: toastSuccess } = useToast();
+
+    const [savedJobId, setSavedJobId] = useState<string | null>(
+        initialSavedJobId,
+    );
+    const [isSaving, setIsSaving] = useState(false);
+    const saved = !!savedJobId;
+
+    const { success: toastSuccess, error: toastError } = useToast();
+
+    const handleSaveToggle = async () => {
+        if (!isAuthenticated) {
+            // Include `redirect_url` to come back here if we use standard clerk or just standard redirect
+            router.push(
+                `/sign-in?redirect_url=${encodeURIComponent(pathname)}`,
+            );
+            return;
+        }
+
+        if (isSaving) return;
+        setIsSaving(true);
+
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("Could not get auth token");
+
+            const client = createAuthenticatedClient(token);
+
+            if (savedJobId) {
+                // Delete
+                await client.delete(`/saved-jobs/${savedJobId}`);
+                setSavedJobId(null);
+                toastSuccess("Job removed from saved list");
+            } else {
+                // Create
+                const res = await client.post("/saved-jobs", {
+                    job_id: job.id,
+                });
+                setSavedJobId(res.data.id);
+                toastSuccess("Job saved successfully");
+            }
+        } catch (error) {
+            console.error("Failed to toggle saved job:", error);
+            toastError("Failed to update saved job status");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const companyDisplay = getCompanyName(job);
     const companyIndustry = getCompanyIndustry(job);
@@ -320,12 +374,17 @@ export default function JobDetailClient({
                                 {buttonConfig.text}
                             </button>
                             <button
-                                onClick={() => setSaved(!saved)}
+                                onClick={handleSaveToggle}
+                                disabled={isSaving}
                                 className={`detail-action opacity-0 btn ${saved ? "btn-secondary" : "btn-ghost border-neutral-content/20"}`}
                             >
-                                <i
-                                    className={`fa-${saved ? "solid" : "regular"} fa-bookmark`}
-                                />
+                                {isSaving ? (
+                                    <i className="fa-duotone fa-solid fa-spinner-third animate-spin" />
+                                ) : (
+                                    <i
+                                        className={`fa-${saved ? "solid" : "regular"} fa-bookmark`}
+                                    />
+                                )}
                                 {saved ? "Saved" : "Save"}
                             </button>
                             <button

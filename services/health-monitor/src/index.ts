@@ -51,6 +51,12 @@ async function main() {
     const serviceDefinitions = loadServiceDefinitions();
     const supabaseKey =
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error(
+            "Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY",
+        );
+    }
     const dryRun = process.env.DRY_RUN === "true";
 
     if (dryRun) {

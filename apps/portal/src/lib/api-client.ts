@@ -1,99 +1,71 @@
 /**
- * Portal App API Client - Simplified Version
- * 
- * This module provides a minimal wrapper around the shared API client.
- * Only complex operations that add business logic are included as named methods.
- * Simple CRUD operations should use the generic get/post/patch/delete methods directly.
+ * Portal App API Client
+ *
+ * Thin re-export wrapper around @splits-network/shared-hooks.
+ * Adds portal-specific business methods on top of the shared client.
+ * 42 portal files import from this module — the public surface is stable.
  */
 
-import { SplitsApiClient, type ApiResponse } from '@splits-network/shared-api-client';
-import type { ApplicationStage } from '@splits-network/shared-types';
-type DashboardStats = Record<string, any>;
+import { AppApiClient } from '@splits-network/shared-hooks';
+export { AppApiClient } from '@splits-network/shared-hooks';
 
 /**
- * Portal API client - simplified wrapper around shared client
+ * Portal API client — extends shared AppApiClient with portal-specific business methods.
+ * Use createAuthenticatedClient(token) or createUnauthenticatedClient() rather than
+ * instantiating directly.
  */
-export class ApiClient {
-    private client: SplitsApiClient;
-
+export class ApiClient extends AppApiClient {
     constructor(token?: string) {
-        this.client = new SplitsApiClient();
-        if (token) {
-            this.client.setAuthToken(token);
+        // Forward to AppApiClient(baseUrl, token) where baseUrl is resolved from env vars.
+        super(ApiClient._getPortalBaseUrl(), token);
+    }
+
+    private static _getPortalBaseUrl(): string {
+        if (typeof window === 'undefined') {
+            if (process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
+                return process.env.NEXT_PUBLIC_API_GATEWAY_URL.replace(/\/+$/, '').replace(/\/api(?:\/v[0-9]+)?$/, '');
+            }
+            const isInDocker = process.env.RUNNING_IN_DOCKER === 'true';
+            return isInDocker ? 'http://api-gateway:3000' : 'http://localhost:3000';
         }
+        const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+        return publicApiUrl.replace(/\/+$/, '').replace(/\/api(?:\/v[0-9]+)?$/, '');
     }
+
+    // ===== PORTAL-SPECIFIC BUSINESS METHODS =====
 
     /**
-     * Set authentication token
-     */
-    setToken(token: string): void {
-        this.client.setAuthToken(token);
-    }
-
-    /**
-     * Remove authentication token
-     */
-    clearToken(): void {
-        this.client.clearAuthToken();
-    }
-
-    // ===== DIRECT HTTP METHODS =====
-    // Use these for simple CRUD operations
-
-    async get<T = any>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> {
-        const response = await this.client.get(endpoint, options?.params);
-        return response as T;
-    }
-
-    async post<T = any>(endpoint: string, data?: any): Promise<T> {
-        const response = await this.client.post(endpoint, data);
-        return response as T;
-    }
-
-    async patch<T = any>(endpoint: string, data?: any): Promise<T> {
-        const response = await this.client.patch(endpoint, data);
-        return response as T;
-    }
-
-    async put<T = any>(endpoint: string, data?: any): Promise<T> {
-        const response = await this.client.put(endpoint, data);
-        return response as T;
-    }
-
-    async delete<T = any>(endpoint: string): Promise<T> {
-        const response = await this.client.delete(endpoint);
-        return response as T;
-    }
-
-    // ===== COMPLEX BUSINESS LOGIC OPERATIONS ONLY =====
-    // Keep only methods that add real value beyond simple HTTP calls
-
-    /**
-     * Get current user's recruiter profile
-     * Uses /me endpoint for security (prevents seeing other users' data)
+     * Get current user's recruiter profile.
+     * Uses /me endpoint for security (prevents seeing other users' data).
      */
     async getCurrentRecruiter(): Promise<{ data: any }> {
         return await this.get('/recruiters/me');
     }
 
     /**
-     * Get current user's active subscription
-     * Uses /me endpoint for security
+     * Get current user's active subscription.
+     * Uses /me endpoint for security.
      */
     async getCurrentSubscription(): Promise<{ data: any }> {
         return await this.get('/subscriptions/me');
     }
 }
 
-// Export a singleton instance
+// Singleton unauthenticated client — used for public API access
 export const apiClient = new ApiClient();
 
-// Export a factory function for creating authenticated clients
+/**
+ * Factory: create an authenticated portal API client.
+ * Replaces createPortalClient from shared-hooks with a portal-specific ApiClient
+ * so all 42 consumers retain access to portal business methods (getCurrentRecruiter, etc.).
+ */
 export function createAuthenticatedClient(token: string): ApiClient {
     return new ApiClient(token);
 }
 
-// Export a factory function for creating unauthenticated clients (public API access)
+/**
+ * Factory: create an unauthenticated portal API client for public routes.
+ */
 export function createUnauthenticatedClient(): ApiClient {
     return new ApiClient();
 }

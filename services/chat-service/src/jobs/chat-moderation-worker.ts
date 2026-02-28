@@ -18,6 +18,11 @@ async function main() {
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
     const redisConfig = loadRedisConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     const logger = createLogger({
         serviceName: `${baseConfig.serviceName}-moderation-worker`,
@@ -27,7 +32,7 @@ async function main() {
 
     const repository = new ChatRepository(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
 
     const eventPublisher = new ChatEventPublisher(redisConfig, logger);

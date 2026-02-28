@@ -24,6 +24,9 @@ import { registerInvitationRoutes } from './invitations/routes';
 import { registerConsentRoutes } from './consent/routes';
 import { webhooksRoutesV2 } from './webhooks/routes';
 import { resolveAccessContext } from './shared/access';
+import { AdminIdentityRepository } from './admin/repository';
+import { AdminIdentityService } from './admin/service';
+import { registerAdminIdentityRoutes } from './admin/routes';
 
 interface IdentityV2Config {
     supabaseUrl: string;
@@ -81,4 +84,9 @@ export async function registerV2Routes(
     registerInvitationRoutes(app, { invitationService, logError });
     registerConsentRoutes(app, { consentService, logError });
     await webhooksRoutesV2(app, webhookService);
+
+    // Admin routes (permissive, no access filtering)
+    const adminRepository = new AdminIdentityRepository(supabaseUrl, supabaseKey);
+    const adminService = new AdminIdentityService(adminRepository);
+    registerAdminIdentityRoutes(app, { adminService });
 }

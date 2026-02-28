@@ -64,6 +64,8 @@ export interface ApiClientConfig {
     authToken?: string;
     /** Base URL override (defaults to environment-based detection) */
     baseUrl?: string;
+    /** Path prefix prepended to all endpoints (defaults to '/api/v2') */
+    pathPrefix?: string;
 }
 
 export interface ApiResponse<T> {
@@ -128,10 +130,12 @@ function normalizeBaseUrl(url: string): string {
  */
 export class SplitsApiClient {
     private baseUrl: string;
+    private pathPrefix: string;
     private authToken?: string;
 
     constructor(config: ApiClientConfig = {}) {
         this.baseUrl = config.baseUrl || getApiBaseUrl();
+        this.pathPrefix = config.pathPrefix ?? '/api/v2';
         this.authToken = config.authToken;
     }
 
@@ -156,7 +160,7 @@ export class SplitsApiClient {
         endpoint: string,
         options: RequestInit = {}
     ): Promise<T> {
-        const url = `${this.baseUrl}/api/v2${endpoint}`;
+        const url = `${this.baseUrl}${this.pathPrefix}${endpoint}`;
 
         const headers: Record<string, string> = {
             ...options.headers as Record<string, string>,

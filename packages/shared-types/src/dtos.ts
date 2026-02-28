@@ -257,3 +257,12 @@ export interface PaginatedResponse<T> {
         total_pages: number;
     };
 }
+
+export interface CandidateSavedJobDTO {
+    id: string;
+    candidate_id: string;
+    job_id: string;
+    created_at: string;
+    updated_at: string;
+    job?: JobDTO;
+}

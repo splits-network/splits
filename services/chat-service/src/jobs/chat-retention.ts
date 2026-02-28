@@ -16,6 +16,11 @@ async function main() {
     const baseConfig = loadBaseConfig('chat-service');
     const dbConfig = loadDatabaseConfig();
     const redisConfig = loadRedisConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     const logger = createLogger({
         serviceName: `${baseConfig.serviceName}-retention`,
@@ -25,14 +30,14 @@ async function main() {
 
     const supabase: SupabaseClient<any> = createClient(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
 
     const eventPublisher = new ChatEventPublisher(redisConfig, logger);
     const bucket = process.env.CHAT_ATTACHMENTS_BUCKET || 'chat-attachments';
     const storage = new ChatStorageClient(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         bucket
     );
 
