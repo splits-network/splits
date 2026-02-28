@@ -6,7 +6,7 @@
 - v3.0 Platform Admin Restructure (Phases 4-7) -- shipped 2026-02-13
 - v4.0 Commute Types & Job Levels (Phases 8-10) -- shipped 2026-02-13
 - v5.0 Custom GPT / Applicant Network (Phases 11-15) -- shipped 2026-02-13
-- v6.0 Admin App Extraction (Phases 16-20) -- in progress
+- v6.0 Admin App Extraction (Phases 16-20) -- shipped 2026-02-27
 
 ## Phases
 
@@ -140,7 +140,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 20-01-PLAN.md — Fix all integration and deployment gaps from milestone audit
+- [x] 20-01-PLAN.md — Fix all integration and deployment gaps from milestone audit
 
 ## Progress
 
@@ -168,8 +168,8 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19 -> 20
 | 17. Admin App & Gateway Scaffold | v6.0 | 3/3 | Complete | 2026-02-27 |
 | 18. Page Migration | v6.0 | 10/10 | Complete | 2026-02-28 |
 | 19. Portal & Gateway Cleanup | v6.0 | 2/2 | Complete | 2026-02-28 |
-| 20. Admin Integration & Deployment Fixes | v6.0 | 0/1 | Pending | — |
+| 20. Admin Integration & Deployment Fixes | v6.0 | 1/1 | Complete | 2026-02-27 |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-28 (Phase 20 added — gap closure from milestone audit)*
+*Last updated: 2026-02-27 (Phase 20 complete — v6.0 milestone shipped)*
