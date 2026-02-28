@@ -6,7 +6,7 @@
 - v3.0 Platform Admin Restructure (Phases 4-7) -- shipped 2026-02-13
 - v4.0 Commute Types & Job Levels (Phases 8-10) -- shipped 2026-02-13
 - v5.0 Custom GPT / Applicant Network (Phases 11-15) -- shipped 2026-02-13
-- v6.0 Admin App Extraction (Phases 16-19) -- in progress
+- v6.0 Admin App Extraction (Phases 16-19) -- shipped 2026-02-28
 
 ## Phases
 
@@ -122,8 +122,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — Remove admin navigation, redirect stubs, dashboard view, and unused hooks from portal
-- [ ] 19-02-PLAN.md — Remove admin-specific routes from api-gateway (chat, site-notifications, content)
+- [x] 19-01-PLAN.md — Remove admin navigation, redirect stubs, dashboard view, and unused hooks from portal
+- [x] 19-02-PLAN.md — Remove admin-specific routes from api-gateway (chat, site-notifications, content)
 
 ## Progress
 
@@ -150,8 +150,8 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19
 | 16. Shared Packages | v6.0 | 2/2 | Complete | 2026-02-27 |
 | 17. Admin App & Gateway Scaffold | v6.0 | 3/3 | Complete | 2026-02-27 |
 | 18. Page Migration | v6.0 | 10/10 | Complete | 2026-02-28 |
-| 19. Portal & Gateway Cleanup | v6.0 | 0/TBD | Not started | - |
+| 19. Portal & Gateway Cleanup | v6.0 | 2/2 | Complete | 2026-02-28 |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-28 (Phase 18 complete)*
+*Last updated: 2026-02-28 (Phase 19 complete — v6.0 milestone shipped)*

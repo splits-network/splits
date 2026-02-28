@@ -54,10 +54,10 @@ Requirements for admin extraction milestone. Each maps to roadmap phases.
 
 ### Cleanup
 
-- [ ] **CLN-01**: Remove all admin routes, components, and hooks from portal app
-- [ ] **CLN-02**: Remove admin-specific route files from api-gateway
-- [ ] **CLN-03**: Add redirect from portal `/portal/admin` to admin app URL
-- [ ] **CLN-04**: Update portal sidebar to remove admin navigation link (or replace with external link to admin app)
+- [x] **CLN-01**: Remove all admin routes, components, and hooks from portal app
+- [x] **CLN-02**: Remove admin-specific route files from api-gateway
+- [x] **CLN-03**: Add redirect from portal `/portal/admin` to admin app URL
+- [x] **CLN-04**: Update portal sidebar to remove admin navigation link (or replace with external link to admin app)
 
 ## v6.1 Requirements (Deferred)
 
@@ -137,10 +137,10 @@ Remaining admin sections to migrate in follow-up milestone.
 | DIR-04 | Phase 18 | Complete |
 | DIR-05 | Phase 18 | Complete |
 | SET-01 | Phase 18 | Complete |
-| CLN-01 | Phase 19 | Pending |
-| CLN-02 | Phase 19 | Pending |
-| CLN-03 | Phase 19 | Pending |
-| CLN-04 | Phase 19 | Pending |
+| CLN-01 | Phase 19 | Complete |
+| CLN-02 | Phase 19 | Complete |
+| CLN-03 | Phase 19 | Complete |
+| CLN-04 | Phase 19 | Complete |
 
 **Coverage:**
 - v6.0 requirements: 31 total
@@ -149,4 +149,4 @@ Remaining admin sections to migrate in follow-up milestone.
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-28 after Phase 18 complete*
+*Last updated: 2026-02-28 after Phase 19 complete — v6.0 milestone shipped*
