@@ -55,10 +55,19 @@ export class MembershipServiceV2 {
      * Find all memberships with pagination and filters
      */
     async findMemberships(clerkUserId: string, filters: any) {
-        if (filters.organization_id) {
-            await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, filters.organization_id);
-        } else {
-            await this.requirePlatformAdmin(clerkUserId);
+        const access = await this.resolveAccessContext(clerkUserId);
+
+        // Always scope by user's own memberships unless they're platform admin
+        if (!access.isPlatformAdmin) {
+            // Regular users can only see their own memberships
+            filters.user_clerk_id = clerkUserId;
+        }
+
+        // If org is specified, verify access to that org
+        if (filters.organization_id && !access.isPlatformAdmin) {
+            if (!access.organizationIds.includes(filters.organization_id)) {
+                throw new Error('You do not have access to this organization');
+            }
         }
 
         this.logger.info({ filters }, 'MembershipService.findMemberships');
