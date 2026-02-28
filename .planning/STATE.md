@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v6.0 Admin App Extraction — Dashboard Real Data
+**Current focus:** v6.0 Admin App Extraction — COMPLETE
 
 ## Current Position
 
 Phase: 21 of 21 (Admin Dashboard Real Data)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-28 -- Completed 21-01-PLAN.md (backend stats endpoints)
+Plan: 2 of 2 in current phase
+Status: Phase complete — all phases complete
+Last activity: 2026-02-28 -- Completed 21-02-PLAN.md (frontend wiring, real data pipeline)
 
-Progress: [####################] 97% (20.5/21 phases complete across all milestones)
+Progress: [####################] 100% (21/21 phases complete across all milestones)
 
 ## Performance Metrics
 
@@ -85,6 +85,10 @@ Recent decisions affecting current work:
 - [21-01]: Supabase .then() returns PromiseLike not Promise — use async countRows() helpers to get native Promise<number>
 - [21-01]: Stats/chart logic extracted to stats-repository.ts + chart-repository.ts when repository would exceed 200 lines
 - [21-01]: getAdminStats(period)/getAdminChartData(period) as standard admin analytics method names across services
+- [21-02]: StatMetric { total, sparkline, trend } shape for any metric with time-series data in AdminStats
+- [21-02]: useAdminChartData hook pattern: parallel fetch from identity+ats /admin/chart-data, re-fetches on period change
+- [21-02]: Removed Revenue Trend/Fraud by Type/Billing Distribution charts — no time-series endpoints exist for these
+- [21-02]: ChartCard sample prop removed — real data needs no badge; skeleton shown when loading
 
 ### Pending Todos
 
@@ -98,10 +102,10 @@ See previous STATE.md versions for full list if needed.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 21-01-PLAN.md — backend admin stats endpoints
+Stopped at: Completed 21-02-PLAN.md — frontend dashboard wiring (final plan)
 Resume file: None
-Next: /gsd:execute-phase 21 (plan 02 — frontend wiring)
+Next: All phases complete — v6.0 Admin App Extraction milestone done
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-27 (Phase 21 added — admin dashboard real data)*
+*Last updated: 2026-02-28 (Phase 21 Plan 02 complete — all phases done)*
