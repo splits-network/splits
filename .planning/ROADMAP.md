@@ -6,7 +6,7 @@
 - v3.0 Platform Admin Restructure (Phases 4-7) -- shipped 2026-02-13
 - v4.0 Commute Types & Job Levels (Phases 8-10) -- shipped 2026-02-13
 - v5.0 Custom GPT / Applicant Network (Phases 11-15) -- shipped 2026-02-13
-- v6.0 Admin App Extraction (Phases 16-20) -- shipped 2026-02-27
+- v6.0 Admin App Extraction (Phases 16-21) -- shipped 2026-02-27
 
 ## Phases
 
@@ -142,10 +142,26 @@ Plans:
 Plans:
 - [x] 20-01-PLAN.md — Fix all integration and deployment gaps from milestone audit
 
+#### Phase 21: Admin Dashboard Real Data
+**Goal**: Dashboard and metrics pages display real data from the database instead of hardcoded/random values
+**Depends on**: Phase 20
+**Gap Closure**: Closes sample-data tech debt from v6.0-MILESTONE-AUDIT.md
+**Success Criteria** (what must be TRUE):
+  1. Dashboard stat tiles show real counts with real sparkline trends and period-over-period change percentages from the database
+  2. All dashboard charts (user growth, job postings, application volume, recruiter status, application funnel, top recruiters, hiring funnel) render real data from API endpoints
+  3. Dashboard `timePeriod` selector actually changes the data displayed in charts
+  4. Dashboard activity feed shows real activity or a proper empty state — no hardcoded placeholder items
+  5. Metrics page charts render real time-series data from API endpoints with working period selector
+**Plans**: TBD
+
+Plans:
+- [ ] 21-01-PLAN.md — Admin stats backend routes and gateway proxy
+- [ ] 21-02-PLAN.md — Wire dashboard and metrics frontend to real API data
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 16 -> 17 -> 18 -> 19 -> 20
+Phases execute in numeric order: 16 -> 17 -> 18 -> 19 -> 20 -> 21
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -169,7 +185,8 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19 -> 20
 | 18. Page Migration | v6.0 | 10/10 | Complete | 2026-02-28 |
 | 19. Portal & Gateway Cleanup | v6.0 | 2/2 | Complete | 2026-02-28 |
 | 20. Admin Integration & Deployment Fixes | v6.0 | 1/1 | Complete | 2026-02-27 |
+| 21. Admin Dashboard Real Data | v6.0 | 0/2 | In Progress | — |
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-27 (Phase 20 complete — v6.0 milestone shipped)*
+*Last updated: 2026-02-27 (Phase 21 added — admin dashboard real data)*
