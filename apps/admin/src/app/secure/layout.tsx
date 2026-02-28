@@ -20,8 +20,8 @@ export default async function SecureLayout({ children }: { children: React.React
     // Any error (network, non-200, non-admin) redirects to /unauthorized.
     let isAdmin = false;
     try {
-        const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://admin-gateway:3020';
-        const response = await fetch(`${gatewayUrl}/admin/identity/users/me`, {
+        const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://admin-gateway:3030';
+        const response = await fetch(`${gatewayUrl}/admin/identity/api/v2/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         if (response.ok) {

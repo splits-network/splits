@@ -723,6 +723,55 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  admin-gateway:
+    build:
+      context: .
+      dockerfile: services/admin-gateway/Dockerfile
+      target: development
+    container_name: splits-admin-gateway
+    ports:
+      - "3030:3030"
+    environment:
+      NODE_ENV: development
+      PORT: 3030
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      IDENTITY_SERVICE_URL: http://identity-service:3001
+      ATS_SERVICE_URL: http://ats-service:3002
+      NETWORK_SERVICE_URL: http://network-service:3003
+      BILLING_SERVICE_URL: http://billing-service:3004
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      DOCUMENT_SERVICE_URL: http://document-service:3006
+      AUTOMATION_SERVICE_URL: http://automation-service:3007
+      DOCUMENT_PROCESSING_SERVICE_URL: http://document-processing-service:3008
+      AI_SERVICE_URL: http://ai-service:3009
+      ANALYTICS_SERVICE_URL: http://analytics-service:3010
+      CONTENT_SERVICE_URL: http://content-service:3015
+      INTEGRATION_SERVICE_URL: http://integration-service:3016
+      MATCHING_SERVICE_URL: http://matching-service:3017
+      ADMIN_CLERK_SECRET_KEY: ${ADMIN_CLERK_SECRET_KEY}
+      CORS_ORIGIN: http://localhost:3200
+    volumes:
+      - ./services/admin-gateway/src:/app/services/admin-gateway/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      identity-service:
+        condition: service_started
+      ats-service:
+        condition: service_started
+      network-service:
+        condition: service_started
+      billing-service:
+        condition: service_started
+
   api-gateway:
     build:
       context: .
@@ -868,6 +917,37 @@ services:
     depends_on:
       - api-gateway
     command: pnpm --filter @splits-network/candidate dev
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      target: development
+      args:
+        NEXT_PUBLIC_ADMIN_GATEWAY_URL: http://localhost:3030
+    container_name: splits-admin
+    ports:
+      - "3200:3200"
+    environment:
+      NODE_ENV: development
+      PORT: 3200
+      NEXT_PUBLIC_ADMIN_GATEWAY_URL: http://admin-gateway:3030
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${ADMIN_CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${ADMIN_CLERK_SECRET_KEY}
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /secure
+      NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: /secure
+    volumes:
+      - ./apps/admin/src:/app/apps/admin/src
+      - ./apps/admin/public:/app/apps/admin/public
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/admin/.next
+    networks:
+      - splits-network
+    depends_on:
+      - admin-gateway
+    command: pnpm --filter @splits-network/admin dev
 
   status:
     build:

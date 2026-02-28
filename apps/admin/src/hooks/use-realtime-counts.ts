@@ -26,7 +26,7 @@ const DEFAULT_COUNTS: AdminCounts = {
     totalApplications: 0,
 };
 
-const GATEWAY_URL = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://localhost:3020';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://localhost:3030';
 const POLL_INTERVAL_MS = 60_000;
 
 /**
@@ -47,7 +47,7 @@ export function useRealtimeCounts(): { counts: AdminCounts; loading: boolean } {
         if (!token) return;
 
         try {
-            const res = await fetch(`${GATEWAY_URL}/admin/identity/admin-counts`, {
+            const res = await fetch(`${GATEWAY_URL}/admin/identity/admin/counts`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) return;
