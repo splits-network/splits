@@ -21,7 +21,7 @@ export interface BaseConfig {
 
 export interface DatabaseConfig {
     supabaseUrl: string;
-    supabaseAnonKey: string;
+    supabaseAnonKey?: string;
     supabaseServiceRoleKey?: string;
 }
 
@@ -93,11 +93,13 @@ export function loadBaseConfig(serviceName: string): BaseConfig {
 
 /**
  * Load database configuration
+ * Note: SUPABASE_ANON_KEY is optional — only needed for services that proxy client requests.
+ * Backend services should prefer SUPABASE_SERVICE_ROLE_KEY instead.
  */
 export function loadDatabaseConfig(): DatabaseConfig {
     return {
         supabaseUrl: getEnvOrThrow('SUPABASE_URL'),
-        supabaseAnonKey: getEnvOrThrow('SUPABASE_ANON_KEY'),
+        supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
         supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
     };
 }
