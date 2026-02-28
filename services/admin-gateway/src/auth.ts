@@ -69,11 +69,14 @@ export class AdminAuthMiddleware {
             }
 
             if (!isPlatformAdmin) {
-                const { data: userRow, error: userError } = await this.supabase
+                const { data: userRow, error: userError } = (await this.supabase
                     .from("users")
                     .select("id")
                     .eq("clerk_user_id", verified.sub)
-                    .maybeSingle();
+                    .maybeSingle()) as {
+                    data: { id: string } | null;
+                    error: any;
+                };
 
                 if (userError) {
                     console.error("[admin-gateway] user lookup failed", {
@@ -87,12 +90,15 @@ export class AdminAuthMiddleware {
                     identityUserId = userRow.id;
 
                     const { data: roleRows, error: roleError } =
-                        await this.supabase
+                        (await this.supabase
                             .from("user_roles")
                             .select("id")
                             .eq("user_id", userRow.id)
                             .eq("role_name", "platform_admin")
-                            .limit(1);
+                            .limit(1)) as {
+                            data: { id: string }[] | null;
+                            error: any;
+                        };
 
                     if (roleError) {
                         console.error(
@@ -110,12 +116,15 @@ export class AdminAuthMiddleware {
 
                     if (!isPlatformAdmin) {
                         const { data: membershipRows, error: membershipError } =
-                            await this.supabase
+                            (await this.supabase
                                 .from("memberships")
                                 .select("id")
                                 .eq("user_id", userRow.id)
                                 .eq("role_name", "platform_admin")
-                                .limit(1);
+                                .limit(1)) as {
+                                data: { id: string }[] | null;
+                                error: any;
+                            };
 
                         if (membershipError) {
                             console.warn(
