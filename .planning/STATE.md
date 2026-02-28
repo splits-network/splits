@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 18 of 19 (Page Migration)
-Plan: 4 of 10 in current phase
+Plan: 7 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-28 -- Completed 18-04 Admin Layout Shell
+Last activity: 2026-02-28 -- Completed 18-07 Directory Pages (Users, Orgs, Companies, Jobs, Candidates)
 
 Progress: [##################] 89% (17/19 phases complete across all milestones)
 
@@ -67,6 +67,8 @@ Recent decisions affecting current work:
 - [18-04]: SecureShell client component extracted from server layout -- keeps auth check as server component while allowing useState for mobile drawer
 - [18-04]: admin-toast.tsx re-exports from toast-provider.tsx -- single render location, clean import paths
 - [18-04]: AdminDataTable uses T extends { id: string | number } constraint for type-safe key/selection
+- [18-07]: useStandardList option is defaultLimit not pageSize — hook returns data/goToPage as canonical names
+- [18-07]: Job detail page is 'use client' with useEffect fetch — Clerk token required, syncToUrl:false on nested lists
 
 ### Pending Todos
 
@@ -80,9 +82,9 @@ See previous STATE.md versions for full list if needed.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 18-04 Admin Layout Shell
+Stopped at: Completed 18-07 Directory Pages
 Resume file: None
-Next: Execute 18-05-PLAN.md
+Next: Execute 18-08-PLAN.md
 
 ---
 *Created: 2026-02-12*
