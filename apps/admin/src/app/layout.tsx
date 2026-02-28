@@ -21,7 +21,7 @@ export default function RootLayout({
     }
 
     return (
-        <ClerkProvider publishableKey={publishableKey}>
+        <ClerkProvider publishableKey={publishableKey} secretKey={process.env.ADMIN_CLERK_SECRET_KEY}>
             <html lang="en" suppressHydrationWarning>
                 <head>
                     <Script
