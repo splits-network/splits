@@ -60,6 +60,8 @@ export class SavedJobRepositoryV2 {
         query.range(rangeStart, rangeEnd);
 
         const result = await query;
+        console.log(`[SavedJobs] List fetched for ${clerkUserId}, count: ${result.data?.length}, total: ${result.count}`);
+        if (result.error) console.error(`[SavedJobs] DB error:`, result.error);
 
         return {
             data: result.data || [],

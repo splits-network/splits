@@ -54,6 +54,23 @@ export default function SavedJobsAnimator({
                 );
             }
 
+            /* Content section entrance */
+            const content = $1(".saved-jobs-content");
+            if (content) {
+                gsap.fromTo(
+                    content,
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        ease: "power3.out",
+                        delay: 0.15,
+                        clearProps: "transform",
+                    },
+                );
+            }
+
             /* Staggered card entrance */
             const cards = $(".saved-job-card");
             if (cards.length) {
