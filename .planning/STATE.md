@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 18 of 19 (Page Migration)
-Plan: 2 of 10 in current phase
+Plan: 3 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-27 -- Completed 18-02 Admin Real-Time Infrastructure
+Last activity: 2026-02-27 -- Completed 18-03 Admin Domain Service Routes
 
 Progress: [##################] 89% (17/19 phases complete across all milestones)
 
@@ -60,6 +60,10 @@ Recent decisions affecting current work:
 - [18-02]: Separate redisSub client via redis.duplicate() -- pub/sub requires dedicated Redis connection
 - [18-02]: admin: prefix applied server-side -- clients subscribe to short names, server prefixes to prevent arbitrary Redis key access
 - [18-02]: useRealtimeCounts: REST initial load + WS updates + 60s polling fallback -- counts visible before WS connects
+- [18-03]: Admin routes under /admin/* in domain services -- clean separation from user-scoped /api/v2/* routes
+- [18-03]: Admin-gateway rewritePrefix:'' strips /admin/{service}, leaving /admin/* intact -- no gateway changes needed
+- [18-03]: network-service admin uses recruiters+recruiter_companies (no matches table exists in network-service)
+- [18-03]: notification-service admin covers site_notifications (CRUD) + notification_log (read-only)
 
 ### Pending Todos
 
@@ -73,9 +77,9 @@ See previous STATE.md versions for full list if needed.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 18-02 Admin Real-Time Infrastructure
+Stopped at: Completed 18-03 Admin Domain Service Routes
 Resume file: None
-Next: Execute 18-03-PLAN.md
+Next: Execute 18-04-PLAN.md
 
 ---
 *Created: 2026-02-12*
