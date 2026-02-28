@@ -1,38 +1,74 @@
-import { currentUser } from '@clerk/nextjs/server';
-import { UserButtonClient } from './user-button-client';
+'use client';
 
-export default async function SecurePage() {
-    const user = await currentUser();
+import React, { useState } from 'react';
+import { useAuth } from '@clerk/nextjs';
+import { useAdminStats, type TimePeriod } from '@/hooks/use-admin-stats';
+import { DashboardStats } from './components/dashboard-stats';
+import { DashboardCharts } from './components/dashboard-charts';
+import { DashboardActivity } from './components/dashboard-activity';
+import { DashboardActions } from './components/dashboard-actions';
+import { DashboardHealth } from './components/dashboard-health';
+import { TimePeriodSelector } from './components/time-period-selector';
+
+export default function SecurePage() {
+    const { getToken } = useAuth();
+    const [timePeriod, setTimePeriod] = useState<TimePeriod>('30d');
+    const [token, setToken] = useState<string | null>(null);
+
+    const { stats, loading, error, refetch } = useAdminStats(timePeriod);
+
+    // Fetch token once for health checks
+    React.useEffect(() => {
+        getToken()
+            .then((t) => setToken(t))
+            .catch(() => setToken(null));
+    }, [getToken]);
 
     return (
-        <div className="flex min-h-screen items-center justify-center p-6">
-            <div className="card bg-base-100 shadow-xl w-full max-w-md">
-                <div className="card-body gap-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-black tracking-tight">
-                                Welcome, {user?.firstName ?? 'Admin'}
-                            </h1>
-                            <p className="text-sm text-base-content/60 mt-1">
-                                Admin dashboard coming soon.
-                            </p>
-                        </div>
-                        <UserButtonClient />
-                    </div>
-
-                    <div className="divider my-0" />
-
-                    <div className="alert">
-                        <i className="fa-duotone fa-regular fa-hammer-crash text-primary" />
-                        <div>
-                            <p className="font-semibold text-sm">Under Construction</p>
-                            <p className="text-xs text-base-content/60">
-                                Admin tools are being migrated. Check back soon.
-                            </p>
-                        </div>
-                    </div>
+        <div className="flex flex-col gap-6">
+            {/* Page header */}
+            <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <h1 className="text-2xl font-black tracking-tight">Dashboard</h1>
+                    <p className="text-sm text-base-content/60 mt-0.5">
+                        Platform overview and key metrics
+                    </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <TimePeriodSelector value={timePeriod} onChange={setTimePeriod} />
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => void refetch()}
+                        type="button"
+                        title="Refresh stats"
+                    >
+                        <i className="fa-duotone fa-regular fa-arrows-rotate" />
+                    </button>
                 </div>
             </div>
+
+            {/* Error banner */}
+            {error && (
+                <div className="alert alert-warning">
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation" />
+                    <span className="text-sm">
+                        Could not load live stats — showing cached data. {error}
+                    </span>
+                </div>
+            )}
+
+            {/* KPI stat tiles */}
+            <DashboardStats stats={stats} loading={loading} />
+
+            {/* Actions + Activity + Health */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <DashboardActions stats={stats} loading={loading} />
+                <DashboardActivity />
+                <DashboardHealth token={token} />
+            </div>
+
+            {/* Charts */}
+            <DashboardCharts timePeriod={timePeriod} />
         </div>
     );
 }
