@@ -24,6 +24,15 @@ export default function SignInPage() {
         }
     }, [isLoaded, isSignedIn, router, redirectUrl]);
 
+    const signInWithGoogle = () => {
+        if (!isLoaded) return;
+        signIn.authenticateWithRedirect({
+            strategy: 'oauth_google',
+            redirectUrl: '/sso-callback',
+            redirectUrlComplete: redirectUrl || '/secure',
+        });
+    };
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!isLoaded) return;
@@ -82,6 +91,23 @@ export default function SignInPage() {
                     <span>{error}</span>
                 </div>
             )}
+
+            <div className="mb-6">
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    onClick={signInWithGoogle}
+                >
+                    <i className="fa-brands fa-google text-lg" />
+                    <span className="text-sm font-semibold">Continue with Google</span>
+                </button>
+            </div>
+
+            <div className="flex items-center gap-3 mb-6">
+                <div className="flex-1 h-px bg-base-300" />
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">or</span>
+                <div className="flex-1 h-px bg-base-300" />
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div id="clerk-captcha" />
