@@ -36,7 +36,7 @@ interface NavItemData {
 const navItems: NavItemData[] = [
     {
         href: "/portal/admin",
-        label: "Admin",
+        label: "Admin App",
         icon: "fa-duotone fa-regular fa-gauge-high",
         roles: ["platform_admin"],
         section: "main",

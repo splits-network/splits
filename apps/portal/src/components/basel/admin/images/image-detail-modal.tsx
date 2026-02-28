@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { useAdminConfirm } from "@/app/portal/admin/components";
 import {
     BaselModal,
     BaselModalHeader,
@@ -38,7 +37,6 @@ export function ImageDetailModal({
 }: ImageDetailModalProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const confirm = useAdminConfirm();
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [altText, setAltText] = useState("");
@@ -84,12 +82,7 @@ export function ImageDetailModal({
     async function handleDelete() {
         if (!image) return;
 
-        const confirmed = await confirm({
-            title: "Delete Image",
-            message: `Are you sure you want to delete "${image.filename}"? This will remove the image from storage.`,
-            confirmText: "Delete",
-            type: "warning",
-        });
+        const confirmed = window.confirm(`Are you sure you want to delete "${image.filename}"? This will remove the image from storage.`);
         if (!confirmed) return;
 
         setDeleting(true);

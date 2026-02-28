@@ -1,14 +1,7 @@
-import AdminDashboardClient from "./admin-dashboard-client";
-import { PageTitle } from "@/components/page-title";
+import { redirect } from 'next/navigation';
+
+const ADMIN_APP_URL = process.env.NEXT_PUBLIC_ADMIN_APP_URL || 'http://localhost:3200';
 
 export default function AdminPage() {
-    return (
-        <>
-            <PageTitle
-                title="Admin Dashboard"
-                subtitle="Platform administration and monitoring"
-            />
-            <AdminDashboardClient />
-        </>
-    );
+    redirect(ADMIN_APP_URL);
 }
