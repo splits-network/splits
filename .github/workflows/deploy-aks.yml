@@ -10,196 +10,66 @@ env:
     NAMESPACE: splits-network
 
 jobs:
-    detect-changes:
-        name: Detect Changed Services
-        runs-on: ubuntu-latest
-        outputs:
-            matrix: ${{ steps.changes.outputs.matrix }}
-            has_changes: ${{ steps.changes.outputs.has_changes }}
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 2
-
-            - name: Detect changed services
-              id: changes
-              run: |
-                  # On workflow_dispatch, build everything
-                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-                    echo "Manual trigger — building all services"
-                    BUILD_ALL=true
-                  else
-                    BUILD_ALL=false
-                  fi
-
-                  # Get changed files (fallback to building all if git diff fails)
-                  if [ "$BUILD_ALL" = "false" ]; then
-                    CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "DIFF_FAILED")
-                    if [ "$CHANGED" = "DIFF_FAILED" ]; then
-                      echo "Could not diff — building all services"
-                      BUILD_ALL=true
-                    fi
-                  fi
-
-                  # Define the full service/app list
-                  ALL_SERVICES=(
-                    "api-gateway:services/api-gateway"
-                    "admin-gateway:services/admin-gateway"
-                    "identity-service:services/identity-service"
-                    "ats-service:services/ats-service"
-                    "network-service:services/network-service"
-                    "billing-service:services/billing-service"
-                    "notification-service:services/notification-service"
-                    "automation-service:services/automation-service"
-                    "document-service:services/document-service"
-                    "ai-service:services/ai-service"
-                    "document-processing-service:services/document-processing-service"
-                    "analytics-service:services/analytics-service"
-                    "chat-gateway:services/chat-gateway"
-                    "analytics-gateway:services/analytics-gateway"
-                    "chat-service:services/chat-service"
-                    "matching-service:services/matching-service"
-                    "search-service:services/search-service"
-                    "gpt-service:services/gpt-service"
-                    "content-service:services/content-service"
-                    "integration-service:services/integration-service"
-                    "health-monitor:services/health-monitor"
-                  )
-
-                  ALL_APPS=(
-                    "portal:apps/portal"
-                    "candidate:apps/candidate"
-                    "corporate:apps/corporate"
-                    "status:apps/status"
-                    "admin:apps/admin"
-                  )
-
-                  # If building all, output the full matrix
-                  if [ "$BUILD_ALL" = "true" ]; then
-                    MATRIX='{"service":['
-                    FIRST=true
-                    for entry in "${ALL_SERVICES[@]}" "${ALL_APPS[@]}"; do
-                      name="${entry%%:*}"
-                      path="${entry#*:}"
-                      if [ "$FIRST" = "true" ]; then FIRST=false; else MATRIX+=','; fi
-                      MATRIX+="{\"name\":\"$name\",\"path\":\"$path\"}"
-                    done
-                    MATRIX+=']}'
-                    echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
-                    echo "has_changes=true" >> "$GITHUB_OUTPUT"
-                    echo "Building all: $(echo "$MATRIX" | jq '.service | length') services/apps"
-                    exit 0
-                  fi
-
-                  echo "Changed files:"
-                  echo "$CHANGED"
-                  echo "---"
-
-                  # Track which services need building (associative array)
-                  declare -A TO_BUILD
-
-                  # Helper: mark a service for building
-                  mark() {
-                    local name=$1 path=$2
-                    TO_BUILD["$name"]="$path"
-                  }
-
-                  # Helper: mark all services
-                  mark_all_services() {
-                    for entry in "${ALL_SERVICES[@]}"; do
-                      mark "${entry%%:*}" "${entry#*:}"
-                    done
-                  }
-
-                  # Helper: mark all apps
-                  mark_all_apps() {
-                    for entry in "${ALL_APPS[@]}"; do
-                      mark "${entry%%:*}" "${entry#*:}"
-                    done
-                  }
-
-                  # Check each changed file against trigger rules
-                  while IFS= read -r file; do
-                    [ -z "$file" ] && continue
-
-                    # Global triggers — rebuild everything
-                    case "$file" in
-                      VERSION|pnpm-lock.yaml|pnpm-workspace.yaml)
-                        mark_all_services; mark_all_apps; break ;;
-                      packages/shared-types/*|packages/shared-config/*|packages/shared-logging/*)
-                        mark_all_services; mark_all_apps; break ;;
-                    esac
-
-                    # All-services triggers
-                    case "$file" in
-                      packages/shared-fastify/*|packages/shared-access-context/*|packages/shared-job-queue/*|packages/shared-clients/*)
-                        mark_all_services ;;
-                    esac
-
-                    # All-apps triggers
-                    case "$file" in
-                      packages/shared-ui/*|packages/basel-ui/*)
-                        mark_all_apps ;;
-                    esac
-
-                    # App-specific package triggers
-                    case "$file" in
-                      packages/memphis-ui/*)
-                        mark "portal" "apps/portal"
-                        mark "candidate" "apps/candidate"
-                        mark "corporate" "apps/corporate" ;;
-                      packages/shared-api-client/*)
-                        mark "portal" "apps/portal"
-                        mark "candidate" "apps/candidate"
-                        mark "analytics-service" "services/analytics-service" ;;
-                      packages/shared-hooks/*)
-                        mark "portal" "apps/portal" ;;
-                      packages/chat-ui/*)
-                        mark "portal" "apps/portal"
-                        mark "candidate" "apps/candidate" ;;
-                    esac
-
-                    # Direct service/app triggers
-                    case "$file" in
-                      services/*)
-                        svc_name=$(echo "$file" | cut -d'/' -f2)
-                        mark "$svc_name" "services/$svc_name" ;;
-                      apps/*)
-                        app_name=$(echo "$file" | cut -d'/' -f2)
-                        mark "$app_name" "apps/$app_name" ;;
-                    esac
-                  done <<< "$CHANGED"
-
-                  # Build the matrix JSON
-                  if [ ${#TO_BUILD[@]} -eq 0 ]; then
-                    echo "No service changes detected"
-                    echo 'matrix={"service":[]}' >> "$GITHUB_OUTPUT"
-                    echo "has_changes=false" >> "$GITHUB_OUTPUT"
-                    exit 0
-                  fi
-
-                  MATRIX='{"service":['
-                  FIRST=true
-                  for name in "${!TO_BUILD[@]}"; do
-                    path="${TO_BUILD[$name]}"
-                    if [ "$FIRST" = "true" ]; then FIRST=false; else MATRIX+=','; fi
-                    MATRIX+="{\"name\":\"$name\",\"path\":\"$path\"}"
-                  done
-                  MATRIX+=']}'
-
-                  echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
-                  echo "has_changes=true" >> "$GITHUB_OUTPUT"
-                  echo "Building ${#TO_BUILD[@]} services/apps: ${!TO_BUILD[*]}"
-
     build-and-push:
         name: Build and Push Images
         runs-on: ubuntu-latest
-        needs: detect-changes
-        if: needs.detect-changes.outputs.has_changes == 'true'
         environment: production
         strategy:
-            matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
+            matrix:
+                service:
+                    - { name: api-gateway, path: services/api-gateway }
+                    - { name: admin-gateway, path: services/admin-gateway }
+                    - {
+                          name: identity-service,
+                          path: services/identity-service,
+                      }
+                    - { name: ats-service, path: services/ats-service }
+                    - { name: network-service, path: services/network-service }
+                    - { name: billing-service, path: services/billing-service }
+                    - {
+                          name: notification-service,
+                          path: services/notification-service,
+                      }
+                    - {
+                          name: automation-service,
+                          path: services/automation-service,
+                      }
+                    - {
+                          name: document-service,
+                          path: services/document-service,
+                      }
+                    - { name: ai-service, path: services/ai-service }
+                    - {
+                          name: document-processing-service,
+                          path: services/document-processing-service,
+                      }
+                    - {
+                          name: analytics-service,
+                          path: services/analytics-service,
+                      }
+                    - { name: chat-gateway, path: services/chat-gateway }
+                    - {
+                          name: analytics-gateway,
+                          path: services/analytics-gateway,
+                      }
+                    - { name: chat-service, path: services/chat-service }
+                    - {
+                          name: matching-service,
+                          path: services/matching-service,
+                      }
+                    - { name: search-service, path: services/search-service }
+                    - { name: gpt-service, path: services/gpt-service }
+                    - { name: content-service, path: services/content-service }
+                    - {
+                          name: integration-service,
+                          path: services/integration-service,
+                      }
+                    - { name: health-monitor, path: services/health-monitor }
+                    - { name: portal, path: apps/portal }
+                    - { name: candidate, path: apps/candidate }
+                    - { name: corporate, path: apps/corporate }
+                    - { name: status, path: apps/status }
+                    - { name: admin, path: apps/admin }
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -315,7 +185,7 @@ jobs:
         name: Deploy to AKS
         runs-on: ubuntu-latest
         environment: production
-        needs: [detect-changes, build-and-push]
+        needs: build-and-push
         if: always() && !failure() && !cancelled()
         steps:
             - name: Checkout code
