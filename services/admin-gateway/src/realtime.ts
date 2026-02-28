@@ -109,9 +109,18 @@ export function setupRealtimeServer(
     redisSub.on('message', (channel, message) => {
         const sockets = channelSockets.get(channel);
         if (!sockets) return;
+        // Strip admin: prefix so client receives short channel name
+        const shortChannel = channel.replace(/^admin:/, '');
+        let parsedData: unknown;
+        try {
+            parsedData = JSON.parse(message);
+        } catch {
+            parsedData = message;
+        }
+        const envelope = JSON.stringify({ channel: shortChannel, data: parsedData });
         for (const socket of sockets) {
             if (socket.readyState === WebSocket.OPEN) {
-                socket.send(message);
+                socket.send(envelope);
             }
         }
     });

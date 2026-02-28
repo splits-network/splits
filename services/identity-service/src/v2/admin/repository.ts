@@ -108,4 +108,50 @@ export class AdminIdentityRepository {
             organizations: orgsResult.count || 0,
         };
     }
+
+    async getAdminActivity(params: { scope?: string; limit?: number }): Promise<any[]> {
+        const limit = Math.min(50, Math.max(1, params.limit ?? 20));
+
+        // Query recent user and org activity from the audit trail
+        // user_roles changes + user creations serve as admin activity
+        const { data: roleChanges } = await this.supabase
+            .from('user_roles')
+            .select('id, user_id, role_name, created_at')
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        const { data: recentUsers } = await this.supabase
+            .from('users')
+            .select('id, email, first_name, last_name, created_at')
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        // Merge and sort by created_at descending
+        const activities: any[] = [];
+
+        for (const role of (roleChanges || [])) {
+            activities.push({
+                id: `role-${role.id}`,
+                type: 'role_assigned',
+                description: `Role "${role.role_name}" assigned`,
+                entityId: role.user_id,
+                createdAt: role.created_at,
+            });
+        }
+
+        for (const user of (recentUsers || [])) {
+            activities.push({
+                id: `user-${user.id}`,
+                type: 'user_created',
+                description: `User ${user.first_name || ''} ${user.last_name || ''} (${user.email}) registered`.trim(),
+                actor: user.email,
+                entityId: user.id,
+                createdAt: user.created_at,
+            });
+        }
+
+        // Sort combined by createdAt descending, take limit
+        activities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return activities.slice(0, limit);
+    }
 }

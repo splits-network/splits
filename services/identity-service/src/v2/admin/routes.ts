@@ -71,4 +71,18 @@ export function registerAdminIdentityRoutes(
             reply.code(500).send({ error: { message: 'Failed to fetch counts' } });
         }
     });
+
+    // GET /admin/activity
+    app.get('/admin/activity', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const params = request.query as { scope?: string; limit?: string };
+            const activities = await adminService.getAdminActivity({
+                scope: params.scope,
+                limit: params.limit ? parseInt(params.limit, 10) : 20,
+            });
+            reply.send({ data: activities });
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to fetch activity' } });
+        }
+    });
 }

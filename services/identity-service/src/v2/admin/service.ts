@@ -18,4 +18,8 @@ export class AdminIdentityService {
     getAdminCounts(): Promise<{ users: number; organizations: number }> {
         return this.repository.getAdminCounts();
     }
+
+    getAdminActivity(params: { scope?: string; limit?: number }): Promise<any[]> {
+        return this.repository.getAdminActivity(params);
+    }
 }
