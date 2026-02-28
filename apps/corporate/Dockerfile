@@ -32,8 +32,6 @@ COPY packages/shared-ui ./packages/shared-ui
 COPY packages/basel-ui ./packages/basel-ui
 COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/corporate ./apps/corporate
-# Reinstall to ensure workspace links are properly established after copying source
-RUN pnpm install --frozen-lockfile
 # Build shared packages first
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-ui build

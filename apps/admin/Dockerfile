@@ -44,8 +44,6 @@ COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-charts ./packages/shared-charts
 COPY packages/basel-ui ./packages/basel-ui
 COPY apps/admin ./apps/admin
-# Reinstall to ensure workspace links are properly established after copying source
-RUN pnpm install --frozen-lockfile
 # Build shared packages first (in dependency order)
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-config build
