@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 20 of 20 (Admin Integration & Deployment Fixes)
-Plan: 0 of 1 in current phase
-Status: Not started
-Last activity: 2026-02-28 -- Added Phase 20 gap closure from milestone audit
+Plan: 1 of 1 in current phase
+Status: Phase complete — ALL PHASES COMPLETE
+Last activity: 2026-02-27 -- Completed 20-01-PLAN.md (admin integration gap closure)
 
-Progress: [###################-] 95% (19/20 phases complete across all milestones)
+Progress: [####################] 100% (20/20 phases complete across all milestones)
 
 ## Performance Metrics
 
@@ -79,6 +79,9 @@ Recent decisions affecting current work:
 - [19-01]: isAdmin kept in portal filterByRole + role display — admins are valid portal users; only admin-specific links/views removed
 - [19-01]: Admin users visiting /portal/dashboard see recruiter/company view — no dedicated admin dashboard in portal
 - [19-02]: Api-gateway = user-facing only; admin-gateway = admin traffic only — clean separation established
+- [20-01]: Proxy path includes full /api/v2/users/me — proxy strips /admin/identity prefix only, downstream path must be exact route
+- [20-01]: Activity feed from user_roles + users — no separate audit log table; these provide meaningful recent activity without schema changes
+- [20-01]: WebSocket strips admin: prefix server-side on fan-out — clients subscribe to short names, server prefixes for Redis isolation
 
 ### Pending Todos
 
@@ -91,11 +94,11 @@ See previous STATE.md versions for full list if needed.
 
 ## Session Continuity
 
-Last session: 2026-02-28
-Stopped at: Added Phase 20 gap closure from milestone audit
+Last session: 2026-02-27
+Stopped at: Completed 20-01-PLAN.md — all 20 phases complete
 Resume file: None
-Next: Plan Phase 20
+Next: v6.0 milestone complete — all phases done
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-28 (Phase 20 added — gap closure from milestone audit)*
+*Last updated: 2026-02-27 (Phase 20 complete — v6.0 milestone all phases done)*
