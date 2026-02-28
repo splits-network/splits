@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 18 of 19 (Page Migration)
-Plan: 1 of 10 in current phase
+Plan: 2 of 10 in current phase
 Status: In progress
-Last activity: 2026-02-28 -- Completed 18-01-PLAN.md (shared-charts package)
+Last activity: 2026-02-27 -- Completed 18-02 Admin Real-Time Infrastructure
 
 Progress: [##################] 89% (17/19 phases complete across all milestones)
 
@@ -56,6 +56,10 @@ Recent decisions affecting current work:
 - [18-01]: getSplitsThemeOptions() merges DaisyUI oklch vars into ECharts option object at component level
 - [18-01]: SVG renderer for all chart components -- crisp on retina, no pixelation
 - [18-01]: Sparkline zero chrome -- no axes/grid/tooltip, purely visual trend indicator
+- [18-02]: setupRealtimeServer receives config struct not AdminAuthMiddleware -- keeps WS module independent of Fastify
+- [18-02]: Separate redisSub client via redis.duplicate() -- pub/sub requires dedicated Redis connection
+- [18-02]: admin: prefix applied server-side -- clients subscribe to short names, server prefixes to prevent arbitrary Redis key access
+- [18-02]: useRealtimeCounts: REST initial load + WS updates + 60s polling fallback -- counts visible before WS connects
 
 ### Pending Todos
 
@@ -68,10 +72,10 @@ See previous STATE.md versions for full list if needed.
 
 ## Session Continuity
 
-Last session: 2026-02-28
-Stopped at: Completed 18-01-PLAN.md (shared-charts package)
+Last session: 2026-02-27
+Stopped at: Completed 18-02 Admin Real-Time Infrastructure
 Resume file: None
-Next: Execute 18-02-PLAN.md
+Next: Execute 18-03-PLAN.md
 
 ---
 *Created: 2026-02-12*
