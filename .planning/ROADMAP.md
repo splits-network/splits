@@ -152,10 +152,10 @@ Plans:
   3. Dashboard `timePeriod` selector actually changes the data displayed in charts
   4. Dashboard activity feed shows real activity or a proper empty state — no hardcoded placeholder items
   5. Metrics page charts render real time-series data from API endpoints with working period selector
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Admin stats backend routes and gateway proxy
+- [ ] 21-01-PLAN.md — Admin stats backend routes (sparklines, trends, breakdowns)
 - [ ] 21-02-PLAN.md — Wire dashboard and metrics frontend to real API data
 
 ## Progress
@@ -189,4 +189,4 @@ Phases execute in numeric order: 16 -> 17 -> 18 -> 19 -> 20 -> 21
 
 ---
 *Roadmap created: 2026-02-12 (v2.0)*
-*Last updated: 2026-02-27 (Phase 21 added — admin dashboard real data)*
+*Last updated: 2026-02-27 (Phase 21 planned — admin dashboard real data)*
