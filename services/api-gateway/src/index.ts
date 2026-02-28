@@ -29,6 +29,11 @@ async function main() {
     const dbConfig = loadDatabaseConfig();
     const redisConfig = loadRedisConfig();
     const rabbitConfig = loadRabbitMQConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -463,7 +468,7 @@ async function main() {
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
     );
 
     // Register V2 proxy routes only

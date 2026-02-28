@@ -25,6 +25,11 @@ async function main() {
     const baseConfig = loadBaseConfig('ats-service');
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -120,12 +125,12 @@ async function main() {
     // Initialize V2 domain event consumer to sync events from other services
     const applicationRepository = new ApplicationRepository(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
 
     const candidateRepository = new CandidateRepository(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
 
     const candidateSourcerRepository = new CandidateSourcerRepository(
@@ -142,7 +147,7 @@ async function main() {
     // Initialize placement service for domain consumer
     const placementRepository = new (await import('./v2/placements/repository')).PlacementRepository(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
     const companySourcerRepository = new (await import('./v2/company-sourcers/repository')).CompanySourcerRepository(
         candidateRepository.getSupabase()
@@ -178,7 +183,7 @@ async function main() {
     // Register V2 routes (V2-only architecture)
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         eventPublisher: outboxPublisher,
     });
 
@@ -188,7 +193,7 @@ async function main() {
             // Check database connectivity using V2 repository
             const healthRepo = new ApplicationRepository(
                 dbConfig.supabaseUrl,
-                dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+                supabaseKey
             );
 
             // Test database connectivity by doing a simple query

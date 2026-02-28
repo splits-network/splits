@@ -20,6 +20,11 @@ if (process.env.SENTRY_DSN) {
 async function main() {
     const baseConfig = loadBaseConfig('network-service');
     const dbConfig = loadDatabaseConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -117,7 +122,7 @@ async function main() {
     const { createClient } = await import('@supabase/supabase-js');
     const supabaseClient = createClient(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
 
     // Set up transactional outbox for durable event delivery
@@ -129,7 +134,7 @@ async function main() {
     // Register V2 routes
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         eventPublisher: outboxPublisher,
     });
 

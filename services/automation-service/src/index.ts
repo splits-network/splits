@@ -16,6 +16,13 @@ async function main() {
     const baseConfig = loadBaseConfig("automation-service");
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error(
+            "Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY",
+        );
+    }
 
     let v2EventPublisher: EventPublisher | null = null;
     let domainConsumer: DomainEventConsumer | null = null;
@@ -73,7 +80,7 @@ async function main() {
         const { createClient } = await import('@supabase/supabase-js');
         const supabaseClient = createClient(
             dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+            supabaseKey
         );
 
         // Import access context resolver for domain consumer
@@ -85,7 +92,7 @@ async function main() {
         domainConsumer = new DomainEventConsumer({
             rabbitMqUrl: rabbitConfig.url,
             supabaseUrl: dbConfig.supabaseUrl,
-            supabaseKey: dbConfig.supabaseServiceRoleKey!,
+            supabaseKey,
             eventPublisher: v2EventPublisher!,
             resolveAccessContext: accessResolver,
             logger,
@@ -104,7 +111,7 @@ async function main() {
         // Initialize reputation event consumer for reputation recalculation
         const reputationRepository = new ReputationRepository(
             dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey!,
+            supabaseKey,
         );
         const reputationService = new ReputationService(
             reputationRepository,
@@ -113,7 +120,7 @@ async function main() {
         );
         const companyReputationRepository = new CompanyReputationRepository(
             dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey!,
+            supabaseKey,
         );
         const companyReputationService = new CompanyReputationService(
             companyReputationRepository,
@@ -134,7 +141,7 @@ async function main() {
         // Register V2 routes only
         await registerV2Routes(app, {
             supabaseUrl: dbConfig.supabaseUrl,
-            supabaseKey: dbConfig.supabaseServiceRoleKey!,
+            supabaseKey,
             eventPublisher: outboxPublisher,
         });
 

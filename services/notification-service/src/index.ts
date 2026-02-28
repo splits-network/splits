@@ -29,6 +29,11 @@ async function main() {
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
     const resendConfig = loadResendConfig();
+    const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+    if (!supabaseKey) {
+        throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+    }
 
     // Load service URLs from environment
     const identityServiceUrl = process.env.IDENTITY_SERVICE_URL || 'http://localhost:3001';
@@ -87,7 +92,7 @@ async function main() {
     // Initialize repository and notification service
     const repository = new NotificationRepository(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
 
     const notificationService = new NotificationService(
@@ -141,7 +146,7 @@ async function main() {
     const { createClient } = await import('@supabase/supabase-js');
     const supabaseClient = createClient(
         dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+        supabaseKey
     );
 
     // Set up transactional outbox for durable event delivery
@@ -153,7 +158,7 @@ async function main() {
     // Register V2 HTTP routes only
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
-        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        supabaseKey,
         eventPublisher: outboxPublisher,
     });
 

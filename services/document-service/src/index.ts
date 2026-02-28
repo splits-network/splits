@@ -16,6 +16,14 @@ async function start() {
         const baseConfig = loadBaseConfig("document-service");
         const dbConfig = loadDatabaseConfig();
         const rabbitConfig = loadRabbitMQConfig();
+        const supabaseKey =
+            dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
+
+        if (!supabaseKey) {
+            throw new Error(
+                "Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY",
+            );
+        }
 
         const logger = createLogger({
             serviceName: baseConfig.serviceName,
@@ -38,7 +46,7 @@ async function start() {
         // Initialize storage
         const storage = new StorageClient(
             dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+            supabaseKey,
         );
 
         // Ensure storage buckets exist (development)
@@ -70,7 +78,7 @@ async function start() {
         const { createClient } = await import('@supabase/supabase-js');
         const supabaseClient = createClient(
             dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+            supabaseKey
         );
 
         // Set up transactional outbox for durable event delivery
@@ -82,8 +90,7 @@ async function start() {
         // Register V2 routes
         await registerV2Routes(fastify, {
             supabaseUrl: dbConfig.supabaseUrl,
-            supabaseKey:
-                dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+            supabaseKey,
             storage,
             eventPublisher: outboxPublisher,
         });
