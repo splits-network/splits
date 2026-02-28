@@ -6,39 +6,43 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 
 export type TimePeriod = '7d' | '30d' | '90d' | '1y' | 'all';
 
-export interface AdminStats {
-    // Identity
-    totalUsers: number;
-    totalRecruiters: number;
-    pendingRecruiters: number;
-    activeFraud: number;
-    // ATS
-    totalJobs: number;
-    totalApplications: number;
-    pendingApplications: number;
-    // Network
-    totalNetworkConnections: number;
-    // Billing
-    activeEscrow: number;
-    pendingPayouts: number;
-    totalRevenue: number;
-    // Notifications
-    activeNotifications: number;
+export interface StatMetric {
+    total: number;
+    sparkline: number[];
+    trend: number;
 }
 
+export interface AdminStats {
+    // From /admin/stats endpoints (have sparkline + trend)
+    users: StatMetric;
+    jobs: StatMetric;
+    applications: StatMetric;
+    recruiters: StatMetric;
+    // From /admin/counts endpoints (totals only, no sparkline)
+    pendingRecruiters: number;
+    activeFraud: number;
+    activeEscrow: number;
+    pendingPayouts: number;
+    activeNotifications: number;
+    // Breakdown data for charts
+    recruiterStatus: { label: string; value: number }[];
+    applicationFunnel: { label: string; value: number }[];
+}
+
+const DEFAULT_STAT_METRIC: StatMetric = { total: 0, sparkline: [], trend: 0 };
+
 const DEFAULT_STATS: AdminStats = {
-    totalUsers: 0,
-    totalRecruiters: 0,
+    users: { ...DEFAULT_STAT_METRIC },
+    jobs: { ...DEFAULT_STAT_METRIC },
+    applications: { ...DEFAULT_STAT_METRIC },
+    recruiters: { ...DEFAULT_STAT_METRIC },
     pendingRecruiters: 0,
     activeFraud: 0,
-    totalJobs: 0,
-    totalApplications: 0,
-    pendingApplications: 0,
-    totalNetworkConnections: 0,
     activeEscrow: 0,
     pendingPayouts: 0,
-    totalRevenue: 0,
     activeNotifications: 0,
+    recruiterStatus: [],
+    applicationFunnel: [],
 };
 
 export interface AdminStatsResult {
@@ -60,7 +64,17 @@ async function safeFetch(
     }
 }
 
-export function useAdminStats(_timePeriod: TimePeriod = '30d'): AdminStatsResult {
+function toStatMetric(raw: unknown): StatMetric {
+    if (!raw || typeof raw !== 'object') return { ...DEFAULT_STAT_METRIC };
+    const r = raw as Record<string, unknown>;
+    return {
+        total: (r.total as number) ?? 0,
+        sparkline: Array.isArray(r.sparkline) ? (r.sparkline as number[]) : [],
+        trend: (r.trend as number) ?? 0,
+    };
+}
+
+export function useAdminStats(timePeriod: TimePeriod = '30d'): AdminStatsResult {
     const { getToken } = useAuth();
     const [stats, setStats] = useState<AdminStats>(DEFAULT_STATS);
     const [loading, setLoading] = useState(true);
@@ -78,32 +92,39 @@ export function useAdminStats(_timePeriod: TimePeriod = '30d'): AdminStatsResult
         setError(null);
 
         const client = createAuthenticatedClient(token);
+        const period = timePeriod;
 
-        const [identity, ats, network, billing, notification] = await Promise.all([
-            safeFetch(client, '/admin/identity/admin/counts'),
-            safeFetch(client, '/admin/ats/admin/counts'),
-            safeFetch(client, '/admin/network/admin/counts'),
-            safeFetch(client, '/admin/billing/admin/counts'),
-            safeFetch(client, '/admin/notification/admin/counts'),
-        ]);
+        const [identityStats, atsStats, networkStats, identityCounts, billingCounts, notifCounts, networkCounts] =
+            await Promise.all([
+                safeFetch(client, `/admin/identity/admin/stats?period=${period}`),
+                safeFetch(client, `/admin/ats/admin/stats?period=${period}`),
+                safeFetch(client, `/admin/network/admin/stats?period=${period}`),
+                safeFetch(client, '/admin/identity/admin/counts'),
+                safeFetch(client, '/admin/billing/admin/counts'),
+                safeFetch(client, '/admin/notification/admin/counts'),
+                safeFetch(client, '/admin/network/admin/counts'),
+            ]);
 
         setStats({
-            totalUsers: (identity.totalUsers as number) ?? 0,
-            totalRecruiters: (identity.totalRecruiters as number) ?? 0,
-            pendingRecruiters: (identity.pendingRecruiters as number) ?? 0,
-            activeFraud: (identity.activeFraud as number) ?? 0,
-            totalJobs: (ats.totalJobs as number) ?? 0,
-            totalApplications: (ats.totalApplications as number) ?? 0,
-            pendingApplications: (ats.pendingApplications as number) ?? 0,
-            totalNetworkConnections: (network.totalConnections as number) ?? 0,
-            activeEscrow: (billing.activeEscrow as number) ?? 0,
-            pendingPayouts: (billing.pendingPayouts as number) ?? 0,
-            totalRevenue: (billing.totalRevenue as number) ?? 0,
-            activeNotifications: (notification.activeNotifications as number) ?? 0,
+            users: toStatMetric(identityStats.users),
+            jobs: toStatMetric(atsStats.jobs),
+            applications: toStatMetric(atsStats.applications),
+            recruiters: toStatMetric(networkStats.recruiters),
+            pendingRecruiters: (networkCounts.recruiters_pending as number) ?? 0,
+            activeFraud: (identityCounts.activeFraud as number) ?? 0,
+            activeEscrow: (billingCounts.activeEscrow as number) ?? 0,
+            pendingPayouts: (billingCounts.pendingPayouts as number) ?? 0,
+            activeNotifications: (notifCounts.activeNotifications as number) ?? 0,
+            recruiterStatus: Array.isArray(networkStats.recruiterStatus)
+                ? (networkStats.recruiterStatus as { label: string; value: number }[])
+                : [],
+            applicationFunnel: Array.isArray(atsStats.applicationFunnel)
+                ? (atsStats.applicationFunnel as { label: string; value: number }[])
+                : [],
         });
 
         setLoading(false);
-    }, [getToken]);
+    }, [getToken, timePeriod]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         void fetchStats();
