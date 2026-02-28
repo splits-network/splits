@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 21 of 21 (Admin Dashboard Real Data)
-Plan: 0 of 2 in current phase
-Status: Phase created — ready for planning
-Last activity: 2026-02-27 -- Phase 21 added to roadmap
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-28 -- Completed 21-01-PLAN.md (backend stats endpoints)
 
-Progress: [####################] 95% (20/21 phases complete across all milestones)
+Progress: [####################] 97% (20.5/21 phases complete across all milestones)
 
 ## Performance Metrics
 
@@ -82,6 +82,9 @@ Recent decisions affecting current work:
 - [20-01]: Proxy path includes full /api/v2/users/me — proxy strips /admin/identity prefix only, downstream path must be exact route
 - [20-01]: Activity feed from user_roles + users — no separate audit log table; these provide meaningful recent activity without schema changes
 - [20-01]: WebSocket strips admin: prefix server-side on fan-out — clients subscribe to short names, server prefixes for Redis isolation
+- [21-01]: Supabase .then() returns PromiseLike not Promise — use async countRows() helpers to get native Promise<number>
+- [21-01]: Stats/chart logic extracted to stats-repository.ts + chart-repository.ts when repository would exceed 200 lines
+- [21-01]: getAdminStats(period)/getAdminChartData(period) as standard admin analytics method names across services
 
 ### Pending Todos
 
@@ -94,10 +97,10 @@ See previous STATE.md versions for full list if needed.
 
 ## Session Continuity
 
-Last session: 2026-02-27
-Stopped at: Phase 21 created — ready for planning
+Last session: 2026-02-28
+Stopped at: Completed 21-01-PLAN.md — backend admin stats endpoints
 Resume file: None
-Next: /gsd:plan-phase 21
+Next: /gsd:execute-phase 21 (plan 02 — frontend wiring)
 
 ---
 *Created: 2026-02-12*
