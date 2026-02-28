@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 19 of 19 (Portal & Gateway Cleanup)
-Plan: 0 of TBD in current phase
-Status: Not started
-Last activity: 2026-02-28 -- Completed Phase 18 Page Migration (10/10 plans)
+Plan: 2 of TBD in current phase
+Status: In progress
+Last activity: 2026-02-28 -- Completed 19-02-PLAN.md (remove admin routes from api-gateway)
 
 Progress: [##################] 95% (18/19 phases complete across all milestones)
 
@@ -76,6 +76,7 @@ Recent decisions affecting current work:
 - [18-09]: useStandardList canonical API: data/sortBy/sortOrder/handleSort/goToPage (items/sortField/sortDir deprecated aliases)
 - [18-09]: Content Navigation and Images show empty states — content API not yet connected
 - [18-09]: Metrics page uses sample chart data — analytics endpoints not yet available
+- [19-02]: Api-gateway = user-facing only; admin-gateway = admin traffic only — clean separation established
 
 ### Pending Todos
 
@@ -89,10 +90,10 @@ See previous STATE.md versions for full list if needed.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed Phase 18 Page Migration (all 10 plans)
+Stopped at: Completed 19-02-PLAN.md (api-gateway admin route removal)
 Resume file: None
-Next: Plan and execute Phase 19 (Portal & Gateway Cleanup)
+Next: Continue Phase 19 plans
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-28 (Phase 18 complete)*
+*Last updated: 2026-02-28 (Phase 19 in progress — 19-02 complete)*
