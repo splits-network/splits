@@ -280,18 +280,25 @@ export function BillingTab({ company }: BillingTabProps) {
                                     {billingProfile?.billing_email || "Not set"}
                                 </span>
                             </div>
-                            {billingStatus === "incomplete" && (
-                                <div className="pt-4 border-t border-base-300">
-                                    <button
-                                        className="btn btn-sm btn-warning"
-                                        onClick={() =>
-                                            setSetupModalOpen(true)
-                                        }
-                                    >
-                                        Complete Setup
-                                    </button>
-                                </div>
-                            )}
+                            <div className="pt-4 border-t border-base-300">
+                                <p className="text-sm text-base-content/50 flex items-start gap-2">
+                                    <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5" />
+                                    A 3% processing fee applies to all placement invoices to cover payment processing costs.
+                                </p>
+                            </div>
+                            <div className="pt-4 border-t border-base-300">
+                                <button
+                                    className={`btn btn-sm ${billingStatus === "incomplete" ? "btn-warning" : "btn-ghost"}`}
+                                    onClick={() =>
+                                        setSetupModalOpen(true)
+                                    }
+                                >
+                                    <i className="fa-duotone fa-regular fa-wand-magic-sparkles" />
+                                    {billingStatus === "incomplete"
+                                        ? "Complete Setup"
+                                        : "Run Setup Wizard"}
+                                </button>
+                            </div>
                         </div>
                     </div>
 

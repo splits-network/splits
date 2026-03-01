@@ -6,8 +6,9 @@ import { QueryProvider } from "@/providers/query-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "Splits Network Admin",
-    description: "Admin Portal",
+    title: "Employment Networks Administration",
+    description:
+        "Internal administration portal for Employment Networks. Visit splits.network for recruiters and companies, or applicant.network for job seekers.",
 };
 
 export default function RootLayout({
