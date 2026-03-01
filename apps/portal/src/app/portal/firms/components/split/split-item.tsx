@@ -72,7 +72,7 @@ export function SplitItem({
                     firm={firm}
                     variant="icon-only"
                     size="xs"
-                    showActions={{ viewDetails: false }}
+                    showActions={{}}
                     onRefresh={onRefresh}
                 />
             </div>

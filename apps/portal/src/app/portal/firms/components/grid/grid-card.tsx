@@ -86,7 +86,6 @@ export function GridCard({
                         size="sm"
                         onRefresh={onRefresh}
                         showActions={{
-                            viewDetails: true,
                             inviteMember: false,
                         }}
                     />

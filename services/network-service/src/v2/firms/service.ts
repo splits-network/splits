@@ -5,7 +5,7 @@
 import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { FirmRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
-import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmRequest, CreateFirmInvitationRequest, TransferOwnershipRequest } from './types';
+import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmRequest, CreateFirmInvitationRequest, TransferOwnershipRequest, VALID_PLACEMENT_TYPES, VALID_TEAM_SIZE_RANGES } from './types';
 
 export class FirmServiceV2 {
     constructor(
@@ -31,6 +31,14 @@ export class FirmServiceV2 {
 
     async getFirm(id: string): Promise<any> {
         const firm = await this.repository.findFirm(id);
+        if (!firm) {
+            throw { statusCode: 404, message: 'Firm not found' };
+        }
+        return firm;
+    }
+
+    async getFirmBySlug(slug: string): Promise<any> {
+        const firm = await this.repository.findFirmBySlug(slug);
         if (!firm) {
             throw { statusCode: 404, message: 'Firm not found' };
         }
@@ -84,6 +92,49 @@ export class FirmServiceV2 {
                 throw { statusCode: 400, message: 'Admin take rate must be between 0 and 100' };
             }
             await this.requireFirmAdmin(id, clerkUserId);
+        }
+
+        // Validate profile fields
+        if (updates.slug !== undefined) {
+            if (updates.slug) {
+                if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(updates.slug)) {
+                    throw { statusCode: 400, message: 'Slug must be lowercase alphanumeric with hyphens only' };
+                }
+                const taken = await this.repository.isSlugTaken(updates.slug, id);
+                if (taken) {
+                    throw { statusCode: 409, message: 'This slug is already taken' };
+                }
+            }
+        }
+        if (updates.tagline && updates.tagline.length > 160) {
+            throw { statusCode: 400, message: 'Tagline must be 160 characters or fewer' };
+        }
+        if (updates.placement_types) {
+            const invalid = updates.placement_types.filter(
+                t => !(VALID_PLACEMENT_TYPES as readonly string[]).includes(t)
+            );
+            if (invalid.length > 0) {
+                throw { statusCode: 400, message: `Invalid placement types: ${invalid.join(', ')}` };
+            }
+        }
+        if (updates.team_size_range) {
+            if (!(VALID_TEAM_SIZE_RANGES as readonly string[]).includes(updates.team_size_range)) {
+                throw { statusCode: 400, message: `Invalid team size range: ${updates.team_size_range}` };
+            }
+        }
+        if (updates.headquarters_country && updates.headquarters_country.length !== 2) {
+            throw { statusCode: 400, message: 'Country must be a 2-letter ISO 3166-1 alpha-2 code' };
+        }
+        if (updates.founded_year !== undefined && updates.founded_year !== null) {
+            const currentYear = new Date().getFullYear();
+            if (updates.founded_year < 1900 || updates.founded_year > currentYear) {
+                throw { statusCode: 400, message: `Founded year must be between 1900 and ${currentYear}` };
+            }
+        }
+        if (updates.guarantee_period_days !== undefined && updates.guarantee_period_days !== null) {
+            if (updates.guarantee_period_days < 0 || updates.guarantee_period_days > 365) {
+                throw { statusCode: 400, message: 'Guarantee period must be between 0 and 365 days' };
+            }
         }
 
         const firm = await this.repository.updateFirm(id, updates);
@@ -212,6 +263,42 @@ export class FirmServiceV2 {
     }
 
     // ── Invitations ──
+
+    async listFirmInvitations(firmId: string): Promise<any[]> {
+        return this.repository.listFirmInvitations(firmId);
+    }
+
+    async cancelFirmInvitation(
+        firmId: string,
+        invitationId: string,
+        clerkUserId: string
+    ): Promise<void> {
+        await this.repository.cancelFirmInvitation(firmId, invitationId);
+
+        await this.eventPublisher.publish('firm.invitation.cancelled', {
+            firmId,
+            invitationId,
+            cancelledBy: clerkUserId,
+        });
+    }
+
+    async resendFirmInvitation(
+        firmId: string,
+        invitationId: string,
+        clerkUserId: string
+    ): Promise<any> {
+        const invitation = await this.repository.resendFirmInvitation(firmId, invitationId);
+
+        await this.eventPublisher.publish('firm.invitation.created', {
+            firmId,
+            invitationId: invitation.id,
+            email: invitation.email,
+            role: invitation.role,
+            invitedBy: clerkUserId,
+        });
+
+        return invitation;
+    }
 
     async createFirmInvitation(
         firmId: string,

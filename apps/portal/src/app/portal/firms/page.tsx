@@ -10,7 +10,6 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
-import { ModalPortal } from "@splits-network/shared-ui";
 import type { Firm, FirmFilters } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { FirmsAnimator } from "./firms-animator";
@@ -19,7 +18,7 @@ import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
-import CreateFirmModal from "./components/modals/create-firm-modal";
+import { FirmProfileWizard } from "./components/modals/firm-profile-wizard";
 
 export default function FirmsPage() {
     const searchParams = useSearchParams();
@@ -110,10 +109,13 @@ export default function FirmsPage() {
             total: pagination?.total || firms.length,
             active: firms.filter((t) => t.status === "active").length,
             totalMembers: firms.reduce(
-                (sum, t) => sum + t.active_member_count,
+                (sum, t) => sum + (t.active_member_count || 0),
                 0,
             ),
-            totalRevenue: firms.reduce((sum, t) => sum + t.total_revenue, 0),
+            totalRevenue: firms.reduce(
+                (sum, t) => sum + (t.total_revenue || 0),
+                0,
+            ),
         }),
         [firms, pagination],
     );
@@ -219,18 +221,14 @@ export default function FirmsPage() {
                 </div>
             </FirmsAnimator>
 
-            <ModalPortal>
-                {showAddModal && (
-                    <CreateFirmModal
-                        isOpen={showAddModal}
-                        onClose={() => setShowAddModal(false)}
-                        onSuccess={() => {
-                            setShowAddModal(false);
-                            refresh();
-                        }}
-                    />
-                )}
-            </ModalPortal>
+            <FirmProfileWizard
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onSuccess={() => {
+                    setShowAddModal(false);
+                    refresh();
+                }}
+            />
         </>
     );
 }

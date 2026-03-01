@@ -11,6 +11,7 @@ import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
 import { CompanyInvitationsConsumer } from './consumers/company-invitations/consumer';
 import { RecruiterCompanyInvitationsConsumer } from './consumers/recruiter-company-invitations/consumer';
+import { FirmInvitationsConsumer } from './consumers/firm-invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
 import { ChatEventConsumer } from './consumers/chat/consumer';
@@ -45,6 +46,7 @@ export class DomainEventConsumer {
     private invitationsConsumer: InvitationsConsumer;
     private companyInvitationsConsumer: CompanyInvitationsConsumer;
     private recruiterCompanyInvitationsConsumer: RecruiterCompanyInvitationsConsumer;
+    private firmInvitationsConsumer: FirmInvitationsConsumer;
     private recruiterSubmissionConsumer: RecruiterSubmissionEventConsumer;
     private supportConsumer: SupportEventConsumer;
     private chatConsumer: ChatEventConsumer;
@@ -119,6 +121,13 @@ export class DomainEventConsumer {
             contactLookup
         );
         this.recruiterCompanyInvitationsConsumer = new RecruiterCompanyInvitationsConsumer(
+            notificationService,
+            logger,
+            portalUrl,
+            dataLookup,
+            contactLookup
+        );
+        this.firmInvitationsConsumer = new FirmInvitationsConsumer(
             notificationService,
             logger,
             portalUrl,
@@ -313,6 +322,9 @@ export class DomainEventConsumer {
             // Company platform invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'company_invitation.accepted');
+
+            // Firm invitation events
+            await this.channel.bindQueue(this.queue, this.exchange, 'firm.invitation.created');
 
             // Recruiter-company invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'recruiter_company.invited');
@@ -596,6 +608,11 @@ export class DomainEventConsumer {
                 break;
             case 'company_invitation.accepted':
                 await this.companyInvitationsConsumer.handleCompanyInvitationAccepted(event);
+                break;
+
+            // Firm invitations domain
+            case 'firm.invitation.created':
+                await this.firmInvitationsConsumer.handleFirmInvitationCreated(event);
                 break;
 
             // Recruiter-company invitations domain

@@ -169,8 +169,8 @@ export class FirmStripeConnectService {
         await this.stripe.accounts.update(status.account_id, {
             company: {
                 name: details.company_name,
-                phone: details.company_phone,
-                tax_id: details.company_tax_id,
+                ...(details.company_phone ? { phone: details.company_phone } : {}),
+                ...(details.company_tax_id ? { tax_id: details.company_tax_id } : {}),
                 address: {
                     line1: details.address.line1,
                     line2: details.address.line2,

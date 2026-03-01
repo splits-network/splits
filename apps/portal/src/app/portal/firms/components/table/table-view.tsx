@@ -26,7 +26,7 @@ export function TableView({
     onRefresh?: () => void;
 }) {
     return (
-        <div className="container mx-auto px-6 lg:px-12 py-6">
+        <div className="p-4">
             <div className="overflow-x-auto border-2 border-base-300">
                 <table className="w-full" style={{ minWidth: 800 }}>
                     <thead>

@@ -3,41 +3,38 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import type { Firm, FirmMember } from "../../types";
-import {
-    formatCurrency,
-    formatDate,
-    formatMemberRole,
-    formatMemberStatus,
-} from "../../types";
-import {
-    statusColor,
-    memberRoleColor,
-    memberStatusColor,
-} from "./status-color";
-import { formatStatus, firmInitials, memberCountDisplay } from "./helpers";
+import type { Firm, FirmMember, FirmInvitation } from "../../types";
+import { formatCurrency, formatDate } from "../../types";
+import { statusColor } from "./status-color";
+import { formatStatus, memberCountDisplay } from "./helpers";
 import { FirmActionsToolbar } from "./actions-toolbar";
+import { MembersSection } from "../detail/members-section";
+import { BillingSection } from "../detail/billing-section";
+import { SettingsSection } from "../detail/settings-section";
+
+type DetailTab = "members" | "billing" | "settings";
 
 /* --- Detail Panel --------------------------------------------------------- */
 
 export function FirmDetail({
     firm,
     members,
+    invitations,
     onClose,
     onRefresh,
 }: {
     firm: Firm;
     members: FirmMember[];
+    invitations: FirmInvitation[];
     onClose?: () => void;
     onRefresh?: () => void;
 }) {
-    const previewMembers = members.slice(0, 5);
-    const remainingCount = members.length - previewMembers.length;
+    const [activeTab, setActiveTab] = useState<DetailTab>("members");
 
     return (
-        <div>
+        <div className="w-full">
             {/* Header */}
-            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-6 py-4">
+            <div className="sticky top-0 z-10 bg-base-100 border-b-2 border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -77,123 +74,82 @@ export function FirmDetail({
                         variant="descriptive"
                         size="sm"
                         onRefresh={onRefresh}
-                        showActions={{ viewDetails: false }}
+                        showActions={{}}
                     />
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="p-6 space-y-8">
-                {/* Stats grid */}
-                <div className="grid grid-cols-3 gap-[2px] bg-base-300">
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Members
-                        </p>
-                        <p className="text-lg font-black tracking-tight">
-                            {firm.active_member_count}
-                        </p>
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Placements
-                        </p>
-                        <p className="text-lg font-black tracking-tight">
-                            {firm.total_placements}
-                        </p>
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Revenue
-                        </p>
-                        <p className="text-lg font-black tracking-tight">
-                            {formatCurrency(firm.total_revenue)}
-                        </p>
-                    </div>
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-[2px] bg-base-300">
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        Members
+                    </p>
+                    <p className="text-lg font-black tracking-tight">
+                        {firm.active_member_count}
+                    </p>
                 </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        Placements
+                    </p>
+                    <p className="text-lg font-black tracking-tight">
+                        {firm.total_placements}
+                    </p>
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        Revenue
+                    </p>
+                    <p className="text-lg font-black tracking-tight">
+                        {formatCurrency(firm.total_revenue)}
+                    </p>
+                </div>
+            </div>
 
-                {/* Members preview */}
-                <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
-                        Firm Members ({members.length})
-                    </h3>
-                    {previewMembers.length > 0 ? (
-                        <div className="space-y-0">
-                            {previewMembers.map((member, idx) => (
-                                <div
-                                    key={member.id}
-                                    className={`flex items-center gap-3 p-3 ${idx < previewMembers.length - 1 ? "border-b-2 border-base-300" : ""}`}
-                                >
-                                    <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center border-2 border-base-300 bg-base-200 text-xs font-bold">
-                                        {firmInitials(
-                                            member.recruiter.user?.name,
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-bold truncate">
-                                            {member.recruiter.user?.name}
-                                        </div>
-                                        <div className="text-xs text-base-content/50 truncate">
-                                            {member.recruiter.user?.email}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span
-                                            className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-0.5 ${memberRoleColor(member.role)}`}
-                                        >
-                                            {formatMemberRole(member.role)}
-                                        </span>
-                                        <span
-                                            className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-0.5 ${memberStatusColor(member.status)}`}
-                                        >
-                                            {formatMemberStatus(member.status)}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                            {remainingCount > 0 && (
-                                <a
-                                    href={`/portal/firms/${firm.id}`}
-                                    className="block text-center text-sm font-bold text-primary mt-3 hover:underline"
-                                >
-                                    View all {members.length} members
-                                </a>
-                            )}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-base-content/50">
-                            No members yet
-                        </p>
+            {/* Tab bar */}
+            <div className="border-b border-base-300 px-6 pt-4">
+                <div className="flex bg-base-200 p-1 w-fit">
+                    {(["members", "billing", "settings"] as const).map(
+                        (tab) => (
+                            <button
+                                key={tab}
+                                type="button"
+                                className={`px-4 py-1.5 text-sm font-semibold transition-colors ${
+                                    activeTab === tab
+                                        ? "bg-primary text-primary-content"
+                                        : "text-base-content/50 hover:text-base-content/70"
+                                }`}
+                                style={{ borderRadius: 0 }}
+                                onClick={() => setActiveTab(tab)}
+                            >
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            </button>
+                        ),
                     )}
                 </div>
+            </div>
 
-                {/* Firm info grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Created
-                        </p>
-                        <p className="font-bold text-sm">
-                            {formatDate(firm.created_at)}
-                        </p>
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Status
-                        </p>
-                        <p className="font-bold text-sm">
-                            {formatStatus(firm.status)}
-                        </p>
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Owner
-                        </p>
-                        <p className="font-bold text-sm truncate">
-                            {firm.owner_user_id}
-                        </p>
-                    </div>
-                </div>
+            {/* Tab content */}
+            <div className="p-6">
+                {activeTab === "members" && (
+                    <MembersSection
+                        firm={firm}
+                        members={members}
+                        invitations={invitations}
+                        onRefresh={onRefresh ?? (() => {})}
+                    />
+                )}
+                {activeTab === "billing" && (
+                    <BillingSection firm={firm} members={members} />
+                )}
+                {activeTab === "settings" && (
+                    <SettingsSection
+                        firm={firm}
+                        members={members}
+                        onRefresh={onRefresh ?? (() => {})}
+                    />
+                )}
             </div>
         </div>
     );
@@ -215,6 +171,7 @@ export function FirmDetailLoader({
     const { getToken } = useAuth();
     const [loadedFirm, setLoadedFirm] = useState<Firm | null>(firm || null);
     const [members, setMembers] = useState<FirmMember[]>([]);
+    const [invitations, setInvitations] = useState<FirmInvitation[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -237,9 +194,15 @@ export function FirmDetailLoader({
                     if (!signal?.cancelled) setLoadedFirm(firmRes.data);
                 }
 
-                // Fetch members
-                const membersRes = await client.get(`/firms/${id}/members`);
-                if (!signal?.cancelled) setMembers(membersRes.data || []);
+                // Fetch members and invitations in parallel
+                const [membersRes, invitationsRes] = await Promise.all([
+                    client.get(`/firms/${id}/members`),
+                    client.get(`/firms/${id}/invitations`),
+                ]);
+                if (!signal?.cancelled) {
+                    setMembers(membersRes.data || []);
+                    setInvitations(invitationsRes.data || []);
+                }
             } catch (err) {
                 console.error("Failed to fetch firm details:", err);
             }
@@ -286,6 +249,7 @@ export function FirmDetailLoader({
         <FirmDetail
             firm={resolvedFirm}
             members={members}
+            invitations={invitations}
             onClose={onClose}
             onRefresh={handleRefresh}
         />

@@ -41,7 +41,7 @@ export function MobileDetailOverlay({
         <>
             {mobileOverlay}
             <div className={`hidden md:flex md:flex-col ${className}`}>
-                <div className="">{children}</div>
+                {children}
             </div>
         </>
     );

@@ -522,6 +522,50 @@ export class DataLookupHelper {
     }
 
     /**
+     * Get firm by ID
+     */
+    async getFirm(firmId: string): Promise<{ id: string; name: string } | null> {
+        const { data, error } = await this.supabase
+            .from('firms')
+            .select('id, name')
+            .eq('id', firmId)
+            .single();
+
+        if (error) {
+            this.logger.error({ error, firmId }, 'Failed to fetch firm');
+            return null;
+        }
+
+        return data;
+    }
+
+    /**
+     * Get firm invitation by ID
+     */
+    async getFirmInvitation(invitationId: string): Promise<{
+        id: string;
+        firm_id: string;
+        email: string;
+        role: string;
+        token: string;
+        expires_at: string;
+        invited_by: string;
+    } | null> {
+        const { data, error } = await this.supabase
+            .from('firm_invitations')
+            .select('id, firm_id, email, role, token, expires_at, invited_by')
+            .eq('id', invitationId)
+            .single();
+
+        if (error) {
+            this.logger.error({ error, invitationId }, 'Failed to fetch firm invitation');
+            return null;
+        }
+
+        return data;
+    }
+
+    /**
      * Get document by ID
      */
     async getDocument(documentId: string): Promise<{

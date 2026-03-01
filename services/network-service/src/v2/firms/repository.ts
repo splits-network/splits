@@ -62,6 +62,28 @@ export class FirmRepository {
         if (filters.search) {
             query = query.ilike('name', `%${filters.search}%`);
         }
+        if (filters.marketplace_visible !== undefined) {
+            query = query.eq('marketplace_visible', filters.marketplace_visible);
+            // When filtering marketplace, only show approved firms
+            if (filters.marketplace_visible) {
+                query = query.not('marketplace_approved_at', 'is', null);
+            }
+        }
+        if (filters.seeking_split_partners !== undefined) {
+            query = query.eq('seeking_split_partners', filters.seeking_split_partners);
+        }
+        if (filters.industries && filters.industries.length > 0) {
+            query = query.overlaps('industries', filters.industries);
+        }
+        if (filters.specialties && filters.specialties.length > 0) {
+            query = query.overlaps('specialties', filters.specialties);
+        }
+        if (filters.placement_types && filters.placement_types.length > 0) {
+            query = query.overlaps('placement_types', filters.placement_types);
+        }
+        if (filters.geo_focus && filters.geo_focus.length > 0) {
+            query = query.overlaps('geo_focus', filters.geo_focus);
+        }
 
         // Apply sorting
         const sortBy = filters.sort_by || 'created_at';
@@ -357,6 +379,48 @@ export class FirmRepository {
         return data;
     }
 
+    async listFirmInvitations(firmId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .from('firm_invitations')
+            .select('id, email, role, status, token, invited_by, expires_at, created_at')
+            .eq('firm_id', firmId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async cancelFirmInvitation(firmId: string, invitationId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('firm_invitations')
+            .update({ status: 'cancelled' })
+            .eq('id', invitationId)
+            .eq('firm_id', firmId)
+            .eq('status', 'pending');
+
+        if (error) throw error;
+    }
+
+    async resendFirmInvitation(firmId: string, invitationId: string): Promise<any> {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        const { data, error } = await this.supabase
+            .from('firm_invitations')
+            .update({
+                token: randomUUID(),
+                expires_at: expiresAt.toISOString(),
+            })
+            .eq('id', invitationId)
+            .eq('firm_id', firmId)
+            .eq('status', 'pending')
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
     async getRecruiterByUserId(userId: string): Promise<{ id: string; user_id: string } | null> {
         const { data, error } = await this.supabase
             .from('recruiters')
@@ -382,6 +446,31 @@ export class FirmRepository {
 
         if (error) throw error;
         return data;
+    }
+
+    async findFirmBySlug(slug: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('firms')
+            .select('*')
+            .eq('slug', slug)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async isSlugTaken(slug: string, excludeFirmId?: string): Promise<boolean> {
+        let query = this.supabase
+            .from('firms')
+            .select('id')
+            .eq('slug', slug);
+
+        if (excludeFirmId) {
+            query = query.neq('id', excludeFirmId);
+        }
+
+        const { data } = await query.maybeSingle();
+        return !!data;
     }
 
     async findFirmByRecruiterId(recruiterId: string): Promise<any | null> {

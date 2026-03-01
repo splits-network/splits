@@ -309,6 +309,26 @@ function registerFirmRoutes(app: FastifyInstance, services: ServiceRegistry) {
     );
 
     app.get(
+        '/api/v2/firms/by-slug/:slug',
+        routeOptions('Get firm by slug'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { slug } = request.params as { slug: string };
+                const correlationId = getCorrelationId(request);
+                const firm = await networkService().get(
+                    `/api/v2/firms/by-slug/${slug}`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(firm);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch firm by slug');
+            }
+        }
+    );
+
+    app.get(
         '/api/v2/firms/:firmId',
         routeOptions('Get firm by ID'),
         async (request: FastifyRequest, reply: FastifyReply) => {
@@ -364,6 +384,65 @@ function registerFirmRoutes(app: FastifyInstance, services: ServiceRegistry) {
                 return reply.send(data);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to list firm members');
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/firms/:firmId/invitations',
+        routeOptions('List firm invitations'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { firmId } = request.params as { firmId: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    `/api/v2/firms/${firmId}/invitations`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to list firm invitations');
+            }
+        }
+    );
+
+    app.delete(
+        '/api/v2/firms/:firmId/invitations/:invitationId',
+        routeOptions('Cancel firm invitation'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { firmId, invitationId } = request.params as { firmId: string; invitationId: string };
+                const correlationId = getCorrelationId(request);
+                await networkService().delete(
+                    `/api/v2/firms/${firmId}/invitations/${invitationId}`,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.status(204).send();
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to cancel invitation');
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firms/:firmId/invitations/:invitationId/resend',
+        routeOptions('Resend firm invitation'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { firmId, invitationId } = request.params as { firmId: string; invitationId: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    `/api/v2/firms/${firmId}/invitations/${invitationId}/resend`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to resend invitation');
             }
         }
     );

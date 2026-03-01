@@ -9,8 +9,9 @@ interface HeaderSectionProps {
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
     const formatRevenue = (amount: number): string => {
-        if (amount >= 1000) return `$${Math.round(amount / 1000)}k`;
-        return `$${amount}`;
+        const value = amount || 0;
+        if (value >= 1000) return `$${Math.round(value / 1000)}k`;
+        return `$${value}`;
     };
 
     return (

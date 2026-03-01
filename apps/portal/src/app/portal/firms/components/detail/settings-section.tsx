@@ -11,6 +11,7 @@ import { formatCurrency, formatDate } from "../../types";
 import { statusColor } from "../shared/status-color";
 import { formatStatus, memberCountDisplay } from "../shared/helpers";
 import TransferOwnershipModal from "../modals/transfer-ownership-modal";
+import { FirmProfileWizard } from "../modals/firm-profile-wizard";
 
 interface SettingsSectionProps {
     firm: Firm;
@@ -21,6 +22,7 @@ interface SettingsSectionProps {
 export function SettingsSection({ firm, members, onRefresh }: SettingsSectionProps) {
     const { profile } = useUserProfile();
     const [showTransferModal, setShowTransferModal] = useState(false);
+    const [showEditWizard, setShowEditWizard] = useState(false);
 
     // Check if current user is the firm owner or admin
     const currentMember = members.find(
@@ -31,6 +33,28 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
 
     return (
         <div className="space-y-8">
+            {/* Edit Profile (owner/admin only) */}
+            {isAdmin && (
+                <div className="flex items-center justify-between border-b border-base-300 pb-6">
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Firm Profile
+                        </h3>
+                        <p className="text-sm text-base-content/60">
+                            Update your firm's public profile, specializations, and marketplace settings.
+                        </p>
+                    </div>
+                    <button
+                        className="btn btn-sm btn-primary"
+                        style={{ borderRadius: 0 }}
+                        onClick={() => setShowEditWizard(true)}
+                    >
+                        <i className="fa-duotone fa-regular fa-pen-to-square mr-2" />
+                        Edit Profile
+                    </button>
+                </div>
+            )}
+
             {/* Section 1: Firm Information */}
             <div>
                 <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
@@ -139,6 +163,17 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         : "Activate Firm"}
                 </button>
             </div>
+
+            {/* Edit Profile Wizard */}
+            <FirmProfileWizard
+                isOpen={showEditWizard}
+                onClose={() => setShowEditWizard(false)}
+                onSuccess={() => {
+                    setShowEditWizard(false);
+                    onRefresh();
+                }}
+                firm={firm}
+            />
 
             {/* Transfer Ownership Modal */}
             <ModalPortal>

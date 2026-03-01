@@ -143,8 +143,8 @@ export function FirmConnectWizard({
         try {
             const detailsPayload: UpdateFirmDetailsPayload = {
                 company_name: company.companyName,
-                company_phone: company.companyPhone,
-                company_tax_id: company.companyTaxId,
+                company_phone: company.companyPhone || undefined,
+                company_tax_id: company.companyTaxId || undefined,
                 first_name: representative.firstName,
                 last_name: representative.lastName,
                 email: representative.email,
