@@ -58,7 +58,7 @@ const documentationRoutes = [
     '/documentation/feature-guides/profile',
     '/documentation/feature-guides/billing',
     '/documentation/feature-guides/company-settings',
-    '/documentation/feature-guides/team-management',
+    '/documentation/feature-guides/firm-management',
     '/documentation/feature-guides/notifications',
     '/documentation/integrations',
 ];

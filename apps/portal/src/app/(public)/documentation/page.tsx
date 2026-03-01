@@ -206,14 +206,14 @@ export default function DocumentationIndexPage() {
                             </div>
                         </Link>
                         <Link
-                            href="/documentation/feature-guides/team-management"
+                            href="/documentation/feature-guides/firm-management"
                             className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
                         >
                             <div className="card-body">
-                                <h3 className="card-title">Team Management</h3>
+                                <h3 className="card-title">Firm Management</h3>
                                 <p className="text-sm text-base-content/70">
                                     Assign roles, manage access, and invite
-                                    teammates.
+                                    firm members.
                                 </p>
                             </div>
                         </Link>

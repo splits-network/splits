@@ -18,9 +18,9 @@ import { registerCompanyReputationRoutes } from './company-reputation/routes';
 import { recruiterCompanyRoutes } from './recruiter-companies/routes';
 import { companyInvitationRoutes } from './company-invitations/routes';
 import { recruiterCodeRoutes } from './recruiter-codes/routes';
-import { TeamRepository } from './teams/repository';
-import { TeamServiceV2 } from './teams/service';
-import { registerTeamRoutes } from './teams/routes';
+import { FirmRepository } from './firms/repository';
+import { FirmServiceV2 } from './firms/service';
+import { registerFirmRoutes } from './firms/routes';
 import { createClient } from '@supabase/supabase-js';
 import { AdminNetworkRepository } from './admin/repository';
 import { AdminNetworkService } from './admin/service';
@@ -44,7 +44,7 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     );
     const reputationRepository = new ReputationRepository(config.supabaseUrl, config.supabaseKey);
     const companyReputationRepository = new CompanyReputationRepository(config.supabaseUrl, config.supabaseKey);
-    const teamRepository = new TeamRepository(config.supabaseUrl, config.supabaseKey);
+    const firmRepository = new FirmRepository(config.supabaseUrl, config.supabaseKey);
 
     const recruiterService = new RecruiterServiceV2(recruiterRepository, config.eventPublisher);
     const assignmentService = new AssignmentServiceV2(assignmentRepository, config.eventPublisher);
@@ -55,14 +55,14 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     );
     const reputationService = new ReputationServiceV2(reputationRepository, config.eventPublisher);
     const companyReputationService = new CompanyReputationServiceV2(companyReputationRepository);
-    const teamService = new TeamServiceV2(teamRepository, config.eventPublisher);
+    const firmService = new FirmServiceV2(firmRepository, config.eventPublisher);
 
     registerRecruiterRoutes(app, { recruiterService });
     registerAssignmentRoutes(app, { assignmentService });
     registerRecruiterCandidateRoutes(app, { recruiterCandidateService });
     registerReputationRoutes(app, { reputationService });
     registerCompanyReputationRoutes(app, { companyReputationService });
-    registerTeamRoutes(app, { teamService });
+    registerFirmRoutes(app, { firmService });
 
     // Register recruiter-companies routes
     await recruiterCompanyRoutes(app, supabase, config.eventPublisher);

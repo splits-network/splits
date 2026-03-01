@@ -77,7 +77,7 @@ export function registerNetworkRoutes(app: FastifyInstance, services: ServiceReg
 
     // Register custom routes FIRST before generic CRUD routes
     registerRecruiterCandidateInvitationRoutes(app, services);
-    registerTeamRoutes(app, services);
+    registerFirmRoutes(app, services);
     registerRecruiterCompanyRoutes(app, services);
     registerCompanyInvitationRoutes(app, services);
     registerRecruiterCodeRoutes(app, services);
@@ -231,7 +231,7 @@ function registerRecruiterCandidateInvitationRoutes(
     );
 }
 
-function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
+function registerFirmRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const networkService = () => services.get('network');
 
     const routeOptions = (description: string) => {
@@ -247,97 +247,97 @@ function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
         error: any,
         message: string
     ) => {
-        request.log.error({ error, message }, 'Teams route failed');
+        request.log.error({ error, message }, 'Firms route failed');
         return reply.status(error?.statusCode || 500).send(error?.jsonBody || { error: message });
     };
 
     app.get(
-        '/api/v2/teams',
-        routeOptions('List teams for current user'),
+        '/api/v2/firms',
+        routeOptions('List firms for current user'),
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    '/api/v2/teams',
+                    '/api/v2/firms',
                     request.query as Record<string, any>,
                     correlationId,
                     buildAuthHeaders(request)
                 );
                 return reply.send(data);
             } catch (error: any) {
-                return handleNetworkError(request, reply, error, 'Failed to list teams');
+                return handleNetworkError(request, reply, error, 'Failed to list firms');
             }
         }
     );
 
     app.post(
-        '/api/v2/teams',
-        routeOptions('Create team'),
+        '/api/v2/firms',
+        routeOptions('Create firm'),
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
                 const correlationId = getCorrelationId(request);
-                const team = await networkService().post(
-                    '/api/v2/teams',
+                const firm = await networkService().post(
+                    '/api/v2/firms',
                     request.body,
                     correlationId,
                     buildAuthHeaders(request)
                 );
-                return reply.code(201).send(team);
+                return reply.code(201).send(firm);
             } catch (error: any) {
-                return handleNetworkError(request, reply, error, 'Failed to create team');
+                return handleNetworkError(request, reply, error, 'Failed to create firm');
             }
         }
     );
 
     app.get(
-        '/api/v2/teams/:teamId',
-        routeOptions('Get team by ID'),
+        '/api/v2/firms/:firmId',
+        routeOptions('Get firm by ID'),
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const { teamId } = request.params as { teamId: string };
+                const { firmId } = request.params as { firmId: string };
                 const correlationId = getCorrelationId(request);
-                const team = await networkService().get(
-                    `/api/v2/teams/${teamId}`,
+                const firm = await networkService().get(
+                    `/api/v2/firms/${firmId}`,
                     undefined,
                     correlationId,
                     buildAuthHeaders(request)
                 );
-                return reply.send(team);
+                return reply.send(firm);
             } catch (error: any) {
-                return handleNetworkError(request, reply, error, 'Failed to fetch team');
+                return handleNetworkError(request, reply, error, 'Failed to fetch firm');
             }
         }
     );
 
     app.get(
-        '/api/v2/teams/:teamId/members',
-        routeOptions('List team members'),
+        '/api/v2/firms/:firmId/members',
+        routeOptions('List firm members'),
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const { teamId } = request.params as { teamId: string };
+                const { firmId } = request.params as { firmId: string };
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    `/api/v2/teams/${teamId}/members`,
+                    `/api/v2/firms/${firmId}/members`,
                     request.query as Record<string, any>,
                     correlationId,
                     buildAuthHeaders(request)
                 );
                 return reply.send(data);
             } catch (error: any) {
-                return handleNetworkError(request, reply, error, 'Failed to list team members');
+                return handleNetworkError(request, reply, error, 'Failed to list firm members');
             }
         }
     );
 
     app.post(
-        '/api/v2/teams/:teamId/invitations',
-        routeOptions('Invite team member'),
+        '/api/v2/firms/:firmId/invitations',
+        routeOptions('Invite firm member'),
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const { teamId } = request.params as { teamId: string };
+                const { firmId } = request.params as { firmId: string };
                 const correlationId = getCorrelationId(request);
                 const invitation = await networkService().post(
-                    `/api/v2/teams/${teamId}/invitations`,
+                    `/api/v2/firms/${firmId}/invitations`,
                     request.body,
                     correlationId,
                     buildAuthHeaders(request)
@@ -350,14 +350,14 @@ function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
     );
 
     app.delete(
-        '/api/v2/teams/:teamId/members/:memberId',
-        routeOptions('Remove team member'),
+        '/api/v2/firms/:firmId/members/:memberId',
+        routeOptions('Remove firm member'),
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const { teamId, memberId } = request.params as { teamId: string; memberId: string };
+                const { firmId, memberId } = request.params as { firmId: string; memberId: string };
                 const correlationId = getCorrelationId(request);
                 await networkService().delete(
-                    `/api/v2/teams/${teamId}/members/${memberId}`,
+                    `/api/v2/firms/${firmId}/members/${memberId}`,
                     correlationId,
                     buildAuthHeaders(request)
                 );

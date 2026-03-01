@@ -73,7 +73,7 @@ async function main() {
         openapi: {
             info: {
                 title: 'Network Service API',
-                description: 'Recruiter network management - profiles, assignments, teams, and statistics',
+                description: 'Recruiter network management - profiles, assignments, firms, and statistics',
                 version: '1.0.0',
             },
             servers: [
@@ -86,7 +86,7 @@ async function main() {
                 { name: 'recruiters', description: 'Recruiter profile management' },
                 { name: 'assignments', description: 'Job role assignments to recruiters' },
                 { name: 'stats', description: 'Recruiter performance statistics' },
-                { name: 'teams', description: 'Recruiting teams and agencies (Phase 4B)' },
+                { name: 'firms', description: 'Recruiting firms and agencies (Phase 4B)' },
             ],
         },
     });

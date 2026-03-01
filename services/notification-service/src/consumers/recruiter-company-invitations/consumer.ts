@@ -49,7 +49,7 @@ export class RecruiterCompanyInvitationsConsumer {
             }
 
             // Look up inviter name
-            let inviterName = 'A team member';
+            let inviterName = 'A firm member';
             if (invitedBy) {
                 const inviterContact = await this.contactLookup.getContactByClerkUserId(invitedBy);
                 if (inviterContact) {

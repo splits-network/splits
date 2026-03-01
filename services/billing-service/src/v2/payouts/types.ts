@@ -24,7 +24,7 @@ export interface PlacementSplit {
     role: PayoutRole;                // Explicit role from snapshot
     split_percentage: number;
     split_amount: number;
-    team_id?: string | null;
+    firm_id?: string | null;
     split_configuration_id?: string | null;
     notes?: string | null;
     created_at: string;
@@ -36,7 +36,7 @@ export interface PlacementSplitInsert {
     role: PayoutRole;
     split_percentage: number;
     split_amount: number;
-    team_id?: string;
+    firm_id?: string;
     split_configuration_id?: string;
     notes?: string;
 }

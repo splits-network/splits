@@ -15,7 +15,7 @@ export * from './network.types';
 export * from './billing.types';
 export * from './notification.types';
 export * from './document.types';
-export * from './team.types';
+export * from './firm.types';
 export * from './integration.types';
 export * from './automation.types';
 export * from './marketplace.types';
