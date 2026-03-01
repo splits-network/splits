@@ -25,7 +25,7 @@ spec:
                       - name: PORT
                         value: "3030"
                       - name: CORS_ORIGIN
-                        value: "https://admin.employment-networks.com"
+                        value: "https://admin.employment-networks.com,https://admin.staging.employment-networks.com"
                       - name: ADMIN_CLERK_SECRET_KEY
                         valueFrom:
                             secretKeyRef:

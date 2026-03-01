@@ -90,6 +90,7 @@ COPY --from=build /app/apps/admin/package.json ./apps/admin/
 
 # Copy built artifacts
 COPY --from=build /app/apps/admin/.next ./apps/admin/.next
+COPY --from=build /app/apps/admin/public ./apps/admin/public
 COPY --from=build /app/apps/admin/next.config.mjs ./apps/admin/
 
 EXPOSE 3200

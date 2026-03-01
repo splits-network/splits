@@ -63,10 +63,15 @@ async function main() {
         supabaseServiceRoleKey
     );
 
+    // CORS configuration — supports comma-separated origins in production
+    const allowedOrigins = baseConfig.nodeEnv === 'production'
+        ? (process.env.CORS_ORIGIN || '').split(',').filter(Boolean)
+        : (process.env.CORS_ORIGIN || 'http://localhost:3200');
+
     const app = await buildServer({
         logger,
         cors: {
-            origin: process.env.CORS_ORIGIN || 'http://localhost:3200',
+            origin: allowedOrigins,
             credentials: true,
         },
         disableRequestLogging: true,
