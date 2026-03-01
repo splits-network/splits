@@ -484,7 +484,7 @@ async function main() {
             // Check Redis connectivity with 1 second timeout to avoid blocking health checks
             // If Redis is slow, fail fast so health monitor can detect the issue immediately
             const pingPromise = redis.ping();
-            const timeoutPromise = new Promise((_, reject) => 
+            const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Redis ping timeout')), 1000)
             );
             await Promise.race([pingPromise, timeoutPromise]);
