@@ -23,6 +23,7 @@ spec:
               - staging.applicant.network
               - staging.employment-networks.com
               - status.staging.splits.network
+              - status.staging.employment-networks.com
               - admin.staging.employment-networks.com
               - admin.api.staging.employment-networks.com
           secretName: splits-network-tls
@@ -92,6 +93,16 @@ spec:
                             port:
                                 number: 80
         - host: status.staging.splits.network
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: status
+                            port:
+                                number: 80
+        - host: status.staging.employment-networks.com
           http:
               paths:
                   - path: /
