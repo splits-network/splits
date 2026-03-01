@@ -19,14 +19,14 @@ export function SplitView({
     const selectedFirm = firms.find((t) => t.id === selectedId) ?? null;
 
     return (
-        <div className="container mx-auto px-6 lg:px-12 py-6">
+        <div className="p-4">
             <div
                 className="flex border-2 border-base-300"
                 style={{ minHeight: 600 }}
             >
                 {/* Left list -- hidden on mobile when a firm is selected */}
                 <div
-                    className={`w-full md:w-2/5 border-r-2 border-base-300 overflow-y-auto ${
+                    className={`w-full md:w-1/5 border-r-2 border-base-300 overflow-y-auto ${
                         selectedId ? "hidden md:block" : "block"
                     }`}
                 >
@@ -43,7 +43,7 @@ export function SplitView({
                 {/* Right detail -- MobileDetailOverlay handles mobile portal */}
                 <MobileDetailOverlay
                     isOpen={!!selectedFirm}
-                    className="md:w-3/5 w-full bg-base-100"
+                    className="md:w-4/5 w-full bg-base-100"
                 >
                     {selectedFirm ? (
                         <FirmDetailLoader

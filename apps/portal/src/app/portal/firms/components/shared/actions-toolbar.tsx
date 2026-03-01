@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
-import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { InviteMemberModal } from "../modals/invite-member-modal";
+import { FirmProfileWizard } from "../modals/firm-profile-wizard";
 import type { Firm } from "../../types";
 import { Button, SpeedMenu, BaselConfirmModal, type SpeedDialAction } from "@splits-network/basel-ui";
 
@@ -19,12 +19,11 @@ export interface FirmActionsToolbarProps {
     layout?: "horizontal" | "vertical";
     size?: "xs" | "sm" | "md";
     showActions?: {
-        viewDetails?: boolean;
         inviteMember?: boolean;
         statusActions?: boolean;
+        editProfile?: boolean;
     };
     onRefresh?: () => void;
-    onViewDetails?: (firmId: string) => void;
     className?: string;
 }
 
@@ -37,7 +36,6 @@ export function FirmActionsToolbar({
     size = "sm",
     showActions = {},
     onRefresh,
-    onViewDetails,
     className = "",
 }: FirmActionsToolbarProps) {
     const { getToken } = useAuth();
@@ -46,6 +44,7 @@ export function FirmActionsToolbar({
     const refresh = onRefresh ?? (() => {});
 
     const [showInviteModal, setShowInviteModal] = useState(false);
+    const [showEditWizard, setShowEditWizard] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
     const [pendingStatus, setPendingStatus] = useState<"active" | "suspended" | null>(null);
@@ -88,7 +87,6 @@ export function FirmActionsToolbar({
 
     /* -- Handlers -- */
 
-    const handleViewDetails = () => onViewDetails?.(firm.id);
     const handleInviteSuccess = () => {
         setShowInviteModal(false);
         refresh();
@@ -97,47 +95,14 @@ export function FirmActionsToolbar({
     /* -- Visibility -- */
 
     const actions = {
-        viewDetails: showActions.viewDetails !== false,
         inviteMember: showActions.inviteMember !== false,
         statusActions: showActions.statusActions !== false && canManageFirm,
+        editProfile: showActions.editProfile === true,
     };
 
     const getSizeClass = () => `btn-${size}`;
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
-
-    /* -- Quick Status Button (icon-only) -- */
-
-    const renderQuickStatusButton = () => {
-        if (variant !== "icon-only" || !actions.statusActions) return null;
-        if (firm.status === "active") {
-            return (
-                <Button
-                    icon="fa-duotone fa-regular fa-ban"
-                    variant="btn-error"
-                    size={size}
-                    onClick={() => handleStatusChange("suspended")}
-                    disabled={updatingStatus}
-                    loading={updatingStatus && statusAction === "suspended"}
-                    title="Suspend Firm"
-                />
-            );
-        }
-        if (firm.status === "suspended") {
-            return (
-                <Button
-                    icon="fa-duotone fa-regular fa-play"
-                    variant="btn-success"
-                    size={size}
-                    onClick={() => handleStatusChange("active")}
-                    disabled={updatingStatus}
-                    loading={updatingStatus && statusAction === "active"}
-                    title="Activate Firm"
-                />
-            );
-        }
-        return null;
-    };
 
     /* -- Status Dropdown -- */
 
@@ -234,6 +199,15 @@ export function FirmActionsToolbar({
 
     const modals = (
         <>
+        <FirmProfileWizard
+            isOpen={showEditWizard}
+            onClose={() => setShowEditWizard(false)}
+            onSuccess={() => {
+                setShowEditWizard(false);
+                refresh();
+            }}
+            firm={firm}
+        />
         <BaselConfirmModal
             isOpen={!!pendingStatus}
             onClose={() => setPendingStatus(null)}
@@ -261,6 +235,15 @@ export function FirmActionsToolbar({
     if (variant === "icon-only") {
         const speedDialActions: SpeedDialAction[] = [];
 
+        if (actions.editProfile) {
+            speedDialActions.push({
+                key: "edit-profile",
+                icon: "fa-duotone fa-regular fa-pen-to-square",
+                label: "Edit Profile",
+                variant: "btn-secondary",
+                onClick: () => setShowEditWizard(true),
+            });
+        }
         if (actions.inviteMember) {
             speedDialActions.push({
                 key: "invite",
@@ -293,16 +276,6 @@ export function FirmActionsToolbar({
                 });
             }
         }
-        if (actions.viewDetails) {
-            speedDialActions.push({
-                key: "details",
-                icon: "fa-duotone fa-regular fa-eye",
-                label: "View Details",
-                variant: "btn-primary",
-                onClick: onViewDetails ? handleViewDetails : undefined,
-                href: !onViewDetails ? `/portal/firms/${firm.id}` : undefined,
-            });
-        }
 
         return (
             <>
@@ -323,6 +296,17 @@ export function FirmActionsToolbar({
             <div
                 className={`flex flex-wrap items-center ${getLayoutClass()} ${className}`}
             >
+                {actions.editProfile && (
+                    <button
+                        onClick={() => setShowEditWizard(true)}
+                        className={`btn ${getSizeClass()} btn-secondary gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title="Edit Profile"
+                    >
+                        <i className="fa-duotone fa-regular fa-pen-to-square" />
+                        <span className="hidden md:inline">Edit Profile</span>
+                    </button>
+                )}
                 {actions.inviteMember && (
                     <button
                         onClick={() => setShowInviteModal(true)}
@@ -335,39 +319,6 @@ export function FirmActionsToolbar({
                     </button>
                 )}
                 {renderStatusDropdown()}
-                {actions.viewDetails &&
-                    (actions.inviteMember || actions.statusActions) && (
-                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
-                    )}
-                {actions.viewDetails && (
-                    <>
-                        {onViewDetails ? (
-                            <button
-                                onClick={handleViewDetails}
-                                className={`btn ${getSizeClass()} btn-outline gap-2`}
-                                style={{ borderRadius: 0 }}
-                                title="View Details"
-                            >
-                                <i className="fa-duotone fa-regular fa-eye" />
-                                <span className="hidden md:inline">
-                                    View Details
-                                </span>
-                            </button>
-                        ) : (
-                            <Link
-                                href={`/portal/firms/${firm.id}`}
-                                className={`btn ${getSizeClass()} btn-outline gap-2`}
-                                style={{ borderRadius: 0 }}
-                                title="View Details"
-                            >
-                                <i className="fa-duotone fa-regular fa-eye" />
-                                <span className="hidden md:inline">
-                                    View Details
-                                </span>
-                            </Link>
-                        )}
-                    </>
-                )}
             </div>
             {modals}
         </>

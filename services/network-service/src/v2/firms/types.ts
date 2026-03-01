@@ -7,13 +7,57 @@ import { PaginationParams, SortParams } from '../shared/pagination';
 export interface FirmFilters extends PaginationParams, SortParams {
     search?: string;
     status?: string;
+    marketplace_visible?: boolean;
+    industries?: string[];
+    specialties?: string[];
+    placement_types?: string[];
+    geo_focus?: string[];
+    seeking_split_partners?: boolean;
 }
 
 export interface FirmUpdate {
     name?: string;
     status?: string;
     admin_take_rate?: number;
+    // Profile / branding
+    slug?: string;
+    tagline?: string;
+    description?: string;
+    logo_url?: string;
+    logo_path?: string;
+    banner_url?: string;
+    banner_path?: string;
+    // Specialization
+    industries?: string[];
+    specialties?: string[];
+    placement_types?: string[];
+    geo_focus?: string[];
+    // Location
+    headquarters_city?: string;
+    headquarters_state?: string;
+    headquarters_country?: string;
+    founded_year?: number;
+    team_size_range?: string;
+    // Contact
+    website_url?: string;
+    linkedin_url?: string;
+    contact_email?: string;
+    contact_phone?: string;
+    // Marketplace toggles
+    marketplace_visible?: boolean;
+    seeking_split_partners?: boolean;
+    accepts_candidate_submissions?: boolean;
+    // Visibility controls
+    show_member_count?: boolean;
+    show_placement_stats?: boolean;
+    show_contact_info?: boolean;
+    // Split terms
+    preferred_split_terms?: string;
+    guarantee_period_days?: number;
 }
+
+export const VALID_PLACEMENT_TYPES = ['permanent', 'contract', 'contract_to_hire', 'executive_search'] as const;
+export const VALID_TEAM_SIZE_RANGES = ['solo', '2_5', '6_15', '16_50', '50_plus'] as const;
 
 export interface CreateFirmRequest {
     name: string;

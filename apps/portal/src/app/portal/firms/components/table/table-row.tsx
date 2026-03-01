@@ -93,7 +93,6 @@ export function TableRow({
                             size="xs"
                             onRefresh={onRefresh}
                             showActions={{
-                                viewDetails: false,
                                 inviteMember: false,
                             }}
                         />

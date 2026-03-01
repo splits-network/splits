@@ -163,18 +163,49 @@ export class DomainEventConsumer {
         );
 
         try {
-            // Get internal service user ID for audit trail
-            // For now we'll use 'system' as the user - in production this could be a service account
-            const systemClerkUserId = 'system_' + changed_by;
+            // Fetch current application to verify stage hasn't changed
+            const currentApplication = await this.applicationRepository.findApplication(
+                application_id,
+                'internal-service'
+            );
+            if (!currentApplication) {
+                this.logger.warn(
+                    { application_id },
+                    'Application not found for stage sync'
+                );
+                return;
+            }
+
+            // Only update if stage is different
+            if (currentApplication.stage === new_stage) {
+                this.logger.info(
+                    { application_id, stage: new_stage },
+                    'Application stage already at target, skipping update'
+                );
+                return;
+            }
 
             // Update application stage using repository
-            // This will create audit log and maintain consistency
             const updated = await this.applicationRepository.updateApplication(
                 application_id,
                 {
                     stage: new_stage,
                 }
             );
+
+            // Create audit log entry to maintain consistency
+            await this.applicationRepository.createAuditLog({
+                application_id,
+                action: 'stage_changed',
+                performed_by_user_id: changed_by || 'system',
+                performed_by_role: 'system',
+                old_value: { stage: old_stage },
+                new_value: { stage: new_stage },
+                metadata: {
+                    source_event: event.event_type,
+                    event_id: event.event_id,
+                },
+            });
 
             // Note: Placement creation for hired applications is handled by the
             // POST /applications/:id/hire route handler, not by the domain consumer.
@@ -268,33 +299,34 @@ export class DomainEventConsumer {
                     'Updated application stage after AI review - candidate can now review feedback'
                 );
 
-                // Publish application.stage_changed event for other services
-                const stageChangeEvent = {
-                    event_id: `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                    event_type: 'application.stage_changed',
-                    timestamp: new Date().toISOString(),
-                    source_service: 'ats-service',
-                    payload: {
+                // Create audit log entry to maintain audit trail
+                await this.applicationRepository.createAuditLog({
+                    application_id: updatedApplication.id,
+                    action: 'ai_review_completed',
+                    performed_by_user_id: 'system',
+                    performed_by_role: 'system',
+                    old_value: { stage: application.stage },
+                    new_value: { stage: nextStage },
+                    metadata: {
+                        ai_review_id: payload.ai_review_id,
+                        fit_score: payload.fit_score,
+                        recommendation: payload.recommendation,
+                        source_event: event.event_id,
+                    },
+                });
+
+                // Publish application.stage_changed event using the outbox system for durable delivery
+                // Use eventPublisher instead of direct channel.publish() to ensure reliability
+                if (this.eventPublisher) {
+                    await this.eventPublisher.publish('application.stage_changed', {
                         application_id: updatedApplication.id,
                         candidate_id: updatedApplication.candidate_id,
                         job_id: updatedApplication.job_id,
                         recruiter_id: updatedApplication.recruiter_id,
                         old_stage: application.stage,
                         new_stage: nextStage,
-                    },
-                    metadata: {
-                        ai_review_id: payload.ai_review_id,
-                        fit_score: payload.fit_score,
-                        recommendation: payload.recommendation
-                    }
-                };
-
-                if (this.channel) {
-                    await this.channel.publish(
-                        this.exchange,
-                        'application.stage_changed',
-                        Buffer.from(JSON.stringify(stageChangeEvent))
-                    );
+                        changed_by: 'system',
+                    });
                 }
 
                 this.logger.info(
@@ -303,7 +335,7 @@ export class DomainEventConsumer {
                         event: 'application.stage_changed',
                         stage_change: `${application.stage} -> ${nextStage}`
                     },
-                    'Published application.stage_changed event'
+                    'Published application.stage_changed event via outbox'
                 );
             } else {
                 this.logger.info(
