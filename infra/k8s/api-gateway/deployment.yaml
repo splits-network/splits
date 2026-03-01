@@ -113,6 +113,8 @@ spec:
                         value: "http://content-service:3015"
                       - name: INTEGRATION_SERVICE_URL
                         value: "http://integration-service:80"
+                      - name: MATCHING_SERVICE_URL
+                        value: "http://matching-service:3017"
                   resources:
                       requests:
                           cpu: 200m
