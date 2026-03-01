@@ -10,7 +10,8 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { ApplicationsAnimator } from "./applications-animator";
-import type { Application, ApplicationFilters, ViewMode } from "./types";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
+import type { Application, ApplicationFilters } from "./types";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
@@ -147,7 +148,7 @@ export default function ApplicationsBaselPage() {
             </div>
 
             {/* Content area */}
-            <section className="content-area opacity-0">
+            <section className="content-area opacity-0 p-4">
                 <div className="mx-auto">
                     {loading && applications.length === 0 ? (
                         <LoadingState message="Loading pipeline..." />

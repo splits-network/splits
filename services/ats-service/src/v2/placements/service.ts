@@ -91,7 +91,7 @@ export class PlacementServiceV2 {
         // 2 & 3: Get job for company_recruiter_id, job_owner_recruiter_id and company_id
         const { data: job } = await this.supabase
             .from('jobs')
-            .select('company_recruiter_id, job_owner_recruiter_id, company_id')
+            .select('company_recruiter_id, job_owner_recruiter_id, company_id, source_firm_id')
             .eq('id', jobId)
             .single();
 
@@ -99,8 +99,10 @@ export class PlacementServiceV2 {
             throw new Error(`Job ${jobId} not found for attribution gathering`);
         }
 
+        const isOffPlatform = job.source_firm_id && !job.company_id;
         const companyRecruiterId = job.company_recruiter_id || null;
-        const jobOwnerRecruiterId = job.job_owner_recruiter_id || null;
+        // Off-platform jobs have no job_owner commission
+        const jobOwnerRecruiterId = isOffPlatform ? null : (job.job_owner_recruiter_id || null);
 
         // 4: Get candidate sourcer (check if active)
         let candidateSourcerRecruiterId: string | null = null;
@@ -110,12 +112,14 @@ export class PlacementServiceV2 {
             candidateSourcerRecruiterId = isActive ? candidateSourcer.sourcer_recruiter_id : null;
         }
 
-        // 5: Get company sourcer (check if active)
+        // 5: Get company sourcer (check if active) — skip for off-platform jobs
         let companySourcerRecruiterId: string | null = null;
-        const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
-        if (companySourcer) {
-            const isActive = await this.companySourcerRepo.isSourcerActive(job.company_id);
-            companySourcerRecruiterId = isActive ? companySourcer.recruiter_id : null;
+        if (job.company_id) {
+            const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
+            if (companySourcer) {
+                const isActive = await this.companySourcerRepo.isSourcerActive(job.company_id);
+                companySourcerRecruiterId = isActive ? companySourcer.recruiter_id : null;
+            }
         }
 
         return {
@@ -346,16 +350,18 @@ export class PlacementServiceV2 {
             throw new Error(`Application must be in 'hired' stage to create placement. Current stage: ${application.stage}`);
         }
 
-        // Get job data with company_id and job owner
+        // Get job data with company_id, job owner, and off-platform fields
         const { data: job } = await this.supabase
             .from('jobs')
-            .select('id, title, company_id, company_recruiter_id, job_owner_recruiter_id, fee_percentage, guarantee_days')
+            .select('id, title, company_id, company_recruiter_id, job_owner_recruiter_id, fee_percentage, guarantee_days, source_firm_id, company_name')
             .eq('id', application.job_id)
             .single();
 
         if (!job) {
             throw new Error(`Job ${application.job_id} not found`);
         }
+
+        const isOffPlatform = job.source_firm_id && !job.company_id;
 
         // Get candidate data for denormalized fields
         const { data: candidate } = await this.supabase
@@ -364,17 +370,24 @@ export class PlacementServiceV2 {
             .eq('id', application.candidate_id)
             .single();
 
-        // Get company data for denormalized fields
-        const { data: company } = await this.supabase
-            .from('companies')
-            .select('name')
-            .eq('id', job.company_id)
-            .single();
+        // Get company name — from platform company or denormalized job field for off-platform
+        let companyName: string | null = null;
+        if (job.company_id) {
+            const { data: company } = await this.supabase
+                .from('companies')
+                .select('name')
+                .eq('id', job.company_id)
+                .single();
+            companyName = company?.name || null;
+        } else {
+            companyName = job.company_name || '3rd Party';
+        }
 
         // Get all 5 recruiter role IDs from referential data (all nullable)
         const candidateRecruiterId = application.candidate_recruiter_id;  // From application
         const companyRecruiterId = job.company_recruiter_id;              // From job
-        const jobOwnerRecruiterId = job.job_owner_recruiter_id;           // From job
+        // Off-platform jobs have no job_owner commission
+        const jobOwnerRecruiterId = isOffPlatform ? null : job.job_owner_recruiter_id;
 
         // Get sourcer IDs from dedicated tables (all nullable)
         let candidateSourcerRecruiterId: string | null = null;
@@ -384,11 +397,14 @@ export class PlacementServiceV2 {
             candidateSourcerRecruiterId = isActive ? candidateSourcer.sourcer_recruiter_id : null;
         }
 
+        // Company sourcer — skip for off-platform jobs (no platform company to source)
         let companySourcerRecruiterId: string | null = null;
-        const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
-        if (companySourcer) {
-            const isActive = await this.companySourcerRepo.isSourcerActive(job.company_id);
-            companySourcerRecruiterId = isActive ? companySourcer.recruiter_id : null;
+        if (job.company_id) {
+            const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
+            if (companySourcer) {
+                const isActive = await this.companySourcerRepo.isSourcerActive(job.company_id);
+                companySourcerRecruiterId = isActive ? companySourcer.recruiter_id : null;
+            }
         }
 
         // Calculate placement fee
@@ -418,7 +434,7 @@ export class PlacementServiceV2 {
             candidate_name: candidate?.full_name || null,
             candidate_email: candidate?.email || null,
             job_title: job.title || null,
-            company_name: company?.name || null,
+            company_name: companyName,
 
             // Money details
             salary: salary,

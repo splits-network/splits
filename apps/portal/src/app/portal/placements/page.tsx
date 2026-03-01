@@ -8,7 +8,7 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import type { Placement, PlacementFilters } from "./types";
-import type { ViewMode } from "./components/shared/status-color";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { PlacementsAnimator } from "./placements-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -149,7 +149,7 @@ export default function PlacementsBaselPage() {
             />
 
             {/* Content Area */}
-            <section className="content-area opacity-0">
+            <section className="content-area opacity-0 p-4">
                 <div ref={contentRef}>
                     {loading && placements.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">

@@ -46,6 +46,19 @@ export function registerFirmRoutes(
         }
     });
 
+    // GET current user's firm
+    app.get('/api/v2/firms/my-firm', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const firm = await config.firmService.getMyFirm(clerkUserId);
+            return reply.send({ data: firm });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Internal server error' });
+        }
+    });
+
     // GET single firm
     app.get('/api/v2/firms/:id', async (request, reply) => {
         try {
@@ -137,6 +150,26 @@ export function registerFirmRoutes(
             const { firmId, memberId } = request.params as { firmId: string; memberId: string };
             await config.firmService.removeFirmMember(firmId, memberId, clerkUserId);
             return reply.code(204).send();
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Internal server error' });
+        }
+    });
+
+    // TRANSFER ownership
+    app.post('/api/v2/firms/:firmId/transfer-ownership', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { firmId } = request.params as { firmId: string };
+            const body = request.body as any;
+
+            if (!body.newOwnerRecruiterId) {
+                return reply.code(400).send({ error: 'newOwnerRecruiterId is required' });
+            }
+
+            const firm = await config.firmService.transferOwnership(firmId, body, clerkUserId);
+            return reply.send({ data: firm });
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 500)

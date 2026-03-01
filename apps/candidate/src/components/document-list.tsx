@@ -6,6 +6,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import type { Document as ApiDocument } from '@/lib/document-utils';
 import UploadDocumentModal from './upload-document-modal';
 import { useToast } from '@/lib/toast-context';
+import { BaselConfirmModal } from '@splits-network/basel-ui';
 
 interface DocumentListProps {
     entityType: string;
@@ -28,6 +29,7 @@ export default function DocumentList({
     const [loading, setLoading] = useState(!initialDocuments);
     const [downloading, setDownloading] = useState<string | null>(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
+    const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!initialDocuments) {
@@ -72,9 +74,14 @@ export default function DocumentList({
         }
     };
 
-    const handleDelete = async (docId: string) => {
-        if (!confirm('Are you sure you want to delete this document?')) return;
+    const handleDelete = (docId: string) => {
+        setDeleteDocId(docId);
+    };
 
+    const confirmDelete = async () => {
+        if (!deleteDocId) return;
+        const docId = deleteDocId;
+        setDeleteDocId(null);
         try {
             const token = await getToken();
             if (!token) return;
@@ -213,6 +220,18 @@ export default function DocumentList({
                     }}
                 />
             )}
+
+            <BaselConfirmModal
+                isOpen={deleteDocId !== null}
+                onClose={() => setDeleteDocId(null)}
+                onConfirm={confirmDelete}
+                title="Delete Document"
+                icon="fa-trash"
+                confirmColor="btn-error"
+                confirmLabel="Delete"
+            >
+                <p>Are you sure you want to delete this document? This action cannot be undone.</p>
+            </BaselConfirmModal>
         </>
     );
 }

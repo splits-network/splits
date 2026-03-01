@@ -9,7 +9,7 @@ import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { InviteMemberModal } from "../modals/invite-member-modal";
 import type { Firm } from "../../types";
-import { Button, SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
+import { Button, SpeedMenu, BaselConfirmModal, type SpeedDialAction } from "@splits-network/basel-ui";
 
 /* --- Types ---------------------------------------------------------------- */
 
@@ -48,6 +48,7 @@ export function FirmActionsToolbar({
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
+    const [pendingStatus, setPendingStatus] = useState<"active" | "suspended" | null>(null);
 
     /* -- Permissions -- */
 
@@ -58,13 +59,14 @@ export function FirmActionsToolbar({
 
     /* -- Status Change -- */
 
-    const handleStatusChange = async (newStatus: "active" | "suspended") => {
-        if (
-            !confirm(
-                `Are you sure you want to change the firm status to ${newStatus}?`,
-            )
-        )
-            return;
+    const handleStatusChange = (newStatus: "active" | "suspended") => {
+        setPendingStatus(newStatus);
+    };
+
+    const confirmStatusChange = async () => {
+        if (!pendingStatus) return;
+        const newStatus = pendingStatus;
+        setPendingStatus(null);
 
         setUpdatingStatus(true);
         setStatusAction(newStatus);
@@ -231,6 +233,17 @@ export function FirmActionsToolbar({
     /* -- Modals -- */
 
     const modals = (
+        <>
+        <BaselConfirmModal
+            isOpen={!!pendingStatus}
+            onClose={() => setPendingStatus(null)}
+            onConfirm={confirmStatusChange}
+            title="Change Firm Status"
+            icon="fa-triangle-exclamation"
+            confirmColor={pendingStatus === "suspended" ? "btn-error" : "btn-primary"}
+        >
+            <p>Are you sure you want to change the firm status to {pendingStatus}?</p>
+        </BaselConfirmModal>
         <ModalPortal>
             {showInviteModal && (
                 <InviteMemberModal
@@ -240,6 +253,7 @@ export function FirmActionsToolbar({
                 />
             )}
         </ModalPortal>
+        </>
     );
 
     /* -- Icon-Only Variant (SpeedDial) -- */

@@ -57,14 +57,14 @@ export class JobRepository {
             .select(
                 `
                 *,
-                company:companies!inner(id, name, industry, headquarters_location, logo_url, identity_organization_id)
+                company:companies(id, name, industry, headquarters_location, logo_url, identity_organization_id)
             `,
                 { count: 'exact' }
             );
 
         if (clerkUserId) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-            
+
             if (accessContext.isPlatformAdmin) {
                 // Platform admins see all jobs
             } else if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
@@ -110,7 +110,8 @@ export class JobRepository {
                 }
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users (company_admin, hiring_manager) see only their organization's jobs
-
+                // Exclude off-platform jobs (company_id is null) from company user views
+                query = query.not('company_id', 'is', null);
                 query = query.in('company.identity_organization_id', accessContext.organizationIds);
 
                 if (filters.job_owner_filter === 'assigned' && accessContext.identityUserId) {
@@ -252,30 +253,48 @@ export class JobRepository {
         // Track if creator is a recruiter for setting ownership fields
         let creatorRecruiterId: string | null = null;
 
-        // Authorize company access
+        // Authorize access
+        const isOffPlatform = job.source_firm_id && !job.company_id;
+
         if (!accessContext.isPlatformAdmin) {
             if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
-                // Recruiters can only create jobs for companies they have active relationships with
-                const { data: relationships } = await this.supabase
+                if (isOffPlatform) {
+                    // Off-platform job: verify recruiter is an active member of the source firm
+                    const { data: firmMember } = await this.supabase
+                        .from('firm_members')
+                        .select('id')
+                        .eq('firm_id', job.source_firm_id)
+                        .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('status', 'active')
+                        .maybeSingle();
 
-                    .from('recruiter_companies')
-                    .select('company_id')
-                    .eq('recruiter_id', accessContext.recruiterId)
-                    .eq('status', 'active')
-                    .eq('can_manage_company_jobs', true);
+                    if (!firmMember) {
+                        throw new Error('Forbidden: You must be an active member of the firm to create off-platform jobs');
+                    }
+                } else {
+                    // Platform job: check recruiter_companies for company access
+                    const { data: relationships } = await this.supabase
+                        .from('recruiter_companies')
+                        .select('company_id')
+                        .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('status', 'active')
+                        .eq('can_manage_company_jobs', true);
 
-                const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
+                    const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
 
-                if (!allowedCompanyIds.includes(job.company_id)) {
-                    throw new Error('Forbidden: No active relationship with permission to create jobs for this company');
+                    if (!allowedCompanyIds.includes(job.company_id)) {
+                        throw new Error('Forbidden: No active relationship with permission to create jobs for this company');
+                    }
                 }
 
                 // Set the creator recruiter ID for ownership assignment
                 creatorRecruiterId = accessContext.recruiterId;
             } else if (accessContext.organizationIds.length > 0) {
+                if (isOffPlatform) {
+                    throw new Error('Forbidden: Company users cannot create off-platform jobs');
+                }
                 // Company users can create jobs for their organization
                 const { data: company } = await this.supabase
-
                     .from('companies')
                     .select('identity_organization_id')
                     .eq('id', job.company_id)
@@ -289,11 +308,18 @@ export class JobRepository {
             }
         }
 
-        // If a recruiter is creating the job, set them as the job owner and company recruiter
+        // Set ownership fields
         const jobData = { ...job };
         if (creatorRecruiterId) {
-            jobData.job_owner_recruiter_id = creatorRecruiterId;
-            jobData.company_recruiter_id = creatorRecruiterId;
+            if (isOffPlatform) {
+                // Off-platform: set company_recruiter (manages the job) but NOT job_owner (no commission)
+                jobData.company_recruiter_id = creatorRecruiterId;
+                jobData.job_owner_recruiter_id = null;
+            } else {
+                // Platform job: set both as before
+                jobData.job_owner_recruiter_id = creatorRecruiterId;
+                jobData.company_recruiter_id = creatorRecruiterId;
+            }
         }
 
         const { data, error } = await this.supabase
@@ -308,9 +334,8 @@ export class JobRepository {
 
     async updateJob(id: string, clerkUserId: string, updates: JobUpdate): Promise<any> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        
+
         let query = this.supabase
-            
             .from('jobs')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id);
@@ -318,34 +343,56 @@ export class JobRepository {
         // Apply authorization filters
         if (!accessContext.isPlatformAdmin) {
             if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
-                // Recruiters can only edit jobs if they have active company relationship with can_manage_company_jobs=true
-                const { data: relationships } = await this.supabase
-                    
-                    .from('recruiter_companies')
-                    .select('company_id')
-                    .eq('recruiter_id', accessContext.recruiterId)
-                    .eq('status', 'active')
-                    .eq('can_manage_company_jobs', true);
-                
-                const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
-                
-                if (allowedCompanyIds.length === 0) {
-                    throw new Error('Forbidden: No active company relationships with job management permissions');
+                // Check if this is an off-platform job (source_firm_id set, no company_id)
+                const { data: existingJob } = await this.supabase
+                    .from('jobs')
+                    .select('company_id, source_firm_id')
+                    .eq('id', id)
+                    .single();
+
+                if (existingJob?.source_firm_id && !existingJob?.company_id) {
+                    // Off-platform job: verify firm membership
+                    const { data: firmMember } = await this.supabase
+                        .from('firm_members')
+                        .select('id')
+                        .eq('firm_id', existingJob.source_firm_id)
+                        .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('status', 'active')
+                        .maybeSingle();
+
+                    if (!firmMember) {
+                        throw new Error('Forbidden: You must be an active firm member to edit this off-platform job');
+                    }
+                } else {
+                    // Platform job: check recruiter_companies
+                    const { data: relationships } = await this.supabase
+                        .from('recruiter_companies')
+                        .select('company_id')
+                        .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('status', 'active')
+                        .eq('can_manage_company_jobs', true);
+
+                    const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
+
+                    if (allowedCompanyIds.length === 0) {
+                        throw new Error('Forbidden: No active company relationships with job management permissions');
+                    }
+
+                    query = query.in('company_id', allowedCompanyIds);
                 }
-                
-                query = query.in('company_id', allowedCompanyIds);
             } else if (accessContext.organizationIds.length > 0) {
-                // Company users can edit their organization's jobs
+                // Company users can edit their organization's jobs (not off-platform)
+                query = query.not('company_id', 'is', null);
                 query = query.in('company.identity_organization_id', accessContext.organizationIds);
             } else {
                 throw new Error('Forbidden: Insufficient permissions to update job');
             }
         }
-        
+
         const { data, error } = await query
             .select(`
                 *,
-                company:companies!inner(id, name, identity_organization_id)
+                company:companies(id, name, identity_organization_id)
             `)
             .single();
 
@@ -360,9 +407,8 @@ export class JobRepository {
 
     async deleteJob(id: string, clerkUserId: string): Promise<void> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        
+
         let query = this.supabase
-            
             .from('jobs')
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);
@@ -370,36 +416,56 @@ export class JobRepository {
         // Apply authorization filters
         if (!accessContext.isPlatformAdmin) {
             if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
-                // Recruiters can only delete jobs if they have active company relationship with can_manage_company_jobs=true
-                const { data: relationships } = await this.supabase
-                    
-                    .from('recruiter_companies')
-                    .select('company_id')
-                    .eq('recruiter_id', accessContext.recruiterId)
-                    .eq('status', 'active')
-                    .eq('can_manage_company_jobs', true);
-                
-                const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
-                
-                if (allowedCompanyIds.length === 0) {
-                    throw new Error('Forbidden: No active company relationships with job management permissions');
+                // Check if this is an off-platform job
+                const { data: existingJob } = await this.supabase
+                    .from('jobs')
+                    .select('company_id, source_firm_id')
+                    .eq('id', id)
+                    .single();
+
+                if (existingJob?.source_firm_id && !existingJob?.company_id) {
+                    // Off-platform job: verify firm membership
+                    const { data: firmMember } = await this.supabase
+                        .from('firm_members')
+                        .select('id')
+                        .eq('firm_id', existingJob.source_firm_id)
+                        .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('status', 'active')
+                        .maybeSingle();
+
+                    if (!firmMember) {
+                        throw new Error('Forbidden: You must be an active firm member to delete this off-platform job');
+                    }
+                } else {
+                    // Platform job: check recruiter_companies
+                    const { data: relationships } = await this.supabase
+                        .from('recruiter_companies')
+                        .select('company_id')
+                        .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('status', 'active')
+                        .eq('can_manage_company_jobs', true);
+
+                    const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
+
+                    if (allowedCompanyIds.length === 0) {
+                        throw new Error('Forbidden: No active company relationships with job management permissions');
+                    }
+
+                    query = query.in('company_id', allowedCompanyIds);
                 }
-                
-                query = query.in('company_id', allowedCompanyIds);
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users can delete their organization's jobs
                 const { data: companies } = await this.supabase
-                    
                     .from('companies')
                     .select('id')
                     .in('identity_organization_id', accessContext.organizationIds);
-                
+
                 const allowedCompanyIds = companies?.map(c => c.id) || [];
-                
+
                 if (allowedCompanyIds.length === 0) {
                     throw new Error('Forbidden: No companies found for your organization');
                 }
-                
+
                 query = query.in('company_id', allowedCompanyIds);
             } else {
                 throw new Error('Forbidden: Insufficient permissions to delete job');

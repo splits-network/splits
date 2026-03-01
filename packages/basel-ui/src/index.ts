@@ -57,6 +57,8 @@ export {
     BaselWizardModal,
     type BaselWizardModalProps,
     type BaselWizardStep,
+    BaselPromptModal,
+    type BaselPromptModalProps,
 } from './modals';
 
 // Button components
@@ -153,6 +155,19 @@ export {
     writeConsentCookie,
     type ConsentPreferences,
 } from './consent';
+
+// List components (controls-bar, view mode, results count)
+export {
+    type BaselViewMode,
+    BaselControlsBarShell,
+    type BaselControlsBarShellProps,
+    BaselViewModeSelector,
+    type BaselViewModeSelectorProps,
+    BaselResultsCount,
+    type BaselResultsCountProps,
+    BaselRefreshButton,
+    type BaselRefreshButtonProps,
+} from './lists';
 
 // Color utilities
 export {

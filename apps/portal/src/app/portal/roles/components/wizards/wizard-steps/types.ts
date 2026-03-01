@@ -16,6 +16,8 @@ export interface FormData {
     // Step 1: Basic Info
     title: string;
     company_id: string;
+    source_firm_id?: string;
+    company_name?: string;
     location: string;
     department: string;
     status: 'active' | 'paused' | 'closed';

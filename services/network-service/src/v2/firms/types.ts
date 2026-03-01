@@ -12,6 +12,7 @@ export interface FirmFilters extends PaginationParams, SortParams {
 export interface FirmUpdate {
     name?: string;
     status?: string;
+    admin_take_rate?: number;
 }
 
 export interface CreateFirmRequest {
@@ -26,6 +27,10 @@ export interface FirmMemberFilters extends PaginationParams {
 export interface CreateFirmInvitationRequest {
     email: string;
     role: 'admin' | 'member' | 'collaborator';
+}
+
+export interface TransferOwnershipRequest {
+    newOwnerRecruiterId: string;
 }
 
 export interface RepositoryListResponse<T> {

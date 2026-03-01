@@ -2,7 +2,13 @@
 
 import { useCallback } from "react";
 import { SearchInput } from "@/components/standard-lists";
-import type { ApplicationFilters, ViewMode } from "../../types";
+import {
+    BaselControlsBarShell,
+    BaselViewModeSelector,
+    BaselRefreshButton,
+    type BaselViewMode,
+} from "@splits-network/basel-ui";
+import type { ApplicationFilters } from "../../types";
 
 interface ControlsBarProps {
     searchInput: string;
@@ -12,8 +18,8 @@ interface ControlsBarProps {
         key: K,
         value: ApplicationFilters[K],
     ) => void;
-    viewMode: ViewMode;
-    onViewModeChange: (mode: ViewMode) => void;
+    viewMode: BaselViewMode;
+    onViewModeChange: (mode: BaselViewMode) => void;
     loading: boolean;
     refresh: () => void;
     onSubmitCandidate: () => void;
@@ -37,153 +43,96 @@ export function ControlsBar({
     }, [onFilterChange]);
 
     return (
-        <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
-            <div className="container mx-auto px-6 lg:px-12 py-4">
-                <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                    {/* Search + Filters */}
-                    <div className="flex flex-wrap gap-3 items-center flex-1">
-                        {/* Search */}
-                        <SearchInput
-                            value={searchInput}
-                            onChange={onSearchChange}
-                            placeholder="Search by candidate, role, or company..."
-                            className="flex-1 min-w-[200px] max-w-md"
-                        />
-
-                        {/* Scope filter */}
-                        <select
-                            value={filters.scope || "all"}
-                            onChange={(e) =>
-                                onFilterChange(
-                                    "scope",
-                                    (e.target.value as "all" | "mine") ||
-                                        undefined,
-                                )
-                            }
-                            className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
-                        >
-                            <option value="all">All Applications</option>
-                            <option value="mine">My Applications</option>
-                        </select>
-
-                        {/* Stage filter */}
-                        <select
-                            value={filters.stage || ""}
-                            onChange={(e) =>
-                                onFilterChange(
-                                    "stage",
-                                    e.target.value || undefined,
-                                )
-                            }
-                            className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
-                        >
-                            <option value="">All Stages</option>
-                            <option value="draft">Draft</option>
-                            <option value="screen">Screening</option>
-                            <option value="submitted">Submitted</option>
-                            <option value="company_review">
-                                Company Review
-                            </option>
-                            <option value="recruiter_review">
-                                Recruiter Review
-                            </option>
-                            <option value="interview">Interview</option>
-                            <option value="offer">Offer</option>
-                            <option value="hired">Hired</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-
-                        {/* AI Score filter */}
-                        <select
-                            value={filters.ai_score_filter || ""}
-                            onChange={(e) =>
-                                onFilterChange(
-                                    "ai_score_filter",
-                                    e.target.value || undefined,
-                                )
-                            }
-                            className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
-                        >
-                            <option value="">All AI Scores</option>
-                            <option value="high">High Match</option>
-                            <option value="medium">Medium Match</option>
-                            <option value="low">Low Match</option>
-                            <option value="not_reviewed">Not Scored</option>
-                        </select>
-
-                        {/* Reset */}
-                        <button
-                            onClick={resetFilters}
-                            className="btn btn-sm btn-ghost"
-                            disabled={loading}
-                        >
-                            <i className="fa-duotone fa-regular fa-filter-circle-xmark" />
-                        </button>
-
-                        {/* Refresh */}
-                        <button
-                            onClick={refresh}
-                            className="btn btn-sm btn-ghost"
-                            disabled={loading}
-                        >
-                            <i
-                                className={`fa-duotone fa-regular fa-arrows-rotate ${loading ? "animate-spin" : ""}`}
-                            />
-                        </button>
-
-                        {/* Submit Candidate */}
-                        <button
-                            className="btn btn-sm btn-primary"
-                            onClick={onSubmitCandidate}
-                        >
-                            <i className="fa-duotone fa-regular fa-user-plus" />
-                            <span className="hidden sm:inline">
-                                Submit Candidate
-                            </span>
-                        </button>
+        <BaselControlsBarShell
+            filters={
+                <>
+                    <div className="flex bg-base-200 p-1 rounded-none">
+                        {(
+                            [
+                                { value: "all", label: "All Applications" },
+                                { value: "mine", label: "My Applications" },
+                            ] as const
+                        ).map(({ value, label }) => (
+                            <button
+                                key={value}
+                                onClick={() => onFilterChange("scope", value)}
+                                className={`px-3 py-1.5 text-sm font-bold uppercase tracking-wider transition-colors rounded-none ${
+                                    (filters.scope || "all") === value
+                                        ? "bg-primary text-primary-content"
+                                        : "text-base-content/50 hover:text-base-content"
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
                     </div>
 
-                    {/* View Toggle */}
-                    <div className="flex items-center gap-4">
-                        <div className="flex bg-base-200 p-1">
-                            {(
-                                [
-                                    {
-                                        mode: "table" as ViewMode,
-                                        icon: "fa-table-list",
-                                        label: "Table",
-                                    },
-                                    {
-                                        mode: "grid" as ViewMode,
-                                        icon: "fa-grid-2",
-                                        label: "Grid",
-                                    },
-                                    {
-                                        mode: "split" as ViewMode,
-                                        icon: "fa-columns-3",
-                                        label: "Split",
-                                    },
-                                ] as const
-                            ).map((v) => (
-                                <button
-                                    key={v.mode}
-                                    onClick={() => onViewModeChange(v.mode)}
-                                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                                        viewMode === v.mode
-                                            ? "bg-primary text-primary-content"
-                                            : "text-base-content/50 hover:text-base-content"
-                                    }`}
-                                >
-                                    <i
-                                        className={`fa-duotone fa-regular ${v.icon} mr-1`}
-                                    />
-                                    {v.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                    <SearchInput
+                        value={searchInput}
+                        onChange={onSearchChange}
+                        placeholder="Search by candidate, role, or company..."
+                        className="flex-1 min-w-[200px] max-w-md"
+                    />
+
+                    <select
+                        value={filters.stage || ""}
+                        onChange={(e) =>
+                            onFilterChange("stage", e.target.value || undefined)
+                        }
+                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                    >
+                        <option value="">All Stages</option>
+                        <option value="draft">Draft</option>
+                        <option value="screen">Screening</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="company_review">Company Review</option>
+                        <option value="recruiter_review">Recruiter Review</option>
+                        <option value="interview">Interview</option>
+                        <option value="offer">Offer</option>
+                        <option value="hired">Hired</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+
+                    <select
+                        value={filters.ai_score_filter || ""}
+                        onChange={(e) =>
+                            onFilterChange("ai_score_filter", e.target.value || undefined)
+                        }
+                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                    >
+                        <option value="">All AI Scores</option>
+                        <option value="high">High Match</option>
+                        <option value="medium">Medium Match</option>
+                        <option value="low">Low Match</option>
+                        <option value="not_reviewed">Not Scored</option>
+                    </select>
+
+                    <button
+                        onClick={resetFilters}
+                        className="btn btn-ghost rounded-none"
+                        disabled={loading}
+                    >
+                        <i className="fa-duotone fa-regular fa-filter-circle-xmark" />
+                    </button>
+
+                    <button
+                        className="btn btn-primary rounded-none"
+                        onClick={onSubmitCandidate}
+                    >
+                        <i className="fa-duotone fa-regular fa-user-plus" />
+                        <span className="hidden sm:inline">Submit Candidate</span>
+                    </button>
+                </>
+            }
+            statusRight={
+                <>
+                    <BaselRefreshButton onClick={refresh} loading={loading} />
+                    <BaselViewModeSelector
+                        viewMode={viewMode}
+                        onViewModeChange={onViewModeChange}
+                    />
+                </>
+            }
+        />
     );
 }

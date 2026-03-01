@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { apiClient } from "@/lib/api-client";
+import { getContentPages } from "@/lib/content";
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -142,6 +143,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         );
     } catch (error) {
         console.error("Failed to fetch recruiters for sitemap:", error);
+    }
+
+    // Fetch dynamic CMS pages from database
+    try {
+        const cmsPages = await getContentPages(undefined, 100);
+        entries.push(
+            ...cmsPages.map((page) => ({
+                url: `${baseUrl}/cms/${page.slug}`,
+                lastModified: toDate(page.updated_at ?? page.published_at),
+                changeFrequency: "monthly" as MetadataRoute.Sitemap[number]["changeFrequency"],
+                priority: 0.5,
+            })),
+        );
+    } catch (error) {
+        console.error("Failed to fetch CMS pages for sitemap:", error);
     }
 
     return entries;

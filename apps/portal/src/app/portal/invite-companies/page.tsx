@@ -9,7 +9,7 @@ import {
 } from "@/hooks/use-standard-list";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { CompanyInvitation, InvitationFilters } from "./types";
-import type { ViewMode } from "./components/shared/status-color";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { InvitationsAnimator } from "./invitations-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -136,7 +136,7 @@ export default function InviteCompaniesBaselPage() {
                 />
 
                 {/* Content Area */}
-                <section className="content-area opacity-0">
+                <section className="content-area opacity-0 p-4">
                     <div ref={contentRef} className="mx-auto">
                         {loading && invitations.length === 0 ? (
                             <div className="py-28 text-center">

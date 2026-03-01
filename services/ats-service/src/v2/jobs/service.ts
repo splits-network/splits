@@ -69,8 +69,18 @@ export class JobServiceV2 {
         if (!data.title) {
             throw new Error('Job title is required');
         }
-        if (!data.company_id) {
-            throw new Error('Company ID is required');
+        if (!data.company_id && !data.source_firm_id) {
+            throw new Error('Either company_id or source_firm_id is required');
+        }
+
+        // Off-platform job validation
+        if (data.source_firm_id && !data.company_id) {
+            if (!data.fee_percentage || data.fee_percentage < 5) {
+                throw new Error('Off-platform jobs require a minimum 5% fee');
+            }
+            if (!data.company_name) {
+                throw new Error('Company name is required for off-platform jobs');
+            }
         }
 
         // Validate commute_types

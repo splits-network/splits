@@ -15,7 +15,7 @@ import { LoadingState } from "@/components/standard-lists/loading-state";
 import { ErrorState } from "@/components/standard-lists/error-state";
 import { BaselEmptyState } from "@splits-network/basel-ui";
 import type { Job, JobFilters } from "./types";
-import type { ViewMode } from "./components/shared/status-color";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { JobsAnimator } from "./jobs-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";

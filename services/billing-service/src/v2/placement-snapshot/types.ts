@@ -24,6 +24,18 @@ export interface PlacementSnapshot {
     candidate_sourcer_tier: 'free' | 'paid' | 'premium' | null;
     company_sourcer_tier: 'free' | 'paid' | 'premium' | null;
 
+    // Per-role firm context (frozen at snapshot time)
+    candidate_recruiter_firm_id: string | null;
+    candidate_recruiter_admin_take_rate: number | null;
+    company_recruiter_firm_id: string | null;
+    company_recruiter_admin_take_rate: number | null;
+    job_owner_firm_id: string | null;
+    job_owner_admin_take_rate: number | null;
+    candidate_sourcer_firm_id: string | null;
+    candidate_sourcer_admin_take_rate: number | null;
+    company_sourcer_firm_id: string | null;
+    company_sourcer_admin_take_rate: number | null;
+
     // Timestamps
     created_at: string;
 }
@@ -46,6 +58,18 @@ export interface PlacementSnapshotCreate {
     job_owner_tier: 'free' | 'paid' | 'premium' | null;
     candidate_sourcer_tier: 'free' | 'paid' | 'premium' | null;
     company_sourcer_tier: 'free' | 'paid' | 'premium' | null;
+
+    // Per-role firm context (frozen at snapshot time)
+    candidate_recruiter_firm_id?: string | null;
+    candidate_recruiter_admin_take_rate?: number | null;
+    company_recruiter_firm_id?: string | null;
+    company_recruiter_admin_take_rate?: number | null;
+    job_owner_firm_id?: string | null;
+    job_owner_admin_take_rate?: number | null;
+    candidate_sourcer_firm_id?: string | null;
+    candidate_sourcer_admin_take_rate?: number | null;
+    company_sourcer_firm_id?: string | null;
+    company_sourcer_admin_take_rate?: number | null;
 }
 
 export interface PlacementSnapshotFilters {

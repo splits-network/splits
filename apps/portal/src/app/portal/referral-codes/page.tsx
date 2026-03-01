@@ -221,7 +221,7 @@ export default function ReferralCodesBaselPage() {
                 />
 
                 {/* Content Area */}
-                <section className="content-area opacity-0">
+                <section className="content-area opacity-0 p-4">
                     <div ref={contentRef} className="mx-auto">
                         {loading && codes.length === 0 ? (
                             <div className="py-28 text-center">

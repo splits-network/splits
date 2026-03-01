@@ -6,6 +6,7 @@ import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
 import { AdminPageHeader } from "../components";
 import { LoadingState } from "@splits-network/shared-ui";
+import { BaselConfirmModal, BaselPromptModal } from "@splits-network/basel-ui";
 
 interface AutomationRule {
     id: string;
@@ -41,6 +42,8 @@ export default function AutomationControlsPage() {
     >([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"rules" | "executions">("rules");
+    const [approvingExecutionId, setApprovingExecutionId] = useState<string | null>(null);
+    const [rejectingExecutionId, setRejectingExecutionId] = useState<string | null>(null);
     const toast = useToast();
     const { getToken } = useAuth();
 
@@ -94,8 +97,14 @@ export default function AutomationControlsPage() {
         }
     };
 
-    const approveExecution = async (executionId: string) => {
-        if (!confirm("Approve this automation execution?")) return;
+    const approveExecution = (executionId: string) => {
+        setApprovingExecutionId(executionId);
+    };
+
+    const confirmApprove = async () => {
+        if (!approvingExecutionId) return;
+        const executionId = approvingExecutionId;
+        setApprovingExecutionId(null);
 
         try {
             const token = await getToken();
@@ -112,9 +121,14 @@ export default function AutomationControlsPage() {
         }
     };
 
-    const rejectExecution = async (executionId: string) => {
-        const reason = prompt("Reason for rejection:");
-        if (!reason) return;
+    const rejectExecution = (executionId: string) => {
+        setRejectingExecutionId(executionId);
+    };
+
+    const confirmReject = async (reason: string) => {
+        if (!rejectingExecutionId) return;
+        const executionId = rejectingExecutionId;
+        setRejectingExecutionId(null);
 
         try {
             const token = await getToken();
@@ -422,6 +436,29 @@ export default function AutomationControlsPage() {
                     )}
                 </>
             )}
+
+            <BaselConfirmModal
+                isOpen={!!approvingExecutionId}
+                onClose={() => setApprovingExecutionId(null)}
+                onConfirm={confirmApprove}
+                title="Approve Execution"
+                icon="fa-triangle-exclamation"
+                confirmColor="btn-primary"
+            >
+                <p>Approve this automation execution?</p>
+            </BaselConfirmModal>
+
+            <BaselPromptModal
+                isOpen={!!rejectingExecutionId}
+                onClose={() => setRejectingExecutionId(null)}
+                onSubmit={confirmReject}
+                title="Reject Execution"
+                icon="fa-ban"
+                label="Reason for rejection"
+                placeholder="Enter the reason..."
+                submitLabel="Reject"
+                submitColor="btn-error"
+            />
         </div>
     );
 }

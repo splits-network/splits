@@ -38,6 +38,12 @@ import { resolveAccessContext } from './shared/access';
 import { AdminBillingRepository } from './admin/repository';
 import { AdminBillingService } from './admin/service';
 import { registerAdminBillingRoutes } from './admin/routes';
+import { FirmBillingProfileRepository } from './firm-billing/repository';
+import { FirmBillingProfileService } from './firm-billing/service';
+import { firmBillingProfileRoutes } from './firm-billing/routes';
+import { FirmStripeConnectRepository } from './firm-connect/repository';
+import { FirmStripeConnectService } from './firm-connect/service';
+import { firmStripeConnectRoutes } from './firm-connect/routes';
 
 interface BillingV2Config {
     supabaseUrl: string;
@@ -91,6 +97,21 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         accessResolver,
         config.eventPublisher
     );
+    // Initialize firm billing services
+    const firmBillingRepository = new FirmBillingProfileRepository(accessClient);
+    const firmBillingService = new FirmBillingProfileService(
+        firmBillingRepository,
+        accessClient,
+        accessResolver,
+        config.eventPublisher
+    );
+    const firmConnectRepository = new FirmStripeConnectRepository(accessClient);
+    const firmConnectService = new FirmStripeConnectService(
+        firmConnectRepository,
+        accessClient,
+        accessResolver
+    );
+
     const placementInvoiceRepository = new PlacementInvoiceRepository(accessClient);
     const placementInvoiceService = new PlacementInvoiceService(
         accessClient,
@@ -98,7 +119,10 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         snapshotRepository,
         companyBillingRepository,
         companyBillingService,
-        accessResolver
+        accessResolver,
+        undefined, // stripeSecretKey — uses env default
+        firmBillingRepository,
+        firmBillingService
     );
     const payoutService = new PayoutServiceV2(
         snapshotRepository,
@@ -106,7 +130,9 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         transactionRepository,
         recruiterConnectRepository,
         accessResolver,
-        config.eventPublisher
+        config.eventPublisher,
+        undefined,
+        firmConnectRepository
     );
 
     // Create new automation services
@@ -139,6 +165,8 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     discountRoutes(app, discountService);
     stripeConnectRoutes(app, connectService);
     companyBillingProfileRoutes(app, companyBillingService);
+    firmBillingProfileRoutes(app, firmBillingService);
+    firmStripeConnectRoutes(app, firmConnectService);
     placementInvoiceRoutes(app, placementInvoiceService);
 
     // Register automation routes

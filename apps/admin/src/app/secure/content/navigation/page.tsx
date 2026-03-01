@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useAdminToast } from "@/hooks/use-admin-toast";
 import { AdminPageHeader } from "@/components/shared";
-import { BaselTabBar } from "@splits-network/basel-ui";
+import { BaselTabBar, BaselConfirmModal } from "@splits-network/basel-ui";
 import { ButtonLoading } from "@splits-network/shared-ui";
 import { StandardListLoadingState } from "@splits-network/shared-hooks";
 import type {
@@ -49,6 +49,7 @@ export default function NavigationAdminPage() {
     const [saving, setSaving] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [pendingSwitch, setPendingSwitch] = useState<{ type: "app" | "location"; value: string } | null>(null);
 
     // Current config from server
     const [serverConfig, setServerConfig] = useState<
@@ -155,18 +156,28 @@ export default function NavigationAdminPage() {
 
     function handleAppChange(value: string) {
         if (isDirty) {
-            if (!window.confirm("You have unsaved changes. Switch anyway?"))
-                return;
+            setPendingSwitch({ type: "app", value });
+            return;
         }
         setActiveApp(value as ContentApp);
     }
 
     function handleLocationChange(value: string) {
         if (isDirty) {
-            if (!window.confirm("You have unsaved changes. Switch anyway?"))
-                return;
+            setPendingSwitch({ type: "location", value });
+            return;
         }
         setActiveLocation(value as NavLocation);
+    }
+
+    function confirmSwitch() {
+        if (!pendingSwitch) return;
+        if (pendingSwitch.type === "app") {
+            setActiveApp(pendingSwitch.value as ContentApp);
+        } else {
+            setActiveLocation(pendingSwitch.value as NavLocation);
+        }
+        setPendingSwitch(null);
     }
 
     return (
@@ -269,6 +280,19 @@ export default function NavigationAdminPage() {
                         : '{\n  "sections": [...],\n  "socialLinks": [...],\n  "trustStats": [...],\n  "legalLinks": [...]\n}'
                 }
             />
+
+            <BaselConfirmModal
+                isOpen={pendingSwitch !== null}
+                onClose={() => setPendingSwitch(null)}
+                onConfirm={confirmSwitch}
+                title="Unsaved Changes"
+                subtitle="Warning"
+                icon="fa-triangle-exclamation"
+                confirmColor="btn-primary"
+                confirmLabel="Switch Anyway"
+            >
+                <p>You have unsaved changes. Are you sure you want to switch? Your changes will be lost.</p>
+            </BaselConfirmModal>
         </div>
     );
 }

@@ -262,7 +262,7 @@ export default function IntegrationsMarketplacePage() {
             <MarketplaceHero activeCount={activeConnections.length} />
 
             {/* ── Content ─────────────────────────────────────────────── */}
-            <section className="mkt-content opacity-0 container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+            <section className="mkt-content opacity-0 p-4">
                 {/* Error banner */}
                 {error && (
                     <div className="bg-error/5 border-l-4 border-error px-4 py-3 mb-6">

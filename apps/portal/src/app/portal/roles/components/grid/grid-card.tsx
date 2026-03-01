@@ -62,8 +62,13 @@ export function GridCard({
             </h3>
 
             {/* Company */}
-            <div className="text-sm font-semibold text-base-content/60 mb-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-base-content/60 mb-2">
                 {name}
+                {!job.company_id && job.source_firm_id && (
+                    <span className="badge badge-warning badge-sm text-xs uppercase tracking-wider">
+                        3rd Party
+                    </span>
+                )}
             </div>
 
             {/* Location */}
