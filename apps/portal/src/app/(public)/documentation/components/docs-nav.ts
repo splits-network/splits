@@ -143,8 +143,8 @@ export const docsNavSections: DocsNavSection[] = [
                 href: "/documentation/feature-guides/company-settings",
             },
             {
-                title: "Team Management",
-                href: "/documentation/feature-guides/team-management",
+                title: "Firm Management",
+                href: "/documentation/feature-guides/firm-management",
             },
             {
                 title: "Notifications",

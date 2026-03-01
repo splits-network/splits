@@ -57,7 +57,7 @@ export const NETWORK_ASSIGNMENT_ROLES: UserRole[] = ['company_admin', 'platform_
 
 export const NETWORK_ADMIN_ROLES: UserRole[] = ['platform_admin'];
 
-export const NETWORK_TEAM_ROLES: UserRole[] = ['recruiter', 'company_admin', 'platform_admin'];
+export const NETWORK_FIRM_ROLES: UserRole[] = ['recruiter', 'company_admin', 'platform_admin'];
 
 export const BILLING_VIEW_ROLES: UserRole[] = ['platform_admin'];
 

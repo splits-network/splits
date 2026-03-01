@@ -1,12 +1,12 @@
 /**
  * Invitation Email Templates
- * Professional branded templates for team invitation notifications
+ * Professional branded templates for firm invitation notifications
  */
 
 import { baseEmailTemplate, EmailSource } from '../base';
 import { heading, paragraph, button, infoCard, alert, divider, badge } from '../components';
 
-export interface TeamInvitationData {
+export interface FirmInvitationData {
     organizationName: string;
     role: string;
     invitedByName: string;
@@ -15,7 +15,7 @@ export interface TeamInvitationData {
     source?: EmailSource;
 }
 
-export function teamInvitationEmail(data: TeamInvitationData): string {
+export function firmInvitationEmail(data: FirmInvitationData): string {
     const content = `
 ${heading({ level: 1, text: "You're Invited" })}
 
@@ -65,7 +65,7 @@ export interface InvitationAcceptedData {
 
 export function invitationAcceptedEmail(data: InvitationAcceptedData): string {
     const content = `
-${heading({ level: 1, text: 'New team member joined' })}
+${heading({ level: 1, text: 'New firm member joined' })}
 
 ${alert({
     type: 'success',
@@ -83,7 +83,7 @@ ${infoCard({
 })}
 
 ${paragraph(
-    'The new member now has access to your organization based on their assigned role. You can manage team members and permissions from your organization settings.'
+    'The new member now has access to your organization based on their assigned role. You can manage firm members and permissions from your organization settings.'
 )}
 
 ${divider()}

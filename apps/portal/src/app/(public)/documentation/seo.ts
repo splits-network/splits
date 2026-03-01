@@ -191,10 +191,10 @@ export const DOCS_METADATA: Record<string, DocMeta> = {
             "Manage organization profile, settings, and shared preferences.",
         canonicalPath: "/documentation/feature-guides/company-settings",
     },
-    "feature-guides/team-management": {
-        title: "Team Management",
-        description: "Manage team members, roles, and access levels.",
-        canonicalPath: "/documentation/feature-guides/team-management",
+    "feature-guides/firm-management": {
+        title: "Firm Management",
+        description: "Manage firm members, roles, and access levels.",
+        canonicalPath: "/documentation/feature-guides/firm-management",
     },
     "feature-guides/notifications": {
         title: "Notifications",

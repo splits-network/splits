@@ -52,7 +52,7 @@ import {
     serviceRecoveredEmail,
 } from './health';
 import {
-    teamInvitationEmail,
+    firmInvitationEmail,
     invitationRevokedEmail,
 } from './invitations';
 import {
@@ -411,13 +411,13 @@ const serviceRecoveredData = {
     timestamp: '2026-02-26T14:45:00Z',
 };
 
-// ── Team invitation sample data ──────────────────────────────────────
+// ── Firm invitation sample data ──────────────────────────────────────
 
-const teamInvitationData = {
+const firmInvitationData = {
     organizationName: 'Smith Recruiting',
     role: 'Recruiter',
     invitedByName: 'Jane Smith',
-    invitationLink: 'https://splits.network/invite/team/abc123',
+    invitationLink: 'https://splits.network/invite/firm/abc123',
     expiresDate: 'March 15, 2026',
 };
 
@@ -817,8 +817,8 @@ function generatePreviews() {
         { name: 'service-unhealthy', html: serviceUnhealthyEmail(serviceUnhealthyData) },
         { name: 'service-recovered', html: serviceRecoveredEmail(serviceRecoveredData) },
 
-        // Team Invitations
-        { name: 'team-invitation', html: teamInvitationEmail(teamInvitationData) },
+        // Firm Invitations
+        { name: 'firm-invitation', html: firmInvitationEmail(firmInvitationData) },
         { name: 'invitation-revoked', html: invitationRevokedEmail(invitationRevokedData) },
 
         // Recruiter Submissions
@@ -1006,8 +1006,8 @@ function generatePreviews() {
             <a href="service-unhealthy.html">Service Unhealthy <span class="badge">Critical</span></a>
             <a href="service-recovered.html">Service Recovered <span class="badge">Resolved</span></a>
 
-            <h3 style="color: #18181b; margin: 24px 0 12px;">Team Invitation Emails</h3>
-            <a href="team-invitation.html">Team Invitation <span class="badge">Invite</span></a>
+            <h3 style="color: #18181b; margin: 24px 0 12px;">Firm Invitation Emails</h3>
+            <a href="firm-invitation.html">Firm Invitation <span class="badge">Invite</span></a>
             <a href="invitation-accepted.html">Invitation Accepted <span class="badge">New</span></a>
             <a href="invitation-revoked.html">Invitation Revoked <span class="badge">Revoked</span></a>
 

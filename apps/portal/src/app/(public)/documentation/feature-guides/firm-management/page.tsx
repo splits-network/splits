@@ -3,18 +3,18 @@ import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
 import { getDocMetadata, getDocJsonLd } from "../../seo";
 import { JsonLd } from "@splits-network/shared-ui";
 
-export const metadata = getDocMetadata("feature-guides/company-settings");
-export default function CompanySettingsGuidePage() {
+export const metadata = getDocMetadata("feature-guides/firm-management");
+export default function FirmManagementGuidePage() {
     return (
         <>
             <JsonLd
-                data={getDocJsonLd("feature-guides/company-settings")}
-                id="docs-feature-guides-company-settings-jsonld"
+                data={getDocJsonLd("feature-guides/firm-management")}
+                id="docs-feature-guides-firm-management-jsonld"
             />
             <div className="space-y-10">
                 <DocPageHeader
-                    title="Company Settings"
-                    description="Manage organization profile, settings, and shared preferences."
+                    title="Firm Management"
+                    description="Manage firm members, roles, and access levels."
                     roles={["Company Admin", "Hiring Manager"]}
                     breadcrumbs={[
                         { label: "Documentation", href: "/documentation" },
@@ -22,28 +22,27 @@ export default function CompanySettingsGuidePage() {
                             label: "Feature Guides",
                             href: "/documentation/feature-guides",
                         },
-                        { label: "Company Settings" },
+                        { label: "Firm Management" },
                     ]}
-                    lastUpdated="February 3, 2026"
+                    lastUpdated="February 28, 2026"
                 />
 
                 <section className="space-y-4">
                     <h2 className="text-xl font-semibold">Purpose</h2>
                     <p className="text-base text-base-content/70">
-                        Company Settings store the organization profile and
-                        shared defaults that appear across roles and
-                        applications. Accurate settings help maintain consistent
-                        branding and data.
+                        Firm Management controls who has access to your
+                        organization and what they can do. It is where
+                        permissions are set and maintained.
                     </p>
                     <p className="text-base text-base-content/70">
-                        This guide explains where to update company information,
-                        what fields are used elsewhere in the platform, and how
-                        changes affect role listings. It also notes typical
-                        permission limits.
+                        This guide describes the firm list, role assignments,
+                        and common management actions like invites or updates.
+                        It helps you avoid misaligned access that can block
+                        workflows.
                     </p>
                     <p className="text-base text-base-content/70">
-                        Use this page when updating company details or
-                        troubleshooting why roles show outdated information.
+                        Use this page when adding new firm members, adjusting
+                        roles, or auditing existing permissions.
                     </p>
                 </section>
 
@@ -62,17 +61,17 @@ export default function CompanySettingsGuidePage() {
                 <section className="space-y-4">
                     <h2 className="text-xl font-semibold">Prerequisites</h2>
                     <div className="space-y-2 text-base text-base-content/70">
-                        <div>Company admin or hiring manager access.</div>
-                        <div>Organization details to update.</div>
+                        <div>Company admin or hiring manager permissions.</div>
+                        <div>Active organization membership.</div>
                     </div>
                 </section>
 
                 <section className="space-y-4">
                     <h2 className="text-xl font-semibold">Key Areas</h2>
                     <ul className="list-disc list-inside space-y-2 text-base text-base-content/70">
-                        <li>Company name, logo, and profile info.</li>
-                        <li>Organization identifiers and defaults.</li>
-                        <li>Shared settings affecting roles and workflows.</li>
+                        <li>Firm list with roles and status.</li>
+                        <li>Role assignment and invite actions.</li>
+                        <li>Member management and permissions.</li>
                     </ul>
                 </section>
 
@@ -82,16 +81,16 @@ export default function CompanySettingsGuidePage() {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <ScreenshotPlaceholder
-                            title="Company settings"
-                            description="Company settings form with profile fields."
+                            title="Firm management"
+                            description="Firm list with role assignments."
                             variant="desktop"
-                            filename="docs-company-settings-desktop.png"
+                            filename="docs-firm-management-list-desktop.png"
                         />
                         <ScreenshotPlaceholder
-                            title="Company settings"
-                            description="Mobile company settings form."
+                            title="Firm management"
+                            description="Mobile firm list with role badges."
                             variant="mobile"
-                            filename="docs-company-settings-mobile.png"
+                            filename="docs-firm-management-mobile.png"
                         />
                     </div>
                 </section>
@@ -100,9 +99,12 @@ export default function CompanySettingsGuidePage() {
                     <h2 className="text-xl font-semibold">Tips</h2>
                     <div className="space-y-2 text-base text-base-content/70">
                         <div>
-                            Keep company branding consistent across roles.
+                            Audit firm roles quarterly to keep access correct.
                         </div>
-                        <div>Update settings before publishing new roles.</div>
+                        <div>
+                            Use invitations for new firm members instead of
+                            sharing credentials.
+                        </div>
                     </div>
                 </section>
 
@@ -110,24 +112,23 @@ export default function CompanySettingsGuidePage() {
                     <h2 className="text-xl font-semibold">Troubleshooting</h2>
                     <div className="space-y-3 text-base text-base-content/70">
                         <div>
-                            <strong>Symptom:</strong> I cannot access Company
-                            Settings.
+                            <strong>Symptom:</strong> I cannot edit a firm
+                            member.
                             <br />
-                            <strong>Likely cause:</strong> Your role lacks
-                            permissions.
+                            <strong>Likely cause:</strong> You are not a company
+                            admin.
                             <br />
-                            <strong>Fix:</strong> Ask a company admin to grant
-                            access.
+                            <strong>Fix:</strong> Ask a company admin to make
+                            the change.
                         </div>
                         <div>
-                            <strong>Symptom:</strong> Changes do not appear in
-                            roles.
+                            <strong>Symptom:</strong> Firm list is empty.
                             <br />
-                            <strong>Likely cause:</strong> Data is cached or
-                            missing required fields.
+                            <strong>Likely cause:</strong> Organization is not
+                            linked or data failed to load.
                             <br />
-                            <strong>Fix:</strong> Refresh the page and confirm
-                            required fields are saved.
+                            <strong>Fix:</strong> Confirm organization settings
+                            or refresh.
                         </div>
                     </div>
                 </section>
@@ -136,10 +137,10 @@ export default function CompanySettingsGuidePage() {
                     <h2 className="text-xl font-semibold">Related Pages</h2>
                     <div className="space-y-2 space-x-4">
                         <a
-                            href="/documentation/feature-guides/firm-management"
+                            href="/documentation/feature-guides/company-settings"
                             className="link link-hover"
                         >
-                            Firm Management{" "}
+                            Company Settings{" "}
                             <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                         </a>
                         <a
@@ -156,8 +157,8 @@ export default function CompanySettingsGuidePage() {
                     <h2 className="text-xl font-semibold">Reference</h2>
                     <div className="space-y-2 text-base text-base-content/70">
                         <div>
-                            <strong>Organization profile:</strong> The shared
-                            company details visible across the portal.
+                            <strong>Role assignment:</strong> The permission
+                            level granted to a user.
                         </div>
                     </div>
                 </section>

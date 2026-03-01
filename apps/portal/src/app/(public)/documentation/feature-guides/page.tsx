@@ -54,9 +54,9 @@ const guides = [
         description: "Manage organization settings.",
     },
     {
-        title: "Team Management",
-        href: "/documentation/feature-guides/team-management",
-        description: "Manage team roles and access.",
+        title: "Firm Management",
+        href: "/documentation/feature-guides/firm-management",
+        description: "Manage firm roles and access.",
     },
     {
         title: "Notifications",

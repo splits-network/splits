@@ -212,8 +212,8 @@ const navItems: NavItemData[] = [
         section: "settings",
     },
     {
-        href: "/portal/teams",
-        label: "Teams",
+        href: "/portal/firms",
+        label: "Firms",
         icon: "fa-duotone fa-regular fa-users",
         roles: ["recruiter", "platform_admin"],
         section: "settings",

@@ -6,7 +6,7 @@
 import { Resend } from 'resend';
 import { NotificationRepository } from '../../repository';
 import { Logger } from '@splits-network/shared-logging';
-import { teamInvitationEmail, invitationRevokedEmail, invitationAcceptedEmail } from '../../templates/invitations';
+import { firmInvitationEmail, invitationRevokedEmail, invitationAcceptedEmail } from '../../templates/invitations';
 
 export class InvitationsEmailService {
     constructor(
@@ -159,7 +159,7 @@ export class InvitationsEmailService {
     }
 
     /**
-     * Send invitation email to new team member
+     * Send invitation email to new firm member
      */
     async sendInvitation(payload: {
         invitation_id: string;
@@ -186,7 +186,7 @@ export class InvitationsEmailService {
         });
 
         const subject = `You've been invited to join ${organization_name} on Splits Network`;
-        const html = teamInvitationEmail({
+        const html = firmInvitationEmail({
             organizationName: organization_name,
             role: roleLabel,
             invitedByName: invited_by_name,
@@ -295,8 +295,8 @@ export class InvitationsEmailService {
                     new_member_name,
                     role,
                 },
-                actionUrl: '/portal/settings/team',
-                actionLabel: 'View Team',
+                actionUrl: '/portal/settings/firm',
+                actionLabel: 'View Firm',
                 priority: 'normal',
                 category: 'invitation',
             });
