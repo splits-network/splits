@@ -2,7 +2,8 @@
  * Firm Domain Types
  *
  * Generated from Supabase database schema.
- * Includes: firms, firm_members, firm_invitations, split_configurations, placement_splits
+ * Includes: firms, firm_members, firm_invitations, firm_billing_profiles, firm_stripe_accounts,
+ * split_configurations, placement_splits
  */
 
 import type { Database, Tables, TablesInsert, TablesUpdate } from '../supabase/database.types';
@@ -35,6 +36,22 @@ export type FirmMemberUpdate = DbTableUpdate<'firm_members'>;
 export type FirmInvitation = DbTable<'firm_invitations'>;
 export type FirmInvitationInsert = DbTableInsert<'firm_invitations'>;
 export type FirmInvitationUpdate = DbTableUpdate<'firm_invitations'>;
+
+// ============================================================================
+// FIRM BILLING PROFILES
+// ============================================================================
+
+export type FirmBillingProfile = DbTable<'firm_billing_profiles'>;
+export type FirmBillingProfileInsert = DbTableInsert<'firm_billing_profiles'>;
+export type FirmBillingProfileUpdate = DbTableUpdate<'firm_billing_profiles'>;
+
+// ============================================================================
+// FIRM STRIPE ACCOUNTS
+// ============================================================================
+
+export type FirmStripeAccount = DbTable<'firm_stripe_accounts'>;
+export type FirmStripeAccountInsert = DbTableInsert<'firm_stripe_accounts'>;
+export type FirmStripeAccountUpdate = DbTableUpdate<'firm_stripe_accounts'>;
 
 // ============================================================================
 // SPLIT CONFIGURATIONS
