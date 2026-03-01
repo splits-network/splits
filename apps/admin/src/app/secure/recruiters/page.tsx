@@ -1,7 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import { useStandardList } from '@/hooks/use-standard-list';
-import { AdminPageHeader } from '@/components/shared';
+import { AdminPageHeader, AdminStatsBanner } from '@/components/shared';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import { RecruiterTable } from './components/recruiter-table';
 
 type RecruiterStatus = 'pending' | 'active' | 'suspended' | '';
@@ -18,6 +21,28 @@ const STATUS_OPTIONS: { label: string; value: RecruiterStatus }[] = [
 ];
 
 export default function RecruitersPage() {
+    const { getToken } = useAuth();
+    const [counts, setCounts] = useState({ recruiters: 0, recruiters_pending: 0, recruiter_companies: 0 });
+    const [countsLoading, setCountsLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchCounts() {
+            try {
+                const token = await getToken();
+                if (!token) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get('/network/admin/counts');
+                setCounts(res.data);
+            } catch {
+                // silently fail — stats are non-critical
+            } finally {
+                setCountsLoading(false);
+            }
+        }
+        fetchCounts();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const {
         data,
         total,
@@ -44,6 +69,15 @@ export default function RecruitersPage() {
             <AdminPageHeader
                 title="Recruiters"
                 subtitle={`${total} recruiter${total !== 1 ? 's' : ''} on the platform`}
+            />
+
+            <AdminStatsBanner
+                stats={[
+                    { label: 'Total Recruiters', value: counts.recruiters, icon: 'fa-duotone fa-regular fa-users', color: 'primary' },
+                    { label: 'Pending Approval', value: counts.recruiters_pending, icon: 'fa-duotone fa-regular fa-clock', color: 'warning' },
+                    { label: 'Companies', value: counts.recruiter_companies, icon: 'fa-duotone fa-regular fa-building', color: 'secondary' },
+                ]}
+                loading={countsLoading}
             />
 
             {/* Filters */}

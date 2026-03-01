@@ -1,26 +1,38 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import { useStandardList } from '@/hooks/use-standard-list';
-import { AdminPageHeader } from '@/components/shared';
+import { AdminPageHeader, AdminStatsBanner } from '@/components/shared';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import { ApplicationTable } from './components/application-table';
 
-type Stage = 'submitted' | 'screening' | 'interview' | 'offer' | 'placed' | 'rejected' | '';
-
 type Filters = {
-    status: Stage;
+    stage: string;
 };
 
-const STAGE_OPTIONS: { label: string; value: Stage }[] = [
+const STAGE_OPTIONS: { label: string; value: string }[] = [
     { label: 'All', value: '' },
+    { label: 'AI Review', value: 'ai_review' },
+    { label: 'AI Reviewed', value: 'ai_reviewed' },
+    { label: 'Recruiter Request', value: 'recruiter_request' },
+    { label: 'Recruiter Proposed', value: 'recruiter_proposed' },
     { label: 'Submitted', value: 'submitted' },
     { label: 'Screening', value: 'screening' },
+    { label: 'Company Review', value: 'company_review' },
     { label: 'Interview', value: 'interview' },
     { label: 'Offer', value: 'offer' },
+    { label: 'Hired', value: 'hired' },
     { label: 'Placed', value: 'placed' },
     { label: 'Rejected', value: 'rejected' },
+    { label: 'Withdrawn', value: 'withdrawn' },
 ];
 
 export default function ApplicationsPage() {
+    const { getToken } = useAuth();
+    const [counts, setCounts] = useState<Record<string, number>>({});
+    const [countsLoading, setCountsLoading] = useState(true);
+
     const {
         data,
         total,
@@ -28,8 +40,6 @@ export default function ApplicationsPage() {
         loading,
         filters,
         setFilter,
-        searchInput,
-        setSearchInput,
         sortBy,
         sortOrder,
         handleSort,
@@ -37,9 +47,31 @@ export default function ApplicationsPage() {
         goToPage,
     } = useStandardList<any, Filters>({
         endpoint: '/ats/admin/applications',
-        defaultFilters: { status: '' },
+        defaultFilters: { stage: '' },
         defaultLimit: 25,
     });
+
+    useEffect(() => {
+        async function loadCounts() {
+            try {
+                const token = await getToken();
+                if (!token) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Record<string, number> }>('/ats/admin/counts');
+                setCounts(res.data);
+            } catch { /* non-critical */ } finally {
+                setCountsLoading(false);
+            }
+        }
+        loadCounts();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const stats = [
+        { label: 'Applications', value: counts.applications ?? 0, icon: 'fa-duotone fa-regular fa-file-lines', color: 'primary' as const },
+        { label: 'Jobs', value: counts.jobs ?? 0, icon: 'fa-duotone fa-regular fa-briefcase', color: 'secondary' as const },
+        { label: 'Candidates', value: counts.candidates ?? 0, icon: 'fa-duotone fa-regular fa-user-group', color: 'accent' as const },
+        { label: 'Placements', value: counts.placements ?? 0, icon: 'fa-duotone fa-regular fa-handshake', color: 'success' as const },
+    ];
 
     return (
         <div>
@@ -48,6 +80,10 @@ export default function ApplicationsPage() {
                 subtitle={`${total} application${total !== 1 ? 's' : ''} on the platform`}
             />
 
+            <div className="mb-6">
+                <AdminStatsBanner stats={stats} loading={countsLoading} />
+            </div>
+
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-3 mb-4">
                 <div className="flex flex-wrap items-center gap-1">
@@ -55,21 +91,12 @@ export default function ApplicationsPage() {
                         <button
                             key={opt.value}
                             type="button"
-                            className={`btn btn-sm ${filters.status === opt.value ? 'btn-primary' : 'btn-ghost'}`}
-                            onClick={() => setFilter('status', opt.value)}
+                            className={`btn btn-sm ${filters.stage === opt.value ? 'btn-primary' : 'btn-ghost'}`}
+                            onClick={() => setFilter('stage', opt.value)}
                         >
                             {opt.label}
                         </button>
                     ))}
-                </div>
-                <div className="flex-1 max-w-xs">
-                    <input
-                        type="text"
-                        className="input input-sm input-bordered w-full"
-                        placeholder="Search applications..."
-                        value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
-                    />
                 </div>
             </div>
 

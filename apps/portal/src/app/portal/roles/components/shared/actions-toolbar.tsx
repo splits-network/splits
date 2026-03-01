@@ -128,26 +128,23 @@ export default function RoleActionsToolbar({
             process.env.NEXT_PUBLIC_CANDIDATE_APP_URL ||
             "https://staging.applicant.network";
         const shareUrl = `${candidateAppUrl}/jobs/${job.id}`;
-        const shareData = {
-            title: `${job.title || "Job Opportunity"} at ${job.company?.name || "Company"}`,
-            text: `Check out this job opportunity: ${job.title || "Job Opportunity"}${job.company?.name ? ` at ${job.company.name}` : ""}`,
-            url: shareUrl,
-        };
+        const shareText = `Check out this job: ${job.title || "Job Opportunity"} at ${job.company?.name || "Company"}`;
+        const clipboardText = `${shareText}\n${shareUrl}`;
         try {
-            if (
-                navigator.share &&
-                navigator.canShare &&
-                navigator.canShare(shareData)
-            ) {
-                await navigator.share(shareData);
+            if (navigator.share && navigator.canShare?.({ url: shareUrl })) {
+                await navigator.share({
+                    title: `${job.title || "Job Opportunity"} at ${job.company?.name || "Company"}`,
+                    text: shareText,
+                    url: shareUrl,
+                });
             } else {
-                await navigator.clipboard.writeText(shareUrl);
+                await navigator.clipboard.writeText(clipboardText);
                 toast.success("Job link copied to clipboard!");
             }
         } catch (error: any) {
             if (error.name !== "AbortError") {
                 try {
-                    await navigator.clipboard.writeText(shareUrl);
+                    await navigator.clipboard.writeText(clipboardText);
                     toast.success("Job link copied to clipboard!");
                 } catch {
                     toast.error("Failed to share job link");

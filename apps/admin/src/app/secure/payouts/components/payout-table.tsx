@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { AdminDataTable, AdminPageHeader, type Column } from '@/components/shared';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
+import { AdminDataTable, AdminPageHeader, AdminStatsBanner, type Column } from '@/components/shared';
 import { useStandardList } from '@/hooks/use-standard-list';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import { PayoutDetailModal } from './payout-detail-modal';
 
 export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed' | 'reversed' | 'on_hold';
@@ -13,6 +15,7 @@ export type PayoutTransaction = {
     recruiter_id: string;
     recruiter_name?: string;
     recruiter_email?: string;
+    recruiter?: { id: string; user: { name: string; email: string } | null } | null;
     amount: number;
     status: PayoutStatus;
     type?: string;
@@ -58,12 +61,16 @@ const COLUMNS: Column<PayoutTransaction>[] = [
         key: 'recruiter_name',
         label: 'Recruiter',
         sortable: true,
-        render: (p) => (
-            <div>
-                <p className="text-sm font-medium">{p.recruiter_name ?? '—'}</p>
-                {p.recruiter_email && <p className="text-sm text-base-content/50">{p.recruiter_email}</p>}
-            </div>
-        ),
+        render: (p) => {
+            const name = p.recruiter?.user?.name ?? p.recruiter_name;
+            const email = p.recruiter?.user?.email ?? p.recruiter_email;
+            return (
+                <div>
+                    <p className="text-sm font-medium">{name ?? '—'}</p>
+                    {email && <p className="text-sm text-base-content/50">{email}</p>}
+                </div>
+            );
+        },
     },
     {
         key: 'amount',
@@ -100,7 +107,10 @@ const COLUMNS: Column<PayoutTransaction>[] = [
 type Filters = { status?: PayoutStatus; search: string };
 
 export function PayoutTable() {
+    const { getToken } = useAuth();
     const [selectedPayout, setSelectedPayout] = useState<PayoutTransaction | null>(null);
+    const [counts, setCounts] = useState<Record<string, number>>({});
+    const [countsLoading, setCountsLoading] = useState(true);
 
     const { data: items, loading, filters, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
         useStandardList<PayoutTransaction, Filters>({
@@ -109,9 +119,34 @@ export function PayoutTable() {
             defaultLimit: 25,
         });
 
+    useEffect(() => {
+        async function loadCounts() {
+            try {
+                const token = await getToken();
+                if (!token) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Record<string, number> }>('/billing/admin/counts');
+                setCounts(res.data);
+            } catch { /* non-critical */ } finally {
+                setCountsLoading(false);
+            }
+        }
+        loadCounts();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const stats = [
+        { label: 'Pending Payouts', value: counts.payouts_pending ?? 0, icon: 'fa-duotone fa-regular fa-clock', color: 'warning' as const },
+        { label: 'Active Escrow', value: counts.escrow_active ?? 0, icon: 'fa-duotone fa-regular fa-vault', color: 'info' as const },
+        { label: 'Billing Profiles', value: counts.billing_profiles ?? 0, icon: 'fa-duotone fa-regular fa-credit-card', color: 'secondary' as const },
+    ];
+
     return (
         <div>
             <AdminPageHeader title="Payouts" subtitle="Manage payout transactions" />
+
+            <div className="mb-6">
+                <AdminStatsBanner stats={stats} loading={countsLoading} />
+            </div>
 
             <div className="flex items-center gap-3 mb-4 flex-wrap">
                 <label className="input input-sm flex items-center gap-2 flex-1 max-w-sm">

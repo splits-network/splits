@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { AdminHeader } from '@/components/header/admin-header';
 import { AdminSidebar } from '@/components/sidebar/admin-sidebar';
+import { AdminConfirmProvider } from '@/components/shared/admin-confirm-provider';
 
 export function SecureShell({ children }: { children: React.ReactNode }) {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,7 +35,9 @@ export function SecureShell({ children }: { children: React.ReactNode }) {
 
                 {/* Main content */}
                 <main className="flex-1 overflow-y-auto p-6 min-w-0">
-                    {children}
+                    <AdminConfirmProvider>
+                        {children}
+                    </AdminConfirmProvider>
                 </main>
             </div>
         </div>

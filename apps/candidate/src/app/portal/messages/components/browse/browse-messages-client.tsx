@@ -40,7 +40,7 @@ export default function BrowseMessagesClient({
     }, [pathname, router, searchParams]);
 
     return (
-        <div className="h-[calc(100vh-8rem)] flex flex-col md:flex-row bg-base-200 rounded-xl overflow-hidden shadow-sm border border-base-300">
+        <div className="h-[calc(100vh-8rem)] flex flex-col md:flex-row bg-base-200 overflow-hidden border border-base-300">
             <ListPanel selectedId={selectedId} onSelect={handleSelect} />
 
             <div

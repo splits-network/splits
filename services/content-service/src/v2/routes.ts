@@ -49,5 +49,10 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerImageRoutes(app, { imageService });
 
     // Admin routes (permissive — admin-gateway enforces isPlatformAdmin)
-    registerAdminContentRoutes(app, { supabase });
+    registerAdminContentRoutes(app, {
+        supabase,
+        pageService,
+        navigationRepository,
+        imageService,
+    });
 }

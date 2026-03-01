@@ -47,6 +47,33 @@ export function registerAdminAtsRoutes(
         }
     });
 
+    // PATCH /admin/jobs/:id/status
+    app.patch('/admin/jobs/:id/status', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { id } = request.params as { id: string };
+            const { status } = request.body as { status: string };
+
+            if (!status) {
+                return reply.code(400).send({ error: { message: 'status is required' } });
+            }
+
+            const job = await adminService.updateJobStatusAdmin(id, status);
+            reply.send({ data: job });
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to update job status' } });
+        }
+    });
+
+    // GET /admin/job-counts-by-status
+    app.get('/admin/job-counts-by-status', async (_request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const counts = await adminService.getJobCountsByStatus();
+            reply.send({ data: counts });
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to fetch job counts' } });
+        }
+    });
+
     // GET /admin/applications
     app.get('/admin/applications', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
@@ -58,6 +85,7 @@ export function registerAdminAtsRoutes(
                 sort_by: params.sort_by,
                 sort_order: params.sort_order,
                 status: params.status,
+                stage: params.stage,
             });
             reply.send(result);
         } catch (error) {

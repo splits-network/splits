@@ -1,130 +1,380 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-import { AdminPageHeader, AdminLoadingState, AdminErrorState } from '@/components/shared';
+import { useEffect, useState, useCallback, use } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useAdminToast } from "@/hooks/use-admin-toast";
+import { useAdminConfirm } from "@/components/shared/admin-confirm-provider";
+import { AdminPageHeader } from "@/components/shared";
+import { ButtonLoading } from "@splits-network/shared-ui";
+import { StandardListLoadingState } from "@splits-network/shared-hooks";
+import type {
+    ContentPage,
+    ContentBlock,
+    ContentBlockType,
+} from "@splits-network/shared-types";
+import { BlockPanel } from "../components/block-panel";
+import { LivePreviewPane } from "../components/live-preview-pane";
+import {
+    PageSettingsModal,
+    type PageMetaForm,
+} from "../components/page-settings-modal";
+import { BlockPickerModal } from "../components/block-picker-modal";
+import { BlockFormModal } from "../components/block-form-modal";
 
-type ContentPage = {
-    id: string;
-    title: string;
-    slug: string;
-    status: 'published' | 'draft' | 'archived';
-    author?: string;
-    content?: string;
-    meta_description?: string;
-    updated_at: string;
-    created_at: string;
-};
+interface PageEditorProps {
+    params: Promise<{ id: string }>;
+}
 
-const STATUS_BADGE: Record<string, string> = {
-    published: 'badge-success',
-    draft: 'badge-warning',
-    archived: 'badge-ghost',
-};
-
-export default function ContentPageDetailPage() {
-    const { id } = useParams<{ id: string }>();
-    const router = useRouter();
+export default function PageEditorPage({ params }: PageEditorProps) {
+    const { id } = use(params);
     const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useAdminToast();
+    const confirm = useAdminConfirm();
+
+    // Page state
     const [page, setPage] = useState<ContentPage | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [publishing, setPublishing] = useState(false);
+
+    // Draft state
+    const [draftBlocks, setDraftBlocks] = useState<ContentBlock[]>([]);
+    const [blockIds, setBlockIds] = useState<string[]>([]);
+    const [pageMeta, setPageMeta] = useState<PageMetaForm>({
+        title: "",
+        slug: "",
+        description: "",
+        og_image: "",
+        category: "",
+        author: "",
+        read_time: "",
+        app: "portal",
+    });
+    const [isDirty, setIsDirty] = useState(false);
+
+    // Modal state
+    const [showSettings, setShowSettings] = useState(false);
+    const [showBlockPicker, setShowBlockPicker] = useState(false);
+    const [editingBlock, setEditingBlock] = useState<{
+        index: number;
+        block: ContentBlock;
+        blockType: ContentBlockType;
+    } | null>(null);
+    const [creatingBlockType, setCreatingBlockType] =
+        useState<ContentBlockType | null>(null);
+
+    // Load page
+    const loadPage = useCallback(async () => {
+        setLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const apiClient = createAuthenticatedClient(token);
+            const result = await apiClient.get(`/content/admin/pages/${id}`);
+            const p = result.data as ContentPage;
+            setPage(p);
+            setDraftBlocks(p.blocks || []);
+            setBlockIds((p.blocks || []).map(() => crypto.randomUUID()));
+            setPageMeta({
+                title: p.title || "",
+                slug: p.slug || "",
+                description: p.description || "",
+                og_image: p.og_image || "",
+                category: p.category || "",
+                author: p.author || "",
+                read_time: p.read_time || "",
+                app: p.app,
+            });
+            setIsDirty(false);
+        } catch (err) {
+            console.error("Failed to load page:", err);
+            toast.error("Failed to load page");
+        } finally {
+            setLoading(false);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
 
     useEffect(() => {
-        async function load() {
-            try {
-                const token = await getToken();
-                const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3030';
-                const res = await fetch(`${gatewayUrl}/api/v2/content/admin/pages/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error(`Failed to load page: ${res.status}`);
-                const json = await res.json();
-                setPage(json.data ?? json);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load page');
-            } finally {
-                setLoading(false);
-            }
-        }
-        load();
-    }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+        loadPage();
+    }, [loadPage]);
 
-    if (loading) return <AdminLoadingState />;
-    if (error) return <AdminErrorState message={error} />;
-    if (!page) return null;
+    // Block operations
+    const handleBlocksChange = useCallback(
+        (blocks: ContentBlock[], ids: string[]) => {
+            setDraftBlocks(blocks);
+            setBlockIds(ids);
+            setIsDirty(true);
+        },
+        [],
+    );
+
+    const handleAddBlock = useCallback((type: ContentBlockType) => {
+        setShowBlockPicker(false);
+        setCreatingBlockType(type);
+    }, []);
+
+    const handleBlockCreated = useCallback((block: ContentBlock) => {
+        setDraftBlocks((prev) => [...prev, block]);
+        setBlockIds((prev) => [...prev, crypto.randomUUID()]);
+        setCreatingBlockType(null);
+        setIsDirty(true);
+    }, []);
+
+    const handleBlockEdited = useCallback(
+        (block: ContentBlock) => {
+            if (!editingBlock) return;
+            setDraftBlocks((prev) => {
+                const updated = [...prev];
+                updated[editingBlock.index] = block;
+                return updated;
+            });
+            setEditingBlock(null);
+            setIsDirty(true);
+        },
+        [editingBlock],
+    );
+
+    const handleDeleteBlock = useCallback(
+        async (index: number) => {
+            const confirmed = await confirm({
+                title: "Remove Block",
+                message: "Are you sure you want to remove this block?",
+                confirmText: "Remove",
+                type: "warning",
+            });
+            if (!confirmed) return;
+
+            setDraftBlocks((prev) => prev.filter((_, i) => i !== index));
+            setBlockIds((prev) => prev.filter((_, i) => i !== index));
+            setIsDirty(true);
+        },
+        [confirm],
+    );
+
+    const handleEditBlock = useCallback(
+        (index: number) => {
+            const block = draftBlocks[index];
+            if (block) {
+                setEditingBlock({
+                    index,
+                    block,
+                    blockType: block.type as ContentBlockType,
+                });
+            }
+        },
+        [draftBlocks],
+    );
+
+    // Meta change
+    const handleMetaChange = useCallback((meta: PageMetaForm) => {
+        setPageMeta(meta);
+        setIsDirty(true);
+    }, []);
+
+    // Save
+    async function handleSave() {
+        setSaving(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const apiClient = createAuthenticatedClient(token);
+
+            await apiClient.patch(`/content/admin/pages/${id}`, {
+                title: pageMeta.title,
+                slug: pageMeta.slug,
+                description: pageMeta.description || undefined,
+                og_image: pageMeta.og_image || undefined,
+                category: pageMeta.category || undefined,
+                author: pageMeta.author || undefined,
+                read_time: pageMeta.read_time || undefined,
+                blocks: draftBlocks,
+            });
+
+            toast.success("Draft saved");
+            setIsDirty(false);
+            setPage((prev) =>
+                prev ? { ...prev, blocks: draftBlocks, ...pageMeta } : prev,
+            );
+        } catch (err) {
+            console.error("Failed to save:", err);
+            toast.error("Failed to save");
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    // Publish / Unpublish
+    async function handlePublishToggle() {
+        if (!page) return;
+        const isPublishing = page.status !== "published";
+
+        if (isPublishing && draftBlocks.length === 0) {
+            toast.error("Add at least one block before publishing");
+            return;
+        }
+
+        setPublishing(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const apiClient = createAuthenticatedClient(token);
+
+            await apiClient.patch(`/content/admin/pages/${id}`, {
+                status: isPublishing ? "published" : "draft",
+                ...(isPublishing
+                    ? { published_at: new Date().toISOString() }
+                    : {}),
+                blocks: draftBlocks,
+                title: pageMeta.title,
+                slug: pageMeta.slug,
+                description: pageMeta.description || undefined,
+                og_image: pageMeta.og_image || undefined,
+                category: pageMeta.category || undefined,
+                author: pageMeta.author || undefined,
+                read_time: pageMeta.read_time || undefined,
+            });
+
+            toast.success(isPublishing ? "Page published" : "Page unpublished");
+            setIsDirty(false);
+            await loadPage();
+        } catch (err) {
+            console.error("Failed to update status:", err);
+            toast.error("Failed to update status");
+        } finally {
+            setPublishing(false);
+        }
+    }
+
+    if (loading) {
+        return <StandardListLoadingState message="Loading page editor..." />;
+    }
+
+    if (!page) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-base-content/60">Page not found</p>
+                <button
+                    className="btn btn-ghost btn-sm mt-4"
+                    onClick={() => router.push("/secure/content/pages")}
+                >
+                    Back to Pages
+                </button>
+            </div>
+        );
+    }
 
     return (
-        <div>
-            <AdminPageHeader
-                title={page.title}
-                subtitle={`/${page.slug}`}
-                actions={
-                    <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => router.push('/secure/content/pages')}
-                    >
-                        <i className="fa-duotone fa-regular fa-arrow-left" />
-                        Back
-                    </button>
-                }
+        <div className="flex flex-col h-[calc(100vh-4rem)]">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-base-300 bg-base-100 flex-shrink-0">
+                <AdminPageHeader
+                    title={pageMeta.title || "Untitled Page"}
+                    subtitle={page.app}
+                    actions={
+                        <div className="flex items-center gap-2">
+                            <span
+                                className={`badge badge-sm ${page.status === "published" ? "badge-success" : page.status === "draft" ? "badge-warning" : "badge-ghost"}`}
+                            >
+                                {page.status}
+                            </span>
+                            {isDirty && (
+                                <span className="text-xs text-warning font-medium flex items-center gap-1">
+                                    <i className="fa-duotone fa-regular fa-circle-dot text-[8px]"></i>
+                                    Unsaved changes
+                                </span>
+                            )}
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => setShowSettings(true)}
+                            >
+                                <i className="fa-duotone fa-regular fa-gear mr-1"></i>
+                                Settings
+                            </button>
+                            <button
+                                className="btn btn-outline btn-sm"
+                                onClick={handleSave}
+                                disabled={saving || !isDirty}
+                            >
+                                <ButtonLoading
+                                    loading={saving}
+                                    text="Save Draft"
+                                    loadingText="Saving..."
+                                />
+                            </button>
+                            <button
+                                className={`btn btn-sm ${page.status === "published" ? "btn-warning" : "btn-primary"}`}
+                                onClick={handlePublishToggle}
+                                disabled={publishing}
+                            >
+                                <ButtonLoading
+                                    loading={publishing}
+                                    text={
+                                        page.status === "published"
+                                            ? "Unpublish"
+                                            : "Publish"
+                                    }
+                                    loadingText={
+                                        page.status === "published"
+                                            ? "Unpublishing..."
+                                            : "Publishing..."
+                                    }
+                                />
+                            </button>
+                        </div>
+                    }
+                />
+            </div>
+
+            {/* Editor split layout */}
+            <div className="flex flex-1 overflow-hidden">
+                <BlockPanel
+                    blocks={draftBlocks}
+                    blockIds={blockIds}
+                    onBlocksChange={handleBlocksChange}
+                    onAddBlock={() => setShowBlockPicker(true)}
+                    onEditBlock={handleEditBlock}
+                    onDeleteBlock={handleDeleteBlock}
+                />
+                <LivePreviewPane blocks={draftBlocks} />
+            </div>
+
+            {/* Modals */}
+            <PageSettingsModal
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+                meta={pageMeta}
+                onChange={handleMetaChange}
             />
 
-            <div className="flex items-center gap-2 mb-6">
-                <span className={`badge badge-sm capitalize ${STATUS_BADGE[page.status] ?? 'badge-ghost'}`}>
-                    {page.status}
-                </span>
-                {page.author && (
-                    <span className="text-sm text-base-content/60">by {page.author}</span>
-                )}
-                <span className="text-sm text-base-content/40">
-                    Updated {new Date(page.updated_at).toLocaleDateString()}
-                </span>
-            </div>
+            <BlockPickerModal
+                isOpen={showBlockPicker}
+                onClose={() => setShowBlockPicker(false)}
+                onSelect={handleAddBlock}
+            />
 
-            <div className="grid gap-4 lg:grid-cols-3">
-                <div className="lg:col-span-2">
-                    <div className="card bg-base-100 border border-base-200">
-                        <div className="card-body">
-                            <h2 className="card-title text-base">Content</h2>
-                            {page.content ? (
-                                <div
-                                    className="prose prose-sm max-w-none"
-                                    dangerouslySetInnerHTML={{ __html: page.content }}
-                                />
-                            ) : (
-                                <p className="text-sm text-base-content/50">No content available.</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
+            {creatingBlockType && (
+                <BlockFormModal
+                    isOpen={true}
+                    onClose={() => setCreatingBlockType(null)}
+                    blockType={creatingBlockType}
+                    block={null}
+                    onSave={handleBlockCreated}
+                />
+            )}
 
-                <div className="space-y-4">
-                    <div className="card bg-base-100 border border-base-200">
-                        <div className="card-body">
-                            <h2 className="card-title text-base">Metadata</h2>
-                            <div className="space-y-2 text-sm">
-                                <div>
-                                    <p className="font-medium text-base-content/60">Slug</p>
-                                    <p className="font-mono">{page.slug}</p>
-                                </div>
-                                {page.meta_description && (
-                                    <div>
-                                        <p className="font-medium text-base-content/60">Meta Description</p>
-                                        <p className="text-base-content/80">{page.meta_description}</p>
-                                    </div>
-                                )}
-                                <div>
-                                    <p className="font-medium text-base-content/60">Created</p>
-                                    <p>{new Date(page.created_at).toLocaleString()}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {editingBlock && (
+                <BlockFormModal
+                    isOpen={true}
+                    onClose={() => setEditingBlock(null)}
+                    blockType={editingBlock.blockType}
+                    block={editingBlock.block}
+                    onSave={handleBlockEdited}
+                />
+            )}
         </div>
     );
 }

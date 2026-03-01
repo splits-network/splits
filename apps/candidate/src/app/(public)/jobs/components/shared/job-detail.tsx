@@ -180,21 +180,22 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
     const handleShare = async () => {
         setIsSharing(true);
         const shareUrl = `${window.location.origin}/jobs/${job.id}`;
-        const shareData = {
-            title: `${job.title} at ${name}`,
-            text: `Check out this role: ${job.title} at ${name}`,
-            url: shareUrl,
-        };
+        const shareText = `Check out this job: ${job.title} at ${name}`;
+        const clipboardText = `${shareText}\n${shareUrl}`;
         try {
-            if (navigator.share && navigator.canShare?.(shareData)) {
-                await navigator.share(shareData);
+            if (navigator.share && navigator.canShare?.({ url: shareUrl })) {
+                await navigator.share({
+                    title: `${job.title} at ${name}`,
+                    text: shareText,
+                    url: shareUrl,
+                });
             } else {
-                await navigator.clipboard.writeText(shareUrl);
+                await navigator.clipboard.writeText(clipboardText);
                 toastSuccess("Job link copied to clipboard!");
             }
         } catch (error: any) {
             if (error.name !== "AbortError") {
-                await navigator.clipboard.writeText(shareUrl);
+                await navigator.clipboard.writeText(clipboardText);
                 toastSuccess("Job link copied to clipboard!");
             }
         } finally {

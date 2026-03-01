@@ -58,12 +58,27 @@ export async function generateMetadata({
         "View job responsibilities, requirements, and application details.";
     const description = truncateText(stripHtml(rawDescription));
 
+    const title = job.title
+        ? `${job.title} at ${job.company?.name ?? "Applicant Network"}`
+        : "Job Details";
+    const url = `${CANDIDATE_BASE_URL}/jobs/${id}`;
+
     return {
-        title: job.title
-            ? `${job.title} at ${job.company?.name ?? "Applicant Network"}`
-            : "Job Details",
+        title,
         description,
         ...buildCanonical(canonicalPath),
+        openGraph: {
+            title,
+            description,
+            url,
+            siteName: "Applicant Network",
+            type: "website",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+        },
     };
 }
 

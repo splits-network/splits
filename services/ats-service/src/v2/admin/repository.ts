@@ -102,8 +102,8 @@ export class AdminAtsRepository {
             query = query.eq('status', params.status);
         }
 
-        if (params.search) {
-            query = query.or(`stage.ilike.%${params.search}%`);
+        if (params.stage) {
+            query = query.eq('stage', params.stage);
         }
 
         query = query.order(sortBy, { ascending }).range(offset, offset + limit - 1);
@@ -183,6 +183,33 @@ export class AdminAtsRepository {
         if (error) throw error;
 
         return { data: data || [], pagination: buildPagination(count || 0, page, limit) };
+    }
+
+    async updateJobStatusAdmin(id: string, status: string): Promise<any> {
+        const { data, error } = await this.supabase
+            .from('jobs')
+            .update({ status, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async getJobCountsByStatus(): Promise<Record<string, number>> {
+        const statuses = ['active', 'draft', 'paused', 'closed', 'filled'];
+        const results = await Promise.all(
+            statuses.map((s) =>
+                this.supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', s),
+            ),
+        );
+
+        const counts: Record<string, number> = {};
+        statuses.forEach((s, i) => {
+            counts[s] = results[i].count || 0;
+        });
+        return counts;
     }
 
     async getAdminCounts(): Promise<{

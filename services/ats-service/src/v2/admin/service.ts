@@ -29,6 +29,14 @@ export class AdminAtsService {
         return this.repository.listPlacementsAdmin(params);
     }
 
+    updateJobStatusAdmin(id: string, status: string): Promise<any> {
+        return this.repository.updateJobStatusAdmin(id, status);
+    }
+
+    getJobCountsByStatus(): Promise<Record<string, number>> {
+        return this.repository.getJobCountsByStatus();
+    }
+
     getAdminCounts(): Promise<{
         jobs: number;
         applications: number;

@@ -1,11 +1,21 @@
 'use client';
 
-import { AdminDataTable, AdminPageHeader, type Column } from '@/components/shared';
-import { useStandardList } from '@/hooks/use-standard-list';
+import { AdminDataTable, type Column } from '@/components/shared';
 
 type AdminCompany = {
     id: string;
-    name: string;
+    company: {
+        id: string;
+        name: string;
+        logo_url: string | null;
+    } | null;
+    recruiter: {
+        id: string;
+        user: {
+            name: string | null;
+            email: string | null;
+        } | null;
+    } | null;
     industry: string | null;
     location: string | null;
     city: string | null;
@@ -18,25 +28,43 @@ type AdminCompany = {
 
 const COLUMNS: Column<AdminCompany>[] = [
     {
-        key: 'name',
-        label: 'Name',
+        key: 'company',
+        label: 'Company',
         sortable: true,
-        render: (company) => (
-            <span className="font-medium text-sm">{company.name}</span>
+        render: (row) => (
+            <div className="flex items-center gap-2">
+                {row.company?.logo_url && (
+                    <img
+                        src={row.company.logo_url}
+                        alt=""
+                        className="w-6 h-6 rounded object-cover"
+                    />
+                )}
+                <span className="font-medium text-sm">{row.company?.name ?? '—'}</span>
+            </div>
+        ),
+    },
+    {
+        key: 'recruiter',
+        label: 'Recruiter',
+        render: (row) => (
+            <span className="text-sm text-base-content/70">
+                {row.recruiter?.user?.name ?? row.recruiter?.user?.email ?? '—'}
+            </span>
         ),
     },
     {
         key: 'industry',
         label: 'Industry',
-        render: (company) => (
-            <span className="text-sm text-base-content/70">{company.industry ?? '—'}</span>
+        render: (row) => (
+            <span className="text-sm text-base-content/70">{row.industry ?? '—'}</span>
         ),
     },
     {
         key: 'location',
         label: 'Location',
-        render: (company) => {
-            const loc = [company.city, company.state].filter(Boolean).join(', ') || company.location;
+        render: (row) => {
+            const loc = [row.city, row.state].filter(Boolean).join(', ') || row.location;
             return <span className="text-sm text-base-content/70">{loc ?? '—'}</span>;
         },
     },
@@ -44,79 +72,45 @@ const COLUMNS: Column<AdminCompany>[] = [
         key: 'job_count',
         label: 'Jobs',
         sortable: true,
-        render: (company) => <span className="text-sm">{company.job_count ?? 0}</span>,
+        render: (row) => <span className="text-sm">{row.job_count ?? 0}</span>,
     },
     {
         key: 'placement_count',
         label: 'Placements',
         sortable: true,
-        render: (company) => <span className="text-sm">{company.placement_count ?? 0}</span>,
+        render: (row) => <span className="text-sm">{row.placement_count ?? 0}</span>,
     },
     {
         key: 'created_at',
         label: 'Created',
         sortable: true,
-        render: (company) => (
+        render: (row) => (
             <span className="text-sm text-base-content/60">
-                {new Date(company.created_at).toLocaleDateString()}
+                {new Date(row.created_at).toLocaleDateString()}
             </span>
         ),
     },
 ];
 
-export function CompanyTable() {
-    const { data, loading, filters, total, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
-        useStandardList<AdminCompany>({
-            endpoint: '/network/admin/recruiter-companies',
-            defaultFilters: { search: '' },
-            defaultLimit: 25,
-        });
+type CompanyTableProps = {
+    data: AdminCompany[];
+    loading: boolean;
+    sortField: string;
+    sortDir: 'asc' | 'desc';
+    onSort: (field: string) => void;
+};
 
+export function CompanyTable({ data, loading, sortField, sortDir, onSort }: CompanyTableProps) {
     return (
-        <div>
-            <AdminPageHeader title="Companies" subtitle={`${total} total companies`} />
-
-            <div className="flex items-center gap-3 mb-4">
-                <label className="input input-sm flex items-center gap-2 flex-1 max-w-sm">
-                    <i className="fa-duotone fa-regular fa-magnifying-glass text-base-content/40" />
-                    <input
-                        type="text"
-                        placeholder="Search companies..."
-                        className="grow"
-                        value={filters.search ?? ''}
-                        onChange={(e) => setFilter('search', e.target.value)}
-                    />
-                </label>
-            </div>
-
-            <div className="card bg-base-100 border border-base-200">
-                <AdminDataTable
-                    columns={COLUMNS}
-                    data={data}
-                    loading={loading}
-                    sortField={sortBy}
-                    sortDir={sortOrder}
-                    onSort={handleSort}
-                    emptyTitle="No companies found"
-                    emptyDescription="No companies match your search."
-                />
-            </div>
-
-            {totalPages > 1 && (
-                <div className="flex justify-center mt-4">
-                    <div className="join">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`}
-                                onClick={() => goToPage(p)}
-                            >
-                                {p}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
+        <AdminDataTable
+            columns={COLUMNS}
+            data={data}
+            loading={loading}
+            sortField={sortField}
+            sortDir={sortDir}
+            onSort={onSort}
+            emptyTitle="No companies found"
+            emptyDescription="No companies match your search."
+        />
     );
 }

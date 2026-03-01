@@ -5,9 +5,10 @@ import { RecruiterActions } from './recruiter-actions';
 
 type Recruiter = {
     id: string;
-    clerk_user_id: string;
+    user_id: string;
+    user?: { name: string; email: string } | null;
     status: 'pending' | 'active' | 'suspended';
-    headline?: string;
+    tagline?: string;
     bio?: string;
     created_at: string;
 };
@@ -45,13 +46,17 @@ export function RecruiterTable({
 }: RecruiterTableProps) {
     const columns: Column<Recruiter>[] = [
         {
-            key: 'clerk_user_id',
-            label: 'Recruiter ID',
-            sortable: true,
+            key: 'user',
+            label: 'Recruiter',
             render: (item) => (
-                <span className="font-mono text-sm text-base-content/70">
-                    {item.clerk_user_id.slice(0, 12)}...
-                </span>
+                <div>
+                    <div className="font-medium text-sm">
+                        {item.user?.name || <span className="text-base-content/40 italic">No name</span>}
+                    </div>
+                    <div className="text-sm text-base-content/50">
+                        {item.user?.email || '—'}
+                    </div>
+                </div>
             ),
         },
         {
@@ -65,28 +70,15 @@ export function RecruiterTable({
             ),
         },
         {
-            key: 'headline',
-            label: 'Headline',
+            key: 'tagline',
+            label: 'Tagline',
             render: (item) => (
                 <span className="text-sm">
-                    {item.headline
-                        ? item.headline.length > 60
-                            ? `${item.headline.slice(0, 60)}...`
-                            : item.headline
-                        : <span className="text-base-content/40 italic">No headline</span>}
-                </span>
-            ),
-        },
-        {
-            key: 'bio',
-            label: 'Bio',
-            render: (item) => (
-                <span className="text-sm text-base-content/70">
-                    {item.bio
-                        ? item.bio.length > 80
-                            ? `${item.bio.slice(0, 80)}...`
-                            : item.bio
-                        : <span className="italic">—</span>}
+                    {item.tagline
+                        ? item.tagline.length > 60
+                            ? `${item.tagline.slice(0, 60)}...`
+                            : item.tagline
+                        : <span className="text-base-content/40 italic">No tagline</span>}
                 </span>
             ),
         },

@@ -66,17 +66,14 @@ export const AreaChart = memo(function AreaChart({
               .map((s, i) => ({
                   name: s.name,
                   type: "line",
-                  data: s.data.filter((v) => v !== undefined && v !== null),
+                  data: s.data.map((v) => v ?? 0),
                   smooth,
                   areaStyle: buildAreaStyle(i),
               }))
         : [
               {
                   type: "line",
-                  data:
-                      data
-                          ?.map((d) => d.y)
-                          .filter((v) => v !== undefined && v !== null) ?? [],
+                  data: data?.map((d) => d.y ?? 0) ?? [],
                   smooth,
                   areaStyle: buildAreaStyle(0),
               },

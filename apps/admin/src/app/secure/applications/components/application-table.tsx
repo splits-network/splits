@@ -28,10 +28,17 @@ type ApplicationTableProps = {
 };
 
 const STAGE_BADGE: Record<string, string> = {
+    ai_review: 'badge-info',
+    ai_reviewed: 'badge-info',
+    recruiter_request: 'badge-warning',
+    recruiter_proposed: 'badge-warning',
+    recruiter_review: 'badge-warning',
     submitted: 'badge-info',
     screening: 'badge-warning',
+    company_review: 'badge-accent',
     interview: 'badge-warning',
     offer: 'badge-primary',
+    hired: 'badge-success',
     placed: 'badge-success',
     rejected: 'badge-error',
     withdrawn: 'badge-ghost',
