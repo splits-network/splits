@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { BaselStatusPill } from "@splits-network/basel-ui";
+import { BaselStatusPill, BaselConfirmModal } from "@splits-network/basel-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { createAuthenticatedClient } from "@/lib/api-client";
 /* ─── Types ────────────────────────────────────────────────────────────── */
@@ -576,6 +576,7 @@ function IntegrationDetail({
     const [stats, setStats] = useState<SyncStats | null>(null);
     const [syncLogs, setSyncLogs] = useState<SyncLogEntry[]>([]);
     const [showLogs, setShowLogs] = useState(false);
+    const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
     /* ── Load stats ── */
     useEffect(() => {
@@ -663,13 +664,12 @@ function IntegrationDetail({
     };
 
     /* ── Disconnect ── */
-    const handleDisconnect = async () => {
-        if (
-            !window.confirm(
-                `Disconnect ${meta.name}? Sync data will be preserved but syncing will stop.`,
-            )
-        )
-            return;
+    const handleDisconnect = () => {
+        setShowDisconnectConfirm(true);
+    };
+
+    const confirmDisconnect = async () => {
+        setShowDisconnectConfirm(false);
         setDisconnecting(true);
         try {
             const token = await getToken();
@@ -717,6 +717,7 @@ function IntegrationDetail({
     ] as const;
 
     return (
+        <>
         <div className="space-y-6">
             {/* Back button */}
             <button
@@ -999,5 +1000,16 @@ function IntegrationDetail({
                 </button>
             </div>
         </div>
+        <BaselConfirmModal
+            isOpen={showDisconnectConfirm}
+            onClose={() => setShowDisconnectConfirm(false)}
+            onConfirm={confirmDisconnect}
+            title={`Disconnect ${meta.name}`}
+            icon="fa-triangle-exclamation"
+            confirmColor="btn-error"
+        >
+            <p>Disconnect {meta.name}? Sync data will be preserved but syncing will stop.</p>
+        </BaselConfirmModal>
+        </>
     );
 }

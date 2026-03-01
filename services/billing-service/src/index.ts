@@ -160,7 +160,7 @@ async function main() {
     });
 
     // Create snapshot service with DB-driven rates (must be after V2 routes init)
-    const snapshotService = new PlacementSnapshotService(snapshotRepository, v2Services.splitsRateService);
+    const snapshotService = new PlacementSnapshotService(snapshotRepository, v2Services.splitsRateService, supabase);
 
     // Phase 6: Initialize billing event consumer with payout service
     const systemUserId = getEnvOrThrow('SYSTEM_USER_ID');

@@ -4,6 +4,8 @@ import { requireBillingAdmin } from '../shared/helpers';
 import { PlacementSnapshotRepository } from '../placement-snapshot/repository';
 import { CompanyBillingProfileRepository } from '../company-billing/repository';
 import { CompanyBillingProfileService } from '../company-billing/service';
+import { FirmBillingProfileRepository } from '../firm-billing/repository';
+import { FirmBillingProfileService } from '../firm-billing/service';
 import { PlacementInvoiceRepository } from './repository';
 import { PlacementInvoice } from './types';
 import { buildPaginationResponse } from '../shared/helpers';
@@ -12,9 +14,11 @@ const PROCESSING_FEE_RATE = 0.03;
 
 interface PlacementRecord {
     id: string;
-    company_id: string;
+    company_id: string | null;
     candidate_name?: string | null;
     job_title?: string | null;
+    job_id?: string;
+    source_firm_id?: string | null;
 }
 
 export class PlacementInvoiceService {
@@ -27,7 +31,9 @@ export class PlacementInvoiceService {
         private billingProfileRepository: CompanyBillingProfileRepository,
         private billingProfileService: CompanyBillingProfileService,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        stripeSecretKey?: string
+        stripeSecretKey?: string,
+        private firmBillingRepository?: FirmBillingProfileRepository,
+        private firmBillingService?: FirmBillingProfileService,
     ) {
         this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {
             apiVersion: '2025-11-17.clover',
@@ -66,55 +72,76 @@ export class PlacementInvoiceService {
             throw new Error('Placement snapshot not found');
         }
 
-        const billingProfile = await this.billingProfileRepository.getByCompanyId(placement.company_id);
-        if (!billingProfile) {
-            throw new Error('Company billing profile not found');
+        // Resolve billing profile: company billing for platform jobs, firm billing for off-platform
+        let stripeCustomerId: string;
+        let billingProfileId: string;
+        let billingTerms: string;
+        let invoiceCompanyId: string | null = placement.company_id;
+        let invoiceFirmId: string | null = null;
+
+        if (placement.company_id) {
+            // Platform job: bill the company
+            const billingProfile = await this.billingProfileRepository.getByCompanyId(placement.company_id);
+            if (!billingProfile) {
+                throw new Error('Company billing profile not found');
+            }
+            const ensuredProfile = await this.billingProfileService.ensureStripeCustomer(billingProfile);
+            stripeCustomerId = ensuredProfile.stripe_customer_id as string;
+            billingProfileId = ensuredProfile.id;
+            billingTerms = ensuredProfile.billing_terms;
+        } else if (placement.source_firm_id) {
+            // Off-platform job: bill the firm
+            if (!this.firmBillingRepository || !this.firmBillingService) {
+                throw new Error('Firm billing not configured');
+            }
+            const firmProfile = await this.firmBillingRepository.getByFirmId(placement.source_firm_id);
+            if (!firmProfile) {
+                throw new Error('Firm billing profile not found');
+            }
+            const ensuredProfile = await this.firmBillingService.ensureStripeCustomer(firmProfile);
+            stripeCustomerId = ensuredProfile.stripe_customer_id as string;
+            billingProfileId = ensuredProfile.id;
+            billingTerms = ensuredProfile.billing_terms;
+            invoiceFirmId = placement.source_firm_id;
+        } else {
+            throw new Error('Placement has no billing target (no company_id or source_firm_id)');
         }
 
-        const ensuredProfile = await this.billingProfileService.ensureStripeCustomer(billingProfile);
-
-        const { collection_method, days_until_due } = this.mapBillingTerms(ensuredProfile.billing_terms);
+        const { collection_method, days_until_due } = this.mapBillingTerms(billingTerms);
         const amountCents = Math.round(snapshot.total_placement_fee * 100);
         if (amountCents <= 0) {
             throw new Error('Placement fee must be positive');
         }
 
         const description = this.buildInvoiceDescription(placement, snapshot.total_placement_fee);
+        const invoiceMetadata: Record<string, string> = { placement_id: placement.id };
+        if (invoiceCompanyId) invoiceMetadata.company_id = invoiceCompanyId;
+        if (invoiceFirmId) invoiceMetadata.firm_id = invoiceFirmId;
 
         await this.stripe.invoiceItems.create({
-            customer: ensuredProfile.stripe_customer_id as string,
+            customer: stripeCustomerId,
             currency: 'usd',
             amount: amountCents,
             description,
-            metadata: {
-                placement_id: placement.id,
-                company_id: placement.company_id,
-            },
+            metadata: invoiceMetadata,
         });
 
         const processingFeeCents = Math.round(amountCents * PROCESSING_FEE_RATE);
         await this.stripe.invoiceItems.create({
-            customer: ensuredProfile.stripe_customer_id as string,
+            customer: stripeCustomerId,
             currency: 'usd',
             amount: processingFeeCents,
             description: 'Processing fee (3%)',
-            metadata: {
-                placement_id: placement.id,
-                company_id: placement.company_id,
-                fee_type: 'processing_fee',
-            },
+            metadata: { ...invoiceMetadata, fee_type: 'processing_fee' },
         });
 
         const invoice = await this.stripe.invoices.create({
-            customer: ensuredProfile.stripe_customer_id as string,
+            customer: stripeCustomerId,
             collection_method,
             days_until_due,
             auto_advance: true,
             pending_invoice_items_behavior: 'include',
-            metadata: {
-                placement_id: placement.id,
-                company_id: placement.company_id,
-            },
+            metadata: invoiceMetadata,
         });
 
         const finalized = invoice.status === 'draft'
@@ -128,9 +155,10 @@ export class PlacementInvoiceService {
 
         return this.invoiceRepository.create({
             placement_id: placement.id,
-            company_id: placement.company_id,
-            billing_profile_id: ensuredProfile.id,
-            stripe_customer_id: ensuredProfile.stripe_customer_id,
+            company_id: invoiceCompanyId,
+            firm_id: invoiceFirmId,
+            billing_profile_id: billingProfileId,
+            stripe_customer_id: stripeCustomerId,
             stripe_invoice_id: finalized.id,
             stripe_invoice_number: finalized.number || null,
             invoice_status: (finalized.status as any) || 'open',
@@ -138,11 +166,11 @@ export class PlacementInvoiceService {
             amount_paid: (finalized.amount_paid || 0) / 100,
             currency: finalized.currency || 'usd',
             collection_method,
-            billing_terms: ensuredProfile.billing_terms,
+            billing_terms: billingTerms as any,
             due_date: finalized.due_date ? new Date(finalized.due_date * 1000).toISOString().slice(0, 10) : null,
-            collectible_at: this.computeCollectibleAt(ensuredProfile.billing_terms, finalized),
-            funds_available: false, // Initially false until payout.paid webhook confirms funds are available
-            funds_available_at: null, // Will be set when payout.paid webhook is received
+            collectible_at: this.computeCollectibleAt(billingTerms, finalized),
+            funds_available: false,
+            funds_available_at: null,
             finalized_at: finalized.status_transitions?.finalized_at
                 ? new Date(finalized.status_transitions.finalized_at * 1000).toISOString()
                 : null,
@@ -161,7 +189,7 @@ export class PlacementInvoiceService {
     private async getPlacement(placementId: string): Promise<PlacementRecord> {
         const { data, error } = await this.supabase
             .from('placements')
-            .select('id, company_id, candidate_name, job_title')
+            .select('id, company_id, candidate_name, job_title, job_id')
             .eq('id', placementId)
             .single();
 
@@ -169,7 +197,20 @@ export class PlacementInvoiceService {
             throw new Error(`Failed to load placement: ${error.message}`);
         }
 
-        return data as PlacementRecord;
+        const record = data as PlacementRecord;
+
+        // For off-platform jobs (no company_id), resolve source_firm_id from the job
+        if (!record.company_id && record.job_id) {
+            const { data: job } = await this.supabase
+                .from('jobs')
+                .select('source_firm_id')
+                .eq('id', record.job_id)
+                .single();
+
+            record.source_firm_id = job?.source_firm_id || null;
+        }
+
+        return record;
     }
 
     private mapBillingTerms(terms: string): { collection_method: 'charge_automatically' | 'send_invoice'; days_until_due?: number } {

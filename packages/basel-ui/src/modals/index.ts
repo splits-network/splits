@@ -23,3 +23,7 @@ export {
     type BaselWizardModalProps,
     type BaselWizardStep,
 } from './basel-wizard-modal';
+export {
+    BaselPromptModal,
+    type BaselPromptModalProps,
+} from './basel-prompt-modal';

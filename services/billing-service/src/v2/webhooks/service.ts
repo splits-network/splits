@@ -171,6 +171,9 @@ export class WebhookServiceV2 {
             stripe_subscription_id: subscription.id,
             status: subscription.status,
         });
+
+        // Check if this subscription change affects any owned firms
+        await this.checkFirmOwnerSubscription(subscription.id);
     }
 
     private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
@@ -193,6 +196,68 @@ export class WebhookServiceV2 {
         await this.eventPublisher.publish('subscription.webhook_canceled', {
             stripe_subscription_id: subscription.id,
         });
+
+        // Check if this cancellation affects any owned firms
+        await this.checkFirmOwnerSubscription(subscription.id);
+    }
+
+    // ========================================================================
+    // Firm owner subscription check
+    // ========================================================================
+
+    private async checkFirmOwnerSubscription(stripeSubscriptionId: string): Promise<void> {
+        try {
+            // Find the subscription record with plan tier
+            const { data: sub } = await this.supabase
+                .from('subscriptions')
+                .select('user_id, status, plan:plans(tier)')
+                .eq('stripe_subscription_id', stripeSubscriptionId)
+                .single();
+
+            if (!sub) return;
+
+            // Find firms owned by this user
+            const { data: firms } = await this.supabase
+                .from('firms')
+                .select('id, status')
+                .eq('owner_user_id', sub.user_id);
+
+            if (!firms?.length) return;
+
+            const isPartner = sub.status === 'active' && (sub as any).plan?.tier === 'partner';
+            const now = new Date().toISOString();
+
+            for (const firm of firms) {
+                if (!isPartner && firm.status === 'active') {
+                    // Suspend: owner lost partner tier
+                    await this.supabase
+                        .from('firms')
+                        .update({ status: 'suspended', updated_at: now })
+                        .eq('id', firm.id);
+
+                    this.logger.info({ firmId: firm.id, userId: sub.user_id }, 'Firm suspended: owner lost partner subscription');
+
+                    await this.eventPublisher.publish('firm.suspended', {
+                        firmId: firm.id,
+                        reason: 'owner_subscription_lapsed',
+                    });
+                } else if (isPartner && firm.status === 'suspended') {
+                    // Reactivate: owner regained partner tier
+                    await this.supabase
+                        .from('firms')
+                        .update({ status: 'active', updated_at: now })
+                        .eq('id', firm.id);
+
+                    this.logger.info({ firmId: firm.id, userId: sub.user_id }, 'Firm reactivated: owner regained partner subscription');
+
+                    await this.eventPublisher.publish('firm.reactivated', {
+                        firmId: firm.id,
+                    });
+                }
+            }
+        } catch (err) {
+            this.logger.error({ err, stripeSubscriptionId }, 'Failed to check firm owner subscription status');
+        }
     }
 
     // ========================================================================

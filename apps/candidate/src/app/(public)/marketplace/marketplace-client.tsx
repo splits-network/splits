@@ -11,7 +11,8 @@ import {
 import gsap from "gsap";
 import MarketplaceAnimator from "./marketplace-animator";
 import HeaderSection from "./components/header-section";
-import ControlsBar, { type ViewMode } from "./components/controls-bar";
+import { ControlsBar } from "./components/controls-bar";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import GridView from "./components/grid-view";
 import TableView from "./components/table-view";
 import SplitView from "./components/split-view";

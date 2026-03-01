@@ -290,6 +290,25 @@ function registerFirmRoutes(app: FastifyInstance, services: ServiceRegistry) {
     );
 
     app.get(
+        '/api/v2/firms/my-firm',
+        routeOptions('Get current user firm'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/api/v2/firms/my-firm',
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch user firm');
+            }
+        }
+    );
+
+    app.get(
         '/api/v2/firms/:firmId',
         routeOptions('Get firm by ID'),
         async (request: FastifyRequest, reply: FastifyReply) => {
@@ -305,6 +324,26 @@ function registerFirmRoutes(app: FastifyInstance, services: ServiceRegistry) {
                 return reply.send(firm);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to fetch firm');
+            }
+        }
+    );
+
+    app.patch(
+        '/api/v2/firms/:firmId',
+        routeOptions('Update firm'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { firmId } = request.params as { firmId: string };
+                const correlationId = getCorrelationId(request);
+                const firm = await networkService().patch(
+                    `/api/v2/firms/${firmId}`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(firm);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to update firm');
             }
         }
     );
@@ -364,6 +403,26 @@ function registerFirmRoutes(app: FastifyInstance, services: ServiceRegistry) {
                 return reply.status(204).send();
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to remove member');
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firms/:firmId/transfer-ownership',
+        routeOptions('Transfer firm ownership'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { firmId } = request.params as { firmId: string };
+                const correlationId = getCorrelationId(request);
+                const result = await networkService().post(
+                    `/api/v2/firms/${firmId}/transfer-ownership`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(result);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to transfer ownership');
             }
         }
     );

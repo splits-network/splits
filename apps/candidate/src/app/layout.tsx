@@ -6,10 +6,7 @@ import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
 import { getHeaderNav, getFooterNav } from "@/lib/content";
 import CookieConsent from "@/components/cookie-consent";
-import {
-    ThemeScript,
-    ThemeProvider,
-} from "@splits-network/basel-ui";
+import { ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { CandidateActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { ToastProvider } from "@/lib/toast-context";
@@ -30,7 +27,14 @@ export const metadata: Metadata = {
         template: "%s | Applicant Network",
     },
     description:
-        "Browse thousands of job opportunities and manage your job search on Applicant. Track applications, verify credentials, and connect with recruiters.",
+        "Browse thousands of job opportunities, manage your job search, and connect with recruiters on Applicant Network. Free platform for career advancement.",
+    keywords: [
+        "job search",
+        "career opportunities",
+        "job board",
+        "recruiting",
+        "applications",
+    ],
     openGraph: {
         title: "Applicant Network - Find Your Next Career Opportunity",
         description:
@@ -56,6 +60,13 @@ export const metadata: Metadata = {
         images: [
             `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/og-image.png`,
         ],
+    },
+    robots: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
     },
 };
 
@@ -177,9 +188,7 @@ export default async function RootLayout({
                             <ToastProvider>
                                 <CandidateChatSidebar>
                                     <Header navItems={headerNav?.items} />
-                                    <main className="flex-1">
-                                        {children}
-                                    </main>
+                                    <main className="flex-1">{children}</main>
                                     <Footer footerNav={footerNav} />
                                 </CandidateChatSidebar>
                                 <CookieConsent />

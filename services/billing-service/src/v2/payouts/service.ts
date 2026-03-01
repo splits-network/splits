@@ -8,6 +8,7 @@ import { PlacementSplitRepository } from './placement-split-repository';
 import { PlacementPayoutTransactionRepository, TransactionListFilters } from './placement-payout-transaction-repository';
 import type { PlacementSplit, PlacementPayoutTransaction, PlacementSplitInsert, PlacementPayoutTransactionInsert, PayoutRole } from './types';
 import { RecruiterConnectRepository } from './recruiter-connect-repository';
+import { FirmStripeConnectRepository } from '../firm-connect/repository';
 
 export class PayoutServiceV2 {
     private stripe: Stripe;
@@ -19,7 +20,8 @@ export class PayoutServiceV2 {
         private recruiterConnectRepository: RecruiterConnectRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: IEventPublisher,
-        stripeSecretKey?: string
+        stripeSecretKey?: string,
+        private firmConnectRepository?: FirmStripeConnectRepository
     ) {
         this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {
             apiVersion: '2025-11-17.clover',
@@ -89,25 +91,42 @@ export class PayoutServiceV2 {
         }
 
         // === STEP 1: Create placement_splits (attribution layer) ===
-        const roles: { idKey: keyof PlacementSnapshot; rateKey: keyof PlacementSnapshot; role: PayoutRole }[] = [
-            { idKey: 'candidate_recruiter_id', rateKey: 'candidate_recruiter_rate', role: 'candidate_recruiter' },
-            { idKey: 'company_recruiter_id', rateKey: 'company_recruiter_rate', role: 'company_recruiter' },
-            { idKey: 'job_owner_recruiter_id', rateKey: 'job_owner_rate', role: 'job_owner' },
-            { idKey: 'candidate_sourcer_recruiter_id', rateKey: 'candidate_sourcer_rate', role: 'candidate_sourcer' },
-            { idKey: 'company_sourcer_recruiter_id', rateKey: 'company_sourcer_rate', role: 'company_sourcer' },
+        const roles: {
+            idKey: keyof PlacementSnapshot;
+            rateKey: keyof PlacementSnapshot;
+            firmIdKey: keyof PlacementSnapshot;
+            takeRateKey: keyof PlacementSnapshot;
+            role: PayoutRole;
+        }[] = [
+            { idKey: 'candidate_recruiter_id', rateKey: 'candidate_recruiter_rate', firmIdKey: 'candidate_recruiter_firm_id', takeRateKey: 'candidate_recruiter_admin_take_rate', role: 'candidate_recruiter' },
+            { idKey: 'company_recruiter_id', rateKey: 'company_recruiter_rate', firmIdKey: 'company_recruiter_firm_id', takeRateKey: 'company_recruiter_admin_take_rate', role: 'company_recruiter' },
+            { idKey: 'job_owner_recruiter_id', rateKey: 'job_owner_rate', firmIdKey: 'job_owner_firm_id', takeRateKey: 'job_owner_admin_take_rate', role: 'job_owner' },
+            { idKey: 'candidate_sourcer_recruiter_id', rateKey: 'candidate_sourcer_rate', firmIdKey: 'candidate_sourcer_firm_id', takeRateKey: 'candidate_sourcer_admin_take_rate', role: 'candidate_sourcer' },
+            { idKey: 'company_sourcer_recruiter_id', rateKey: 'company_sourcer_rate', firmIdKey: 'company_sourcer_firm_id', takeRateKey: 'company_sourcer_admin_take_rate', role: 'company_sourcer' },
         ];
 
         const splitsToCreate: PlacementSplitInsert[] = [];
-        for (const { idKey, rateKey, role } of roles) {
+        for (const { idKey, rateKey, firmIdKey, takeRateKey, role } of roles) {
             const recruiterId = snapshot[idKey] as string | null;
             const rate = snapshot[rateKey] as number | null;
             if (recruiterId && rate) {
+                const splitAmount = (snapshot.total_placement_fee * rate) / 100;
+                const firmId = snapshot[firmIdKey] as string | null;
+                const adminTakeRate = snapshot[takeRateKey] as number | null;
+                const effectiveTakeRate = (firmId && adminTakeRate && adminTakeRate > 0) ? adminTakeRate : 0;
+                const firmTakeAmount = (splitAmount * effectiveTakeRate) / 100;
+                const netAmount = splitAmount - firmTakeAmount;
+
                 splitsToCreate.push({
                     placement_id: placementId,
                     recruiter_id: recruiterId,
                     role,
                     split_percentage: rate,
-                    split_amount: (snapshot.total_placement_fee * rate) / 100,
+                    split_amount: splitAmount,
+                    firm_id: firmId || undefined,
+                    firm_admin_take_rate: effectiveTakeRate || undefined,
+                    firm_admin_take_amount: firmTakeAmount || undefined,
+                    net_amount: netAmount,
                 });
             }
         }
@@ -119,13 +138,43 @@ export class PayoutServiceV2 {
         const createdSplits = await this.splitRepository.createBatch(splitsToCreate);
 
         // === STEP 2: Create placement_payout_transactions (execution layer) ===
-        const transactionsToCreate: PlacementPayoutTransactionInsert[] = createdSplits.map(split => ({
-            placement_split_id: split.id,
-            placement_id: split.placement_id,
-            recruiter_id: split.recruiter_id,
-            amount: split.split_amount || 0,
-            status: 'pending',
-        }));
+        const transactionsToCreate: PlacementPayoutTransactionInsert[] = [];
+
+        for (const split of createdSplits) {
+            const hasAdminTake = (split.firm_admin_take_amount || 0) > 0;
+
+            if (hasAdminTake) {
+                // Member payout (net amount after firm take)
+                transactionsToCreate.push({
+                    placement_split_id: split.id,
+                    placement_id: split.placement_id,
+                    recruiter_id: split.recruiter_id,
+                    amount: split.net_amount || 0,
+                    status: 'pending',
+                    transaction_type: 'member_payout',
+                });
+                // Firm admin take (goes to firm's Stripe Connect account)
+                transactionsToCreate.push({
+                    placement_split_id: split.id,
+                    placement_id: split.placement_id,
+                    recruiter_id: split.recruiter_id,
+                    amount: split.firm_admin_take_amount || 0,
+                    status: 'pending',
+                    transaction_type: 'firm_admin_take',
+                    firm_id: split.firm_id || undefined,
+                });
+            } else {
+                // No firm take — single transaction for full amount
+                transactionsToCreate.push({
+                    placement_split_id: split.id,
+                    placement_id: split.placement_id,
+                    recruiter_id: split.recruiter_id,
+                    amount: split.split_amount || 0,
+                    status: 'pending',
+                    transaction_type: 'member_payout',
+                });
+            }
+        }
 
         const createdTransactions = await this.transactionRepository.createBatch(transactionsToCreate);
 
@@ -181,6 +230,20 @@ export class PayoutServiceV2 {
             throw new Error(`Transaction amount must be positive (recruiter ${transaction.recruiter_id}, amount: $${transaction.amount})`);
         }
 
+        // Route to firm or recruiter Connect account based on transaction type
+        if (transaction.transaction_type === 'firm_admin_take' && transaction.firm_id) {
+            return this.processFirmAdminTakeTransaction(transaction);
+        }
+
+        return this.processMemberPayoutTransaction(transaction);
+    }
+
+    /**
+     * Process a member payout transaction (to recruiter's Stripe Connect)
+     */
+    private async processMemberPayoutTransaction(
+        transaction: PlacementPayoutTransaction
+    ): Promise<PlacementPayoutTransaction> {
         const recruiterStatus = await this.recruiterConnectRepository.getStatus(transaction.recruiter_id);
         if (!recruiterStatus?.stripe_connect_account_id) {
             await this.publishEvent('payout_transaction.connect_required', {
@@ -204,13 +267,73 @@ export class PayoutServiceV2 {
             throw new Error(`Recruiter ${transaction.recruiter_id} has not completed Stripe Connect onboarding — payouts cannot be sent until onboarding is finished`);
         }
 
+        return this.executeStripeTransfer(transaction, recruiterStatus.stripe_connect_account_id, {
+            placement_id: transaction.placement_id,
+            recruiter_id: transaction.recruiter_id,
+            placement_split_id: transaction.placement_split_id,
+            transaction_id: transaction.id,
+            transaction_type: 'member_payout',
+        });
+    }
+
+    /**
+     * Process a firm admin take transaction (to firm's Stripe Connect)
+     */
+    private async processFirmAdminTakeTransaction(
+        transaction: PlacementPayoutTransaction
+    ): Promise<PlacementPayoutTransaction> {
+        if (!this.firmConnectRepository) {
+            throw new Error('FirmStripeConnectRepository not configured — cannot process firm admin take transactions');
+        }
+
+        const firmAccount = await this.firmConnectRepository.getByFirmId(transaction.firm_id!);
+        if (!firmAccount?.stripe_connect_account_id) {
+            await this.publishEvent('payout_transaction.connect_required', {
+                firmId: transaction.firm_id,
+                placementId: transaction.placement_id,
+                transactionId: transaction.id,
+                amount: transaction.amount,
+                reason: 'no_firm_connect_account',
+            });
+            throw new Error(`Firm ${transaction.firm_id} does not have a Stripe Connect account — firm must complete Stripe onboarding before admin take payouts can be processed`);
+        }
+
+        if (!firmAccount.stripe_connect_onboarded) {
+            await this.publishEvent('payout_transaction.connect_required', {
+                firmId: transaction.firm_id,
+                placementId: transaction.placement_id,
+                transactionId: transaction.id,
+                amount: transaction.amount,
+                reason: 'firm_not_onboarded',
+            });
+            throw new Error(`Firm ${transaction.firm_id} has not completed Stripe Connect onboarding — admin take payouts cannot be sent until onboarding is finished`);
+        }
+
+        return this.executeStripeTransfer(transaction, firmAccount.stripe_connect_account_id, {
+            placement_id: transaction.placement_id,
+            firm_id: transaction.firm_id!,
+            recruiter_id: transaction.recruiter_id,
+            placement_split_id: transaction.placement_split_id,
+            transaction_id: transaction.id,
+            transaction_type: 'firm_admin_take',
+        });
+    }
+
+    /**
+     * Common Stripe transfer execution
+     */
+    private async executeStripeTransfer(
+        transaction: PlacementPayoutTransaction,
+        connectAccountId: string,
+        metadata: Record<string, string>
+    ): Promise<PlacementPayoutTransaction> {
         const amountCents = Math.round(transaction.amount * 100);
         if (amountCents <= 0) {
             throw new Error('Transaction amount must be at least $0.01');
         }
 
         await this.transactionRepository.updateStatus(transaction.id, 'processing', {
-            stripe_connect_account_id: recruiterStatus.stripe_connect_account_id,
+            stripe_connect_account_id: connectAccountId,
         });
 
         try {
@@ -218,13 +341,8 @@ export class PayoutServiceV2 {
                 {
                     amount: amountCents,
                     currency: 'usd',
-                    destination: recruiterStatus.stripe_connect_account_id,
-                    metadata: {
-                        placement_id: transaction.placement_id,
-                        recruiter_id: transaction.recruiter_id,
-                        placement_split_id: transaction.placement_split_id,
-                        transaction_id: transaction.id,
-                    },
+                    destination: connectAccountId,
+                    metadata,
                 },
                 {
                     idempotencyKey: `placement_payout_transaction_${transaction.id}`,
@@ -233,7 +351,7 @@ export class PayoutServiceV2 {
 
             return await this.transactionRepository.updateStatus(transaction.id, 'paid', {
                 stripe_transfer_id: transfer.id,
-                stripe_connect_account_id: recruiterStatus.stripe_connect_account_id,
+                stripe_connect_account_id: connectAccountId,
                 retry_count: transaction.retry_count || 0,
             });
         } catch (error: any) {

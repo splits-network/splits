@@ -8,7 +8,7 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import type { Application, ApplicationFilters } from "./types";
-import type { ViewMode } from "./components/shared/status-color";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { ApplicationsAnimator } from "./applications-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";

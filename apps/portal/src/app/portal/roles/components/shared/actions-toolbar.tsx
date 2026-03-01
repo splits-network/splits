@@ -14,6 +14,7 @@ import type { Job } from "../../types";
 import {
     Button,
     SpeedMenu,
+    BaselConfirmModal,
     type SpeedDialAction,
 } from "@splits-network/basel-ui";
 
@@ -67,6 +68,7 @@ export default function RoleActionsToolbar({
     const [isSharing, setIsSharing] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
+    const [pendingStatus, setPendingStatus] = useState<"active" | "paused" | "filled" | "closed" | null>(null);
 
     /* ── Permissions ── */
 
@@ -90,15 +92,16 @@ export default function RoleActionsToolbar({
 
     /* ── Status Change ── */
 
-    const handleStatusChange = async (
+    const handleStatusChange = (
         newStatus: "active" | "paused" | "filled" | "closed",
     ) => {
-        if (
-            !confirm(
-                `Are you sure you want to change the status to ${newStatus}?`,
-            )
-        )
-            return;
+        setPendingStatus(newStatus);
+    };
+
+    const confirmStatusChange = async () => {
+        if (!pendingStatus) return;
+        const newStatus = pendingStatus;
+        setPendingStatus(null);
 
         setUpdatingStatus(true);
         setStatusAction(newStatus);
@@ -330,6 +333,16 @@ export default function RoleActionsToolbar({
 
     const modals = (
         <>
+            <BaselConfirmModal
+                isOpen={!!pendingStatus}
+                onClose={() => setPendingStatus(null)}
+                onConfirm={confirmStatusChange}
+                title="Change Role Status"
+                icon="fa-triangle-exclamation"
+                confirmColor={pendingStatus === "closed" ? "btn-error" : "btn-primary"}
+            >
+                <p>Are you sure you want to change the status to {pendingStatus}?</p>
+            </BaselConfirmModal>
             <ModalPortal>
                 {showEditModal && (
                     <RoleWizardModal
@@ -348,8 +361,8 @@ export default function RoleActionsToolbar({
                         preSelectedJob={{
                             id: job.id,
                             title: job.title,
-                            company_id: job.company_id,
-                            company_name: job.company?.name,
+                            company_id: job.company_id || "",
+                            company_name: job.company?.name || job.company_name || undefined,
                             location: job.location,
                             fee_percentage: job.fee_percentage,
                             status: job.status,

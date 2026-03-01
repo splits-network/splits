@@ -10,6 +10,7 @@ import {
     BaselModalBody,
     BaselModalFooter,
     BaselFormField,
+    BaselConfirmModal,
 } from "@splits-network/basel-ui";
 import { ButtonLoading } from "@splits-network/shared-ui";
 import type { ContentImage } from "@splits-network/shared-types";
@@ -42,6 +43,7 @@ export function ImageDetailModal({
     const [altText, setAltText] = useState("");
     const [tags, setTags] = useState("");
     const [filename, setFilename] = useState("");
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
         if (image) {
@@ -79,11 +81,13 @@ export function ImageDetailModal({
         }
     }
 
-    async function handleDelete() {
-        if (!image) return;
+    function handleDelete() {
+        setShowDeleteConfirm(true);
+    }
 
-        const confirmed = window.confirm(`Are you sure you want to delete "${image.filename}"? This will remove the image from storage.`);
-        if (!confirmed) return;
+    async function confirmDelete() {
+        if (!image) return;
+        setShowDeleteConfirm(false);
 
         setDeleting(true);
         try {
@@ -111,6 +115,7 @@ export function ImageDetailModal({
     if (!image) return null;
 
     return (
+        <>
         <BaselModal isOpen={isOpen} onClose={onClose} maxWidth="max-w-2xl">
             <BaselModalHeader
                 title="Image Details"
@@ -242,5 +247,16 @@ export function ImageDetailModal({
                 </button>
             </BaselModalFooter>
         </BaselModal>
+        <BaselConfirmModal
+            isOpen={showDeleteConfirm}
+            onClose={() => setShowDeleteConfirm(false)}
+            onConfirm={confirmDelete}
+            title="Delete Image"
+            icon="fa-trash"
+            confirmColor="btn-error"
+        >
+            <p>Are you sure you want to delete &quot;{image?.filename}&quot;? This will remove the image from storage.</p>
+        </BaselConfirmModal>
+        </>
     );
 }

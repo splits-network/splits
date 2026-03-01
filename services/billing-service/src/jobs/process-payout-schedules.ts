@@ -20,6 +20,7 @@ import { PlacementSnapshotRepository } from '../v2/placement-snapshot/repository
 import { PlacementSplitRepository } from '../v2/payouts/placement-split-repository';
 import { PlacementPayoutTransactionRepository } from '../v2/payouts/placement-payout-transaction-repository';
 import { RecruiterConnectRepository } from '../v2/payouts/recruiter-connect-repository';
+import { FirmStripeConnectRepository } from '../v2/firm-connect/repository';
 
 // Load and validate environment variables
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -65,6 +66,8 @@ async function main() {
         const transactionRepository = new PlacementPayoutTransactionRepository(supabase);
         const recruiterConnectRepository = new RecruiterConnectRepository(supabase);
 
+        const firmConnectRepository = new FirmStripeConnectRepository(supabase);
+
         const payoutService = new PayoutServiceV2(
             snapshotRepository,
             splitRepository,
@@ -81,7 +84,9 @@ async function main() {
                 isPlatformAdmin: true,
                 error: '',
             }),
-            eventPublisher
+            eventPublisher,
+            undefined,
+            firmConnectRepository
         );
 
         // Initialize service

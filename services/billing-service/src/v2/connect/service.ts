@@ -38,7 +38,6 @@ export class StripeConnectService {
 
         if (!recruiter.stripe_connect_account_id) {
             const account = await this.stripe.accounts.create({
-                type: 'custom',
                 country: 'US',
                 business_type: 'individual',
                 capabilities: {

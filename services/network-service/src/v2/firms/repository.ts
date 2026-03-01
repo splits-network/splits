@@ -132,6 +132,64 @@ export class FirmRepository {
         return data;
     }
 
+    async resolveInternalUserId(clerkUserId: string): Promise<string> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        if (!accessContext.identityUserId) {
+            throw { statusCode: 400, message: 'User not found' };
+        }
+        return accessContext.identityUserId;
+    }
+
+    async hasPartnerSubscription(clerkUserId: string): Promise<boolean> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        if (!accessContext.identityUserId) return false;
+
+        const { data } = await this.supabase
+            .from('subscriptions')
+            .select('id, plan:plans(tier)')
+            .eq('user_id', accessContext.identityUserId)
+            .eq('status', 'active')
+            .limit(1)
+            .maybeSingle();
+
+        return (data as any)?.plan?.tier === 'partner';
+    }
+
+    async hasPartnerSubscriptionByUserId(internalUserId: string): Promise<boolean> {
+        const { data } = await this.supabase
+            .from('subscriptions')
+            .select('id, plan:plans(tier)')
+            .eq('user_id', internalUserId)
+            .eq('status', 'active')
+            .limit(1)
+            .maybeSingle();
+
+        return (data as any)?.plan?.tier === 'partner';
+    }
+
+    async getRecruiterUserId(recruiterId: string): Promise<string | null> {
+        const { data } = await this.supabase
+            .from('recruiters')
+            .select('user_id')
+            .eq('id', recruiterId)
+            .single();
+
+        return data?.user_id || null;
+    }
+
+    async findOwnerMember(firmId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('firm_members')
+            .select('*')
+            .eq('firm_id', firmId)
+            .eq('role', 'owner')
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
     async createFirm(
         firmData: { name: string },
         clerkUserId: string
@@ -297,5 +355,79 @@ export class FirmRepository {
 
         if (error) throw error;
         return data;
+    }
+
+    async getRecruiterByUserId(userId: string): Promise<{ id: string; user_id: string } | null> {
+        const { data, error } = await this.supabase
+            .from('recruiters')
+            .select('id, user_id')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async findFirmMemberByRecruiterId(
+        firmId: string,
+        recruiterId: string
+    ): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('firm_members')
+            .select('*')
+            .eq('firm_id', firmId)
+            .eq('recruiter_id', recruiterId)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async findFirmByRecruiterId(recruiterId: string): Promise<any | null> {
+        const { data: membership, error: memberError } = await this.supabase
+            .from('firm_members')
+            .select('firm_id')
+            .eq('recruiter_id', recruiterId)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (memberError) throw memberError;
+        if (!membership) return null;
+
+        return this.findFirm(membership.firm_id);
+    }
+
+    async transferOwnership(
+        firmId: string,
+        newOwnerUserId: string,
+        newOwnerMemberId: string,
+        oldOwnerMemberId: string
+    ): Promise<any> {
+        const now = new Date().toISOString();
+
+        // Update firm owner
+        const { data: firm, error: firmError } = await this.supabase
+            .from('firms')
+            .update({ owner_user_id: newOwnerUserId, updated_at: now })
+            .eq('id', firmId)
+            .select()
+            .single();
+
+        if (firmError) throw firmError;
+
+        // Demote old owner to admin
+        await this.supabase
+            .from('firm_members')
+            .update({ role: 'admin' })
+            .eq('id', oldOwnerMemberId);
+
+        // Promote new owner
+        await this.supabase
+            .from('firm_members')
+            .update({ role: 'owner' })
+            .eq('id', newOwnerMemberId);
+
+        return firm;
     }
 }

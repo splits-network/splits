@@ -4,10 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
-import {
-    ThemeScript,
-    ThemeProvider,
-} from "@splits-network/basel-ui";
+import { ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { PortalActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { JsonLd } from "@splits-network/shared-ui";
@@ -29,7 +26,14 @@ export const metadata: Metadata = {
         template: "%s | Splits Network",
     },
     description:
-        "Split-fee recruiting marketplace platform. Collaborate with recruiters, share roles, and split fees while growing your recruiting business.",
+        "Collaborative recruiting marketplace platform. Earn split fees, manage placements, and grow your recruiting business with 15% commission model.",
+    keywords: [
+        "recruiting",
+        "recruiter platform",
+        "job placement",
+        "split fees",
+        "staffing",
+    ],
     openGraph: {
         title: "Splits Network - Recruiting Marketplace",
         description:
@@ -53,6 +57,13 @@ export const metadata: Metadata = {
         description:
             "Split-fee recruiting marketplace platform. Collaborate with recruiters, share roles, and split fees.",
         images: ["https://splits.network/og-image.png"],
+    },
+    robots: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
     },
 };
 

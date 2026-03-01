@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, BaselConfirmModal, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { CompanyInvitation } from "../../types";
 import { getInviteLink } from "./helpers";
 
@@ -39,6 +39,7 @@ export default function InvitationActionsToolbar({
 
     const [resending, setResending] = useState(false);
     const [revoking, setRevoking] = useState(false);
+    const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
 
     const isPending = invitation.status === "pending";
     const hasEmail = !!invitation.invited_email;
@@ -114,10 +115,12 @@ export default function InvitationActionsToolbar({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast]);
 
-    const handleRevoke = useCallback(async () => {
-        if (!confirm("Are you sure you want to revoke this invitation?")) {
-            return;
-        }
+    const handleRevoke = useCallback(() => {
+        setShowRevokeConfirm(true);
+    }, []);
+
+    const confirmRevoke = useCallback(async () => {
+        setShowRevokeConfirm(false);
         setRevoking(true);
         try {
             const token = await getToken();
@@ -199,16 +202,29 @@ export default function InvitationActionsToolbar({
         }
 
         return (
-            <SpeedMenu
-                actions={speedDialActions}
-                size={size ?? "sm"}
-                className={className}
-            />
+            <>
+                <SpeedMenu
+                    actions={speedDialActions}
+                    size={size ?? "sm"}
+                    className={className}
+                />
+                <BaselConfirmModal
+                    isOpen={showRevokeConfirm}
+                    onClose={() => setShowRevokeConfirm(false)}
+                    onConfirm={confirmRevoke}
+                    title="Revoke Invitation"
+                    icon="fa-ban"
+                    confirmColor="btn-error"
+                >
+                    <p>Are you sure you want to revoke this invitation?</p>
+                </BaselConfirmModal>
+            </>
         );
     }
 
     // Descriptive variant
     return (
+        <>
         <div
             className={`flex flex-wrap items-center ${layout === "horizontal" ? "gap-2" : "flex-col gap-2"} ${className}`}
         >
@@ -281,5 +297,16 @@ export default function InvitationActionsToolbar({
                 </>
             )}
         </div>
+        <BaselConfirmModal
+            isOpen={showRevokeConfirm}
+            onClose={() => setShowRevokeConfirm(false)}
+            onConfirm={confirmRevoke}
+            title="Revoke Invitation"
+            icon="fa-ban"
+            confirmColor="btn-error"
+        >
+            <p>Are you sure you want to revoke this invitation?</p>
+        </BaselConfirmModal>
+        </>
     );
 }

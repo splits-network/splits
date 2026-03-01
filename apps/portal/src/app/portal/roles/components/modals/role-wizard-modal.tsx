@@ -327,7 +327,11 @@ export default function RoleWizardModal({
     const [companies, setCompanies] = useState<Company[]>([]);
     const [isRecruiterWithCompanyAccess, setIsRecruiterWithCompanyAccess] =
         useState(false);
+    const [userFirmId, setUserFirmId] = useState<string | null>(null);
     const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
+
+    // Off-platform is automatic: firm member with no manageable companies
+    const isOffPlatform = isRecruiter && !!userFirmId && !isRecruiterWithCompanyAccess;
 
     const totalSteps = 5;
 
@@ -425,15 +429,15 @@ export default function RoleWizardModal({
                     }>("/companies");
                     setCompanies(companiesResponse.data || []);
                 } else if (isRecruiter) {
+                    let hasCompanyAccess = false;
                     try {
                         const response = await client.get<{ data: Company[] }>(
                             "/recruiter-companies/manageable-companies-with-details",
                         );
                         const manageableCompanies = response.data || [];
                         setCompanies(manageableCompanies);
-                        setIsRecruiterWithCompanyAccess(
-                            manageableCompanies.length > 0,
-                        );
+                        hasCompanyAccess = manageableCompanies.length > 0;
+                        setIsRecruiterWithCompanyAccess(hasCompanyAccess);
                         if (manageableCompanies.length === 1) {
                             setFormData((prev) => ({
                                 ...prev,
@@ -446,6 +450,24 @@ export default function RoleWizardModal({
                             err,
                         );
                         setCompanies([]);
+                    }
+
+                    // Check if recruiter is a firm member (enables off-platform jobs)
+                    try {
+                        const firmResponse = await client.get<{ data: any }>(
+                            "/firms/my-firm",
+                        );
+                        const firmId = firmResponse.data?.id || null;
+                        setUserFirmId(firmId);
+                        // Auto-set source_firm_id for off-platform (firm member with no company access)
+                        if (firmId && !hasCompanyAccess) {
+                            setFormData((prev) => ({
+                                ...prev,
+                                source_firm_id: firmId,
+                            }));
+                        }
+                    } catch {
+                        setUserFirmId(null);
                     }
                 } else if (isCompanyUser) {
                     const organizationId = profile?.organization_ids?.[0];
@@ -524,8 +546,12 @@ export default function RoleWizardModal({
                 setError("Job title is required");
                 return;
             }
-            if (!formData.company_id) {
+            if (!formData.company_id && !isOffPlatform) {
                 setError("Please select a company");
+                return;
+            }
+            if (isOffPlatform && !formData.company_name?.trim()) {
+                setError("Company name is required for off-platform jobs");
                 return;
             }
         }
@@ -674,8 +700,19 @@ export default function RoleWizardModal({
 
             const payload: any = {
                 title: formData.title,
-                company_id: formData.company_id,
-                fee_percentage: formData.fee_percentage,
+                fee_percentage: isOffPlatform
+                    ? Math.max(5, formData.fee_percentage)
+                    : formData.fee_percentage,
+            };
+
+            if (isOffPlatform && userFirmId) {
+                payload.source_firm_id = userFirmId;
+                payload.company_name = formData.company_name?.trim();
+            } else {
+                payload.company_id = formData.company_id;
+            }
+
+            Object.assign(payload, {
                 status: formData.status,
                 employment_type: formData.employment_type,
                 open_to_relocation: formData.open_to_relocation,
@@ -690,7 +727,7 @@ export default function RoleWizardModal({
                         options: q.options?.length ? q.options : undefined,
                         disclaimer: q.disclaimer?.trim() || undefined,
                     })),
-            };
+            });
 
             if (formData.location) payload.location = formData.location;
             if (formData.department) payload.department = formData.department;
@@ -916,7 +953,25 @@ export default function RoleWizardModal({
                                             />
                                         </fieldset>
 
-                                        {showCompanySelect ? (
+                                        {isOffPlatform ? (
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
+                                                    Company Name *
+                                                </legend>
+                                                <input
+                                                    className="input input-bordered w-full"
+                                                    style={{ borderRadius: 0 }}
+                                                    value={formData.company_name || ""}
+                                                    onChange={(e) =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            company_name: e.target.value,
+                                                        }))
+                                                    }
+                                                    placeholder="Enter the company name..."
+                                                />
+                                            </fieldset>
+                                        ) : showCompanySelect ? (
                                             <fieldset className="fieldset">
                                                 <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                                                     Company *

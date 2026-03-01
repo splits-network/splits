@@ -92,6 +92,8 @@ export class PlacementPayoutTransactionRepository {
             recruiter_id: row.recruiter_id,
             amount: row.amount,
             status: row.status,
+            transaction_type: row.transaction_type || null,
+            firm_id: row.firm_id || null,
             stripe_transfer_id: row.stripe_transfer_id,
             stripe_payout_id: row.stripe_payout_id,
             stripe_connect_account_id: row.stripe_connect_account_id,

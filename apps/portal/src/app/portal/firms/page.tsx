@@ -12,7 +12,7 @@ import {
 import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Firm, FirmFilters } from "./types";
-import type { ViewMode } from "./components/shared/status-color";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { FirmsAnimator } from "./firms-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -65,8 +65,9 @@ export default function FirmsPage() {
     }, [selectedFirmId, viewMode, pathname, router]);
 
     /* -- User profile -- */
-    const { isAdmin, isRecruiter } = useUserProfile();
-    const canCreateFirm = isAdmin || isRecruiter;
+    const { isAdmin, isRecruiter, planTier } = useUserProfile();
+    const isPartner = planTier === "partner";
+    const canCreateFirm = isAdmin || (isRecruiter && isPartner);
 
     /* -- Data -- */
     const {
@@ -134,6 +135,7 @@ export default function FirmsPage() {
                     viewMode={viewMode}
                     onViewModeChange={handleViewModeChange}
                     canCreateFirm={canCreateFirm}
+                    showUpgradeHint={isRecruiter && !isPartner}
                     onAddFirm={() => setShowAddModal(true)}
                     firmCount={firms.length}
                     totalCount={pagination?.total ?? firms.length}
@@ -142,7 +144,7 @@ export default function FirmsPage() {
                 />
 
                 {/* Content Area */}
-                <section className="content-area opacity-0">
+                <section className="content-area opacity-0 p-4">
                     <div ref={contentRef}>
                         {loading && firms.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">

@@ -25,6 +25,9 @@ export interface PlacementSplit {
     split_percentage: number;
     split_amount: number;
     firm_id?: string | null;
+    firm_admin_take_rate?: number | null;
+    firm_admin_take_amount?: number | null;
+    net_amount?: number | null;
     split_configuration_id?: string | null;
     notes?: string | null;
     created_at: string;
@@ -37,6 +40,9 @@ export interface PlacementSplitInsert {
     split_percentage: number;
     split_amount: number;
     firm_id?: string;
+    firm_admin_take_rate?: number;
+    firm_admin_take_amount?: number;
+    net_amount?: number;
     split_configuration_id?: string;
     notes?: string;
 }
@@ -47,6 +53,8 @@ export interface PlacementSplitInsert {
  */
 export type TransactionStatus = 'pending' | 'processing' | 'paid' | 'failed' | 'reversed' | 'on_hold';
 
+export type TransactionType = 'member_payout' | 'firm_admin_take';
+
 export interface PlacementPayoutTransaction {
     id: string;
     placement_split_id: string;
@@ -54,6 +62,8 @@ export interface PlacementPayoutTransaction {
     recruiter_id: string;
     amount: number;
     status: TransactionStatus;
+    transaction_type?: TransactionType | null;
+    firm_id?: string | null;
     stripe_transfer_id?: string | null;
     stripe_payout_id?: string | null;
     stripe_connect_account_id?: string | null;
@@ -83,6 +93,8 @@ export interface PlacementPayoutTransactionInsert {
     recruiter_id: string;
     amount: number;
     status?: TransactionStatus;
+    transaction_type?: TransactionType;
+    firm_id?: string;
     stripe_connect_account_id?: string;
 }
 

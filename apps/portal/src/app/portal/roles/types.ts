@@ -15,7 +15,9 @@ export type EmploymentType = "full_time" | "contract" | "temporary";
 export interface Job {
     // Core identifiers
     id: string;
-    company_id: string;
+    company_id: string | null;
+    source_firm_id?: string | null;
+    company_name?: string | null;
 
     // Basic info
     title: string;

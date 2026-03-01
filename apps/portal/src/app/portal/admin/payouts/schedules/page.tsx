@@ -13,6 +13,7 @@ import {
     LoadingState,
     ErrorState,
 } from '@/hooks/use-standard-list';
+import { BaselConfirmModal } from '@splits-network/basel-ui';
 
 interface PayoutSchedule {
     id: string;
@@ -49,6 +50,7 @@ export default function PayoutSchedulesPage() {
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loadingStats, setLoadingStats] = useState(true);
+    const [confirmAction, setConfirmAction] = useState<{type: 'trigger' | 'cancel' | 'retry'; scheduleId: string} | null>(null);
     const toast = useToast();
 
     const defaultFilters = useMemo<ScheduleFilters>(() => ({ status: 'scheduled' }), []);
@@ -106,63 +108,71 @@ export default function PayoutSchedulesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    async function triggerSchedule(scheduleId: string) {
-        if (!confirm('Manually trigger this schedule? This will process it immediately.')) return;
-
-        setProcessingId(scheduleId);
-        try {
-            const token = await getToken();
-            if (!token) throw new Error('No auth token');
-            const apiClient = createAuthenticatedClient(token);
-            await apiClient.post(`/payout-schedules/${scheduleId}/trigger`);
-            toast.success('Schedule triggered successfully');
-            refresh();
-        } catch (error: any) {
-            console.error('Failed to trigger schedule:', error);
-            const message = error?.message || error?.error || 'Failed to trigger schedule';
-            toast.error(message);
-            refresh();
-        } finally {
-            setProcessingId(null);
-        }
+    function triggerSchedule(scheduleId: string) {
+        setConfirmAction({ type: 'trigger', scheduleId });
     }
 
-    async function cancelSchedule(scheduleId: string) {
-        if (!confirm('Cancel this schedule? This action cannot be undone.')) return;
-
-        try {
-            const token = await getToken();
-            if (!token) throw new Error('No auth token');
-            const apiClient = createAuthenticatedClient(token);
-            await apiClient.delete(`/payout-schedules/${scheduleId}`);
-            toast.success('Schedule cancelled successfully');
-            refresh();
-        } catch (error) {
-            console.error('Failed to cancel schedule:', error);
-            toast.error('Failed to cancel schedule');
-        }
+    function cancelSchedule(scheduleId: string) {
+        setConfirmAction({ type: 'cancel', scheduleId });
     }
 
-    async function retrySchedule(scheduleId: string) {
-        if (!confirm('Retry this failed schedule? This will reset it to pending status.')) return;
+    function retrySchedule(scheduleId: string) {
+        setConfirmAction({ type: 'retry', scheduleId });
+    }
 
-        setProcessingId(scheduleId);
-        try {
-            const token = await getToken();
-            if (!token) throw new Error('No auth token');
-            const apiClient = createAuthenticatedClient(token);
-            await apiClient.patch(`/payout-schedules/${scheduleId}`, {
-                status: 'pending',
-                retry_count: 0,
-            });
-            toast.success('Schedule reset to pending');
-            refresh();
-        } catch (error: any) {
-            console.error('Failed to retry schedule:', error);
-            const message = error?.message || error?.error || 'Failed to retry schedule';
-            toast.error(message);
-        } finally {
-            setProcessingId(null);
+    async function handleConfirmAction() {
+        if (!confirmAction) return;
+        const { type, scheduleId } = confirmAction;
+        setConfirmAction(null);
+
+        if (type === 'trigger') {
+            setProcessingId(scheduleId);
+            try {
+                const token = await getToken();
+                if (!token) throw new Error('No auth token');
+                const apiClient = createAuthenticatedClient(token);
+                await apiClient.post(`/payout-schedules/${scheduleId}/trigger`);
+                toast.success('Schedule triggered successfully');
+                refresh();
+            } catch (error: any) {
+                console.error('Failed to trigger schedule:', error);
+                const message = error?.message || error?.error || 'Failed to trigger schedule';
+                toast.error(message);
+                refresh();
+            } finally {
+                setProcessingId(null);
+            }
+        } else if (type === 'cancel') {
+            try {
+                const token = await getToken();
+                if (!token) throw new Error('No auth token');
+                const apiClient = createAuthenticatedClient(token);
+                await apiClient.delete(`/payout-schedules/${scheduleId}`);
+                toast.success('Schedule cancelled successfully');
+                refresh();
+            } catch (error) {
+                console.error('Failed to cancel schedule:', error);
+                toast.error('Failed to cancel schedule');
+            }
+        } else if (type === 'retry') {
+            setProcessingId(scheduleId);
+            try {
+                const token = await getToken();
+                if (!token) throw new Error('No auth token');
+                const apiClient = createAuthenticatedClient(token);
+                await apiClient.patch(`/payout-schedules/${scheduleId}`, {
+                    status: 'pending',
+                    retry_count: 0,
+                });
+                toast.success('Schedule reset to pending');
+                refresh();
+            } catch (error: any) {
+                console.error('Failed to retry schedule:', error);
+                const message = error?.message || error?.error || 'Failed to retry schedule';
+                toast.error(message);
+            } finally {
+                setProcessingId(null);
+            }
         }
     }
 
@@ -470,6 +480,29 @@ export default function PayoutSchedulesPage() {
                     )}
                 </div>
             </div>
+
+            <BaselConfirmModal
+                isOpen={!!confirmAction}
+                onClose={() => setConfirmAction(null)}
+                onConfirm={handleConfirmAction}
+                title={
+                    confirmAction?.type === 'trigger' ? 'Trigger Schedule' :
+                    confirmAction?.type === 'cancel' ? 'Cancel Schedule' :
+                    'Retry Schedule'
+                }
+                icon={
+                    confirmAction?.type === 'cancel' ? 'fa-ban' : 'fa-triangle-exclamation'
+                }
+                confirmColor={
+                    confirmAction?.type === 'cancel' ? 'btn-error' : 'btn-primary'
+                }
+            >
+                <p>
+                    {confirmAction?.type === 'trigger' && 'Manually trigger this schedule? This will process it immediately.'}
+                    {confirmAction?.type === 'cancel' && 'Cancel this schedule? This action cannot be undone.'}
+                    {confirmAction?.type === 'retry' && 'Retry this failed schedule? This will reset it to pending status.'}
+                </p>
+            </BaselConfirmModal>
         </div>
     );
 }

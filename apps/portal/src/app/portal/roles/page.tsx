@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import {
     useStandardList,
     PaginationControls,
@@ -10,9 +11,10 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Job, UnifiedJobFilters } from "./types";
-import type { ViewMode } from "./components/shared/status-color";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { isNew } from "./components/shared/helpers";
 import { RolesAnimator } from "./roles-animator";
 import { HeaderSection } from "./components/shared/header-section";
@@ -68,10 +70,31 @@ export default function RolesPage() {
     /* ── User profile ── */
     const { isAdmin, isRecruiter, isCompanyUser, manageableCompanyIds } =
         useUserProfile();
+    const { getToken } = useAuth();
+    const [isFirmMember, setIsFirmMember] = useState(false);
+
+    useEffect(() => {
+        if (!isRecruiter || manageableCompanyIds.length > 0) return;
+        let cancelled = false;
+        async function checkFirm() {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: any }>("/firms/my-firm");
+                if (!cancelled && res.data?.id) setIsFirmMember(true);
+            } catch { /* not a firm member */ }
+        }
+        checkFirm();
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isRecruiter, manageableCompanyIds.length]);
+
     const canCreateRole =
         isAdmin ||
         isCompanyUser ||
-        (isRecruiter && manageableCompanyIds.length > 0);
+        (isRecruiter && manageableCompanyIds.length > 0) ||
+        (isRecruiter && isFirmMember);
 
     /* ── Data ── */
     const {
@@ -149,7 +172,7 @@ export default function RolesPage() {
                 />
 
                 {/* Content Area */}
-                <section className="content-area opacity-0">
+                <section className="content-area opacity-0 p-4">
                     <div ref={contentRef}>
                         {loading && jobs.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">

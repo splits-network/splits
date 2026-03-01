@@ -9,6 +9,7 @@ import {
     requestChatRefresh,
 } from "@/lib/chat-refresh-queue";
 import { useToast } from "@/lib/toast-context";
+import { BaselPromptModal } from "@splits-network/basel-ui";
 import { ThreadHeader } from "./thread-header";
 import { ThreadMessages } from "./thread-messages";
 import { ThreadCompose } from "./thread-compose";
@@ -40,6 +41,8 @@ export default function ThreadPanel({
     const [sending, setSending] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+    const [reportStep, setReportStep] = useState<null | "category" | "details">(null);
+    const [reportCategory, setReportCategory] = useState("");
     const prevScrollRef = useRef<{
         height: number;
         top: number;
@@ -258,24 +261,29 @@ export default function ThreadPanel({
         requestChatRefresh();
     };
 
-    const handleReport = async () => {
+    const handleReport = () => {
         if (!otherUserId) return;
-        const category = window.prompt(
-            "Report category (spam, harassment, fraud, other):",
-            "spam",
-        );
-        if (!category) return;
-        const description = window.prompt("Optional details:");
+        setReportStep("category");
+    };
+
+    const handleReportCategory = (category: string) => {
+        setReportCategory(category);
+        setReportStep("details");
+    };
+
+    const handleReportDetails = async (description: string) => {
+        setReportStep(null);
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
         await client.post(`/chat/reports`, {
             conversationId,
             reportedUserId: otherUserId,
-            category,
-            description,
+            category: reportCategory,
+            description: description || undefined,
         });
         toast.success("Report submitted");
+        setReportCategory("");
     };
 
     const loadOlderMessages = useCallback(async () => {
@@ -391,6 +399,36 @@ export default function ThreadPanel({
                 sending={sending}
                 disabled={disabled}
                 placeholderText={placeholderText}
+            />
+
+            <BaselPromptModal
+                isOpen={reportStep === "category"}
+                onClose={() => setReportStep(null)}
+                onSubmit={handleReportCategory}
+                title="Report Conversation"
+                subtitle="Step 1 of 2"
+                icon="fa-flag"
+                iconColor="error"
+                label="Report category"
+                placeholder="e.g. spam, harassment, fraud, other"
+                defaultValue="spam"
+                submitLabel="Next"
+                submitColor="btn-error"
+            />
+            <BaselPromptModal
+                isOpen={reportStep === "details"}
+                onClose={() => setReportStep(null)}
+                onSubmit={handleReportDetails}
+                title="Report Details"
+                subtitle="Step 2 of 2"
+                icon="fa-flag"
+                iconColor="error"
+                label="Additional details (optional)"
+                placeholder="Describe the issue..."
+                required={false}
+                multiline
+                submitLabel="Submit Report"
+                submitColor="btn-error"
             />
         </div>
     );

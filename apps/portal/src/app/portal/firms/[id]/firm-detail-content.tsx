@@ -15,11 +15,12 @@ import {
 } from "../components/shared/helpers";
 import { FirmDetailAnimator } from "./firm-detail-animator";
 import { MembersSection } from "../components/detail/members-section";
+import { BillingSection } from "../components/detail/billing-section";
 import { SettingsSection } from "../components/detail/settings-section";
 
-type DetailTab = "members" | "settings";
+type DetailTab = "members" | "billing" | "settings";
 
-const VALID_TABS = new Set<string>(["members", "settings"]);
+const VALID_TABS = new Set<string>(["members", "billing", "settings"]);
 
 interface FirmDetailContentProps {
     firmId: string;
@@ -190,6 +191,34 @@ export default function FirmDetailContent({ firmId }: FirmDetailContentProps) {
                 />
             </section>
 
+            {/* Suspended firm banner */}
+            {firm.status === "suspended" && (
+                <div className="container mx-auto px-6 lg:px-12 pt-6">
+                    <div className="bg-warning/10 border-l-4 border-warning p-4 flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning text-lg mt-0.5" />
+                        <div>
+                            <p className="font-bold text-sm text-warning mb-1">
+                                Firm Suspended
+                            </p>
+                            <p className="text-sm text-base-content/70">
+                                This firm is suspended because the owner&apos;s Partner
+                                subscription is no longer active. To reactivate, the
+                                owner must upgrade to Partner tier or transfer ownership
+                                to a Partner-tier member.
+                            </p>
+                            <a
+                                href="/portal/profile?tab=subscription"
+                                className="btn btn-sm btn-warning btn-outline mt-3"
+                                style={{ borderRadius: 0 }}
+                            >
+                                <i className="fa-duotone fa-regular fa-crown mr-2" />
+                                Upgrade Subscription
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Tab bar */}
             <div className="detail-tabs opacity-0 container mx-auto px-6 lg:px-12 pt-8">
                 <div className="flex bg-base-200 p-1 w-fit">
@@ -204,6 +233,18 @@ export default function FirmDetailContent({ firmId }: FirmDetailContentProps) {
                         onClick={() => setActiveTab("members")}
                     >
                         Members
+                    </button>
+                    <button
+                        type="button"
+                        className={`px-5 py-2 text-sm font-semibold transition-colors ${
+                            activeTab === "billing"
+                                ? "bg-primary text-primary-content"
+                                : "text-base-content/50 hover:text-base-content/70"
+                        }`}
+                        style={{ borderRadius: 0 }}
+                        onClick={() => setActiveTab("billing")}
+                    >
+                        Billing
                     </button>
                     <button
                         type="button"
@@ -229,8 +270,11 @@ export default function FirmDetailContent({ firmId }: FirmDetailContentProps) {
                         onRefresh={loadFirmData}
                     />
                 )}
+                {activeTab === "billing" && (
+                    <BillingSection firm={firm} members={members} />
+                )}
                 {activeTab === "settings" && (
-                    <SettingsSection firm={firm} onRefresh={loadFirmData} />
+                    <SettingsSection firm={firm} members={members} onRefresh={loadFirmData} />
                 )}
             </div>
         </FirmDetailAnimator>

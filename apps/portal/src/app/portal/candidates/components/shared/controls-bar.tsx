@@ -1,7 +1,13 @@
 "use client";
 
 import { SearchInput } from "@/components/standard-lists";
-import type { ViewMode } from "./status-color";
+import {
+    BaselControlsBarShell,
+    BaselViewModeSelector,
+    BaselResultsCount,
+    BaselRefreshButton,
+    type BaselViewMode,
+} from "@splits-network/basel-ui";
 import type { CandidateFilters, CandidateScope } from "../../types";
 
 interface ControlsBarProps {
@@ -14,8 +20,8 @@ interface ControlsBarProps {
     ) => void;
     scope: CandidateScope;
     onScopeChange: (scope: CandidateScope) => void;
-    viewMode: ViewMode;
-    onViewModeChange: (mode: ViewMode) => void;
+    viewMode: BaselViewMode;
+    onViewModeChange: (mode: BaselViewMode) => void;
     onAddCandidate: () => void;
     candidateCount: number;
     totalCount: number;
@@ -39,138 +45,93 @@ export function ControlsBar({
     refresh,
 }: ControlsBarProps) {
     return (
-        <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
-            <div className="container mx-auto px-6 lg:px-12 py-4">
-                <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                    {/* Search + Filters */}
-                    <div className="flex flex-wrap gap-3 items-center flex-1">
-                        {/* Search */}
-                        <SearchInput
-                            value={searchInput}
-                            onChange={onSearchChange}
-                            placeholder="Search by name, skill, or title..."
-                            className="flex-1 min-w-[200px] max-w-md"
-                        />
-
-                        {/* Scope filter */}
-                        <select
-                            value={scope}
-                            onChange={(e) =>
-                                onScopeChange(e.target.value as CandidateScope)
-                            }
-                            className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <option value="mine">My Candidates</option>
-                            <option value="all">All Candidates</option>
-                        </select>
-
-                        {/* Verification filter */}
-                        <select
-                            value={filters.verification_status || ""}
-                            onChange={(e) =>
-                                onFilterChange(
-                                    "verification_status",
-                                    e.target.value || undefined,
-                                )
-                            }
-                            className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <option value="">All Status</option>
-                            <option value="verified">Verified</option>
-                            <option value="pending">Pending</option>
-                            <option value="unverified">Unverified</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-
-                        {/* Job Type filter */}
-                        <select
-                            value={filters.desired_job_type || ""}
-                            onChange={(e) =>
-                                onFilterChange(
-                                    "desired_job_type",
-                                    e.target.value || undefined,
-                                )
-                            }
-                            className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <option value="">All Types</option>
-                            <option value="full_time">Full Time</option>
-                            <option value="contract">Contract</option>
-                            <option value="freelance">Freelance</option>
-                            <option value="part_time">Part Time</option>
-                        </select>
-
-                        {/* Add Candidate */}
-                        <button
-                            onClick={onAddCandidate}
-                            className="btn btn-sm btn-primary gap-2"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <i className="fa-duotone fa-regular fa-plus" />
-                            <span className="hidden sm:inline">
-                                Add Candidate
-                            </span>
-                        </button>
-
-                        {/* Refresh */}
-                        <button
-                            onClick={refresh}
-                            className="btn btn-sm btn-ghost"
-                            disabled={loading}
-                        >
-                            <i
-                                className={`fa-duotone fa-regular fa-arrows-rotate ${loading ? "animate-spin" : ""}`}
-                            />
-                        </button>
+        <BaselControlsBarShell
+            filters={
+                <>
+                    <div className="flex bg-base-200 p-1 rounded-none">
+                        {(
+                            [
+                                { value: "mine", label: "My Candidates" },
+                                { value: "all", label: "All Candidates" },
+                            ] as const
+                        ).map(({ value, label }) => (
+                            <button
+                                key={value}
+                                onClick={() => onScopeChange(value)}
+                                className={`px-3 py-1.5 text-sm font-bold uppercase tracking-wider transition-colors rounded-none ${
+                                    scope === value
+                                        ? "bg-primary text-primary-content"
+                                        : "text-base-content/50 hover:text-base-content"
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
                     </div>
 
-                    {/* View Toggle + Results */}
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs uppercase tracking-wider text-base-content/40 font-bold">
-                            {candidateCount} of {totalCount} results
-                        </span>
-                        <div className="flex bg-base-200 p-1">
-                            {(
-                                [
-                                    {
-                                        mode: "table" as ViewMode,
-                                        icon: "fa-table-list",
-                                        label: "Table",
-                                    },
-                                    {
-                                        mode: "grid" as ViewMode,
-                                        icon: "fa-grid-2",
-                                        label: "Grid",
-                                    },
-                                    {
-                                        mode: "split" as ViewMode,
-                                        icon: "fa-columns-3",
-                                        label: "Split",
-                                    },
-                                ] as const
-                            ).map(({ mode, icon, label }) => (
-                                <button
-                                    key={mode}
-                                    onClick={() => onViewModeChange(mode)}
-                                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                                        viewMode === mode
-                                            ? "bg-primary text-primary-content"
-                                            : "text-base-content/50 hover:text-base-content"
-                                    }`}
-                                >
-                                    <i
-                                        className={`fa-duotone fa-regular ${icon} mr-1`}
-                                    />
-                                    {label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                    <SearchInput
+                        value={searchInput}
+                        onChange={onSearchChange}
+                        placeholder="Search by name, skill, or title..."
+                        className="flex-1 min-w-[200px] max-w-md"
+                    />
+
+                    <select
+                        value={filters.verification_status || ""}
+                        onChange={(e) =>
+                            onFilterChange(
+                                "verification_status",
+                                e.target.value || undefined,
+                            )
+                        }
+                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                    >
+                        <option value="">All Status</option>
+                        <option value="verified">Verified</option>
+                        <option value="pending">Pending</option>
+                        <option value="unverified">Unverified</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+
+                    <select
+                        value={filters.desired_job_type || ""}
+                        onChange={(e) =>
+                            onFilterChange(
+                                "desired_job_type",
+                                e.target.value || undefined,
+                            )
+                        }
+                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                    >
+                        <option value="">All Types</option>
+                        <option value="full_time">Full Time</option>
+                        <option value="contract">Contract</option>
+                        <option value="freelance">Freelance</option>
+                        <option value="part_time">Part Time</option>
+                    </select>
+
+                    <button
+                        onClick={onAddCandidate}
+                        className="btn btn-primary gap-2 rounded-none"
+                    >
+                        <i className="fa-duotone fa-regular fa-plus" />
+                        <span className="hidden sm:inline">Add Candidate</span>
+                    </button>
+
+                </>
+            }
+            statusLeft={
+                <BaselResultsCount count={candidateCount} total={totalCount} />
+            }
+            statusRight={
+                <>
+                    <BaselRefreshButton onClick={refresh} loading={loading} />
+                    <BaselViewModeSelector
+                        viewMode={viewMode}
+                        onViewModeChange={onViewModeChange}
+                    />
+                </>
+            }
+        />
     );
 }

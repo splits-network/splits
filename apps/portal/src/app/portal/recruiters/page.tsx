@@ -11,7 +11,7 @@ import {
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
 import type { RecruiterWithUser, MarketplaceFilters } from "./types";
-import type { ViewMode } from "./components/shared/status-color";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { RecruitersAnimator } from "./recruiters-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -170,7 +170,10 @@ function RecruitersContent() {
             <section className="min-h-screen">
                 <div className="mx-auto">
                     {/* Content Area */}
-                    <div ref={contentRef} className="content-area opacity-0">
+                    <div
+                        ref={contentRef}
+                        className="content-area opacity-0 p-4"
+                    >
                         {loading && recruiters.length === 0 ? (
                             <LoadingState message="Loading recruiters..." />
                         ) : recruiters.length === 0 ? (

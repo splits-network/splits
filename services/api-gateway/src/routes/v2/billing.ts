@@ -1064,6 +1064,389 @@ function registerEscrowHoldStatsRoute(app: FastifyInstance, services: ServiceReg
     );
 }
 
+function registerFirmBillingProfileRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/firm-billing-profiles/:firmId',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/firm-billing-profiles/${firmId}`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch firm billing profile');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch firm billing profile' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firm-billing-profiles/:firmId',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/firm-billing-profiles/${firmId}`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to upsert firm billing profile');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to upsert firm billing profile' } });
+            }
+        }
+    );
+
+    app.patch(
+        '/api/v2/firm-billing-profiles/:firmId',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().patch(
+                    `/api/v2/firm-billing-profiles/${firmId}`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to update firm billing profile');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to update firm billing profile' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firm-billing-profiles/:firmId/setup-intent',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/firm-billing-profiles/${firmId}/setup-intent`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create firm billing setup intent');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create firm billing setup intent' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/firm-billing-profiles/:firmId/payment-method',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/firm-billing-profiles/${firmId}/payment-method`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch firm payment method');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch firm payment method' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firm-billing-profiles/:firmId/payment-method',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/firm-billing-profiles/${firmId}/payment-method`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to update firm payment method');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to update firm payment method' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/firm-billing-profiles/:firmId/billing-readiness',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/firm-billing-profiles/${firmId}/billing-readiness`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch firm billing readiness');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch firm billing readiness' } });
+            }
+        }
+    );
+}
+
+function registerFirmStripeConnectRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/firm-stripe-connect/:firmId/account',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/firm-stripe-connect/${firmId}/account`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch firm Stripe Connect account');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch firm Stripe Connect account' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firm-stripe-connect/:firmId/account',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/firm-stripe-connect/${firmId}/account`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create firm Stripe Connect account');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create firm Stripe Connect account' } });
+            }
+        }
+    );
+
+    app.patch(
+        '/api/v2/firm-stripe-connect/:firmId/account',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().patch(
+                    `/api/v2/firm-stripe-connect/${firmId}/account`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to update firm Stripe Connect account');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to update firm Stripe Connect account' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firm-stripe-connect/:firmId/bank-account',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/firm-stripe-connect/${firmId}/bank-account`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to add firm bank account');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to add firm bank account' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firm-stripe-connect/:firmId/accept-tos',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/firm-stripe-connect/${firmId}/accept-tos`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to accept firm TOS');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to accept firm TOS' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firm-stripe-connect/:firmId/verification-session',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/firm-stripe-connect/${firmId}/verification-session`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create firm verification session');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create firm verification session' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/firm-stripe-connect/:firmId/payouts',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/firm-stripe-connect/${firmId}/payouts`,
+                    request.query as Record<string, any>,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch firm payouts');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch firm payouts' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/firm-stripe-connect/:firmId/onboarding-link',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { firmId } = request.params as { firmId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/firm-stripe-connect/${firmId}/onboarding-link`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create firm Stripe Connect onboarding link');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create firm Stripe Connect onboarding link' } });
+            }
+        }
+    );
+}
+
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register webhook proxy (no auth - verified by Stripe signature)
     registerStripeWebhookProxy(app, services);
@@ -1085,6 +1468,8 @@ export function registerBillingRoutes(app: FastifyInstance, services: ServiceReg
     registerEscrowHoldStatsRoute(app, services);
     registerPayoutTransactionRoutes(app, services);
     registerCompanyBillingProfileRoutes(app, services);
+    registerFirmBillingProfileRoutes(app, services);
+    registerFirmStripeConnectRoutes(app, services);
     registerPlacementInvoiceRoutes(app, services);
 
     // Register other billing resources (excluding plans which is handled above)

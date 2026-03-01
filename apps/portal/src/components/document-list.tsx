@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useToast } from '@/lib/toast-context';
 import UploadDocumentModal from './upload-document-modal';
+import { BaselConfirmModal } from '@splits-network/basel-ui';
 
 interface Document {
     id: string;
@@ -38,6 +39,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
     const [loading, setLoading] = useState(true);
     const [downloading, setDownloading] = useState<string | null>(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
+    const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchDocuments();
@@ -86,13 +88,17 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
         }
     };
 
-    const handleDelete = async (docId: string) => {
-        if (!confirm('Are you sure you want to delete this document?')) return;
+    const handleDelete = (docId: string) => {
+        setDeleteDocId(docId);
+    };
 
+    const confirmDelete = async () => {
+        if (!deleteDocId) return;
+        const docId = deleteDocId;
+        setDeleteDocId(null);
         try {
             const token = await getToken();
             if (!token) return;
-
             const client = createAuthenticatedClient(token);
             await client.delete(`/documents/${docId}`);
             await fetchDocuments();
@@ -227,6 +233,16 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
                     }}
                 />
             )}
+            <BaselConfirmModal
+                isOpen={!!deleteDocId}
+                onClose={() => setDeleteDocId(null)}
+                onConfirm={confirmDelete}
+                title="Delete Document"
+                icon="fa-trash"
+                confirmColor="btn-error"
+            >
+                <p>Are you sure you want to delete this document? This action cannot be undone.</p>
+            </BaselConfirmModal>
         </>
     );
 }

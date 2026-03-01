@@ -325,6 +325,36 @@ function CompanyTab({ job }: { job: Job }) {
         return "?";
     };
 
+    // Off-platform job: show simplified company info
+    if (!job.company_id && job.source_firm_id) {
+        return (
+            <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 flex items-center justify-center border-2 border-warning/30 bg-warning/10 font-bold text-lg text-warning">
+                        {companyInitials(name)}
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <p className="text-lg font-black">{name}</p>
+                            <span className="badge badge-warning badge-sm text-xs uppercase tracking-wider">
+                                3rd Party
+                            </span>
+                        </div>
+                        <p className="text-sm text-base-content/50">
+                            Off-platform company
+                        </p>
+                    </div>
+                </div>
+                <div className="bg-base-200 p-4">
+                    <p className="text-sm text-base-content/60">
+                        This role is for a company not on the Splits Network platform.
+                        It was sourced by a firm member.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-8">
             {/* Company Info */}

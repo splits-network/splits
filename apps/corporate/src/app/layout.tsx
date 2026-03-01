@@ -20,7 +20,14 @@ export const metadata: Metadata = {
         template: "%s | Employment Networks",
     },
     description:
-        "Powering the future of recruiting with Splits (collaborative recruiting platform) and Applicant (modern candidate portal). Transform your hiring process with our innovative platforms.",
+        "Transform your hiring with Splits (collaborative recruiting platform) and Applicant (modern candidate portal). Build a stronger employer brand and streamline recruiting.",
+    keywords: [
+        "recruiting",
+        "talent acquisition",
+        "candidate experience",
+        "employer branding",
+        "hiring platform",
+    ],
     openGraph: {
         title: "Employment Networks - Modern Recruiting & Candidate Experience",
         description:
@@ -46,7 +53,14 @@ export const metadata: Metadata = {
             "Powering the future of recruiting with Splits and Applicant. Transform your hiring process.",
         images: ["https://employment-networks.com/og-image.png"],
     },
-    // Additional meta tags that Teams may look for
+    robots: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+    },
+    // Additional meta tags that search engines and AI crawlers look for
     other: {
         image: "https://employment-networks.com/og-image.png",
     },

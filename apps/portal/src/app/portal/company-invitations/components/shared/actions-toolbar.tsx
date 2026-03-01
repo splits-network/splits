@@ -6,7 +6,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
-import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
+import { SpeedMenu, BaselConfirmModal, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { RecruiterCompanyRelationship } from "../../types";
 import TerminateCompanyModal from "@/app/portal/companies/components/modals/terminate-company-modal";
 
@@ -43,6 +43,8 @@ export default function ConnectionActionsToolbar({
     const [declining, setDeclining] = useState(false);
     const [revoking, setRevoking] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
+    const [showDeclineConfirm, setShowDeclineConfirm] = useState(false);
+    const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
 
     const isPending = invitation.status === "pending";
     const isActive = invitation.status === "active";
@@ -81,14 +83,12 @@ export default function ConnectionActionsToolbar({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast]);
 
-    const handleDecline = useCallback(async () => {
-        if (
-            !confirm(
-                "Are you sure you want to decline this connection request?",
-            )
-        ) {
-            return;
-        }
+    const handleDecline = useCallback(() => {
+        setShowDeclineConfirm(true);
+    }, []);
+
+    const confirmDecline = useCallback(async () => {
+        setShowDeclineConfirm(false);
         setDeclining(true);
         try {
             const token = await getToken();
@@ -111,14 +111,12 @@ export default function ConnectionActionsToolbar({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invitation.id, toast]);
 
-    const handleRevoke = useCallback(async () => {
-        if (
-            !confirm(
-                "Are you sure you want to revoke this invitation?",
-            )
-        ) {
-            return;
-        }
+    const handleRevoke = useCallback(() => {
+        setShowRevokeConfirm(true);
+    }, []);
+
+    const confirmRevoke = useCallback(async () => {
+        setShowRevokeConfirm(false);
         setRevoking(true);
         try {
             const token = await getToken();
@@ -223,6 +221,26 @@ export default function ConnectionActionsToolbar({
                     className={className}
                 />
                 {terminateModal}
+                <BaselConfirmModal
+                    isOpen={showDeclineConfirm}
+                    onClose={() => setShowDeclineConfirm(false)}
+                    onConfirm={confirmDecline}
+                    title="Decline Connection"
+                    icon="fa-ban"
+                    confirmColor="btn-error"
+                >
+                    <p>Are you sure you want to decline this connection request?</p>
+                </BaselConfirmModal>
+                <BaselConfirmModal
+                    isOpen={showRevokeConfirm}
+                    onClose={() => setShowRevokeConfirm(false)}
+                    onConfirm={confirmRevoke}
+                    title="Revoke Invitation"
+                    icon="fa-ban"
+                    confirmColor="btn-error"
+                >
+                    <p>Are you sure you want to revoke this invitation?</p>
+                </BaselConfirmModal>
             </>
         );
     }
@@ -291,6 +309,26 @@ export default function ConnectionActionsToolbar({
                 )}
             </div>
             {terminateModal}
+            <BaselConfirmModal
+                isOpen={showDeclineConfirm}
+                onClose={() => setShowDeclineConfirm(false)}
+                onConfirm={confirmDecline}
+                title="Decline Connection"
+                icon="fa-ban"
+                confirmColor="btn-error"
+            >
+                <p>Are you sure you want to decline this connection request?</p>
+            </BaselConfirmModal>
+            <BaselConfirmModal
+                isOpen={showRevokeConfirm}
+                onClose={() => setShowRevokeConfirm(false)}
+                onConfirm={confirmRevoke}
+                title="Revoke Invitation"
+                icon="fa-ban"
+                confirmColor="btn-error"
+            >
+                <p>Are you sure you want to revoke this invitation?</p>
+            </BaselConfirmModal>
         </>
     );
 }

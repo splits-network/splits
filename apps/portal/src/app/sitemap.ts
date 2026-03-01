@@ -2,9 +2,14 @@ import type { MetadataRoute } from 'next';
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { getAllArticleSlugs } from "@/lib/press";
+import { getContentPages } from "@/lib/content";
 
 const baseUrl = 'https://splits.network';
 const appRoot = join(process.cwd(), "apps", "portal", "src", "app");
+
+function toDate(value?: string) {
+    return value ? new Date(value) : new Date();
+}
 
 const publicRoutes = [
     '',
@@ -63,7 +68,7 @@ const documentationRoutes = [
     '/documentation/integrations',
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const pressArticleRoutes = getAllArticleSlugs().map(
         (slug) => `/press/${slug}`,
     );
@@ -101,7 +106,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         return new Date();
     };
 
-    return routes.map((path) => ({
+    const entries: MetadataRoute.Sitemap = routes.map((path) => ({
         url: `${baseUrl}${path}`,
         lastModified: getLastModifiedForPath(path),
         changeFrequency:
@@ -127,4 +132,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
                                     ? 0.7
                                     : 0.7,
     }));
+
+    // Fetch dynamic CMS pages from database
+    try {
+        const cmsPages = await getContentPages(undefined, 100);
+        entries.push(
+            ...cmsPages.map((page) => ({
+                url: `${baseUrl}/cms/${page.slug}`,
+                lastModified: toDate(page.updated_at ?? page.published_at),
+                changeFrequency: "monthly" as MetadataRoute.Sitemap[number]["changeFrequency"],
+                priority: page.category === 'press' ? 0.6 : 0.5,
+            })),
+        );
+    } catch (error) {
+        console.error("Failed to fetch CMS pages for sitemap:", error);
+    }
+
+    return entries;
 }

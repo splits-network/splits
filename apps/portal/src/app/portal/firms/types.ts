@@ -14,6 +14,7 @@ export interface Firm {
     active_member_count: number;
     total_placements: number;
     total_revenue: number;
+    admin_take_rate: number;
     created_at: string;
 }
 

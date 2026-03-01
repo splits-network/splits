@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ProfileImageUpload from "./ProfileImageUpload";
 import { ButtonLoading } from "@splits-network/shared-ui";
+import { useToast } from "@/lib/toast-context";
 
 interface ProfileFormProps {
     userId: string;
@@ -19,6 +20,7 @@ export default function ProfileForm({
     initialData,
     onSave,
 }: ProfileFormProps) {
+    const toast = useToast();
     const [formData, setFormData] = useState({
         name: initialData?.name || "",
         email: initialData?.email || "",
@@ -41,7 +43,7 @@ export default function ProfileForm({
             onSave?.();
         } catch (error) {
             console.error("Error saving profile:", error);
-            alert("Failed to save profile. Please try again.");
+            toast.error("Failed to save profile. Please try again.");
         } finally {
             setSaving(false);
         }

@@ -4,7 +4,8 @@ export type CollectionMethod = 'charge_automatically' | 'send_invoice';
 export interface PlacementInvoice {
     id: string;
     placement_id: string;
-    company_id: string;
+    company_id: string | null;
+    firm_id: string | null;
     billing_profile_id: string | null;
     stripe_customer_id: string | null;
     stripe_invoice_id: string | null;

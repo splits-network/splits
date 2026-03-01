@@ -10,7 +10,8 @@ import {
 } from "@/hooks/use-standard-list";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts/user-profile-context";
-import type { EnrichedMatch, MatchFilters, ViewMode } from "./types";
+import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
+import type { EnrichedMatch, MatchFilters } from "./types";
 import { isNewMatch } from "./types";
 import { MatchesAnimator } from "./matches-animator";
 import { HeaderSection } from "./components/shared/header-section";
@@ -32,8 +33,8 @@ export default function MatchesPage() {
         const v = searchParams.get("view");
         return v === "table" || v === "grid" || v === "split" ? v : "grid";
     });
-    const [selectedMatchId, setSelectedMatchId] = useState<string | null>(
-        () => searchParams.get("matchId"),
+    const [selectedMatchId, setSelectedMatchId] = useState<string | null>(() =>
+        searchParams.get("matchId"),
     );
     const [dismissing, setDismissing] = useState(false);
 
@@ -99,9 +100,7 @@ export default function MatchesPage() {
     });
 
     const handleSelect = useCallback((match: EnrichedMatch) => {
-        setSelectedMatchId((prev) =>
-            prev === match.id ? null : match.id,
-        );
+        setSelectedMatchId((prev) => (prev === match.id ? null : match.id));
     }, []);
 
     const handleViewModeChange = useCallback((mode: ViewMode) => {
@@ -116,7 +115,9 @@ export default function MatchesPage() {
                 if (!token) return;
                 const client = createAuthenticatedClient(token);
                 await client.patch(`/matches/${id}/dismiss`);
-                updateItem(id, { status: "dismissed" } as Partial<EnrichedMatch>);
+                updateItem(id, {
+                    status: "dismissed",
+                } as Partial<EnrichedMatch>);
             } catch (err) {
                 console.error("Failed to dismiss match:", err);
             } finally {
@@ -170,7 +171,7 @@ export default function MatchesPage() {
             />
 
             {/* Content Area */}
-            <section className="content-area opacity-0">
+            <section className="content-area opacity-0 p-4">
                 <div ref={contentRef}>
                     {loading && matches.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
