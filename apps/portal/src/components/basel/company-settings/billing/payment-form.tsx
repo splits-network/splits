@@ -154,6 +154,11 @@ export function BaselPaymentForm({
                 </div>
             )}
 
+            <p className="text-sm text-base-content/50 flex items-start gap-2">
+                <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5 shrink-0" />
+                A 3% processing fee applies to all placement invoices to cover payment processing costs.
+            </p>
+
             <p className="text-xs text-base-content/30 flex items-center gap-1">
                 <i className="fa-duotone fa-regular fa-lock" />
                 Your payment details are collected and stored securely by

@@ -8,6 +8,8 @@ import { PlacementInvoiceRepository } from './repository';
 import { PlacementInvoice } from './types';
 import { buildPaginationResponse } from '../shared/helpers';
 
+const PROCESSING_FEE_RATE = 0.03;
+
 interface PlacementRecord {
     id: string;
     company_id: string;
@@ -87,6 +89,19 @@ export class PlacementInvoiceService {
             metadata: {
                 placement_id: placement.id,
                 company_id: placement.company_id,
+            },
+        });
+
+        const processingFeeCents = Math.round(amountCents * PROCESSING_FEE_RATE);
+        await this.stripe.invoiceItems.create({
+            customer: ensuredProfile.stripe_customer_id as string,
+            currency: 'usd',
+            amount: processingFeeCents,
+            description: 'Processing fee (3%)',
+            metadata: {
+                placement_id: placement.id,
+                company_id: placement.company_id,
+                fee_type: 'processing_fee',
             },
         });
 

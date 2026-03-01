@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import {
@@ -76,6 +76,24 @@ export function BaselBillingSetupWizard({
     // Step 2 state
     const [paymentMethodSaved, setPaymentMethodSaved] = useState(false);
     const [skippedPayment, setSkippedPayment] = useState(false);
+
+    // Reset form state when modal opens so existing values are populated
+    useEffect(() => {
+        if (!open) return;
+        setStep(0);
+        setError(null);
+        setPaymentMethodSaved(false);
+        setSkippedPayment(false);
+        setBillingEmail(existingProfile?.billing_email || "");
+        setBillingContactName(existingProfile?.billing_contact_name || "");
+        setBillingTerms(existingProfile?.billing_terms || "net_30");
+        setStreet(existingProfile?.billing_address?.street || "");
+        setCity(existingProfile?.billing_address?.city || "");
+        setState(existingProfile?.billing_address?.state || "");
+        setZip(existingProfile?.billing_address?.zip || "");
+        setCountry(existingProfile?.billing_address?.country || "United States");
+        setTaxId(existingProfile?.stripe_tax_id || "");
+    }, [open, existingProfile]);
 
     const isImmediateBilling = billingTerms === "immediate";
 
@@ -255,6 +273,11 @@ export function BaselBillingSetupWizard({
                         </select>
                     </BaselFormField>
 
+                    <p className="text-sm text-base-content/50 flex items-start gap-2">
+                        <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5 shrink-0" />
+                        A 3% processing fee is applied to all placement invoices to cover payment processing costs.
+                    </p>
+
                     <BaselFormField label="Street Address">
                         <input
                             type="text"
@@ -386,7 +409,7 @@ export function BaselBillingSetupWizard({
                                           )}
                             </span>
                         </div>
-                        <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center justify-between py-2 border-b border-base-300">
                             <span className="text-sm text-base-content/60">
                                 Payment Method
                             </span>
@@ -396,6 +419,14 @@ export function BaselBillingSetupWizard({
                                     : skippedPayment
                                       ? "Skipped \u2014 pay via invoice link"
                                       : "\u2014"}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                            <span className="text-sm text-base-content/60">
+                                Processing Fee
+                            </span>
+                            <span className="text-sm font-semibold">
+                                3% on all placements
                             </span>
                         </div>
                     </div>
@@ -417,6 +448,11 @@ export function BaselBillingSetupWizard({
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-success mt-0.5" />
                                 Payment is due within your billing terms
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <i className="fa-duotone fa-regular fa-check text-success mt-0.5" />
+                                A 3% processing fee is included on each invoice
+                                to cover payment processing
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-success mt-0.5" />
