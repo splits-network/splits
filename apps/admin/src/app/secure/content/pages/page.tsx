@@ -1,107 +1,336 @@
 'use client';
 
+import { useMemo, useState } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { AdminDataTable, AdminPageHeader, type Column } from '@/components/shared';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import { useAdminToast } from '@/hooks/use-admin-toast';
+import { useAdminConfirm } from '@/components/shared/admin-confirm-provider';
 import { useStandardList } from '@/hooks/use-standard-list';
+import { AdminPageHeader } from '@/components/shared';
+import {
+    SearchInput,
+    PaginationControls,
+    EmptyState,
+    ErrorState,
+    StandardListLoadingState,
+} from '@splits-network/shared-hooks';
+import type { ContentPage } from '@splits-network/shared-types';
+import { CreatePageModal } from './components/create-page-modal';
+import { ImportJsonModal } from './components/import-json-modal';
 
-type ContentPage = {
-    id: string;
-    title: string;
-    slug: string;
-    status: 'published' | 'draft' | 'archived';
-    author?: string;
-    updated_at: string;
-};
+interface PageFilters {
+    app?: string;
+    status?: string;
+}
 
-const STATUS_BADGE: Record<string, string> = {
-    published: 'badge-success',
-    draft: 'badge-warning',
-    archived: 'badge-ghost',
-};
+function getStatusBadge(status: string) {
+    switch (status) {
+        case 'published': return 'badge-success';
+        case 'draft': return 'badge-warning';
+        case 'archived': return 'badge-ghost';
+        default: return 'badge-ghost';
+    }
+}
 
-const COLUMNS: Column<ContentPage>[] = [
-    {
-        key: 'title',
-        label: 'Title',
-        sortable: true,
-        render: (p) => <span className="text-sm font-medium">{p.title}</span>,
-    },
-    {
-        key: 'slug',
-        label: 'Slug',
-        render: (p) => <span className="font-mono text-sm text-base-content/60">{p.slug}</span>,
-    },
-    {
-        key: 'status',
-        label: 'Status',
-        render: (p) => (
-            <span className={`badge badge-sm capitalize ${STATUS_BADGE[p.status] ?? 'badge-ghost'}`}>
-                {p.status}
-            </span>
-        ),
-    },
-    {
-        key: 'author',
-        label: 'Author',
-        render: (p) => <span className="text-sm text-base-content/70">{p.author ?? '—'}</span>,
-    },
-    {
-        key: 'updated_at',
-        label: 'Updated',
-        sortable: true,
-        render: (p) => (
-            <span className="text-sm text-base-content/60">
-                {new Date(p.updated_at).toLocaleDateString()}
-            </span>
-        ),
-    },
-];
+function getAppBadge(app: string) {
+    switch (app) {
+        case 'portal': return 'badge-primary';
+        case 'candidate': return 'badge-secondary';
+        case 'corporate': return 'badge-accent';
+        default: return 'badge-ghost';
+    }
+}
 
 export default function ContentPagesPage() {
+    const { getToken } = useAuth();
     const router = useRouter();
-    const { data, loading, page, totalPages, setPage, sortBy, sortOrder, handleSort } =
-        useStandardList<ContentPage>({
-            endpoint: '/content/admin/pages',
-            defaultFilters: {},
-            defaultLimit: 25,
+    const toast = useAdminToast();
+    const confirm = useAdminConfirm();
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [importing, setImporting] = useState(false);
+
+    const defaultFilters = useMemo<PageFilters>(() => ({}), []);
+
+    const {
+        items: pages,
+        loading,
+        error,
+        pagination,
+        filters,
+        search,
+        setSearch,
+        setFilters,
+        setPage,
+        refresh,
+    } = useStandardList<ContentPage, PageFilters>({
+        fetchFn: async (params) => {
+            const token = await getToken();
+            if (!token) throw new Error('No auth token');
+            const apiClient = createAuthenticatedClient(token);
+
+            const queryParams = new URLSearchParams();
+            queryParams.set('page', String(params.page));
+            queryParams.set('limit', String(params.limit));
+            if (params.search) queryParams.set('search', params.search);
+            if (params.filters?.app) queryParams.set('app', params.filters.app);
+            if (params.filters?.status) queryParams.set('status', params.filters.status);
+            else queryParams.set('status', 'all');
+            if (params.sort_by) queryParams.set('sort_by', params.sort_by);
+            if (params.sort_order) queryParams.set('sort_order', params.sort_order);
+
+            return await apiClient.get(`/content/admin/pages?${queryParams.toString()}`);
+        },
+        defaultFilters,
+        defaultSortBy: 'updated_at',
+        defaultSortOrder: 'desc',
+        syncToUrl: true,
+    });
+
+    async function deletePage(page: ContentPage) {
+        const confirmed = await confirm({
+            title: 'Delete Page',
+            message: `Are you sure you want to delete "${page.title}"? This action can be undone.`,
+            confirmText: 'Delete',
+            type: 'warning',
         });
+        if (!confirmed) return;
+
+        setDeletingId(page.id);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error('No auth token');
+            const apiClient = createAuthenticatedClient(token);
+            await apiClient.delete(`/content/admin/pages/${page.id}`);
+            toast.success('Page deleted');
+            refresh();
+        } catch (err) {
+            console.error('Failed to delete page:', err);
+            toast.error('Failed to delete page');
+        } finally {
+            setDeletingId(null);
+        }
+    }
+
+    async function handleImportPage(data: unknown) {
+        const pageData = data as Record<string, unknown>;
+        if (!pageData.title || !pageData.slug || !pageData.app || !pageData.blocks) {
+            toast.error('JSON must include title, slug, app, and blocks');
+            return;
+        }
+        setImporting(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error('No auth token');
+            const apiClient = createAuthenticatedClient(token);
+            const result = await apiClient.post('/content/admin/pages', pageData);
+            const created = result.data as ContentPage;
+            toast.success(`Page "${created.title}" imported`);
+            setShowImportModal(false);
+            router.push(`/secure/content/pages/${created.id}`);
+        } catch (err) {
+            console.error('Failed to import page:', err);
+            toast.error('Failed to import page — check JSON format');
+        } finally {
+            setImporting(false);
+        }
+    }
+
+    const publishedCount = pages.filter((p) => p.status === 'published').length;
+    const draftCount = pages.filter((p) => p.status === 'draft').length;
 
     return (
-        <div>
+        <div className="space-y-6">
             <AdminPageHeader
                 title="Content Pages"
-                subtitle="Manage CMS content pages"
+                subtitle="Manage CMS pages published across all apps"
+                actions={
+                    <div className="flex items-center gap-2">
+                        <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => setShowImportModal(true)}
+                        >
+                            <i className="fa-duotone fa-regular fa-file-import" />
+                            Import
+                        </button>
+                        <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => setShowCreateModal(true)}
+                        >
+                            <i className="fa-duotone fa-regular fa-plus mr-1" />
+                            Create Page
+                        </button>
+                    </div>
+                }
             />
 
-            <div className="card bg-base-100 border border-base-200">
-                <AdminDataTable
-                    columns={COLUMNS}
-                    data={data}
-                    loading={loading}
-                    sortField={sortBy}
-                    sortDir={sortOrder}
-                    onSort={handleSort}
-                    onRowClick={(p) => router.push(`/secure/content/pages/${p.id}`)}
-                    emptyTitle="No content pages"
-                    emptyDescription="No content pages have been created yet."
-                />
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="stat bg-base-100 shadow rounded-lg p-4">
+                    <div className="stat-title text-sm">Total</div>
+                    <div className="stat-value text-2xl text-primary">
+                        {loading ? '...' : pagination.total}
+                    </div>
+                </div>
+                <div className="stat bg-base-100 shadow rounded-lg p-4">
+                    <div className="stat-title text-sm">Published</div>
+                    <div className="stat-value text-2xl text-success">
+                        {loading ? '...' : publishedCount}
+                    </div>
+                </div>
+                <div className="stat bg-base-100 shadow rounded-lg p-4">
+                    <div className="stat-title text-sm">Drafts</div>
+                    <div className="stat-value text-2xl text-warning">
+                        {loading ? '...' : draftCount}
+                    </div>
+                </div>
+                <div className="stat bg-base-100 shadow rounded-lg p-4">
+                    <div className="stat-title text-sm">This Page</div>
+                    <div className="stat-value text-2xl text-secondary">
+                        {loading ? '...' : pages.length}
+                    </div>
+                </div>
             </div>
 
-            {totalPages > 1 && (
-                <div className="flex justify-center mt-4">
-                    <div className="join">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`}
-                                onClick={() => setPage(p)}
-                            >
-                                {p}
-                            </button>
-                        ))}
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4 items-center">
+                <SearchInput value={search} onChange={setSearch} placeholder="Search pages..." />
+                <select
+                    className="select select-sm"
+                    value={filters.app || ''}
+                    onChange={(e) => setFilters({ ...filters, app: e.target.value || undefined })}
+                >
+                    <option value="">All Apps</option>
+                    <option value="portal">Portal</option>
+                    <option value="candidate">Candidate</option>
+                    <option value="corporate">Corporate</option>
+                </select>
+                <select
+                    className="select select-sm"
+                    value={filters.status || ''}
+                    onChange={(e) => setFilters({ ...filters, status: e.target.value || undefined })}
+                >
+                    <option value="">All Statuses</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+
+            {/* Table */}
+            {loading ? (
+                <StandardListLoadingState message="Loading content pages..." />
+            ) : error ? (
+                <ErrorState message={error} onRetry={refresh} />
+            ) : pages.length === 0 ? (
+                <EmptyState
+                    icon="fa-file-lines"
+                    title="No pages found"
+                    description={
+                        search || filters.app || filters.status
+                            ? 'Try adjusting your search or filters'
+                            : 'Create your first content page to get started'
+                    }
+                />
+            ) : (
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body p-0">
+                        <div className="overflow-x-auto">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Page</th>
+                                        <th>App</th>
+                                        <th>Status</th>
+                                        <th>Category</th>
+                                        <th>Updated</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pages.map((page) => (
+                                        <tr key={page.id}>
+                                            <td>
+                                                <div>
+                                                    <div className="font-semibold">{page.title}</div>
+                                                    <div className="text-xs text-base-content/50">/{page.slug}</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className={`badge badge-sm ${getAppBadge(page.app)}`}>
+                                                    {page.app}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className={`badge badge-sm ${getStatusBadge(page.status)}`}>
+                                                    {page.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className="text-sm text-base-content/70">
+                                                    {page.category || '\u2014'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className="text-sm text-base-content/60" suppressHydrationWarning>
+                                                    {new Date(page.updated_at).toLocaleDateString()}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="flex gap-1">
+                                                    <button
+                                                        onClick={() => router.push(`/secure/content/pages/${page.id}`)}
+                                                        className="btn btn-xs btn-ghost"
+                                                        title="Edit"
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-pen" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deletePage(page)}
+                                                        className="btn btn-xs btn-ghost text-error"
+                                                        disabled={deletingId === page.id}
+                                                        title="Delete"
+                                                    >
+                                                        {deletingId === page.id ? (
+                                                            <span className="loading loading-spinner loading-xs" />
+                                                        ) : (
+                                                            <i className="fa-duotone fa-regular fa-trash" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}
+
+            {!loading && !error && pages.length > 0 && (
+                <PaginationControls pagination={pagination} setPage={setPage} />
+            )}
+
+            <CreatePageModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onCreated={(pageId) => {
+                    setShowCreateModal(false);
+                    router.push(`/secure/content/pages/${pageId}`);
+                }}
+            />
+
+            <ImportJsonModal
+                isOpen={showImportModal}
+                onClose={() => setShowImportModal(false)}
+                onImport={handleImportPage}
+                title="Import Page from JSON"
+                description="Paste or upload a JSON file matching the CMS page schema. Must include title, slug, app, and blocks."
+                placeholder={'{\n  "title": "Page Title",\n  "slug": "page-slug",\n  "app": "portal",\n  "status": "draft",\n  "blocks": [\n    { "type": "hero", "headlineWords": [...] },\n    { "type": "cta", "heading": "...", "buttons": [...] }\n  ]\n}'}
+            />
         </div>
     );
 }

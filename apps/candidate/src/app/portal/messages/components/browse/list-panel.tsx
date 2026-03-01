@@ -135,32 +135,42 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                 selectedId ? "hidden md:flex" : "flex"
             }`}
         >
-            <div className="p-4 border-b border-base-300 bg-base-100/50 backdrop-blur-sm sticky top-0 z-20">
-                <div role="tablist" className="tabs tabs-box w-full mb-4">
-                    {(["inbox", "requests", "archived"] as const).map(
-                        (tab) => (
-                            <a
-                                key={tab}
-                                role="tab"
-                                className={`tab ${
-                                    filter === tab ? "tab-active" : ""
-                                }`}
-                                onClick={() => setFilter(tab)}
-                            >
-                                {tab[0].toUpperCase() + tab.slice(1)}
-                            </a>
-                        ),
-                    )}
+            <div className="p-4 border-b border-base-300 bg-base-200">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-black tracking-tight">
+                        Inbox
+                    </h2>
                 </div>
 
-                <div className="flex gap-2">
+                {/* Search */}
+                <div className="relative mb-3">
+                    <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm" />
                     <input
                         type="search"
-                        className="input w-full"
-                        placeholder="Search messages..."
+                        className="input input-sm w-full pl-9 bg-base-100 border-base-300"
+                        placeholder="Search conversations..."
                         value={searchInput}
                         onChange={(event) => setSearchInput(event.target.value)}
                     />
+                </div>
+
+                {/* Filter pills */}
+                <div className="flex gap-1.5 flex-wrap">
+                    {(["inbox", "requests", "archived"] as const).map(
+                        (tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setFilter(tab)}
+                                className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all ${
+                                    filter === tab
+                                        ? "bg-neutral text-neutral-content"
+                                        : "bg-base-100 text-base-content/60 hover:bg-base-300"
+                                }`}
+                            >
+                                {tab[0].toUpperCase() + tab.slice(1)}
+                            </button>
+                        ),
+                    )}
                 </div>
             </div>
 

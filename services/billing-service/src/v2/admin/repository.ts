@@ -45,7 +45,10 @@ export class AdminBillingRepository {
 
         let query = this.supabase
             .from('placement_payout_transactions')
-            .select('*', { count: 'exact' });
+            .select(
+                '*, recruiter:recruiters!placement_payout_transactions_recruiter_id_fkey(id, user:users!recruiters_user_id_fkey(name, email))',
+                { count: 'exact' },
+            );
 
         if (params.status) {
             query = query.eq('status', params.status);
@@ -66,7 +69,10 @@ export class AdminBillingRepository {
 
         let query = this.supabase
             .from('escrow_holds')
-            .select('*', { count: 'exact' });
+            .select(
+                '*, placement:placements!escrow_holds_placement_id_fkey(id, candidate_name, company_name)',
+                { count: 'exact' },
+            );
 
         if (params.status) {
             query = query.eq('status', params.status);
@@ -87,7 +93,10 @@ export class AdminBillingRepository {
 
         let query = this.supabase
             .from('company_billing_profiles')
-            .select('*', { count: 'exact' });
+            .select(
+                '*, company:companies!company_billing_profiles_company_id_fkey(id, name)',
+                { count: 'exact' },
+            );
 
         if (params.search) {
             query = query.or(`stripe_customer_id.ilike.%${params.search}%`);

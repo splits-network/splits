@@ -44,16 +44,13 @@ export const LineChart = memo(function LineChart({
               .map((s) => ({
                   name: s.name,
                   type: "line",
-                  data: s.data.filter((v) => v !== undefined && v !== null),
+                  data: s.data.map((v) => v ?? 0),
                   smooth: s.smooth ?? smooth,
               }))
         : [
               {
                   type: "line",
-                  data:
-                      data
-                          ?.map((d) => d.y)
-                          .filter((v) => v !== undefined && v !== null) ?? [],
+                  data: data?.map((d) => d.y ?? 0) ?? [],
                   smooth,
               },
           ];

@@ -1,8 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AdminDataTable, AdminPageHeader, type Column } from '@/components/shared';
+import { useAuth } from '@clerk/nextjs';
+import { AdminDataTable, AdminPageHeader, AdminStatsBanner, type Column } from '@/components/shared';
 import { useStandardList } from '@/hooks/use-standard-list';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import { JobActions } from './job-actions';
 
 type AdminJob = {
     id: string;
@@ -14,63 +18,18 @@ type AdminJob = {
     created_at: string;
 };
 
-function StatusBadge({ status }: { status: string }) {
-    const map: Record<string, string> = {
-        active: 'badge-success',
-        draft: 'badge-ghost',
-        closed: 'badge-neutral',
-        paused: 'badge-warning',
-    };
-    return (
-        <span className={`badge badge-sm ${map[status] ?? 'badge-ghost'} capitalize`}>{status}</span>
-    );
-}
+const STATUS_BADGE: Record<string, string> = {
+    active: 'badge-success',
+    draft: 'badge-ghost',
+    closed: 'badge-neutral',
+    paused: 'badge-warning',
+    filled: 'badge-info',
+};
 
 function TypeBadge({ value }: { value: string | null }) {
     if (!value) return <span className="text-base-content/40 text-sm">—</span>;
-    return (
-        <span className="badge badge-ghost badge-sm capitalize">{value.replace(/_/g, ' ')}</span>
-    );
+    return <span className="badge badge-ghost badge-sm capitalize">{value.replace(/_/g, ' ')}</span>;
 }
-
-const COLUMNS: Column<AdminJob>[] = [
-    {
-        key: 'title',
-        label: 'Job Title',
-        sortable: true,
-        render: (job) => (
-            <div>
-                <p className="font-medium text-sm">{job.title}</p>
-                {job.company && <p className="text-sm text-base-content/50">{job.company.name}</p>}
-            </div>
-        ),
-    },
-    {
-        key: 'status',
-        label: 'Status',
-        render: (job) => <StatusBadge status={job.status} />,
-    },
-    {
-        key: 'commute_type',
-        label: 'Commute',
-        render: (job) => <TypeBadge value={job.commute_type} />,
-    },
-    {
-        key: 'job_level',
-        label: 'Level',
-        render: (job) => <TypeBadge value={job.job_level} />,
-    },
-    {
-        key: 'created_at',
-        label: 'Created',
-        sortable: true,
-        render: (job) => (
-            <span className="text-sm text-base-content/60">
-                {new Date(job.created_at).toLocaleDateString()}
-            </span>
-        ),
-    },
-];
 
 const STATUS_OPTIONS = [
     { value: '', label: 'All Statuses' },
@@ -78,6 +37,7 @@ const STATUS_OPTIONS = [
     { value: 'draft', label: 'Draft' },
     { value: 'paused', label: 'Paused' },
     { value: 'closed', label: 'Closed' },
+    { value: 'filled', label: 'Filled' },
 ];
 
 const COMMUTE_OPTIONS = [
@@ -99,16 +59,87 @@ const LEVEL_OPTIONS = [
 
 export function JobTable() {
     const router = useRouter();
-    const { data, loading, filters, total, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort } =
+    const { getToken } = useAuth();
+    const [jobCounts, setJobCounts] = useState<Record<string, number>>({});
+    const [countsLoading, setCountsLoading] = useState(true);
+
+    const { data, loading, filters, total, totalPages, page, goToPage, setFilter, sortBy, sortOrder, handleSort, refresh } =
         useStandardList<AdminJob>({
             endpoint: '/ats/admin/jobs',
             defaultFilters: { search: '', status: '', commute_type: '', job_level: '' },
             defaultLimit: 25,
         });
 
+    useEffect(() => {
+        async function loadCounts() {
+            try {
+                const token = await getToken();
+                if (!token) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Record<string, number> }>('/ats/admin/job-counts-by-status');
+                setJobCounts(res.data);
+            } catch { /* counts are non-critical */ } finally {
+                setCountsLoading(false);
+            }
+        }
+        loadCounts();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const columns: Column<AdminJob>[] = [
+        {
+            key: 'title',
+            label: 'Job Title',
+            sortable: true,
+            render: (job) => (
+                <div>
+                    <p className="font-medium text-sm">{job.title}</p>
+                    {job.company && <p className="text-sm text-base-content/50">{job.company.name}</p>}
+                </div>
+            ),
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            render: (job) => (
+                <span className={`badge badge-sm ${STATUS_BADGE[job.status] ?? 'badge-ghost'} capitalize`}>{job.status}</span>
+            ),
+        },
+        {
+            key: 'commute_type',
+            label: 'Commute',
+            render: (job) => <TypeBadge value={job.commute_type} />,
+        },
+        {
+            key: 'job_level',
+            label: 'Level',
+            render: (job) => <TypeBadge value={job.job_level} />,
+        },
+        {
+            key: 'created_at',
+            label: 'Created',
+            sortable: true,
+            render: (job) => (
+                <span className="text-sm text-base-content/60">
+                    {new Date(job.created_at).toLocaleDateString()}
+                </span>
+            ),
+        },
+    ];
+
+    const stats = [
+        { label: 'Active', value: jobCounts.active ?? 0, icon: 'fa-duotone fa-regular fa-circle-check', color: 'success' as const },
+        { label: 'Draft', value: jobCounts.draft ?? 0, icon: 'fa-duotone fa-regular fa-file-pen', color: 'warning' as const },
+        { label: 'Paused', value: jobCounts.paused ?? 0, icon: 'fa-duotone fa-regular fa-pause', color: 'info' as const },
+        { label: 'Closed', value: (jobCounts.closed ?? 0) + (jobCounts.filled ?? 0), icon: 'fa-duotone fa-regular fa-circle-xmark', color: 'secondary' as const },
+    ];
+
     return (
         <div>
             <AdminPageHeader title="Jobs" subtitle={`${total} total jobs`} />
+
+            <div className="mb-6">
+                <AdminStatsBanner stats={stats} loading={countsLoading} />
+            </div>
 
             <div className="flex items-center gap-3 mb-4 flex-wrap">
                 <label className="input input-sm flex items-center gap-2 flex-1 max-w-sm">
@@ -134,7 +165,7 @@ export function JobTable() {
 
             <div className="card bg-base-100 border border-base-200">
                 <AdminDataTable
-                    columns={COLUMNS}
+                    columns={columns}
                     data={data}
                     loading={loading}
                     sortField={sortBy}
@@ -143,13 +174,16 @@ export function JobTable() {
                     onRowClick={(job) => router.push(`/secure/jobs/${job.id}`)}
                     emptyTitle="No jobs found"
                     emptyDescription="No jobs match your filters."
+                    actions={(job) => (
+                        <JobActions jobId={job.id} currentStatus={job.status} onSuccess={refresh} />
+                    )}
                 />
             </div>
 
             {totalPages > 1 && (
                 <div className="flex justify-center mt-4">
                     <div className="join">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                        {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map((p) => (
                             <button key={p} className={`join-item btn btn-sm ${p === page ? 'btn-active' : ''}`} onClick={() => goToPage(p)}>
                                 {p}
                             </button>

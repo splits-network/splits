@@ -45,10 +45,10 @@ export class AdminNetworkRepository {
 
         let query = this.supabase
             .from('recruiters')
-            .select('*', { count: 'exact' });
+            .select('*, user:users!recruiters_user_id_fkey(name, email)', { count: 'exact' });
 
         if (params.search) {
-            query = query.or(`headline.ilike.%${params.search}%,bio.ilike.%${params.search}%`);
+            query = query.or(`tagline.ilike.%${params.search}%,bio.ilike.%${params.search}%`);
         }
 
         if (params.status) {
@@ -82,7 +82,10 @@ export class AdminNetworkRepository {
 
         let query = this.supabase
             .from('recruiter_companies')
-            .select('*', { count: 'exact' });
+            .select(
+                '*, company:companies!recruiter_companies_company_id_fkey(id, name, logo_url), recruiter:recruiters!recruiter_companies_recruiter_id_fkey(id, user:users!recruiters_user_id_fkey(name, email))',
+                { count: 'exact' },
+            );
 
         if (params.status) {
             query = query.eq('status', params.status);

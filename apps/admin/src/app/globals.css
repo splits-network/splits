@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* Scan Basel UI component source so BaselArticleRenderer preview has all required CSS classes */
+@source "../../../../packages/basel-ui/src";
+
 @import "./themes/light.css";
 @import "./themes/dark.css";

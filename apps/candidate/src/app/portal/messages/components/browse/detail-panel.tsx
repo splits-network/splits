@@ -1,6 +1,6 @@
 "use client";
 
-import ThreadPanel from "../thread-panel";
+import ThreadPanel from "../thread/thread-panel";
 
 interface DetailPanelProps {
     id: string | null;

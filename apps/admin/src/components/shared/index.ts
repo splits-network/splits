@@ -6,5 +6,7 @@ export { AdminConfirmModal } from './admin-confirm-modal';
 export { AdminEmptyState } from './admin-empty-state';
 export { AdminErrorState } from './admin-error-state';
 export { AdminLoadingState } from './admin-loading-state';
+export { AdminStatsBanner } from './admin-stats-banner';
+export type { StatCard } from './admin-stats-banner';
 export { ToastProvider } from './admin-toast';
 export type { ToastContextValue, ToastVariant, Toast } from './admin-toast';

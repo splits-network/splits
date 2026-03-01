@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { AdminPageHeader, AdminLoadingState } from '@/components/shared';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import { SettingsForm } from './components/settings-form';
 
 export default function SettingsPage() {
@@ -14,14 +15,10 @@ export default function SettingsPage() {
         async function load() {
             try {
                 const token = await getToken();
-                const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3030';
-                const res = await fetch(`${gatewayUrl}/api/v2/identity/admin/settings`, {
-                    headers: { Authorization: `Bearer ${token ?? ''}` },
-                });
-                if (res.ok) {
-                    const json = await res.json();
-                    setSettings(json.data ?? json);
-                }
+                if (!token) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Record<string, any> }>('/identity/admin/settings');
+                setSettings(res.data ?? res);
             } catch {
                 // Use defaults if endpoint not available
             } finally {

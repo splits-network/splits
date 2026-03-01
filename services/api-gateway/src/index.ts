@@ -258,6 +258,8 @@ async function main() {
             request.url.includes('/notifications/unread-count') ||
             request.url.includes('/notifications?') ||
             request.url.includes('/activity/heartbeat') ||
+            request.url.includes('/system-health') ||
+            request.url.includes('/chat/presence') ||
             request.method === 'OPTIONS') {
             return;
         }
@@ -283,6 +285,8 @@ async function main() {
             request.url.includes('/notifications/unread-count') ||
             request.url.includes('/notifications?') ||
             request.url.includes('/activity/heartbeat') ||
+            request.url.includes('/system-health') ||
+            request.url.includes('/chat/presence') ||
             request.method === 'OPTIONS') {
             return;
         }
