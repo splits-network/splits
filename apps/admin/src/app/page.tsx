@@ -158,12 +158,12 @@ export default function HomePage() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
-                            Employment Networks
+                            Internal Platform
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-8">
                             <span className="hero-headline-word inline-block opacity-0 text-base-content">
-                                Platform
+                                Employment Networks
                             </span>{" "}
                             <span className="hero-headline-word inline-block opacity-0 text-primary">
                                 Administration
