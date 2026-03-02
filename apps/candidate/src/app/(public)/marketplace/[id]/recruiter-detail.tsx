@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import SimilarRecruiters from "./similar-recruiters";
+import ConnectModal, { type ConnectModalHandle } from "./connect-modal";
 import { getInitials } from "../components/status-color";
 
 interface Recruiter {
@@ -57,7 +58,9 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
 
 export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
     const [activeTab, setActiveTab] = useState<TabKey>("about");
+    const [connected, setConnected] = useState(false);
     const pageRef = useRef<HTMLDivElement>(null);
+    const connectModalRef = useRef<ConnectModalHandle>(null);
 
     const name = recruiter.users?.name || recruiter.name || "Recruiter";
     const initials = getInitials(name);
@@ -242,13 +245,20 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                                 >
                                     <i className="fa-duotone fa-regular fa-bookmark" />
                                 </button>
-                                <button
-                                    className="btn btn-sm btn-primary gap-2"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    <i className="fa-duotone fa-regular fa-handshake" />
-                                    Connect
-                                </button>
+                                {connected ? (
+                                    <span className="btn btn-sm btn-success gap-2 no-animation" style={{ borderRadius: 0 }}>
+                                        <i className="fa-duotone fa-regular fa-check" />
+                                        Message Sent
+                                    </span>
+                                ) : (
+                                    <ConnectModal
+                                        ref={connectModalRef}
+                                        recruiterName={name}
+                                        recruiterUserId={recruiter.user_id}
+                                        specialization={recruiter.specialization}
+                                        onConnected={() => setConnected(true)}
+                                    />
+                                )}
                             </div>
                         </div>
 
@@ -433,8 +443,14 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                                     <div className="w-7 h-7 flex items-center justify-center bg-accent/10 text-accent">
                                         <i className="fa-duotone fa-regular fa-comment text-xs" />
                                     </div>
-                                    <button className="text-base-content/70 hover:text-primary transition-colors text-left">
-                                        Send Message
+                                    <button
+                                        className="text-base-content/70 hover:text-primary transition-colors text-left"
+                                        onClick={() => {
+                                            if (connected) return;
+                                            connectModalRef.current?.open();
+                                        }}
+                                    >
+                                        {connected ? "Message Sent" : "Send Message"}
                                     </button>
                                 </div>
                             </div>

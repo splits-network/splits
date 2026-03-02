@@ -103,9 +103,7 @@ export function TableRow({
                     {experienceDisplay(recruiter) || "\u2014"}
                 </td>
                 <td className="px-4 py-3">
-                    <span
-                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
-                    >
+                    <span className={`badge ${statusColor(status)}`}>
                         {formatStatus(status)}
                     </span>
                 </td>

@@ -10,6 +10,9 @@ export interface RecruiterWithUser extends MarketplaceRecruiterDTO {
         email: string;
         profile_image_url?: string;
     };
+    firm_name?: string | null;
+    firm_slug?: string | null;
+    firm_role?: string | null;
 }
 
 /**

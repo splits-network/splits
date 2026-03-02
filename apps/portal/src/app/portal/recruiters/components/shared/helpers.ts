@@ -65,3 +65,13 @@ export function experienceDisplay(
     if (!recruiter.years_experience) return null;
     return `${recruiter.years_experience}+ yrs`;
 }
+
+export function memberSinceDisplay(recruiter: RecruiterWithUser): string | null {
+    if (!recruiter.created_at) return null;
+    const d = new Date(recruiter.created_at);
+    const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+    return `${months[d.getMonth()]} ${d.getFullYear()}`;
+}

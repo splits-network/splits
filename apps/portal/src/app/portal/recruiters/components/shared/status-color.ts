@@ -5,19 +5,19 @@
 
 export type ViewMode = "table" | "grid" | "split";
 
-/** Recruiter status → DaisyUI semantic badge/text classes */
+/** Recruiter status → DaisyUI badge modifier classes */
 export function statusColor(status?: string): string {
     switch (status) {
         case "active":
-            return "bg-success/15 text-success";
+            return "badge-info badge-soft badge-outline";
         case "pending":
-            return "bg-warning/15 text-warning";
+            return "badge-warning badge-soft badge-outline";
         case "suspended":
-            return "bg-error/15 text-error";
+            return "badge-error badge-soft badge-outline";
         case "inactive":
-            return "bg-base-content/15 text-base-content/50";
+            return "badge-ghost";
         default:
-            return "bg-base-content/15 text-base-content/50";
+            return "badge-ghost";
     }
 }
 

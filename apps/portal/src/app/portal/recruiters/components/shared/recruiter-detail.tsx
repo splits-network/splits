@@ -63,14 +63,12 @@ export function RecruiterDetail({
                         <div className="flex-1 min-w-0">
                             {/* Status + NEW */}
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span
-                                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(status)}`}
-                                >
+                                <span className={`badge ${statusColor(status)}`}>
                                     {formatStatus(status)}
                                 </span>
                                 {isNew(recruiter) && (
-                                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
-                                        <i className="fa-duotone fa-regular fa-sparkles mr-1" />
+                                    <span className="badge badge-warning badge-soft badge-outline">
+                                        <i className="fa-duotone fa-regular fa-sparkles" />
                                         New
                                     </span>
                                 )}

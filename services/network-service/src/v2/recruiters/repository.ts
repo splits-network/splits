@@ -237,6 +237,10 @@ export class RecruiterRepository {
                     // JOIN with recruiter_reputation table via recruiter_id foreign key
                     selectParts.push('recruiter_reputation!recruiter_id(recruiter_id, total_submissions, total_hires, hire_rate, total_placements, completed_placements, failed_placements, completion_rate, total_collaborations, collaboration_rate, avg_response_time_hours, reputation_score, last_calculated_at, created_at, updated_at)');
                     break;
+                case 'firm':
+                    // JOIN through firm_members → firms to get the recruiter's firm name
+                    selectParts.push('firm_members!recruiter_id(firm_id, role, firms!firm_id(id, name, slug))');
+                    break;
             }
         }
 

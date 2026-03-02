@@ -102,7 +102,7 @@ function RecruitersContent() {
         defaultSortOrder: "desc",
         defaultLimit: 24,
         syncToUrl: true,
-        include: "user,reputation",
+        include: "user,reputation,firm",
     });
 
     const handleSelect = useCallback((recruiter: RecruiterWithUser) => {

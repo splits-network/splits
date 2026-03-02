@@ -82,9 +82,7 @@ export function SplitItem({
                         </>
                     ) : null}
                 </div>
-                <span
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(status)}`}
-                >
+                <span className={`badge badge-sm ${statusColor(status)}`}>
                     {formatStatus(status)}
                 </span>
             </div>

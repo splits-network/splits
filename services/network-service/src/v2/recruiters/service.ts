@@ -144,7 +144,15 @@ export class RecruiterServiceV2 {
     private flattenRecruiterData(recruiter: any): any {
         if (!recruiter) return recruiter;
 
-        const { recruiter_reputation, ...rest } = recruiter;
+        const { recruiter_reputation, firm_members, ...rest } = recruiter;
+
+        // Flatten firm data — take first firm membership's firm name
+        if (firm_members && Array.isArray(firm_members) && firm_members.length > 0) {
+            const membership = firm_members[0];
+            rest.firm_name = membership.firms?.name || null;
+            rest.firm_slug = membership.firms?.slug || null;
+            rest.firm_role = membership.role || null;
+        }
 
         // Helper to extract reputation fields from a reputation record
         const flattenReputation = (rep: any) => ({

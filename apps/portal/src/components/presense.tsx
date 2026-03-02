@@ -28,6 +28,7 @@ export function Presence({
                     ? "status-sm"
                     : "status-xs";
     const statusLabel = label ?? (isActive ? "Online" : "Offline");
+    const badgeSizeClass = size === "xs" ? "badge-xs" : size === "sm" ? "badge-sm" : size === "lg" ? "badge-lg" : "";
 
     if (variant === "both") {
         return (
@@ -40,7 +41,7 @@ export function Presence({
                     />
                 </span>
                 <span
-                    className={`badge badge-sm ${isActive ? "badge-outline badge-success badge-soft" : ""} gap-2}`}
+                    className={`badge ${badgeSizeClass} ${isActive ? "badge-outline badge-success badge-soft" : ""} gap-2`}
                     aria-label={statusLabel}
                     title={statusLabel}
                 >
@@ -53,7 +54,7 @@ export function Presence({
     if (variant === "badge") {
         return (
             <span
-                className={`badge badge-sm ${isActive ? "badge-outline badge-success badge-soft" : ""} gap-2} ${className}`}
+                className={`badge ${badgeSizeClass} ${isActive ? "badge-outline badge-success badge-soft" : ""} gap-2 ${className}`}
                 aria-label={statusLabel}
                 title={statusLabel}
             >
