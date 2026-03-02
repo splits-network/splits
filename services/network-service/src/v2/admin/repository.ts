@@ -99,24 +99,88 @@ export class AdminNetworkRepository {
         return { data: data || [], pagination: buildPagination(count || 0, page, limit) };
     }
 
+    async listFirmsAdmin(params: AdminListParams): Promise<AdminListResponse<any>> {
+        const { page, limit, offset } = paginate(params);
+        const sortBy = params.sort_by || 'created_at';
+        const ascending = params.sort_order === 'asc';
+
+        let query = this.supabase
+            .from('firms')
+            .select('*, owner:users!firms_owner_user_id_fkey(name, email)', { count: 'exact' });
+
+        if (params.search) {
+            query = query.ilike('name', `%${params.search}%`);
+        }
+
+        if (params.status) {
+            query = query.eq('status', params.status);
+        }
+
+        if (params.marketplace_status === 'pending_approval') {
+            query = query.eq('marketplace_visible', true).is('marketplace_approved_at', null);
+        } else if (params.marketplace_status === 'approved') {
+            query = query.not('marketplace_approved_at', 'is', null);
+        } else if (params.marketplace_status === 'not_listed') {
+            query = query.eq('marketplace_visible', false);
+        }
+
+        query = query.order(sortBy, { ascending }).range(offset, offset + limit - 1);
+
+        const { data, count, error } = await query;
+        if (error) throw error;
+
+        return { data: data || [], pagination: buildPagination(count || 0, page, limit) };
+    }
+
+    async updateFirmMarketplaceApproval(firmId: string, approved: boolean): Promise<any> {
+        const { data, error } = await this.supabase
+            .from('firms')
+            .update({
+                marketplace_approved_at: approved ? new Date().toISOString() : null,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', firmId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
     async getAdminCounts(): Promise<{
         recruiters: number;
         recruiters_pending: number;
         recruiter_companies: number;
+        firms: number;
+        firms_pending_approval: number;
+        firms_marketplace_active: number;
     }> {
-        const [recruitersRes, pendingRes, companiesRes] = await Promise.all([
+        const [recruitersRes, pendingRes, companiesRes, firmsRes, firmsPendingRes, firmsActiveRes] = await Promise.all([
             this.supabase.from('recruiters').select('id', { count: 'exact', head: true }),
             this.supabase
                 .from('recruiters')
                 .select('id', { count: 'exact', head: true })
                 .eq('status', 'pending'),
             this.supabase.from('recruiter_companies').select('id', { count: 'exact', head: true }),
+            this.supabase.from('firms').select('id', { count: 'exact', head: true }),
+            this.supabase
+                .from('firms')
+                .select('id', { count: 'exact', head: true })
+                .eq('marketplace_visible', true)
+                .is('marketplace_approved_at', null),
+            this.supabase
+                .from('firms')
+                .select('id', { count: 'exact', head: true })
+                .not('marketplace_approved_at', 'is', null),
         ]);
 
         return {
             recruiters: recruitersRes.count || 0,
             recruiters_pending: pendingRes.count || 0,
             recruiter_companies: companiesRes.count || 0,
+            firms: firmsRes.count || 0,
+            firms_pending_approval: firmsPendingRes.count || 0,
+            firms_marketplace_active: firmsActiveRes.count || 0,
         };
     }
 

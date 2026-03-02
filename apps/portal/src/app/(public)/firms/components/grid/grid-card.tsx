@@ -1,25 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import type { PublicFirm } from "../../types";
 import { firmLocation, firmInitials } from "../../types";
 
 interface GridCardProps {
     firm: PublicFirm;
-    isSelected: boolean;
-    onSelect: () => void;
 }
 
-export function GridCard({ firm, isSelected, onSelect }: GridCardProps) {
+export function GridCard({ firm }: GridCardProps) {
     const location = firmLocation(firm);
     const initials = firmInitials(firm.name);
+    const href = firm.slug ? `/firms/${firm.slug}` : "#";
 
     return (
-        <div
-            onClick={onSelect}
-            className={[
-                "firm-card group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30 opacity-0",
-                isSelected ? "border-primary border-l-4" : "border-base-300",
-            ].join(" ")}
+        <Link
+            href={href}
+            className="firm-card group flex flex-col bg-base-100 border-2 border-base-300 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30"
             style={{ borderRadius: 0 }}
         >
             {/* Logo + Name */}
@@ -97,6 +94,6 @@ export function GridCard({ firm, isSelected, onSelect }: GridCardProps) {
                     </span>
                 )}
             </div>
-        </div>
+        </Link>
     );
 }

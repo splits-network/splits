@@ -1,46 +1,17 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, Suspense } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useMemo, useRef, Suspense } from "react";
 import { useStandardList } from "@/hooks/use-standard-list";
 import { PaginationControls, LoadingState, ErrorState } from "@/components/standard-lists";
 import { BaselEmptyState } from "@splits-network/basel-ui";
-import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import type { PublicFirm, PublicFirmFilters } from "./types";
 import { FirmsAnimator } from "./firms-animator";
 import { HeaderSection } from "./components/header-section";
 import { ControlsBar } from "./components/controls-bar";
 import { GridView } from "./components/grid/grid-view";
-import { TableView } from "./components/table/table-view";
-import { SplitView } from "./components/split/split-view";
 
 function FirmsClientInner() {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
     const contentRef = useRef<HTMLDivElement>(null);
-
-    const [viewMode, setViewMode] = useState<ViewMode>(() => {
-        const param = searchParams.get("view");
-        if (param === "table" || param === "split") return param;
-        return "grid";
-    });
-
-    const [selectedFirmId, setSelectedFirmId] = useState<string | null>(
-        () => searchParams.get("firmId") || null,
-    );
-
-    useEffect(() => {
-        const params = new URLSearchParams(searchParams.toString());
-        if (selectedFirmId) params.set("firmId", selectedFirmId);
-        else params.delete("firmId");
-        if (viewMode !== "grid") params.set("view", viewMode);
-        else params.delete("view");
-        const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
-        router.replace(newUrl, { scroll: false });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedFirmId, viewMode, pathname]);
 
     const {
         data: firms,
@@ -71,19 +42,6 @@ function FirmsClientInner() {
         acceptsSubmissions: firms.filter((f) => f.accepts_candidate_submissions).length,
     }), [firms, pagination]);
 
-    const handleSelect = useCallback((firm: PublicFirm) => {
-        setSelectedFirmId((prev) => (prev === firm.id ? null : firm.id));
-    }, []);
-
-    const handleViewModeChange = useCallback(
-        (mode: ViewMode) => {
-            if (mode === viewMode) return;
-            setViewMode(mode);
-            setSelectedFirmId(null);
-        },
-        [viewMode],
-    );
-
     return (
         <FirmsAnimator contentRef={contentRef}>
             <HeaderSection
@@ -95,13 +53,11 @@ function FirmsClientInner() {
             <ControlsBar
                 resultCount={firms.length}
                 totalCount={total}
-                viewMode={viewMode}
-                onViewModeChange={handleViewModeChange}
                 loading={loading}
                 refresh={refresh}
             />
 
-            <section className="content-area opacity-0">
+            <section className="content-area" style={{ opacity: loading ? 0 : 1, transition: 'opacity 0.4s ease' }}>
                 <div className="container mx-auto px-6 lg:px-12 py-8">
                     {loading ? (
                         <LoadingState />
@@ -124,15 +80,7 @@ function FirmsClientInner() {
                         />
                     ) : (
                         <div ref={contentRef}>
-                            {viewMode === "grid" && (
-                                <GridView firms={firms} selectedId={selectedFirmId} onSelect={handleSelect} />
-                            )}
-                            {viewMode === "table" && (
-                                <TableView firms={firms} selectedId={selectedFirmId} onSelect={handleSelect} />
-                            )}
-                            {viewMode === "split" && (
-                                <SplitView firms={firms} selectedId={selectedFirmId} onSelect={handleSelect} />
-                            )}
+                            <GridView firms={firms} />
                         </div>
                     )}
 

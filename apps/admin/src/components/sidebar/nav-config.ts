@@ -67,6 +67,7 @@ export const NAV_SECTIONS: NavSection[] = [
                 keywords: ['user', 'account', 'member'],
             },
             { href: '/secure/organizations', label: 'Organizations', icon: 'fa-building', keywords: ['org', 'organization'] },
+            { href: '/secure/firms', label: 'Firms', icon: 'fa-building-columns', keywords: ['firm', 'agency', 'marketplace', 'approval'] },
             { href: '/secure/companies', label: 'Companies', icon: 'fa-city', keywords: ['company', 'employer'] },
             {
                 href: '/secure/jobs',

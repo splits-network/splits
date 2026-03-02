@@ -69,6 +69,47 @@ export function registerAdminNetworkRoutes(
         }
     });
 
+    // GET /admin/firms
+    app.get('/admin/firms', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const params = request.query as any;
+            const result = await adminService.listFirmsAdmin({
+                page: params.page ? parseInt(params.page, 10) : 1,
+                limit: params.limit ? parseInt(params.limit, 10) : 25,
+                search: params.search,
+                sort_by: params.sort_by,
+                sort_order: params.sort_order,
+                status: params.status,
+                marketplace_status: params.marketplace_status,
+            });
+            reply.send(result);
+        } catch (error) {
+            reply.code(500).send({ error: { message: 'Failed to list firms' } });
+        }
+    });
+
+    // PATCH /admin/firms/:id/marketplace-approval
+    app.patch('/admin/firms/:id/marketplace-approval', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { id } = request.params as { id: string };
+            const { approved } = request.body as { approved: boolean };
+
+            if (typeof approved !== 'boolean') {
+                return reply.code(400).send({ error: { message: 'approved (boolean) is required' } });
+            }
+
+            const firm = await adminService.updateFirmMarketplaceApproval(id, approved);
+            reply.send({ data: firm });
+        } catch (error) {
+            const code = (error as any)?.code;
+            if (code === 'PGRST116') {
+                reply.code(404).send({ error: { message: 'Firm not found' } });
+            } else {
+                reply.code(500).send({ error: { message: 'Failed to update firm marketplace approval' } });
+            }
+        }
+    });
+
     // GET /admin/counts
     app.get('/admin/counts', async (request: FastifyRequest, reply: FastifyReply) => {
         try {

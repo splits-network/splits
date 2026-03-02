@@ -2,17 +2,13 @@
 
 import {
     BaselControlsBarShell,
-    BaselViewModeSelector,
     BaselResultsCount,
     BaselRefreshButton,
-    type BaselViewMode,
 } from "@splits-network/basel-ui";
 
 interface ControlsBarProps {
     resultCount: number;
     totalCount: number;
-    viewMode: BaselViewMode;
-    onViewModeChange: (mode: BaselViewMode) => void;
     loading: boolean;
     refresh: () => void;
 }
@@ -20,8 +16,6 @@ interface ControlsBarProps {
 export function ControlsBar({
     resultCount,
     totalCount,
-    viewMode,
-    onViewModeChange,
     loading,
     refresh,
 }: ControlsBarProps) {
@@ -31,13 +25,7 @@ export function ControlsBar({
                 <BaselResultsCount count={resultCount} total={totalCount} />
             }
             statusRight={
-                <>
-                    <BaselRefreshButton onClick={refresh} loading={loading} />
-                    <BaselViewModeSelector
-                        viewMode={viewMode}
-                        onViewModeChange={onViewModeChange}
-                    />
-                </>
+                <BaselRefreshButton onClick={refresh} loading={loading} />
             }
         />
     );
