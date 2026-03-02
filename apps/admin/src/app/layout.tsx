@@ -25,10 +25,21 @@ export default function RootLayout({
     }
 
     return (
-        <ClerkProvider publishableKey={publishableKey} dynamic>
+        <ClerkProvider publishableKey={publishableKey}>
             <html lang="en" suppressHydrationWarning>
                 <head>
                     <ThemeScript />
+
+                    {/* Preconnect to Clerk for faster auth loading */}
+                    <link
+                        rel="preconnect"
+                        href="https://clerk.admin.employment-networks.com"
+                    />
+                    <link
+                        rel="dns-prefetch"
+                        href="https://clerk.admin.employment-networks.com"
+                    />
+
                     <Script
                         src="https://kit.fontawesome.com/728c8ddec8.js"
                         crossOrigin="anonymous"
