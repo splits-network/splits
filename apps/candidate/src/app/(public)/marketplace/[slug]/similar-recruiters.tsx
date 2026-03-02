@@ -8,6 +8,7 @@ import { getInitials } from "../components/status-color";
 interface SimilarRecruiter {
     id: string;
     user_id: string;
+    slug?: string;
     tagline?: string;
     total_placements?: number;
     reputation_score?: number;
@@ -87,7 +88,7 @@ export default function SimilarRecruiters({
                     const initials = getInitials(name);
 
                     return (
-                        <Link key={r.id} href={`/marketplace/${r.id}`}>
+                        <Link key={r.id} href={`/marketplace/${r.slug || r.id}`}>
                             <div className="flex items-center gap-3 p-3 bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer">
                                 <div className="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-primary/10 text-primary font-bold text-xs">
                                     {initials}

@@ -149,12 +149,12 @@ export default function TableView({
                                 {/* Action */}
                                 <td className="px-6 py-4">
                                     <Link
-                                        href={`/marketplace/${recruiter.id}`}
+                                        href={`/marketplace/${recruiter.slug || recruiter.id}`}
                                         onClick={(e) => e.stopPropagation()}
-                                        className="btn btn-sm btn-primary"
-                                        style={{ borderRadius: 0 }}
+                                        className="btn btn-sm btn-link gap-1"
                                     >
-                                        View
+                                        View Profile
+                                        <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                                     </Link>
                                 </td>
                             </tr>

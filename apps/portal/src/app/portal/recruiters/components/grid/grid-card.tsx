@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
 import { statusColor } from "../shared/status-color";
@@ -283,9 +284,16 @@ export function GridCard({
 
             {/* Footer: actions */}
             <div
-                className="mt-auto flex items-center justify-end gap-3 px-6 py-4 border-t border-base-200"
+                className="mt-auto flex items-center justify-between gap-3 px-6 py-4 border-t border-base-200"
                 onClick={(e) => e.stopPropagation()}
             >
+                <Link
+                    href={`/portal/recruiters/${recruiter.slug || recruiter.id}`}
+                    className="btn btn-sm btn-link gap-1"
+                >
+                    View Profile
+                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
+                </Link>
                 <RecruiterActionsToolbar
                     recruiter={recruiter}
                     variant="icon-only"

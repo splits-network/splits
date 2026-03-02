@@ -69,11 +69,11 @@ export default function SplitView({
                             Back
                         </button>
                         <Link
-                            href={`/marketplace/${selectedRecruiter.id}`}
-                            className="btn btn-sm btn-primary"
-                            style={{ borderRadius: 0 }}
+                            href={`/marketplace/${selectedRecruiter.slug || selectedRecruiter.id}`}
+                            className="btn btn-sm btn-link gap-1"
                         >
                             Full Profile
+                            <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                         </Link>
                     </div>
                     <SplitDetailPanel recruiter={selectedRecruiter} />
@@ -210,12 +210,11 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                 {/* CTA */}
                 <div className="border-t-2 border-base-300 pt-6">
                     <Link
-                        href={`/marketplace/${recruiter.id}`}
-                        className="btn btn-primary w-full"
-                        style={{ borderRadius: 0 }}
+                        href={`/marketplace/${recruiter.slug || recruiter.id}`}
+                        className="btn btn-link w-full gap-2"
                     >
-                        <i className="fa-duotone fa-regular fa-user mr-2" />
                         View Full Profile
+                        <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                     </Link>
                 </div>
             </div>

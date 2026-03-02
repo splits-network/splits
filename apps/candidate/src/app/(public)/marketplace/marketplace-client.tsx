@@ -20,6 +20,7 @@ import SplitView from "./components/split-view";
 export interface Recruiter {
     id: string;
     user_id: string;
+    slug?: string;
     name?: string;
     email?: string;
     phone?: string;
