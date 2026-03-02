@@ -26,11 +26,26 @@ spec:
                         value: "3200"
                       - name: NEXT_PUBLIC_ADMIN_GATEWAY_URL
                         value: "https://admin.api.employment-networks.com"
+                      - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: clerk-secrets
+                                key: admin-clerk-publishable-key
                       - name: CLERK_SECRET_KEY
                         valueFrom:
                             secretKeyRef:
                                 name: clerk-secrets
                                 key: admin-clerk-secret-key
+                      - name: NEXT_PUBLIC_CLERK_SIGN_IN_URL
+                        value: "/sign-in"
+                      - name: NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
+                        value: "/secure"
+                      - name: NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
+                        value: "/secure"
+                      - name: NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+                        value: "/secure"
+                      - name: NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
+                        value: "/secure"
                   resources:
                       requests:
                           cpu: 100m
