@@ -15,10 +15,21 @@ export class AdminNetworkService {
         return this.repository.listRecruiterCompaniesAdmin(params);
     }
 
+    listFirmsAdmin(params: AdminListParams): Promise<AdminListResponse<any>> {
+        return this.repository.listFirmsAdmin(params);
+    }
+
+    updateFirmMarketplaceApproval(firmId: string, approved: boolean): Promise<any> {
+        return this.repository.updateFirmMarketplaceApproval(firmId, approved);
+    }
+
     getAdminCounts(): Promise<{
         recruiters: number;
         recruiters_pending: number;
         recruiter_companies: number;
+        firms: number;
+        firms_pending_approval: number;
+        firms_marketplace_active: number;
     }> {
         return this.repository.getAdminCounts();
     }
