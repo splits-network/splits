@@ -24,6 +24,7 @@ import {
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
 export interface MarketplaceSettingsData {
+    slug: string;
     marketplace_enabled: boolean;
     marketplace_visibility: "public" | "limited" | "hidden";
     industries: string[];
@@ -72,6 +73,7 @@ export function useMarketplaceSettings() {
 /* ─── Provider ───────────────────────────────────────────────────────────── */
 
 const DEFAULT_SETTINGS: MarketplaceSettingsData = {
+    slug: "",
     marketplace_enabled: false,
     marketplace_visibility: "public",
     industries: [],
@@ -121,6 +123,7 @@ export function MarketplaceSettingsProvider({
             const data = result.data;
             setRecruiterId(data.id);
             setSettings({
+                slug: data.slug || "",
                 marketplace_enabled: data.marketplace_enabled ?? false,
                 marketplace_visibility:
                     data.marketplace_visibility || "public",
@@ -161,6 +164,7 @@ export function MarketplaceSettingsProvider({
             const changesToSave = { ...pendingChangesRef.current };
             pendingChangesRef.current = {};
             const payload = {
+                slug: changesToSave.slug ?? settings.slug,
                 marketplace_enabled:
                     changesToSave.marketplace_enabled ??
                     settings.marketplace_enabled,

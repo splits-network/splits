@@ -177,9 +177,8 @@ function HeroHeader({
                     />
                     <div className="w-px self-stretch bg-neutral-content/20" />
                     <Link
-                        href={`/portal/recruiters/${recruiter.id}`}
-                        className="btn btn-sm btn-ghost gap-2"
-                        style={{ borderRadius: 0 }}
+                        href={`/portal/recruiters/${recruiter.slug || recruiter.id}`}
+                        className="btn btn-sm btn-link gap-2"
                     >
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                         <span className="hidden md:inline">View Profile</span>

@@ -91,17 +91,7 @@ const ConnectModal = forwardRef<ConnectModalHandle, ConnectModalProps>(
         }
 
         return (
-            <>
-                <button
-                    className="btn btn-sm btn-primary gap-2"
-                    style={{ borderRadius: 0 }}
-                    onClick={open}
-                >
-                    <i className="fa-duotone fa-regular fa-handshake" />
-                    Connect
-                </button>
-
-                <dialog ref={dialogRef} className="modal">
+            <dialog ref={dialogRef} className="modal">
                     <div className="modal-box" style={{ borderRadius: 0 }}>
                         <h3 className="text-lg font-black tracking-tight mb-1">
                             Connect with {recruiterName}
@@ -157,7 +147,6 @@ const ConnectModal = forwardRef<ConnectModalHandle, ConnectModalProps>(
                         <button>close</button>
                     </form>
                 </dialog>
-            </>
         );
     },
 );

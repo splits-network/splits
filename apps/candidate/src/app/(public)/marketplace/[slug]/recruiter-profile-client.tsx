@@ -5,62 +5,107 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
-import type { RecruiterWithUser } from "../types";
-import { getDisplayName, getInitials } from "../types";
-import {
-    recruiterEmail,
-    recruiterLocation,
-    placementsDisplay,
-    successRateDisplay,
-    reputationDisplay,
-    experienceDisplay,
-    memberSinceDisplay,
-} from "../components/shared/helpers";
-import RecruiterActionsToolbar from "../components/shared/actions-toolbar";
+import ConnectModal, { type ConnectModalHandle } from "./connect-modal";
+import SimilarRecruiters from "./similar-recruiters";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
+interface Recruiter {
+    id: string;
+    user_id: string;
+    slug?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    tagline?: string;
+    specialization?: string;
+    firm_name?: string;
+    status?: string;
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    years_experience?: number;
+    bio?: string;
+    total_placements?: number;
+    success_rate?: number;
+    reputation_score?: number;
+    candidate_recruiter?: boolean;
+    company_recruiter?: boolean;
+    created_at: string;
+    users?: {
+        id: string;
+        name?: string;
+        email?: string;
+        profile_image_url?: string;
+    };
+}
+
 type ProfileTab = "about" | "experience" | "reviews";
+
+function getDisplayName(recruiter: Recruiter): string {
+    return (
+        recruiter.users?.name ||
+        recruiter.name ||
+        recruiter.users?.email ||
+        "Unknown Recruiter"
+    );
+}
+
+function getInitials(name: string): string {
+    const words = name.split(" ");
+    return words.length > 1
+        ? (words[0][0] + words[words.length - 1][0]).toUpperCase()
+        : (words[0]?.[0] || "").toUpperCase();
+}
+
+function memberSinceDisplay(recruiter: Recruiter): string | null {
+    if (!recruiter.created_at) return null;
+    const d = new Date(recruiter.created_at);
+    return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
 
 export default function RecruiterProfileClient({
     recruiter,
 }: {
-    recruiter: RecruiterWithUser;
+    recruiter: Recruiter;
 }) {
     const mainRef = useRef<HTMLElement>(null);
+    const connectModalRef = useRef<ConnectModalHandle>(null);
     const [activeTab, setActiveTab] = useState<ProfileTab>("about");
+    const [connected, setConnected] = useState(false);
 
     const name = getDisplayName(recruiter);
-    const location = recruiterLocation(recruiter);
     const memberSince = memberSinceDisplay(recruiter);
-    const email = recruiterEmail(recruiter);
+    const email = recruiter.users?.email || recruiter.email || null;
 
     const stats = [
-        {
-            label: "Placements",
-            value: placementsDisplay(recruiter),
-            icon: "fa-duotone fa-regular fa-trophy",
-        },
-        successRateDisplay(recruiter)
+        recruiter.total_placements != null
+            ? {
+                  label: "Placements",
+                  value: String(recruiter.total_placements),
+                  icon: "fa-duotone fa-regular fa-trophy",
+              }
+            : null,
+        recruiter.success_rate != null
             ? {
                   label: "Success Rate",
-                  value: successRateDisplay(recruiter)!,
+                  value: `${Math.round(recruiter.success_rate)}%`,
                   icon: "fa-duotone fa-regular fa-bullseye",
               }
             : null,
-        experienceDisplay(recruiter)
+        recruiter.years_experience != null && recruiter.years_experience > 0
             ? {
                   label: "Experience",
-                  value: experienceDisplay(recruiter)!,
+                  value: `${recruiter.years_experience}+ yrs`,
                   icon: "fa-duotone fa-regular fa-clock",
               }
             : null,
-        reputationDisplay(recruiter)
+        recruiter.reputation_score != null
             ? {
                   label: "Rating",
-                  value: reputationDisplay(recruiter)!,
+                  value: recruiter.reputation_score.toFixed(1),
                   icon: "fa-duotone fa-regular fa-star",
               }
             : null,
@@ -218,14 +263,14 @@ export default function RecruiterProfileClient({
                                 </h1>
                                 <p className="text-lg text-neutral-content/60 mb-3">
                                     {recruiter.tagline ||
-                                        recruiter.firm_name ||
+                                        recruiter.specialization ||
                                         "Recruiter"}
                                 </p>
                                 <div className="flex flex-wrap gap-3">
-                                    {location && (
+                                    {recruiter.location && (
                                         <span className="profile-meta opacity-0 flex items-center gap-1.5 text-sm text-neutral-content/40">
                                             <i className="fa-duotone fa-regular fa-location-dot text-xs" />
-                                            {location}
+                                            {recruiter.location}
                                         </span>
                                     )}
                                     {memberSince && (
@@ -239,13 +284,43 @@ export default function RecruiterProfileClient({
                         </div>
 
                         {/* Actions */}
-                        <div className="profile-action opacity-0 flex flex-wrap gap-2">
-                            <RecruiterActionsToolbar
-                                recruiter={recruiter}
-                                variant="descriptive"
-                                size="md"
-                                showActions={{ viewDetails: false }}
-                            />
+                        <div className="flex flex-wrap gap-2">
+                            <button
+                                className="profile-action opacity-0 btn btn-primary"
+                                onClick={() => connectModalRef.current?.open()}
+                                disabled={connected}
+                            >
+                                <i className="fa-duotone fa-regular fa-comments" />
+                                {connected ? "Connected" : "Message"}
+                            </button>
+                            <button
+                                className="profile-action opacity-0 btn btn-ghost border-neutral-content/20"
+                                onClick={() =>
+                                    connectModalRef.current?.open()
+                                }
+                                disabled={connected}
+                            >
+                                <i className="fa-duotone fa-regular fa-user-plus" />
+                                Connect
+                            </button>
+                            <button
+                                className="profile-action opacity-0 btn btn-ghost border-neutral-content/20"
+                                onClick={() => {
+                                    if (navigator.share) {
+                                        navigator.share({
+                                            title: name,
+                                            url: window.location.href,
+                                        });
+                                    } else {
+                                        navigator.clipboard.writeText(
+                                            window.location.href,
+                                        );
+                                    }
+                                }}
+                            >
+                                <i className="fa-duotone fa-regular fa-share-nodes" />
+                                Share
+                            </button>
                         </div>
                     </div>
 
@@ -423,11 +498,11 @@ export default function RecruiterProfileClient({
                                               value: recruiter.phone,
                                           }
                                         : null,
-                                    location
+                                    recruiter.location
                                         ? {
                                               icon: "fa-duotone fa-regular fa-location-dot",
                                               label: "Location",
-                                              value: location,
+                                              value: recruiter.location,
                                           }
                                         : null,
                                 ]
@@ -456,7 +531,7 @@ export default function RecruiterProfileClient({
                         </div>
 
                         {/* Badges */}
-                        <div className="bg-base-200 p-6">
+                        <div className="bg-base-200 p-6 mb-6">
                             <h3 className="text-sm font-black uppercase tracking-wider mb-4">
                                 Badges
                             </h3>
@@ -509,9 +584,25 @@ export default function RecruiterProfileClient({
                                     ))}
                             </div>
                         </div>
+
+                        {/* Similar Recruiters */}
+                        <SimilarRecruiters
+                            currentRecruiterId={recruiter.id}
+                            industries={recruiter.industries}
+                            specialties={recruiter.specialties}
+                        />
                     </div>
                 </div>
             </section>
+
+            {/* Connect Modal */}
+            <ConnectModal
+                ref={connectModalRef}
+                recruiterName={name}
+                recruiterUserId={recruiter.user_id}
+                specialization={recruiter.specialization}
+                onConnected={() => setConnected(true)}
+            />
         </main>
     );
 }

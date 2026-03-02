@@ -280,11 +280,11 @@ export default function GridCard({
                 onClick={(e) => e.stopPropagation()}
             >
                 <Link
-                    href={`/marketplace/${recruiter.id}`}
-                    className="text-sm font-bold uppercase tracking-wider text-primary hover:text-primary/70 transition-colors"
+                    href={`/marketplace/${recruiter.slug || recruiter.id}`}
+                    className="btn btn-sm btn-link gap-1"
                 >
                     View Profile
-                    <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
+                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                 </Link>
             </div>
         </div>

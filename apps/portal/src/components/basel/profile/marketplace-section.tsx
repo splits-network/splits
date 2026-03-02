@@ -117,6 +117,35 @@ export function MarketplaceSection() {
                 />
             </div>
 
+            {/* Profile URL */}
+            <div className="py-5 border-b border-base-300">
+                <p className="font-semibold mb-1">Profile URL</p>
+                <p className="text-sm text-base-content/40 mb-3">
+                    Customize your public profile link
+                </p>
+                <div className="flex items-center gap-0 max-w-lg">
+                    <span className="px-3 py-2 bg-base-200 border border-base-300 border-r-0 text-sm text-base-content/40 select-none whitespace-nowrap">
+                        /marketplace/
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="your-name"
+                        value={settings.slug}
+                        onChange={(e) => {
+                            const value = e.target.value
+                                .toLowerCase()
+                                .replace(/[^a-z0-9-]/g, "");
+                            updateSettings({ slug: value });
+                        }}
+                        className="input input-bordered flex-1 min-w-0"
+                        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                    />
+                </div>
+                <p className="text-sm text-base-content/30 mt-1">
+                    Lowercase letters, numbers, and hyphens only
+                </p>
+            </div>
+
             {/* Recruiter Type */}
             <div className="py-5 border-b border-base-300">
                 <p className="font-semibold mb-1">Recruiter type</p>
