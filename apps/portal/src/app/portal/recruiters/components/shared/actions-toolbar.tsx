@@ -52,8 +52,17 @@ export default function RecruiterActionsToolbar({
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
 
-    const { companies, recruiterRelationships, refreshRelationships } =
-        useCompanyContext();
+    let companies: any[] = [];
+    let recruiterRelationships: Map<string, any> = new Map();
+    let refreshRelationships = () => {};
+    try {
+        const companyCtx = useCompanyContext();
+        companies = companyCtx.companies;
+        recruiterRelationships = companyCtx.recruiterRelationships;
+        refreshRelationships = companyCtx.refreshRelationships;
+    } catch {
+        // CompanyProvider not available (e.g., on public pages) - use defaults
+    }
 
     const companyRelationship = recruiterRelationships.get(recruiter.id);
     const hasActiveRelationship = companyRelationship?.status === "active";
@@ -110,8 +119,7 @@ export default function RecruiterActionsToolbar({
         viewDetails: showActions.viewDetails === true,
         message: showActions.message !== false,
         inviteToCompany: showActions.inviteToCompany !== false && canInvite,
-        endRelationship:
-            (isCompanyUser || isAdmin) && hasActiveRelationship,
+        endRelationship: (isCompanyUser || isAdmin) && hasActiveRelationship,
     };
 
     const getLayoutClass = () =>
@@ -239,8 +247,7 @@ export default function RecruiterActionsToolbar({
                 )}
 
                 {actions.message &&
-                    (actions.inviteToCompany ||
-                        actions.endRelationship) && (
+                    (actions.inviteToCompany || actions.endRelationship) && (
                         <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
                     )}
 
