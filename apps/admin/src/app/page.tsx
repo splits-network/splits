@@ -196,6 +196,13 @@ export default function HomePage() {
                             <i className="fa-duotone fa-regular fa-lock" />
                             Sign In to Administration
                         </Link>
+                        <div className="flex items-center justify-center gap-4 mt-8 text-sm opacity-50">
+                            <a href="https://employment-networks.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">Privacy Policy</a>
+                            <span>·</span>
+                            <a href="https://employment-networks.com/terms-of-service" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">Terms of Service</a>
+                            <span>·</span>
+                            <a href="https://employment-networks.com/cookie-policy" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">Cookie Policy</a>
+                        </div>
                     </div>
                 </div>
             </footer>
