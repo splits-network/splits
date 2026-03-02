@@ -137,7 +137,7 @@ export default function HireModal({
 
             <form onSubmit={handleSubmit}>
                 <BaselModalBody>
-                    <div className="space-y-5">
+                    <div className="space-y-5 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
                         {/* Candidate/Job Summary */}
                         <div className="bg-base-200 p-4 border-l-4 border-success">
                             <p className="font-semibold text-base-content">
@@ -152,7 +152,9 @@ export default function HireModal({
                         </div>
 
                         {error && (
-                            <BaselAlertBox variant="error">{error}</BaselAlertBox>
+                            <BaselAlertBox variant="error">
+                                {error}
+                            </BaselAlertBox>
                         )}
 
                         <fieldset>
@@ -210,8 +212,9 @@ export default function HireModal({
                                 </p>
                                 {!hasFeePercentage && (
                                     <BaselAlertBox variant="warning">
-                                        No fee percentage configured on this job.
-                                        The placement fee will default to $0.
+                                        No fee percentage configured on this
+                                        job. The placement fee will default to
+                                        $0.
                                     </BaselAlertBox>
                                 )}
                                 <div className="grid grid-cols-2 gap-1 text-sm">
