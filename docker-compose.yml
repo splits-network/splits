@@ -439,6 +439,7 @@ services:
       AUTOMATION_SERVICE_URL: http://automation-service:3007
       DOCUMENT_PROCESSING_SERVICE_URL: http://document-processing-service:3008
       AI_SERVICE_URL: http://ai-service:3009
+      GAMIFICATION_SERVICE_URL: http://gamification-service:3018
     volumes:
       - ./services/health-monitor/src:/app/services/health-monitor/src
       - ./packages:/app/packages
@@ -470,6 +471,31 @@ services:
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev_internal_service_key_change_in_production}
     volumes:
       - ./services/automation-service/src:/app/services/automation-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  gamification-service:
+    build:
+      context: .
+      dockerfile: services/gamification-service/Dockerfile
+      target: development
+    container_name: splits-gamification-service
+    ports:
+      - "3018:3018"
+    environment:
+      NODE_ENV: development
+      PORT: 3018
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+    volumes:
+      - ./services/gamification-service/src:/app/services/gamification-service/src
       - ./packages:/app/packages
       - /app/node_modules
     networks:
@@ -644,7 +670,12 @@ services:
       dockerfile: services/gpt-service/Dockerfile
       target: development
     container_name: splits-gpt-service
-    command: ["sh", "-c", "pnpm install --frozen-lockfile && pnpm --filter @splits-network/gpt-service dev"]
+    command:
+      [
+        "sh",
+        "-c",
+        "pnpm install --frozen-lockfile && pnpm --filter @splits-network/gpt-service dev",
+      ]
     ports:
       - "3014:3014"
     environment:
@@ -753,6 +784,7 @@ services:
       CONTENT_SERVICE_URL: http://content-service:3015
       INTEGRATION_SERVICE_URL: http://integration-service:3016
       MATCHING_SERVICE_URL: http://matching-service:3017
+      GAMIFICATION_SERVICE_URL: http://gamification-service:3018
       ADMIN_CLERK_SECRET_KEY: ${ADMIN_CLERK_SECRET_KEY}
       CORS_ORIGIN: http://localhost:3200
     volumes:
@@ -805,6 +837,7 @@ services:
       CONTENT_SERVICE_URL: http://content-service:3015
       INTEGRATION_SERVICE_URL: http://integration-service:3016
       MATCHING_SERVICE_URL: http://matching-service:3017
+      GAMIFICATION_SERVICE_URL: http://gamification-service:3018
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
