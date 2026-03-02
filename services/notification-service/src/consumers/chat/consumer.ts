@@ -43,10 +43,11 @@ export class ChatEventConsumer {
         if (participant.data.muted_at || participant.data.archived_at) {
             return;
         }
-        if (participant.data.request_state === 'pending' || participant.data.request_state === 'declined') {
+        if (participant.data.request_state === 'declined') {
             return;
         }
 
+        const isPending = participant.data.request_state === 'pending';
         const sender = await this.contactLookup.getContactByUserId(payload.sender_user_id);
         const senderName = sender?.name || 'Someone';
 
@@ -56,7 +57,7 @@ export class ChatEventConsumer {
             event_type: 'chat.message.created',
             recipient_user_id: recipient.id,
             recipient_email: recipient.email,
-            subject: `New message from ${senderName}`,
+            subject: isPending ? `Message request from ${senderName}` : `New message from ${senderName}`,
             template: 'chat-message',
             payload: {
                 sender_name: senderName,
