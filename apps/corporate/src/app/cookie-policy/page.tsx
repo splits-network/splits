@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default function CookiePolicyBaselPage() {
-    const lastUpdated = "January 24, 2026";
+    const lastUpdated = "March 1, 2026";
 
     const tocItems = [
         { n: "1", id: "what-are-cookies", label: "What Are Cookies" },
@@ -166,6 +166,13 @@ export default function CookiePolicyBaselPage() {
                                     ["filters", "Content filters", "30 days"],
                                 ],
                             },
+                            {
+                                label: "Marketing", color: "warning",
+                                rows: [
+                                    ["utm_source", "Campaign tracking", "Session"],
+                                    ["marketing_id", "Marketing attribution", "30 days"],
+                                ],
+                            },
                         ].map((table) => (
                             <div key={table.label} className={`border-l-4 border-${table.color} bg-base-200 p-6 mb-6 shadow-sm`}>
                                 <span className={`badge badge-${table.color} mb-4`}>{table.label}</span>
@@ -206,8 +213,10 @@ export default function CookiePolicyBaselPage() {
                         <div className="space-y-4">
                             {[
                                 { icon: "fa-duotone fa-regular fa-chart-line", name: "Google Analytics", desc: "Traffic analysis and behavior tracking" },
+                                { icon: "fa-duotone fa-regular fa-cursor", name: "Microsoft Clarity", desc: "Session recordings, heatmaps, and UX analytics" },
                                 { icon: "fa-duotone fa-regular fa-user", name: "Clerk Authentication", desc: "User identity and authentication" },
                                 { icon: "fa-duotone fa-regular fa-credit-card", name: "Stripe", desc: "Payment processing" },
+                                { icon: "fa-duotone fa-regular fa-envelope", name: "Resend", desc: "Transactional email delivery tracking" },
                             ].map((svc) => (
                                 <div key={svc.name} className="border-l-4 border-primary bg-base-100 p-5 flex items-center gap-4 shadow-sm">
                                     <div className="w-12 h-12 bg-primary/10 flex items-center justify-center flex-shrink-0">

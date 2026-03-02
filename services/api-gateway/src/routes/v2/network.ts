@@ -7,6 +7,7 @@ import {
     registerResourceRoutes,
     getCorrelationId,
 } from './common';
+import { registerPublicFirmGatewayRoutes } from './public-firms';
 
 const NETWORK_RESOURCES: ResourceDefinition[] = [
     {
@@ -74,6 +75,9 @@ function registerRecruiterMeRoute(app: FastifyInstance, services: ServiceRegistr
 export function registerNetworkRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register /me routes FIRST (must be before generic CRUD routes)
     registerRecruiterMeRoute(app, services);
+
+    // Register public routes first (no auth required)
+    registerPublicFirmGatewayRoutes(app, services);
 
     // Register custom routes FIRST before generic CRUD routes
     registerRecruiterCandidateInvitationRoutes(app, services);

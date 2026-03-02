@@ -5,7 +5,7 @@
 import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { FirmRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
-import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmRequest, CreateFirmInvitationRequest, TransferOwnershipRequest, VALID_PLACEMENT_TYPES, VALID_TEAM_SIZE_RANGES } from './types';
+import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmRequest, CreateFirmInvitationRequest, TransferOwnershipRequest, PublicFirmFilters, VALID_PLACEMENT_TYPES, VALID_TEAM_SIZE_RANGES } from './types';
 
 export class FirmServiceV2 {
     constructor(
@@ -131,12 +131,6 @@ export class FirmServiceV2 {
                 throw { statusCode: 400, message: `Founded year must be between 1900 and ${currentYear}` };
             }
         }
-        if (updates.guarantee_period_days !== undefined && updates.guarantee_period_days !== null) {
-            if (updates.guarantee_period_days < 0 || updates.guarantee_period_days > 365) {
-                throw { statusCode: 400, message: 'Guarantee period must be between 0 and 365 days' };
-            }
-        }
-
         const firm = await this.repository.updateFirm(id, updates);
 
         await this.eventPublisher.publish('firm.updated', {
@@ -327,6 +321,37 @@ export class FirmServiceV2 {
         });
 
         return invitation;
+    }
+
+    // ── Public (unauthenticated) ──
+
+    async getPublicFirms(filters: PublicFirmFilters): Promise<PaginationResponse<any>> {
+        const result = await this.repository.findPublicFirms(filters);
+        return buildPaginationResponse(
+            result.data,
+            result.total,
+            filters.page || 1,
+            filters.limit || 24
+        );
+    }
+
+    async getPublicFirmBySlug(slug: string): Promise<any> {
+        const firm = await this.repository.findPublicFirmBySlug(slug);
+        if (!firm) {
+            throw { statusCode: 404, message: 'Firm not found' };
+        }
+        return firm;
+    }
+
+    async getPublicFirmMembers(slug: string): Promise<any[]> {
+        const firm = await this.repository.findPublicFirmBySlug(slug);
+        if (!firm) {
+            throw { statusCode: 404, message: 'Firm not found' };
+        }
+        if (!firm.show_member_count) {
+            throw { statusCode: 403, message: 'Member list is not public' };
+        }
+        return this.repository.findPublicFirmMembers(firm.id);
     }
 
     // ── My Firm ──

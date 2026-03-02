@@ -67,6 +67,10 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
         href: "/marketplace",
     },
     {
+        label: "Firms",
+        href: "/firms",
+    },
+    {
         label: "Companies",
         subItems: [
             {
