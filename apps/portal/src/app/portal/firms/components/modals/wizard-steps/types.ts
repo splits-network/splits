@@ -42,8 +42,6 @@ export interface FirmFormData {
     show_member_count: boolean;
     show_placement_stats: boolean;
     show_contact_info: boolean;
-    preferred_split_terms: string;
-    guarantee_period_days: string; // string for controlled input
 }
 
 export const EMPTY_FIRM_FORM: FirmFormData = {
@@ -71,6 +69,4 @@ export const EMPTY_FIRM_FORM: FirmFormData = {
     show_member_count: true,
     show_placement_stats: true,
     show_contact_info: true,
-    preferred_split_terms: "",
-    guarantee_period_days: "90",
 };

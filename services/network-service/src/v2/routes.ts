@@ -21,6 +21,7 @@ import { recruiterCodeRoutes } from './recruiter-codes/routes';
 import { FirmRepository } from './firms/repository';
 import { FirmServiceV2 } from './firms/service';
 import { registerFirmRoutes } from './firms/routes';
+import { registerPublicFirmRoutes } from './firms/public-routes';
 import { createClient } from '@supabase/supabase-js';
 import { AdminNetworkRepository } from './admin/repository';
 import { AdminNetworkService } from './admin/service';
@@ -63,6 +64,7 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     registerReputationRoutes(app, { reputationService });
     registerCompanyReputationRoutes(app, { companyReputationService });
     registerFirmRoutes(app, { firmService });
+    registerPublicFirmRoutes(app, { firmService });
 
     // Register recruiter-companies routes
     await recruiterCompanyRoutes(app, supabase, config.eventPublisher);

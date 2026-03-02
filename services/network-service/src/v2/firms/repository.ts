@@ -4,7 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmInvitationRequest, RepositoryListResponse } from './types';
+import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmInvitationRequest, PublicFirmFilters, PUBLIC_FIRM_SELECT, RepositoryListResponse } from './types';
 import { resolveAccessContext } from '../shared/access';
 import { randomUUID } from 'crypto';
 
@@ -518,5 +518,115 @@ export class FirmRepository {
             .eq('id', newOwnerMemberId);
 
         return firm;
+    }
+
+    // ── Public (unauthenticated) queries ──
+
+    async findPublicFirms(filters: PublicFirmFilters = {}): Promise<RepositoryListResponse<any>> {
+        const page = filters.page || 1;
+        const limit = filters.limit || 24;
+        const offset = (page - 1) * limit;
+
+        let query = this.supabase
+            .from('firms')
+            .select(PUBLIC_FIRM_SELECT, { count: 'exact' })
+            .eq('marketplace_visible', true)
+            .not('marketplace_approved_at', 'is', null)
+            .eq('status', 'active');
+
+        if (filters.search) {
+            query = query.or(`name.ilike.%${filters.search}%,tagline.ilike.%${filters.search}%`);
+        }
+        if (filters.industries?.length) {
+            query = query.overlaps('industries', filters.industries);
+        }
+        if (filters.specialties?.length) {
+            query = query.overlaps('specialties', filters.specialties);
+        }
+        if (filters.placement_types?.length) {
+            query = query.overlaps('placement_types', filters.placement_types);
+        }
+        if (filters.geo_focus?.length) {
+            query = query.overlaps('geo_focus', filters.geo_focus);
+        }
+        if (filters.seeking_split_partners !== undefined) {
+            query = query.eq('seeking_split_partners', filters.seeking_split_partners);
+        }
+
+        const sortBy = filters.sort_by || 'name';
+        const ascending = filters.sort_order?.toLowerCase() !== 'desc';
+        query = query.order(sortBy, { ascending });
+        query = query.range(offset, offset + limit - 1);
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        const firms = (data || []) as any[];
+
+        // Enrich with member counts (only where show_member_count is true)
+        if (firms.length > 0) {
+            const firmIds = firms.map(f => f.id);
+            const { data: memberCounts } = await this.supabase
+                .from('firm_members')
+                .select('firm_id')
+                .in('firm_id', firmIds)
+                .eq('status', 'active');
+
+            const countMap = new Map<string, number>();
+            for (const m of memberCounts || []) {
+                countMap.set(m.firm_id, (countMap.get(m.firm_id) || 0) + 1);
+            }
+            for (const firm of firms) {
+                firm.active_member_count = firm.show_member_count ? (countMap.get(firm.id) || 0) : null;
+            }
+        }
+
+        return { data: firms, total: count || 0 };
+    }
+
+    async findPublicFirmBySlug(slug: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('firms')
+            .select(PUBLIC_FIRM_SELECT)
+            .eq('slug', slug)
+            .eq('marketplace_visible', true)
+            .not('marketplace_approved_at', 'is', null)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return null;
+
+        const firm = data as any;
+
+        // Enrich with member count if allowed
+        if (firm.show_member_count) {
+            const { count } = await this.supabase
+                .from('firm_members')
+                .select('id', { count: 'exact', head: true })
+                .eq('firm_id', firm.id)
+                .eq('status', 'active');
+            firm.active_member_count = count || 0;
+        }
+
+        return firm;
+    }
+
+    async findPublicFirmMembers(firmId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .from('firm_members')
+            .select(`
+                id, role, joined_at,
+                recruiter:recruiters!inner(
+                    id,
+                    user:users!recruiters_user_id_fkey(name)
+                )
+            `)
+            .eq('firm_id', firmId)
+            .eq('status', 'active')
+            .order('joined_at', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
     }
 }

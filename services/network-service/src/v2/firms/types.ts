@@ -51,13 +51,32 @@ export interface FirmUpdate {
     show_member_count?: boolean;
     show_placement_stats?: boolean;
     show_contact_info?: boolean;
-    // Split terms
-    preferred_split_terms?: string;
-    guarantee_period_days?: number;
 }
 
 export const VALID_PLACEMENT_TYPES = ['permanent', 'contract', 'contract_to_hire', 'executive_search'] as const;
 export const VALID_TEAM_SIZE_RANGES = ['solo', '2_5', '6_15', '16_50', '50_plus'] as const;
+
+export interface PublicFirmFilters extends PaginationParams, SortParams {
+    search?: string;
+    industries?: string[];
+    specialties?: string[];
+    placement_types?: string[];
+    geo_focus?: string[];
+    seeking_split_partners?: boolean;
+}
+
+/** Fields safe to expose in public API responses */
+export const PUBLIC_FIRM_SELECT = [
+    'id', 'name', 'slug', 'tagline', 'description',
+    'logo_url', 'banner_url',
+    'industries', 'specialties', 'placement_types', 'geo_focus',
+    'headquarters_city', 'headquarters_state', 'headquarters_country',
+    'founded_year', 'team_size_range',
+    'website_url', 'linkedin_url', 'contact_email', 'contact_phone',
+    'marketplace_visible', 'seeking_split_partners', 'accepts_candidate_submissions',
+    'show_member_count', 'show_placement_stats', 'show_contact_info',
+    'created_at',
+].join(', ');
 
 export interface CreateFirmRequest {
     name: string;

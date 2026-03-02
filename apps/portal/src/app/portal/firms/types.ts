@@ -51,9 +51,6 @@ export interface Firm {
     show_member_count: boolean;
     show_placement_stats: boolean;
     show_contact_info: boolean;
-    // Split terms
-    preferred_split_terms: string | null;
-    guarantee_period_days: number | null;
     created_at: string;
 }
 

@@ -84,6 +84,12 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
                 desc: "Browse the network",
                 href: "#",
             },
+            {
+                icon: "fa-duotone fa-regular fa-building-columns",
+                label: "Firms",
+                desc: "Explore recruiting firms",
+                href: "/firms",
+            },
         ],
     },
     {

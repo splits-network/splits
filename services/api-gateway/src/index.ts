@@ -443,6 +443,14 @@ async function main() {
             return;
         }
 
+        // Skip auth for public firm endpoints (firm list and detail pages)
+        // GET /api/v2/public/firms - list marketplace-visible firms
+        // GET /api/v2/public/firms/:slug - firm profile by slug
+        // GET /api/v2/public/firms/:slug/members - firm public member list
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/public/firms')) {
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }

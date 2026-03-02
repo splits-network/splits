@@ -56,10 +56,6 @@ function firmToForm(firm: Firm): FirmFormData {
         show_member_count: firm.show_member_count,
         show_placement_stats: firm.show_placement_stats,
         show_contact_info: firm.show_contact_info,
-        preferred_split_terms: firm.preferred_split_terms ?? "",
-        guarantee_period_days: firm.guarantee_period_days
-            ? String(firm.guarantee_period_days)
-            : "90",
     };
 }
 
@@ -67,9 +63,6 @@ function firmToForm(firm: Firm): FirmFormData {
 function formToPayload(form: FirmFormData) {
     const currentYear = new Date().getFullYear();
     const foundedYear = form.founded_year ? Number(form.founded_year) : null;
-    const guaranteeDays = form.guarantee_period_days
-        ? Number(form.guarantee_period_days)
-        : null;
 
     return {
         name: form.name.trim(),
@@ -98,9 +91,6 @@ function formToPayload(form: FirmFormData) {
         show_member_count: form.show_member_count,
         show_placement_stats: form.show_placement_stats,
         show_contact_info: form.show_contact_info,
-        preferred_split_terms: form.preferred_split_terms.trim() || null,
-        guarantee_period_days:
-            guaranteeDays !== null && guaranteeDays >= 0 ? guaranteeDays : null,
     };
 }
 
@@ -134,16 +124,6 @@ function validateStep(step: number, form: FirmFormData): Record<string, string> 
         }
     }
 
-    if (step === 4) {
-        const days = Number(form.guarantee_period_days);
-        if (
-            form.guarantee_period_days &&
-            (isNaN(days) || days < 0 || days > 365)
-        ) {
-            errors.guarantee_period_days = "Guarantee must be 0–365 days";
-        }
-    }
-
     return errors;
 }
 
@@ -167,7 +147,7 @@ interface FirmProfileWizardProps {
  *   2. Specialization — industries, specialties, placement types, geo focus
  *   3. Location — city, state, country, founded year, team size
  *   4. Contact — website, LinkedIn, email, phone
- *   5. Marketplace — 6 toggles + split terms + guarantee days
+ *   5. Marketplace — 6 toggles for visibility and participation
  */
 export function FirmProfileWizard({
     isOpen,

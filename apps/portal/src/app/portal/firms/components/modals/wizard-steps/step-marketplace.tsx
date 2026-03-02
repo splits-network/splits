@@ -1,6 +1,6 @@
 "use client";
 
-import { BaselFormField, BaselToggleRow } from "@splits-network/basel-ui";
+import { BaselToggleRow } from "@splits-network/basel-ui";
 import type { FirmFormData } from "./types";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
@@ -14,18 +14,13 @@ interface StepMarketplaceProps {
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 /**
- * Step 5 — Marketplace: 6 toggles grouped into two visual sections,
- * plus Split Terms textarea and Guarantee Days input.
+ * Step 5 — Marketplace: 6 toggles grouped into two visual sections.
  *
  * Layout:
  * - Section A: "Marketplace Presence" — 3 visibility/participation toggles
  *   (marketplace_visible, seeking_split_partners, accepts_candidate_submissions)
- * - Divider
  * - Section B: "Profile Visibility" — 3 display-control toggles
  *   (show_member_count, show_placement_stats, show_contact_info)
- * - Divider
- * - Section C: "Split Terms" — preferred_split_terms textarea + guarantee_period_days
- *   in a 2-column grid (textarea spans left col, number input on right)
  *
  * UX: The marketplace_visible toggle is the master switch. When off, the other
  * participation toggles are still editable (they persist their values for when
@@ -101,51 +96,6 @@ export function StepMarketplace({ form, onChange, errors }: StepMarketplaceProps
                 color="primary"
             />
 
-            <div className="border-t border-base-300 mt-4 mb-2" />
-
-            {/* Section C: Split Terms */}
-            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/30 pb-1">
-                Split Terms
-            </p>
-
-            <div className="grid grid-cols-3 gap-4 items-start pt-1">
-                {/* Preferred split terms — spans 2 of 3 columns */}
-                <div className="col-span-2">
-                    <BaselFormField
-                        label="Preferred Split Terms"
-                        hint="Describe your standard fee split arrangement for incoming proposals."
-                        error={errors.preferred_split_terms}
-                    >
-                        <textarea
-                            className={`textarea w-full bg-base-200 border-base-300 min-h-[100px] ${errors.preferred_split_terms ? "border-error" : ""}`}
-                            value={form.preferred_split_terms}
-                            onChange={(e) => onChange({ preferred_split_terms: e.target.value })}
-                            placeholder="e.g. 50/50 split, paid within 30 days of candidate start date. Replacement guarantee included."
-                            rows={4}
-                        />
-                    </BaselFormField>
-                </div>
-
-                {/* Guarantee period — right column */}
-                <div>
-                    <BaselFormField
-                        label="Guarantee Days"
-                        hint="Replacement guarantee period."
-                        error={errors.guarantee_period_days}
-                    >
-                        <input
-                            type="number"
-                            className={`input w-full bg-base-200 border-base-300 ${errors.guarantee_period_days ? "border-error" : ""}`}
-                            value={form.guarantee_period_days}
-                            onChange={(e) => onChange({ guarantee_period_days: e.target.value })}
-                            placeholder="90"
-                            min={0}
-                            max={365}
-                        />
-                        <p className="text-sm text-base-content/40 mt-1">days</p>
-                    </BaselFormField>
-                </div>
-            </div>
         </div>
     );
 }
