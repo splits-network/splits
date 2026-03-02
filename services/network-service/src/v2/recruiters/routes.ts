@@ -69,6 +69,21 @@ export function registerRecruiterRoutes(
         }
     });
 
+    // GET by slug — must be BEFORE :id to avoid treating slug as UUID
+    app.get('/api/v2/recruiters/by-slug/:slug', async (request, reply) => {
+        try {
+            const { clerkUserId } = getOptionalUserContext(request);
+            const { slug } = request.params as { slug: string };
+            const query = request.query as { include?: string };
+            const recruiter = await config.recruiterService.getRecruiterBySlug(slug, clerkUserId, query.include);
+            return reply.send({ data: recruiter });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Internal server error' });
+        }
+    });
+
     app.get('/api/v2/recruiters/:id', async (request, reply) => {
         try {
             const { clerkUserId } = getOptionalUserContext(request);

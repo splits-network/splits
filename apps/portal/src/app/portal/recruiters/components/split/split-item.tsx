@@ -26,7 +26,7 @@ export function SplitItem({
 }) {
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
-    const status = recruiter.marketplace_profile?.status || "active";
+    const status = recruiter.status || "active";
 
     return (
         <div
@@ -82,9 +82,7 @@ export function SplitItem({
                         </>
                     ) : null}
                 </div>
-                <span
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(status)}`}
-                >
+                <span className={`badge badge-sm ${statusColor(status)}`}>
                     {formatStatus(status)}
                 </span>
             </div>

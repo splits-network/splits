@@ -3,8 +3,6 @@
  * Helps recruiters understand what they need to complete for better marketplace visibility
  */
 
-import { MarketplaceProfile } from '@splits-network/shared-types';
-
 export interface ProfileField {
     name: string;
     label: string;
@@ -17,12 +15,11 @@ export const PROFILE_FIELDS: ProfileField[] = [
     { name: 'tagline', label: 'Professional Tagline', weight: 8, category: 'basic' },
     { name: 'location', label: 'Location', weight: 5, category: 'basic' },
     { name: 'years_experience', label: 'Years of Experience', weight: 5, category: 'basic' },
-    { name: 'bio', label: 'Professional Bio', weight: 7, category: 'basic' },
+    { name: 'bio', label: 'Professional Bio', weight: 12, category: 'basic' },
     { name: 'industries', label: 'Industries', weight: 5, category: 'basic' },
 
     // Marketplace fields (50% total weight)
     { name: 'specialties', label: 'Specialties', weight: 8, category: 'marketplace' },
-    { name: 'bio_rich', label: 'Detailed Bio', weight: 10, category: 'marketplace' },
     { name: 'marketplace_enabled', label: 'Marketplace Enabled', weight: 10, category: 'marketplace' },
     { name: 'show_success_metrics', label: 'Show Success Metrics', weight: 8, category: 'marketplace' },
     { name: 'show_contact_info', label: 'Show Contact Info', weight: 6, category: 'marketplace' },
@@ -54,7 +51,6 @@ export function calculateProfileCompleteness(
         industries?: string[];
         specialties?: string[];
         marketplace_enabled?: boolean;
-        marketplace_profile?: MarketplaceProfile;
         show_success_metrics?: boolean;
         show_contact_info?: boolean;
     }
@@ -91,17 +87,13 @@ export function calculateProfileCompleteness(
                 isComplete = typeof recruiter.years_experience === 'number' && recruiter.years_experience > 0;
                 break;
             case 'bio':
-                isComplete = !!recruiter.bio && recruiter.bio.trim().length > 20; // Minimum meaningful bio
+                isComplete = !!recruiter.bio && recruiter.bio.trim().length > 50;
                 break;
             case 'industries':
                 isComplete = !!recruiter.industries && recruiter.industries.length > 0;
                 break;
             case 'specialties':
                 isComplete = !!recruiter.specialties && recruiter.specialties.length > 0;
-                break;
-            case 'bio_rich':
-                isComplete = !!recruiter.marketplace_profile?.bio_rich &&
-                    recruiter.marketplace_profile.bio_rich.trim().length > 50; // Richer content
                 break;
             case 'marketplace_enabled':
                 isComplete = recruiter.marketplace_enabled === true;

@@ -178,7 +178,7 @@ export default async function RootLayout({
                         strategy="afterInteractive"
                     ></Script>
                 </head>
-                <body className="flex flex-col min-h-screen bg-base-300">
+                <body className="flex flex-col min-h-screen bg-base-200">
                     <QueryProvider>
                         <ThemeProvider>
                             <UserProfileProvider

@@ -1,7 +1,6 @@
 "use client";
 
 import type { Job } from "../../types";
-import { MobileDetailOverlay } from "@/components/standard-lists";
 import { DetailLoader } from "../shared/job-detail";
 import { GridCard } from "./grid-card";
 
@@ -21,44 +20,37 @@ export function GridView({
     const selectedJob = jobs.find((j) => j.id === selectedId) ?? null;
 
     return (
-        <div className="flex gap-6">
-            {/* Card grid — hidden on mobile when a detail is open */}
-            <div
-                className={`flex flex-col w-full ${selectedJob ? "hidden md:flex" : "flex"}`}
-            >
-                <div
-                    className={`grid gap-4 w-full ${
-                        selectedJob
-                            ? "grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3"
-                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
-                    }`}
-                >
-                    {jobs.map((job) => (
-                        <GridCard
-                            key={job.id}
-                            job={job}
-                            isSelected={selectedId === job.id}
-                            onSelect={() => onSelectAction(job)}
-                            onRefresh={onRefreshAction}
-                            onUpdateItem={onUpdateItemAction}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            {/* Detail sidebar — 50 % width on desktop, full-screen overlay on mobile */}
-            {selectedJob && (
-                <MobileDetailOverlay
-                    isOpen
-                    className="md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start bg-base-100"
-                >
-                    <DetailLoader
-                        jobId={selectedJob.id}
-                        onClose={() => onSelectAction(selectedJob)}
+        <div className="relative">
+            {/* Grid */}
+            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                {jobs.map((job) => (
+                    <GridCard
+                        key={job.id}
+                        job={job}
+                        isSelected={selectedId === job.id}
+                        onSelect={() => onSelectAction(job)}
                         onRefresh={onRefreshAction}
                         onUpdateItem={onUpdateItemAction}
                     />
-                </MobileDetailOverlay>
+                ))}
+            </div>
+
+            {/* Detail Drawer */}
+            {selectedJob && (
+                <>
+                    <div
+                        className="fixed inset-0 z-40 bg-black/30 transition-opacity"
+                        onClick={() => onSelectAction(selectedJob)}
+                    />
+                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+                        <DetailLoader
+                            jobId={selectedJob.id}
+                            onClose={() => onSelectAction(selectedJob)}
+                            onRefresh={onRefreshAction}
+                            onUpdateItem={onUpdateItemAction}
+                        />
+                    </div>
+                </>
             )}
         </div>
     );

@@ -451,6 +451,12 @@ async function main() {
             return;
         }
 
+        // Skip auth for public recruiter endpoints (recruiter profile by slug)
+        // GET /api/v2/public/recruiters/:slug - recruiter profile by slug
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/public/recruiters')) {
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }

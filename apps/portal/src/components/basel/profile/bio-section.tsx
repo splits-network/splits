@@ -5,7 +5,7 @@ import { BaselStatusPill } from "@splits-network/basel-ui";
 import { MarkdownEditor } from "@splits-network/shared-ui";
 
 export function BioSection() {
-    const { settings, updateBioRich, loading } = useMarketplaceSettings();
+    const { settings, updateBio, loading } = useMarketplaceSettings();
 
     if (loading) {
         return (
@@ -47,8 +47,8 @@ export function BioSection() {
             <MarkdownEditor
                 label="Your Story"
                 showCount
-                value={settings.marketplace_profile?.bio_rich || ""}
-                onChange={updateBioRich}
+                value={settings.bio || ""}
+                onChange={updateBio}
                 placeholder={`Tell candidates about yourself...\n\nExample:\n- **15+ years** in tech recruitment\n- Specialized in C-level placements\n- Former software engineer, understands technical roles deeply\n- Track record: 50+ successful placements at top startups`}
                 helperText="This will appear prominently on your marketplace profile."
                 height={300}

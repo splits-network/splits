@@ -35,6 +35,9 @@ export default function TableView({
                         <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden xl:table-cell">
                             Placements
                         </th>
+                        <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6 hidden xl:table-cell">
+                            Type
+                        </th>
                         <th className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 py-3 px-6">
                             Action
                         </th>
@@ -120,6 +123,27 @@ export default function TableView({
                                     <span className="text-sm font-bold">
                                         {recruiter.total_placements ?? 0}
                                     </span>
+                                </td>
+
+                                {/* Type */}
+                                <td className="px-6 py-4 hidden xl:table-cell">
+                                    <div className="flex flex-wrap gap-1">
+                                        {recruiter.company_recruiter && (
+                                            <span className="badge badge-sm badge-primary gap-1">
+                                                <i className="fa-duotone fa-regular fa-building" />
+                                                Company
+                                            </span>
+                                        )}
+                                        {recruiter.candidate_recruiter && (
+                                            <span className="badge badge-sm badge-secondary gap-1">
+                                                <i className="fa-duotone fa-regular fa-user-tie" />
+                                                Candidate
+                                            </span>
+                                        )}
+                                        {!recruiter.company_recruiter && !recruiter.candidate_recruiter && (
+                                            <span className="text-sm text-base-content/30">—</span>
+                                        )}
+                                    </div>
                                 </td>
 
                                 {/* Action */}

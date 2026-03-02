@@ -117,6 +117,64 @@ export function MarketplaceSection() {
                 />
             </div>
 
+            {/* Recruiter Type */}
+            <div className="py-5 border-b border-base-300">
+                <p className="font-semibold mb-1">Recruiter type</p>
+                <p className="text-sm text-base-content/40 mb-4">
+                    Tell the network what kind of recruiting you do
+                </p>
+                <div className="flex flex-col gap-3">
+                    <label className="flex items-center justify-between cursor-pointer">
+                        <div className="flex items-center gap-3">
+                            <i className="fa-duotone fa-regular fa-building text-primary" />
+                            <div>
+                                <p className="font-semibold text-sm">
+                                    Company Recruiter
+                                </p>
+                                <p className="text-sm text-base-content/40">
+                                    You represent companies and source
+                                    candidates for their roles
+                                </p>
+                            </div>
+                        </div>
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-primary"
+                            checked={settings.company_recruiter}
+                            onChange={(e) =>
+                                updateSettings({
+                                    company_recruiter: e.target.checked,
+                                })
+                            }
+                        />
+                    </label>
+                    <label className="flex items-center justify-between cursor-pointer">
+                        <div className="flex items-center gap-3">
+                            <i className="fa-duotone fa-regular fa-user-tie text-secondary" />
+                            <div>
+                                <p className="font-semibold text-sm">
+                                    Candidate Recruiter
+                                </p>
+                                <p className="text-sm text-base-content/40">
+                                    You represent candidates and help them find
+                                    opportunities
+                                </p>
+                            </div>
+                        </div>
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-secondary"
+                            checked={settings.candidate_recruiter}
+                            onChange={(e) =>
+                                updateSettings({
+                                    candidate_recruiter: e.target.checked,
+                                })
+                            }
+                        />
+                    </label>
+                </div>
+            </div>
+
             {settings.marketplace_enabled && (
                 <div className="mt-6 space-y-6">
                     {/* Visibility */}

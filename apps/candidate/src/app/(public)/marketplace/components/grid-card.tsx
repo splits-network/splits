@@ -2,13 +2,46 @@
 
 import Link from "next/link";
 import type { Recruiter } from "../marketplace-client";
-import ReputationDisplay from "./reputation-display";
-import { getInitials, reputationColor } from "./status-color";
+import { getInitials } from "./status-color";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
 
 interface GridCardProps {
     recruiter: Recruiter;
     isSelected?: boolean;
     onSelect?: (recruiter: Recruiter) => void;
+}
+
+function formatStatus(status: string) {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function statusColor(status: string) {
+    switch (status) {
+        case "active":
+            return "badge-info badge-soft badge-outline";
+        case "pending":
+            return "badge-warning badge-soft badge-outline";
+        case "suspended":
+            return "badge-error badge-soft badge-outline";
+        case "inactive":
+            return "badge-ghost";
+        default:
+            return "badge-ghost";
+    }
+}
+
+function memberSinceDisplay(recruiter: Recruiter) {
+    if (!recruiter.created_at) return null;
+    const date = new Date(recruiter.created_at);
+    return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
+
+function isNew(recruiter: Recruiter) {
+    if (!recruiter.created_at) return false;
+    const created = new Date(recruiter.created_at);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return created > thirtyDaysAgo;
 }
 
 export default function GridCard({
@@ -17,116 +50,240 @@ export default function GridCard({
     onSelect,
 }: GridCardProps) {
     const name = recruiter.users?.name || recruiter.name || "Unknown Recruiter";
-    const initials = getInitials(name);
+    const location = recruiter.location;
+    const status = recruiter.status || "active";
+    const memberSince = memberSinceDisplay(recruiter);
+
+    const stats = [
+        recruiter.total_placements != null
+            ? { label: "Placed", value: String(recruiter.total_placements), icon: "fa-duotone fa-regular fa-handshake" }
+            : null,
+        recruiter.success_rate != null
+            ? { label: "Success", value: `${Math.round(recruiter.success_rate)}%`, icon: "fa-duotone fa-regular fa-bullseye" }
+            : null,
+        recruiter.reputation_score != null
+            ? { label: "Rating", value: recruiter.reputation_score.toFixed(1), icon: "fa-duotone fa-regular fa-star" }
+            : null,
+        recruiter.years_experience != null && recruiter.years_experience > 0
+            ? { label: "Exp.", value: `${recruiter.years_experience}yr`, icon: "fa-duotone fa-regular fa-clock" }
+            : null,
+    ].filter(Boolean) as { label: string; value: string; icon: string }[];
 
     return (
         <div
             onClick={() => onSelect?.(recruiter)}
-            className={`recruiter-card group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all hover:shadow-md ${
+            className={[
+                "recruiter-card group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-lg",
                 isSelected
-                    ? "border-primary border-l-4"
-                    : "border-base-300 hover:border-primary/30"
-            }`}
+                    ? "border-l-primary border-primary"
+                    : "border-l-primary hover:border-primary/40",
+            ].join(" ")}
         >
-            {/* Top row: reputation pill + experience */}
-            <div className="flex items-center justify-between mb-4">
-                {recruiter.reputation_score ? (
-                    <span
-                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${reputationColor(recruiter.reputation_score)}`}
-                    >
-                        <i className="fa-duotone fa-regular fa-star mr-1" />
-                        {recruiter.reputation_score.toFixed(1)} Rating
-                    </span>
-                ) : (
-                    <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-base-content/10 text-base-content/40">
-                        New
-                    </span>
-                )}
-                {recruiter.years_experience &&
-                    recruiter.years_experience >= 5 && (
-                        <span className="text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 bg-accent/15 text-accent">
-                            {recruiter.years_experience}+ yrs
+            {/* Header Band */}
+            <div className="bg-base-300 border-b border-base-300 px-6 pt-6 pb-5">
+                {/* Kicker row: firm name + status badges */}
+                <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate">
+                        {recruiter.firm_name || "Independent"}
+                    </p>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <span className={`badge ${statusColor(status)}`}>
+                            {formatStatus(status)}
+                        </span>
+                        {isNew(recruiter) && (
+                            <span className="badge badge-warning badge-soft badge-outline">
+                                <i className="fa-duotone fa-regular fa-sparkles" />
+                                New
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Avatar + Name block */}
+                <div className="flex items-end gap-4">
+                    {recruiter.users?.profile_image_url ? (
+                        <img
+                            src={recruiter.users.profile_image_url}
+                            alt={name}
+                            className="w-16 h-16 object-cover border-2 border-primary shrink-0"
+                        />
+                    ) : (
+                        <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none shrink-0">
+                            {getInitials(name)}
+                        </div>
+                    )}
+                    <div className="min-w-0">
+                        {recruiter.tagline && (
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5 truncate">
+                                {recruiter.tagline}
+                            </p>
+                        )}
+                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                            {name}
+                        </h3>
+                    </div>
+                </div>
+
+                {/* Location + Member since */}
+                <div className="flex items-center gap-4 mt-3 text-sm text-base-content/40">
+                    {location && (
+                        <span className="flex items-center gap-1.5">
+                            <i className="fa-duotone fa-regular fa-location-dot" />
+                            {location}
                         </span>
                     )}
-            </div>
-
-            {/* Avatar + Name */}
-            <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 flex items-center justify-center bg-primary/10 text-primary font-black text-sm flex-shrink-0">
-                    {initials}
-                </div>
-                <div className="min-w-0">
-                    <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary truncate">
-                        {name}
-                    </h3>
-                    {recruiter.tagline && (
-                        <p className="text-sm font-semibold text-base-content/60 truncate">
-                            {recruiter.tagline}
-                        </p>
+                    {memberSince && (
+                        <>
+                            {location && <span className="text-base-content/20">|</span>}
+                            <span className="flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-calendar" />
+                                Member since {memberSince}
+                            </span>
+                        </>
                     )}
                 </div>
             </div>
 
-            {/* Bio excerpt */}
+            {/* Bio */}
             {recruiter.bio && (
-                <p className="text-sm text-base-content/50 leading-relaxed line-clamp-2 mb-4">
-                    {recruiter.bio}
-                </p>
+                <div className="px-6 py-5 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        About
+                    </p>
+                    <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                        <MarkdownRenderer content={recruiter.bio} />
+                    </div>
+                </div>
             )}
 
-            {/* Meta: Location + Specialization */}
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/50 mb-4">
-                {recruiter.location && (
-                    <span>
-                        <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                        {recruiter.location}
-                    </span>
-                )}
-                {recruiter.specialization && (
-                    <span>
-                        <i className="fa-duotone fa-regular fa-briefcase mr-1" />
-                        {recruiter.specialization}
-                    </span>
-                )}
-                {recruiter.years_experience && (
-                    <span>
-                        <i className="fa-duotone fa-regular fa-clock mr-1" />
-                        {recruiter.years_experience} yrs exp
-                    </span>
-                )}
-            </div>
+            {/* Stats Row */}
+            {stats.length > 0 && (
+                <div className="border-b border-base-300">
+                    <div
+                        className="grid divide-x divide-base-300"
+                        style={{
+                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                        }}
+                    >
+                        {stats.map((stat, i) => {
+                            const iconStyles = [
+                                "bg-primary text-primary-content",
+                                "bg-secondary text-secondary-content",
+                                "bg-accent text-accent-content",
+                                "bg-warning text-warning-content",
+                            ];
+                            const iconStyle = iconStyles[i % iconStyles.length];
+                            return (
+                                <div
+                                    key={stat.label}
+                                    className="flex items-center gap-2.5 px-3 py-4"
+                                >
+                                    <div
+                                        className={`w-8 h-8 flex items-center justify-center shrink-0 ${iconStyle}`}
+                                    >
+                                        <i className={`${stat.icon} text-xs`} />
+                                    </div>
+                                    <div>
+                                        <span className="text-lg font-black text-base-content leading-none block">
+                                            {stat.value}
+                                        </span>
+                                        <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
+                                            {stat.label}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
-            {/* Industries tags */}
-            {recruiter.industries && recruiter.industries.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                    {recruiter.industries.slice(0, 3).map((industry, i) => (
-                        <span
-                            key={i}
-                            className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
-                        >
-                            {industry}
-                        </span>
-                    ))}
-                    {recruiter.industries.length > 3 && (
-                        <span className="text-sm uppercase tracking-wider text-base-content/30 px-2 py-1">
-                            +{recruiter.industries.length - 3}
-                        </span>
+            {/* Specialties + Industries tags */}
+            {((recruiter.specialties || []).length > 0 ||
+                (recruiter.industries || []).length > 0) && (
+                <div className="px-6 py-5 border-b border-base-300 space-y-4">
+                    {(recruiter.specialties || []).length > 0 && (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                                Specialties
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {(recruiter.specialties || [])
+                                    .slice(0, 4)
+                                    .map((spec) => (
+                                        <span
+                                            key={spec}
+                                            className="badge badge-primary badge-soft badge-outline"
+                                        >
+                                            {spec}
+                                        </span>
+                                    ))}
+                                {(recruiter.specialties || []).length > 4 && (
+                                    <span className="badge badge-ghost">
+                                        +{(recruiter.specialties || []).length - 4}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    {(recruiter.industries || []).length > 0 && (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                                Industries
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {(recruiter.industries || [])
+                                    .slice(0, 3)
+                                    .map((ind) => (
+                                        <span
+                                            key={ind}
+                                            className="badge badge-soft badge-outline"
+                                        >
+                                            {ind}
+                                        </span>
+                                    ))}
+                                {(recruiter.industries || []).length > 3 && (
+                                    <span className="badge badge-ghost">
+                                        +{(recruiter.industries || []).length - 3}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                     )}
                 </div>
             )}
 
-            {/* Footer: reputation + view profile */}
-            <div className="mt-auto flex items-center justify-between pt-4 border-t border-base-200">
-                <ReputationDisplay
-                    score={recruiter.reputation_score}
-                    placements={recruiter.total_placements}
-                />
+            {/* Partnership Badges */}
+            <div className="px-6 py-5 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                    Partnership
+                </p>
+                <div className="flex flex-wrap gap-2">
+                    <span
+                        className={`badge gap-2 ${recruiter.company_recruiter ? "badge-primary" : "badge-ghost"}`}
+                    >
+                        <i className="fa-duotone fa-regular fa-building" />
+                        Company Recruiter
+                    </span>
+                    <span
+                        className={`badge gap-2 ${recruiter.candidate_recruiter ? "badge-secondary" : "badge-ghost"}`}
+                    >
+                        <i className="fa-duotone fa-regular fa-user-tie" />
+                        Candidate Recruiter
+                    </span>
+                </div>
+            </div>
+
+            {/* Footer: view link */}
+            <div
+                className="mt-auto flex items-center justify-end gap-3 px-6 py-4 border-t border-base-200"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <Link
                     href={`/marketplace/${recruiter.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/70 transition-colors"
+                    className="text-sm font-bold uppercase tracking-wider text-primary hover:text-primary/70 transition-colors"
                 >
-                    View
+                    View Profile
                     <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
                 </Link>
             </div>

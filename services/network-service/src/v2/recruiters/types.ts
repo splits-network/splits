@@ -18,8 +18,11 @@ export interface RecruiterUpdate {
     name?: string;
     email?: string;
     phone?: string;
+    slug?: string;
     specialization?: string;
     status?: string;
+    candidate_recruiter?: boolean;
+    company_recruiter?: boolean;
     [key: string]: any;
 }
 

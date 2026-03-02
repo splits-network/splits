@@ -2,7 +2,6 @@
 
 import type { Application } from "../../types";
 import { DetailLoader } from "../shared/application-detail";
-import { MobileDetailOverlay } from "@/components/standard-lists";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -20,44 +19,35 @@ export function GridView({
         applications.find((a) => a.id === selectedId) ?? null;
 
     return (
-        <div className="flex gap-6">
-            {/* Card grid — hidden on mobile when a detail is open */}
-            <div
-                className={`flex flex-col w-full ${selectedApplication ? "hidden md:flex" : "flex"}`}
-            >
-                <div
-                    className={`grid gap-4 w-full ${
-                        selectedApplication
-                            ? "grid-cols-1 md:grid-cols-2"
-                            : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5"
-                    }`}
-                >
-                    {applications.map((application) => (
-                        <GridCard
-                            key={application.id}
-                            application={application}
-                            isSelected={selectedId === application.id}
-                            onSelect={() => onSelect(application)}
-                            onRefresh={onRefresh}
-                        />
-                    ))}
-                </div>
+        <div className="relative">
+            {/* Grid */}
+            <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
+                {applications.map((application) => (
+                    <GridCard
+                        key={application.id}
+                        application={application}
+                        isSelected={selectedId === application.id}
+                        onSelect={() => onSelect(application)}
+                        onRefresh={onRefresh}
+                    />
+                ))}
             </div>
 
-            {/* Detail sidebar — 45% width on lg+, full-screen overlay on mobile */}
+            {/* Detail Drawer */}
             {selectedApplication && (
-                <MobileDetailOverlay
-                    isOpen
-                    className="md:w-[45%] md:flex-shrink-0 md:self-start bg-base-100 border-l-4 border-primary"
-                >
-                    <div className="h-full sticky top-[140px] overflow-y-auto">
+                <>
+                    <div
+                        className="fixed inset-0 z-40 bg-black/30 transition-opacity"
+                        onClick={() => onSelect(selectedApplication)}
+                    />
+                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
                         <DetailLoader
                             applicationId={selectedApplication.id}
                             onClose={() => onSelect(selectedApplication)}
                             onRefresh={onRefresh}
                         />
                     </div>
-                </MobileDetailOverlay>
+                </>
             )}
         </div>
     );
