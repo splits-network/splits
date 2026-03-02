@@ -2,6 +2,7 @@
 
 import type { Recruiter } from "../marketplace-client";
 import { getInitials, reputationColor } from "./status-color";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface SplitItemProps {
     recruiter: Recruiter;
@@ -14,6 +15,8 @@ export default function SplitItem({
     isSelected,
     onSelect,
 }: SplitItemProps) {
+    const { getLevel } = useGamification();
+    const level = getLevel(recruiter.id);
     const name = recruiter.users?.name || recruiter.name || "Unknown";
     const initials = getInitials(name);
 
@@ -32,6 +35,7 @@ export default function SplitItem({
                     </div>
                     <h3 className="font-bold text-sm tracking-tight truncate">
                         {name}
+                        {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                     </h3>
                 </div>
                 {recruiter.reputation_score && (

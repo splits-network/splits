@@ -19,6 +19,7 @@ const nextConfig = {
         "@splits-network/shared-types",
         "@splits-network/shared-config",
         "@splits-network/shared-ui",
+        "@splits-network/shared-gamification",
         "@splits-network/memphis-ui",
         "@splits-network/basel-ui",
     ],

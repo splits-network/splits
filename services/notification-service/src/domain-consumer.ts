@@ -24,6 +24,7 @@ import { RelationshipsEventConsumer } from './consumers/relationships/consumer';
 import { SecurityEventConsumer } from './consumers/security/consumer';
 import { RecruiterCodesEventConsumer } from './consumers/recruiter-codes/consumer';
 import { DocumentsEventConsumer } from './consumers/documents/consumer';
+import { GamificationEventConsumer } from './consumers/gamification/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -59,6 +60,7 @@ export class DomainEventConsumer {
     private securityConsumer: SecurityEventConsumer;
     private recruiterCodesConsumer: RecruiterCodesEventConsumer;
     private documentsConsumer: DocumentsEventConsumer;
+    private gamificationConsumer: GamificationEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -207,6 +209,11 @@ export class DomainEventConsumer {
             notificationService.documents,
             logger,
             portalUrl,
+            contactLookup,
+            dataLookup
+        );
+        this.gamificationConsumer = new GamificationEventConsumer(
+            logger,
             contactLookup,
             dataLookup
         );
@@ -381,6 +388,11 @@ export class DomainEventConsumer {
             // Health monitoring events
             await this.channel.bindQueue(this.queue, this.exchange, 'system.health.service_unhealthy');
             await this.channel.bindQueue(this.queue, this.exchange, 'system.health.service_recovered');
+
+            // Gamification events
+            await this.channel.bindQueue(this.queue, this.exchange, 'badge.awarded');
+            await this.channel.bindQueue(this.queue, this.exchange, 'level.up');
+            await this.channel.bindQueue(this.queue, this.exchange, 'streak.milestone');
 
             this.logger.info('Connected to RabbitMQ and bound to events');
 
@@ -747,6 +759,17 @@ export class DomainEventConsumer {
                 break;
             case 'system.health.service_recovered':
                 await this.healthConsumer.handleServiceRecovered(event);
+                break;
+
+            // Gamification domain
+            case 'badge.awarded':
+                await this.gamificationConsumer.handleBadgeAwarded(event);
+                break;
+            case 'level.up':
+                await this.gamificationConsumer.handleLevelUp(event);
+                break;
+            case 'streak.milestone':
+                await this.gamificationConsumer.handleStreakMilestone(event);
                 break;
 
             default:

@@ -18,6 +18,10 @@ import RecruiterActionsToolbar from "../shared/actions-toolbar";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 export function GridCard({
     recruiter,
@@ -30,13 +34,19 @@ export function GridCard({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const level = getLevel(recruiter.id);
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
     const status = recruiter.status || "active";
     const memberSince = memberSinceDisplay(recruiter);
     const recruiterUserId = recruiter.users?.id;
-    const presence = usePresence([recruiterUserId], { enabled: Boolean(recruiterUserId) });
-    const presenceStatus = recruiterUserId ? presence[recruiterUserId]?.status : undefined;
+    const presence = usePresence([recruiterUserId], {
+        enabled: Boolean(recruiterUserId),
+    });
+    const presenceStatus = recruiterUserId
+        ? presence[recruiterUserId]?.status
+        : undefined;
 
     const stats = [
         {
@@ -86,10 +96,7 @@ export function GridCard({
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
                         {presenceStatus === "online" && (
-                            <Presence
-                                status={presenceStatus}
-                                variant="badge"
-                            />
+                            <Presence status={presenceStatus} variant="badge" />
                         )}
                         <span className={`badge ${statusColor(status)}`}>
                             {formatStatus(status)}
@@ -124,6 +131,11 @@ export function GridCard({
                         )}
                         <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
+                            {level && (
+                                <span className="ml-2 align-middle inline-block">
+                                    <LevelBadge level={level} size="sm" />
+                                </span>
+                            )}
                         </h3>
                     </div>
                 </div>
@@ -138,7 +150,9 @@ export function GridCard({
                     )}
                     {memberSince && (
                         <>
-                            {location && <span className="text-base-content/20">|</span>}
+                            {location && (
+                                <span className="text-base-content/20">|</span>
+                            )}
                             <span className="flex items-center gap-1.5">
                                 <i className="fa-duotone fa-regular fa-calendar" />
                                 Member since {memberSince}
@@ -150,136 +164,144 @@ export function GridCard({
 
             {/* Card Body — evenly distribute sections */}
             <div className="flex-1 flex flex-col justify-between">
-            {/* Bio */}
-            {recruiter.bio && (
-                <div className="px-6 py-5 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                        About
-                    </p>
-                    <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                        <MarkdownRenderer content={recruiter.bio} />
+                {/* Bio */}
+                {recruiter.bio && (
+                    <div className="px-6 py-5 border-b border-base-300">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                            About
+                        </p>
+                        <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                            <MarkdownRenderer content={recruiter.bio} />
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Stats Row */}
-            {stats.length > 0 && (
-                <div className="border-b border-base-300">
-                    <div
-                        className="grid divide-x divide-base-300"
-                        style={{
-                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
-                        }}
-                    >
-                        {stats.map((stat, i) => {
-                            const iconStyles = [
-                                "bg-primary text-primary-content",
-                                "bg-secondary text-secondary-content",
-                                "bg-accent text-accent-content",
-                                "bg-warning text-warning-content",
-                            ];
-                            const iconStyle = iconStyles[i % iconStyles.length];
-                            return (
-                                <div
-                                    key={stat.label}
-                                    className="flex items-center gap-2.5 px-3 py-4"
-                                >
+                {/* Stats Row */}
+                {stats.length > 0 && (
+                    <div className="border-b border-base-300">
+                        <div
+                            className="grid divide-x divide-base-300"
+                            style={{
+                                gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                            }}
+                        >
+                            {stats.map((stat, i) => {
+                                const iconStyles = [
+                                    "bg-primary text-primary-content",
+                                    "bg-secondary text-secondary-content",
+                                    "bg-accent text-accent-content",
+                                    "bg-warning text-warning-content",
+                                ];
+                                const iconStyle =
+                                    iconStyles[i % iconStyles.length];
+                                return (
                                     <div
-                                        className={`w-8 h-8 flex items-center justify-center shrink-0 ${iconStyle}`}
+                                        key={stat.label}
+                                        className="flex items-center gap-2.5 px-3 py-4"
                                     >
-                                        <i className={`${stat.icon} text-xs`} />
+                                        <div
+                                            className={`w-8 h-8 flex items-center justify-center shrink-0 ${iconStyle}`}
+                                        >
+                                            <i
+                                                className={`${stat.icon} text-xs`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <span className="text-lg font-black text-base-content leading-none block">
+                                                {stat.value}
+                                            </span>
+                                            <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
+                                                {stat.label}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span className="text-lg font-black text-base-content leading-none block">
-                                            {stat.value}
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Specialties + Industries tags */}
+                {((recruiter.specialties || []).length > 0 ||
+                    (recruiter.industries || []).length > 0) && (
+                    <div className="px-6 py-5 border-b border-base-300 space-y-4">
+                        {(recruiter.specialties || []).length > 0 && (
+                            <div>
+                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                                    Specialties
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {(recruiter.specialties || [])
+                                        .slice(0, 4)
+                                        .map((spec) => (
+                                            <span
+                                                key={spec}
+                                                className="badge badge-primary badge-soft badge-outline"
+                                            >
+                                                {spec}
+                                            </span>
+                                        ))}
+                                    {(recruiter.specialties || []).length >
+                                        4 && (
+                                        <span className="badge badge-ghost">
+                                            +
+                                            {(recruiter.specialties || [])
+                                                .length - 4}
                                         </span>
-                                        <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
-                                            {stat.label}
-                                        </span>
-                                    </div>
+                                    )}
                                 </div>
-                            );
-                        })}
+                            </div>
+                        )}
+                        {(recruiter.industries || []).length > 0 && (
+                            <div>
+                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                                    Industries
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {(recruiter.industries || [])
+                                        .slice(0, 3)
+                                        .map((ind) => (
+                                            <span
+                                                key={ind}
+                                                className="badge badge-soft badge-outline"
+                                            >
+                                                {ind}
+                                            </span>
+                                        ))}
+                                    {(recruiter.industries || []).length >
+                                        3 && (
+                                        <span className="badge badge-ghost">
+                                            +
+                                            {(recruiter.industries || [])
+                                                .length - 3}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Partnership Badges */}
+                <div className="px-6 py-5 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                        Partnership
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        <span
+                            className={`badge gap-2 ${recruiter.company_recruiter ? "badge-primary" : "badge-ghost"}`}
+                        >
+                            <i className="fa-duotone fa-regular fa-building" />
+                            Company Recruiter
+                        </span>
+                        <span
+                            className={`badge gap-2 ${recruiter.candidate_recruiter ? "badge-secondary" : "badge-ghost"}`}
+                        >
+                            <i className="fa-duotone fa-regular fa-user-tie" />
+                            Candidate Recruiter
+                        </span>
                     </div>
                 </div>
-            )}
-
-            {/* Specialties + Industries tags */}
-            {((recruiter.specialties || []).length > 0 ||
-                (recruiter.industries || []).length > 0) && (
-                <div className="px-6 py-5 border-b border-base-300 space-y-4">
-                    {(recruiter.specialties || []).length > 0 && (
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                                Specialties
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {(recruiter.specialties || [])
-                                    .slice(0, 4)
-                                    .map((spec) => (
-                                        <span
-                                            key={spec}
-                                            className="badge badge-primary badge-soft badge-outline"
-                                        >
-                                            {spec}
-                                        </span>
-                                    ))}
-                                {(recruiter.specialties || []).length > 4 && (
-                                    <span className="badge badge-ghost">
-                                        +{(recruiter.specialties || []).length - 4}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                    {(recruiter.industries || []).length > 0 && (
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                                Industries
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {(recruiter.industries || [])
-                                    .slice(0, 3)
-                                    .map((ind) => (
-                                        <span
-                                            key={ind}
-                                            className="badge badge-soft badge-outline"
-                                        >
-                                            {ind}
-                                        </span>
-                                    ))}
-                                {(recruiter.industries || []).length > 3 && (
-                                    <span className="badge badge-ghost">
-                                        +{(recruiter.industries || []).length - 3}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Partnership Badges */}
-            <div className="px-6 py-5 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                    Partnership
-                </p>
-                <div className="flex flex-wrap gap-2">
-                    <span
-                        className={`badge gap-2 ${recruiter.company_recruiter ? "badge-primary" : "badge-ghost"}`}
-                    >
-                        <i className="fa-duotone fa-regular fa-building" />
-                        Company Recruiter
-                    </span>
-                    <span
-                        className={`badge gap-2 ${recruiter.candidate_recruiter ? "badge-secondary" : "badge-ghost"}`}
-                    >
-                        <i className="fa-duotone fa-regular fa-user-tie" />
-                        Candidate Recruiter
-                    </span>
-                </div>
-            </div>
-
             </div>
 
             {/* Footer: actions */}
@@ -288,7 +310,7 @@ export function GridCard({
                 onClick={(e) => e.stopPropagation()}
             >
                 <Link
-                    href={`/portal/recruiters/${recruiter.slug || recruiter.id}`}
+                    href={`/recruiters/${recruiter.slug || recruiter.id}`}
                     className="btn btn-sm btn-link gap-1"
                 >
                     View Profile

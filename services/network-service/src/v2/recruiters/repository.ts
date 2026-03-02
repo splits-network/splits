@@ -241,6 +241,13 @@ export class RecruiterRepository {
                     // JOIN through firm_members → firms to get the recruiter's firm name
                     selectParts.push('firm_members!recruiter_id(firm_id, role, firms!firm_id(id, name, slug))');
                     break;
+                case 'activity':
+                    // JOIN with recruiter_activity_recent view (latest 5 per recruiter)
+                    selectParts.push('recruiter_activity_recent!recruiter_id(id, activity_type, description, metadata, created_at)');
+                    break;
+                case 'response_metrics':
+                    // Handled separately via getResponseMetrics() — view has no FK for PostgREST join
+                    break;
             }
         }
 
@@ -273,6 +280,21 @@ export class RecruiterRepository {
 
         const { data } = await query.maybeSingle();
         return !!data;
+    }
+
+    /**
+     * Fetch response metrics from the analytics bridge view.
+     * Separate query because the view has no FK for PostgREST relational joins.
+     */
+    async getResponseMetrics(recruiterId: string): Promise<{ response_rate: number | null; avg_response_time_hours: number | null } | null> {
+        const { data, error } = await this.supabase
+            .from('recruiter_response_metrics_latest')
+            .select('response_rate, avg_response_time_hours')
+            .eq('recruiter_id', recruiterId)
+            .maybeSingle();
+
+        if (error) return null;
+        return data;
     }
 
     /**

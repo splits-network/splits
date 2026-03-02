@@ -6,11 +6,13 @@ import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { RecruiterRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { RecruiterFilters, RecruiterUpdate } from './types';
+import { RecruiterActivityService } from '../recruiter-activity/service';
 
 export class RecruiterServiceV2 {
     constructor(
         private repository: RecruiterRepository,
-        private eventPublisher: IEventPublisher
+        private eventPublisher: IEventPublisher,
+        private activityService?: RecruiterActivityService
     ) { }
 
     async getRecruiters(
@@ -157,6 +159,21 @@ export class RecruiterServiceV2 {
             updates: Object.keys(updates),
         });
 
+        // Record activity for meaningful profile changes
+        if (updates.status === 'active') {
+            await this.activityService?.recordActivity({
+                recruiter_id: id,
+                activity_type: 'profile_verified',
+                description: 'Profile verified and activated',
+            });
+        } else {
+            await this.activityService?.recordActivity({
+                recruiter_id: id,
+                activity_type: 'profile_updated',
+                description: 'Updated profile',
+            });
+        }
+
         return recruiter;
     }
 
@@ -177,7 +194,23 @@ export class RecruiterServiceV2 {
     private flattenRecruiterData(recruiter: any): any {
         if (!recruiter) return recruiter;
 
-        const { recruiter_reputation, firm_members, ...rest } = recruiter;
+        const { recruiter_reputation, firm_members, recruiter_activity_recent, recruiter_response_metrics_latest, ...rest } = recruiter;
+
+        // Pass through activity as a flat array
+        if (recruiter_activity_recent && Array.isArray(recruiter_activity_recent)) {
+            rest.recent_activity = recruiter_activity_recent;
+        }
+
+        // Flatten response metrics from analytics view
+        if (recruiter_response_metrics_latest) {
+            const metrics = Array.isArray(recruiter_response_metrics_latest)
+                ? recruiter_response_metrics_latest[0]
+                : recruiter_response_metrics_latest;
+            if (metrics) {
+                rest.response_rate = metrics.response_rate;
+                rest.avg_response_time_hours = metrics.avg_response_time_hours;
+            }
+        }
 
         // Flatten firm data — take first firm membership's firm name
         if (firm_members && Array.isArray(firm_members) && firm_members.length > 0) {

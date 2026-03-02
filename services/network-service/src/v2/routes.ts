@@ -23,6 +23,8 @@ import { FirmServiceV2 } from './firms/service';
 import { registerFirmRoutes } from './firms/routes';
 import { registerPublicFirmRoutes } from './firms/public-routes';
 import { createClient } from '@supabase/supabase-js';
+import { RecruiterActivityRepository } from './recruiter-activity/repository';
+import { RecruiterActivityService } from './recruiter-activity/service';
 import { AdminNetworkRepository } from './admin/repository';
 import { AdminNetworkService } from './admin/service';
 import { registerAdminNetworkRoutes } from './admin/routes';
@@ -46,13 +48,16 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     const reputationRepository = new ReputationRepository(config.supabaseUrl, config.supabaseKey);
     const companyReputationRepository = new CompanyReputationRepository(config.supabaseUrl, config.supabaseKey);
     const firmRepository = new FirmRepository(config.supabaseUrl, config.supabaseKey);
+    const recruiterActivityRepository = new RecruiterActivityRepository(config.supabaseUrl, config.supabaseKey);
 
-    const recruiterService = new RecruiterServiceV2(recruiterRepository, config.eventPublisher);
+    const recruiterActivityService = new RecruiterActivityService(recruiterActivityRepository);
+    const recruiterService = new RecruiterServiceV2(recruiterRepository, config.eventPublisher, recruiterActivityService);
     const assignmentService = new AssignmentServiceV2(assignmentRepository, config.eventPublisher);
     const recruiterCandidateService = new RecruiterCandidateServiceV2(
         recruiterCandidateRepository,
         config.eventPublisher,
-        supabase
+        supabase,
+        recruiterActivityService
     );
     const reputationService = new ReputationServiceV2(reputationRepository, config.eventPublisher);
     const companyReputationService = new CompanyReputationServiceV2(companyReputationRepository);
@@ -67,7 +72,7 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     registerPublicFirmRoutes(app, { firmService });
 
     // Register recruiter-companies routes
-    await recruiterCompanyRoutes(app, supabase, config.eventPublisher);
+    await recruiterCompanyRoutes(app, supabase, config.eventPublisher, recruiterActivityService);
 
     // Register company platform invitation routes
     await companyInvitationRoutes(app, supabase, config.eventPublisher, config.portalUrl);

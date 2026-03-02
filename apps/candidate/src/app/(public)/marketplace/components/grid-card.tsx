@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Recruiter } from "../marketplace-client";
 import { getInitials } from "./status-color";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface GridCardProps {
     recruiter: Recruiter;
@@ -49,6 +50,8 @@ export default function GridCard({
     isSelected,
     onSelect,
 }: GridCardProps) {
+    const { getLevel } = useGamification();
+    const level = getLevel(recruiter.id);
     const name = recruiter.users?.name || recruiter.name || "Unknown Recruiter";
     const location = recruiter.location;
     const status = recruiter.status || "active";
@@ -120,6 +123,11 @@ export default function GridCard({
                         )}
                         <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
+                            {level && (
+                                <span className="ml-2 align-middle inline-block">
+                                    <LevelBadge level={level} size="sm" />
+                                </span>
+                            )}
                         </h3>
                     </div>
                 </div>

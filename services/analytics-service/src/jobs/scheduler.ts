@@ -12,6 +12,7 @@ import { rollupHourlyMetrics } from './rollup-hourly';
 import { rollupDailyMetrics } from './rollup-daily';
 import { rollupMonthlyMetrics } from './rollup-monthly';
 import { computeMarketplaceHealth } from './marketplace-health';
+import { computeRecruiterResponseMetrics } from './recruiter-response-metrics';
 
 const logger = createLogger('analytics-service:scheduler');
 
@@ -89,6 +90,18 @@ export class JobScheduler {
             })
         );
 
+        // Recruiter response metrics - runs at 3:15 AM every day
+        this.tasks.push(
+            cron.schedule('15 3 * * *', async () => {
+                logger.info('Computing recruiter response metrics');
+                try {
+                    await computeRecruiterResponseMetrics(this.supabase);
+                } catch (error: any) {
+                    logger.error(`Recruiter response metrics computation failed: ${error.message}`);
+                }
+            })
+        );
+
         logger.info(`Scheduled ${this.tasks.length} background jobs`);
     }
 
@@ -112,6 +125,7 @@ export class JobScheduler {
             await rollupDailyMetrics(this.supabase);
             await rollupMonthlyMetrics(this.supabase);
             await computeMarketplaceHealth(this.supabase);
+            await computeRecruiterResponseMetrics(this.supabase);
             logger.info('All jobs completed successfully');
         } catch (error: any) {
             logger.error(`Job execution failed: ${error.message}`);
