@@ -248,6 +248,33 @@ export class RecruiterRepository {
     }
 
 
+    async findRecruiterBySlug(slug: string, include?: string): Promise<any | null> {
+        const selectClause = this.buildSelectClause(include);
+
+        const { data, error } = await this.supabase
+            .from('recruiters')
+            .select(selectClause)
+            .eq('slug', slug)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async isSlugTaken(slug: string, excludeRecruiterId?: string): Promise<boolean> {
+        let query = this.supabase
+            .from('recruiters')
+            .select('id')
+            .eq('slug', slug);
+
+        if (excludeRecruiterId) {
+            query = query.neq('id', excludeRecruiterId);
+        }
+
+        const { data } = await query.maybeSingle();
+        return !!data;
+    }
+
     /**
      * Create a user_role entry for a recruiter.
      * Used during recruiter creation to explicitly assign the 'recruiter' role.

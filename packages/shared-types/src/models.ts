@@ -621,6 +621,7 @@ export interface MarketplaceProfile {
 export interface Recruiter {
     id: string;
     user_id: string;
+    slug?: string;
     status: RecruiterStatus;
     bio?: string;
     // Core profile fields (all recruiters)

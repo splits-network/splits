@@ -38,6 +38,14 @@ export class RecruiterServiceV2 {
         return this.flattenRecruiterData(recruiter);
     }
 
+    async getRecruiterBySlug(slug: string, clerkUserId?: string, include?: string): Promise<any> {
+        const recruiter = await this.repository.findRecruiterBySlug(slug, include);
+        if (!recruiter) {
+            throw { statusCode: 404, message: 'Recruiter not found' };
+        }
+        return this.flattenRecruiterData(recruiter);
+    }
+
     async getRecruiterByClerkId(clerkUserId: string): Promise<any> {
         const recruiter = await this.repository.findByClerkUserId(clerkUserId);
         if (!recruiter) {
@@ -66,8 +74,20 @@ export class RecruiterServiceV2 {
             throw { statusCode: 409, message: 'Recruiter profile already exists for this user' };
         }
 
+        // Auto-generate slug from name if not provided
+        let slug: string | undefined;
+        if (data.user_id) {
+            const user = await this.repository.findRecruiterByUserId(data.user_id);
+            // If no existing recruiter, try to generate slug from any available name
+            const nameForSlug = (data as any).name;
+            if (nameForSlug) {
+                slug = await this.generateUniqueSlug(nameForSlug);
+            }
+        }
+
         const recruiter = await this.repository.createRecruiter({
             ...data,
+            ...(slug ? { slug } : {}),
             status: data.status || 'active',  //may be changed to 'pending' based on requirements
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -99,6 +119,19 @@ export class RecruiterServiceV2 {
         }
         if (updates.name !== undefined && updates.name.trim().length === 0) {
             throw { statusCode: 400, message: 'Name cannot be empty' };
+        }
+
+        // Slug validation
+        if (updates.slug !== undefined) {
+            if (updates.slug) {
+                if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(updates.slug)) {
+                    throw { statusCode: 400, message: 'Slug must be lowercase alphanumeric with hyphens only' };
+                }
+                const taken = await this.repository.isSlugTaken(updates.slug, id);
+                if (taken) {
+                    throw { statusCode: 409, message: 'This slug is already taken' };
+                }
+            }
         }
 
         // Status transition validation
@@ -181,6 +214,28 @@ export class RecruiterServiceV2 {
         }
 
         return rest;
+    }
+
+    /**
+     * Generate a unique slug from a name, appending -2, -3, etc. if taken
+     */
+    private async generateUniqueSlug(name: string): Promise<string> {
+        const base = name
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+
+        if (!base) return '';
+
+        let slug = base;
+        let counter = 2;
+        while (await this.repository.isSlugTaken(slug)) {
+            slug = `${base}-${counter}`;
+            counter++;
+        }
+        return slug;
     }
 
     private isValidEmail(email: string): boolean {

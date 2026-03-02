@@ -70,7 +70,7 @@ export function GridCard({
         <div
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-lg",
+                "group cursor-pointer flex flex-col h-full bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-lg",
                 isSelected
                     ? "border-l-primary border-primary"
                     : "border-l-primary hover:border-primary/40",
@@ -147,6 +147,8 @@ export function GridCard({
                 </div>
             </div>
 
+            {/* Card Body — evenly distribute sections */}
+            <div className="flex-1 flex flex-col justify-between">
             {/* Bio */}
             {recruiter.bio && (
                 <div className="px-6 py-5 border-b border-base-300">
@@ -275,6 +277,8 @@ export function GridCard({
                         Candidate Recruiter
                     </span>
                 </div>
+            </div>
+
             </div>
 
             {/* Footer: actions */}

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import type { Recruiter } from "../marketplace-client";
-import ReputationDisplay from "./reputation-display";
 import { getInitials } from "./status-color";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 
@@ -19,11 +18,13 @@ function formatStatus(status: string) {
 function statusColor(status: string) {
     switch (status) {
         case "active":
-            return "badge-success";
+            return "badge-info badge-soft badge-outline";
         case "pending":
-            return "badge-warning";
+            return "badge-warning badge-soft badge-outline";
         case "suspended":
-            return "badge-error";
+            return "badge-error badge-soft badge-outline";
+        case "inactive":
+            return "badge-ghost";
         default:
             return "badge-ghost";
     }
@@ -273,18 +274,16 @@ export default function GridCard({
                 </div>
             </div>
 
-            {/* Footer: reputation + view */}
-            <div className="mt-auto flex items-center justify-between px-6 py-4 border-t border-base-200">
-                <ReputationDisplay
-                    score={recruiter.reputation_score}
-                    placements={recruiter.total_placements}
-                />
+            {/* Footer: view link */}
+            <div
+                className="mt-auto flex items-center justify-end gap-3 px-6 py-4 border-t border-base-200"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <Link
                     href={`/marketplace/${recruiter.id}`}
-                    onClick={(e) => e.stopPropagation()}
                     className="text-sm font-bold uppercase tracking-wider text-primary hover:text-primary/70 transition-colors"
                 >
-                    View
+                    View Profile
                     <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
                 </Link>
             </div>

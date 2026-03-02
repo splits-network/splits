@@ -155,6 +155,7 @@ export interface UpdateMarketplaceProfileDTO {
 export interface MarketplaceRecruiterDTO {
     id: string;
     user_id: string;
+    slug?: string;
     name: string;
     status: string;
     email?: string; // Only if show_contact_info is true

@@ -19,17 +19,16 @@ export function GridView({
 
     return (
         <div className="relative">
-            {/* Masonry Grid */}
-            <div className="columns-1 sm:columns-2 lg:columns-3 3xl:columns-4 gap-4 w-full">
+            {/* Grid */}
+            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4">
                 {recruiters.map((recruiter) => (
-                    <div key={recruiter.id} className="break-inside-avoid mb-4">
-                        <GridCard
-                            recruiter={recruiter}
-                            isSelected={selectedId === recruiter.id}
-                            onSelect={() => onSelectAction(recruiter)}
-                            onRefresh={onRefreshAction}
-                        />
-                    </div>
+                    <GridCard
+                        key={recruiter.id}
+                        recruiter={recruiter}
+                        isSelected={selectedId === recruiter.id}
+                        onSelect={() => onSelectAction(recruiter)}
+                        onRefresh={onRefreshAction}
+                    />
                 ))}
             </div>
 

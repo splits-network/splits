@@ -1,7 +1,6 @@
 "use client";
 
 import type { Placement } from "../../types";
-import { MobileDetailOverlay } from "@/components/standard-lists";
 import { GridCard } from "./grid-card";
 import { DetailPanel } from "../shared/detail-panel";
 
@@ -19,40 +18,33 @@ export function GridView({
     const selectedPlacement = placements.find((p) => p.id === selectedId) ?? null;
 
     return (
-        <div className="flex gap-6">
-            {/* Card grid — hidden on mobile when a detail is open */}
-            <div
-                className={`flex flex-col w-full ${selectedPlacement ? "hidden md:flex" : "flex"}`}
-            >
-                <div
-                    className={`grid gap-4 w-full ${
-                        selectedPlacement
-                            ? "grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3"
-                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5"
-                    }`}
-                >
-                    {placements.map((placement) => (
-                        <GridCard
-                            key={placement.id}
-                            placement={placement}
-                            isSelected={selectedId === placement.id}
-                            onSelect={() => onSelect(placement)}
-                        />
-                    ))}
-                </div>
+        <div className="relative">
+            {/* Grid */}
+            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5">
+                {placements.map((placement) => (
+                    <GridCard
+                        key={placement.id}
+                        placement={placement}
+                        isSelected={selectedId === placement.id}
+                        onSelect={() => onSelect(placement)}
+                    />
+                ))}
             </div>
 
-            {/* Detail sidebar — 50% width on desktop, full-screen overlay on mobile */}
+            {/* Detail Drawer */}
             {selectedPlacement && (
-                <MobileDetailOverlay
-                    isOpen
-                    className="md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start bg-base-100"
-                >
-                    <DetailPanel
-                        placement={selectedPlacement}
-                        onClose={() => onSelect(selectedPlacement)}
+                <>
+                    <div
+                        className="fixed inset-0 z-40 bg-black/30 transition-opacity"
+                        onClick={() => onSelect(selectedPlacement)}
                     />
-                </MobileDetailOverlay>
+                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+                        <DetailPanel
+                            placement={selectedPlacement}
+                            onClose={() => onSelect(selectedPlacement)}
+                        />
+                    </div>
+                </>
             )}
         </div>
     );
