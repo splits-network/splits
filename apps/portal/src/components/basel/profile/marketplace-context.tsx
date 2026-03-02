@@ -12,7 +12,6 @@ import {
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
-import type { MarketplaceProfile } from "@splits-network/shared-types";
 import {
     calculateProfileCompleteness,
     getCompletionTierBadge,
@@ -34,9 +33,10 @@ export interface MarketplaceSettingsData {
     tagline: string;
     years_experience: number;
     bio: string;
-    marketplace_profile: MarketplaceProfile;
     show_success_metrics: boolean;
     show_contact_info: boolean;
+    candidate_recruiter: boolean;
+    company_recruiter: boolean;
 }
 
 interface MarketplaceContextValue {
@@ -45,7 +45,7 @@ interface MarketplaceContextValue {
     updateSettings: (updates: Partial<MarketplaceSettingsData>) => void;
     toggleIndustry: (industry: string) => void;
     toggleSpecialty: (specialty: string) => void;
-    updateBioRich: (bio_rich: string) => void;
+    updateBio: (bio: string) => void;
     completeness: CompletenessResult;
     tierBadge: ReturnType<typeof getCompletionTierBadge>;
     topPriorities: ProfileField[];
@@ -81,9 +81,10 @@ const DEFAULT_SETTINGS: MarketplaceSettingsData = {
     tagline: "",
     years_experience: 0,
     bio: "",
-    marketplace_profile: {},
     show_success_metrics: false,
     show_contact_info: true,
+    candidate_recruiter: false,
+    company_recruiter: false,
 };
 
 export function MarketplaceSettingsProvider({
@@ -130,9 +131,10 @@ export function MarketplaceSettingsProvider({
                 tagline: data.tagline || "",
                 years_experience: data.years_experience || 0,
                 bio: data.bio || "",
-                marketplace_profile: data.marketplace_profile || {},
                 show_success_metrics: data.show_success_metrics ?? false,
                 show_contact_info: data.show_contact_info !== false,
+                candidate_recruiter: data.candidate_recruiter ?? false,
+                company_recruiter: data.company_recruiter ?? false,
             });
         } catch (err) {
             console.error("Failed to load marketplace settings:", err);
@@ -173,15 +175,18 @@ export function MarketplaceSettingsProvider({
                 years_experience:
                     changesToSave.years_experience ?? settings.years_experience,
                 bio: changesToSave.bio ?? settings.bio,
-                marketplace_profile:
-                    changesToSave.marketplace_profile ??
-                    settings.marketplace_profile,
                 show_success_metrics:
                     changesToSave.show_success_metrics ??
                     settings.show_success_metrics,
                 show_contact_info:
                     changesToSave.show_contact_info ??
                     settings.show_contact_info,
+                candidate_recruiter:
+                    changesToSave.candidate_recruiter ??
+                    settings.candidate_recruiter,
+                company_recruiter:
+                    changesToSave.company_recruiter ??
+                    settings.company_recruiter,
             };
             await client.patch(`/recruiters/${recruiterId}`, payload);
             setLastSaved(new Date());
@@ -217,13 +222,8 @@ export function MarketplaceSettingsProvider({
         updateSettings({ specialties: newSpecialties });
     };
 
-    const updateBioRich = (bio_rich: string) => {
-        updateSettings({
-            marketplace_profile: {
-                ...settings.marketplace_profile,
-                bio_rich,
-            },
-        });
+    const updateBio = (bio: string) => {
+        updateSettings({ bio });
     };
 
     const completeness = useMemo(
@@ -242,7 +242,7 @@ export function MarketplaceSettingsProvider({
                 updateSettings,
                 toggleIndustry,
                 toggleSpecialty,
-                updateBioRich,
+                updateBio,
                 completeness,
                 tierBadge,
                 topPriorities,

@@ -16,6 +16,8 @@ interface Recruiter {
     phone?: string;
     tagline?: string;
     specialization?: string;
+    firm_name?: string;
+    status?: string;
     industries?: string[];
     specialties?: string[];
     location?: string;
@@ -24,11 +26,14 @@ interface Recruiter {
     total_placements?: number;
     success_rate?: number;
     reputation_score?: number;
+    candidate_recruiter?: boolean;
+    company_recruiter?: boolean;
     created_at: string;
     users?: {
         id: string;
         name?: string;
         email?: string;
+        profile_image_url?: string;
     };
 }
 
@@ -211,7 +216,7 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                                     </p>
                                 )}
 
-                                <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-content/50">
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-content/50">
                                     {recruiter.location && (
                                         <span>
                                             <i className="fa-duotone fa-regular fa-location-dot mr-1 text-secondary" />
@@ -347,7 +352,7 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                                                         (s, i) => (
                                                             <span
                                                                 key={i}
-                                                                className="text-xs font-bold uppercase tracking-[0.15em] bg-secondary/10 text-secondary px-3 py-1.5"
+                                                                className="badge badge-primary badge-soft badge-outline"
                                                             >
                                                                 {s}
                                                             </span>
@@ -368,7 +373,7 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                                                             (industry, i) => (
                                                                 <span
                                                                     key={i}
-                                                                    className="text-xs uppercase tracking-[0.15em] text-base-content/60 border border-base-300 px-3 py-1.5"
+                                                                    className="badge badge-soft badge-outline"
                                                                 >
                                                                     {industry}
                                                                 </span>
@@ -379,6 +384,27 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                                             )}
                                     </div>
                                 )}
+
+                                {/* Partnership */}
+                                <div className="profile-section bg-base-100 border-2 border-base-300 border-l-4 border-l-accent p-8 opacity-0">
+                                    <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
+                                        Partnership
+                                    </h2>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span
+                                            className={`badge badge-lg gap-2 ${recruiter.company_recruiter ? "badge-primary" : "badge-ghost"}`}
+                                        >
+                                            <i className="fa-duotone fa-regular fa-building" />
+                                            Company Recruiter
+                                        </span>
+                                        <span
+                                            className={`badge badge-lg gap-2 ${recruiter.candidate_recruiter ? "badge-secondary" : "badge-ghost"}`}
+                                        >
+                                            <i className="fa-duotone fa-regular fa-user-tie" />
+                                            Candidate Recruiter
+                                        </span>
+                                    </div>
+                                </div>
                             </>
                         )}
 
@@ -474,7 +500,7 @@ export default function RecruiterDetail({ recruiter }: RecruiterDetailProps) {
                                     Currently Active
                                 </span>
                             </div>
-                            <p className="text-xs text-base-content/50">
+                            <p className="text-sm text-base-content/50">
                                 Open to new opportunities and partnerships.
                             </p>
                         </div>

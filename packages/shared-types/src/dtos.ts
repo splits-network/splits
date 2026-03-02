@@ -146,15 +146,17 @@ export interface UpdateMarketplaceProfileDTO {
     location?: string;
     tagline?: string;
     years_experience?: number;
-    marketplace_profile?: Record<string, any>;
     show_success_metrics?: boolean;
     show_contact_info?: boolean;
+    candidate_recruiter?: boolean;
+    company_recruiter?: boolean;
 }
 
 export interface MarketplaceRecruiterDTO {
     id: string;
     user_id: string;
     name: string;
+    status: string;
     email?: string; // Only if show_contact_info is true
     phone?: string; // Only if show_contact_info is true
     tagline?: string;
@@ -162,8 +164,9 @@ export interface MarketplaceRecruiterDTO {
     specialties?: string[];
     location?: string;
     years_experience?: number;
-    marketplace_profile?: Record<string, any>;
     bio?: string;
+    candidate_recruiter?: boolean;
+    company_recruiter?: boolean;
     // Success metrics (only if show_success_metrics is true)
     total_placements?: number;
     success_rate?: number;

@@ -33,7 +33,7 @@ export function TableRow({
 }) {
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
-    const status = recruiter.marketplace_profile?.status || "active";
+    const status = recruiter.status || "active";
 
     return (
         <Fragment>

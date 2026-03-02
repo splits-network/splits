@@ -190,11 +190,10 @@ export class RecruiterServiceV2 {
 
     private validateStatusTransition(currentStatus: string, newStatus: string): void {
         const validTransitions: Record<string, string[]> = {
-            pending: ['active', 'rejected'],
-            active: ['inactive', 'suspended'],
-            inactive: ['active'],
+            pending: ['active', 'suspended'],
+            active: ['suspended', 'inactive'],
             suspended: ['active', 'inactive'],
-            rejected: [], // Terminal state
+            inactive: ['active'],
         };
 
         const allowed = validTransitions[currentStatus] || [];

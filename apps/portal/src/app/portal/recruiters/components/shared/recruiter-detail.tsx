@@ -35,13 +35,9 @@ export function RecruiterDetail({
     const location = recruiterLocation(recruiter);
     const specialties = recruiter.specialties || [];
     const industries = recruiter.industries || [];
-    const status = recruiter.marketplace_profile?.status || "active";
+    const status = recruiter.status || "active";
 
-    const bioContent =
-        recruiter.marketplace_profile?.description ||
-        recruiter.marketplace_profile?.bio_rich ||
-        recruiter.marketplace_profile?.bio ||
-        recruiter.bio;
+    const bioContent = recruiter.bio;
 
     return (
         <div>
@@ -209,6 +205,27 @@ export function RecruiterDetail({
                         </div>
                     </div>
                 )}
+
+                {/* Partnership */}
+                <div className="mb-6">
+                    <h3 className="uppercase tracking-[0.2em] text-base-content/40 text-xs font-bold mb-3">
+                        Partnership
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        <span
+                            className={`badge badge-lg gap-2 ${recruiter.company_recruiter ? "badge-primary" : "badge-ghost"}`}
+                        >
+                            <i className="fa-duotone fa-regular fa-building" />
+                            Company Recruiter
+                        </span>
+                        <span
+                            className={`badge badge-lg gap-2 ${recruiter.candidate_recruiter ? "badge-secondary" : "badge-ghost"}`}
+                        >
+                            <i className="fa-duotone fa-regular fa-user-tie" />
+                            Candidate Recruiter
+                        </span>
+                    </div>
+                </div>
 
                 {/* Contact Info */}
                 <div className="border-l-4 border-primary p-4 bg-base-200/50">

@@ -595,7 +595,7 @@ export interface Placement {
 }
 
 // Network domain types
-export type RecruiterStatus = 'pending' | 'active' | 'suspended';
+export type RecruiterStatus = 'pending' | 'active' | 'suspended' | 'inactive';
 
 export type MarketplaceVisibility = 'public' | 'limited' | 'hidden';
 
@@ -631,9 +631,11 @@ export interface Recruiter {
     years_experience?: number;
     created_at: Date;
     updated_at: Date;
+    // Recruiter role type flags
+    candidate_recruiter?: boolean;
+    company_recruiter?: boolean;
     // Marketplace-specific fields (opt-in)
     marketplace_enabled?: boolean;
-    marketplace_profile?: MarketplaceProfile;
     marketplace_visibility?: MarketplaceVisibility;
     show_success_metrics?: boolean;
     show_contact_info?: boolean;

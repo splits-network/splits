@@ -31,7 +31,7 @@ export function GridCard({
 }) {
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
-    const status = recruiter.marketplace_profile?.status || "active";
+    const status = recruiter.status || "active";
     const memberSince = memberSinceDisplay(recruiter);
     const recruiterUserId = recruiter.users?.id;
     const presence = usePresence([recruiterUserId], { enabled: Boolean(recruiterUserId) });
@@ -131,7 +131,7 @@ export function GridCard({
                 <div className="flex items-center gap-4 mt-3 text-sm text-base-content/40">
                     {location && (
                         <span className="flex items-center gap-1.5">
-                            <i className="fa-duotone fa-regular fa-location-dot text-xs" />
+                            <i className="fa-duotone fa-regular fa-location-dot" />
                             {location}
                         </span>
                     )}
@@ -139,7 +139,7 @@ export function GridCard({
                         <>
                             {location && <span className="text-base-content/20">|</span>}
                             <span className="flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-calendar text-xs" />
+                                <i className="fa-duotone fa-regular fa-calendar" />
                                 Member since {memberSince}
                             </span>
                         </>
@@ -255,6 +255,27 @@ export function GridCard({
                     )}
                 </div>
             )}
+
+            {/* Partnership Badges */}
+            <div className="px-6 py-5 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                    Partnership
+                </p>
+                <div className="flex flex-wrap gap-2">
+                    <span
+                        className={`badge gap-2 ${recruiter.company_recruiter ? "badge-primary" : "badge-ghost"}`}
+                    >
+                        <i className="fa-duotone fa-regular fa-building" />
+                        Company Recruiter
+                    </span>
+                    <span
+                        className={`badge gap-2 ${recruiter.candidate_recruiter ? "badge-secondary" : "badge-ghost"}`}
+                    >
+                        <i className="fa-duotone fa-regular fa-user-tie" />
+                        Candidate Recruiter
+                    </span>
+                </div>
+            </div>
 
             {/* Footer: actions */}
             <div

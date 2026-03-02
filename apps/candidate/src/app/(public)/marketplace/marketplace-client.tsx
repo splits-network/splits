@@ -25,6 +25,8 @@ export interface Recruiter {
     phone?: string;
     tagline?: string;
     specialization?: string;
+    firm_name?: string;
+    status?: string;
     industries?: string[];
     specialties?: string[];
     location?: string;
@@ -33,11 +35,14 @@ export interface Recruiter {
     total_placements?: number;
     success_rate?: number;
     reputation_score?: number;
+    candidate_recruiter?: boolean;
+    company_recruiter?: boolean;
     created_at: string;
     users?: {
         id: string;
         name?: string;
         email?: string;
+        profile_image_url?: string;
     };
 }
 

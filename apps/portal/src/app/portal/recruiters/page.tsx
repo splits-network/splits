@@ -119,9 +119,7 @@ function RecruitersContent() {
         () => ({
             total: pagination?.total || recruiters.length,
             active: recruiters.filter(
-                (r) =>
-                    r.marketplace_profile?.status === "active" ||
-                    !r.marketplace_profile?.status,
+                (r) => r.status === "active",
             ).length,
             avgPlacements:
                 recruiters.length > 0

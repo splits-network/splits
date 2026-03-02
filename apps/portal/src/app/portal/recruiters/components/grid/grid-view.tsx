@@ -2,7 +2,6 @@
 
 import type { RecruiterWithUser } from "../../types";
 import { DetailLoader } from "../shared/recruiter-detail";
-import { MobileDetailOverlay } from "@/components/standard-lists";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -19,41 +18,39 @@ export function GridView({
     const selectedRecruiter = recruiters.find((r) => r.id === selectedId);
 
     return (
-        <div className="flex gap-6">
-            <div
-                className={`flex flex-col w-full ${selectedRecruiter ? "hidden md:flex" : "flex"}`}
-            >
-                <div
-                    className={`grid gap-4 w-full ${
-                        selectedRecruiter
-                            ? "grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3"
-                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                    }`}
-                >
-                    {recruiters.map((recruiter) => (
+        <div className="relative">
+            {/* Masonry Grid */}
+            <div className="columns-1 sm:columns-2 lg:columns-3 3xl:columns-4 gap-4 w-full">
+                {recruiters.map((recruiter) => (
+                    <div key={recruiter.id} className="break-inside-avoid mb-4">
                         <GridCard
-                            key={recruiter.id}
                             recruiter={recruiter}
                             isSelected={selectedId === recruiter.id}
                             onSelect={() => onSelectAction(recruiter)}
                             onRefresh={onRefreshAction}
                         />
-                    ))}
-                </div>
+                    </div>
+                ))}
             </div>
 
-            {/* Detail Sidebar */}
+            {/* Detail Drawer */}
             {selectedRecruiter && (
-                <MobileDetailOverlay
-                    isOpen
-                    className="md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start bg-base-100 shadow-sm"
-                >
-                    <DetailLoader
-                        recruiterId={selectedRecruiter.id}
-                        onClose={() => onSelectAction(selectedRecruiter)}
-                        onRefresh={onRefreshAction}
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 z-40 bg-black/30 transition-opacity"
+                        onClick={() => onSelectAction(selectedRecruiter)}
                     />
-                </MobileDetailOverlay>
+
+                    {/* Slide-over Panel */}
+                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+                        <DetailLoader
+                            recruiterId={selectedRecruiter.id}
+                            onClose={() => onSelectAction(selectedRecruiter)}
+                            onRefresh={onRefreshAction}
+                        />
+                    </div>
+                </>
             )}
         </div>
     );

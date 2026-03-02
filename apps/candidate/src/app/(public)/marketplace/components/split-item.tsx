@@ -45,14 +45,14 @@ export default function SplitItem({
 
             {/* Row 2: Tagline */}
             {recruiter.tagline && (
-                <p className="text-xs font-semibold text-base-content/60 mb-1 truncate pl-[42px]">
+                <p className="text-sm font-semibold text-base-content/60 mb-1 truncate pl-[42px]">
                     {recruiter.tagline}
                 </p>
             )}
 
-            {/* Row 3: Location + Experience */}
+            {/* Row 3: Location + Placements */}
             <div className="flex items-center justify-between pl-[42px]">
-                <span className="text-xs text-base-content/40">
+                <span className="text-sm text-base-content/40">
                     {recruiter.location && (
                         <>
                             <i className="fa-duotone fa-regular fa-location-dot mr-1" />
@@ -60,24 +60,34 @@ export default function SplitItem({
                         </>
                     )}
                 </span>
-                <span className="text-xs font-bold text-primary">
+                <span className="text-sm font-bold text-primary">
                     {recruiter.total_placements ?? 0} placements
                 </span>
             </div>
 
-            {/* Row 4: Industries */}
-            {recruiter.industries && recruiter.industries.length > 0 && (
-                <div className="flex gap-1 mt-2 pl-[42px]">
-                    {recruiter.industries.slice(0, 3).map((ind, i) => (
-                        <span
-                            key={i}
-                            className="text-[8px] uppercase tracking-wider bg-base-200 text-base-content/40 px-1.5 py-0.5"
-                        >
-                            {ind}
-                        </span>
-                    ))}
-                </div>
-            )}
+            {/* Row 4: Partnership + Industries */}
+            <div className="flex flex-wrap gap-1 mt-2 pl-[42px]">
+                {recruiter.company_recruiter && (
+                    <span className="badge badge-sm badge-primary gap-1">
+                        <i className="fa-duotone fa-regular fa-building" />
+                        Company
+                    </span>
+                )}
+                {recruiter.candidate_recruiter && (
+                    <span className="badge badge-sm badge-secondary gap-1">
+                        <i className="fa-duotone fa-regular fa-user-tie" />
+                        Candidate
+                    </span>
+                )}
+                {recruiter.industries?.slice(0, 2).map((ind) => (
+                    <span
+                        key={ind}
+                        className="badge badge-sm badge-soft badge-outline"
+                    >
+                        {ind}
+                    </span>
+                ))}
+            </div>
         </div>
     );
 }

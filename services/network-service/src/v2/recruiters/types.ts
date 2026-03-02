@@ -20,6 +20,8 @@ export interface RecruiterUpdate {
     phone?: string;
     specialization?: string;
     status?: string;
+    candidate_recruiter?: boolean;
+    company_recruiter?: boolean;
     [key: string]: any;
 }
 
