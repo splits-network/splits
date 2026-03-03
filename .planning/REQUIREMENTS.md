@@ -33,10 +33,10 @@ Requirements for company profile enrichment and card redesign. Each maps to road
 - [x] **API-08**: Company skills list endpoint (`GET /api/v2/company-skills?company_id=X`)
 - [x] **API-09**: Company perks list endpoint (`GET /api/v2/company-perks?company_id=X`)
 - [x] **API-10**: Company culture tags list endpoint (`GET /api/v2/company-culture-tags?company_id=X`)
-- [ ] **API-11**: Company update endpoint supports new scalar fields (stage, founded_year, tagline, social links)
-- [ ] **API-12**: Company queries return computed open_roles_count from jobs table
-- [ ] **API-13**: Company queries return computed avg_salary from jobs table
-- [ ] **API-14**: Gateway routes for all new endpoints
+- [x] **API-11**: Company update endpoint supports new scalar fields (stage, founded_year, tagline, social links)
+- [x] **API-12**: Company queries return computed open_roles_count from jobs table
+- [x] **API-13**: Company queries return computed avg_salary from jobs table
+- [x] **API-14**: Gateway routes for all new endpoints
 
 ### UI
 

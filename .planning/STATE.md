@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v7.0 Company Profile Enhancement — Phase 24: Company Enrichment APIs
+**Current focus:** v7.0 Company Profile Enhancement — Phase 25: Company Settings UI
 
 ## Current Position
 
-Phase: 24 of 27 (Company Enrichment APIs)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-03 — Completed 24-02-PLAN.md (gateway proxy routes for company enrichment APIs)
+Phase: 25 of 27 (Company Settings UI)
+Plan: 0 of 2 in current phase
+Status: Ready to plan
+Last activity: 2026-03-03 — Phase 24 complete (2 plans, enrichment APIs + gateway routes)
 
 Progress: [███████░░░░░░░░░░░░░] 50% (7/14 v7.0 plans)
 
@@ -51,10 +51,10 @@ None active.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 24-02-PLAN.md — gateway proxy routes for company enrichment APIs
+Stopped at: Phase 24 complete — enrichment APIs + gateway routes executed
 Resume file: None
-Next: Phase 24 complete — proceed to Phase 25 (Company Profile UI)
+Next: `/basel:discuss-phase 25` or `/basel:plan-phase 25`
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-03 (Phase 24 complete, all gateway proxy routes registered)*
+*Last updated: 2026-03-03 (Phase 24 complete, ready for Phase 25)*
