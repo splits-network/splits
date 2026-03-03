@@ -70,6 +70,13 @@ export type {
     CandidateSkill,
     CandidateSkillSource,
     JobSkill,
+    // Company profile types
+    CompanyStage,
+    Perk,
+    CultureTag,
+    CompanyPerk,
+    CompanyCultureTag,
+    CompanySkill,
 } from './models';
 
 // Content CMS block types and page structure
