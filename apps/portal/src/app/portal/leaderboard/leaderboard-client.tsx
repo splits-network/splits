@@ -7,6 +7,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { LeaderboardRow } from "@splits-network/shared-gamification";
 import type { LeaderboardEntryInfo } from "@splits-network/shared-gamification";
 import { LoadingState } from "@splits-network/shared-ui";
+import { BaselTabBar } from "@splits-network/basel-ui";
 
 type EntityType = "recruiter" | "candidate" | "company";
 type Period = "weekly" | "monthly" | "quarterly" | "all_time";
@@ -105,22 +106,11 @@ export default function LeaderboardClient() {
             </div>
 
             {/* Entity type tabs */}
-            <div className="flex gap-1 bg-base-200 border border-base-300 p-1 w-fit">
-                {ENTITY_TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        className={`px-4 py-2 text-sm font-bold transition-colors ${
-                            entityType === tab.key
-                                ? "bg-primary text-primary-content"
-                                : "text-base-content/50 hover:text-base-content"
-                        }`}
-                        onClick={() => setEntityType(tab.key)}
-                    >
-                        <i className={`${tab.icon} mr-2`} />
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+            <BaselTabBar
+                tabs={ENTITY_TABS.map(t => ({ label: t.label, value: t.key, icon: t.icon }))}
+                active={entityType}
+                onChange={(v) => setEntityType(v as EntityType)}
+            />
 
             {/* Filters row */}
             <div className="flex flex-wrap gap-4">

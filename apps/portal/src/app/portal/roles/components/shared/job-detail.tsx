@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { BaselTabBar } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
@@ -18,6 +19,7 @@ import {
     companyInitials,
 } from "./helpers";
 import RoleActionsToolbar from "./actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { JobMatchesTab } from "./job-matches-tab";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -40,12 +42,12 @@ interface CompanyMember {
     };
 }
 
-const TABS: { key: TabKey; label: string; icon: string }[] = [
-    { key: "brief", label: "Recruiter Brief", icon: "fa-file-lines" },
-    { key: "candidate", label: "Candidate", icon: "fa-user" },
-    { key: "financials", label: "Financials", icon: "fa-calculator" },
-    { key: "company", label: "Company", icon: "fa-building" },
-    { key: "matches", label: "Matches", icon: "fa-bullseye" },
+const TABS = [
+    { value: "brief", label: "Recruiter Brief", icon: "fa-duotone fa-regular fa-file-lines" },
+    { value: "candidate", label: "Candidate", icon: "fa-duotone fa-regular fa-user" },
+    { value: "financials", label: "Financials", icon: "fa-duotone fa-regular fa-calculator" },
+    { value: "company", label: "Company", icon: "fa-duotone fa-regular fa-building" },
+    { value: "matches", label: "Matches", icon: "fa-duotone fa-regular fa-bullseye" },
 ];
 
 /* ─── Tab Content Components ────────────────────────────────────────────── */
@@ -264,6 +266,8 @@ function FinancialsTab({ job }: { job: Job }) {
 
 function CompanyTab({ job }: { job: Job }) {
     const { getToken } = useAuth();
+    const { getLevel } = useGamification();
+    const companyLevel = job.company_id ? getLevel(job.company_id) : undefined;
     const name = companyName(job);
     const [members, setMembers] = useState<CompanyMember[]>([]);
     const [loadingMembers, setLoadingMembers] = useState(true);
@@ -359,17 +363,24 @@ function CompanyTab({ job }: { job: Job }) {
         <div className="space-y-8">
             {/* Company Info */}
             <div className="flex items-center gap-4">
-                {job.company?.logo_url ? (
-                    <img
-                        src={job.company.logo_url}
-                        alt={name}
-                        className="w-14 h-14 object-contain border-2 border-base-300"
-                    />
-                ) : (
-                    <div className="w-14 h-14 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-lg">
-                        {companyInitials(name)}
-                    </div>
-                )}
+                <div className="relative shrink-0">
+                    {job.company?.logo_url ? (
+                        <img
+                            src={job.company.logo_url}
+                            alt={name}
+                            className="w-14 h-14 object-contain border-2 border-base-300"
+                        />
+                    ) : (
+                        <div className="w-14 h-14 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-lg">
+                            {companyInitials(name)}
+                        </div>
+                    )}
+                    {companyLevel && (
+                        <div className="absolute -bottom-1 -right-1">
+                            <LevelBadge level={companyLevel} size="sm" />
+                        </div>
+                    )}
+                </div>
                 <div>
                     <p className="text-lg font-black">{name}</p>
                     {job.company?.industry && (
@@ -598,25 +609,12 @@ export function JobDetail({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-0 mt-4 -mb-4 border-b-0">
-                    {TABS.map((tab) => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setActiveTab(tab.key)}
-                            className={[
-                                "px-4 py-2.5 text-xs font-bold uppercase tracking-[0.15em] transition-colors border-b-2",
-                                activeTab === tab.key
-                                    ? "border-primary text-primary"
-                                    : "border-transparent text-base-content/40 hover:text-base-content/70",
-                            ].join(" ")}
-                        >
-                            <i
-                                className={`fa-duotone fa-regular ${tab.icon} mr-1.5`}
-                            />
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
+                <BaselTabBar
+                    tabs={TABS}
+                    active={activeTab}
+                    onChange={(v) => setActiveTab(v as TabKey)}
+                    className="mt-4 -mb-4"
+                />
             </div>
 
             {/* Tab Content */}

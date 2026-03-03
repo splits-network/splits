@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, Suspense } from "react";
+import { useMemo, useRef, useEffect, Suspense } from "react";
 import { useStandardList } from "@/hooks/use-standard-list";
 import { PaginationControls, LoadingState, ErrorState } from "@/components/standard-lists";
 import { BaselEmptyState } from "@splits-network/basel-ui";
@@ -9,6 +9,7 @@ import { FirmsAnimator } from "./firms-animator";
 import { HeaderSection } from "./components/header-section";
 import { ControlsBar } from "./components/controls-bar";
 import { GridView } from "./components/grid/grid-view";
+import { useGamification } from "@splits-network/shared-gamification";
 
 function FirmsClientInner() {
     const contentRef = useRef<HTMLDivElement>(null);
@@ -35,6 +36,15 @@ function FirmsClientInner() {
         defaultSortOrder: "asc",
         syncToUrl: true,
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const firmIds = firms.map((f) => f.id);
+        if (firmIds.length > 0) {
+            registerEntities("firm", [...new Set(firmIds)]);
+        }
+    }, [firms, registerEntities]);
 
     const stats = useMemo(() => ({
         total: pagination?.total || firms.length,

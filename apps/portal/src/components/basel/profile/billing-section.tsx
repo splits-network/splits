@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { BaselTabBar } from "@splits-network/basel-ui";
 import { SubscriptionTab } from "./subscription-tab";
 import { PayoutsTab } from "./payouts-tab";
 
@@ -50,19 +51,12 @@ export function BillingSection({ initialTab = "subscription", onTabChange }: Bil
     return (
         <div>
             {/* Tab bar */}
-            <div role="tablist" className="tabs tabs-bordered mb-8">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        role="tab"
-                        className={`tab gap-2 font-bold ${activeTab === tab.key ? "tab-active" : ""}`}
-                        onClick={() => handleTabChange(tab.key)}
-                    >
-                        <i className={tab.icon} />
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+            <BaselTabBar
+                tabs={TABS.map(t => ({ label: t.label, value: t.key, icon: t.icon }))}
+                active={activeTab}
+                onChange={(v) => handleTabChange(v as BillingTab)}
+                className="mb-8"
+            />
 
             {/* Tab content */}
             <div ref={contentRef}>

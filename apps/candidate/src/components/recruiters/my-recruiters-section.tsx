@@ -5,9 +5,11 @@ import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { RecruiterCard } from './recruiter-card';
 import TerminateRecruiterModal from './terminate-recruiter-modal';
+import { useGamification } from "@splits-network/shared-gamification";
 
 interface RecruiterRelationship {
     id: string;
+    recruiter_id: string;
     recruiter_name: string;
     recruiter_email: string;
     recruiter_bio?: string;
@@ -30,6 +32,7 @@ interface MyRecruitersResponse {
 
 export function MyRecruitersSection() {
     const { getToken } = useAuth();
+    const { registerEntities } = useGamification();
     const [recruiters, setRecruiters] = useState<MyRecruitersResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -69,6 +72,14 @@ export function MyRecruitersSection() {
             });
 
             setRecruiters(grouped);
+
+            // Register recruiter IDs for gamification
+            const recruiterIds: string[] = allRelationships
+                .map((r: RecruiterRelationship) => r.recruiter_id)
+                .filter((id: string) => !!id);
+            if (recruiterIds.length > 0) {
+                registerEntities("recruiter", [...new Set(recruiterIds)]);
+            }
         } catch (err: any) {
             console.error('Failed to fetch recruiters:', err);
             setError(err.message || 'Failed to load recruiter relationships');

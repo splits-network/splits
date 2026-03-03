@@ -1,6 +1,9 @@
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+
 // Type definition from my-recruiters-section (extended with additional fields)
 interface RecruiterRelationship {
     id: string;
+    recruiter_id: string;
     recruiter_name: string;
     recruiter_email: string;
     recruiter_bio?: string;
@@ -22,6 +25,9 @@ interface RecruiterCardProps {
 }
 
 export function RecruiterCard({ relationship, showActions = true, onTerminate }: RecruiterCardProps) {
+    const { getLevel } = useGamification();
+    const recruiterLevel = relationship.recruiter_id ? getLevel(relationship.recruiter_id) : undefined;
+
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
@@ -54,12 +60,19 @@ export function RecruiterCard({ relationship, showActions = true, onTerminate }:
                 {/* Header with name and status */}
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3 flex-1">
-                        <div className="avatar avatar-placeholder">
-                            <div className="bg-primary text-primary-content rounded-full w-12">
-                                <span className="text-lg">
-                                    {relationship.recruiter_name.charAt(0).toUpperCase()}
-                                </span>
+                        <div className="relative">
+                            <div className="avatar avatar-placeholder">
+                                <div className="bg-primary text-primary-content rounded-full w-12">
+                                    <span className="text-lg">
+                                        {relationship.recruiter_name.charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
                             </div>
+                            {recruiterLevel && (
+                                <div className="absolute -bottom-1 -right-1">
+                                    <LevelBadge level={recruiterLevel} size="sm" />
+                                </div>
+                            )}
                         </div>
                         <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-lg truncate">

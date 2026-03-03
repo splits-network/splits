@@ -13,6 +13,7 @@ import {
     estimatedPayoutRange,
 } from "../shared/helpers";
 import RoleActionsToolbar from "../shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function GridCard({
     job,
@@ -27,6 +28,8 @@ export function GridCard({
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
+    const { getLevel } = useGamification();
+    const companyLevel = job.company_id ? getLevel(job.company_id) : undefined;
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const level = formatJobLevel(job.job_level);
@@ -117,17 +120,24 @@ export function GridCard({
             {/* Footer: company logo / initials left, actions right */}
             <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-base-200">
                 <div className="flex items-center gap-2 min-w-0">
-                    {job.company?.logo_url ? (
-                        <img
-                            src={job.company.logo_url}
-                            alt={name}
-                            className="w-9 h-9 shrink-0 object-contain bg-base-200 border border-base-300 p-1"
-                        />
-                    ) : (
-                        <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
-                            {companyInitials(name)}
-                        </div>
-                    )}
+                    <div className="relative shrink-0">
+                        {job.company?.logo_url ? (
+                            <img
+                                src={job.company.logo_url}
+                                alt={name}
+                                className="w-9 h-9 object-contain bg-base-200 border border-base-300 p-1"
+                            />
+                        ) : (
+                            <div className="w-9 h-9 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
+                                {companyInitials(name)}
+                            </div>
+                        )}
+                        {companyLevel && (
+                            <div className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={companyLevel} size="sm" />
+                            </div>
+                        )}
+                    </div>
                     <div className="min-w-0">
                         <div className="text-sm font-semibold text-base-content truncate">
                             {name}

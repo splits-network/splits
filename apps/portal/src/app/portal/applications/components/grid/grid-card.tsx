@@ -21,6 +21,7 @@ import {
     getAIScoreColor,
 } from "../shared/status-color";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function GridCard({
     application,
@@ -33,6 +34,8 @@ export function GridCard({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const companyLevel = application.job?.company?.id ? getLevel(application.job.company.id) : undefined;
     const name = candidateName(application);
     const role = roleTitle(application);
     const company = companyName(application);
@@ -157,17 +160,24 @@ export function GridCard({
             {/* Footer: company avatar left, actions right */}
             <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-base-200">
                 <div className="flex items-center gap-2 min-w-0">
-                    {application.job?.company?.logo_url ? (
-                        <img
-                            src={application.job.company.logo_url}
-                            alt={company}
-                            className="w-8 h-8 shrink-0 object-contain bg-base-200 border border-base-300 p-0.5"
-                        />
-                    ) : (
-                        <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
-                            {cInitials}
-                        </div>
-                    )}
+                    <div className="relative shrink-0">
+                        {application.job?.company?.logo_url ? (
+                            <img
+                                src={application.job.company.logo_url}
+                                alt={company}
+                                className="w-8 h-8 object-contain bg-base-200 border border-base-300 p-0.5"
+                            />
+                        ) : (
+                            <div className="w-8 h-8 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
+                                {cInitials}
+                            </div>
+                        )}
+                        {companyLevel && (
+                            <div className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={companyLevel} size="sm" />
+                            </div>
+                        )}
+                    </div>
                     <span className="text-xs font-semibold text-base-content/60 truncate">
                         {company}
                     </span>

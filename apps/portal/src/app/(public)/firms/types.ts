@@ -44,6 +44,7 @@ export interface EnrichedPublicFirmProfile {
     firm: PublicFirm;
     placement_stats: FirmPlacementStats;
     recent_placements: FirmRecentPlacement[];
+    contact_user_id: string | null;
 }
 
 export interface FirmMember {

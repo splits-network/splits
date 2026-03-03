@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { BaselTabBar } from "@splits-network/basel-ui";
 
 type ReportRow = {
     id: string;
@@ -159,17 +160,14 @@ export default function ChatModerationClient() {
                         Review reports, evidence, and moderation actions.
                     </p>
                 </div>
-                <div className="tabs tabs-box">
-                    {(["reports", "audit"] as const).map((item) => (
-                        <button
-                            key={item}
-                            className={`tab ${tab === item ? "tab-active" : ""}`}
-                            onClick={() => setTab(item)}
-                        >
-                            {item === "reports" ? "Reports Queue" : "Audit Log"}
-                        </button>
-                    ))}
-                </div>
+                <BaselTabBar
+                    tabs={[
+                        { label: "Reports Queue", value: "reports" },
+                        { label: "Audit Log", value: "audit" },
+                    ]}
+                    active={tab}
+                    onChange={(v) => setTab(v as "reports" | "audit")}
+                />
             </div>
 
             {loading ? (

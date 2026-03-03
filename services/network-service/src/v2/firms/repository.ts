@@ -612,6 +612,17 @@ export class FirmRepository {
         return firm;
     }
 
+    async getFirmOwnerUserId(firmId: string): Promise<string | null> {
+        const { data, error } = await this.supabase
+            .from('firms')
+            .select('owner_user_id')
+            .eq('id', firmId)
+            .single();
+
+        if (error || !data) return null;
+        return data.owner_user_id;
+    }
+
     async getFirmPlacementStats(firmId: string): Promise<any | null> {
         const { data, error } = await this.supabase
             .from('firm_placement_stats')

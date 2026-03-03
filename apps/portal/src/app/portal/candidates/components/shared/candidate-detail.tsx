@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { BaselTabBar } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
@@ -31,11 +32,11 @@ import {
 
 type TabType = "overview" | "resume" | "applications" | "documents";
 
-const TABS: { key: TabType; label: string; icon: string }[] = [
-    { key: "overview", label: "Overview", icon: "fa-user" },
-    { key: "resume", label: "Resume", icon: "fa-file-user" },
-    { key: "applications", label: "Applications", icon: "fa-briefcase" },
-    { key: "documents", label: "Documents", icon: "fa-file-lines" },
+const TABS = [
+    { value: "overview", label: "Overview", icon: "fa-duotone fa-regular fa-user" },
+    { value: "resume", label: "Resume", icon: "fa-duotone fa-regular fa-file-user" },
+    { value: "applications", label: "Applications", icon: "fa-duotone fa-regular fa-briefcase" },
+    { value: "documents", label: "Documents", icon: "fa-duotone fa-regular fa-file-lines" },
 ];
 
 /* ─── Detail Loading Wrapper ────────────────────────────────────────────── */
@@ -142,6 +143,16 @@ export function CandidateDetail({
     /* Lazy-loaded applications */
     const [applications, setApplications] = useState<any[]>([]);
     const [appsLoading, setAppsLoading] = useState(false);
+
+    const tabsWithCounts = useMemo(
+        () =>
+            TABS.map((tab) =>
+                tab.value === "applications"
+                    ? { ...tab, count: applications.length }
+                    : tab,
+            ),
+        [applications.length],
+    );
 
     const fetchApplications = useCallback(async () => {
         setAppsLoading(true);
@@ -313,30 +324,11 @@ export function CandidateDetail({
             </div>
 
             {/* Tab Bar */}
-            <div className="flex border-b-2 border-base-300">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-[0.15em] transition-colors border-b-2 -mb-[2px] ${
-                            activeTab === tab.key
-                                ? "border-b-2 border-primary text-primary"
-                                : "border-transparent text-base-content/40 hover:text-base-content/70"
-                        }`}
-                    >
-                        <i
-                            className={`fa-duotone fa-regular ${tab.icon} mr-1.5`}
-                        />
-                        {tab.label}
-                        {tab.key === "applications" &&
-                            applications.length > 0 && (
-                                <span className="ml-1.5 text-xs">
-                                    {applications.length}
-                                </span>
-                            )}
-                    </button>
-                ))}
-            </div>
+            <BaselTabBar
+                tabs={tabsWithCounts}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as TabType)}
+            />
 
             {/* Tab Content */}
             <div className="flex-1 min-h-0 overflow-y-auto">

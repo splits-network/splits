@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api-client";
 import type { PublicFirm, FirmMember } from "../types";
 import { firmInitials } from "../types";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface TeamTabProps {
     firm: PublicFirm;
@@ -12,6 +13,7 @@ interface TeamTabProps {
 export default function TeamTab({ firm }: TeamTabProps) {
     const [members, setMembers] = useState<FirmMember[]>([]);
     const [loading, setLoading] = useState(true);
+    const { registerEntities, getLevel } = useGamification();
 
     useEffect(() => {
         let cancelled = false;
@@ -31,6 +33,15 @@ export default function TeamTab({ firm }: TeamTabProps) {
             cancelled = true;
         };
     }, [firm.slug]);
+
+    useEffect(() => {
+        const recruiterIds = members
+            .map((m) => m.recruiter?.id)
+            .filter((id): id is string => !!id);
+        if (recruiterIds.length > 0) {
+            registerEntities("recruiter", [...new Set(recruiterIds)]);
+        }
+    }, [members, registerEntities]);
 
     if (loading) {
         return (
@@ -63,8 +74,15 @@ export default function TeamTab({ firm }: TeamTabProps) {
                             key={m.id}
                             className="flex items-center gap-4 bg-base-200 border border-base-300 px-5 py-4"
                         >
-                            <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-sm shrink-0">
-                                {initials}
+                            <div className="relative shrink-0">
+                                <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-sm">
+                                    {initials}
+                                </div>
+                                {m.recruiter?.id && getLevel(m.recruiter.id) && (
+                                    <div className="absolute -bottom-1 -right-1">
+                                        <LevelBadge level={getLevel(m.recruiter.id)!} size="sm" />
+                                    </div>
+                                )}
                             </div>
                             <div className="min-w-0">
                                 <p className="text-sm font-black text-base-content leading-tight">

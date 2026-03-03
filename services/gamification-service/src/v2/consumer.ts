@@ -17,6 +17,7 @@ const EVENT_MAP: Record<string, { entityType: BadgeEntityType; entityIdField: st
         { entityType: 'recruiter', entityIdField: 'company_recruiter_id', xpSource: 'placement_completed', streakType: 'weekly_placement' },
         { entityType: 'candidate', entityIdField: 'candidate_id', xpSource: 'candidate_hired' },
         { entityType: 'company', entityIdField: 'company_id', xpSource: 'placement_completed' },
+        { entityType: 'firm', entityIdField: 'firm_id', xpSource: 'placement_completed' },
     ],
     'application.created': [
         { entityType: 'recruiter', entityIdField: 'recruiter_id', xpSource: 'application_submitted' },

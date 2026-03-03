@@ -121,4 +121,5 @@ export interface EnrichedPublicFirmProfile {
     firm: Record<string, unknown>;
     placement_stats: FirmPlacementStats | null;
     recent_placements: FirmRecentPlacement[];
+    contact_user_id: string | null;
 }

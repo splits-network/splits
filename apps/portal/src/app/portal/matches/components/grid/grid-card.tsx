@@ -12,6 +12,7 @@ import {
     tierLabel,
 } from "../../types";
 import { MatchScoreBadge } from "@/components/matches/match-score-badge";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function GridCard({
     match,
@@ -22,6 +23,8 @@ export function GridCard({
     isSelected: boolean;
     onSelect: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const candidateLevel = match.candidate_id ? getLevel(match.candidate_id) : undefined;
     const factors = match.match_factors;
 
     return (
@@ -45,8 +48,15 @@ export function GridCard({
 
             {/* Candidate avatar + name */}
             <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-primary/10 text-primary flex items-center justify-center font-black text-sm flex-shrink-0">
-                    {candidateInitials(match)}
+                <div className="relative flex-shrink-0">
+                    <div className="w-10 h-10 bg-primary/10 text-primary flex items-center justify-center font-black text-sm">
+                        {candidateInitials(match)}
+                    </div>
+                    {candidateLevel && (
+                        <div className="absolute -bottom-1 -right-1">
+                            <LevelBadge level={candidateLevel} size="sm" />
+                        </div>
+                    )}
                 </div>
                 <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors">
                     {candidateDisplayName(match)}

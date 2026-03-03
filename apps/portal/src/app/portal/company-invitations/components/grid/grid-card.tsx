@@ -11,6 +11,7 @@ import {
 import { statusColor } from "../shared/status-color";
 import { isNew, postedAgo } from "../shared/helpers";
 import ConnectionActionsToolbar from "../shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function GridCard({
     invitation,
@@ -24,6 +25,7 @@ export function GridCard({
     onRefresh?: () => void;
 }) {
     const { isCompanyUser } = useUserProfile();
+    const { getLevel } = useGamification();
     const counterpartyName = getCounterpartyName(invitation, isCompanyUser);
     const counterpartySubtext = getCounterpartySubtext(
         invitation,
@@ -32,6 +34,9 @@ export function GridCard({
     const counterpartyLogo = isCompanyUser
         ? undefined
         : invitation.company?.logo_url;
+    const companyLevel = !isCompanyUser && invitation.company?.id
+        ? getLevel(invitation.company.id)
+        : undefined;
 
     return (
         <div
@@ -86,17 +91,24 @@ export function GridCard({
             {/* Footer: logo/initials left, actions right */}
             <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-base-200">
                 <div className="flex items-center gap-2 min-w-0">
-                    {counterpartyLogo ? (
-                        <img
-                            src={counterpartyLogo}
-                            alt={counterpartyName}
-                            className="w-9 h-9 shrink-0 object-contain bg-base-200 border border-base-300 p-1"
-                        />
-                    ) : (
-                        <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
-                            {getInitials(counterpartyName)}
-                        </div>
-                    )}
+                    <div className="relative shrink-0">
+                        {counterpartyLogo ? (
+                            <img
+                                src={counterpartyLogo}
+                                alt={counterpartyName}
+                                className="w-9 h-9 object-contain bg-base-200 border border-base-300 p-1"
+                            />
+                        ) : (
+                            <div className="w-9 h-9 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
+                                {getInitials(counterpartyName)}
+                            </div>
+                        )}
+                        {companyLevel && (
+                            <div className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={companyLevel} size="sm" />
+                            </div>
+                        )}
+                    </div>
                     <div className="min-w-0">
                         <div className="text-sm font-semibold text-base-content truncate">
                             {counterpartyName}

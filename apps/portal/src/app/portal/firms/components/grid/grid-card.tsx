@@ -10,6 +10,7 @@ import {
     memberCountDisplay,
 } from "../shared/helpers";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function GridCard({
     firm,
@@ -22,6 +23,8 @@ export function GridCard({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const firmLevel = firm.id ? getLevel(firm.id) : undefined;
     const initials = firmInitials(firm.name);
     const location = [
         firm.headquarters_city,
@@ -69,17 +72,24 @@ export function GridCard({
 
                 {/* Logo + Name block */}
                 <div className="flex items-end gap-4">
-                    {firm.logo_url ? (
-                        <img
-                            src={firm.logo_url}
-                            alt={`${firm.name} logo`}
-                            className="w-16 h-16 object-contain bg-base-100 shrink-0"
-                        />
-                    ) : (
-                        <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none shrink-0">
-                            {initials}
-                        </div>
-                    )}
+                    <div className="relative shrink-0">
+                        {firm.logo_url ? (
+                            <img
+                                src={firm.logo_url}
+                                alt={`${firm.name} logo`}
+                                className="w-16 h-16 object-contain bg-base-100"
+                            />
+                        ) : (
+                            <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none">
+                                {initials}
+                            </div>
+                        )}
+                        {firmLevel && (
+                            <div className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={firmLevel} size="sm" />
+                            </div>
+                        )}
+                    </div>
                     <div className="min-w-0">
                         <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {firm.name}

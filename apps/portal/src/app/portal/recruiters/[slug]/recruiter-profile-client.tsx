@@ -21,6 +21,7 @@ import {
 } from "../components/shared/helpers";
 import RecruiterActionsToolbar from "../components/shared/actions-toolbar";
 import { createUnauthenticatedClient } from "@/lib/api-client";
+import { BaselTabBar } from "@splits-network/basel-ui";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -390,26 +391,12 @@ export default function RecruiterProfileClient({
             </header>
 
             {/* ── Tab Nav ─────────────────────────────────────────────── */}
-            <nav className="bg-base-100 border-b border-base-300">
-                <div className="container mx-auto px-8">
-                    <div className="flex gap-0">
-                        {TABS.map((tab) => (
-                            <button
-                                key={tab.key}
-                                onClick={() => setActiveTab(tab.key)}
-                                className={`flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
-                                    activeTab === tab.key
-                                        ? "border-primary text-primary"
-                                        : "border-transparent text-base-content/40 hover:text-base-content/60 hover:border-base-300"
-                                }`}
-                            >
-                                <i className={`${tab.icon} text-sm`} />
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </nav>
+            <BaselTabBar
+                tabs={TABS.map(t => ({ label: t.label, value: t.key, icon: t.icon }))}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as ProfileTab)}
+                className="bg-base-100 border-b border-base-300 container mx-auto px-8"
+            />
 
             {/* ── Content ─────────────────────────────────────────────── */}
             <section className="container mx-auto px-8 py-12">

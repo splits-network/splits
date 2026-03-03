@@ -9,6 +9,7 @@ const SHOWCASE_CATEGORIES: {
 		pages: [
 			{ title: "Headers", slug: "headers", description: "Navigation bars, mega menus, mobile", icon: "fa-browser", href: "/showcase/headers/one" },
 			{ title: "Footers", slug: "footers", description: "Site footers, link columns, newsletters", icon: "fa-rectangle-wide", href: "/showcase/footers/one" },
+			{ title: "Tabs", slug: "tabs", description: "Scrollable tabs, badges, vertical layouts", icon: "fa-folder-open", href: "/showcase/tabs/one" },
 		],
 	},
 	{

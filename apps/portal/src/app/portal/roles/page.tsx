@@ -11,6 +11,7 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
+import { useGamification } from "@splits-network/shared-gamification";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Job, UnifiedJobFilters } from "./types";
@@ -125,6 +126,17 @@ export default function RolesPage() {
         syncToUrl: true,
         include: "company",
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const companyIds = jobs
+            .map((j) => j.company_id)
+            .filter((id): id is string => !!id);
+        if (companyIds.length > 0) {
+            registerEntities("company", [...new Set(companyIds)]);
+        }
+    }, [jobs, registerEntities]);
 
     const handleSelect = useCallback((job: Job) => {
         setSelectedJobId((prev) => (prev === job.id ? null : job.id));

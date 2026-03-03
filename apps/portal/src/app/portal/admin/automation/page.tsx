@@ -6,7 +6,7 @@ import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
 import { AdminPageHeader } from "../components";
 import { LoadingState } from "@splits-network/shared-ui";
-import { BaselConfirmModal, BaselPromptModal } from "@splits-network/basel-ui";
+import { BaselConfirmModal, BaselPromptModal, BaselTabBar } from "@splits-network/basel-ui";
 
 interface AutomationRule {
     id: string;
@@ -182,27 +182,14 @@ export default function AutomationControlsPage() {
             )}
 
             {/* Tabs */}
-            <div className="tabs tabs-boxed">
-                <button
-                    className={`tab ${activeTab === "rules" ? "tab-active" : ""}`}
-                    onClick={() => setActiveTab("rules")}
-                >
-                    <i className="fa-duotone fa-regular fa-gears mr-2"></i>
-                    Automation Rules
-                </button>
-                <button
-                    className={`tab ${activeTab === "executions" ? "tab-active" : ""}`}
-                    onClick={() => setActiveTab("executions")}
-                >
-                    <i className="fa-duotone fa-regular fa-list-check mr-2"></i>
-                    Pending Approvals
-                    {pendingExecutions.length > 0 && (
-                        <span className="badge badge-warning badge-sm ml-2">
-                            {pendingExecutions.length}
-                        </span>
-                    )}
-                </button>
-            </div>
+            <BaselTabBar
+                tabs={[
+                    { label: "Automation Rules", value: "rules", icon: "fa-duotone fa-regular fa-gears" },
+                    { label: "Pending Approvals", value: "executions", icon: "fa-duotone fa-regular fa-list-check", count: pendingExecutions.length },
+                ]}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as "rules" | "executions")}
+            />
 
             {loading ? (
                 <LoadingState message="Loading automation rules..." />
