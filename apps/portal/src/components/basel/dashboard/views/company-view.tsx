@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import RoleWizardModal from "@/app/portal/roles/components/modals/role-wizard-modal";
+import { ModalPortal } from "@splits-network/shared-ui";
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
 import { useCompanyStats } from "@/app/portal/dashboard/hooks/use-company-stats";
@@ -518,11 +519,13 @@ export default function CompanyView() {
                     </div>
                 </section>
             </BaselAnimator>
-            <RoleWizardModal
-                isOpen={isRoleModalOpen}
-                onClose={() => setIsRoleModalOpen(false)}
-                onSuccess={refreshStats}
-            />
+            <ModalPortal>
+                <RoleWizardModal
+                    isOpen={isRoleModalOpen}
+                    onClose={() => setIsRoleModalOpen(false)}
+                    onSuccess={refreshStats}
+                />
+            </ModalPortal>
         </div>
     );
 }

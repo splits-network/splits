@@ -65,6 +65,8 @@ export interface BaselWizardModalProps {
     backdropRef?: React.RefObject<HTMLDivElement | null>;
     /** Ref forwarded to the step content container for GSAP step transitions */
     stepContentRef?: React.RefObject<HTMLDivElement | null>;
+    /** Whether clicking the backdrop closes the modal (default: false for wizards) */
+    closeOnBackdropClick?: boolean;
     /** Optional custom footer content — overrides default back/next/submit buttons */
     footer?: React.ReactNode;
 }
@@ -121,6 +123,7 @@ export function BaselWizardModal({
     className,
     containerRef,
     backdropRef,
+    closeOnBackdropClick = false,
     stepContentRef,
     footer,
 }: BaselWizardModalProps) {
@@ -136,7 +139,7 @@ export function BaselWizardModal({
             className={className}
             containerRef={containerRef}
             backdropRef={backdropRef}
-            closeOnBackdropClick={!submitting}
+            closeOnBackdropClick={closeOnBackdropClick && !submitting}
         >
             {/* Header with progress bar */}
             <BaselModalHeader

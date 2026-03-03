@@ -1,4 +1,6 @@
 import { SkillRepository } from './repository';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 function generateSlug(name: string): string {
     return name
@@ -9,7 +11,13 @@ function generateSlug(name: string): string {
 }
 
 export class SkillService {
-    constructor(private repository: SkillRepository) {}
+    private accessResolver?: AccessContextResolver;
+
+    constructor(private repository: SkillRepository, supabase?: SupabaseClient) {
+        if (supabase) {
+            this.accessResolver = new AccessContextResolver(supabase);
+        }
+    }
 
     async searchSkills(query: string, limit: number = 10) {
         return this.repository.search(query, limit);
@@ -19,7 +27,7 @@ export class SkillService {
         return this.repository.getById(id);
     }
 
-    async findOrCreate(name: string, createdBy?: string) {
+    async findOrCreate(name: string, clerkUserId?: string) {
         if (!name || !name.trim()) {
             throw new Error('Skill name is required');
         }
@@ -37,8 +45,15 @@ export class SkillService {
             return existing;
         }
 
+        // Resolve Clerk user ID to internal UUID for created_by
+        let createdByUuid: string | undefined;
+        if (clerkUserId && clerkUserId !== 'internal-service' && this.accessResolver) {
+            const context = await this.accessResolver.resolve(clerkUserId);
+            createdByUuid = context.identityUserId || undefined;
+        }
+
         // Create new skill
-        return this.repository.create(trimmed, slug, createdBy);
+        return this.repository.create(trimmed, slug, createdByUuid);
     }
 
     async listSkills(page: number = 1, limit: number = 50) {
