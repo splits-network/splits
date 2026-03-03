@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v7.0 Company Profile Enhancement — Phase 22: Schema & Types
+**Current focus:** v7.0 Company Profile Enhancement — Phase 23: Lookup APIs
 
 ## Current Position
 
-Phase: 22 of 27 (Schema & Types)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-03 — Completed 22-02-PLAN.md (shared-types: CompanyStage, Perk, CultureTag, junction types)
+Phase: 23 of 27 (Lookup APIs)
+Plan: 0 of 3 in current phase
+Status: Ready to plan
+Last activity: 2026-03-03 — Phase 22 complete (2 plans, migration + types)
 
 Progress: [██░░░░░░░░░░░░░░░░░░] 14% (2/14 v7.0 plans)
 
@@ -50,11 +50,11 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:42:22Z
-Stopped at: Completed 22-02-PLAN.md (Phase 22 complete)
+Last session: 2026-03-03
+Stopped at: Phase 22 complete — migration + types executed
 Resume file: None
-Next: Phase 23 (API layer for company profile endpoints in ats-service)
+Next: `/basel:discuss-phase 23` or `/basel:plan-phase 23`
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-03 (22-02 complete, Phase 22 done)*
+*Last updated: 2026-03-03 (Phase 22 complete, ready for Phase 23)*

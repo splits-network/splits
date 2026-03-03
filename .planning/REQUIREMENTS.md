@@ -9,17 +9,17 @@ Requirements for company profile enrichment and card redesign. Each maps to road
 
 ### Schema
 
-- [ ] **SCHEMA-01**: `perks` master table with name, slug (unique), is_approved, created_by, trigram index
-- [ ] **SCHEMA-02**: `company_perks` junction table (company_id, perk_id, composite PK)
-- [ ] **SCHEMA-03**: `culture_tags` master table with name, slug (unique), is_approved, created_by, trigram index
-- [ ] **SCHEMA-04**: `company_culture_tags` junction table (company_id, culture_tag_id, composite PK)
-- [ ] **SCHEMA-05**: `company_skills` junction table (company_id, skill_id, composite PK) reusing existing `skills` table
-- [ ] **SCHEMA-06**: `companies.stage` TEXT column with CHECK constraint (Seed, Series A, Series B, Series C, Growth, Public, Bootstrapped, Non-Profit)
-- [ ] **SCHEMA-07**: `companies.founded_year` SMALLINT column
-- [ ] **SCHEMA-08**: `companies.tagline` TEXT column
-- [ ] **SCHEMA-09**: `companies.linkedin_url`, `companies.twitter_url`, `companies.glassdoor_url` TEXT columns
-- [ ] **SCHEMA-10**: RLS policies on all new tables (select/insert/update/delete for authenticated, service_role bypass)
-- [ ] **SCHEMA-11**: TypeScript types for all new fields, enums, and junction table rows in shared-types
+- [x] **SCHEMA-01**: `perks` master table with name, slug (unique), is_approved, created_by, trigram index
+- [x] **SCHEMA-02**: `company_perks` junction table (company_id, perk_id, composite PK)
+- [x] **SCHEMA-03**: `culture_tags` master table with name, slug (unique), is_approved, created_by, trigram index
+- [x] **SCHEMA-04**: `company_culture_tags` junction table (company_id, culture_tag_id, composite PK)
+- [x] **SCHEMA-05**: `company_skills` junction table (company_id, skill_id, composite PK) reusing existing `skills` table
+- [x] **SCHEMA-06**: `companies.stage` TEXT column with CHECK constraint (Seed, Series A, Series B, Series C, Growth, Public, Bootstrapped, Non-Profit)
+- [x] **SCHEMA-07**: `companies.founded_year` SMALLINT column
+- [x] **SCHEMA-08**: `companies.tagline` TEXT column
+- [x] **SCHEMA-09**: `companies.linkedin_url`, `companies.twitter_url`, `companies.glassdoor_url` TEXT columns
+- [x] **SCHEMA-10**: RLS policies on all new tables (select/insert/update/delete for authenticated, service_role bypass)
+- [x] **SCHEMA-11**: TypeScript types for all new fields, enums, and junction table rows in shared-types
 
 ### API
 
@@ -87,17 +87,17 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | Phase 22 | Pending |
-| SCHEMA-02 | Phase 22 | Pending |
-| SCHEMA-03 | Phase 22 | Pending |
-| SCHEMA-04 | Phase 22 | Pending |
-| SCHEMA-05 | Phase 22 | Pending |
-| SCHEMA-06 | Phase 22 | Pending |
-| SCHEMA-07 | Phase 22 | Pending |
-| SCHEMA-08 | Phase 22 | Pending |
-| SCHEMA-09 | Phase 22 | Pending |
-| SCHEMA-10 | Phase 22 | Pending |
-| SCHEMA-11 | Phase 22 | Pending |
+| SCHEMA-01 | Phase 22 | Complete |
+| SCHEMA-02 | Phase 22 | Complete |
+| SCHEMA-03 | Phase 22 | Complete |
+| SCHEMA-04 | Phase 22 | Complete |
+| SCHEMA-05 | Phase 22 | Complete |
+| SCHEMA-06 | Phase 22 | Complete |
+| SCHEMA-07 | Phase 22 | Complete |
+| SCHEMA-08 | Phase 22 | Complete |
+| SCHEMA-09 | Phase 22 | Complete |
+| SCHEMA-10 | Phase 22 | Complete |
+| SCHEMA-11 | Phase 22 | Complete |
 | API-01 | Phase 23 | Pending |
 | API-02 | Phase 23 | Pending |
 | API-03 | Phase 23 | Pending |

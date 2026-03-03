@@ -22,7 +22,7 @@ Completed milestones documented in .planning/MILESTONES.md
 
 **Milestone Goal:** Enrich company profiles with tech stack, perks, culture tags, stage, and social links — then surface all of it in redesigned company cards and search.
 
-- [ ] **Phase 22: Schema & Types** - Database tables, columns, RLS, and TypeScript types for all new company data
+- [x] **Phase 22: Schema & Types** - Database tables, columns, RLS, and TypeScript types for all new company data (completed 2026-03-03)
 - [ ] **Phase 23: Lookup APIs** - Search/create endpoints for perks and culture tags, plus junction CRUD for skills/perks/culture
 - [ ] **Phase 24: Company Enrichment APIs** - Scalar field updates, computed stats, and gateway routing
 - [ ] **Phase 25: Company Settings UI** - Form sections for all new fields in company settings
@@ -43,8 +43,8 @@ Completed milestones documented in .planning/MILESTONES.md
 **Plans:** 2 plans
 
 Plans:
-- [ ] 22-01-PLAN.md -- Migration for new tables, columns, indexes, and RLS
-- [ ] 22-02-PLAN.md -- TypeScript types in shared-types
+- [x] 22-01-PLAN.md -- Migration for new tables, columns, indexes, and RLS
+- [x] 22-02-PLAN.md -- TypeScript types in shared-types
 
 ### Phase 23: Lookup APIs
 **Goal**: Perks and culture tags can be searched and created via typeahead, and company junction tables have full CRUD
@@ -131,7 +131,7 @@ Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 22. Schema & Types | v7.0 | 0/2 | Not started | - |
+| 22. Schema & Types | v7.0 | 2/2 | Complete | 2026-03-03 |
 | 23. Lookup APIs | v7.0 | 0/3 | Not started | - |
 | 24. Company Enrichment APIs | v7.0 | 0/2 | Not started | - |
 | 25. Company Settings UI | v7.0 | 0/2 | Not started | - |
