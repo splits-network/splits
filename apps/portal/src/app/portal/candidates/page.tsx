@@ -14,6 +14,7 @@ import { ModalPortal } from "@splits-network/shared-ui";
 import type { Candidate, CandidateFilters, CandidateScope } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { isNew } from "./components/shared/helpers";
+import { useGamification } from "@splits-network/shared-gamification";
 import { CandidatesAnimator } from "./candidates-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -143,6 +144,14 @@ export default function CandidatesPage() {
         },
         [setScope],
     );
+
+    // Register candidate IDs with gamification context for batch fetching
+    const { registerEntities } = useGamification();
+    useEffect(() => {
+        if (candidates.length > 0) {
+            registerEntities("candidate", candidates.map(c => c.id));
+        }
+    }, [candidates, registerEntities]);
 
     const stats = useMemo(
         () => ({

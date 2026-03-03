@@ -457,6 +457,21 @@ async function main() {
             return;
         }
 
+        // Skip auth for public gamification endpoints (badges, XP, leaderboards)
+        // These use optionalAuth() at the route level — try auth if present, don't fail if missing
+        if (request.method === 'GET' && (
+            request.url.startsWith('/api/v2/badges/') ||
+            request.url.startsWith('/api/v2/xp/') ||
+            request.url.startsWith('/api/v2/leaderboards')
+        )) {
+            try {
+                await authMiddleware.createMiddleware()(request, reply);
+            } catch (error) {
+                request.log.debug('No valid auth token for public gamification endpoint, continuing as anonymous');
+            }
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }
@@ -482,6 +497,7 @@ async function main() {
     services.register('content', process.env.CONTENT_SERVICE_URL || 'http://localhost:3015');
     services.register('integration', process.env.INTEGRATION_SERVICE_URL || 'http://localhost:3016');
     services.register('matching', process.env.MATCHING_SERVICE_URL || 'http://localhost:3017');
+    services.register('gamification', process.env.GAMIFICATION_SERVICE_URL || 'http://localhost:3018');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

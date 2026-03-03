@@ -12,6 +12,7 @@ import {
     isNew,
 } from "../shared/helpers";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function SplitItem({
     recruiter,
@@ -24,6 +25,8 @@ export function SplitItem({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const level = getLevel(recruiter.id);
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
     const status = recruiter.status || "active";
@@ -58,6 +61,7 @@ export function SplitItem({
                             )}
                             <h4 className="font-bold text-sm tracking-tight truncate">
                                 {name}
+                                {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                             </h4>
                         </div>
                         {recruiter.tagline && (

@@ -17,6 +17,7 @@ import { getCurrentUserProfile } from "@/lib/current-user-profile";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
+import { GamificationWrapper } from "@/providers/gamification-wrapper";
 
 export const metadata: Metadata = {
     metadataBase: new URL(
@@ -185,6 +186,7 @@ export default async function RootLayout({
                 <body className="flex flex-col min-h-screen bg-base-300">
                     <ThemeProvider>
                         <UserProfileProvider initialProfile={initialProfile}>
+                            <GamificationWrapper>
                             <ToastProvider>
                                 <CandidateChatSidebar>
                                     <Header navItems={headerNav?.items} />
@@ -193,6 +195,7 @@ export default async function RootLayout({
                                 </CandidateChatSidebar>
                                 <CookieConsent />
                             </ToastProvider>
+                            </GamificationWrapper>
                         </UserProfileProvider>
                     </ThemeProvider>
                     <DevDebugPanel />

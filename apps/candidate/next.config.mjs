@@ -10,6 +10,7 @@ const nextConfig = {
         "@splits-network/shared-types",
         "@splits-network/shared-config",
         "@splits-network/shared-ui",
+        "@splits-network/shared-gamification",
         "@splits-network/basel-ui",
     ],
     serverExternalPackages: ["@supabase/supabase-js"],

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Recruiter } from "../marketplace-client";
 import { getInitials, reputationColor } from "./status-color";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface TableViewProps {
     recruiters: Recruiter[];
@@ -15,6 +16,8 @@ export default function TableView({
     selectedRecruiter,
     onSelect,
 }: TableViewProps) {
+    const { getLevel } = useGamification();
+
     return (
         <div className="overflow-x-auto border-2 border-base-300">
             <table className="table w-full">
@@ -72,6 +75,7 @@ export default function TableView({
                                         <div className="min-w-0">
                                             <p className="font-bold text-sm truncate">
                                                 {name}
+                                                {(() => { const lvl = getLevel(recruiter.id); return lvl ? <span className="ml-1.5 inline-block align-middle"><LevelBadge level={lvl} size="sm" /></span> : null; })()}
                                             </p>
                                             {recruiter.tagline && (
                                                 <div className="flex gap-1 mt-0.5">

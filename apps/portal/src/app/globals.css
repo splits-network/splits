@@ -175,6 +175,10 @@
     background-clip: text;
 }
 
+.badge {
+    @apply uppercase font-bold;
+}
+
 /* Badge Ribbon (for entity cards) */
 .badge-ribbon {
     border-top-left-radius: 0;

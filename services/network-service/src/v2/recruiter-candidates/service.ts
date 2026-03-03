@@ -8,13 +8,15 @@ import { RecruiterCandidateRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { RecruiterCandidateFilters, RecruiterCandidateUpdate, TerminateRecruiterCandidateRequest } from './types';
 import { resolveAccessContext } from '../shared/access';
+import { RecruiterActivityService } from '../recruiter-activity/service';
 
 export class RecruiterCandidateServiceV2 {
 
     constructor(
         private repository: RecruiterCandidateRepository,
         private eventPublisher: IEventPublisher,
-        private supabase?: SupabaseClient
+        private supabase?: SupabaseClient,
+        private activityService?: RecruiterActivityService
     ) {
         // V2 services use direct database queries, not HTTP clients
     }
@@ -88,6 +90,14 @@ export class RecruiterCandidateServiceV2 {
             candidate_id: relationship.candidate_id,
             invitation_token: invitationToken,
             invitation_expires_at: invitationExpiresAt.toISOString(),
+        });
+
+        // Record activity
+        await this.activityService?.recordActivity({
+            recruiter_id: relationship.recruiter_id,
+            activity_type: 'candidate_connected',
+            description: 'Connected with a new candidate',
+            metadata: { candidate_id: relationship.candidate_id },
         });
 
         return relationship;

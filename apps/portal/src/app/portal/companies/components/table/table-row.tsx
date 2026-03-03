@@ -5,6 +5,7 @@ import type { Company, CompanyRelationship, CompanyTab } from "../../types";
 import { statusColor } from "../shared/status-color";
 import {
     companyName,
+    companyId,
     companyIndustry,
     companyLocation,
     addedAgo,
@@ -12,6 +13,7 @@ import {
     extractRelationship,
     formatStatus,
 } from "../shared/helpers";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { CompanyDetailLoader } from "../shared/company-detail";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
 
@@ -40,6 +42,8 @@ export function TableRow({
     const location = companyLocation(item, isMarketplace);
     const company = extractCompany(item, isMarketplace);
     const relationship = extractRelationship(item, isMarketplace);
+    const { getLevel } = useGamification();
+    const level = getLevel(companyId(item, isMarketplace));
 
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
@@ -60,8 +64,9 @@ export function TableRow({
 
                 {/* Company */}
                 <td className="px-4 py-3">
-                    <span className="font-bold text-sm text-base-content">
+                    <span className="font-bold text-sm text-base-content inline-flex items-center gap-1.5">
                         {name}
+                        {level && <LevelBadge level={level} size="sm" />}
                     </span>
                 </td>
 

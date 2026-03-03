@@ -8,6 +8,7 @@ import { RecruiterCompanyRepository } from './repository';
 import { EventPublisherV2, IEventPublisher } from '../shared/events';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
+import { RecruiterActivityService } from '../recruiter-activity/service';
 import {
     RecruiterCompany,
     RecruiterCompanyCreate,
@@ -25,7 +26,8 @@ export class RecruiterCompanyServiceV2 {
     constructor(
         private repository: RecruiterCompanyRepository,
         supabase: SupabaseClient,
-        private eventPublisher?: IEventPublisher
+        private eventPublisher?: IEventPublisher,
+        private activityService?: RecruiterActivityService
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }
@@ -248,6 +250,16 @@ export class RecruiterCompanyServiceV2 {
             respondedBy: userContext.identityUserId
         });
         console.log(`[RESPOND] Event published, total time: ${Date.now() - startTime}ms`);
+
+        // Record activity for accepted relationships
+        if (accept) {
+            await this.activityService?.recordActivity({
+                recruiter_id: relationship.recruiter_id,
+                activity_type: 'company_connected',
+                description: 'Partnered with a new company',
+                metadata: { company_id: relationship.company_id },
+            });
+        }
 
         return updatedRelationship;
     }

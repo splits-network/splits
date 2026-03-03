@@ -62,6 +62,12 @@ export default function AuthenticatedNav() {
                             </Link>
                         </li>
                         <li>
+                            <Link href="/portal/achievements">
+                                <i className="fa-duotone fa-regular fa-trophy"></i>
+                                Achievements
+                            </Link>
+                        </li>
+                        <li>
                             <Link href="/portal/profile">
                                 <i className="fa-duotone fa-regular fa-user"></i>
                                 Profile

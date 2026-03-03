@@ -12,6 +12,7 @@ import {
     companyInitials,
     truncateDescription,
 } from "../shared/helpers";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface GridCardProps {
     job: Job;
@@ -22,8 +23,10 @@ interface GridCardProps {
 export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
     const name = companyName(job);
     const salary = salaryDisplay(job);
-    const level = formatJobLevel(job.job_level);
+    const jobLevel = formatJobLevel(job.job_level);
     const desc = truncateDescription(job);
+    const { getLevel } = useGamification();
+    const companyLevel = getLevel(job.company?.id);
 
     return (
         <div
@@ -79,16 +82,16 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
             )}
 
             {/* Tags */}
-            {(job.employment_type || level) && (
+            {(job.employment_type || jobLevel) && (
                 <div className="flex flex-wrap gap-1 mb-4">
                     {job.employment_type && (
                         <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
                             {formatEmploymentType(job.employment_type)}
                         </span>
                     )}
-                    {level && (
+                    {jobLevel && (
                         <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
-                            {level}
+                            {jobLevel}
                         </span>
                     )}
                 </div>
@@ -96,17 +99,24 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
 
             {/* Footer: company logo */}
             <div className="mt-auto flex items-center gap-3 pt-4 border-t border-base-200">
-                {job.company?.logo_url ? (
-                    <img
-                        src={job.company.logo_url}
-                        alt={name}
-                        className="w-9 h-9 shrink-0 object-contain bg-base-200 border border-base-300 p-1"
-                    />
-                ) : (
-                    <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
-                        {companyInitials(name)}
-                    </div>
-                )}
+                <div className="relative shrink-0">
+                    {job.company?.logo_url ? (
+                        <img
+                            src={job.company.logo_url}
+                            alt={name}
+                            className="w-9 h-9 object-contain bg-base-200 border border-base-300 p-1"
+                        />
+                    ) : (
+                        <div className="w-9 h-9 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
+                            {companyInitials(name)}
+                        </div>
+                    )}
+                    {companyLevel && (
+                        <div className="absolute -bottom-1 -right-1">
+                            <LevelBadge level={companyLevel} size="xs" />
+                        </div>
+                    )}
+                </div>
                 <div className="min-w-0">
                     <div className="text-sm font-semibold text-base-content truncate">
                         {name}

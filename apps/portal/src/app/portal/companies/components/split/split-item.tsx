@@ -4,12 +4,14 @@ import type { Company, CompanyRelationship, CompanyTab } from "../../types";
 import { statusColor } from "../shared/status-color";
 import {
     companyName,
+    companyId,
     companyIndustry,
     companyLocation,
     addedAgo,
     extractRelationship,
     formatStatus,
 } from "../shared/helpers";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
@@ -30,6 +32,8 @@ export function SplitItem({
     const industry = companyIndustry(item, isMarketplace);
     const location = companyLocation(item, isMarketplace);
     const relationship = extractRelationship(item, isMarketplace);
+    const { getLevel } = useGamification();
+    const level = getLevel(companyId(item, isMarketplace));
 
     const company: Company = isMarketplace
         ? (item as Company)
@@ -46,8 +50,9 @@ export function SplitItem({
         >
             {/* Row 1: name + time */}
             <div className="flex items-start justify-between gap-2 mb-1">
-                <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
+                <h4 className="font-bold text-sm tracking-tight truncate text-base-content flex items-center gap-1.5">
                     {name}
+                    {level && <LevelBadge level={level} size="sm" />}
                 </h4>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {addedAgo(item)}

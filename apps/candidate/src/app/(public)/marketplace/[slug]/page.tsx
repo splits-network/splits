@@ -21,7 +21,7 @@ interface Recruiter {
     years_experience?: number;
     bio?: string;
     total_placements?: number;
-    success_rate?: number;
+    hire_rate?: number;
     reputation_score?: number;
     candidate_recruiter?: boolean;
     company_recruiter?: boolean;
@@ -32,6 +32,13 @@ interface Recruiter {
         email?: string;
         profile_image_url?: string;
     };
+    recent_activity?: {
+        id: string;
+        activity_type: string;
+        description: string;
+        metadata: Record<string, unknown>;
+        created_at: string;
+    }[];
 }
 
 interface Props {
@@ -44,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     try {
         const response = await apiClient.get<{ data: Recruiter }>(
             `/public/recruiters/${slug}`,
-            { params: { include: "user,reputation,firm" } },
+            { params: { include: "user,reputation,firm,activity,response_metrics" } },
         );
         const recruiter = response.data;
         const name =
@@ -77,7 +84,7 @@ export default async function RecruiterProfilePage({ params }: Props) {
     try {
         const response = await apiClient.get<{ data: Recruiter }>(
             `/public/recruiters/${slug}`,
-            { params: { include: "user,reputation,firm" } },
+            { params: { include: "user,reputation,firm,activity,response_metrics" } },
         );
         recruiter = response.data;
     } catch {

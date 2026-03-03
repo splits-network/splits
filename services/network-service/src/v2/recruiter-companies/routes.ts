@@ -8,6 +8,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { RecruiterCompanyRepository } from './repository';
 import { RecruiterCompanyServiceV2 } from './service';
 import { EventPublisherV2, IEventPublisher } from '../shared/events';
+import { RecruiterActivityService } from '../recruiter-activity/service';
 import { requireUserContext } from '../helpers';
 import { StandardListParams } from '@splits-network/shared-types';
 import {
@@ -81,12 +82,13 @@ const updateSchema = {
 };
 
 export async function recruiterCompanyRoutes(
-    app: FastifyInstance, 
+    app: FastifyInstance,
     supabase: SupabaseClient,
-    eventPublisher: IEventPublisher
+    eventPublisher: IEventPublisher,
+    activityService?: RecruiterActivityService
 ) {
     const repository = new RecruiterCompanyRepository(supabase);
-    const service = new RecruiterCompanyServiceV2(repository, supabase, eventPublisher);
+    const service = new RecruiterCompanyServiceV2(repository, supabase, eventPublisher, activityService);
 
     // LIST relationships
     app.get('/api/v2/recruiter-companies', {

@@ -22,6 +22,11 @@ import Link from "next/link";
 import RecruiterActionsToolbar from "./actions-toolbar";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
+import {
+    LevelBadge,
+    BadgeGrid,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -38,13 +43,19 @@ function HeroHeader({
     onClose?: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel, getBadges } = useGamification();
+    const level = getLevel(recruiter.id);
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
     const status = recruiter.status || "active";
     const memberSince = memberSinceDisplay(recruiter);
     const recruiterUserId = recruiter.users?.id;
-    const presence = usePresence([recruiterUserId], { enabled: Boolean(recruiterUserId) });
-    const presenceStatus = recruiterUserId ? presence[recruiterUserId]?.status : undefined;
+    const presence = usePresence([recruiterUserId], {
+        enabled: Boolean(recruiterUserId),
+    });
+    const presenceStatus = recruiterUserId
+        ? presence[recruiterUserId]?.status
+        : undefined;
 
     const stats = [
         {
@@ -103,10 +114,7 @@ function HeroHeader({
                     </p>
                     <div className="flex items-center gap-3 shrink-0">
                         {presenceStatus === "online" && (
-                            <Presence
-                                status={presenceStatus}
-                                variant="badge"
-                            />
+                            <Presence status={presenceStatus} variant="badge" />
                         )}
                         <span className={`badge ${statusColor(status)}`}>
                             {formatStatus(status)}
@@ -141,6 +149,11 @@ function HeroHeader({
                         )}
                         <h2 className="text-3xl font-black tracking-tight leading-none text-neutral-content mb-2 truncate">
                             {name}
+                            {level && (
+                                <span className="ml-2 align-middle inline-block">
+                                    <LevelBadge level={level} size="sm" />
+                                </span>
+                            )}
                         </h2>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
                             {location && (
@@ -177,7 +190,7 @@ function HeroHeader({
                     />
                     <div className="w-px self-stretch bg-neutral-content/20" />
                     <Link
-                        href={`/portal/recruiters/${recruiter.slug || recruiter.id}`}
+                        href={`/recruiters/${recruiter.slug || recruiter.id}`}
                         className="btn btn-sm btn-link gap-2"
                     >
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
@@ -208,9 +221,7 @@ function HeroHeader({
                                 <div
                                     className={`w-9 h-9 flex items-center justify-center shrink-0 ${iconStyle}`}
                                 >
-                                    <i
-                                        className={`${stat.icon} text-sm`}
-                                    />
+                                    <i className={`${stat.icon} text-sm`} />
                                 </div>
                                 <div>
                                     <span className="text-lg font-black text-neutral-content leading-none block">
@@ -272,6 +283,8 @@ function TabNav({
 }
 
 function AboutPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
+    const { getBadges } = useGamification();
+    const badges = getBadges(recruiter.id);
     const specialties = recruiter.specialties || [];
     const industries = recruiter.industries || [];
     const bioContent = recruiter.bio;
@@ -299,10 +312,7 @@ function AboutPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {specialties.map((spec) => (
-                            <span
-                                key={spec}
-                                className="badge badge-primary"
-                            >
+                            <span key={spec} className="badge badge-primary">
                                 {spec}
                             </span>
                         ))}
@@ -357,6 +367,18 @@ function AboutPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
                     </span>
                 </div>
             </div>
+
+            {/* Earned Badges */}
+            {badges.length > 0 && (
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+                        Earned Badges
+                    </p>
+                    <div className="bg-base-200 border border-base-300">
+                        <BadgeGrid badges={badges} maxVisible={6} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -451,6 +473,11 @@ export function RecruiterDetail({
     onRefresh?: () => void;
 }) {
     const [activeTab, setActiveTab] = useState<DetailTab>("about");
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        registerEntities("recruiter", [recruiter.id]);
+    }, [recruiter.id, registerEntities]);
 
     return (
         <div>
@@ -461,9 +488,7 @@ export function RecruiterDetail({
             />
             <TabNav active={activeTab} onChange={setActiveTab} />
             {activeTab === "about" && <AboutPanel recruiter={recruiter} />}
-            {activeTab === "contact" && (
-                <ContactPanel recruiter={recruiter} />
-            )}
+            {activeTab === "contact" && <ContactPanel recruiter={recruiter} />}
         </div>
     );
 }

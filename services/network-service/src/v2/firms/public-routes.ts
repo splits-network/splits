@@ -33,7 +33,7 @@ export function registerPublicFirmRoutes(
                 specialties: query.specialties ? [].concat(query.specialties) : undefined,
                 placement_types: query.placement_types ? [].concat(query.placement_types) : undefined,
                 geo_focus: query.geo_focus ? [].concat(query.geo_focus) : undefined,
-                seeking_split_partners: query.seeking_split_partners === 'true' ? true : undefined,
+                candidate_firm: query.candidate_firm === 'true' ? true : undefined,
             };
 
             const result = await config.firmService.getPublicFirms(filters);
@@ -51,6 +51,22 @@ export function registerPublicFirmRoutes(
             const { slug } = request.params as { slug: string };
             const firm = await config.firmService.getPublicFirmBySlug(slug);
             return reply.send({ data: firm });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Internal server error' });
+        }
+    });
+
+    // GET enriched firm profile (firm + placement stats + recent placements)
+    app.get('/api/v2/public/firms/:slug/profile', async (request, reply) => {
+        try {
+            const { slug } = request.params as { slug: string };
+            const result = await config.firmService.getPublicFirmProfile(slug);
+            if (!result) {
+                return reply.code(404).send({ error: 'Firm not found' });
+            }
+            return reply.send({ data: result });
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 500)

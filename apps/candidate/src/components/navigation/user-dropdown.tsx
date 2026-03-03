@@ -30,6 +30,12 @@ const MENU_ITEMS = [
         description: "Jobs you saved for later",
     },
     {
+        href: "/portal/achievements",
+        icon: "fa-duotone fa-regular fa-trophy",
+        label: "Achievements",
+        description: "Badges, XP & level",
+    },
+    {
         href: "/portal/documents",
         icon: "fa-duotone fa-regular fa-folder-open",
         label: "Documents",

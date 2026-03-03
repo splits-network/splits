@@ -19,6 +19,7 @@ import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
 import { CompanyProvider, useCompanyContext } from "./contexts/company-context";
+import { useGamification } from "@splits-network/shared-gamification";
 
 export default function RecruitersBaselPage() {
     return (
@@ -104,6 +105,14 @@ function RecruitersContent() {
         syncToUrl: true,
         include: "user,reputation,firm",
     });
+
+    // Register recruiter IDs with gamification context for batch fetching
+    const { registerEntities } = useGamification();
+    useEffect(() => {
+        if (recruiters.length > 0) {
+            registerEntities("recruiter", recruiters.map(r => r.id));
+        }
+    }, [recruiters, registerEntities]);
 
     const handleSelect = useCallback((recruiter: RecruiterWithUser) => {
         setSelectedRecruiterId((prev) =>

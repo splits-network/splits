@@ -8,6 +8,7 @@ import {
     salaryDisplay,
     formatStage,
 } from "../shared/helpers";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import ActionsToolbar from "../shared/actions-toolbar";
 
 export function GridCard({
@@ -23,6 +24,8 @@ export function GridCard({
 }) {
     const name = companyName(app);
     const salary = salaryDisplay(app);
+    const { getLevel } = useGamification();
+    const companyLevel = getLevel(app.job?.company?.id);
 
     return (
         <div
@@ -68,21 +71,28 @@ export function GridCard({
             {/* Footer: company logo/initials left, actions right */}
             <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-base-200">
                 <div className="flex items-center gap-2 min-w-0">
-                    {app.job?.company?.logo_url ? (
-                        <img
-                            src={app.job.company.logo_url}
-                            alt={name}
-                            className="w-9 h-9 shrink-0 object-contain bg-base-200 border border-base-300 p-1"
-                            style={{ borderRadius: 0 }}
-                        />
-                    ) : (
-                        <div
-                            className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60"
-                            style={{ borderRadius: 0 }}
-                        >
-                            {companyInitials(name)}
-                        </div>
-                    )}
+                    <div className="relative shrink-0">
+                        {app.job?.company?.logo_url ? (
+                            <img
+                                src={app.job.company.logo_url}
+                                alt={name}
+                                className="w-9 h-9 object-contain bg-base-200 border border-base-300 p-1"
+                                style={{ borderRadius: 0 }}
+                            />
+                        ) : (
+                            <div
+                                className="w-9 h-9 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60"
+                                style={{ borderRadius: 0 }}
+                            >
+                                {companyInitials(name)}
+                            </div>
+                        )}
+                        {companyLevel && (
+                            <div className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={companyLevel} size="xs" />
+                            </div>
+                        )}
+                    </div>
                     <div className="min-w-0">
                         <div className="text-sm font-semibold text-base-content truncate">
                             {name}

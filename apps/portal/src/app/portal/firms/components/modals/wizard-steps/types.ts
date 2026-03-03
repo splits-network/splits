@@ -37,8 +37,8 @@ export interface FirmFormData {
 
     // Step 5 — Marketplace
     marketplace_visible: boolean;
-    seeking_split_partners: boolean;
-    accepts_candidate_submissions: boolean;
+    candidate_firm: boolean;
+    company_firm: boolean;
     show_member_count: boolean;
     show_placement_stats: boolean;
     show_contact_info: boolean;
@@ -64,8 +64,8 @@ export const EMPTY_FIRM_FORM: FirmFormData = {
     contact_email: "",
     contact_phone: "",
     marketplace_visible: false,
-    seeking_split_partners: false,
-    accepts_candidate_submissions: false,
+    candidate_firm: false,
+    company_firm: false,
     show_member_count: true,
     show_placement_stats: true,
     show_contact_info: true,

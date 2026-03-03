@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useGamification } from "@splits-network/shared-gamification";
 import type { StandardListResponse } from "@splits-network/shared-types";
 import {
     useStandardList,
@@ -100,6 +101,14 @@ export default function MarketplaceClient({
             prev?.id === recruiter.id ? null : recruiter,
         );
     }, []);
+
+    // Register recruiter IDs with gamification context for batch fetching
+    const { registerEntities } = useGamification();
+    useEffect(() => {
+        if (recruiters.length > 0) {
+            registerEntities("recruiter", recruiters.map(r => r.id));
+        }
+    }, [recruiters, registerEntities]);
 
     const handleViewModeChange = useCallback(
         (newMode: ViewMode) => {

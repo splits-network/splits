@@ -62,6 +62,30 @@ export function registerPublicFirmGatewayRoutes(
         }
     );
 
+    // GET enriched firm profile
+    app.get(
+        '/api/v2/public/firms/:slug/profile',
+        { preHandler: optionalAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { slug } = request.params as { slug: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    `/api/v2/public/firms/${slug}/profile`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error }, 'Failed to fetch firm profile');
+                return reply
+                    .status(error?.statusCode || 500)
+                    .send(error?.jsonBody || { error: 'Failed to fetch firm profile' });
+            }
+        }
+    );
+
     // GET firm public members
     app.get(
         '/api/v2/public/firms/:slug/members',

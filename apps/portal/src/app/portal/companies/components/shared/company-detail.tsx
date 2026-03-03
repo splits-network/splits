@@ -7,6 +7,7 @@ import type { Company, CompanyRelationship } from "../../types";
 import { formatDate, formatCompanySize } from "../../types";
 import { statusColor } from "./status-color";
 import { companyInitials, formatStatus } from "./helpers";
+import { LevelBadge, BadgeGrid, useGamification } from "@splits-network/shared-gamification";
 import CompanyActionsToolbar from "./actions-toolbar";
 import CompanyContacts from "@/components/company-contacts";
 
@@ -23,6 +24,15 @@ export function CompanyDetail({
     onClose?: () => void;
     onRefresh?: () => void;
 }) {
+    const { registerEntities, getLevel, getBadges } = useGamification();
+
+    useEffect(() => {
+        registerEntities("company", [company.id]);
+    }, [company.id, registerEntities]);
+
+    const level = getLevel(company.id);
+    const badges = getBadges(company.id);
+
     return (
         <div>
             {/* Header */}
@@ -30,17 +40,24 @@ export function CompanyDetail({
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
-                            {company.logo_url ? (
-                                <img
-                                    src={company.logo_url}
-                                    alt={company.name}
-                                    className="w-14 h-14 object-contain border-2 border-base-300 bg-base-200 p-1"
-                                />
-                            ) : (
-                                <div className="w-14 h-14 flex items-center justify-center border-2 border-base-300 bg-base-200 text-lg font-bold text-base-content/60">
-                                    {companyInitials(company.name)}
-                                </div>
-                            )}
+                            <div className="relative flex-shrink-0">
+                                {company.logo_url ? (
+                                    <img
+                                        src={company.logo_url}
+                                        alt={company.name}
+                                        className="w-14 h-14 object-contain border-2 border-base-300 bg-base-200 p-1"
+                                    />
+                                ) : (
+                                    <div className="w-14 h-14 flex items-center justify-center border-2 border-base-300 bg-base-200 text-lg font-bold text-base-content/60">
+                                        {companyInitials(company.name)}
+                                    </div>
+                                )}
+                                {level && (
+                                    <div className="absolute -bottom-1.5 -right-2">
+                                        <LevelBadge level={level} size="sm" />
+                                    </div>
+                                )}
+                            </div>
                             <div>
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-1">
                                     {company.industry || "Company"}
@@ -245,6 +262,16 @@ export function CompanyDetail({
                                 </p>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* Achievements */}
+                {badges.length > 0 && (
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Achievements
+                        </h3>
+                        <BadgeGrid badges={badges} maxVisible={6} />
                     </div>
                 )}
 

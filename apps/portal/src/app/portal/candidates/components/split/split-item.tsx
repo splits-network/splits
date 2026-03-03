@@ -11,6 +11,10 @@ import {
     addedAgo,
 } from "../shared/helpers";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 export function SplitItem({
     candidate,
@@ -24,6 +28,8 @@ export function SplitItem({
     onRefresh?: () => void;
 }) {
     const title = candidateTitle(candidate);
+    const { getLevel } = useGamification();
+    const level = getLevel(candidate.id);
 
     return (
         <div
@@ -43,6 +49,7 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {candidateName(candidate)}
                     </h4>
+                    {level && <span className="ml-1 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                     <span
                         className={`inline-flex items-center px-1.5 py-px text-sm font-semibold flex-shrink-0 ${statusColor(
                             candidate.verification_status,

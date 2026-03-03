@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import type { PublicFirm } from "../types";
 import { firmLocation, firmInitials } from "../types";
+import { HeroStats } from "./hero-stats";
 
 interface HeroSectionProps {
     firm: PublicFirm;
@@ -20,133 +20,113 @@ export default function HeroSection({ firm }: HeroSectionProps) {
     const location = firmLocation(firm);
     const initials = firmInitials(firm.name);
 
-    const stats = [
-        { label: "Team Size", value: firm.team_size_range || "N/A" },
-        ...(firm.show_member_count
-            ? [{ label: "Members", value: String(firm.active_member_count ?? "N/A") }]
-            : []),
-        { label: "Founded", value: firm.founded_year ? String(firm.founded_year) : "N/A" },
-        { label: "Placement Types", value: String(firm.placement_types.length) },
-    ];
-
     return (
-        <div className="bg-neutral text-neutral-content py-16 lg:py-20 relative overflow-hidden">
-            <div className="container mx-auto px-6 lg:px-12">
-                {/* Back link */}
-                <Link
-                    href="/firms"
-                    className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-neutral-content/50 hover:text-neutral-content transition-colors mb-8"
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-left" />
-                    All Firms
-                </Link>
+        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+            <div
+                className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
+                style={{ clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)" }}
+            />
+            <div className="relative px-8 pt-10 pb-0">
+                {/* Kicker row */}
+                <div className="flex items-center justify-between mb-8">
+                    <p className="hero-kicker opacity-0 text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40">
+                        {firm.industries.join(" \u00B7 ")}
+                    </p>
+                    <div className="flex items-center gap-4">
+                        {firm.candidate_firm && (
+                            <span className="hero-kicker opacity-0 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary">
+                                <i className="fa-duotone fa-regular fa-handshake text-sm" />
+                                Candidate Partners
+                            </span>
+                        )}
+                        {firm.company_firm && (
+                            <span className="hero-kicker opacity-0 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-success">
+                                <i className="fa-duotone fa-regular fa-paper-plane text-sm" />
+                                Company Partners
+                            </span>
+                        )}
+                    </div>
+                </div>
 
-                <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
-                    {/* Left: logo + info */}
-                    <div className="flex items-start gap-6">
-                        <div className="firm-avatar opacity-0 flex-shrink-0">
+                {/* Logo + Identity */}
+                <div className="flex flex-col lg:flex-row lg:items-end gap-8">
+                    <div className="flex items-end gap-5 flex-1">
+                        <div className="firm-avatar opacity-0 shrink-0">
                             {firm.logo_url ? (
                                 <img
                                     src={firm.logo_url}
                                     alt={`${firm.name} logo`}
-                                    className="w-24 h-24 lg:w-28 lg:h-28 object-contain bg-base-100"
-                                    style={{ borderRadius: 0 }}
+                                    className="w-20 h-20 lg:w-24 lg:h-24 object-contain bg-base-100"
                                 />
                             ) : (
-                                <div
-                                    className="w-24 h-24 lg:w-28 lg:h-28 flex items-center justify-center bg-primary text-primary-content"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    <span className="text-3xl font-black">{initials}</span>
+                                <div className="w-20 h-20 lg:w-24 lg:h-24 bg-primary text-primary-content flex items-center justify-center text-2xl lg:text-3xl font-black tracking-tight select-none">
+                                    {initials}
                                 </div>
                             )}
                         </div>
-
-                        <div className="min-w-0">
-                            <h1 className="firm-name opacity-0 text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
+                        <div className="min-w-0 pb-1">
+                            <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1">
+                                Recruiting Firm
+                            </p>
+                            <h1 className="firm-name opacity-0 text-4xl lg:text-5xl font-black tracking-tight leading-none text-neutral-content mb-3">
                                 {firm.name}
                             </h1>
-                            {firm.tagline && (
-                                <p className="firm-meta opacity-0 text-sm font-semibold text-primary mt-2">
-                                    {firm.tagline}
-                                </p>
-                            )}
-
-                            <div className="flex flex-wrap items-center gap-4 mt-3">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
                                 {location && (
-                                    <span className="firm-meta opacity-0 text-sm text-neutral-content/50">
-                                        <i className="fa-duotone fa-regular fa-location-dot mr-1 text-secondary" />
+                                    <span className="firm-meta opacity-0 flex items-center gap-1.5">
+                                        <i className="fa-duotone fa-regular fa-location-dot text-xs" />
                                         {location}
                                     </span>
                                 )}
                                 {firm.founded_year && (
-                                    <span className="firm-meta opacity-0 text-sm text-neutral-content/50">
-                                        <i className="fa-duotone fa-regular fa-calendar mr-1 text-secondary" />
-                                        Est. {firm.founded_year}
-                                    </span>
-                                )}
-                                {firm.team_size_range && (
-                                    <span className="firm-meta opacity-0 text-sm text-neutral-content/50">
-                                        <i className="fa-duotone fa-regular fa-users mr-1 text-secondary" />
-                                        {firm.team_size_range}
-                                    </span>
+                                    <>
+                                        {location && <span className="text-neutral-content/20">|</span>}
+                                        <span className="firm-meta opacity-0 flex items-center gap-1.5">
+                                            <i className="fa-duotone fa-regular fa-calendar text-xs" />
+                                            Est. {firm.founded_year}
+                                        </span>
+                                    </>
                                 )}
                                 {firm.website_url && (
-                                    <span className="firm-meta opacity-0 text-sm text-neutral-content/50">
-                                        <i className="fa-duotone fa-regular fa-globe mr-1 text-secondary" />
-                                        {extractDomain(firm.website_url)}
-                                    </span>
+                                    <>
+                                        <span className="text-neutral-content/20">|</span>
+                                        <span className="firm-meta opacity-0 flex items-center gap-1.5">
+                                            <i className="fa-duotone fa-regular fa-globe text-xs" />
+                                            {extractDomain(firm.website_url)}
+                                        </span>
+                                    </>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Right: action buttons */}
-                    <div className="flex items-center gap-3 flex-shrink-0">
+                    {/* CTA buttons */}
+                    <div className="flex flex-wrap gap-2 pb-1 shrink-0">
+                        <button className="firm-action opacity-0 btn btn-primary btn-sm font-bold uppercase tracking-wider">
+                            <i className="fa-duotone fa-regular fa-paper-plane" />
+                            Submit a Candidate
+                        </button>
                         {firm.website_url && (
                             <a
                                 href={firm.website_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="firm-action opacity-0 btn btn-ghost text-neutral-content/60 hover:text-neutral-content gap-2"
-                                style={{ borderRadius: 0 }}
+                                className="firm-action opacity-0 btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider"
                             >
                                 <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
-                                Visit Website
+                                Website
                             </a>
                         )}
-                        <Link
-                            href="https://portal.splits.network/sign-up"
-                            className="firm-action opacity-0 btn btn-primary gap-2"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <i className="fa-duotone fa-regular fa-handshake" />
-                            Partner With This Firm
-                        </Link>
+                        <button className="firm-action opacity-0 btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider">
+                            <i className="fa-duotone fa-regular fa-share-nodes" />
+                            Share
+                        </button>
                     </div>
                 </div>
 
-                {/* Stats grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-[2px] bg-neutral-content/10 mt-8">
-                    {stats.map((stat, i) => (
-                        <div
-                            key={i}
-                            className="stat-block bg-neutral-content/5 p-4 text-center opacity-0"
-                        >
-                            <p className="text-xl font-black">{stat.value}</p>
-                            <p className="text-sm uppercase tracking-wider opacity-40 mt-1">
-                                {stat.label}
-                            </p>
-                        </div>
-                    ))}
-                </div>
+                {/* Stats strip */}
+                <HeroStats firm={firm} />
             </div>
-
-            {/* Diagonal accent */}
-            <div
-                className="absolute bottom-0 left-0 right-0 h-6 bg-base-100"
-                style={{ clipPath: "polygon(0 100%, 100% 0, 100% 100%)" }}
-            />
-        </div>
+        </header>
     );
 }

@@ -38,16 +38,16 @@ function FirmsClientInner() {
 
     const stats = useMemo(() => ({
         total: pagination?.total || firms.length,
-        seekingSplit: firms.filter((f) => f.seeking_split_partners).length,
-        acceptsSubmissions: firms.filter((f) => f.accepts_candidate_submissions).length,
+        candidateFirms: firms.filter((f) => f.candidate_firm).length,
+        companyFirms: firms.filter((f) => f.company_firm).length,
     }), [firms, pagination]);
 
     return (
         <FirmsAnimator contentRef={contentRef}>
             <HeaderSection
                 total={stats.total}
-                seekingSplit={stats.seekingSplit}
-                acceptsSubmissions={stats.acceptsSubmissions}
+                candidateFirms={stats.candidateFirms}
+                companyFirms={stats.companyFirms}
             />
 
             <ControlsBar

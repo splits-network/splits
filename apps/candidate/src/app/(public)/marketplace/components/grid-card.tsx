@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Recruiter } from "../marketplace-client";
 import { getInitials } from "./status-color";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface GridCardProps {
     recruiter: Recruiter;
@@ -49,6 +50,8 @@ export default function GridCard({
     isSelected,
     onSelect,
 }: GridCardProps) {
+    const { getLevel } = useGamification();
+    const level = getLevel(recruiter.id);
     const name = recruiter.users?.name || recruiter.name || "Unknown Recruiter";
     const location = recruiter.location;
     const status = recruiter.status || "active";
@@ -101,17 +104,24 @@ export default function GridCard({
 
                 {/* Avatar + Name block */}
                 <div className="flex items-end gap-4">
-                    {recruiter.users?.profile_image_url ? (
-                        <img
-                            src={recruiter.users.profile_image_url}
-                            alt={name}
-                            className="w-16 h-16 object-cover border-2 border-primary shrink-0"
-                        />
-                    ) : (
-                        <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none shrink-0">
-                            {getInitials(name)}
-                        </div>
-                    )}
+                    <div className="relative shrink-0">
+                        {recruiter.users?.profile_image_url ? (
+                            <img
+                                src={recruiter.users.profile_image_url}
+                                alt={name}
+                                className="w-16 h-16 object-cover border-2 border-primary"
+                            />
+                        ) : (
+                            <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none">
+                                {getInitials(name)}
+                            </div>
+                        )}
+                        {level && (
+                            <div className="absolute -bottom-1.5 -right-2">
+                                <LevelBadge level={level} size="sm" />
+                            </div>
+                        )}
+                    </div>
                     <div className="min-w-0">
                         {recruiter.tagline && (
                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5 truncate">

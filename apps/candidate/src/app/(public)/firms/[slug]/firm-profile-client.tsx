@@ -3,9 +3,9 @@
 import { useState, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import type { PublicFirm } from "../types";
+import type { PublicFirm, FirmRecentPlacement } from "../types";
 import HeroSection from "./hero-section";
-import ContentTabs from "./content-tabs";
+import ContentTabs, { type TabKey } from "./content-tabs";
 import Sidebar from "./sidebar";
 
 if (typeof window !== "undefined") {
@@ -13,24 +13,24 @@ if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
-type TabKey = "about" | "specialties" | "team" | "partnership";
+const TABS: { key: TabKey; label: string; icon: string }[] = [
+    { key: "about", label: "About", icon: "fa-duotone fa-regular fa-building" },
+    { key: "specialties", label: "Specialties", icon: "fa-duotone fa-regular fa-bullseye" },
+    { key: "team", label: "Team", icon: "fa-duotone fa-regular fa-users" },
+    { key: "reviews", label: "Reviews", icon: "fa-duotone fa-regular fa-star" },
+];
 
 interface FirmProfileClientProps {
     firm: PublicFirm;
+    recentPlacements?: FirmRecentPlacement[];
 }
 
-export default function FirmProfileClient({ firm }: FirmProfileClientProps) {
+export default function FirmProfileClient({
+    firm,
+    recentPlacements = [],
+}: FirmProfileClientProps) {
     const [activeTab, setActiveTab] = useState<TabKey>("about");
     const pageRef = useRef<HTMLDivElement>(null);
-
-    const tabs: { key: TabKey; label: string; icon: string }[] = [
-        { key: "about", label: "About", icon: "fa-duotone fa-regular fa-building" },
-        { key: "specialties", label: "Specialties", icon: "fa-duotone fa-regular fa-bullseye" },
-        ...(firm.show_member_count
-            ? [{ key: "team" as TabKey, label: "Team", icon: "fa-duotone fa-regular fa-users" }]
-            : []),
-        { key: "partnership", label: "Partnership", icon: "fa-duotone fa-regular fa-handshake" },
-    ];
 
     useGSAP(
         () => {
@@ -64,6 +64,16 @@ export default function FirmProfileClient({ firm }: FirmProfileClientProps) {
                     name,
                     { opacity: 0, y: 30 },
                     { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
+                    "-=0.3",
+                );
+            }
+
+            const kickers = $(".hero-kicker");
+            if (kickers.length) {
+                tl.fromTo(
+                    kickers,
+                    { opacity: 0, y: 10 },
+                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, clearProps: "transform" },
                     "-=0.3",
                 );
             }
@@ -134,39 +144,41 @@ export default function FirmProfileClient({ firm }: FirmProfileClientProps) {
 
     return (
         <div ref={pageRef} className="min-h-screen bg-base-100">
-            <div className="h-1 bg-primary" />
             <HeroSection firm={firm} />
 
-            {/* Tab Bar */}
-            <div className="border-b border-base-300 px-6 pt-4">
-                <div className="container mx-auto">
-                    <div className="bg-base-200 p-1 w-fit flex" style={{ borderRadius: 0 }}>
-                        {tabs.map((tab) => (
+            {/* Tab Nav */}
+            <nav className="bg-base-100 border-b border-base-300">
+                <div className="max-w-6xl mx-auto px-8">
+                    <div className="flex gap-0">
+                        {TABS.map((tab) => (
                             <button
                                 key={tab.key}
                                 onClick={() => setActiveTab(tab.key)}
-                                className={`px-4 py-2 text-sm font-bold flex items-center gap-2 transition-colors ${
+                                className={`flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
                                     activeTab === tab.key
-                                        ? "bg-primary text-primary-content"
-                                        : "text-base-content/50 hover:text-base-content/70"
+                                        ? "border-primary text-primary"
+                                        : "border-transparent text-base-content/40 hover:text-base-content/60 hover:border-base-300"
                                 }`}
-                                style={{ borderRadius: 0 }}
                             >
-                                <i className={tab.icon} />
+                                <i className={`${tab.icon} text-sm`} />
                                 {tab.label}
                             </button>
                         ))}
                     </div>
                 </div>
-            </div>
+            </nav>
 
             {/* Content */}
-            <div className="container mx-auto px-6 lg:px-12 py-10">
-                <div className="lg:grid lg:grid-cols-5 gap-8">
-                    <div className="lg:col-span-3 space-y-8">
-                        <ContentTabs firm={firm} activeTab={activeTab} />
+            <div className="max-w-6xl mx-auto px-8 py-12">
+                <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
+                    <div className="lg:col-span-3">
+                        <ContentTabs
+                            firm={firm}
+                            activeTab={activeTab}
+                            recentPlacements={recentPlacements}
+                        />
                     </div>
-                    <div className="lg:col-span-2 space-y-6 mt-8 lg:mt-0">
+                    <div className="lg:col-span-2">
                         <Sidebar firm={firm} />
                     </div>
                 </div>

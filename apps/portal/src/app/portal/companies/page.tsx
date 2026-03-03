@@ -7,6 +7,7 @@ import {
     PaginationControls,
     ErrorState,
 } from "@/hooks/use-standard-list";
+import { useGamification } from "@splits-network/shared-gamification";
 import type {
     Company,
     CompanyRelationship,
@@ -96,6 +97,19 @@ export default function CompaniesBaselPage() {
         defaultLimit: 24,
         syncToUrl: false,
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const marketplaceIds = marketplace.data.map((c: Company) => c.id);
+        const relIds = myCompanies.data
+            .map((r: CompanyRelationship) => r.company_id || r.company?.id)
+            .filter(Boolean);
+        const allIds = [...new Set([...marketplaceIds, ...relIds])];
+        if (allIds.length > 0) {
+            registerEntities("company", allIds);
+        }
+    }, [marketplace.data, myCompanies.data, registerEntities]);
 
     const active = isMarketplace ? marketplace : myCompanies;
 

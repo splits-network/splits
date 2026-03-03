@@ -262,6 +262,52 @@ export interface ApplicationReactivatedEvent extends DomainEvent {
     };
 }
 
+// ============================================================================
+// Gamification Events
+// ============================================================================
+
+export interface BadgeAwardedEvent extends DomainEvent {
+    event_type: 'badge.awarded';
+    payload: {
+        badge_definition_id: string;
+        badge_slug: string;
+        entity_type: string;
+        entity_id: string;
+        xp_reward: number;
+    };
+}
+
+export interface BadgeRevokedEvent extends DomainEvent {
+    event_type: 'badge.revoked';
+    payload: {
+        badge_definition_id: string;
+        entity_type: string;
+        entity_id: string;
+    };
+}
+
+export interface LevelUpEvent extends DomainEvent {
+    event_type: 'level.up';
+    payload: {
+        entity_type: string;
+        entity_id: string;
+        new_level: number;
+        title: string;
+        total_xp: number;
+    };
+}
+
+export interface StreakMilestoneEvent extends DomainEvent {
+    event_type: 'streak.milestone';
+    payload: {
+        entity_type: string;
+        entity_id: string;
+        streak_type: string;
+        milestone: number;
+        current_count: number;
+    };
+}
+
 export type AnyDomainEvent =
     | ApplicationCreatedEvent
     | ApplicationStageChangedEvent
@@ -286,5 +332,10 @@ export type AnyDomainEvent =
     // Application expiration events
     | ApplicationExpiredEvent
     | ApplicationExpirationWarningEvent
-    | ApplicationReactivatedEvent;
+    | ApplicationReactivatedEvent
+    // Gamification events
+    | BadgeAwardedEvent
+    | BadgeRevokedEvent
+    | LevelUpEvent
+    | StreakMilestoneEvent;
 

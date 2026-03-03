@@ -15,6 +15,7 @@ import {
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/recruiter-detail";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function TableRow({
     recruiter,
@@ -31,6 +32,8 @@ export function TableRow({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const level = getLevel(recruiter.id);
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
     const status = recruiter.status || "active";
@@ -68,6 +71,7 @@ export function TableRow({
                                 <i className="fa-duotone fa-regular fa-sparkles text-sm text-warning" />
                             )}
                             <span className="font-bold text-sm">{name}</span>
+                            {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                         </div>
                     </div>
                 </td>
