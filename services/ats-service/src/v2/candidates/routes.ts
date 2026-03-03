@@ -91,6 +91,13 @@ export function registerCandidateRoutes(
             const candidate = await config.candidateService.createCandidate(request.body as any, clerkUserId);
             return reply.code(201).send({ data: candidate });
         } catch (error: any) {
+            const isDuplicate = error.code === '23505' ||
+                error.message?.includes('candidates_email_key');
+            if (isDuplicate) {
+                return reply.code(409).send({
+                    error: { message: 'A candidate with this email already exists.' },
+                });
+            }
             return reply.code(400).send({ error: { message: error.message } });
         }
     });
