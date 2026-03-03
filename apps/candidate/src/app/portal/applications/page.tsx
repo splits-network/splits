@@ -7,6 +7,7 @@ import {
     PaginationControls,
     ErrorState,
 } from "@/hooks/use-standard-list";
+import { useGamification } from "@splits-network/shared-gamification";
 import type { Application, ApplicationFilters } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { ApplicationsAnimator } from "./applications-animator";
@@ -96,6 +97,17 @@ export default function ApplicationsBaselPage() {
         syncToUrl: true,
         include: "job,recruiter,ai_review",
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const companyIds = applications
+            .map((a) => a.job?.company?.id)
+            .filter((id): id is string => !!id);
+        if (companyIds.length > 0) {
+            registerEntities("company", [...new Set(companyIds)]);
+        }
+    }, [applications, registerEntities]);
 
     const handleSelect = useCallback((app: Application) => {
         setSelectedId((prev) => (prev === app.id ? null : app.id));

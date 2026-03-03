@@ -343,6 +343,22 @@ export class FirmServiceV2 {
         return firm;
     }
 
+    async getPublicFirmProfile(slug: string) {
+        const firm = await this.repository.findPublicFirmBySlug(slug);
+        if (!firm) return null;
+
+        const [statsResult, placementsResult] = await Promise.allSettled([
+            this.repository.getFirmPlacementStats(firm.id),
+            this.repository.getFirmRecentPlacements(firm.id),
+        ]);
+
+        return {
+            firm,
+            placement_stats: statsResult.status === 'fulfilled' ? statsResult.value : null,
+            recent_placements: placementsResult.status === 'fulfilled' ? placementsResult.value : [],
+        };
+    }
+
     async getPublicFirmMembers(slug: string): Promise<any[]> {
         const firm = await this.repository.findPublicFirmBySlug(slug);
         if (!firm) {

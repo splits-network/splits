@@ -12,7 +12,7 @@ export interface FirmFilters extends PaginationParams, SortParams {
     specialties?: string[];
     placement_types?: string[];
     geo_focus?: string[];
-    seeking_split_partners?: boolean;
+    candidate_firm?: boolean;
 }
 
 export interface FirmUpdate {
@@ -45,8 +45,8 @@ export interface FirmUpdate {
     contact_phone?: string;
     // Marketplace toggles
     marketplace_visible?: boolean;
-    seeking_split_partners?: boolean;
-    accepts_candidate_submissions?: boolean;
+    candidate_firm?: boolean;
+    company_firm?: boolean;
     // Visibility controls
     show_member_count?: boolean;
     show_placement_stats?: boolean;
@@ -62,7 +62,7 @@ export interface PublicFirmFilters extends PaginationParams, SortParams {
     specialties?: string[];
     placement_types?: string[];
     geo_focus?: string[];
-    seeking_split_partners?: boolean;
+    candidate_firm?: boolean;
 }
 
 /** Fields safe to expose in public API responses */
@@ -73,7 +73,7 @@ export const PUBLIC_FIRM_SELECT = [
     'headquarters_city', 'headquarters_state', 'headquarters_country',
     'founded_year', 'team_size_range',
     'website_url', 'linkedin_url', 'contact_email', 'contact_phone',
-    'marketplace_visible', 'seeking_split_partners', 'accepts_candidate_submissions',
+    'marketplace_visible', 'candidate_firm', 'company_firm',
     'show_member_count', 'show_placement_stats', 'show_contact_info',
     'created_at',
 ].join(', ');
@@ -99,4 +99,26 @@ export interface TransferOwnershipRequest {
 export interface RepositoryListResponse<T> {
     data: T[];
     total: number;
+}
+
+export interface FirmPlacementStats {
+    firm_id: string;
+    total_placements: number;
+    recent_placements: number;
+    total_revenue: number;
+    avg_fee: number;
+    last_placement_at: string | null;
+}
+
+export interface FirmRecentPlacement {
+    placement_id: string;
+    job_title: string;
+    hired_at: string;
+    salary: number | null;
+}
+
+export interface EnrichedPublicFirmProfile {
+    firm: Record<string, unknown>;
+    placement_stats: FirmPlacementStats | null;
+    recent_placements: FirmRecentPlacement[];
 }

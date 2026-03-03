@@ -45,8 +45,8 @@ export interface Firm {
     // Marketplace toggles
     marketplace_visible: boolean;
     marketplace_approved_at: string | null;
-    seeking_split_partners: boolean;
-    accepts_candidate_submissions: boolean;
+    candidate_firm: boolean;
+    company_firm: boolean;
     // Visibility controls
     show_member_count: boolean;
     show_placement_stats: boolean;

@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { useGamification } from "@splits-network/shared-gamification";
 import type { EnrichedMatch } from "@splits-network/shared-types";
 import {
     useStandardList,
@@ -79,6 +80,17 @@ export default function MatchesContent() {
         defaultLimit: 12,
         syncToUrl: true,
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const companyIds = matches
+            .map((m) => m.job?.companies?.id)
+            .filter((id): id is string => !!id);
+        if (companyIds.length > 0) {
+            registerEntities("company", [...new Set(companyIds)]);
+        }
+    }, [matches, registerEntities]);
 
     const handleTierChange = useCallback(
         (tier: string) => {

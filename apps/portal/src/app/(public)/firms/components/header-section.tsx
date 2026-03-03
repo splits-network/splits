@@ -2,14 +2,14 @@
 
 interface HeaderSectionProps {
     total: number;
-    seekingSplit: number;
-    acceptsSubmissions: number;
+    candidateFirms: number;
+    companyFirms: number;
 }
 
 export function HeaderSection({
     total,
-    seekingSplit,
-    acceptsSubmissions,
+    candidateFirms,
+    companyFirms,
 }: HeaderSectionProps) {
     return (
         <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
@@ -56,10 +56,10 @@ export function HeaderSection({
                             </div>
                             <div>
                                 <div className="text-2xl font-black">
-                                    {seekingSplit}
+                                    {candidateFirms}
                                 </div>
                                 <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Seeking Partners
+                                    Candidate Firms
                                 </div>
                             </div>
                         </div>
@@ -69,10 +69,10 @@ export function HeaderSection({
                             </div>
                             <div>
                                 <div className="text-2xl font-black">
-                                    {acceptsSubmissions}
+                                    {companyFirms}
                                 </div>
                                 <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Accept Candidates
+                                    Company Firms
                                 </div>
                             </div>
                         </div>

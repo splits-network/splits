@@ -13,6 +13,10 @@ import {
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/candidate-detail";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 export function TableRow({
     candidate,
@@ -29,6 +33,9 @@ export function TableRow({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const level = getLevel(candidate.id);
+
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
         : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
@@ -59,6 +66,7 @@ export function TableRow({
                         <span className="font-bold text-sm text-base-content">
                             {candidateName(candidate)}
                         </span>
+                        {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                     </div>
                 </td>
 

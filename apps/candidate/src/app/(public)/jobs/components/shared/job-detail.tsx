@@ -8,6 +8,7 @@ import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import type { Job } from "../../types";
 import { formatCommuteTypes, formatJobLevel } from "../../types";
 import { statusColor } from "./status-color";
@@ -39,10 +40,18 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
     const [showWizard, setShowWizard] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
 
+    const { registerEntities, getLevel: getCompanyLevel } = useGamification();
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const commute = formatCommuteTypes(job.commute_types);
     const level = formatJobLevel(job.job_level);
+    const companyGamLevel = getCompanyLevel(job.company?.id);
+
+    useEffect(() => {
+        if (job.company?.id) {
+            registerEntities("company", [job.company.id]);
+        }
+    }, [job.company?.id, registerEntities]);
 
     const mandatoryReqs = (job.requirements || [])
         .filter((r) => r.requirement_type === "mandatory")
@@ -449,17 +458,24 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                         About the Company
                     </h3>
                     <div className="flex items-center gap-4 mb-4">
-                        {job.company?.logo_url ? (
-                            <img
-                                src={job.company.logo_url}
-                                alt={name}
-                                className="w-12 h-12 object-contain border-2 border-base-300"
-                            />
-                        ) : (
-                            <div className="w-12 h-12 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-sm">
-                                {companyInitials(name)}
-                            </div>
-                        )}
+                        <div className="relative shrink-0">
+                            {job.company?.logo_url ? (
+                                <img
+                                    src={job.company.logo_url}
+                                    alt={name}
+                                    className="w-12 h-12 object-contain border-2 border-base-300"
+                                />
+                            ) : (
+                                <div className="w-12 h-12 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-sm">
+                                    {companyInitials(name)}
+                                </div>
+                            )}
+                            {companyGamLevel && (
+                                <div className="absolute -bottom-1.5 -right-2">
+                                    <LevelBadge level={companyGamLevel} size="sm" />
+                                </div>
+                            )}
+                        </div>
                         <div>
                             <p className="font-bold">{name}</p>
                             {job.company?.industry && (

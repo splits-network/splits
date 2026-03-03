@@ -19,8 +19,8 @@ export interface PublicFirm {
     linkedin_url?: string | null;
     contact_email?: string | null;
     contact_phone?: string | null;
-    seeking_split_partners: boolean;
-    accepts_candidate_submissions: boolean;
+    candidate_firm: boolean;
+    company_firm: boolean;
     show_member_count: boolean;
     show_placement_stats: boolean;
     show_contact_info: boolean;
@@ -40,9 +40,27 @@ export interface FirmMember {
     };
 }
 
+export interface FirmPlacementStats {
+    totalPlacements: number;
+    avgTimeToFill: string | null;
+    topLevel: string | null;
+}
+
+export interface FirmRecentPlacement {
+    role: string;
+    level: string;
+    time: string;
+}
+
+export interface EnrichedPublicFirmProfile extends PublicFirm {
+    members: FirmMember[];
+    placementStats: FirmPlacementStats | null;
+    recentPlacements: FirmRecentPlacement[];
+}
+
 export interface PublicFirmFilters {
-    seeking_split_partners?: boolean;
-    accepts_candidate_submissions?: boolean;
+    candidate_firm?: boolean;
+    company_firm?: boolean;
     industry?: string;
 }
 

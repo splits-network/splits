@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { EnrichedMatch } from "@splits-network/shared-types";
 import { getMatchScoreLabel } from "@splits-network/shared-types";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import MatchExplainer from "./match-explainer";
 
 interface CandidateMatchCardProps {
@@ -31,10 +32,12 @@ export default function CandidateMatchCard({
     onDismiss,
     dismissing,
 }: CandidateMatchCardProps) {
+    const { getLevel } = useGamification();
     const job = match.job;
     const company = job?.companies;
     const scoreLabel = getMatchScoreLabel(match.match_score);
     const companyName = company?.name || "Company not listed";
+    const companyLevel = getLevel(company?.id);
     const initials = companyName
         .split(" ")
         .map((w) => w[0])
@@ -111,17 +114,24 @@ export default function CandidateMatchCard({
 
             {/* Footer: company logo + actions */}
             <div className="mt-auto flex items-center gap-3 pt-4 border-t border-base-200">
-                {company?.logo_url ? (
-                    <img
-                        src={company.logo_url}
-                        alt={companyName}
-                        className="w-9 h-9 shrink-0 object-contain bg-base-200 border border-base-300 p-1"
-                    />
-                ) : (
-                    <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
-                        {initials}
-                    </div>
-                )}
+                <div className="relative shrink-0">
+                    {company?.logo_url ? (
+                        <img
+                            src={company.logo_url}
+                            alt={companyName}
+                            className="w-9 h-9 object-contain bg-base-200 border border-base-300 p-1"
+                        />
+                    ) : (
+                        <div className="w-9 h-9 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
+                            {initials}
+                        </div>
+                    )}
+                    {companyLevel && (
+                        <div className="absolute -bottom-1 -right-1">
+                            <LevelBadge level={companyLevel} size="xs" />
+                        </div>
+                    )}
+                </div>
                 <div className="flex-1" />
                 <button
                     className="btn btn-ghost btn-sm rounded-none text-base-content/50"

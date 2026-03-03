@@ -17,143 +17,91 @@ function extractDomain(url: string): string {
 }
 
 export default function Sidebar({ firm }: SidebarProps) {
-    const location = firmLocation(firm);
+    const contactItems = [
+        firm.show_contact_info && firm.contact_email
+            ? { icon: "fa-duotone fa-regular fa-envelope", label: "Email", value: firm.contact_email }
+            : null,
+        firm.show_contact_info && firm.contact_phone
+            ? { icon: "fa-duotone fa-regular fa-phone", label: "Phone", value: firm.contact_phone }
+            : null,
+        firm.website_url
+            ? { icon: "fa-duotone fa-regular fa-globe", label: "Website", value: extractDomain(firm.website_url) }
+            : null,
+        firm.linkedin_url
+            ? { icon: "fa-brands fa-linkedin-in", label: "LinkedIn", value: "LinkedIn" }
+            : null,
+    ].filter(Boolean) as { icon: string; label: string; value: string }[];
 
     return (
-        <>
-            {/* Partnership Status */}
-            <div className="sidebar-card opacity-0 bg-base-200 border-t-4 border-primary p-6">
-                <h3 className="text-sm font-black uppercase tracking-wider mb-4">
-                    Partnership Status
-                </h3>
-                <div className="space-y-3 mb-6">
-                    <span
-                        className={`block w-fit px-3 py-1.5 text-sm font-bold ${
-                            firm.seeking_split_partners
-                                ? "bg-success/15 text-success"
-                                : "text-base-content/40"
-                        }`}
-                    >
-                        <i className="fa-duotone fa-regular fa-handshake mr-2" />
-                        {firm.seeking_split_partners
-                            ? "Seeking Partners"
-                            : "Not Seeking Partners"}
-                    </span>
-                    {firm.accepts_candidate_submissions && (
-                        <span className="block w-fit px-3 py-1.5 text-sm font-bold bg-info/15 text-info">
-                            <i className="fa-duotone fa-regular fa-user-plus mr-2" />
-                            Accepts Candidate Submissions
-                        </span>
-                    )}
-                </div>
-                <Link
-                    href="/sign-up"
-                    className="btn btn-primary btn-block gap-2"
-                    style={{ borderRadius: 0 }}
-                >
-                    <i className="fa-duotone fa-regular fa-handshake" />
-                    Request Partnership
-                </Link>
-            </div>
-
-            {/* Contact Info */}
-            {firm.show_contact_info &&
-                (firm.website_url || firm.linkedin_url || firm.contact_email) && (
-                    <div className="sidebar-card opacity-0 bg-base-200 border-t-4 border-secondary p-6">
-                        <h3 className="text-sm font-black uppercase tracking-wider mb-4">
+        <aside className="space-y-6">
+            {/* Contact card */}
+            {contactItems.length > 0 && (
+                <div className="sidebar-card opacity-0 bg-base-200 border border-base-300 border-l-4 border-l-primary">
+                    <div className="px-6 py-4 border-b border-base-300">
+                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                             Contact
-                        </h3>
-                        <div className="space-y-3">
-                            {firm.website_url && (
-                                <a
-                                    href={firm.website_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-                                >
-                                    <div className="w-7 h-7 flex items-center justify-center bg-primary/10 text-primary flex-shrink-0">
-                                        <i className="fa-duotone fa-regular fa-globe text-xs" />
-                                    </div>
-                                    <span className="text-base-content/70 truncate">
-                                        {extractDomain(firm.website_url)}
-                                    </span>
-                                </a>
-                            )}
-                            {firm.linkedin_url && (
-                                <a
-                                    href={firm.linkedin_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-                                >
-                                    <div className="w-7 h-7 flex items-center justify-center bg-info/10 text-info flex-shrink-0">
-                                        <i className="fa-brands fa-linkedin text-xs" />
-                                    </div>
-                                    <span className="text-base-content/70 truncate">
-                                        LinkedIn
-                                    </span>
-                                </a>
-                            )}
-                            {firm.contact_email && (
-                                <a
-                                    href={`mailto:${firm.contact_email}`}
-                                    className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-                                >
-                                    <div className="w-7 h-7 flex items-center justify-center bg-secondary/10 text-secondary flex-shrink-0">
-                                        <i className="fa-duotone fa-regular fa-envelope text-xs" />
-                                    </div>
-                                    <span className="text-base-content/70 truncate">
-                                        {firm.contact_email}
-                                    </span>
-                                </a>
-                            )}
-                            {firm.contact_phone && (
-                                <a
-                                    href={`tel:${firm.contact_phone}`}
-                                    className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-                                >
-                                    <div className="w-7 h-7 flex items-center justify-center bg-accent/10 text-accent flex-shrink-0">
-                                        <i className="fa-duotone fa-regular fa-phone text-xs" />
-                                    </div>
-                                    <span className="text-base-content/70">
-                                        {firm.contact_phone}
-                                    </span>
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-            {/* Location */}
-            <div className="sidebar-card opacity-0 bg-base-200 border-t-4 border-accent p-6">
-                <h3 className="text-sm font-black uppercase tracking-wider mb-4">
-                    Location
-                </h3>
-                <div className="space-y-3">
-                    {location ? (
-                        <div className="flex items-center gap-3 text-sm">
-                            <div className="w-7 h-7 flex items-center justify-center bg-accent/10 text-accent flex-shrink-0">
-                                <i className="fa-duotone fa-regular fa-location-dot text-xs" />
-                            </div>
-                            <span className="text-base-content/70">{location}</span>
-                        </div>
-                    ) : (
-                        <p className="text-sm text-base-content/40 italic">
-                            Location not specified
                         </p>
-                    )}
-                    {firm.founded_year && (
-                        <div className="flex items-center gap-3 text-sm">
-                            <div className="w-7 h-7 flex items-center justify-center bg-primary/10 text-primary flex-shrink-0">
-                                <i className="fa-duotone fa-regular fa-calendar text-xs" />
+                    </div>
+                    <div className="divide-y divide-base-300">
+                        {contactItems.map((c) => (
+                            <div key={c.label} className="flex items-center gap-4 px-6 py-4">
+                                <div className="w-8 h-8 bg-primary/10 flex items-center justify-center shrink-0">
+                                    <i className={`${c.icon} text-primary text-xs`} />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-0.5">
+                                        {c.label}
+                                    </p>
+                                    <p className="text-sm font-semibold text-base-content truncate">
+                                        {c.value}
+                                    </p>
+                                </div>
                             </div>
-                            <span className="text-base-content/70">
-                                Founded {firm.founded_year}
-                            </span>
-                        </div>
-                    )}
+                        ))}
+                    </div>
+                    <div className="px-6 pb-5 pt-4">
+                        <Link
+                            href="/sign-up"
+                            className="btn btn-primary btn-sm w-full font-bold uppercase tracking-wider"
+                        >
+                            <i className="fa-duotone fa-regular fa-handshake" />
+                            Request Partnership
+                        </Link>
+                    </div>
+                </div>
+            )}
+
+            {/* Milestones card — Coming Soon */}
+            <div className="sidebar-card opacity-0 bg-base-200 border border-base-300">
+                <div className="px-6 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
+                        Milestones
+                    </p>
+                </div>
+                <div className="px-6 py-8 text-center">
+                    <i className="fa-duotone fa-regular fa-flag text-2xl text-base-content/15 mb-2 block" />
+                    <p className="text-sm text-base-content/40">Coming Soon</p>
                 </div>
             </div>
-        </>
+
+            {/* Markets Served card */}
+            {firm.geo_focus.length > 0 && (
+                <div className="sidebar-card opacity-0 bg-base-200 border border-base-300">
+                    <div className="px-6 py-4 border-b border-base-300">
+                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
+                            Markets Served
+                        </p>
+                    </div>
+                    <div className="divide-y divide-base-300">
+                        {firm.geo_focus.map((geo) => (
+                            <div key={geo} className="flex items-center gap-3 px-6 py-3.5">
+                                <i className="fa-duotone fa-regular fa-globe text-xs text-accent" />
+                                <span className="text-sm text-base-content/60">{geo}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </aside>
     );
 }

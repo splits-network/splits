@@ -18,7 +18,7 @@ interface StepMarketplaceProps {
  *
  * Layout:
  * - Section A: "Marketplace Presence" — 3 visibility/participation toggles
- *   (marketplace_visible, seeking_split_partners, accepts_candidate_submissions)
+ *   (marketplace_visible, candidate_firm, company_firm)
  * - Section B: "Profile Visibility" — 3 display-control toggles
  *   (show_member_count, show_placement_stats, show_contact_info)
  *
@@ -52,16 +52,16 @@ export function StepMarketplace({ form, onChange, errors }: StepMarketplaceProps
             <BaselToggleRow
                 label="Seeking split partners"
                 description="Signal to the network that you're open to incoming split proposals."
-                checked={form.seeking_split_partners}
-                onChange={(v) => onChange({ seeking_split_partners: v })}
+                checked={form.candidate_firm}
+                onChange={(v) => onChange({ candidate_firm: v })}
                 color="secondary"
             />
 
             <BaselToggleRow
                 label="Accept candidate submissions"
                 description="Allow other recruiters to submit candidates against your open jobs."
-                checked={form.accepts_candidate_submissions}
-                onChange={(v) => onChange({ accepts_candidate_submissions: v })}
+                checked={form.company_firm}
+                onChange={(v) => onChange({ company_firm: v })}
                 color="secondary"
             />
 

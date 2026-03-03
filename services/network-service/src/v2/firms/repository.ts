@@ -69,8 +69,8 @@ export class FirmRepository {
                 query = query.not('marketplace_approved_at', 'is', null);
             }
         }
-        if (filters.seeking_split_partners !== undefined) {
-            query = query.eq('seeking_split_partners', filters.seeking_split_partners);
+        if (filters.candidate_firm !== undefined) {
+            query = query.eq('candidate_firm', filters.candidate_firm);
         }
         if (filters.industries && filters.industries.length > 0) {
             query = query.overlaps('industries', filters.industries);
@@ -549,8 +549,8 @@ export class FirmRepository {
         if (filters.geo_focus?.length) {
             query = query.overlaps('geo_focus', filters.geo_focus);
         }
-        if (filters.seeking_split_partners !== undefined) {
-            query = query.eq('seeking_split_partners', filters.seeking_split_partners);
+        if (filters.candidate_firm !== undefined) {
+            query = query.eq('candidate_firm', filters.candidate_firm);
         }
 
         const sortBy = filters.sort_by || 'name';
@@ -610,6 +610,28 @@ export class FirmRepository {
         }
 
         return firm;
+    }
+
+    async getFirmPlacementStats(firmId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('firm_placement_stats')
+            .select('*')
+            .eq('firm_id', firmId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async getFirmRecentPlacements(firmId: string, limit = 5): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .from('firm_recent_placements')
+            .select('*')
+            .eq('firm_id', firmId)
+            .limit(limit);
+
+        if (error) throw error;
+        return data || [];
     }
 
     async findPublicFirmMembers(firmId: string): Promise<any[]> {

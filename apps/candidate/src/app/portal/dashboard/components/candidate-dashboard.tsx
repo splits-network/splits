@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { usePresence } from "@/hooks/use-presence";
+import { useUserProfile } from "@/contexts";
+import { ApiClient } from "@/lib/api-client";
+import type { EntityLevelInfo } from "@splits-network/shared-gamification";
 import { useCandidateDashboardData } from "../hooks/use-candidate-dashboard-data";
 import { useCandidateNotifications } from "../hooks/use-candidate-notifications";
 import { useProfileCompletion } from "../hooks/use-profile-completion";
@@ -45,6 +48,21 @@ export default function CandidateDashboard({
         hasResume,
         loading: profileLoading,
     } = useProfileCompletion();
+
+    const { profile } = useUserProfile();
+    const candidateId = profile?.candidate_id;
+    const [level, setLevel] = useState<EntityLevelInfo | null>(null);
+
+    useEffect(() => {
+        if (!candidateId) return;
+        const client = new ApiClient();
+        client
+            .get<{ data: EntityLevelInfo }>("/xp/level", {
+                params: { entity_type: "candidate", entity_id: candidateId },
+            })
+            .then((res) => setLevel(res.data))
+            .catch(() => {});
+    }, [candidateId]);
 
     const recruiterUserIds = useMemo(
         () => activeRecruiters.map((r) => r.recruiter_email),
@@ -260,6 +278,20 @@ export default function CandidateDashboard({
             href: "/portal/recruiters",
             description: "Working with you",
         },
+        ...(level
+            ? [
+                  {
+                      label: "Level",
+                      value: `${level.current_level}`,
+                      icon: "fa-solid fa-star",
+                      borderClass: "border-info",
+                      bgClass: "bg-info/10",
+                      textClass: "text-info",
+                      href: "/portal/achievements",
+                      description: level.title,
+                  },
+              ]
+            : []),
     ];
 
     return (
@@ -334,8 +366,8 @@ export default function CandidateDashboard({
             <section className="bg-base-200 py-10">
                 <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     {dataLoading ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                            {Array.from({ length: 5 }).map((_, i) => (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                            {Array.from({ length: 6 }).map((_, i) => (
                                 <div
                                     key={i}
                                     className="bg-base-100 border-t-4 border-base-content/10 p-6"
@@ -347,7 +379,7 @@ export default function CandidateDashboard({
                             ))}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                             {kpis.map((kpi, i) => {
                                 const content = (
                                     <div

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useStandardList } from "@/hooks/use-standard-list";
+import { useGamification } from "@splits-network/shared-gamification";
 import { PaginationControls } from "@/components/standard-lists/pagination-controls";
 import { LoadingState } from "@/components/standard-lists/loading-state";
 import { ErrorState } from "@/components/standard-lists/error-state";
@@ -94,6 +95,18 @@ function JobsPageInner() {
         requireAuth: false,
         include: "company",
     });
+
+    /* -- Gamification: register company entities -- */
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const companyIds = jobs
+            .map((j) => j.company?.id)
+            .filter((id): id is string => !!id);
+        if (companyIds.length > 0) {
+            registerEntities("company", [...new Set(companyIds)]);
+        }
+    }, [jobs, registerEntities]);
 
     /* -- Stats -- */
 

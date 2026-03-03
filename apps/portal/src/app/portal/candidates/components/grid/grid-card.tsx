@@ -17,6 +17,10 @@ import {
     skillsList,
 } from "../shared/helpers";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 export function GridCard({
     candidate,
@@ -29,6 +33,8 @@ export function GridCard({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const level = getLevel(candidate.id);
     const name = candidateName(candidate);
     const title = candidateTitle(candidate);
     const company = candidateCompany(candidate);
@@ -68,6 +74,11 @@ export function GridCard({
             {/* Name */}
             <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors mb-1 truncate">
                 {name}
+                {level && (
+                    <span className="ml-1.5 align-middle inline-block">
+                        <LevelBadge level={level} size="sm" />
+                    </span>
+                )}
             </h3>
             {candidate.email && (
                 <div className="text-sm text-base-content/40 truncate pb-1">

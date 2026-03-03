@@ -2,14 +2,14 @@
 
 interface HeaderSectionProps {
     total: number;
-    seekingSplit: number;
-    acceptsSubmissions: number;
+    candidateFirm: number;
+    companyFirm: number;
 }
 
 export function HeaderSection({
     total,
-    seekingSplit,
-    acceptsSubmissions,
+    candidateFirm,
+    companyFirm,
 }: HeaderSectionProps) {
     return (
         <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
@@ -33,8 +33,8 @@ export function HeaderSection({
 
                     {/* Subtitle */}
                     <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 opacity-0">
-                        Browse marketplace-approved recruiting firms seeking
-                        split-fee partners.
+                        Browse marketplace-approved recruiting firms accepting
+                        candidate submissions.
                     </p>
 
                     {/* Stats */}
@@ -56,10 +56,10 @@ export function HeaderSection({
                             </div>
                             <div>
                                 <div className="text-2xl font-black">
-                                    {seekingSplit}
+                                    {candidateFirm}
                                 </div>
                                 <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Seeking Partners
+                                    Candidate Partners
                                 </div>
                             </div>
                         </div>
@@ -69,10 +69,10 @@ export function HeaderSection({
                             </div>
                             <div>
                                 <div className="text-2xl font-black">
-                                    {acceptsSubmissions}
+                                    {companyFirm}
                                 </div>
                                 <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Accept Candidates
+                                    Company Partners
                                 </div>
                             </div>
                         </div>

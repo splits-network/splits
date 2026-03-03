@@ -7,11 +7,13 @@ import {
     companyInitials,
     companyIndustry,
     companyLocation,
+    companyId,
     addedAgo,
     extractCompany,
     extractRelationship,
     formatStatus,
 } from "../shared/helpers";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
 
 export function GridCard({
@@ -33,6 +35,8 @@ export function GridCard({
     const location = companyLocation(item, isMarketplace);
     const company = extractCompany(item, isMarketplace);
     const relationship = extractRelationship(item, isMarketplace);
+    const { getLevel } = useGamification();
+    const level = getLevel(companyId(item, isMarketplace));
 
     return (
         <div
@@ -44,17 +48,24 @@ export function GridCard({
         >
             {/* Company avatar + name */}
             <div className="flex items-center gap-3 mb-3">
-                {company.logo_url ? (
-                    <img
-                        src={company.logo_url}
-                        alt={name}
-                        className="w-10 h-10 shrink-0 object-contain bg-base-200 border border-base-300 p-1"
-                    />
-                ) : (
-                    <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
-                        {companyInitials(name)}
-                    </div>
-                )}
+                <div className="relative shrink-0">
+                    {company.logo_url ? (
+                        <img
+                            src={company.logo_url}
+                            alt={name}
+                            className="w-10 h-10 object-contain bg-base-200 border border-base-300 p-1"
+                        />
+                    ) : (
+                        <div className="w-10 h-10 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
+                            {companyInitials(name)}
+                        </div>
+                    )}
+                    {level && (
+                        <div className="absolute -bottom-1 -right-1">
+                            <LevelBadge level={level} size="sm" />
+                        </div>
+                    )}
+                </div>
                 <div className="min-w-0">
                     <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors truncate">
                         {name}

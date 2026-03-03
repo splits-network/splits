@@ -21,6 +21,11 @@ import {
     skillsList,
 } from "./helpers";
 import CandidateActionsToolbar from "./actions-toolbar";
+import {
+    LevelBadge,
+    BadgeGrid,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 /* ─── Tab Types ─────────────────────────────────────────────────────────── */
 
@@ -125,6 +130,14 @@ export function CandidateDetail({
 }) {
     const { getToken } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>("overview");
+    const { registerEntities, getLevel, getBadges } = useGamification();
+
+    useEffect(() => {
+        registerEntities("candidate", [candidate.id]);
+    }, [candidate.id, registerEntities]);
+
+    const level = getLevel(candidate.id);
+    const badges = getBadges(candidate.id);
 
     /* Lazy-loaded applications */
     const [applications, setApplications] = useState<any[]>([]);
@@ -170,8 +183,15 @@ export function CandidateDetail({
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1">
                         {/* Initials square */}
-                        <div className="w-14 h-14 flex items-center justify-center bg-primary text-primary-content font-black text-lg flex-shrink-0">
-                            {initials}
+                        <div className="relative flex-shrink-0">
+                            <div className="w-14 h-14 flex items-center justify-center bg-primary text-primary-content font-black text-lg">
+                                {initials}
+                            </div>
+                            {level && (
+                                <div className="absolute -bottom-1.5 -right-2">
+                                    <LevelBadge level={level} size="sm" />
+                                </div>
+                            )}
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
@@ -326,6 +346,7 @@ export function CandidateDetail({
                         bioText={bioText}
                         skills={skills}
                         salary={salary}
+                        badges={badges}
                     />
                 )}
                 {activeTab === "resume" && <ResumeTab />}
@@ -348,11 +369,13 @@ function OverviewTab({
     bioText,
     skills,
     salary,
+    badges,
 }: {
     candidate: Candidate;
     bioText?: string;
     skills: string[];
     salary: string | null;
+    badges: import("@splits-network/shared-gamification").BadgeAward[];
 }) {
     return (
         <div className="p-6 space-y-8">
@@ -531,6 +554,16 @@ function OverviewTab({
                     )}
                 </div>
             </div>
+
+            {/* Achievements */}
+            {badges.length > 0 && (
+                <div>
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                        Achievements
+                    </h3>
+                    <BadgeGrid badges={badges} maxVisible={6} />
+                </div>
+            )}
         </div>
     );
 }

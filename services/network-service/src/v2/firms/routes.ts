@@ -38,8 +38,8 @@ export function registerFirmRoutes(
                 marketplace_visible: query.marketplace_visible !== undefined
                     ? query.marketplace_visible === 'true'
                     : undefined,
-                seeking_split_partners: query.seeking_split_partners !== undefined
-                    ? query.seeking_split_partners === 'true'
+                candidate_firm: query.candidate_firm !== undefined
+                    ? query.candidate_firm === 'true'
                     : undefined,
                 industries: query.industries
                     ? (Array.isArray(query.industries) ? query.industries : [query.industries])

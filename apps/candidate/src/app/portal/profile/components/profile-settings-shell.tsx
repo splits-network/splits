@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
+import { createAuthenticatedClient, ApiClient } from "@/lib/api-client";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
 import { useToast } from "@/lib/toast-context";
+import type { EntityLevelInfo } from "@splits-network/shared-gamification";
+import { XpLevelBar } from "@splits-network/shared-gamification";
 import { ProfileHeader } from "./profile-header";
 import { ProfileCompletenessCard } from "./profile-completeness-card";
 import { SectionProfile } from "./section-profile";
@@ -57,6 +59,9 @@ export function ProfileSettingsShell() {
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
 
+    // Gamification level
+    const [level, setLevel] = useState<EntityLevelInfo | null>(null);
+
     // Name editing
     const [name, setName] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -69,6 +74,18 @@ export function ProfileSettingsShell() {
         loadSettings();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Fetch gamification level once candidateId is known
+    useEffect(() => {
+        if (!candidateId) return;
+        const client = new ApiClient();
+        client
+            .get<{ data: EntityLevelInfo }>("/xp/level", {
+                params: { entity_type: "candidate", entity_id: candidateId },
+            })
+            .then((res) => setLevel(res.data))
+            .catch(() => {});
+    }, [candidateId]);
 
     const loadSettings = async () => {
         try {
@@ -314,8 +331,9 @@ export function ProfileSettingsShell() {
                     </div>
 
                     {/* Completeness Sidebar */}
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-1 space-y-6">
                         <ProfileCompletenessCard settings={settings} />
+                        {level && <XpLevelBar level={level} />}
                     </div>
                 </div>
             </section>

@@ -20,6 +20,8 @@ const LEADERBOARD_JOBS: LeaderboardJob[] = [
     { entityType: 'candidate', period: 'all_time', metric: 'total_xp' },
     { entityType: 'firm', period: 'monthly', metric: 'total_xp' },
     { entityType: 'firm', period: 'all_time', metric: 'total_xp' },
+    { entityType: 'company', period: 'monthly', metric: 'total_xp' },
+    { entityType: 'company', period: 'all_time', metric: 'total_xp' },
 ];
 
 export class LeaderboardScheduler {
