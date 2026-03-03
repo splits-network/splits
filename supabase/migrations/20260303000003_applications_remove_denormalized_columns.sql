@@ -83,6 +83,13 @@ BEGIN
 END;
 $$;
 
+-- 3b. Recreate the trigger to fire on title/company_id instead of title/company_name
+DROP TRIGGER IF EXISTS sync_applications_job_data ON public.jobs;
+CREATE TRIGGER sync_applications_job_data
+    AFTER UPDATE OF title, company_id ON public.jobs
+    FOR EACH ROW
+    EXECUTE FUNCTION sync_applications_job_data();
+
 -- 4. Rewrite search index sync to JOIN for all data
 CREATE OR REPLACE FUNCTION search.sync_application_to_search_index()
 RETURNS trigger
