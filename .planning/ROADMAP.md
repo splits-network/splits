@@ -56,12 +56,12 @@ Plans:
   3. Culture tags search and create work identically to perks
   4. Bulk-replacing a company's skills/perks/culture tags atomically swaps the full set in one call
   5. List endpoints return all skills/perks/culture tags for a given company
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 23-01: Perks search/create endpoints in ats-service
-- [ ] 23-02: Culture tags search/create endpoints in ats-service
-- [ ] 23-03: Company junction bulk-replace and list endpoints
+- [ ] 23-01-PLAN.md -- Perks search/create endpoints (repository, service, routes)
+- [ ] 23-02-PLAN.md -- Culture tags search/create endpoints (repository, service, routes)
+- [ ] 23-03-PLAN.md -- Company junction bulk-replace and list (skills, perks, culture tags)
 
 ### Phase 24: Company Enrichment APIs
 **Goal**: Companies can be updated with new scalar fields, queries return computed stats, and all new routes are exposed through the gateway
