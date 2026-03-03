@@ -9,6 +9,10 @@ export class SkillRepository {
         });
     }
 
+    getSupabase(): SupabaseClient {
+        return this.supabase;
+    }
+
     async search(query: string, limit: number = 10) {
         if (!query || query.trim().length < 1) {
             return [];

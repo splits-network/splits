@@ -112,7 +112,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
 
     // Skills modules (shared Supabase client from job repository)
     const skillRepository = new SkillRepository(config.supabaseUrl, config.supabaseKey);
-    const skillService = new SkillService(skillRepository);
+    const skillService = new SkillService(skillRepository, skillRepository.getSupabase());
     registerSkillRoutes(app, { service: skillService });
 
     const candidateSkillRepository = new CandidateSkillRepository(candidateRepository.getSupabase());
