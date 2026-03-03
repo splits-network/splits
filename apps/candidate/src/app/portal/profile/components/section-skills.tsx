@@ -3,7 +3,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { BaselSkillPicker, BaselBadge, type SkillOption } from "@splits-network/basel-ui";
+import {
+    BaselSkillPicker,
+    BaselBadge,
+    type SkillOption,
+} from "@splits-network/basel-ui";
 import type { ResumeSkill } from "@splits-network/shared-types";
 import { useToast } from "@/lib/toast-context";
 
@@ -12,7 +16,10 @@ interface SectionSkillsProps {
     resumeSkills?: ResumeSkill[];
 }
 
-export default function SectionSkills({ candidateId, resumeSkills = [] }: SectionSkillsProps) {
+export default function SectionSkills({
+    candidateId,
+    resumeSkills = [],
+}: SectionSkillsProps) {
     const { getToken } = useAuth();
     const toast = useToast();
     const [skills, setSkills] = useState<SkillOption[]>([]);
@@ -25,14 +32,14 @@ export default function SectionSkills({ candidateId, resumeSkills = [] }: Sectio
             try {
                 const token = await getToken();
                 if (!token) {
-                    console.error('Authentication required');
+                    console.error("Authentication required");
                     setLoading(false);
                     return;
                 }
                 const client = createAuthenticatedClient(token);
-                const response = await client.get<{ data: Array<{ skill_id: string; skill: SkillOption }> }>(
-                    `/candidate-skills?candidate_id=${candidateId}`
-                );
+                const response = await client.get<{
+                    data: Array<{ skill_id: string; skill: SkillOption }>;
+                }>(`/candidate-skills?candidate_id=${candidateId}`);
                 const loaded = (response.data || [])
                     .filter((cs: any) => cs.skill)
                     .map((cs: any) => cs.skill as SkillOption);
@@ -46,66 +53,90 @@ export default function SectionSkills({ candidateId, resumeSkills = [] }: Sectio
         load();
     }, [candidateId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const searchSkills = useCallback(async (query: string): Promise<SkillOption[]> => {
-        const token = await getToken();
-        if (!token) {
-            console.error('Authentication required');
-            return [];
-        }
-        const client = createAuthenticatedClient(token);
-        const response = await client.get<{ data: SkillOption[] }>(`/skills?q=${encodeURIComponent(query)}&limit=10`);
-        return response.data || [];
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const createSkill = useCallback(async (name: string): Promise<SkillOption> => {
-        const token = await getToken();
-        if (!token) {
-            throw new Error('Authentication required');
-        }
-        const client = createAuthenticatedClient(token);
-        const response = await client.post<{ data: SkillOption }>("/skills", { name });
-        return response.data;
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const handleSkillsChange = useCallback(async (newSkills: SkillOption[]) => {
-        setSkills(newSkills);
-
-        // Auto-save via bulk replace
-        setSaving(true);
-        try {
+    const searchSkills = useCallback(
+        async (query: string): Promise<SkillOption[]> => {
             const token = await getToken();
             if (!token) {
-                throw new Error('Authentication required');
+                console.error("Authentication required");
+                return [];
             }
             const client = createAuthenticatedClient(token);
-            await client.put(`/candidate-skills/candidate/${candidateId}/bulk-replace`, {
-                skills: newSkills.map(s => ({ skill_id: s.id, source: "manual" })),
-            });
-        } catch (err) {
-            console.error("Failed to save skills:", err);
-            toast.error("Failed to save skills");
-        } finally {
-            setSaving(false);
-        }
-    }, [candidateId]); // eslint-disable-line react-hooks/exhaustive-deps
+            const response = await client.get<{ data: SkillOption[] }>(
+                `/skills?q=${encodeURIComponent(query)}&limit=10`,
+            );
+            return response.data || [];
+        },
+        [],
+    ); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const addResumeSkill = useCallback(async (resumeSkill: ResumeSkill) => {
-        // First find-or-create the skill
-        try {
-            const skill = await createSkill(resumeSkill.name);
-            if (!skills.some(s => s.id === skill.id)) {
-                await handleSkillsChange([...skills, skill]);
-                toast.success(`Added "${resumeSkill.name}" to your skills`);
+    const createSkill = useCallback(
+        async (name: string): Promise<SkillOption> => {
+            const token = await getToken();
+            if (!token) {
+                throw new Error("Authentication required");
             }
-        } catch (err) {
-            console.error("Failed to add resume skill:", err);
-            toast.error("Failed to add skill");
-        }
-    }, [skills, createSkill, handleSkillsChange, toast]);
+            const client = createAuthenticatedClient(token);
+            const response = await client.post<{ data: SkillOption }>(
+                "/skills",
+                { name },
+            );
+            return response.data;
+        },
+        [],
+    ); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleSkillsChange = useCallback(
+        async (newSkills: SkillOption[]) => {
+            setSkills(newSkills);
+
+            // Auto-save via bulk replace
+            setSaving(true);
+            try {
+                const token = await getToken();
+                if (!token) {
+                    throw new Error("Authentication required");
+                }
+                const client = createAuthenticatedClient(token);
+                await client.put(
+                    `/candidate-skills/candidate/${candidateId}/bulk-replace`,
+                    {
+                        skills: newSkills.map((s) => ({
+                            skill_id: s.id,
+                            source: "manual",
+                        })),
+                    },
+                );
+            } catch (err) {
+                console.error("Failed to save skills:", err);
+                toast.error("Failed to save skills");
+            } finally {
+                setSaving(false);
+            }
+        },
+        [candidateId],
+    ); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const addResumeSkill = useCallback(
+        async (resumeSkill: ResumeSkill) => {
+            // First find-or-create the skill
+            try {
+                const skill = await createSkill(resumeSkill.name);
+                if (!skills.some((s) => s.id === skill.id)) {
+                    await handleSkillsChange([...skills, skill]);
+                    toast.success(`Added "${resumeSkill.name}" to your skills`);
+                }
+            } catch (err) {
+                console.error("Failed to add resume skill:", err);
+                toast.error("Failed to add skill");
+            }
+        },
+        [skills, createSkill, handleSkillsChange, toast],
+    );
 
     // Resume skills not already in user's skills list
     const unadded = resumeSkills.filter(
-        rs => !skills.some(s => s.name.toLowerCase() === rs.name.toLowerCase())
+        (rs) =>
+            !skills.some((s) => s.name.toLowerCase() === rs.name.toLowerCase()),
     );
 
     if (loading) {
@@ -120,7 +151,9 @@ export default function SectionSkills({ candidateId, resumeSkills = [] }: Sectio
         <div className="space-y-8">
             {/* User-managed skills */}
             <div>
-                <h3 className="text-lg font-bold text-base-content mb-1">Your Skills</h3>
+                <h3 className="text-lg font-bold text-base-content mb-1">
+                    Your Skills
+                </h3>
                 <p className="text-sm text-base-content/50 mb-4">
                     Add skills to improve your match quality with open roles.
                 </p>
@@ -147,7 +180,8 @@ export default function SectionSkills({ candidateId, resumeSkills = [] }: Sectio
                         AI-Extracted Skills
                     </h3>
                     <p className="text-sm text-base-content/50 mb-4">
-                        These skills were extracted from your resume. Click to add them to your profile.
+                        These skills were extracted from your resume. Click to
+                        add them to your profile.
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {unadded.map((rs) => (
