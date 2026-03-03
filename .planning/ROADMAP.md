@@ -40,11 +40,11 @@ Completed milestones documented in .planning/MILESTONES.md
   2. The companies table has stage (with CHECK constraint), founded_year, tagline, linkedin_url, twitter_url, and glassdoor_url columns
   3. RLS policies enforce authenticated select/insert/update/delete on all new tables with service_role bypass
   4. TypeScript types in shared-types cover CompanyStage enum, Perk, CultureTag, and all junction table row types
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 22-01: Migrations for new tables, columns, indexes, and RLS
-- [ ] 22-02: TypeScript types in shared-types
+- [ ] 22-01-PLAN.md -- Migration for new tables, columns, indexes, and RLS
+- [ ] 22-02-PLAN.md -- TypeScript types in shared-types
 
 ### Phase 23: Lookup APIs
 **Goal**: Perks and culture tags can be searched and created via typeahead, and company junction tables have full CRUD
