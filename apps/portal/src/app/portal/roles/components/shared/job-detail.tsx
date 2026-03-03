@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { BaselTabBar } from "@splits-network/basel-ui";
+import { BaselTabBar, BaselBadge } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
@@ -17,6 +17,8 @@ import {
     isNew,
     companyName,
     companyInitials,
+    requiredSkillNames,
+    preferredSkillNames,
 } from "./helpers";
 import RoleActionsToolbar from "./actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
@@ -61,6 +63,8 @@ function RecruiterBriefTab({ job }: { job: Job }) {
         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
     const commute = formatCommuteTypes(job.commute_types);
     const level = formatJobLevel(job.job_level);
+    const reqSkills = requiredSkillNames(job);
+    const prefSkills = preferredSkillNames(job);
 
     return (
         <div className="space-y-8">
@@ -170,9 +174,42 @@ function RecruiterBriefTab({ job }: { job: Job }) {
                 </div>
             )}
 
+            {/* Required Skills */}
+            {reqSkills.length > 0 && (
+                <div>
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                        Required Skills
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {reqSkills.map((skill) => (
+                            <BaselBadge key={skill} color="primary" variant="soft" size="sm">
+                                {skill}
+                            </BaselBadge>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Preferred Skills */}
+            {prefSkills.length > 0 && (
+                <div>
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                        Nice-to-Have Skills
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {prefSkills.map((skill) => (
+                            <BaselBadge key={skill} variant="outline" size="sm">
+                                {skill}
+                            </BaselBadge>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {!job.recruiter_description &&
                 mandatoryReqs.length === 0 &&
-                preferredReqs.length === 0 && (
+                preferredReqs.length === 0 &&
+                reqSkills.length === 0 && (
                     <div className="text-center py-12 text-base-content/40">
                         <i className="fa-duotone fa-regular fa-file-lines text-3xl mb-3 block" />
                         <p className="text-sm font-semibold">
@@ -656,7 +693,7 @@ export function DetailLoader({
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Job }>(`/jobs/${id}`, {
-                    params: { include: "company,requirements" },
+                    params: { include: "company,requirements,skills" },
                 });
                 if (!signal?.cancelled) setJob(res.data);
             } catch (err) {

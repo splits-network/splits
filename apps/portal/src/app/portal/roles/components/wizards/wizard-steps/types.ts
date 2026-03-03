@@ -12,6 +12,12 @@ export interface PreScreenQuestion {
     disclaimer?: string;
 }
 
+export interface SkillOption {
+    id: string;
+    name: string;
+    slug: string;
+}
+
 export interface FormData {
     // Step 1: Basic Info
     title: string;
@@ -41,6 +47,10 @@ export interface FormData {
     mandatory_requirements: string[];
     preferred_requirements: string[];
 
-    // Step 5: Pre-Screen Questions
+    // Step 5: Skills
+    required_skills: SkillOption[];
+    preferred_skills: SkillOption[];
+
+    // Step 6: Pre-Screen Questions
     pre_screen_questions: PreScreenQuestion[];
 }

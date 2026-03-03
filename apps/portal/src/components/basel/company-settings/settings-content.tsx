@@ -6,6 +6,9 @@ import { useUserProfile } from "@/contexts";
 import { redirect } from "next/navigation";
 import { LoadingState } from "@splits-network/shared-ui";
 import { BaselVerticalTabBar } from "@splits-network/basel-ui";
+import { MiniLeaderboard, AchievementsSection } from "@splits-network/shared-gamification";
+import { useAuth } from "@clerk/nextjs";
+import { createUnauthenticatedClient, createAuthenticatedClient } from "@/lib/api-client";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { CompanyTab } from "./company-tab";
@@ -29,9 +32,14 @@ const NAV_ITEMS = [
         label: "Team",
         icon: "fa-duotone fa-regular fa-users",
     },
+    {
+        value: "achievements",
+        label: "Achievements",
+        icon: "fa-duotone fa-regular fa-trophy",
+    },
 ];
 
-const VALID_TABS = new Set<string>(["company", "billing", "team"]);
+const VALID_TABS = new Set<string>(["company", "billing", "team", "achievements"]);
 
 interface SettingsContentProps {
     company: Company | null;
@@ -44,6 +52,7 @@ export default function BaselSettingsContent({
     companyId,
     organizationId,
 }: SettingsContentProps) {
+    const { getToken } = useAuth();
     const { profile, isLoading, isCompanyUser } = useUserProfile();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -101,7 +110,7 @@ export default function BaselSettingsContent({
             tl.fromTo(
                 $1(".settings-kicker"),
                 { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
+                { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
             )
                 .fromTo(
                     $(".settings-title-word"),
@@ -112,19 +121,20 @@ export default function BaselSettingsContent({
                         rotateX: 0,
                         duration: 0.8,
                         stagger: 0.1,
+                        clearProps: "transform",
                     },
                     "-=0.3",
                 )
                 .fromTo(
                     $1(".settings-desc"),
                     { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
+                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
                     "-=0.4",
                 )
                 .fromTo(
                     $1(".settings-body"),
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
+                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
                     "-=0.2",
                 );
         },
@@ -193,10 +203,24 @@ export default function BaselSettingsContent({
                     {/* Main Panel */}
                     <div className="lg:col-span-4">
                         {activeTab === "company" && (
-                            <CompanyTab
-                                company={company}
-                                organizationId={resolvedOrgId}
-                            />
+                            <>
+                                <CompanyTab
+                                    company={company}
+                                    organizationId={resolvedOrgId}
+                                />
+                                {companyId && (
+                                    <div className="mt-8">
+                                        <MiniLeaderboard
+                                            entityType="company"
+                                            entityId={companyId}
+                                            client={createUnauthenticatedClient()}
+                                            showToggle={false}
+                                            title="Company Rankings"
+                                            fullLeaderboardHref="/portal/leaderboard"
+                                        />
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         {activeTab === "billing" && (
@@ -216,6 +240,25 @@ export default function BaselSettingsContent({
                                     <i className="fa-duotone fa-regular fa-circle-info text-warning" />
                                     Save your company profile first to manage
                                     team members.
+                                </p>
+                            </div>
+                        )}
+
+                        {activeTab === "achievements" && companyId && (
+                            <AchievementsSection
+                                entityId={companyId}
+                                entityType="company"
+                                getToken={getToken}
+                                createClient={createAuthenticatedClient}
+                            />
+                        )}
+
+                        {activeTab === "achievements" && !companyId && (
+                            <div className="bg-warning/5 border border-warning/20 p-6">
+                                <p className="text-sm font-semibold text-base-content flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-circle-info text-warning" />
+                                    Save your company profile first to view
+                                    achievements.
                                 </p>
                             </div>
                         )}

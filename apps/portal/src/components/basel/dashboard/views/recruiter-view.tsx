@@ -1,10 +1,13 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { ModalPortal } from "@splits-network/shared-ui";
 import dynamic from "next/dynamic";
+import RoleWizardModal from "@/app/portal/roles/components/modals/role-wizard-modal";
 import { useRecruiterStats } from "@/app/portal/dashboard/hooks/use-recruiter-stats";
 import { useFunnelData } from "@/app/portal/dashboard/hooks/use-funnel-data";
 import { useCommissionData } from "@/app/portal/dashboard/hooks/use-commission-data";
@@ -116,9 +119,31 @@ const DEFAULT_STAGE = {
 /* ── Component ─────────────────────────────────────────────────────────────── */
 
 export default function RecruiterView() {
-    const { userId } = useAuth();
-    const { profile } = useUserProfile();
+    const { userId, getToken } = useAuth();
+    const { profile, manageableCompanyIds } = useUserProfile();
     const [trendPeriod, setTrendPeriod] = useState(6);
+    const [showAddRoleModal, setShowAddRoleModal] = useState(false);
+    const [canCreateRole, setCanCreateRole] = useState(false);
+
+    useEffect(() => {
+        if (manageableCompanyIds.length > 0) {
+            setCanCreateRole(true);
+            return;
+        }
+        let cancelled = false;
+        async function checkFirm() {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: any[] }>("/firms/my-firms");
+                if (!cancelled && res.data?.length > 0) setCanCreateRole(true);
+            } catch { /* not a firm member */ }
+        }
+        checkFirm();
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [manageableCompanyIds.length]);
 
     /* Data hooks */
     const {
@@ -200,9 +225,18 @@ export default function RecruiterView() {
                                 value={trendPeriod}
                                 onChange={setTrendPeriod}
                             />
+                            {canCreateRole && (
+                                <button
+                                    onClick={() => setShowAddRoleModal(true)}
+                                    className="btn btn-primary btn-sm"
+                                >
+                                    <i className="fa-duotone fa-regular fa-plus" />{" "}
+                                    Create Role
+                                </button>
+                            )}
                             <Link
                                 href="/portal/roles"
-                                className="btn btn-primary btn-sm"
+                                className="btn btn-ghost btn-sm"
                             >
                                 <i className="fa-duotone fa-regular fa-briefcase" />{" "}
                                 Browse Roles
@@ -609,6 +643,17 @@ export default function RecruiterView() {
                     </div>
                 </section>
             </BaselAnimator>
+
+            <ModalPortal>
+                {showAddRoleModal && (
+                    <RoleWizardModal
+                        isOpen={showAddRoleModal}
+                        mode="create"
+                        onClose={() => setShowAddRoleModal(false)}
+                        onSuccess={() => setShowAddRoleModal(false)}
+                    />
+                )}
+            </ModalPortal>
         </div>
     );
 }

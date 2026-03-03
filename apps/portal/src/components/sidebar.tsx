@@ -190,6 +190,13 @@ const navItems: NavItemData[] = [
         shortcut: "P",
     },
     {
+        href: "/portal/leaderboard",
+        label: "Leaderboard",
+        icon: "fa-duotone fa-regular fa-ranking-star",
+        roles: ["recruiter", "company_admin", "hiring_manager", "platform_admin"],
+        section: "management",
+    },
+    {
         href: "/portal/profile",
         label: "Profile",
         icon: "fa-duotone fa-regular fa-user",

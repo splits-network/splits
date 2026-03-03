@@ -1,5 +1,5 @@
 import { LeaderboardRepository } from './repository';
-import { LeaderboardFilters, LeaderboardPeriod } from './types';
+import { LeaderboardEntry, LeaderboardFilters, LeaderboardPeriod } from './types';
 import { BadgeEntityType } from '../badges/definitions/types';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { buildPaginationResponse } from '../shared/pagination';
@@ -19,7 +19,8 @@ export class LeaderboardService {
 
     async getLeaderboard(filters: LeaderboardFilters) {
         const result = await this.repository.getLeaderboard(filters);
-        return buildPaginationResponse(result.data, result.total, filters.page || 1, filters.limit || 25);
+        const enriched = await this.enrichEntries(result.data, filters.entity_type);
+        return buildPaginationResponse(enriched, result.total, filters.page || 1, filters.limit || 25);
     }
 
     async getEntityRank(
@@ -28,7 +29,88 @@ export class LeaderboardService {
         period: LeaderboardPeriod,
         metric: string
     ) {
-        return this.repository.getEntityRank(entityType, entityId, period, metric);
+        const entry = await this.repository.getEntityRank(entityType, entityId, period, metric);
+        if (!entry) return null;
+        const [enriched] = await this.enrichEntries([entry], entityType);
+        return enriched;
+    }
+
+    private async enrichEntries(
+        entries: LeaderboardEntry[],
+        entityType: BadgeEntityType
+    ): Promise<LeaderboardEntry[]> {
+        if (entries.length === 0) return entries;
+
+        const entityIds = entries.map(e => e.entity_id);
+        const nameMap = new Map<string, { display_name: string; avatar_url?: string }>();
+
+        try {
+            if (entityType === 'recruiter') {
+                // Two-step: get user_ids from recruiters, then names from users
+                const { data: recruiters } = await this.supabase
+                    .from('recruiters')
+                    .select('id, user_id')
+                    .in('id', entityIds);
+                const recruiterUserMap = new Map<string, string>();
+                const userIds: string[] = [];
+                for (const r of recruiters || []) {
+                    if (r.user_id) {
+                        recruiterUserMap.set(r.user_id, r.id);
+                        userIds.push(r.user_id);
+                    }
+                }
+                if (userIds.length > 0) {
+                    const { data: users } = await this.supabase
+                        .from('users')
+                        .select('id, name, profile_image_url')
+                        .in('id', userIds);
+                    for (const u of users || []) {
+                        const recruiterId = recruiterUserMap.get(u.id);
+                        if (recruiterId) {
+                            nameMap.set(recruiterId, {
+                                display_name: u.name || 'Recruiter',
+                                avatar_url: u.profile_image_url || undefined,
+                            });
+                        }
+                    }
+                }
+            } else if (entityType === 'candidate') {
+                const { data } = await this.supabase
+                    .from('candidates')
+                    .select('id, full_name')
+                    .in('id', entityIds);
+                for (const row of data || []) {
+                    nameMap.set(row.id, { display_name: row.full_name || 'Candidate' });
+                }
+            } else if (entityType === 'company') {
+                const { data } = await this.supabase
+                    .from('companies')
+                    .select('id, name')
+                    .in('id', entityIds);
+                for (const row of data || []) {
+                    nameMap.set(row.id, { display_name: row.name || 'Company' });
+                }
+            } else if (entityType === 'firm') {
+                const { data } = await this.supabase
+                    .from('firms')
+                    .select('id, name')
+                    .in('id', entityIds);
+                for (const row of data || []) {
+                    nameMap.set(row.id, { display_name: row.name || 'Firm' });
+                }
+            }
+        } catch (err) {
+            this.logger.warn({ err, entityType }, 'Failed to enrich leaderboard entries');
+        }
+
+        return entries.map(entry => {
+            const info = nameMap.get(entry.entity_id);
+            return {
+                ...entry,
+                display_name: info?.display_name,
+                avatar_url: info?.avatar_url,
+            };
+        });
     }
 
     /**

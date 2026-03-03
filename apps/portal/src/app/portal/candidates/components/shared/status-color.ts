@@ -2,6 +2,8 @@
  * Basel status color system for candidates — DaisyUI semantic tokens only.
  */
 
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
+
 export type ViewMode = "table" | "grid" | "split";
 
 /** Verification status → DaisyUI semantic badge/text classes */
@@ -17,6 +19,22 @@ export function statusColor(status?: string | null): string {
             return "bg-error/15 text-error";
         default:
             return "bg-base-content/15 text-base-content/50";
+    }
+}
+
+/** Verification status → BaselSemanticColor name for use with BaselBadge */
+export function statusColorName(status?: string | null): BaselSemanticColor {
+    switch (status) {
+        case "verified":
+            return "success";
+        case "pending":
+            return "warning";
+        case "unverified":
+            return "info";
+        case "rejected":
+            return "error";
+        default:
+            return "neutral";
     }
 }
 

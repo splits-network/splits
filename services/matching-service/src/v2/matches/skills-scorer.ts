@@ -1,9 +1,19 @@
 /**
  * Layer 2: Skills Scoring Engine
  *
- * Matches candidate resume_metadata.skills[] against job_requirements[].description.
+ * Two scoring paths:
+ * 1. Structured: Direct skill-to-skill matching via job_skills ↔ candidate_skills
+ * 2. Legacy: Tokenized matching of resume_metadata.skills[] against job_requirements[].description
+ *
+ * When structured skills are available, they take priority. Legacy is used as fallback.
  * Pure function — no DB calls.
  */
+
+export interface StructuredSkill {
+    id: string;
+    name: string;
+    slug: string;
+}
 
 export interface SkillsScoringInput {
     candidate_skills: Array<{
@@ -15,6 +25,11 @@ export interface SkillsScoringInput {
         description: string;
         requirement_type: 'mandatory' | 'preferred';
     }>;
+    structured_candidate_skills?: StructuredSkill[];
+    structured_job_skills?: Array<{
+        skill: StructuredSkill;
+        is_required: boolean;
+    }>;
 }
 
 export interface SkillsScoringResult {
@@ -23,6 +38,7 @@ export interface SkillsScoringResult {
     missing_mandatory: string[];
     missing_preferred: string[];
     match_pct: number;
+    skills_source: 'structured' | 'legacy';
 }
 
 const NOISE_WORDS = new Set([
@@ -36,10 +52,67 @@ const NOISE_WORDS = new Set([
 ]);
 
 export function computeSkillsScore(input: SkillsScoringInput): SkillsScoringResult {
-    const { candidate_skills, job_requirements } = input;
+    const { candidate_skills, job_requirements, structured_candidate_skills, structured_job_skills } = input;
 
+    // Use structured matching when both sides have structured skills
+    const hasStructuredCandidate = structured_candidate_skills && structured_candidate_skills.length > 0;
+    const hasStructuredJob = structured_job_skills && structured_job_skills.length > 0;
+
+    if (hasStructuredCandidate && hasStructuredJob) {
+        return computeStructuredScore(structured_candidate_skills!, structured_job_skills!);
+    }
+
+    // Fallback: legacy tokenized matching
+    return computeLegacyScore(candidate_skills, job_requirements);
+}
+
+function computeStructuredScore(
+    candidateSkills: StructuredSkill[],
+    jobSkills: Array<{ skill: StructuredSkill; is_required: boolean }>,
+): SkillsScoringResult {
+    if (!candidateSkills.length || !jobSkills.length) {
+        return { score: 50, matched_skills: [], missing_mandatory: [], missing_preferred: [], match_pct: 0, skills_source: 'structured' };
+    }
+
+    const candidateSlugSet = new Set(candidateSkills.map(s => s.slug));
+
+    const required = jobSkills.filter(js => js.is_required);
+    const preferred = jobSkills.filter(js => !js.is_required);
+
+    const requiredMatched = required.filter(js => candidateSlugSet.has(js.skill.slug));
+    const preferredMatched = preferred.filter(js => candidateSlugSet.has(js.skill.slug));
+
+    const requiredScore = required.length > 0
+        ? (requiredMatched.length / required.length) * 60
+        : 30;
+    const preferredScore = preferred.length > 0
+        ? (preferredMatched.length / preferred.length) * 40
+        : 20;
+
+    const matchedNames = [
+        ...requiredMatched.map(js => js.skill.name),
+        ...preferredMatched.map(js => js.skill.name),
+    ];
+
+    const totalSkills = required.length + preferred.length;
+    const totalMatched = requiredMatched.length + preferredMatched.length;
+
+    return {
+        score: Math.round(Math.min(100, requiredScore + preferredScore) * 100) / 100,
+        matched_skills: [...new Set(matchedNames)],
+        missing_mandatory: required.filter(js => !candidateSlugSet.has(js.skill.slug)).map(js => js.skill.name),
+        missing_preferred: preferred.filter(js => !candidateSlugSet.has(js.skill.slug)).map(js => js.skill.name),
+        match_pct: totalSkills > 0 ? Math.round((totalMatched / totalSkills) * 100) : 0,
+        skills_source: 'structured',
+    };
+}
+
+function computeLegacyScore(
+    candidate_skills: SkillsScoringInput['candidate_skills'],
+    job_requirements: SkillsScoringInput['job_requirements'],
+): SkillsScoringResult {
     if (!candidate_skills.length || !job_requirements.length) {
-        return { score: 50, matched_skills: [], missing_mandatory: [], missing_preferred: [], match_pct: 0 };
+        return { score: 50, matched_skills: [], missing_mandatory: [], missing_preferred: [], match_pct: 0, skills_source: 'legacy' };
     }
 
     // Build normalized candidate skill set
@@ -79,6 +152,7 @@ export function computeSkillsScore(input: SkillsScoringInput): SkillsScoringResu
         missing_mandatory: mandatoryResults.filter(r => !r.matched).map(r => r.description),
         missing_preferred: preferredResults.filter(r => !r.matched).map(r => r.description),
         match_pct: totalReqs > 0 ? Math.round((totalMatched / totalReqs) * 100) : 0,
+        skills_source: 'legacy',
     };
 }
 

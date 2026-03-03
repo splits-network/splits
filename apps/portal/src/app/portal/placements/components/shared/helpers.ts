@@ -21,6 +21,16 @@ export function candidateInitials(placement: Placement): string {
         .slice(0, 2);
 }
 
+export function companyInitials(placement: Placement): string {
+    const name = companyName(placement);
+    return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+}
+
 export function jobTitle(placement: Placement): string {
     return placement.job?.title || "Unknown Job";
 }

@@ -6,7 +6,7 @@ import { createAuthenticatedClient, ApiClient } from "@/lib/api-client";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
 import { useToast } from "@/lib/toast-context";
 import type { EntityLevelInfo } from "@splits-network/shared-gamification";
-import { XpLevelBar } from "@splits-network/shared-gamification";
+import { XpLevelBar, MiniLeaderboard, AchievementsSection } from "@splits-network/shared-gamification";
 import { ProfileHeader } from "./profile-header";
 import { ProfileCompletenessCard } from "./profile-completeness-card";
 import { SectionProfile } from "./section-profile";
@@ -15,6 +15,7 @@ import { SectionOnline } from "./section-online";
 import { SectionCareer } from "./section-career";
 import { SectionPrivacy } from "./section-privacy";
 import { SectionConnections } from "./section-connections";
+import SectionSkills from "./section-skills";
 import { CandidateSettings, ProfileSection } from "./types";
 
 const NAV_ITEMS: { id: ProfileSection; label: string; icon: string }[] = [
@@ -35,6 +36,11 @@ const NAV_ITEMS: { id: ProfileSection; label: string; icon: string }[] = [
         icon: "fa-duotone fa-regular fa-briefcase",
     },
     {
+        id: "skills",
+        label: "Skills",
+        icon: "fa-duotone fa-regular fa-tags",
+    },
+    {
         id: "privacy",
         label: "Privacy",
         icon: "fa-duotone fa-regular fa-eye-slash",
@@ -43,6 +49,11 @@ const NAV_ITEMS: { id: ProfileSection; label: string; icon: string }[] = [
         id: "connections",
         label: "Connections",
         icon: "fa-duotone fa-regular fa-plug",
+    },
+    {
+        id: "achievements",
+        label: "Achievements",
+        icon: "fa-duotone fa-regular fa-trophy",
     },
 ];
 
@@ -61,6 +72,7 @@ export function ProfileSettingsShell() {
 
     // Gamification level
     const [level, setLevel] = useState<EntityLevelInfo | null>(null);
+    const [resumeSkills, setResumeSkills] = useState<any[]>([]);
 
     // Name editing
     const [name, setName] = useState("");
@@ -124,6 +136,7 @@ export function ProfileSettingsShell() {
             }
 
             setCandidateId(data.id);
+            setResumeSkills(data.resume_metadata?.skills || []);
             setSettings({
                 id: data.id,
                 phone: data.phone || "",
@@ -317,6 +330,12 @@ export function ProfileSettingsShell() {
                                         onUpdate={updateSettings}
                                     />
                                 )}
+                                {activeSection === "skills" && candidateId && (
+                                    <SectionSkills
+                                        candidateId={candidateId}
+                                        resumeSkills={resumeSkills}
+                                    />
+                                )}
                                 {activeSection === "privacy" && (
                                     <SectionPrivacy
                                         settings={settings}
@@ -326,6 +345,17 @@ export function ProfileSettingsShell() {
                                 {activeSection === "connections" && (
                                     <SectionConnections />
                                 )}
+                                {activeSection === "achievements" &&
+                                    candidateId && (
+                                        <AchievementsSection
+                                            entityId={candidateId}
+                                            entityType="candidate"
+                                            getToken={getToken}
+                                            createClient={
+                                                createAuthenticatedClient
+                                            }
+                                        />
+                                    )}
                             </>
                         )}
                     </div>
@@ -334,6 +364,15 @@ export function ProfileSettingsShell() {
                     <div className="lg:col-span-1 space-y-6">
                         <ProfileCompletenessCard settings={settings} />
                         {level && <XpLevelBar level={level} />}
+                        {candidateId && (
+                            <MiniLeaderboard
+                                entityType="candidate"
+                                entityId={candidateId}
+                                client={new ApiClient()}
+                                showToggle={false}
+                                fullLeaderboardHref="/portal/leaderboard"
+                            />
+                        )}
                     </div>
                 </div>
             </section>

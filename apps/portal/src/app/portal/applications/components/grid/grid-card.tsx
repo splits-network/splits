@@ -3,6 +3,7 @@
 import type { Application } from "../../types";
 import {
     candidateName,
+    candidateInitials,
     roleTitle,
     companyName,
     companyInitials,
@@ -14,14 +15,22 @@ import {
     jobSalaryRange,
     jobEmploymentType,
     recruiterName,
+    submittedDateLabel,
 } from "../shared/helpers";
 import {
     getStageDisplayWithExpired,
-    getAIScoreBadge,
-    getAIScoreColor,
 } from "../shared/status-color";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge } from "@splits-network/basel-ui";
+
+function matchScoreColor(score: number | null): string {
+    if (score == null) return "text-base-content/40";
+    if (score >= 90) return "text-success";
+    if (score >= 70) return "text-primary";
+    if (score >= 50) return "text-warning";
+    return "text-error";
+}
 
 export function GridCard({
     application,
@@ -37,128 +46,151 @@ export function GridCard({
     const { getLevel } = useGamification();
     const companyLevel = application.job?.company?.id ? getLevel(application.job.company.id) : undefined;
     const name = candidateName(application);
+    const initials = candidateInitials(name);
     const role = roleTitle(application);
     const company = companyName(application);
     const score = aiScore(application);
     const stage = getStageDisplayWithExpired(application.stage, (application as any).expired_at);
-    const scoreBadge = getAIScoreBadge(score);
-    const scoreColor = getAIScoreColor(score);
     const headline = candidateHeadline(application);
     const location = jobLocation(application);
     const salary = jobSalaryRange(application);
     const employmentType = jobEmploymentType(application);
     const recruiter = recruiterName(application);
     const cInitials = companyInitials(company);
+    const submittedDate = submittedDateLabel(application);
 
     return (
-        <div
+        <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
-                isSelected ? "border-primary border-l-4" : "border-base-200",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all w-full",
+                isSelected ? "border-l-primary" : "border-l-base-300 hover:border-l-primary/50",
             ].join(" ")}
         >
-            {/* Top row: stage badge + NEW indicator + timestamp */}
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <span
-                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${stage.badge}`}
-                >
-                    <i className={`fa-duotone fa-regular ${stage.icon} mr-1`} />
-                    {stage.label}
-                </span>
-
-                {isNew(application) && (
-                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
-                        <i className="fa-duotone fa-regular fa-sparkles mr-1" />
-                        New
-                    </span>
-                )}
-
-                {/* Timestamp pushed right */}
-                <span className="text-sm uppercase tracking-wider text-base-content/40 ml-auto">
-                    {addedAgo(application)}
-                </span>
-            </div>
-
-            {/* Candidate identity + AI score */}
-            <div className="flex items-start gap-3 mb-3">
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors">
-                        {name}
-                    </h3>
-                    {headline && (
-                        <p className="text-sm text-base-content/50 truncate mt-0.5">
-                            {headline}
-                        </p>
-                    )}
+            {/* Header Band */}
+            <div className="bg-base-300 border-b border-base-300 px-5 pt-5 pb-4">
+                {/* Kicker row: company + status badge + NEW indicator */}
+                <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate mr-2">
+                        {company}
+                    </p>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        {isNew(application) && (
+                            <BaselBadge color="warning" variant="soft" size="sm">New</BaselBadge>
+                        )}
+                        <BaselBadge color={stage.color} variant="soft" size="sm" icon={stage.icon}>
+                            {stage.label}
+                        </BaselBadge>
+                    </div>
                 </div>
 
-                {/* AI Score circle */}
-                {score !== null && (
-                    <div
-                        className={`shrink-0 w-11 h-11 flex flex-col items-center justify-center border-2 ${scoreBadge}`}
-                        title={`AI Fit Score: ${score}%`}
-                    >
-                        <span
-                            className={`text-sm font-black leading-none ${scoreColor}`}
-                        >
-                            {score}
-                        </span>
-                        <span className="text-[8px] uppercase tracking-wider opacity-60 leading-none">
-                            fit
-                        </span>
+                {/* Avatar + Name block */}
+                <div className="flex items-end gap-3">
+                    <div className="relative shrink-0">
+                        <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center text-lg font-black tracking-tight select-none">
+                            {initials}
+                        </div>
                     </div>
-                )}
-            </div>
+                    <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5 truncate">
+                            {role}
+                        </p>
+                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                            {name}
+                        </h3>
+                        {headline && (
+                            <p className="text-sm text-base-content/50 truncate mt-0.5">
+                                {headline}
+                            </p>
+                        )}
+                    </div>
+                </div>
 
-            {/* Role applied for */}
-            <div className="text-sm font-semibold text-base-content/70 mb-1">
-                <i className="fa-duotone fa-regular fa-briefcase mr-1.5 text-base-content/40" />
-                {role}
-            </div>
-
-            {/* Company + location */}
-            <div className="flex items-center gap-1.5 text-sm text-base-content/50 mb-2">
-                <i className="fa-duotone fa-regular fa-building mr-0.5" />
-                <span>{company}</span>
-                {location && (
-                    <>
-                        <span className="text-base-content/30">·</span>
-                        <i className="fa-duotone fa-regular fa-location-dot" />
-                        <span className="truncate">{location}</span>
-                    </>
-                )}
-            </div>
-
-            {/* Salary + employment type */}
-            {(salary || employmentType) && (
-                <div className="flex items-center gap-2 mb-3">
-                    {salary && (
-                        <span className="text-sm font-bold tracking-tight text-primary">
-                            {salary}
+                {/* Submitted by + date row */}
+                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/40">
+                    {recruiter && (
+                        <span className="flex items-center gap-1.5 truncate">
+                            <i className="fa-duotone fa-regular fa-user-tie text-xs" />
+                            {recruiter}
                         </span>
                     )}
-                    {salary && employmentType && (
-                        <span className="text-base-content/30">·</span>
+                    {recruiter && submittedDate && (
+                        <span className="text-base-content/20">|</span>
                     )}
-                    {employmentType && (
-                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-0.5">
-                            {employmentType}
+                    {submittedDate && (
+                        <span className="flex items-center gap-1.5 shrink-0">
+                            <i className="fa-duotone fa-regular fa-calendar text-xs" />
+                            {submittedDate}
                         </span>
                     )}
+                    <span className="text-sm uppercase tracking-wider text-base-content/40 ml-auto shrink-0">
+                        {addedAgo(application)}
+                    </span>
+                </div>
+            </div>
+
+            {/* About snippet — recruiter description of the role */}
+            {(application.job?.recruiter_description || application.job?.description) && (
+                <div className="px-5 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
+                        About
+                    </p>
+                    <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                        {application.job.recruiter_description || application.job.description}
+                    </p>
                 </div>
             )}
 
-            {/* Recruiter attribution */}
-            {recruiter && (
-                <div className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                    <i className="fa-duotone fa-regular fa-user-tie mr-1" />
-                    {recruiter}
+            {/* Stats Row */}
+            <div className="border-b border-base-300">
+                <div className="grid grid-cols-3 divide-x divide-base-300">
+                    {/* AI Fit Score */}
+                    <div className="flex flex-col items-center justify-center px-1.5 py-3.5 gap-1 text-center min-w-0 overflow-hidden">
+                        <i className={`fa-duotone fa-regular fa-bullseye text-sm ${matchScoreColor(score)}`} />
+                        <span className={`text-base font-black leading-none truncate w-full ${matchScoreColor(score)}`}>
+                            {score !== null ? `${score}%` : "--"}
+                        </span>
+                        <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none">
+                            AI Fit
+                        </span>
+                    </div>
+
+                    {/* Salary / Compensation */}
+                    <div className="flex flex-col items-center justify-center px-1.5 py-3.5 gap-1 text-center min-w-0 overflow-hidden">
+                        <i className="fa-duotone fa-regular fa-money-bill text-sm text-primary" />
+                        <span className="text-base font-black text-base-content leading-none truncate w-full">
+                            {salary || "--"}
+                        </span>
+                        <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none">
+                            Salary
+                        </span>
+                    </div>
+
+                    {/* Location */}
+                    <div className="flex flex-col items-center justify-center px-1.5 py-3.5 gap-1 text-center min-w-0 overflow-hidden">
+                        <i className="fa-duotone fa-regular fa-location-dot text-sm text-primary" />
+                        <span className="text-base font-black text-base-content leading-none truncate w-full">
+                            {location || "--"}
+                        </span>
+                        <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none">
+                            Location
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Detail Badges */}
+            {employmentType && (
+                <div className="px-5 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        Details
+                    </p>
+                    <BaselBadge variant="outline" size="sm">{employmentType}</BaselBadge>
                 </div>
             )}
 
             {/* Footer: company avatar left, actions right */}
-            <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-base-200">
+            <div className="mt-auto px-5 py-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 min-w-0">
                     <div className="relative shrink-0">
                         {application.job?.company?.logo_url ? (
@@ -198,6 +230,6 @@ export function GridCard({
                     />
                 </div>
             </div>
-        </div>
+        </article>
     );
 }

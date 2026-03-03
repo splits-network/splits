@@ -1,4 +1,4 @@
-export type SettingsTab = "company" | "billing" | "team";
+export type SettingsTab = "company" | "billing" | "team" | "achievements";
 
 export interface Company {
     id: string;

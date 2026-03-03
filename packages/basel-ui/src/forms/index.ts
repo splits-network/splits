@@ -34,3 +34,8 @@ export {
     type BaselProgressSidebarProps,
     type BaselProgressStep,
 } from './basel-progress-sidebar';
+export {
+    BaselSkillPicker,
+    type BaselSkillPickerProps,
+    type SkillOption,
+} from './basel-skill-picker';

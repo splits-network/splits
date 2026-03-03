@@ -1,4 +1,10 @@
 export {
+    BaselBadge,
+    type BaselBadgeProps,
+    type BaselBadgeVariant,
+    type BaselBadgeSize,
+} from './basel-badge';
+export {
     BaselStatusPill,
     type BaselStatusPillProps,
     type BaselStatusColor,

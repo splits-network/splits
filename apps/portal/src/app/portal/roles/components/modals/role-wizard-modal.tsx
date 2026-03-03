@@ -6,10 +6,12 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { useToast } from "@/lib/toast-context";
 import { MarkdownEditor } from "@splits-network/shared-ui";
+import { StepSkills } from "@/app/portal/roles/components/wizards/wizard-steps/step-skills";
 import type {
     FormData,
     Company,
     PreScreenQuestion,
+    SkillOption,
 } from "@/app/portal/roles/components/wizards/wizard-steps/types";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -19,6 +21,7 @@ const WIZARD_STEPS = [
     { label: "Compensation", icon: "fa-duotone fa-regular fa-money-bill-wave" },
     { label: "Descriptions", icon: "fa-duotone fa-regular fa-file-lines" },
     { label: "Requirements", icon: "fa-duotone fa-regular fa-list-check" },
+    { label: "Skills", icon: "fa-duotone fa-regular fa-tags" },
     {
         label: "Pre-Screen",
         icon: "fa-duotone fa-regular fa-clipboard-question",
@@ -87,6 +90,8 @@ const INITIAL_FORM: FormData = {
     mandatory_requirements: [],
     preferred_requirements: [],
     pre_screen_questions: [],
+    required_skills: [],
+    preferred_skills: [],
 };
 
 // ─── Props ───────────────────────────────────────────────────────────────────
@@ -327,13 +332,16 @@ export default function RoleWizardModal({
     const [companies, setCompanies] = useState<Company[]>([]);
     const [isRecruiterWithCompanyAccess, setIsRecruiterWithCompanyAccess] =
         useState(false);
-    const [userFirmId, setUserFirmId] = useState<string | null>(null);
+    const [userFirms, setUserFirms] = useState<Array<{ id: string; name: string }>>([]);
+    const [roleSource, setRoleSource] = useState<"company" | "firm">("company");
     const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
 
-    // Off-platform is automatic: firm member with no manageable companies
-    const isOffPlatform = isRecruiter && !!userFirmId && !isRecruiterWithCompanyAccess;
+    // Off-platform is driven by user choice (or auto-detected when only firm option exists)
+    const hasFirms = userFirms.length > 0;
+    const hasBothOptions = isRecruiterWithCompanyAccess && hasFirms;
+    const isOffPlatform = isRecruiter && hasFirms && roleSource === "firm";
 
-    const totalSteps = 5;
+    const totalSteps = 6;
 
     // ── Load existing job data (edit mode) ──
 
@@ -393,7 +401,24 @@ export default function RoleWizardModal({
                             options: q.options,
                             disclaimer: q.disclaimer || "",
                         })) || [],
+                    required_skills: [],
+                    preferred_skills: [],
                 });
+
+                // Load job skills
+                try {
+                    const skillsResponse = await client.get<{ data: Array<{ skill_id: string; skill: SkillOption; is_required: boolean }> }>(
+                        `/job-skills?job_id=${jobId}`
+                    );
+                    const jobSkills = skillsResponse.data || [];
+                    setFormData(prev => ({
+                        ...prev,
+                        required_skills: jobSkills.filter(js => js.is_required && js.skill).map(js => js.skill),
+                        preferred_skills: jobSkills.filter(js => !js.is_required && js.skill).map(js => js.skill),
+                    }));
+                } catch (skillsErr) {
+                    console.error("Failed to load job skills:", skillsErr);
+                }
             } catch (err: any) {
                 console.error("Failed to load job:", err);
                 setError("Failed to load job data. Please try again.");
@@ -454,20 +479,21 @@ export default function RoleWizardModal({
 
                     // Check if recruiter is a firm member (enables off-platform jobs)
                     try {
-                        const firmResponse = await client.get<{ data: any }>(
-                            "/firms/my-firm",
+                        const firmsResponse = await client.get<{ data: Array<{ id: string; name: string }> }>(
+                            "/firms/my-firms",
                         );
-                        const firmId = firmResponse.data?.id || null;
-                        setUserFirmId(firmId);
-                        // Auto-set source_firm_id for off-platform (firm member with no company access)
-                        if (firmId && !hasCompanyAccess) {
+                        const firms = (firmsResponse.data || []).map((f) => ({ id: f.id, name: f.name }));
+                        setUserFirms(firms);
+                        // Auto-select role source based on available options
+                        if (firms.length > 0 && !hasCompanyAccess) {
+                            setRoleSource("firm");
                             setFormData((prev) => ({
                                 ...prev,
-                                source_firm_id: firmId,
+                                source_firm_id: firms[0].id,
                             }));
                         }
                     } catch {
-                        setUserFirmId(null);
+                        setUserFirms([]);
                     }
                 } else if (isCompanyUser) {
                     const organizationId = profile?.organization_ids?.[0];
@@ -529,6 +555,7 @@ export default function RoleWizardModal({
         if (isOpen) {
             setCurrentStep(0);
             setError(null);
+            setRoleSource("company");
             setFormData(INITIAL_FORM);
         }
     }, [isOpen]);
@@ -548,6 +575,10 @@ export default function RoleWizardModal({
             }
             if (!formData.company_id && !isOffPlatform) {
                 setError("Please select a company");
+                return;
+            }
+            if (isOffPlatform && !formData.source_firm_id) {
+                setError("Please select a firm");
                 return;
             }
             if (isOffPlatform && !formData.company_name?.trim()) {
@@ -686,6 +717,24 @@ export default function RoleWizardModal({
                 : [...prev.commute_types, value],
         }));
 
+    // ── Skills helpers ──
+
+    const searchSkills = useCallback(async (query: string): Promise<SkillOption[]> => {
+        const token = await getToken();
+        if (!token) return [];
+        const client = createAuthenticatedClient(token);
+        const response = await client.get<{ data: SkillOption[] }>(`/skills?q=${encodeURIComponent(query)}&limit=10`);
+        return response.data || [];
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const createSkill = useCallback(async (name: string): Promise<SkillOption> => {
+        const token = await getToken();
+        if (!token) throw new Error("Authentication required");
+        const client = createAuthenticatedClient(token);
+        const response = await client.post<{ data: SkillOption }>("/skills", { name });
+        return response.data;
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
     // ── Submit ──
 
     const handleSubmit = async () => {
@@ -705,8 +754,8 @@ export default function RoleWizardModal({
                     : formData.fee_percentage,
             };
 
-            if (isOffPlatform && userFirmId) {
-                payload.source_firm_id = userFirmId;
+            if (isOffPlatform && formData.source_firm_id) {
+                payload.source_firm_id = formData.source_firm_id;
                 payload.company_name = formData.company_name?.trim();
             } else {
                 payload.company_id = formData.company_id;
@@ -799,6 +848,17 @@ export default function RoleWizardModal({
                         ),
                     );
                 }
+            }
+
+            // Handle skills
+            const allSkills = [
+                ...formData.required_skills.map(s => ({ skill_id: s.id, is_required: true })),
+                ...formData.preferred_skills.map(s => ({ skill_id: s.id, is_required: false })),
+            ];
+            if (allSkills.length > 0 || mode === "edit") {
+                await client.put(`/job-skills/job/${targetJobId}/bulk-replace`, {
+                    skills: allSkills,
+                });
             }
 
             onClose();
@@ -953,24 +1013,116 @@ export default function RoleWizardModal({
                                             />
                                         </fieldset>
 
-                                        {isOffPlatform ? (
+                                        {/* Role source toggle — only when recruiter has both companies and firms */}
+                                        {hasBothOptions && mode === "create" && (
                                             <fieldset className="fieldset">
                                                 <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
-                                                    Company Name *
+                                                    Creating Role For *
                                                 </legend>
-                                                <input
-                                                    className="input input-bordered w-full"
-                                                    style={{ borderRadius: 0 }}
-                                                    value={formData.company_name || ""}
-                                                    onChange={(e) =>
-                                                        setFormData((prev) => ({
-                                                            ...prev,
-                                                            company_name: e.target.value,
-                                                        }))
-                                                    }
-                                                    placeholder="Enter the company name..."
-                                                />
+                                                <div className="flex bg-base-200 p-1" style={{ borderRadius: 0 }}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setRoleSource("company");
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                source_firm_id: undefined,
+                                                                company_name: undefined,
+                                                            }));
+                                                        }}
+                                                        className={`flex-1 px-3 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
+                                                            roleSource === "company"
+                                                                ? "bg-primary text-primary-content"
+                                                                : "text-base-content/50 hover:text-base-content"
+                                                        }`}
+                                                        style={{ borderRadius: 0 }}
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-building mr-2" />
+                                                        Platform Company
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setRoleSource("firm");
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                company_id: "",
+                                                                source_firm_id: userFirms[0]?.id,
+                                                            }));
+                                                        }}
+                                                        className={`flex-1 px-3 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
+                                                            roleSource === "firm"
+                                                                ? "bg-primary text-primary-content"
+                                                                : "text-base-content/50 hover:text-base-content"
+                                                        }`}
+                                                        style={{ borderRadius: 0 }}
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-users-rectangle mr-2" />
+                                                        Agency (Off-Platform)
+                                                    </button>
+                                                </div>
                                             </fieldset>
+                                        )}
+
+                                        {/* Company/firm selection based on role source */}
+                                        {isOffPlatform ? (
+                                            <>
+                                                {userFirms.length > 1 && (
+                                                    <fieldset className="fieldset">
+                                                        <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
+                                                            Agency *
+                                                        </legend>
+                                                        <select
+                                                            className="select select-bordered w-full"
+                                                            style={{ borderRadius: 0 }}
+                                                            value={formData.source_firm_id || ""}
+                                                            onChange={(e) =>
+                                                                setFormData((prev) => ({
+                                                                    ...prev,
+                                                                    source_firm_id: e.target.value,
+                                                                }))
+                                                            }
+                                                        >
+                                                            {userFirms.map((firm) => (
+                                                                <option key={firm.id} value={firm.id}>
+                                                                    {firm.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </fieldset>
+                                                )}
+                                                {userFirms.length === 1 && (
+                                                    <fieldset className="fieldset">
+                                                        <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
+                                                            Agency
+                                                        </legend>
+                                                        <input
+                                                            className="input input-bordered w-full"
+                                                            style={{ borderRadius: 0 }}
+                                                            value={userFirms[0].name}
+                                                            disabled
+                                                            readOnly
+                                                        />
+                                                    </fieldset>
+                                                )}
+                                                <fieldset className="fieldset">
+                                                    <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
+                                                        Client Company Name *
+                                                    </legend>
+                                                    <input
+                                                        className="input input-bordered w-full"
+                                                        style={{ borderRadius: 0 }}
+                                                        value={formData.company_name || ""}
+                                                        onChange={(e) =>
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                company_name: e.target.value,
+                                                            }))
+                                                        }
+                                                        placeholder="Enter the client company name..."
+                                                    />
+                                                </fieldset>
+                                            </>
                                         ) : showCompanySelect ? (
                                             <fieldset className="fieldset">
                                                 <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
@@ -1558,8 +1710,24 @@ export default function RoleWizardModal({
                                     </div>
                                 )}
 
-                                {/* Step 5: Pre-Screen Questions */}
+                                {/* Step 5: Skills */}
                                 {currentStep === 4 && (
+                                    <StepSkills
+                                        requiredSkills={formData.required_skills}
+                                        preferredSkills={formData.preferred_skills}
+                                        onRequiredChange={(skills) =>
+                                            setFormData((prev) => ({ ...prev, required_skills: skills }))
+                                        }
+                                        onPreferredChange={(skills) =>
+                                            setFormData((prev) => ({ ...prev, preferred_skills: skills }))
+                                        }
+                                        searchFn={searchSkills}
+                                        createFn={createSkill}
+                                    />
+                                )}
+
+                                {/* Step 6: Pre-Screen Questions */}
+                                {currentStep === 5 && (
                                     <div className="space-y-4">
                                         <div
                                             role="alert"

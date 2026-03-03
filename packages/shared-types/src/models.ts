@@ -216,6 +216,34 @@ export interface JobRequirement {
     updated_at: Date;
 }
 
+// Skills domain types
+export interface Skill {
+    id: string;
+    name: string;
+    slug: string;
+    is_approved: boolean;
+    created_by?: string;
+    created_at: string;
+}
+
+export type CandidateSkillSource = 'manual' | 'resume_extraction';
+
+export interface CandidateSkill {
+    candidate_id: string;
+    skill_id: string;
+    skill?: Skill;
+    source: CandidateSkillSource;
+    created_at: string;
+}
+
+export interface JobSkill {
+    job_id: string;
+    skill_id: string;
+    skill?: Skill;
+    is_required: boolean;
+    created_at: string;
+}
+
 export type PreScreenQuestionType = 'text' | 'yes_no' | 'select' | 'multi_select';
 
 export interface JobPreScreenQuestion {

@@ -479,12 +479,29 @@ export class FirmRepository {
             .select('firm_id')
             .eq('recruiter_id', recruiterId)
             .eq('status', 'active')
+            .limit(1)
             .maybeSingle();
 
         if (memberError) throw memberError;
         if (!membership) return null;
 
         return this.findFirm(membership.firm_id);
+    }
+
+    async findFirmsByRecruiterId(recruiterId: string): Promise<any[]> {
+        const { data: memberships, error: memberError } = await this.supabase
+            .from('firm_members')
+            .select('firm_id')
+            .eq('recruiter_id', recruiterId)
+            .eq('status', 'active');
+
+        if (memberError) throw memberError;
+        if (!memberships || memberships.length === 0) return [];
+
+        const firms = await Promise.all(
+            memberships.map((m) => this.findFirm(m.firm_id))
+        );
+        return firms.filter(Boolean);
     }
 
     async transferOwnership(

@@ -119,16 +119,16 @@ export function FirmCardEditorial({ firm }: { firm: FirmCardData }) {
                             return (
                                 <div
                                     key={stat.label}
-                                    className="flex items-center gap-2.5 px-3 py-4"
+                                    className="flex items-center gap-2 px-2 py-4 min-w-0 overflow-hidden"
                                 >
-                                    <div className={`w-8 h-8 flex items-center justify-center shrink-0 ${iconStyle}`}>
+                                    <div className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyle}`}>
                                         <i className={`${stat.icon} text-xs`} />
                                     </div>
-                                    <div>
-                                        <span className="text-lg font-black text-base-content leading-none block">
+                                    <div className="min-w-0">
+                                        <span className="text-sm font-black text-base-content leading-none block truncate">
                                             {stat.value}
                                         </span>
-                                        <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
+                                        <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate block">
                                             {stat.label}
                                         </span>
                                     </div>

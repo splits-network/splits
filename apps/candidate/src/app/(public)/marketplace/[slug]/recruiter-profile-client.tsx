@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useAuth } from "@clerk/nextjs";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
-import { BadgeGrid, LevelBadge } from "@splits-network/shared-gamification";
+import { BadgeGrid, LevelBadge, MiniLeaderboard } from "@splits-network/shared-gamification";
 import { BaselTabBar } from "@splits-network/basel-ui";
 import type { BadgeAward, EntityLevelInfo } from "@splits-network/shared-gamification";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -831,6 +831,16 @@ export default function RecruiterProfileClient({
                             </div>
                             <BadgeGrid badges={badges} />
                         </div>
+
+                        {/* Mini Leaderboard */}
+                        <MiniLeaderboard
+                            entityType="recruiter"
+                            entityId={recruiter.id}
+                            client={new ApiClient()}
+                            showToggle={!!recruiter.specialties?.length}
+                            specialization={recruiter.specialties?.[0]}
+                            fullLeaderboardHref="/portal/leaderboard"
+                        />
 
                         {/* Network Activity card */}
                         <div className="bg-base-200 border border-base-300">

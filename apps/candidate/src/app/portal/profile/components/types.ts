@@ -105,5 +105,7 @@ export type ProfileSection =
     | "marketplace"
     | "online"
     | "career"
+    | "skills"
     | "privacy"
-    | "connections";
+    | "connections"
+    | "achievements";

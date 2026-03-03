@@ -12,7 +12,6 @@
     },
     "dependencies": {
         "@fastify/formbody": "^8.0.2",
-        "@modelcontextprotocol/ext-apps": "^1.1.1",
         "@modelcontextprotocol/sdk": "^1.12.1",
         "@splits-network/shared-access-context": "workspace:*",
         "@splits-network/shared-config": "workspace:*",

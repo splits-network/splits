@@ -94,10 +94,17 @@ export {
     BaselProgressSidebar,
     type BaselProgressSidebarProps,
     type BaselProgressStep,
+    BaselSkillPicker,
+    type BaselSkillPickerProps,
+    type SkillOption,
 } from './forms';
 
 // Display components
 export {
+    BaselBadge,
+    type BaselBadgeProps,
+    type BaselBadgeVariant,
+    type BaselBadgeSize,
     BaselStatusPill,
     type BaselStatusPillProps,
     type BaselStatusColor,

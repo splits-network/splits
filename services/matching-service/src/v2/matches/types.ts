@@ -31,6 +31,7 @@ export interface MatchFactors {
     skills_matched: string[];
     skills_missing: string[];
     skills_match_pct: number;
+    skills_source?: 'structured' | 'legacy';
     ai_summary?: string;
     cosine_similarity?: number;
 }

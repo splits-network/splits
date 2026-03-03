@@ -381,6 +381,13 @@ export class FirmServiceV2 {
         return this.repository.findFirmByRecruiterId(recruiter.id);
     }
 
+    async getMyFirms(clerkUserId: string): Promise<any[]> {
+        const internalUserId = await this.repository.resolveInternalUserId(clerkUserId);
+        const recruiter = await this.repository.getRecruiterByUserId(internalUserId);
+        if (!recruiter) return [];
+        return this.repository.findFirmsByRecruiterId(recruiter.id);
+    }
+
     // ── Private helpers ──
 
     private async requireFirmAdmin(firmId: string, clerkUserId: string): Promise<void> {

@@ -75,21 +75,21 @@ export default function RolesPage() {
     const [isFirmMember, setIsFirmMember] = useState(false);
 
     useEffect(() => {
-        if (!isRecruiter || manageableCompanyIds.length > 0) return;
+        if (!isRecruiter) return;
         let cancelled = false;
         async function checkFirm() {
             try {
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: any }>("/firms/my-firm");
-                if (!cancelled && res.data?.id) setIsFirmMember(true);
+                const res = await client.get<{ data: any[] }>("/firms/my-firms");
+                if (!cancelled && res.data?.length > 0) setIsFirmMember(true);
             } catch { /* not a firm member */ }
         }
         checkFirm();
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isRecruiter, manageableCompanyIds.length]);
+    }, [isRecruiter]);
 
     const canCreateRole =
         isAdmin ||

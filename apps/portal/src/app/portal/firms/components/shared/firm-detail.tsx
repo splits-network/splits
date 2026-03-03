@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
+import { createAuthenticatedClient, createUnauthenticatedClient } from "@/lib/api-client";
 import type { Firm, FirmMember, FirmInvitation } from "../../types";
 import { formatCurrency, formatDate } from "../../types";
 import { statusColor } from "./status-color";
 import { formatStatus, memberCountDisplay } from "./helpers";
 import { FirmActionsToolbar } from "./actions-toolbar";
-import { LevelBadge, BadgeGrid, useGamification } from "@splits-network/shared-gamification";
+import { LevelBadge, BadgeGrid, MiniLeaderboard, useGamification } from "@splits-network/shared-gamification";
 import { BaselTabBar } from "@splits-network/basel-ui";
 import { MembersSection } from "../detail/members-section";
 import { BillingSection } from "../detail/billing-section";
@@ -131,6 +131,17 @@ export function FirmDetail({
                     <BadgeGrid badges={badges} maxVisible={6} />
                 </div>
             )}
+
+            {/* Firm Leaderboard */}
+            <div className="px-6 py-4 border-b border-base-300">
+                <MiniLeaderboard
+                    entityType="recruiter"
+                    entityId={undefined}
+                    client={createUnauthenticatedClient()}
+                    title="Top Recruiters"
+                    fullLeaderboardHref="/portal/leaderboard"
+                />
+            </div>
 
             {/* Tab bar */}
             <BaselTabBar
