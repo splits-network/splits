@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 22 of 27 (Schema & Types)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-03-03 — Roadmap created for v7.0 (6 phases, 14 plans, 31 requirements)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-03 — Completed 22-01-PLAN.md (migration for new tables, columns, RLS)
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (1/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -33,6 +33,11 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
 See .planning/PROJECT.md Key Decisions table for full cumulative list.
 v7.0 decisions: tech stack reuses skills, perks/culture as lookups, stage as enum, computed stats.
 
+| Tech stack reuses skills table | company_skills junction reuses skills; enables cross-entity skill matching | Confirmed in migration |
+| Perks as new lookup table | slug deduplication + trigram typeahead, mirrors skills pattern | Confirmed in migration |
+| Culture tags as new lookup table | same pattern as perks, open-ended culture descriptors | Confirmed in migration |
+| Stage as constrained TEXT | CHECK constraint (8 values) consistent with v4.0 commute_types/job_level approach | Confirmed in migration |
+
 ### Pending Todos
 
 None.
@@ -43,10 +48,10 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-03
-Stopped at: Roadmap created for v7.0
+Last session: 2026-03-03T22:41:47Z
+Stopped at: Completed 22-01-PLAN.md
 Resume file: None
-Next: `/gsd:plan-phase 22`
+Next: Execute 22-02-PLAN.md (TypeScript types in shared-types)
 
 ---
 *Created: 2026-02-12*
