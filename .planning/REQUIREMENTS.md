@@ -85,17 +85,57 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| SCHEMA-01 | Phase 22 | Pending |
+| SCHEMA-02 | Phase 22 | Pending |
+| SCHEMA-03 | Phase 22 | Pending |
+| SCHEMA-04 | Phase 22 | Pending |
+| SCHEMA-05 | Phase 22 | Pending |
+| SCHEMA-06 | Phase 22 | Pending |
+| SCHEMA-07 | Phase 22 | Pending |
+| SCHEMA-08 | Phase 22 | Pending |
+| SCHEMA-09 | Phase 22 | Pending |
+| SCHEMA-10 | Phase 22 | Pending |
+| SCHEMA-11 | Phase 22 | Pending |
+| API-01 | Phase 23 | Pending |
+| API-02 | Phase 23 | Pending |
+| API-03 | Phase 23 | Pending |
+| API-04 | Phase 23 | Pending |
+| API-05 | Phase 23 | Pending |
+| API-06 | Phase 23 | Pending |
+| API-07 | Phase 23 | Pending |
+| API-08 | Phase 23 | Pending |
+| API-09 | Phase 23 | Pending |
+| API-10 | Phase 23 | Pending |
+| API-11 | Phase 24 | Pending |
+| API-12 | Phase 24 | Pending |
+| API-13 | Phase 24 | Pending |
+| API-14 | Phase 24 | Pending |
+| UI-01 | Phase 25 | Pending |
+| UI-02 | Phase 25 | Pending |
+| UI-03 | Phase 25 | Pending |
+| UI-04 | Phase 25 | Pending |
+| UI-05 | Phase 25 | Pending |
+| UI-06 | Phase 25 | Pending |
+| UI-07 | Phase 25 | Pending |
+| UI-08 | Phase 26 | Pending |
+| UI-09 | Phase 26 | Pending |
+| UI-10 | Phase 26 | Pending |
+| UI-11 | Phase 26 | Pending |
+| UI-12 | Phase 26 | Pending |
+| UI-13 | Phase 26 | Pending |
+| SRCH-01 | Phase 27 | Pending |
+| SRCH-02 | Phase 27 | Pending |
+| SRCH-03 | Phase 27 | Pending |
+| SRCH-04 | Phase 27 | Pending |
+| SRCH-05 | Phase 27 | Pending |
 
 **Coverage:**
 - v7.0 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 after roadmap creation*
