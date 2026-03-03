@@ -36,6 +36,9 @@ import { registerAdminAtsRoutes } from './admin/routes';
 import { SkillRepository } from './skills/repository';
 import { SkillService } from './skills/service';
 import { registerSkillRoutes } from './skills/routes';
+import { PerkRepository } from './perks/repository';
+import { PerkService } from './perks/service';
+import { registerPerkRoutes } from './perks/routes';
 import { CandidateSkillRepository } from './candidate-skills/repository';
 import { CandidateSkillService } from './candidate-skills/service';
 import { registerCandidateSkillRoutes } from './candidate-skills/routes';
@@ -122,6 +125,10 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     const jobSkillRepository = new JobSkillRepository(jobRepository.getSupabase());
     const jobSkillService = new JobSkillService(jobSkillRepository);
     registerJobSkillRoutes(app, { service: jobSkillService });
+
+    const perkRepository = new PerkRepository(config.supabaseUrl, config.supabaseKey);
+    const perkService = new PerkService(perkRepository, perkRepository.getSupabase());
+    registerPerkRoutes(app, { service: perkService });
 
     // Admin routes (permissive, no access filtering)
     const adminRepository = new AdminAtsRepository(config.supabaseUrl, config.supabaseKey);
