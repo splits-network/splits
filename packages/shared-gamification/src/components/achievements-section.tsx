@@ -1,22 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { useUserProfile } from "@/contexts";
-import { createAuthenticatedClient } from "@/lib/api-client";
-import {
-    BadgeGrid,
-    BadgeProgressCard,
-    XpLevelBar,
-    StreakIndicator,
-} from "@splits-network/shared-gamification";
 import type {
     BadgeAward,
     BadgeProgressItem,
     EntityLevelInfo,
     EntityStreakInfo,
-} from "@splits-network/shared-gamification";
-import { LoadingState } from "@splits-network/shared-ui";
+} from "../types";
+import { BadgeGrid } from "./badge-grid";
+import { BadgeProgressCard } from "./badge-progress-card";
+import { XpLevelBar } from "./xp-level-bar";
+import { StreakIndicator } from "./streak-indicator";
+
+/* ─── Types ──────────────────────────────────────────────────────────────── */
+
+interface FetchClient {
+    get<T = any>(
+        endpoint: string,
+        options?: { params?: Record<string, any> },
+    ): Promise<T>;
+}
 
 interface XpHistoryEntry {
     id: string;
@@ -24,6 +27,13 @@ interface XpHistoryEntry {
     points: number;
     description: string | null;
     created_at: string;
+}
+
+interface AchievementsSectionProps {
+    entityId: string;
+    entityType: "recruiter" | "candidate" | "company";
+    getToken: () => Promise<string | null>;
+    createClient: (token: string) => FetchClient;
 }
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -40,10 +50,14 @@ const SOURCE_LABELS: Record<string, string> = {
     milestone_bonus: "Milestone Bonus",
 };
 
-export default function AchievementsClient() {
-    const { getToken } = useAuth();
-    const { profile, isLoading: profileLoading } = useUserProfile();
+/* ─── Component ──────────────────────────────────────────────────────────── */
 
+export function AchievementsSection({
+    entityId,
+    entityType,
+    getToken,
+    createClient,
+}: AchievementsSectionProps) {
     const [badges, setBadges] = useState<BadgeAward[]>([]);
     const [progress, setProgress] = useState<BadgeProgressItem[]>([]);
     const [level, setLevel] = useState<EntityLevelInfo | null>(null);
@@ -51,120 +65,143 @@ export default function AchievementsClient() {
     const [xpHistory, setXpHistory] = useState<XpHistoryEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const entityId = profile?.candidate_id;
-    const entityType = "candidate";
-
     useEffect(() => {
-        if (!entityId) return;
         let cancelled = false;
 
         async function fetchAll() {
             try {
                 const token = await getToken();
                 if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const params = { entity_type: entityType, entity_id: entityId };
+                const client = createClient(token);
+                const params = {
+                    entity_type: entityType,
+                    entity_id: entityId,
+                };
 
                 const [badgeRes, progressRes, levelRes, streakRes, xpRes] =
                     await Promise.allSettled([
-                        client.get<{ data: BadgeAward[] }>("/badges/awards", { params }),
-                        client.get<{ data: BadgeProgressItem[] }>("/badges/progress", { params }),
-                        client.get<{ data: EntityLevelInfo }>("/xp/level", { params }),
-                        client.get<{ data: EntityStreakInfo[] }>("/streaks", { params }),
-                        client.get<{ data: XpHistoryEntry[] }>("/xp/history", { params: { ...params, limit: 20 } }),
+                        client.get<{ data: BadgeAward[] }>("/badges/awards", {
+                            params,
+                        }),
+                        client.get<{ data: BadgeProgressItem[] }>(
+                            "/badges/progress",
+                            { params },
+                        ),
+                        client.get<{ data: EntityLevelInfo }>("/xp/level", {
+                            params,
+                        }),
+                        client.get<{ data: EntityStreakInfo[] }>("/streaks", {
+                            params,
+                        }),
+                        client.get<{ data: XpHistoryEntry[] }>("/xp/history", {
+                            params: { ...params, limit: 20 },
+                        }),
                     ]);
 
                 if (cancelled) return;
 
-                if (badgeRes.status === "fulfilled" && badgeRes.value?.data) {
+                if (
+                    badgeRes.status === "fulfilled" &&
+                    badgeRes.value?.data
+                ) {
                     setBadges(badgeRes.value.data);
                 }
-                if (progressRes.status === "fulfilled" && progressRes.value?.data) {
+                if (
+                    progressRes.status === "fulfilled" &&
+                    progressRes.value?.data
+                ) {
                     setProgress(progressRes.value.data);
                 }
-                if (levelRes.status === "fulfilled" && levelRes.value?.data) {
+                if (
+                    levelRes.status === "fulfilled" &&
+                    levelRes.value?.data
+                ) {
                     setLevel(levelRes.value.data);
                 }
-                if (streakRes.status === "fulfilled" && streakRes.value?.data) {
+                if (
+                    streakRes.status === "fulfilled" &&
+                    streakRes.value?.data
+                ) {
                     setStreaks(streakRes.value.data);
                 }
-                if (xpRes.status === "fulfilled" && xpRes.value?.data) {
+                if (
+                    xpRes.status === "fulfilled" &&
+                    xpRes.value?.data
+                ) {
                     setXpHistory(xpRes.value.data);
                 }
             } catch {
-                // Non-critical
+                // Non-critical — graceful degradation
             } finally {
                 if (!cancelled) setLoading(false);
             }
         }
 
         fetchAll();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [entityId]);
+    }, [entityId, entityType]);
 
-    if (profileLoading || loading) {
+    if (loading) {
         return (
-            <div className="p-8">
-                <LoadingState message="Loading achievements..." />
-            </div>
-        );
-    }
-
-    if (!entityId) {
-        return (
-            <div className="p-8 text-center">
-                <i className="fa-duotone fa-regular fa-trophy text-4xl text-base-content/20 mb-4" />
-                <p className="text-base font-semibold text-base-content/50">
-                    Complete your profile to start earning achievements.
-                </p>
+            <div className="flex items-center justify-center py-16">
+                <span className="loading loading-spinner loading-lg text-primary" />
             </div>
         );
     }
 
     return (
-        <div className="max-w-5xl mx-auto p-6 space-y-8">
-            {/* Header */}
-            <div>
-                <h1 className="text-3xl font-black tracking-tight mb-1">Achievements</h1>
-                <p className="text-sm font-semibold text-base-content/50">
-                    Track your progress, earn badges, and level up on the network.
+        <div className="space-y-8">
+            {/* Section header */}
+            <div className="border-l-4 border-primary pl-4">
+                <p className="text-sm font-bold uppercase tracking-widest text-primary mb-1">
+                    Progress
+                </p>
+                <h2 className="text-2xl font-black tracking-tight">
+                    Achievements
+                </h2>
+                <p className="text-sm text-base-content/50 mt-1">
+                    Track your progress, earn badges, and level up on the
+                    network.
                 </p>
             </div>
 
-            {/* Level + Streaks row */}
+            {/* Level + Streaks */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Level card */}
-                <div className="bg-base-200 border border-base-300 p-6">
+                <div className="border-l-4 border-secondary bg-base-200 border-y border-r border-base-300 p-6">
+                    <p className="text-sm font-bold uppercase tracking-widest text-secondary mb-3">
+                        Level
+                    </p>
                     {level ? (
                         <XpLevelBar level={level} />
                     ) : (
-                        <div className="text-center py-4">
-                            <p className="text-sm text-base-content/40">No level data yet</p>
-                        </div>
+                        <p className="text-sm text-base-content/40">
+                            No level data yet
+                        </p>
                     )}
                 </div>
 
-                {/* Streaks card */}
-                <div className="bg-base-200 border border-base-300 p-6">
-                    <div className="flex items-center gap-2 mb-4">
+                <div className="border-l-4 border-warning bg-base-200 border-y border-r border-base-300 p-6">
+                    <div className="flex items-center gap-2 mb-3">
                         <i className="fa-duotone fa-regular fa-fire text-warning" />
-                        <span className="text-sm font-black uppercase tracking-wider text-base-content/60">
+                        <p className="text-sm font-bold uppercase tracking-widest text-warning">
                             Active Streaks
-                        </span>
+                        </p>
                     </div>
                     {streaks.length > 0 ? (
                         <StreakIndicator streaks={streaks} />
                     ) : (
                         <p className="text-sm text-base-content/40">
-                            No active streaks. Stay consistent to build streaks!
+                            No active streaks. Stay consistent to build streaks.
                         </p>
                     )}
                 </div>
             </div>
 
             {/* Earned Badges */}
-            <div className="bg-base-200 border border-base-300">
+            <div className="border-l-4 border-primary bg-base-200 border-y border-r border-base-300">
                 <div className="px-6 py-4 border-b border-base-300 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <i className="fa-duotone fa-regular fa-trophy text-primary" />
@@ -207,19 +244,26 @@ export default function AchievementsClient() {
                             Recent XP
                         </span>
                     </div>
-                    <div className="bg-base-200 border border-base-300 divide-y divide-base-300">
+                    <div className="border-l-4 border-accent bg-base-200 border-y border-r border-base-300 divide-y divide-base-300">
                         {xpHistory.map((entry) => (
-                            <div key={entry.id} className="flex items-center justify-between px-5 py-3">
+                            <div
+                                key={entry.id}
+                                className="flex items-center justify-between px-5 py-3"
+                            >
                                 <div className="flex items-center gap-3">
                                     <span className="text-sm font-bold text-primary">
                                         +{entry.points}
                                     </span>
                                     <span className="text-sm font-semibold text-base-content/70">
-                                        {entry.description || SOURCE_LABELS[entry.source] || entry.source}
+                                        {entry.description ||
+                                            SOURCE_LABELS[entry.source] ||
+                                            entry.source}
                                     </span>
                                 </div>
                                 <span className="text-sm text-base-content/40">
-                                    {new Date(entry.created_at).toLocaleDateString()}
+                                    {new Date(
+                                        entry.created_at,
+                                    ).toLocaleDateString()}
                                 </span>
                             </div>
                         ))}

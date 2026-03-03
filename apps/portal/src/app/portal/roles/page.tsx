@@ -11,6 +11,7 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
+import { useGamification } from "@splits-network/shared-gamification";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Job, UnifiedJobFilters } from "./types";
@@ -74,21 +75,21 @@ export default function RolesPage() {
     const [isFirmMember, setIsFirmMember] = useState(false);
 
     useEffect(() => {
-        if (!isRecruiter || manageableCompanyIds.length > 0) return;
+        if (!isRecruiter) return;
         let cancelled = false;
         async function checkFirm() {
             try {
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: any }>("/firms/my-firm");
-                if (!cancelled && res.data?.id) setIsFirmMember(true);
+                const res = await client.get<{ data: any[] }>("/firms/my-firms");
+                if (!cancelled && res.data?.length > 0) setIsFirmMember(true);
             } catch { /* not a firm member */ }
         }
         checkFirm();
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isRecruiter, manageableCompanyIds.length]);
+    }, [isRecruiter]);
 
     const canCreateRole =
         isAdmin ||
@@ -125,6 +126,17 @@ export default function RolesPage() {
         syncToUrl: true,
         include: "company",
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const companyIds = jobs
+            .map((j) => j.company_id)
+            .filter((id): id is string => !!id);
+        if (companyIds.length > 0) {
+            registerEntities("company", [...new Set(companyIds)]);
+        }
+    }, [jobs, registerEntities]);
 
     const handleSelect = useCallback((job: Job) => {
         setSelectedJobId((prev) => (prev === job.id ? null : job.id));

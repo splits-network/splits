@@ -3,6 +3,8 @@
 import Link from "next/link";
 import type { PublicFirm } from "../types";
 import { firmLocation } from "../types";
+import { MiniLeaderboard } from "@splits-network/shared-gamification";
+import { createUnauthenticatedClient } from "@/lib/api-client";
 
 interface SidebarProps {
     firm: PublicFirm;
@@ -82,6 +84,16 @@ export default function Sidebar({ firm }: SidebarProps) {
                     <i className="fa-duotone fa-regular fa-flag text-2xl text-base-content/15 mb-2 block" />
                     <p className="text-sm text-base-content/40">Coming Soon</p>
                 </div>
+            </div>
+
+            {/* Leaderboard card */}
+            <div className="sidebar-card opacity-0">
+                <MiniLeaderboard
+                    entityType="recruiter"
+                    client={createUnauthenticatedClient()}
+                    title="Top Recruiters"
+                    fullLeaderboardHref="/portal/leaderboard"
+                />
             </div>
 
             {/* Markets Served card */}

@@ -54,6 +54,24 @@ const ATS_RESOURCES: ResourceDefinition[] = [
         basePath: '/saved-jobs',
         tag: 'saved-jobs',
     },
+    {
+        name: 'skills',
+        service: 'ats',
+        basePath: '/skills',
+        tag: 'skills',
+    },
+    {
+        name: 'candidate-skills',
+        service: 'ats',
+        basePath: '/candidate-skills',
+        tag: 'candidate-skills',
+    },
+    {
+        name: 'job-skills',
+        service: 'ats',
+        basePath: '/job-skills',
+        tag: 'job-skills',
+    },
 ];
 
 export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistry) {
@@ -61,6 +79,7 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     registerCompanyContactRoutes(app, services);
     registerTerminationRoutes(app, services);
     registerBulkReplaceRoutes(app, services);
+    registerSkillDeleteRoutes(app, services);
 
     // Register standard CRUD routes for most resources (excluding jobs and candidates)
     ATS_RESOURCES.filter(r => r.name !== 'candidates' && r.name !== 'jobs').forEach(resource =>
@@ -88,6 +107,72 @@ function registerBulkReplaceRoutes(app: FastifyInstance, services: ServiceRegist
             const data = await atsService().put(
                 `/api/v2/job-requirements/job/${jobId}/bulk-replace`,
                 request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.put(
+        '/api/v2/candidate-skills/candidate/:candidateId/bulk-replace',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { candidateId } = request.params as { candidateId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().put(
+                `/api/v2/candidate-skills/candidate/${candidateId}/bulk-replace`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.put(
+        '/api/v2/job-skills/job/:jobId/bulk-replace',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { jobId } = request.params as { jobId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().put(
+                `/api/v2/job-skills/job/${jobId}/bulk-replace`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+}
+
+function registerSkillDeleteRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const atsService = () => services.get('ats');
+
+    app.delete(
+        '/api/v2/candidate-skills/:candidateId/:skillId',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { candidateId, skillId } = request.params as { candidateId: string; skillId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().delete(
+                `/api/v2/candidate-skills/${candidateId}/${skillId}`,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.delete(
+        '/api/v2/job-skills/:jobId/:skillId',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { jobId, skillId } = request.params as { jobId: string; skillId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().delete(
+                `/api/v2/job-skills/${jobId}/${skillId}`,
                 correlationId,
                 buildAuthHeaders(request)
             );

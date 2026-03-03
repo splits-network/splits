@@ -1,7 +1,7 @@
 "use client";
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName } from "../shared/status-color";
 import {
     companyName,
     companyInitials,
@@ -14,7 +14,9 @@ import {
     formatStatus,
 } from "../shared/helpers";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge } from "@splits-network/basel-ui";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
+import { MarketplaceStats, RelationshipStats } from "./grid-card-stats";
 
 export function GridCard({
     item,
@@ -38,91 +40,103 @@ export function GridCard({
     const { getLevel } = useGamification();
     const level = getLevel(companyId(item, isMarketplace));
 
+    const initials = companyInitials(name);
+
     return (
-        <div
+        <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
-                isSelected ? "border-primary border-l-4" : "border-base-200",
+                "group cursor-pointer bg-base-100 border border-base-300 border-l-4 transition-all",
+                isSelected
+                    ? "border-l-primary shadow-md"
+                    : "border-l-base-300 hover:border-l-primary/50 hover:shadow-md",
             ].join(" ")}
         >
-            {/* Company avatar + name */}
-            <div className="flex items-center gap-3 mb-3">
-                <div className="relative shrink-0">
-                    {company.logo_url ? (
-                        <img
-                            src={company.logo_url}
-                            alt={name}
-                            className="w-10 h-10 object-contain bg-base-200 border border-base-300 p-1"
-                        />
-                    ) : (
-                        <div className="w-10 h-10 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
-                            {companyInitials(name)}
-                        </div>
-                    )}
-                    {level && (
-                        <div className="absolute -bottom-1 -right-1">
-                            <LevelBadge level={level} size="sm" />
-                        </div>
+            {/* Header Band */}
+            <div className="bg-base-300 border-b border-base-300 px-5 pt-5 pb-4">
+                {/* Kicker row: industry + status/hiring badge */}
+                <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate">
+                        {industry || "Company"}
+                    </p>
+                    {relationship && (
+                        <BaselBadge color={statusColorName(relationship.status)} size="sm" className="shrink-0">
+                            {formatStatus(relationship.status)}
+                        </BaselBadge>
                     )}
                 </div>
-                <div className="min-w-0">
-                    <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors truncate">
-                        {name}
-                    </h3>
-                    {industry && (
-                        <div className="text-sm font-semibold text-base-content/60">
-                            {industry}
-                        </div>
+
+                {/* Avatar + Name block */}
+                <div className="flex items-end gap-3">
+                    <div className="relative shrink-0">
+                        {company.logo_url ? (
+                            <img
+                                src={company.logo_url}
+                                alt={name}
+                                className="w-14 h-14 object-contain bg-base-100"
+                            />
+                        ) : (
+                            <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center text-lg font-black tracking-tight select-none">
+                                {initials}
+                            </div>
+                        )}
+                        {level && (
+                            <div className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={level} size="sm" />
+                            </div>
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
+                            Company
+                        </p>
+                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                            {name}
+                        </h3>
+                    </div>
+                </div>
+
+                {/* Location + added date */}
+                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/40">
+                    {location && (
+                        <span className="flex items-center gap-1.5 truncate">
+                            <i className="fa-duotone fa-regular fa-location-dot text-xs" />
+                            {location}
+                        </span>
                     )}
+                    {location && (
+                        <span className="text-base-content/20">|</span>
+                    )}
+                    <span className="flex items-center gap-1.5 shrink-0">
+                        <i className="fa-duotone fa-regular fa-clock text-xs" />
+                        {addedAgo(item)}
+                    </span>
                 </div>
             </div>
 
-            {/* Location */}
-            {location && (
-                <div className="flex items-center gap-1 text-sm text-base-content/50 mb-3">
-                    <i className="fa-duotone fa-regular fa-location-dot" />
-                    {location}
+            {/* Description (marketplace only, when available) */}
+            {isMarketplace && (item as Company).description && (
+                <div className="px-5 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
+                        About
+                    </p>
+                    <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                        {(item as Company).description}
+                    </p>
                 </div>
             )}
 
-            {/* Size or relationship info */}
-            <div className="flex items-center justify-between mb-3">
+            {/* Stats Row */}
+            <div className="border-b border-base-300">
                 {isMarketplace ? (
-                    <span className="text-sm font-black text-base-content">
-                        {(item as Company).company_size || "Size N/A"}
-                    </span>
+                    <MarketplaceStats company={item as Company} />
                 ) : (
-                    <span className="text-sm font-bold text-base-content capitalize">
-                        {relationship?.relationship_type || "---"}
-                    </span>
-                )}
-                {relationship && (
-                    <span
-                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(relationship.status)}`}
-                    >
-                        {formatStatus(relationship.status)}
-                    </span>
+                    <RelationshipStats relationship={relationship!} />
                 )}
             </div>
 
-            {/* Manage jobs badge */}
-            {!isMarketplace && relationship && (
-                <div className="flex items-center gap-3 mb-3">
-                    <span className="text-sm font-bold text-secondary">
-                        <i className="fa-duotone fa-regular fa-shield-check mr-1" />
-                        {relationship.can_manage_company_jobs
-                            ? "Can manage jobs"
-                            : "View only"}
-                    </span>
-                </div>
-            )}
-
-            {/* Footer */}
-            <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-base-200">
-                <span className="text-sm text-base-content/40">
-                    Added {addedAgo(item)}
-                </span>
+            {/* Footer: actions toolbar */}
+            <div className="px-5 py-3 flex items-center justify-end">
                 <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                     <CompanyActionsToolbar
                         company={company}
@@ -133,6 +147,6 @@ export function GridCard({
                     />
                 </div>
             </div>
-        </div>
+        </article>
     );
 }

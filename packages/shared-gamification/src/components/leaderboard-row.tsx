@@ -15,8 +15,17 @@ const RANK_STYLES: Record<number, string> = {
     3: "text-accent font-black",
 };
 
+function getInitials(name: string): string {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    return (parts[0]?.slice(0, 2) || "??").toUpperCase();
+}
+
 export function LeaderboardRow({ entry, isCurrentUser, displayName, avatarUrl }: LeaderboardRowProps) {
     const rankStyle = RANK_STYLES[entry.rank] || "text-base-content/40 font-bold";
+    const name = displayName || entry.display_name || "Anonymous";
+    const avatar = avatarUrl || entry.avatar_url;
+    const initials = getInitials(name);
 
     return (
         <div
@@ -32,15 +41,15 @@ export function LeaderboardRow({ entry, isCurrentUser, displayName, avatarUrl }:
                 )}
             </span>
             <div className="flex items-center gap-3 flex-1 min-w-0">
-                {avatarUrl ? (
-                    <img src={avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
+                {avatar ? (
+                    <img src={avatar} alt="" className="w-8 h-8 rounded-none object-cover" />
                 ) : (
-                    <div className="w-8 h-8 rounded-full bg-base-300 flex items-center justify-center">
-                        <i className="fa-duotone fa-regular fa-user text-base-content/30 text-sm" />
+                    <div className="w-8 h-8 rounded-none bg-base-300 flex items-center justify-center">
+                        <span className="text-sm font-bold text-base-content/50">{initials}</span>
                     </div>
                 )}
                 <span className={`text-sm font-bold truncate ${isCurrentUser ? "text-primary" : "text-base-content"}`}>
-                    {displayName || "Anonymous"}
+                    {name}
                 </span>
             </div>
             <span className="text-sm font-black text-base-content/60">

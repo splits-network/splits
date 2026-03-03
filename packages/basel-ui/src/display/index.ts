@@ -1,4 +1,10 @@
 export {
+    BaselBadge,
+    type BaselBadgeProps,
+    type BaselBadgeVariant,
+    type BaselBadgeSize,
+} from './basel-badge';
+export {
     BaselStatusPill,
     type BaselStatusPillProps,
     type BaselStatusColor,
@@ -18,6 +24,10 @@ export {
     type BaselTabBarProps,
     type BaselTab,
 } from './basel-tab-bar';
+export {
+    BaselVerticalTabBar,
+    type BaselVerticalTabBarProps,
+} from './basel-vertical-tab-bar';
 export {
     BaselKeyValueList,
     type BaselKeyValueListProps,

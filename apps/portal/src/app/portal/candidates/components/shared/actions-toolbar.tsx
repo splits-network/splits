@@ -19,6 +19,7 @@ import {
 } from "@splits-network/basel-ui";
 import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
+import RequestToRepresentModal from "../modals/request-to-represent-modal";
 import VerificationModal from "../modals/verification-modal";
 import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
 
@@ -36,6 +37,7 @@ export interface CandidateActionsToolbarProps {
         scheduleInterview?: boolean;
         verify?: boolean;
         endRepresentation?: boolean;
+        requestRepresentation?: boolean;
     };
     onRefresh?: () => void;
     onViewDetails?: (candidateId: string) => void;
@@ -74,6 +76,7 @@ export default function CandidateActionsToolbar({
     const [showTerminateModal, setShowTerminateModal] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [showRTRModal, setShowRTRModal] = useState(false);
 
     /* ── Loading states ── */
     const [startingChat, setStartingChat] = useState(false);
@@ -157,6 +160,12 @@ export default function CandidateActionsToolbar({
             showActions.endRepresentation !== false &&
             isRecruiter &&
             candidate.has_active_relationship,
+        requestRepresentation:
+            showActions.requestRepresentation !== false &&
+            isRecruiter &&
+            !candidate.has_active_relationship &&
+            !candidate.has_pending_invitation &&
+            Boolean(candidate.email),
     };
 
     const getSizeClass = () => `btn-${size}`;
@@ -205,6 +214,18 @@ export default function CandidateActionsToolbar({
                     }}
                 />
             )}
+            {showRTRModal && (
+                <RequestToRepresentModal
+                    isOpen={showRTRModal}
+                    onClose={() => setShowRTRModal(false)}
+                    onSuccess={() => {
+                        setShowRTRModal(false);
+                        refresh();
+                    }}
+                    candidateName={candidate.full_name || "Unknown"}
+                    candidateEmail={candidate.email || ""}
+                />
+            )}
             {showScheduleModal && (
                 <ScheduleInterviewModal
                     candidateName={candidate.full_name || "Unknown"}
@@ -249,6 +270,15 @@ export default function CandidateActionsToolbar({
                 label: "Verify Candidate",
                 variant: "btn-success",
                 onClick: () => setShowVerifyModal(true),
+            });
+        }
+        if (actions.requestRepresentation) {
+            speedDialActions.push({
+                key: "request-rtr",
+                icon: "fa-duotone fa-regular fa-handshake",
+                label: "Request to Represent",
+                variant: "btn-accent",
+                onClick: () => setShowRTRModal(true),
             });
         }
         if (actions.endRepresentation) {
@@ -343,6 +373,21 @@ export default function CandidateActionsToolbar({
                             <span className="hidden md:inline">Verify</span>
                         </button>
                     )}
+
+                {/* Request to Represent */}
+                {actions.requestRepresentation && (
+                    <button
+                        onClick={() => setShowRTRModal(true)}
+                        className={`btn ${getSizeClass()} btn-accent gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title="Request to Represent"
+                    >
+                        <i className="fa-duotone fa-regular fa-handshake" />
+                        <span className="hidden md:inline">
+                            Request to Represent
+                        </span>
+                    </button>
+                )}
 
                 {/* End Representation */}
                 {actions.endRepresentation && (

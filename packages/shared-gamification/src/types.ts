@@ -61,6 +61,8 @@ export interface LeaderboardEntryInfo {
     score: number;
     metric: string;
     metadata: Record<string, any>;
+    display_name?: string;
+    avatar_url?: string;
 }
 
 export interface BadgeDefinitionInfo {

@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
+import { useGamification } from "@splits-network/shared-gamification";
+import { BaselTabBar } from "@splits-network/basel-ui";
 import type { PublicFirm, FirmRecentPlacement } from "../types";
 import HeroSection from "./hero-section";
 import ContentTabs, { type TabKey } from "./content-tabs";
 import Sidebar from "./sidebar";
+import FirmConnectModal, { type FirmConnectModalHandle } from "./firm-connect-modal";
 
 if (typeof window !== "undefined") {
     const { ScrollTrigger } = require("gsap/ScrollTrigger");
@@ -30,7 +35,52 @@ export default function FirmProfileClient({
     recentPlacements = [],
 }: FirmProfileClientProps) {
     const [activeTab, setActiveTab] = useState<TabKey>("about");
+    const [connected, setConnected] = useState(false);
+    const [contactUserId, setContactUserId] = useState<string | null>(null);
+    const connectModalRef = useRef<FirmConnectModalHandle>(null);
     const pageRef = useRef<HTMLDivElement>(null);
+    const { isSignedIn, getToken } = useAuth();
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        registerEntities("firm", [firm.id]);
+    }, [firm.id, registerEntities]);
+
+    // Fetch enriched profile for contact_user_id
+    useEffect(() => {
+        let cancelled = false;
+        apiClient
+            .get<{ data: { contact_user_id: string | null } }>(
+                `/public/firms/${firm.slug}/profile`,
+            )
+            .then((res) => {
+                if (!cancelled && res.data?.contact_user_id) {
+                    setContactUserId(res.data.contact_user_id);
+                }
+            })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [firm.slug]);
+
+    // Check if already connected (has existing conversation with firm owner)
+    useEffect(() => {
+        if (!isSignedIn || !contactUserId) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res: any = await client.get("/chat/conversations", { params: { limit: 100 } });
+                const conversations = res?.data || [];
+                const isConnected = conversations.some(
+                    (c: any) => c.participant_a_id === contactUserId || c.participant_b_id === contactUserId,
+                );
+                if (!cancelled) setConnected(isConnected);
+            } catch {}
+        })();
+        return () => { cancelled = true; };
+    }, [isSignedIn, contactUserId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useGSAP(
         () => {
@@ -139,34 +189,24 @@ export default function FirmProfileClient({
                 );
             });
         },
-        { scope: pageRef },
+        { scope: pageRef, dependencies: [activeTab], revertOnUpdate: true },
     );
 
     return (
         <div ref={pageRef} className="min-h-screen bg-base-100">
-            <HeroSection firm={firm} />
+            <HeroSection
+                firm={firm}
+                connected={connected}
+                onConnect={() => connectModalRef.current?.open()}
+            />
 
             {/* Tab Nav */}
-            <nav className="bg-base-100 border-b border-base-300">
-                <div className="max-w-6xl mx-auto px-8">
-                    <div className="flex gap-0">
-                        {TABS.map((tab) => (
-                            <button
-                                key={tab.key}
-                                onClick={() => setActiveTab(tab.key)}
-                                className={`flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
-                                    activeTab === tab.key
-                                        ? "border-primary text-primary"
-                                        : "border-transparent text-base-content/40 hover:text-base-content/60 hover:border-base-300"
-                                }`}
-                            >
-                                <i className={`${tab.icon} text-sm`} />
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </nav>
+            <BaselTabBar
+                tabs={TABS.map(t => ({ label: t.label, value: t.key, icon: t.icon }))}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as TabKey)}
+                className="bg-base-100 border-b border-base-300 max-w-6xl mx-auto px-8"
+            />
 
             {/* Content */}
             <div className="max-w-6xl mx-auto px-8 py-12">
@@ -183,6 +223,14 @@ export default function FirmProfileClient({
                     </div>
                 </div>
             </div>
+            {contactUserId && (
+                <FirmConnectModal
+                    ref={connectModalRef}
+                    firmName={firm.name}
+                    firmOwnerUserId={contactUserId}
+                    onConnected={() => setConnected(true)}
+                />
+            )}
         </div>
     );
 }

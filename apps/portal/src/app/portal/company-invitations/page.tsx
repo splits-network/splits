@@ -17,6 +17,7 @@ import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
+import { useGamification } from "@splits-network/shared-gamification";
 
 export default function CompanyInvitationsBaselPage() {
     const searchParams = useSearchParams();
@@ -147,6 +148,15 @@ export default function CompanyInvitationsBaselPage() {
         defaultLimit: 24,
         syncToUrl: true,
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const companyIds = invitations.map((inv) => inv.company_id).filter(Boolean);
+        if (companyIds.length > 0) {
+            registerEntities("company", [...new Set(companyIds)]);
+        }
+    }, [invitations, registerEntities]);
 
     const handleSelect = useCallback((inv: RecruiterCompanyRelationship) => {
         setSelectedId((prev) => (prev === inv.id ? null : inv.id));

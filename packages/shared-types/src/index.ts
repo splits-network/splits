@@ -65,6 +65,11 @@ export type {
     ApplicationResumeData,
     ApplicationResumeContact,
     ApplicationResumeSource,
+    // Skills domain types
+    Skill,
+    CandidateSkill,
+    CandidateSkillSource,
+    JobSkill,
 } from './models';
 
 // Content CMS block types and page structure

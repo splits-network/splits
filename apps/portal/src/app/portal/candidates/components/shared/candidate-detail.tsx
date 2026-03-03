@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { BaselTabBar } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
@@ -21,6 +22,9 @@ import {
     skillsList,
 } from "./helpers";
 import CandidateActionsToolbar from "./actions-toolbar";
+import RequestToRepresentModal from "../modals/request-to-represent-modal";
+import { useUserProfile } from "@/contexts";
+import { ModalPortal } from "@splits-network/shared-ui";
 import {
     LevelBadge,
     BadgeGrid,
@@ -31,11 +35,11 @@ import {
 
 type TabType = "overview" | "resume" | "applications" | "documents";
 
-const TABS: { key: TabType; label: string; icon: string }[] = [
-    { key: "overview", label: "Overview", icon: "fa-user" },
-    { key: "resume", label: "Resume", icon: "fa-file-user" },
-    { key: "applications", label: "Applications", icon: "fa-briefcase" },
-    { key: "documents", label: "Documents", icon: "fa-file-lines" },
+const TABS = [
+    { value: "overview", label: "Overview", icon: "fa-duotone fa-regular fa-user" },
+    { value: "resume", label: "Resume", icon: "fa-duotone fa-regular fa-file-user" },
+    { value: "applications", label: "Applications", icon: "fa-duotone fa-regular fa-briefcase" },
+    { value: "documents", label: "Documents", icon: "fa-duotone fa-regular fa-file-lines" },
 ];
 
 /* ─── Detail Loading Wrapper ────────────────────────────────────────────── */
@@ -130,6 +134,8 @@ export function CandidateDetail({
 }) {
     const { getToken } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>("overview");
+    const [showRTRModal, setShowRTRModal] = useState(false);
+    const { isRecruiter } = useUserProfile();
     const { registerEntities, getLevel, getBadges } = useGamification();
 
     useEffect(() => {
@@ -142,6 +148,16 @@ export function CandidateDetail({
     /* Lazy-loaded applications */
     const [applications, setApplications] = useState<any[]>([]);
     const [appsLoading, setAppsLoading] = useState(false);
+
+    const tabsWithCounts = useMemo(
+        () =>
+            TABS.map((tab) =>
+                tab.value === "applications"
+                    ? { ...tab, count: applications.length }
+                    : tab,
+            ),
+        [applications.length],
+    );
 
     const fetchApplications = useCallback(async () => {
         setAppsLoading(true);
@@ -313,30 +329,11 @@ export function CandidateDetail({
             </div>
 
             {/* Tab Bar */}
-            <div className="flex border-b-2 border-base-300">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-[0.15em] transition-colors border-b-2 -mb-[2px] ${
-                            activeTab === tab.key
-                                ? "border-b-2 border-primary text-primary"
-                                : "border-transparent text-base-content/40 hover:text-base-content/70"
-                        }`}
-                    >
-                        <i
-                            className={`fa-duotone fa-regular ${tab.icon} mr-1.5`}
-                        />
-                        {tab.label}
-                        {tab.key === "applications" &&
-                            applications.length > 0 && (
-                                <span className="ml-1.5 text-xs">
-                                    {applications.length}
-                                </span>
-                            )}
-                    </button>
-                ))}
-            </div>
+            <BaselTabBar
+                tabs={tabsWithCounts}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as TabType)}
+            />
 
             {/* Tab Content */}
             <div className="flex-1 min-h-0 overflow-y-auto">
@@ -347,6 +344,14 @@ export function CandidateDetail({
                         skills={skills}
                         salary={salary}
                         badges={badges}
+                        onRequestRTR={
+                            isRecruiter &&
+                            !candidate.has_active_relationship &&
+                            !candidate.has_pending_invitation &&
+                            candidate.email
+                                ? () => setShowRTRModal(true)
+                                : undefined
+                        }
                     />
                 )}
                 {activeTab === "resume" && <ResumeTab />}
@@ -358,6 +363,22 @@ export function CandidateDetail({
                 )}
                 {activeTab === "documents" && <DocumentsTab />}
             </div>
+
+            {/* RTR Modal */}
+            <ModalPortal>
+                {showRTRModal && (
+                    <RequestToRepresentModal
+                        isOpen={showRTRModal}
+                        onClose={() => setShowRTRModal(false)}
+                        onSuccess={() => {
+                            setShowRTRModal(false);
+                            onRefresh?.();
+                        }}
+                        candidateName={candidate.full_name || "Unknown"}
+                        candidateEmail={candidate.email || ""}
+                    />
+                )}
+            </ModalPortal>
         </div>
     );
 }
@@ -370,12 +391,14 @@ function OverviewTab({
     skills,
     salary,
     badges,
+    onRequestRTR,
 }: {
     candidate: Candidate;
     bioText?: string;
     skills: string[];
     salary: string | null;
     badges: import("@splits-network/shared-gamification").BadgeAward[];
+    onRequestRTR?: () => void;
 }) {
     return (
         <div className="p-6 space-y-8">
@@ -505,10 +528,23 @@ function OverviewTab({
                                 Invitation Pending
                             </p>
                         ) : (
-                            <p className="font-bold text-sm text-base-content/50 flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-user-xmark" />
-                                Unrepresented
-                            </p>
+                            <div>
+                                <p className="font-bold text-sm text-base-content/50 flex items-center gap-1.5">
+                                    <i className="fa-duotone fa-regular fa-user-xmark" />
+                                    Unrepresented
+                                </p>
+                                {onRequestRTR && (
+                                    <button
+                                        type="button"
+                                        className="text-xs font-bold text-accent hover:text-accent-content hover:bg-accent px-2 py-1 mt-1.5 uppercase tracking-wider transition-colors"
+                                        style={{ borderRadius: 0 }}
+                                        onClick={onRequestRTR}
+                                    >
+                                        <i className="fa-duotone fa-regular fa-handshake mr-1" />
+                                        Request to Represent
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
                     <div className="bg-base-100 p-4">

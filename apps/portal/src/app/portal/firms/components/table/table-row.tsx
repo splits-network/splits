@@ -11,6 +11,7 @@ import {
 } from "../shared/helpers";
 import { FirmDetailLoader } from "../shared/firm-detail";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function TableRow({
     firm,
@@ -27,6 +28,9 @@ export function TableRow({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
+    const firmLevel = firm.id ? getLevel(firm.id) : undefined;
+
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
         : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
@@ -47,8 +51,9 @@ export function TableRow({
 
                 {/* Firm Name */}
                 <td className="px-4 py-3">
-                    <span className="font-bold text-sm text-base-content">
+                    <span className="font-bold text-sm text-base-content inline-flex items-center gap-1.5">
                         {firm.name}
+                        {firmLevel && <LevelBadge level={firmLevel} size="sm" />}
                     </span>
                 </td>
 

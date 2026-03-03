@@ -3,9 +3,11 @@
  * Uses DaisyUI semantic tokens only.
  */
 
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
+
 export type ViewMode = "table" | "grid" | "split";
 
-/** Status → DaisyUI semantic badge/text classes */
+/** Status → DaisyUI semantic badge/text classes (legacy — for non-BaselBadge callers) */
 export function statusColor(status?: string): string {
     switch (status) {
         case "active":
@@ -18,6 +20,21 @@ export function statusColor(status?: string): string {
             return "bg-base-content/15 text-base-content/50";
         default:
             return "bg-base-content/15 text-base-content/50";
+    }
+}
+
+/** Status → BaselSemanticColor for use with BaselBadge */
+export function statusBadgeColor(status?: string): BaselSemanticColor {
+    switch (status) {
+        case "active":
+            return "success";
+        case "paused":
+            return "warning";
+        case "filled":
+            return "info";
+        case "closed":
+        default:
+            return "neutral";
     }
 }
 

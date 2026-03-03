@@ -21,7 +21,7 @@ export function GridView({
     return (
         <div className="relative">
             {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
+            <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                 {applications.map((application) => (
                     <GridCard
                         key={application.id}

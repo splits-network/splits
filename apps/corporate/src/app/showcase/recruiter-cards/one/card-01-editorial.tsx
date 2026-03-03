@@ -89,15 +89,15 @@ export function Card01({ recruiter }: { recruiter: RecruiterCardData }) {
                     {firstTwoStats.map((stat) => (
                         <div
                             key={stat.label}
-                            className="flex flex-col items-center justify-center px-2 py-4 gap-1 text-center"
+                            className="flex flex-col items-center justify-center px-1.5 py-4 gap-1 text-center min-w-0 overflow-hidden"
                         >
                             <i
-                                className={`${stat.icon} text-primary text-base`}
+                                className={`${stat.icon} text-primary text-sm`}
                             />
-                            <span className="text-xl font-black text-base-content leading-none">
+                            <span className="text-base font-black text-base-content leading-none truncate w-full">
                                 {stat.value}
                             </span>
-                            <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate w-full">
                                 {stat.label}
                             </span>
                         </div>

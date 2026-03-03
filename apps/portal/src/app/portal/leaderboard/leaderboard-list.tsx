@@ -1,0 +1,130 @@
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { LeaderboardRow, LevelBadge } from "@splits-network/shared-gamification";
+import type { LeaderboardEntryInfo, EntityLevelInfo } from "@splits-network/shared-gamification";
+import { LoadingState } from "@splits-network/shared-ui";
+
+interface LeaderboardListProps {
+    entries: LeaderboardEntryInfo[];
+    myEntityId: string | null | undefined;
+    loading: boolean;
+    levelMap?: Map<string, EntityLevelInfo>;
+}
+
+export function LeaderboardList({ entries, myEntityId, loading, levelMap }: LeaderboardListProps) {
+    const listRef = useRef<HTMLDivElement>(null);
+    const filteredEntries = entries.filter((e) => e.rank > 3);
+
+    useGSAP(
+        () => {
+            if (!listRef.current || loading) return;
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+            const rows = listRef.current.querySelectorAll(".lb-row");
+            if (rows.length === 0) return;
+
+            gsap.fromTo(
+                rows,
+                { opacity: 0, x: -16 },
+                {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.4,
+                    stagger: 0.04,
+                    ease: "power3.out",
+                    clearProps: "transform",
+                },
+            );
+        },
+        { scope: listRef, dependencies: [entries, loading] },
+    );
+
+    if (loading) {
+        return <LoadingState message="Loading leaderboard..." />;
+    }
+
+    if (entries.length === 0) {
+        return (
+            <div className="bg-base-200 border-l-4 border-base-300 shadow-sm rounded-none p-12 text-center">
+                <i className="fa-duotone fa-regular fa-ranking-star text-4xl text-base-content/20 mb-4 block" />
+                <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-1">
+                    No Data
+                </p>
+                <p className="text-sm font-semibold text-base-content/50">
+                    No activity yet. Placements move you up.
+                </p>
+            </div>
+        );
+    }
+
+    if (filteredEntries.length === 0) {
+        return null;
+    }
+
+    return (
+        <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-3">
+                Ranks 4+
+            </p>
+            <div
+                ref={listRef}
+                className="bg-base-200 border border-base-300 border-l-4 border-l-primary shadow-sm rounded-none divide-y divide-base-300"
+            >
+                {filteredEntries.map((entry) => (
+                    <div key={entry.id} className="collapse rounded-none bg-base-100 lb-row opacity-0">
+                        <input type="checkbox" />
+                        <div className="collapse-title p-0">
+                            <LeaderboardRow
+                                entry={entry}
+                                isCurrentUser={entry.entity_id === myEntityId}
+                            />
+                        </div>
+                        <div className="collapse-content border-t border-base-300 bg-base-100 rounded-none">
+                            <div className="pt-4 pb-2 px-4 flex flex-wrap gap-6">
+                                {levelMap?.get(entry.entity_id) && (
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-1">
+                                            Level
+                                        </p>
+                                        <LevelBadge level={levelMap.get(entry.entity_id)!} size="sm" />
+                                    </div>
+                                )}
+                                {entry.metadata?.specialization && (
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-1">
+                                            Focuses On
+                                        </p>
+                                        <p className="text-sm font-bold text-base-content">
+                                            {entry.metadata.specialization}
+                                        </p>
+                                    </div>
+                                )}
+                                {entry.metadata?.placement_count != null && (
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-1">
+                                            Placements
+                                        </p>
+                                        <p className="text-sm font-black text-base-content">
+                                            {entry.metadata.placement_count}
+                                        </p>
+                                    </div>
+                                )}
+                                {entry.metadata?.hire_rate != null && (
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-1">
+                                            Hire Rate
+                                        </p>
+                                        <p className="text-sm font-black text-base-content">
+                                            {Math.round(entry.metadata.hire_rate * 100)}%
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}

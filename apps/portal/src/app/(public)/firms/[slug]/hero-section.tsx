@@ -1,12 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import type { PublicFirm, FirmPlacementStats } from "../types";
 import { firmLocation, firmInitials } from "../types";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface HeroSectionProps {
     firm: PublicFirm;
     placementStats?: FirmPlacementStats | null;
+    connected?: boolean;
+    onRequestPartnership?: () => void;
 }
 
 function extractDomain(url: string): string {
@@ -17,7 +19,9 @@ function extractDomain(url: string): string {
     }
 }
 
-export default function HeroSection({ firm, placementStats }: HeroSectionProps) {
+export default function HeroSection({ firm, placementStats, connected, onRequestPartnership }: HeroSectionProps) {
+    const { getLevel } = useGamification();
+    const firmLevel = firm.id ? getLevel(firm.id) : undefined;
     const location = firmLocation(firm);
     const initials = firmInitials(firm.name);
 
@@ -69,7 +73,7 @@ export default function HeroSection({ firm, placementStats }: HeroSectionProps) 
                 {/* Logo + Identity */}
                 <div className="flex flex-col lg:flex-row lg:items-end gap-8">
                     <div className="flex items-end gap-5 flex-1">
-                        <div className="firm-avatar opacity-0 shrink-0">
+                        <div className="firm-avatar opacity-0 relative shrink-0">
                             {firm.logo_url ? (
                                 <img
                                     src={firm.logo_url}
@@ -79,6 +83,11 @@ export default function HeroSection({ firm, placementStats }: HeroSectionProps) 
                             ) : (
                                 <div className="w-20 h-20 lg:w-24 lg:h-24 bg-primary text-primary-content flex items-center justify-center text-2xl lg:text-3xl font-black tracking-tight select-none">
                                     {initials}
+                                </div>
+                            )}
+                            {firmLevel && (
+                                <div className="absolute -bottom-1 -right-1">
+                                    <LevelBadge level={firmLevel} size="sm" />
                                 </div>
                             )}
                         </div>
@@ -120,13 +129,23 @@ export default function HeroSection({ firm, placementStats }: HeroSectionProps) 
 
                     {/* CTA buttons */}
                     <div className="flex flex-wrap gap-2 pb-1 shrink-0">
-                        <Link
-                            href="/sign-up"
-                            className="firm-action opacity-0 btn btn-primary btn-sm font-bold uppercase tracking-wider"
-                        >
-                            <i className="fa-duotone fa-regular fa-handshake" />
-                            Request Partnership
-                        </Link>
+                        {connected ? (
+                            <a
+                                href="/portal/messages"
+                                className="firm-action opacity-0 btn btn-primary btn-sm font-bold uppercase tracking-wider"
+                            >
+                                <i className="fa-duotone fa-regular fa-comments" />
+                                Message
+                            </a>
+                        ) : (
+                            <button
+                                className="firm-action opacity-0 btn btn-primary btn-sm font-bold uppercase tracking-wider"
+                                onClick={onRequestPartnership}
+                            >
+                                <i className="fa-duotone fa-regular fa-handshake" />
+                                Request Partnership
+                            </button>
+                        )}
                         {firm.website_url && (
                             <a
                                 href={firm.website_url}

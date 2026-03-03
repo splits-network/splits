@@ -5,6 +5,7 @@ import { MarkdownEditor, MarkdownRenderer } from "@splits-network/shared-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
+import { BaselTabBar } from "@splits-network/basel-ui";
 
 interface Job {
     id: string;
@@ -732,22 +733,14 @@ export default function UniversalSubmitCandidateWizard({
                     {currentStep === 2 && (
                         <div className="space-y-4">
                             {/* Mode Selection Tabs */}
-                            <div className="tabs tabs-boxed bg-base-200">
-                                <a
-                                    className={`tab ${candidateMode === "select" ? "tab-active" : ""}`}
-                                    onClick={() => setCandidateMode("select")}
-                                >
-                                    <i className="fa-duotone fa-regular fa-user-check mr-2"></i>
-                                    Select Existing
-                                </a>
-                                <a
-                                    className={`tab ${candidateMode === "new" ? "tab-active" : ""}`}
-                                    onClick={() => setCandidateMode("new")}
-                                >
-                                    <i className="fa-duotone fa-regular fa-user-plus mr-2"></i>
-                                    Add New
-                                </a>
-                            </div>
+                            <BaselTabBar
+                                tabs={[
+                                    { label: "Select Existing", value: "select", icon: "fa-duotone fa-regular fa-user-check" },
+                                    { label: "Add New", value: "new", icon: "fa-duotone fa-regular fa-user-plus" },
+                                ]}
+                                active={candidateMode}
+                                onChange={(v) => setCandidateMode(v as "select" | "new")}
+                            />
 
                             {candidateMode === "select" ? (
                                 <>

@@ -5,9 +5,12 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
 import { LoadingState } from "@splits-network/shared-ui";
 import { BaselStatusPill } from "@splits-network/basel-ui";
+import { AchievementsSection } from "@splits-network/shared-gamification";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 import { AccountSection } from "@/components/basel/profile/account-section";
 import { SecuritySection } from "@/components/basel/profile/security-section";
@@ -33,6 +36,7 @@ type Section =
     | "privacy"
     | "subscription"
     | "payouts"
+    | "achievements"
     | "notifications"
     | "admin";
 
@@ -65,7 +69,8 @@ const COMING_SOON_DESCRIPTIONS: Record<string, string> = {
 /* ─── Page ────────────────────────────────────────────────────────────────── */
 
 export default function ProfileBaselPage() {
-    const { isLoading, isAdmin, isRecruiter, hasRole } = useUserProfile();
+    const { getToken } = useAuth();
+    const { isLoading, isAdmin, isRecruiter, hasRole, profile } = useUserProfile();
 
     const isCompanyAdmin = hasRole("company_admin");
     const isPlatformAdmin = isAdmin;
@@ -82,6 +87,7 @@ export default function ProfileBaselPage() {
         "privacy",
         "subscription",
         "payouts",
+        "achievements",
         "notifications",
         "admin",
     ];
@@ -164,6 +170,17 @@ export default function ProfileBaselPage() {
                 ],
             });
         }
+
+        groups.push({
+            title: "Progress",
+            items: [
+                {
+                    key: "achievements",
+                    label: "Achievements",
+                    icon: "fa-duotone fa-regular fa-trophy",
+                },
+            ],
+        });
 
         const systemItems: NavItem[] = [
             {
@@ -276,17 +293,13 @@ export default function ProfileBaselPage() {
             if (!contentRef.current) return;
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
                 return;
-            gsap.fromTo(
-                contentRef.current,
-                { opacity: 0, x: 20 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.3,
-                    ease: "power2.out",
-                    clearProps: "transform",
-                },
-            );
+            gsap.from(contentRef.current, {
+                opacity: 0,
+                x: 20,
+                duration: 0.3,
+                ease: "power2.out",
+                clearProps: "transform,opacity",
+            });
         },
         { dependencies: [active], scope: mainRef },
     );
@@ -396,6 +409,24 @@ export default function ProfileBaselPage() {
                     <SubscriptionTab />
                 )}
                 {isRecruiter && active === "payouts" && <PayoutsTab />}
+
+                {/* Achievements */}
+                {active === "achievements" &&
+                    (profile?.recruiter_id || profile?.candidate_id) && (
+                        <AchievementsSection
+                            entityId={
+                                (profile.recruiter_id ||
+                                    profile.candidate_id) as string
+                            }
+                            entityType={
+                                profile.recruiter_id
+                                    ? "recruiter"
+                                    : "candidate"
+                            }
+                            getToken={getToken}
+                            createClient={createAuthenticatedClient}
+                        />
+                    )}
 
                 {/* Coming soon sections */}
                 {isComingSoon && (

@@ -11,6 +11,7 @@ import { formatMemberRole, formatMemberStatus, formatDate } from "../../types";
 import { memberRoleColor, memberStatusColor } from "../shared/status-color";
 import { firmInitials } from "../shared/helpers";
 import { InviteMemberModal } from "../modals/invite-member-modal";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface MembersSectionProps {
     firm: Firm;
@@ -27,6 +28,7 @@ export function MembersSection({
 }: MembersSectionProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+    const { getLevel } = useGamification();
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [removingMember, setRemovingMember] = useState<FirmMember | null>(
         null,
@@ -148,12 +150,19 @@ export function MembersSection({
                                 }`}
                             >
                                 {/* Initials avatar */}
-                                <div
-                                    className="w-10 h-10 bg-base-200 border border-base-300 flex items-center justify-center text-sm font-bold flex-shrink-0"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    {firmInitials(
-                                        member.recruiter.user?.name ?? "",
+                                <div className="relative flex-shrink-0">
+                                    <div
+                                        className="w-10 h-10 bg-base-200 border border-base-300 flex items-center justify-center text-sm font-bold"
+                                        style={{ borderRadius: 0 }}
+                                    >
+                                        {firmInitials(
+                                            member.recruiter.user?.name ?? "",
+                                        )}
+                                    </div>
+                                    {member.recruiter_id && getLevel(member.recruiter_id) && (
+                                        <div className="absolute -bottom-1 -right-1">
+                                            <LevelBadge level={getLevel(member.recruiter_id)!} size="sm" />
+                                        </div>
                                     )}
                                 </div>
 

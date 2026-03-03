@@ -287,7 +287,7 @@ export default function CandidateDashboard({
                       borderClass: "border-info",
                       bgClass: "bg-info/10",
                       textClass: "text-info",
-                      href: "/portal/achievements",
+                      href: "/portal/profile?section=achievements",
                       description: level.title,
                   },
               ]

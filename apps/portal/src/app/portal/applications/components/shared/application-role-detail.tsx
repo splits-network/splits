@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { BaselTabBar } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
@@ -36,11 +37,11 @@ interface CompanyMember {
     };
 }
 
-const TABS: { key: TabKey; label: string; icon: string }[] = [
-    { key: "brief", label: "Recruiter Brief", icon: "fa-file-lines" },
-    { key: "candidate", label: "Candidate", icon: "fa-user" },
-    { key: "financials", label: "Financials", icon: "fa-calculator" },
-    { key: "company", label: "Company", icon: "fa-building" },
+const TABS = [
+    { value: "brief", label: "Recruiter Brief", icon: "fa-duotone fa-regular fa-file-lines" },
+    { value: "candidate", label: "Candidate", icon: "fa-duotone fa-regular fa-user" },
+    { value: "financials", label: "Financials", icon: "fa-duotone fa-regular fa-calculator" },
+    { value: "company", label: "Company", icon: "fa-duotone fa-regular fa-building" },
 ];
 
 /* ─── Tab Content Components ────────────────────────────────────────────── */
@@ -503,24 +504,11 @@ export function ApplicationRoleDetail({ job }: { job: Job }) {
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b-2 border-base-300">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-[0.15em] transition-colors border-b-2 -mb-[2px] ${
-                            activeTab === tab.key
-                                ? "border-primary text-primary"
-                                : "border-transparent text-base-content/40 hover:text-base-content/70"
-                        }`}
-                    >
-                        <i
-                            className={`fa-duotone fa-regular ${tab.icon} mr-1.5`}
-                        />
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+            <BaselTabBar
+                tabs={TABS}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as TabKey)}
+            />
 
             {/* Tab Content */}
             <div className="flex-1 min-h-0 overflow-y-auto p-6">

@@ -2,6 +2,7 @@ import {
     Company,
     JobRequirement,
     JobPreScreenQuestion,
+    JobSkill,
 } from "@splits-network/shared-types";
 
 // Local type definitions (these exist in shared-types/models but aren't exported from index)
@@ -65,6 +66,7 @@ export interface Job {
     };
     requirements?: JobRequirement[];
     pre_screen_questions?: JobPreScreenQuestion[];
+    skills?: JobSkill[];
 
     // Computed/aggregated fields
     application_count?: number;

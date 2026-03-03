@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, Suspense } from "react";
+import { useMemo, useRef, useEffect, Suspense } from "react";
 import type { StandardListResponse } from "@splits-network/shared-types";
 import { useStandardList } from "@/hooks/use-standard-list";
 import { PaginationControls } from "@/components/standard-lists/pagination-controls";
@@ -12,6 +12,7 @@ import { FirmsAnimator } from "./firms-animator";
 import { HeaderSection } from "./components/header-section";
 import { ControlsBar } from "./components/controls-bar";
 import { GridView } from "./components/grid/grid-view";
+import { useGamification } from "@splits-network/shared-gamification";
 
 interface FirmsClientProps {
     initialData?: PublicFirm[];
@@ -48,6 +49,15 @@ function FirmsClientInner({
         initialData,
         initialPagination,
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const firmIds = firms.map((f) => f.id);
+        if (firmIds.length > 0) {
+            registerEntities("firm", [...new Set(firmIds)]);
+        }
+    }, [firms, registerEntities]);
 
     const stats = useMemo(() => ({
         total: pagination?.total || firms.length,

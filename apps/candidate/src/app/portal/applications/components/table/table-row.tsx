@@ -12,6 +12,7 @@ import {
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/application-detail";
 import ActionsToolbar from "../shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function TableRow({
     app,
@@ -28,11 +29,13 @@ export function TableRow({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
+    const { getLevel } = useGamification();
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
         : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     const name = companyName(app);
+    const companyLevel = app.job?.company?.id ? getLevel(app.job.company.id) : undefined;
 
     return (
         <Fragment>
@@ -51,17 +54,24 @@ export function TableRow({
                 {/* Position */}
                 <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                        {app.job?.company?.logo_url ? (
-                            <img
-                                src={app.job.company.logo_url}
-                                alt={name}
-                                className="w-8 h-8 shrink-0 object-contain bg-base-200 border border-base-300 p-0.5"
-                            />
-                        ) : (
-                            <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
-                                {companyInitials(name)}
-                            </div>
-                        )}
+                        <div className="relative shrink-0">
+                            {app.job?.company?.logo_url ? (
+                                <img
+                                    src={app.job.company.logo_url}
+                                    alt={name}
+                                    className="w-8 h-8 object-contain bg-base-200 border border-base-300 p-0.5"
+                                />
+                            ) : (
+                                <div className="w-8 h-8 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
+                                    {companyInitials(name)}
+                                </div>
+                            )}
+                            {companyLevel && (
+                                <div className="absolute -bottom-1 -right-1">
+                                    <LevelBadge level={companyLevel} size="sm" />
+                                </div>
+                            )}
+                        </div>
                         <span className="font-bold text-sm text-base-content">
                             {app.job?.title || "Untitled Position"}
                         </span>

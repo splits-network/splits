@@ -10,6 +10,7 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
+import { useGamification } from "@splits-network/shared-gamification";
 import type { Firm, FirmFilters } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { FirmsAnimator } from "./firms-animator";
@@ -95,6 +96,15 @@ export default function FirmsPage() {
         defaultLimit: 24,
         syncToUrl: true,
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const firmIds = firms.map((f) => f.id);
+        if (firmIds.length > 0) {
+            registerEntities("firm", [...new Set(firmIds)]);
+        }
+    }, [firms, registerEntities]);
 
     const handleSelect = useCallback((firm: Firm) => {
         setSelectedFirmId((prev) => (prev === firm.id ? null : firm.id));

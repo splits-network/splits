@@ -2,7 +2,8 @@
 
 import type { Job } from "../../types";
 import { formatJobLevel } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusBadgeColor } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     salaryDisplay,
     formatStatus,
@@ -11,8 +12,11 @@ import {
     companyName,
     companyInitials,
     estimatedPayoutRange,
+    postedAgo,
+    requiredSkillNames,
 } from "../shared/helpers";
 import RoleActionsToolbar from "../shared/actions-toolbar";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function GridCard({
     job,
@@ -27,117 +31,217 @@ export function GridCard({
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
+    const { getLevel } = useGamification();
+    const companyLevel = job.company_id ? getLevel(job.company_id) : undefined;
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const level = formatJobLevel(job.job_level);
     const payout = estimatedPayoutRange(job);
+    const posted = postedAgo(job);
+    const skills = requiredSkillNames(job);
+
+    const stats = [
+        {
+            label: "Salary",
+            value: salary || "TBD",
+            icon: "fa-duotone fa-regular fa-dollar-sign",
+        },
+        {
+            label: "Split Fee",
+            value: `${job.fee_percentage}%`,
+            icon: "fa-duotone fa-regular fa-handshake",
+        },
+        ...(payout
+            ? [
+                  {
+                      label: "Est. Payout",
+                      value: payout,
+                      icon: "fa-duotone fa-regular fa-coins",
+                  },
+              ]
+            : []),
+        ...(job.application_count !== undefined
+            ? [
+                  {
+                      label: "Applicants",
+                      value: String(job.application_count),
+                      icon: "fa-duotone fa-regular fa-users",
+                  },
+              ]
+            : []),
+    ];
 
     return (
-        <div
+        <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
-                isSelected ? "border-primary border-l-4" : "border-base-200",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-md",
+                isSelected ? "border-l-primary border-primary" : "border-l-primary",
             ].join(" ")}
         >
-            {/* Top row: status pill + NEW badge */}
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <span
-                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(job.status)}`}
-                >
-                    {formatStatus(job.status)}
-                </span>
+            {/* Header Band */}
+            <div className="bg-base-300 border-b border-base-300 px-6 pt-5 pb-4">
+                {/* Kicker row: status + NEW badge */}
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <BaselBadge color={statusBadgeColor(job.status)} variant="soft" size="sm">
+                            {formatStatus(job.status)}
+                        </BaselBadge>
 
-                {isNew(job) && (
-                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
-                        <i className="fa-duotone fa-regular fa-sparkles mr-1" />
-                        New
-                    </span>
-                )}
-            </div>
+                        {isNew(job) && (
+                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
+                                New
+                            </BaselBadge>
+                        )}
+                    </div>
 
-            {/* Title */}
-            <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors mb-1">
-                {job.title}
-            </h3>
-
-            {/* Company */}
-            <div className="flex items-center gap-2 text-sm font-semibold text-base-content/60 mb-2">
-                {name}
-                {!job.company_id && job.source_firm_id && (
-                    <span className="badge badge-warning badge-sm text-xs uppercase tracking-wider">
-                        3rd Party
-                    </span>
-                )}
-            </div>
-
-            {/* Location */}
-            {job.location && (
-                <div className="flex items-center gap-1 text-sm text-base-content/50 mb-4">
-                    <i className="fa-duotone fa-regular fa-location-dot" />
-                    {job.location}
-                </div>
-            )}
-
-            {/* Salary */}
-            <div className="text-base font-black tracking-tight text-primary mb-3">
-                {salary || "Competitive"}
-            </div>
-
-            {/* Fee + Estimated Payout row */}
-            <div className="flex items-center gap-3 mb-4">
-                <span className="text-sm font-bold text-accent">
-                    <i className="fa-duotone fa-regular fa-percent mr-1" />
-                    {job.fee_percentage} fee
-                </span>
-                {payout && (
-                    <span className="text-sm font-bold text-base-content/60">
-                        <i className="fa-duotone fa-regular fa-coins mr-1" />
-                        {payout} est.
-                    </span>
-                )}
-            </div>
-
-            {/* Tags: employment type + job level */}
-            {(job.employment_type || level) && (
-                <div className="flex flex-wrap gap-1 mb-4">
-                    {job.employment_type && (
-                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
-                            {formatEmploymentType(job.employment_type)}
-                        </span>
-                    )}
-                    {level && (
-                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
-                            {level}
-                        </span>
+                    {!job.company_id && job.source_firm_id && (
+                        <BaselBadge color="warning" variant="soft" size="sm">
+                            3rd Party
+                        </BaselBadge>
                     )}
                 </div>
-            )}
 
-            {/* Footer: company logo / initials left, actions right */}
-            <div className="mt-auto flex items-center justify-between gap-3 pt-4 border-t border-base-200">
-                <div className="flex items-center gap-2 min-w-0">
-                    {job.company?.logo_url ? (
-                        <img
-                            src={job.company.logo_url}
-                            alt={name}
-                            className="w-9 h-9 shrink-0 object-contain bg-base-200 border border-base-300 p-1"
-                        />
-                    ) : (
-                        <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-base-200 border border-base-300 text-xs font-bold text-base-content/60">
-                            {companyInitials(name)}
-                        </div>
-                    )}
-                    <div className="min-w-0">
-                        <div className="text-sm font-semibold text-base-content truncate">
-                            {name}
-                        </div>
-                        {job.company?.industry && (
-                            <div className="text-xs text-base-content/40 truncate">
-                                {job.company.industry}
+                {/* Avatar + Title block */}
+                <div className="flex items-end gap-3">
+                    <div className="relative shrink-0">
+                        {job.company?.logo_url ? (
+                            <img
+                                src={job.company.logo_url}
+                                alt={name}
+                                className="w-14 h-14 object-contain bg-base-100 border border-base-300 p-1"
+                            />
+                        ) : (
+                            <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center text-lg font-black tracking-tight select-none">
+                                {companyInitials(name)}
+                            </div>
+                        )}
+                        {companyLevel && (
+                            <div className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={companyLevel} size="sm" />
                             </div>
                         )}
                     </div>
+                    <div className="min-w-0">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
+                            Role
+                        </p>
+                        <h3 className="text-xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                            {job.title}
+                        </h3>
+                    </div>
+                </div>
+
+                {/* Location + posted date */}
+                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/40">
+                    {job.location && (
+                        <span className="flex items-center gap-1.5">
+                            <i className="fa-duotone fa-regular fa-location-dot text-xs" />
+                            {job.location}
+                        </span>
+                    )}
+                    {job.location && posted && (
+                        <span className="text-base-content/20">|</span>
+                    )}
+                    {posted && (
+                        <span className="flex items-center gap-1.5">
+                            <i className="fa-duotone fa-regular fa-calendar text-xs" />
+                            {posted}
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            {/* About snippet */}
+            {(job.recruiter_description || job.description) && (
+                <div className="px-6 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
+                        About
+                    </p>
+                    <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                        {job.recruiter_description || job.description}
+                    </p>
+                </div>
+            )}
+
+            {/* Stats Row */}
+            {stats.length > 0 && (
+                <div className="border-b border-base-300">
+                    <div
+                        className="grid divide-x divide-base-300"
+                        style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}
+                    >
+                        {stats.map((stat) => (
+                            <div
+                                key={stat.label}
+                                className="flex flex-col items-center justify-center px-1.5 py-3 gap-1 text-center min-w-0 overflow-hidden"
+                            >
+                                <i className={`${stat.icon} text-primary text-sm`} />
+                                <span className="text-sm font-black text-base-content leading-none truncate w-full">
+                                    {stat.value}
+                                </span>
+                                <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate w-full">
+                                    {stat.label}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Skills */}
+            {skills.length > 0 && (
+                <div className="px-6 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        Required Skills
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {skills.slice(0, 4).map((skill) => (
+                            <BaselBadge key={skill} variant="outline" size="sm">
+                                {skill}
+                            </BaselBadge>
+                        ))}
+                        {skills.length > 4 && (
+                            <BaselBadge variant="outline" size="sm">
+                                +{skills.length - 4}
+                            </BaselBadge>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Detail Badges */}
+            {(job.employment_type || level) && (
+                <div className="px-6 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        Details
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        {job.employment_type && (
+                            <BaselBadge color="primary" size="sm" icon="fa-briefcase">
+                                {formatEmploymentType(job.employment_type)}
+                            </BaselBadge>
+                        )}
+                        {level && (
+                            <BaselBadge color="secondary" size="sm" icon="fa-layer-group">
+                                {level}
+                            </BaselBadge>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Footer: company name + actions */}
+            <div className="mt-auto flex items-center justify-between gap-3 px-6 py-4">
+                <div className="min-w-0">
+                    <div className="text-sm font-semibold text-base-content truncate">
+                        {name}
+                    </div>
+                    {job.company?.industry && (
+                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 truncate">
+                            {job.company.industry}
+                        </div>
+                    )}
                 </div>
 
                 <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -156,6 +260,6 @@ export function GridCard({
                     />
                 </div>
             </div>
-        </div>
+        </article>
     );
 }

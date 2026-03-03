@@ -56,6 +56,7 @@ export interface EnrichedPublicFirmProfile extends PublicFirm {
     members: FirmMember[];
     placementStats: FirmPlacementStats | null;
     recentPlacements: FirmRecentPlacement[];
+    contact_user_id: string | null;
 }
 
 export interface PublicFirmFilters {

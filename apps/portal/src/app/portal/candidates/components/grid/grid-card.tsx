@@ -6,7 +6,8 @@ import {
     formatJobType,
     formatAvailability,
 } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     candidateName,
     candidateInitials,
@@ -36,117 +37,193 @@ export function GridCard({
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
     const name = candidateName(candidate);
+    const initials = candidateInitials(name);
     const title = candidateTitle(candidate);
     const company = candidateCompany(candidate);
     const salary = salaryDisplay(candidate);
     const skills = skillsList(candidate);
 
+    const stats = [
+        {
+            label: "Salary",
+            value: salary || "N/A",
+            icon: "fa-duotone fa-regular fa-dollar-sign",
+        },
+        {
+            label: "Type",
+            value: formatJobType(candidate.desired_job_type),
+            icon: "fa-duotone fa-regular fa-briefcase",
+        },
+        {
+            label: "Availability",
+            value: formatAvailability(candidate.availability),
+            icon: "fa-duotone fa-regular fa-clock",
+        },
+    ];
+
     return (
-        <div
+        <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border-2 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30",
-                isSelected ? "border-primary border-l-4" : "border-base-200",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 w-full transition-all hover:shadow-md",
+                isSelected
+                    ? "border-l-primary shadow-md"
+                    : "border-l-primary/40 shadow-sm",
             ].join(" ")}
         >
-            {/* Top row: verification status pill + NEW badge */}
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <span
-                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
-                >
-                    {formatVerificationStatus(candidate.verification_status)}
-                </span>
-
-                {isNew(candidate) && (
-                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
-                        <i className="fa-duotone fa-regular fa-sparkles mr-1" />
-                        New
-                    </span>
-                )}
-
-                {candidate.open_to_remote && (
-                    <span className="text-sm uppercase tracking-wider bg-info/15 text-info px-2 py-1">
-                        Remote
-                    </span>
-                )}
-            </div>
-
-            {/* Name */}
-            <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors mb-1 truncate">
-                {name}
-                {level && (
-                    <span className="ml-1.5 align-middle inline-block">
-                        <LevelBadge level={level} size="sm" />
-                    </span>
-                )}
-            </h3>
-            {candidate.email && (
-                <div className="text-sm text-base-content/40 truncate pb-1">
-                    {candidate.email}
-                </div>
-            )}
-
-            {/* Title */}
-            {title ? (
-                <div className="text-sm font-semibold text-base-content/60 mb-2">
-                    {title}
-                    {company && (
-                        <span className="text-base-content/40">
-                            {" "}
-                            at {company}
-                        </span>
-                    )}
-                </div>
-            ) : (
-                <div className="text-sm font-semibold text-base-content/60 mb-2">
-                    {"No title specified"}
-                </div>
-            )}
-
-            {/* Location */}
-            <div className="flex items-center gap-1 text-sm text-base-content/50 mb-4">
-                <i className="fa-duotone fa-regular fa-location-dot" />
-                {candidate.location || "Location not specified"}
-            </div>
-
-            {/* Salary */}
-            <div className="text-base font-black tracking-tight text-primary mb-3">
-                {salary || "Salary Not specified"}
-            </div>
-
-            {/* Job type + Availability row */}
-            <div className="flex items-center gap-3 mb-4">
-                <span className="text-sm font-bold text-accent">
-                    <i className="fa-duotone fa-regular fa-briefcase mr-1" />
-                    {formatJobType(candidate.desired_job_type)}
-                </span>
-                <span className="text-sm font-bold text-base-content/60">
-                    <i className="fa-duotone fa-regular fa-clock mr-1" />
-                    {formatAvailability(candidate.availability)}
-                </span>
-            </div>
-
-            {/* Skills tags */}
-            {skills.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-4">
-                    {skills.slice(0, 4).map((skill) => (
-                        <span
-                            key={skill}
-                            className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1"
+            {/* Header Band */}
+            <div className="bg-base-300 border-b border-base-300 px-5 pt-5 pb-4">
+                {/* Kicker row: verification status + NEW badge + availability dot */}
+                <div className="flex items-center justify-between mb-3 gap-2">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <BaselBadge
+                            color={statusColorName(candidate.verification_status)}
+                            variant="soft"
+                            size="sm"
                         >
-                            {skill}
-                        </span>
-                    ))}
-                    {skills.length > 4 && (
-                        <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
-                            +{skills.length - 4}
-                        </span>
+                            {formatVerificationStatus(
+                                candidate.verification_status
+                            )}
+                        </BaselBadge>
+                        {isNew(candidate) && (
+                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
+                                New
+                            </BaselBadge>
+                        )}
+                    </div>
+                    {company && (
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate min-w-0">
+                            {company}
+                        </p>
                     )}
+                </div>
+
+                {/* Avatar + Name block */}
+                <div className="flex items-end gap-3">
+                    <div className="relative shrink-0">
+                        <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center text-lg font-black tracking-tight select-none">
+                            {initials}
+                        </div>
+                        {level && (
+                            <span className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={level} size="sm" />
+                            </span>
+                        )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
+                            Candidate
+                        </p>
+                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                            {name}
+                        </h3>
+                    </div>
+                </div>
+
+                {/* Title + Location below header */}
+                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/40 flex-wrap">
+                    {title && (
+                        <>
+                            <span className="flex items-center gap-1.5 truncate">
+                                <i className="fa-duotone fa-regular fa-id-badge text-xs" />
+                                {title}
+                            </span>
+                            <span className="text-base-content/20">|</span>
+                        </>
+                    )}
+                    <span className="flex items-center gap-1.5 truncate">
+                        <i className="fa-duotone fa-regular fa-location-dot text-xs" />
+                        {candidate.location || "Location not specified"}
+                    </span>
+                </div>
+
+                {/* Email */}
+                {candidate.email && (
+                    <div className="text-sm text-base-content/30 truncate mt-1">
+                        {candidate.email}
+                    </div>
+                )}
+            </div>
+
+            {/* About snippet */}
+            {candidate.bio && (
+                <div className="px-5 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
+                        About
+                    </p>
+                    <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                        {candidate.bio}
+                    </p>
                 </div>
             )}
 
-            {/* Footer: candidate avatar / initials left, actions right */}
-            <div className="mt-auto flex items-center justify-end gap-3 pt-2 border-t border-base-200">
+            {/* Stats Row */}
+            <div className="border-b border-base-300">
+                <div className="grid grid-cols-3 divide-x divide-base-300">
+                    {stats.map((stat) => (
+                        <div
+                            key={stat.label}
+                            className="flex flex-col items-center justify-center px-1.5 py-3 gap-1 text-center min-w-0 overflow-hidden"
+                        >
+                            <i
+                                className={`${stat.icon} text-primary text-sm`}
+                            />
+                            <span className="text-sm font-black leading-none truncate w-full text-base-content">
+                                {stat.value}
+                            </span>
+                            <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate w-full">
+                                {stat.label}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Skills */}
+            {skills.length > 0 && (
+                <div className="px-5 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        Skills
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {skills.slice(0, 4).map((skill) => (
+                            <BaselBadge key={skill} variant="outline" size="sm">
+                                {skill}
+                            </BaselBadge>
+                        ))}
+                        {skills.length > 4 && (
+                            <BaselBadge variant="outline" size="sm">
+                                +{skills.length - 4}
+                            </BaselBadge>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Preference Badges + Actions */}
+            <div className="px-5 py-4 mt-auto flex items-center justify-between gap-3">
+                <div className="flex flex-col gap-2 min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30">
+                        Preferences
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {candidate.open_to_remote && (
+                            <BaselBadge color="primary" icon="fa-house-laptop">
+                                Remote
+                            </BaselBadge>
+                        )}
+                        {candidate.open_to_relocation && (
+                            <BaselBadge color="secondary" icon="fa-truck-moving">
+                                Relocatable
+                            </BaselBadge>
+                        )}
+                        {!candidate.open_to_remote && !candidate.open_to_relocation && (
+                            <BaselBadge variant="outline" icon="fa-building" className="opacity-30">
+                                On-Site
+                            </BaselBadge>
+                        )}
+                    </div>
+                </div>
                 <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                     <CandidateActionsToolbar
                         candidate={candidate}
@@ -159,6 +236,6 @@ export function GridCard({
                     />
                 </div>
             </div>
-        </div>
+        </article>
     );
 }

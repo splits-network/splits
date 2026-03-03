@@ -27,6 +27,7 @@ import {
     BadgeGrid,
     useGamification,
 } from "@splits-network/shared-gamification";
+import { BaselTabBar } from "@splits-network/basel-ui";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -240,48 +241,6 @@ function HeroHeader({
     );
 }
 
-function TabNav({
-    active,
-    onChange,
-}: {
-    active: DetailTab;
-    onChange: (t: DetailTab) => void;
-}) {
-    const tabs: { key: DetailTab; label: string; icon: string }[] = [
-        {
-            key: "about",
-            label: "About",
-            icon: "fa-duotone fa-regular fa-user",
-        },
-        {
-            key: "contact",
-            label: "Contact",
-            icon: "fa-duotone fa-regular fa-address-book",
-        },
-    ];
-
-    return (
-        <nav className="bg-base-100 border-b border-base-300">
-            <div className="flex gap-0">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => onChange(tab.key)}
-                        className={`flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
-                            active === tab.key
-                                ? "border-primary text-primary"
-                                : "border-transparent text-base-content/40 hover:text-base-content/60 hover:border-base-300"
-                        }`}
-                    >
-                        <i className={`${tab.icon} text-sm`} />
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
-        </nav>
-    );
-}
-
 function AboutPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
     const { getBadges } = useGamification();
     const badges = getBadges(recruiter.id);
@@ -486,7 +445,15 @@ export function RecruiterDetail({
                 onClose={onClose}
                 onRefresh={onRefresh}
             />
-            <TabNav active={activeTab} onChange={setActiveTab} />
+            <BaselTabBar
+                tabs={[
+                    { label: "About", value: "about", icon: "fa-duotone fa-regular fa-user" },
+                    { label: "Contact", value: "contact", icon: "fa-duotone fa-regular fa-address-book" },
+                ]}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as DetailTab)}
+                className="bg-base-100 border-b border-base-300"
+            />
             {activeTab === "about" && <AboutPanel recruiter={recruiter} />}
             {activeTab === "contact" && <ContactPanel recruiter={recruiter} />}
         </div>

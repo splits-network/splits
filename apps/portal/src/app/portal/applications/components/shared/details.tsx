@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -14,6 +14,7 @@ import type {
     ApplicationNote,
     ApplicationNoteCreatorType,
 } from "@splits-network/shared-types";
+import { BaselTabBar } from "@splits-network/basel-ui";
 import { getStageDisplayWithExpired } from "./status-color";
 import ApplicationTimeline from "@/app/portal/applications/components/shared/application-timeline";
 import DocumentViewerModal from "@/app/portal/applications/components/modals/document-viewer-modal";
@@ -65,41 +66,6 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<TabKey>("overview");
-
-    // Tab scroll arrow buttons
-    const tabScrollRef = useRef<HTMLDivElement>(null);
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(false);
-
-    const updateScrollButtons = useCallback(() => {
-        const el = tabScrollRef.current;
-        if (!el) return;
-        setCanScrollLeft(el.scrollLeft > 0);
-        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
-    }, []);
-
-    useEffect(() => {
-        const el = tabScrollRef.current;
-        if (!el) return;
-        updateScrollButtons();
-        el.addEventListener("scroll", updateScrollButtons);
-        const observer = new ResizeObserver(updateScrollButtons);
-        observer.observe(el);
-        return () => {
-            el.removeEventListener("scroll", updateScrollButtons);
-            observer.disconnect();
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [updateScrollButtons, !!application]);
-
-    const scrollTabs = useCallback((direction: "left" | "right") => {
-        const el = tabScrollRef.current;
-        if (!el) return;
-        el.scrollBy({
-            left: direction === "left" ? -120 : 120,
-            behavior: "smooth",
-        });
-    }, []);
 
     const fetchDetail = useCallback(async () => {
         if (!itemId) return;
@@ -189,58 +155,17 @@ export default function Details({ itemId, onRefresh }: DetailsProps) {
             </div>
 
             {/* ─── Tabs ───────────────────────────────────────────────── */}
-            <div className="relative shrink-0">
-                {canScrollLeft && (
-                    <button
-                        onClick={() => scrollTabs("left")}
-                        className="absolute left-0 top-0 bottom-0  flex items-center px-1 bg-gradient-to-r from-base-100 via-base-100 to-transparent"
-                        aria-label="Scroll tabs left"
-                    >
-                        <i className="fa-duotone fa-regular fa-chevron-left text-xs text-base-content/60" />
-                    </button>
-                )}
-                <div
-                    ref={tabScrollRef}
-                    className="overflow-x-auto"
-                    style={{ scrollbarWidth: "none" }}
-                    data-tab-scroll-basel
-                >
-                    <style>{`[data-tab-scroll-basel]::-webkit-scrollbar { display: none; }`}</style>
-                    <div
-                        role="tablist"
-                        className="tabs tabs-bordered min-w-max"
-                    >
-                        {TABS.map((tab) => (
-                            <a
-                                key={tab.key}
-                                role="tab"
-                                className={`tab ${activeTab === tab.key ? "tab-active" : ""}`}
-                                onClick={() => setActiveTab(tab.key)}
-                            >
-                                <i
-                                    className={`fa-duotone fa-regular ${tab.icon} mr-2`}
-                                />
-                                {tab.label}
-                                {tab.key === "documents" &&
-                                    documents.length > 0 && (
-                                        <span className="ml-1 text-sm uppercase tracking-[0.2em] font-bold px-1.5 py-0.5 bg-primary/15 text-primary">
-                                            {documents.length}
-                                        </span>
-                                    )}
-                            </a>
-                        ))}
-                    </div>
-                </div>
-                {canScrollRight && (
-                    <button
-                        onClick={() => scrollTabs("right")}
-                        className="absolute right-0 top-0 bottom-0  flex items-center px-1 bg-gradient-to-l from-base-100 via-base-100 to-transparent"
-                        aria-label="Scroll tabs right"
-                    >
-                        <i className="fa-duotone fa-regular fa-chevron-right text-xs text-base-content/60" />
-                    </button>
-                )}
-            </div>
+            <BaselTabBar
+                tabs={TABS.map(tab => ({
+                    label: tab.label,
+                    value: tab.key,
+                    icon: `fa-duotone fa-regular ${tab.icon}`,
+                    count: tab.key === "documents" && documents.length > 0 ? documents.length : undefined,
+                }))}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as TabKey)}
+                className="shrink-0"
+            />
 
             {/* ─── Tab Content ────────────────────────────────────────── */}
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4">

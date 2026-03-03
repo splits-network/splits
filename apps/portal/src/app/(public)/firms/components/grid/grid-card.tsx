@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { PublicFirm } from "../../types";
 import { firmLocation, firmInitials } from "../../types";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 interface GridCardProps {
     firm: PublicFirm;
@@ -66,6 +67,9 @@ function CardHeader({
     initials: string;
     location: string | null;
 }) {
+    const { getLevel } = useGamification();
+    const firmLevel = firm.id ? getLevel(firm.id) : undefined;
+
     return (
         <div className="bg-base-300 border-b border-base-300 px-6 pt-6 pb-5">
             {/* Kicker row: industries + location */}
@@ -93,6 +97,11 @@ function CardHeader({
                     ) : (
                         <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none">
                             {initials}
+                        </div>
+                    )}
+                    {firmLevel && (
+                        <div className="absolute -bottom-1 -right-1">
+                            <LevelBadge level={firmLevel} size="sm" />
                         </div>
                     )}
                 </div>

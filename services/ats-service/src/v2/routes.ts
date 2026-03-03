@@ -33,6 +33,16 @@ import { AdminAtsRepository } from './admin/repository';
 import { AdminAtsService } from './admin/service';
 import { registerAdminAtsRoutes } from './admin/routes';
 
+import { SkillRepository } from './skills/repository';
+import { SkillService } from './skills/service';
+import { registerSkillRoutes } from './skills/routes';
+import { CandidateSkillRepository } from './candidate-skills/repository';
+import { CandidateSkillService } from './candidate-skills/service';
+import { registerCandidateSkillRoutes } from './candidate-skills/routes';
+import { JobSkillRepository } from './job-skills/repository';
+import { JobSkillService } from './job-skills/service';
+import { registerJobSkillRoutes } from './job-skills/routes';
+
 interface RegisterConfig {
     supabaseUrl: string;
     supabaseKey: string;
@@ -99,6 +109,19 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
 
     registerJobRequirementRoutes(app, { service: jobRequirementService });
     registerApplicationNoteRoutes(app, noteService);
+
+    // Skills modules (shared Supabase client from job repository)
+    const skillRepository = new SkillRepository(config.supabaseUrl, config.supabaseKey);
+    const skillService = new SkillService(skillRepository);
+    registerSkillRoutes(app, { service: skillService });
+
+    const candidateSkillRepository = new CandidateSkillRepository(candidateRepository.getSupabase());
+    const candidateSkillService = new CandidateSkillService(candidateSkillRepository);
+    registerCandidateSkillRoutes(app, { service: candidateSkillService });
+
+    const jobSkillRepository = new JobSkillRepository(jobRepository.getSupabase());
+    const jobSkillService = new JobSkillService(jobSkillRepository);
+    registerJobSkillRoutes(app, { service: jobSkillService });
 
     // Admin routes (permissive, no access filtering)
     const adminRepository = new AdminAtsRepository(config.supabaseUrl, config.supabaseKey);

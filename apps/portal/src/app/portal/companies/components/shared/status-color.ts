@@ -3,25 +3,43 @@
  * Uses DaisyUI semantic tokens only.
  */
 
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
+
 export type ViewMode = "table" | "grid" | "split";
 
-/** Relationship status -> DaisyUI semantic badge/text classes */
+/** Relationship status → Tailwind class string (bg + text) for raw className usage */
 export function statusColor(status?: string): string {
     switch (status) {
         case "active":
-            return "bg-success/15 text-success";
+            return "bg-success/10 text-success";
         case "pending":
-            return "bg-warning/15 text-warning";
+            return "bg-warning/10 text-warning";
         case "declined":
-            return "bg-error/15 text-error";
+            return "bg-error/10 text-error";
         case "terminated":
-            return "bg-base-content/15 text-base-content/50";
+            return "bg-base-300 text-base-content/50";
         default:
-            return "bg-base-content/15 text-base-content/50";
+            return "bg-base-300 text-base-content/50";
     }
 }
 
-/** Status -> border color class (for selected items) */
+/** Relationship status → BaselSemanticColor name for use with BaselBadge */
+export function statusColorName(status?: string): BaselSemanticColor {
+    switch (status) {
+        case "active":
+            return "success";
+        case "pending":
+            return "warning";
+        case "declined":
+            return "error";
+        case "terminated":
+            return "neutral";
+        default:
+            return "neutral";
+    }
+}
+
+/** Status → border color class (for selected items) */
 export function statusBorder(status?: string): string {
     switch (status) {
         case "active":

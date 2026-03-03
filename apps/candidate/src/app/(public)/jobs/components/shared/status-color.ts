@@ -20,6 +20,20 @@ export function statusColor(status?: string): string {
     }
 }
 
+/** Status -> BaselBadge semantic color name */
+export function statusSemanticColor(status?: string): "success" | "warning" | "info" | "neutral" {
+    switch (status) {
+        case "active":
+            return "success";
+        case "paused":
+            return "warning";
+        case "filled":
+            return "info";
+        default:
+            return "neutral";
+    }
+}
+
 /** Status -> border color class (for selected items) */
 export function statusBorder(status?: string): string {
     switch (status) {

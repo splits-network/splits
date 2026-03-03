@@ -43,6 +43,24 @@ export function companyInitials(name: string): string {
         : (words[0]?.[0] || "").toUpperCase();
 }
 
+export function requiredSkillNames(job: Job): string[] {
+    return (job.skills || [])
+        .filter(js => js.is_required && js.skill)
+        .map(js => js.skill!.name);
+}
+
+export function preferredSkillNames(job: Job): string[] {
+    return (job.skills || [])
+        .filter(js => !js.is_required && js.skill)
+        .map(js => js.skill!.name);
+}
+
+export function allSkillNames(job: Job): string[] {
+    return (job.skills || [])
+        .filter(js => js.skill)
+        .map(js => js.skill!.name);
+}
+
 export function estimatedPayoutRange(job: Job): string | null {
     const salary = job.salary_min || job.salary_max;
     if (!salary || !job.fee_percentage) return null;

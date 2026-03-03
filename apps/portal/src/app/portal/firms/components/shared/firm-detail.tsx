@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
+import { createAuthenticatedClient, createUnauthenticatedClient } from "@/lib/api-client";
 import type { Firm, FirmMember, FirmInvitation } from "../../types";
 import { formatCurrency, formatDate } from "../../types";
 import { statusColor } from "./status-color";
 import { formatStatus, memberCountDisplay } from "./helpers";
 import { FirmActionsToolbar } from "./actions-toolbar";
+import { LevelBadge, BadgeGrid, MiniLeaderboard, useGamification } from "@splits-network/shared-gamification";
+import { BaselTabBar } from "@splits-network/basel-ui";
 import { MembersSection } from "../detail/members-section";
 import { BillingSection } from "../detail/billing-section";
 import { SettingsSection } from "../detail/settings-section";
@@ -30,6 +32,18 @@ export function FirmDetail({
     onRefresh?: () => void;
 }) {
     const [activeTab, setActiveTab] = useState<DetailTab>("members");
+    const { registerEntities, getLevel, getBadges } = useGamification();
+
+    useEffect(() => {
+        registerEntities("firm", [firm.id]);
+        const recruiterIds = members.map((m) => m.recruiter_id).filter(Boolean);
+        if (recruiterIds.length > 0) {
+            registerEntities("recruiter", [...new Set(recruiterIds)]);
+        }
+    }, [firm.id, members, registerEntities]);
+
+    const firmLevel = getLevel(firm.id);
+    const badges = getBadges(firm.id);
 
     return (
         <div className="w-full">
@@ -47,8 +61,9 @@ export function FirmDetail({
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-2">
                             {memberCountDisplay(firm)}
                         </p>
-                        <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-3">
+                        <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-3 flex items-center gap-2">
                             {firm.name}
+                            {firmLevel && <LevelBadge level={firmLevel} size="sm" />}
                         </h2>
                         <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
                             <span>
@@ -107,28 +122,38 @@ export function FirmDetail({
                 </div>
             </div>
 
-            {/* Tab bar */}
-            <div className="border-b border-base-300 px-6 pt-4">
-                <div className="flex bg-base-200 p-1 w-fit">
-                    {(["members", "billing", "settings"] as const).map(
-                        (tab) => (
-                            <button
-                                key={tab}
-                                type="button"
-                                className={`px-4 py-1.5 text-sm font-semibold transition-colors ${
-                                    activeTab === tab
-                                        ? "bg-primary text-primary-content"
-                                        : "text-base-content/50 hover:text-base-content/70"
-                                }`}
-                                style={{ borderRadius: 0 }}
-                                onClick={() => setActiveTab(tab)}
-                            >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                            </button>
-                        ),
-                    )}
+            {/* Achievements */}
+            {badges.length > 0 && (
+                <div className="px-6 py-4 border-b border-base-300">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                        Achievements
+                    </h3>
+                    <BadgeGrid badges={badges} maxVisible={6} />
                 </div>
+            )}
+
+            {/* Firm Leaderboard */}
+            <div className="px-6 py-4 border-b border-base-300">
+                <MiniLeaderboard
+                    entityType="recruiter"
+                    entityId={undefined}
+                    client={createUnauthenticatedClient()}
+                    title="Top Recruiters"
+                    fullLeaderboardHref="/portal/leaderboard"
+                />
             </div>
+
+            {/* Tab bar */}
+            <BaselTabBar
+                tabs={[
+                    { label: "Members", value: "members" },
+                    { label: "Billing", value: "billing" },
+                    { label: "Settings", value: "settings" },
+                ]}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as DetailTab)}
+                className="border-b border-base-300 px-6 pt-4"
+            />
 
             {/* Tab content */}
             <div className="p-6">

@@ -19,6 +19,7 @@ import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
+import { useGamification } from "@splits-network/shared-gamification";
 
 export default function MatchesPage() {
     const searchParams = useSearchParams();
@@ -98,6 +99,21 @@ export default function MatchesPage() {
         defaultLimit: 25,
         syncToUrl: true,
     });
+
+    const { registerEntities } = useGamification();
+
+    useEffect(() => {
+        const candidateIds = matches.map((m) => m.candidate_id).filter(Boolean);
+        const companyIds = matches
+            .map((m) => m.job?.companies?.id)
+            .filter((id): id is string => !!id);
+        if (candidateIds.length > 0) {
+            registerEntities("candidate", [...new Set(candidateIds)]);
+        }
+        if (companyIds.length > 0) {
+            registerEntities("company", [...new Set(companyIds)]);
+        }
+    }, [matches, registerEntities]);
 
     const handleSelect = useCallback((match: EnrichedMatch) => {
         setSelectedMatchId((prev) => (prev === match.id ? null : match.id));

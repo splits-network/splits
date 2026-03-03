@@ -1,9 +1,17 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ButtonLoading } from "@splits-network/shared-ui";
+
+interface CandidateSuggestion {
+    id: string;
+    full_name: string;
+    email: string;
+    current_title?: string;
+    current_company?: string;
+}
 
 interface AddCandidateModalProps {
     isOpen: boolean;
@@ -30,6 +38,56 @@ export default function AddCandidateModal({
         full_name: "",
         email: "",
     });
+    const [suggestions, setSuggestions] = useState<CandidateSuggestion[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [searching, setSearching] = useState(false);
+    const [selectedFromSuggestion, setSelectedFromSuggestion] = useState(false);
+    const suggestionsRef = useRef<HTMLDivElement>(null);
+
+    // Debounced email search
+    useEffect(() => {
+        if (selectedFromSuggestion || formData.email.trim().length < 3) {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            try {
+                setSearching(true);
+                const token = await getToken();
+                if (!token) return;
+
+                const client = createAuthenticatedClient(token);
+                const response = await client.get<{ data: CandidateSuggestion[] }>(
+                    "/candidates",
+                    { params: { search: formData.email.trim(), scope: "all", limit: 5 } },
+                );
+
+                const results = response.data || [];
+                setSuggestions(results);
+                setShowSuggestions(results.length > 0);
+            } catch {
+                setSuggestions([]);
+                setShowSuggestions(false);
+            } finally {
+                setSearching(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formData.email]);
+
+    const handleSelectSuggestion = (candidate: CandidateSuggestion) => {
+        setSelectedFromSuggestion(true);
+        setFormData({
+            full_name: candidate.full_name || "",
+            email: candidate.email || "",
+        });
+        setSuggestions([]);
+        setShowSuggestions(false);
+    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -86,6 +144,9 @@ export default function AddCandidateModal({
         setFormData({ full_name: "", email: "" });
         setError(null);
         setSuccess(null);
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setSelectedFromSuggestion(false);
         onClose();
     };
 
@@ -243,32 +304,89 @@ export default function AddCandidateModal({
                                     />
                                 </div>
 
-                                {/* Email Field */}
-                                <div>
+                                {/* Email Field with Autocomplete */}
+                                <div className="relative">
                                     <label className="block text-sm font-bold uppercase tracking-wider text-base-content/60 mb-2">
                                         Email{" "}
                                         <span className="text-error">*</span>
                                     </label>
-                                    <input
-                                        type="email"
-                                        className="input input-bordered w-full"
-                                        style={{ borderRadius: 0 }}
-                                        value={formData.email}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                email: e.target.value,
-                                            })
-                                        }
-                                        placeholder="john@example.com"
-                                        required
-                                        disabled={submitting}
-                                    />
-                                    <p className="text-xs font-bold text-base-content/50 mt-2 uppercase tracking-wider">
-                                        An invitation to accept your
-                                        representation will be sent to this
-                                        address
-                                    </p>
+                                    <div className="relative">
+                                        <input
+                                            type="email"
+                                            className="input input-bordered w-full"
+                                            style={{ borderRadius: 0 }}
+                                            value={formData.email}
+                                            onChange={(e) => {
+                                                setSelectedFromSuggestion(false);
+                                                setFormData({
+                                                    ...formData,
+                                                    email: e.target.value,
+                                                });
+                                            }}
+                                            placeholder="john@example.com"
+                                            required
+                                            disabled={submitting}
+                                            autoComplete="off"
+                                        />
+                                        {searching && (
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 loading loading-spinner loading-xs text-base-content/40" />
+                                        )}
+                                    </div>
+
+                                    {/* Suggestions Dropdown */}
+                                    {showSuggestions && (
+                                        <div
+                                            ref={suggestionsRef}
+                                            className="absolute z-50 w-full mt-1 border-2 border-base-300 bg-base-100 shadow-md max-h-48 overflow-y-auto"
+                                        >
+                                            <div className="px-3 py-1.5 border-b border-base-200">
+                                                <span className="text-xs font-black uppercase tracking-wider text-base-content/40">
+                                                    Existing candidates
+                                                </span>
+                                            </div>
+                                            {suggestions.map((s) => (
+                                                <button
+                                                    key={s.id}
+                                                    type="button"
+                                                    className="w-full px-3 py-2.5 text-left hover:bg-base-200 flex items-center gap-3 transition-colors"
+                                                    onClick={() => handleSelectSuggestion(s)}
+                                                >
+                                                    <div className="w-8 h-8 bg-primary flex items-center justify-center shrink-0">
+                                                        <span className="text-xs font-black text-primary-content">
+                                                            {s.full_name?.[0] || "?"}
+                                                        </span>
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="font-bold text-sm text-base-content truncate">
+                                                            {s.full_name}
+                                                        </p>
+                                                        <p className="text-xs text-base-content/60 font-medium truncate">
+                                                            {s.email}
+                                                            {s.current_title && ` · ${s.current_title}`}
+                                                        </p>
+                                                    </div>
+                                                    <span className="ml-auto shrink-0 text-xs font-bold text-info uppercase tracking-wider">
+                                                        On platform
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {selectedFromSuggestion ? (
+                                        <div className="flex items-center gap-1.5 mt-2">
+                                            <i className="fa-duotone fa-regular fa-circle-check text-info text-sm" />
+                                            <p className="text-xs font-bold text-info uppercase tracking-wider">
+                                                Already on Splits Network — invitation will be sent
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs font-bold text-base-content/50 mt-2 uppercase tracking-wider">
+                                            An invitation to accept your
+                                            representation will be sent to this
+                                            address
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Actions */}

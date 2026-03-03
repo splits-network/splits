@@ -315,6 +315,25 @@ function registerFirmRoutes(app: FastifyInstance, services: ServiceRegistry) {
     );
 
     app.get(
+        '/api/v2/firms/my-firms',
+        routeOptions('Get all firms for current user'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/api/v2/firms/my-firms',
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch user firms');
+            }
+        }
+    );
+
+    app.get(
         '/api/v2/firms/by-slug/:slug',
         routeOptions('Get firm by slug'),
         async (request: FastifyRequest, reply: FastifyReply) => {

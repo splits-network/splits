@@ -13,6 +13,8 @@ export interface LeaderboardEntry {
     metric: string;
     metadata: Record<string, any>;
     computed_at: string;
+    display_name?: string;
+    avatar_url?: string;
 }
 
 export interface LeaderboardFilters {

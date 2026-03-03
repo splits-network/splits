@@ -92,10 +92,12 @@ export class MatchingOrchestrator {
     }
 
     private async generateMatchForPair(candidateId: string, jobId: string): Promise<void> {
-        const [candidate, job, requirements] = await Promise.all([
+        const [candidate, job, requirements, structuredJobSkills, structuredCandidateSkills] = await Promise.all([
             this.fetchCandidate(candidateId),
             this.fetchJob(jobId),
             this.fetchJobRequirements(jobId),
+            this.fetchJobSkills(jobId),
+            this.fetchCandidateSkills(candidateId),
         ]);
 
         if (!candidate || !job) return;
@@ -125,11 +127,13 @@ export class MatchingOrchestrator {
         };
         const ruleResult = computeRuleScore(ruleInput);
 
-        // Layer 2: Skills scoring
+        // Layer 2: Skills scoring (structured when available, legacy fallback)
         const candidateSkills = candidate.resume_metadata?.skills || [];
         const skillsResult = computeSkillsScore({
             candidate_skills: candidateSkills,
             job_requirements: requirements,
+            structured_candidate_skills: structuredCandidateSkills,
+            structured_job_skills: structuredJobSkills,
         });
 
         // Layer 3: AI scoring (only for partner jobs — "True Match" tier)
@@ -167,6 +171,7 @@ export class MatchingOrchestrator {
             skills_matched: skillsResult.matched_skills,
             skills_missing: [...skillsResult.missing_mandatory, ...skillsResult.missing_preferred],
             skills_match_pct: skillsResult.match_pct,
+            skills_source: skillsResult.skills_source,
             ...(aiSummary && { ai_summary: aiSummary }),
             ...(cosineSimilarity !== undefined && { cosine_similarity: cosineSimilarity }),
         };
@@ -249,5 +254,27 @@ export class MatchingOrchestrator {
             .select('description, requirement_type')
             .eq('job_id', jobId);
         return data || [];
+    }
+
+    private async fetchJobSkills(jobId: string) {
+        const { data } = await this.supabase
+            .from('job_skills')
+            .select('is_required, skill:skills(id, name, slug)')
+            .eq('job_id', jobId);
+        if (!data) return [];
+        return data
+            .filter((row: any) => row.skill)
+            .map((row: any) => ({ skill: row.skill, is_required: row.is_required }));
+    }
+
+    private async fetchCandidateSkills(candidateId: string) {
+        const { data } = await this.supabase
+            .from('candidate_skills')
+            .select('skill:skills(id, name, slug)')
+            .eq('candidate_id', candidateId);
+        if (!data) return [];
+        return data
+            .filter((row: any) => row.skill)
+            .map((row: any) => row.skill);
     }
 }

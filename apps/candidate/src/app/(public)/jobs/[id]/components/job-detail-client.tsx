@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -26,6 +26,7 @@ import {
     type Job,
     type JobRequirement,
 } from "../../types";
+import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -61,6 +62,15 @@ export default function JobDetailClient({
     const saved = !!savedJobId;
 
     const { success: toastSuccess, error: toastError } = useToast();
+
+    const { registerEntities, getLevel } = useGamification();
+    const companyLevel = job.company?.id ? getLevel(job.company.id) : undefined;
+
+    useEffect(() => {
+        if (job.company?.id) {
+            registerEntities("company", [job.company.id]);
+        }
+    }, [job.company?.id, registerEntities]);
 
     const handleSaveToggle = async () => {
         if (!isAuthenticated) {
@@ -320,7 +330,7 @@ export default function JobDetailClient({
 
                         {/* Title + Company */}
                         <div className="flex items-start gap-5 mb-6">
-                            <div className="w-14 h-14 flex-shrink-0">
+                            <div className="relative flex-shrink-0">
                                 {job.company?.logo_url ? (
                                     <img
                                         src={job.company.logo_url}
@@ -330,6 +340,11 @@ export default function JobDetailClient({
                                 ) : (
                                     <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                                         {initials}
+                                    </div>
+                                )}
+                                {companyLevel && (
+                                    <div className="absolute -bottom-1 -right-1">
+                                        <LevelBadge level={companyLevel} size="sm" />
                                     </div>
                                 )}
                             </div>
@@ -651,17 +666,24 @@ export default function JobDetailClient({
                                 Company Info
                             </h3>
                             <div className="flex items-center gap-3 mb-4">
-                                {job.company?.logo_url ? (
-                                    <img
-                                        src={job.company.logo_url}
-                                        alt={`${companyDisplay} logo`}
-                                        className="w-12 h-12 object-contain"
-                                    />
-                                ) : (
-                                    <div className="w-12 h-12 bg-accent text-accent-content flex items-center justify-center font-black text-lg">
-                                        {initials}
-                                    </div>
-                                )}
+                                <div className="relative shrink-0">
+                                    {job.company?.logo_url ? (
+                                        <img
+                                            src={job.company.logo_url}
+                                            alt={`${companyDisplay} logo`}
+                                            className="w-12 h-12 object-contain"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 bg-accent text-accent-content flex items-center justify-center font-black text-lg">
+                                            {initials}
+                                        </div>
+                                    )}
+                                    {companyLevel && (
+                                        <div className="absolute -bottom-1 -right-1">
+                                            <LevelBadge level={companyLevel} size="sm" />
+                                        </div>
+                                    )}
+                                </div>
                                 <div>
                                     <div className="font-bold">
                                         {companyDisplay}

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { AdminPageHeader } from '../../components';
+import { BaselTabBar } from "@splits-network/basel-ui";
 import JobOverviewTab from './components/job-overview-tab';
 import MatchedCandidatesTab from './components/matched-candidates-tab';
 
@@ -101,19 +102,11 @@ export default function JobDetailClient({ jobId }: { jobId: string }) {
             />
 
             {/* Tab Navigation */}
-            <div role="tablist" className="tabs tabs-bordered">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        role="tab"
-                        className={`tab gap-2 ${activeTab === tab.key ? 'tab-active' : ''}`}
-                        onClick={() => setActiveTab(tab.key)}
-                    >
-                        <i className={`fa-duotone fa-regular ${tab.icon}`} />
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+            <BaselTabBar
+                tabs={TABS.map(t => ({ label: t.label, value: t.key, icon: `fa-duotone fa-regular ${t.icon}` }))}
+                active={activeTab}
+                onChange={(v) => setActiveTab(v as TabKey)}
+            />
 
             {/* Tab Content */}
             {activeTab === 'overview' && <JobOverviewTab job={job} />}

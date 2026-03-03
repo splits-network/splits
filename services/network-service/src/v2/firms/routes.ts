@@ -77,6 +77,19 @@ export function registerFirmRoutes(
         }
     });
 
+    // GET all firms for current user
+    app.get('/api/v2/firms/my-firms', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const firms = await config.firmService.getMyFirms(clerkUserId);
+            return reply.send({ data: firms });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Internal server error' });
+        }
+    });
+
     // GET firm by slug
     app.get('/api/v2/firms/by-slug/:slug', async (request, reply) => {
         try {

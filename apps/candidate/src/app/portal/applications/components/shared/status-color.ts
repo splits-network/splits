@@ -1,8 +1,11 @@
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
+
 export type ViewMode = "table" | "grid" | "split";
 
 /**
  * Basel stage color utility — returns bg + text classes for pills/badges.
  * Uses semantic DaisyUI tokens only; no Memphis colors.
+ * @deprecated Use stageColorName with BaselBadge instead.
  */
 export function stageColor(stage: string): string {
     switch (stage) {
@@ -32,5 +35,40 @@ export function stageColor(stage: string): string {
             return "bg-warning/15 text-warning";
         default:
             return "bg-base-200 text-base-content/50";
+    }
+}
+
+/**
+ * Returns a BaselSemanticColor for use with BaselBadge.
+ * Mirrors the stageColor mapping but returns a typed color name.
+ */
+export function stageColorName(stage: string): BaselSemanticColor {
+    switch (stage) {
+        case "draft":
+            return "neutral";
+        case "ai_review":
+        case "ai_reviewed":
+            return "info";
+        case "submitted":
+        case "recruiter_review":
+        case "company_review":
+            return "primary";
+        case "recruiter_proposed":
+        case "recruiter_request":
+            return "secondary";
+        case "screen":
+        case "interview":
+        case "company_feedback":
+            return "accent";
+        case "offer":
+        case "hired":
+            return "success";
+        case "rejected":
+            return "error";
+        case "withdrawn":
+        case "expired":
+            return "warning";
+        default:
+            return "neutral";
     }
 }
