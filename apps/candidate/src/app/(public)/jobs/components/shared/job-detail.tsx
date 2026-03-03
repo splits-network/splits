@@ -520,12 +520,10 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                                     {job.company.industry}
                                 </p>
                             )}
-                            {(job.company?.headquarters_location ||
-                                job.company_headquarters_location) && (
+                            {job.company?.headquarters_location && (
                                 <p className="text-sm text-base-content/50">
                                     <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                                    {job.company?.headquarters_location ||
-                                        job.company_headquarters_location}
+                                    {job.company.headquarters_location}
                                 </p>
                             )}
                         </div>

@@ -541,8 +541,8 @@ export default function RecruiterView() {
                                                         icon={style.icon}
                                                         iconColor={style.color}
                                                         iconBg={style.bg}
-                                                        title={`${app.candidate_name || "Candidate"} - ${app.job_title}`}
-                                                        meta={`${app.company_name || ""} -- ${app.stage?.replace("_", " ")} -- ${timeAgo(app.updated_at)}`}
+                                                        title={`${app.candidate?.full_name || "Candidate"} - ${app.job?.title || "Role"}`}
+                                                        meta={`${app.job?.company?.name || ""} -- ${app.stage?.replace("_", " ")} -- ${timeAgo(app.updated_at)}`}
                                                     />
                                                 );
                                             },

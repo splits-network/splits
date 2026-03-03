@@ -16,7 +16,7 @@ function stripHtml(value: string) {
 }
 
 function buildSummary(job: any) {
-    const company = job?.company?.name || job?.company_name || "";
+    const company = job?.company?.name || "";
     const location = job?.location || "";
     const salaryMin = job?.salary_min ? `$${Number(job.salary_min).toLocaleString()}` : "";
     const salaryMax = job?.salary_max ? `$${Number(job.salary_max).toLocaleString()}` : "";

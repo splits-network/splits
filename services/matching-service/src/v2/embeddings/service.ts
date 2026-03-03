@@ -100,8 +100,8 @@ export class EmbeddingService {
             parts.push(`Requirements: ${reqText}`);
         }
 
-        if (job.company_name) parts.push(`Company: ${job.company_name}`);
-        if (job.company_industry) parts.push(`Industry: ${job.company_industry}`);
+        if (job.company?.name) parts.push(`Company: ${job.company.name}`);
+        if (job.company?.industry) parts.push(`Industry: ${job.company.industry}`);
 
         return parts.join('. ').substring(0, MAX_TEXT_LENGTH);
     }

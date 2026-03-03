@@ -69,7 +69,7 @@ export function registerSearchJobsTool(
                 const lines = [`Found ${result.total} job${result.total !== 1 ? 's' : ''}. Page ${page} of ${totalPages}.\n`];
                 for (const job of jobs) {
                     const parts = [
-                        `**${job.title}** at ${job.company_name}`,
+                        `**${job.title}** at ${job.company_name || '3rd Party Firm'}`,
                         `${job.location}${job.commute_types?.length ? ' · ' + job.commute_types.join(', ') : ''}`,
                     ];
                     if (job.salary_range) parts.push(`Salary: ${job.salary_range}`);

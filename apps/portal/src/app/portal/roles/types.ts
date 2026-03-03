@@ -18,7 +18,6 @@ export interface Job {
     id: string;
     company_id: string | null;
     source_firm_id?: string | null;
-    company_name?: string | null;
 
     // Basic info
     title: string;

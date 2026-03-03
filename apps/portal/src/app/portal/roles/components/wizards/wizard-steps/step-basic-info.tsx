@@ -58,7 +58,7 @@ export function StepBasicInfo({
                             type="button"
                             onClick={() => {
                                 onRoleSourceChange("company");
-                                onChange({ source_firm_id: undefined, company_name: undefined });
+                                onChange({ source_firm_id: undefined });
                             }}
                             className={`flex-1 px-3 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
                                 roleSource === "company"
@@ -117,17 +117,6 @@ export function StepBasicInfo({
                             <input className="input w-full" value={userFirms[0].name} disabled readOnly />
                         </fieldset>
                     )}
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
-                            Client Company Name *
-                        </legend>
-                        <input
-                            className="input w-full"
-                            value={formData.company_name || ""}
-                            onChange={(e) => onChange({ company_name: e.target.value })}
-                            placeholder="e.g., Acme Corporation"
-                        />
-                    </fieldset>
                 </>
             ) : showCompanySelect ? (
                 <fieldset className="fieldset">

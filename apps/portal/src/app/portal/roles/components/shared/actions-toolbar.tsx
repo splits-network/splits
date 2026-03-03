@@ -362,7 +362,7 @@ export default function RoleActionsToolbar({
                             id: job.id,
                             title: job.title,
                             company_id: job.company_id || "",
-                            company_name: job.company?.name || job.company_name || undefined,
+                            company_name: job.company?.name || undefined,
                             location: job.location,
                             fee_percentage: job.fee_percentage,
                             status: job.status,

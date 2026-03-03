@@ -267,7 +267,6 @@ export default function RoleWizardModal({
             if (!formData.title.trim()) { setError("A job title is required to continue."); return; }
             if (!formData.company_id && !isOffPlatform) { setError("Select a company to continue."); return; }
             if (isOffPlatform && !formData.source_firm_id) { setError("Select a firm to continue."); return; }
-            if (isOffPlatform && !formData.company_name?.trim()) { setError("Enter the client company name for agency roles."); return; }
         }
         setError(null);
         setCurrentStep((prev) => Math.min(prev + 1, WIZARD_STEPS.length - 1));
@@ -311,7 +310,6 @@ export default function RoleWizardModal({
             };
             if (isOffPlatform && formData.source_firm_id) {
                 payload.source_firm_id = formData.source_firm_id;
-                payload.company_name = formData.company_name?.trim();
             } else {
                 payload.company_id = formData.company_id;
             }

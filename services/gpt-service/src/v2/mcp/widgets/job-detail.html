@@ -109,7 +109,7 @@
 
     let html = `
       <h1>${esc(job.title)}</h1>
-      <div class="company">${esc(job.company?.name || job.company_name || 'Unknown Company')}</div>
+      <div class="company">${esc(job.company?.name || '3rd Party Firm')}</div>
       <div class="meta-row">
         <span class="badge">${esc(job.location || 'Location N/A')}</span>
         ${(job.commute_types || []).map(t => `<span class="badge">${esc(t)}</span>`).join('')}
