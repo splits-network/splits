@@ -183,18 +183,20 @@ export default async function RootLayout({
                         strategy="afterInteractive"
                     ></Script>
                 </head>
-                <body className="flex flex-col min-h-screen bg-base-300">
+                <body className="flex flex-col min-h-screen bg-base-200">
                     <ThemeProvider>
                         <UserProfileProvider initialProfile={initialProfile}>
                             <GamificationWrapper>
-                            <ToastProvider>
-                                <CandidateChatSidebar>
-                                    <Header navItems={headerNav?.items} />
-                                    <main className="flex-1">{children}</main>
-                                    <Footer footerNav={footerNav} />
-                                </CandidateChatSidebar>
-                                <CookieConsent />
-                            </ToastProvider>
+                                <ToastProvider>
+                                    <CandidateChatSidebar>
+                                        <Header navItems={headerNav?.items} />
+                                        <main className="flex-1">
+                                            {children}
+                                        </main>
+                                        <Footer footerNav={footerNav} />
+                                    </CandidateChatSidebar>
+                                    <CookieConsent />
+                                </ToastProvider>
                             </GamificationWrapper>
                         </UserProfileProvider>
                     </ThemeProvider>

@@ -56,3 +56,15 @@ export function truncateDescription(
         ? stripped.substring(0, maxLength) + "..."
         : stripped;
 }
+
+export function requiredSkillNames(job: Job): string[] {
+    return (job.skills || [])
+        .filter((js) => js.is_required && js.skill)
+        .map((js) => js.skill!.name);
+}
+
+export function preferredSkillNames(job: Job): string[] {
+    return (job.skills || [])
+        .filter((js) => !js.is_required && js.skill)
+        .map((js) => js.skill!.name);
+}

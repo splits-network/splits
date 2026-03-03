@@ -191,8 +191,29 @@ export class JobRepository {
 
         if (error) throw error;
 
+        const jobs = data || [];
+
+        // Batch-fetch skills if requested via include param
+        const includeList = params.include ? params.include.split(',').map(s => s.trim()) : [];
+        if (includeList.includes('skills') && jobs.length > 0) {
+            const jobIds = jobs.map((j: any) => j.id);
+            const { data: allSkills } = await this.supabase
+                .from('job_skills')
+                .select('job_id, skill_id, is_required, created_at, skill:skills(id, name, slug)')
+                .in('job_id', jobIds);
+
+            const skillsByJobId: Record<string, any[]> = {};
+            for (const s of allSkills || []) {
+                if (!skillsByJobId[s.job_id]) skillsByJobId[s.job_id] = [];
+                skillsByJobId[s.job_id].push(s);
+            }
+            for (const job of jobs) {
+                job.skills = skillsByJobId[job.id] || [];
+            }
+        }
+
         return {
-            data: data || [],
+            data: jobs,
             total: count || 0,
         };
     }

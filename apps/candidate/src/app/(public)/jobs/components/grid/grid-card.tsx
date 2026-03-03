@@ -13,8 +13,12 @@ import {
     companyInitials,
     truncateDescription,
     postedAgo,
+    requiredSkillNames,
 } from "../shared/helpers";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 interface GridCardProps {
     job: Job;
@@ -27,6 +31,7 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
     const salary = salaryDisplay(job);
     const jobLevel = formatJobLevel(job.job_level);
     const desc = truncateDescription(job);
+    const skills = requiredSkillNames(job);
     const { getLevel } = useGamification();
     const companyLevel = job.company?.id ? getLevel(job.company.id) : undefined;
     const posted = postedAgo(job);
@@ -36,29 +41,38 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
             onClick={onSelect}
             className={[
                 "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-md",
-                isSelected ? "border-l-primary border-primary" : "border-l-primary",
+                isSelected
+                    ? "border-l-primary border-primary"
+                    : "border-l-primary",
             ].join(" ")}
         >
             {/* Header Band */}
             <div className="bg-base-300 border-b border-base-300 px-6 pt-5 pb-4">
                 {/* Kicker row: status + NEW badge */}
                 <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <BaselBadge color={statusSemanticColor(job.status)} size="sm">
-                            {formatStatusLabel(job.status)}
-                        </BaselBadge>
-                        {isNew(job) && (
-                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                                New
-                            </BaselBadge>
-                        )}
-                    </div>
-
                     {job.company?.industry && (
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40">
                             {job.company.industry}
                         </p>
                     )}
+                    <div className="flex items-center gap-2 flex-wrap ml-auto">
+                        <BaselBadge
+                            color={statusSemanticColor(job.status)}
+                            size="sm"
+                        >
+                            {formatStatusLabel(job.status)}
+                        </BaselBadge>
+                        {isNew(job) && (
+                            <BaselBadge
+                                color="warning"
+                                variant="soft"
+                                size="sm"
+                                icon="fa-sparkles"
+                            >
+                                New
+                            </BaselBadge>
+                        )}
+                    </div>
                 </div>
 
                 {/* Avatar + Title block */}
@@ -136,6 +150,27 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
                                 Salary
                             </span>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Skills */}
+            {skills.length > 0 && (
+                <div className="px-6 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        Required Skills
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {skills.slice(0, 4).map((skill) => (
+                            <BaselBadge key={skill} variant="outline" size="sm">
+                                {skill}
+                            </BaselBadge>
+                        ))}
+                        {skills.length > 4 && (
+                            <BaselBadge variant="outline" size="sm">
+                                +{skills.length - 4}
+                            </BaselBadge>
+                        )}
                     </div>
                 </div>
             )}

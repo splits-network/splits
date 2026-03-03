@@ -1,3 +1,5 @@
+import type { JobSkill } from "@splits-network/shared-types";
+
 // ===== TYPES =====
 
 export interface JobRequirement {
@@ -39,6 +41,7 @@ export interface Job {
         description?: string | null;
     };
     requirements?: JobRequirement[];
+    skills?: JobSkill[];
 }
 
 export interface JobFilters {
