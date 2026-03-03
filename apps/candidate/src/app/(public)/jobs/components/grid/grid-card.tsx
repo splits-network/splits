@@ -113,7 +113,7 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
                     )}
                     {companyLevel && (
                         <div className="absolute -bottom-1 -right-1">
-                            <LevelBadge level={companyLevel} size="xs" />
+                            <LevelBadge level={companyLevel} size="sm" />
                         </div>
                     )}
                 </div>
