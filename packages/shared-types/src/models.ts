@@ -152,6 +152,8 @@ export interface Membership {
 }
 
 // ATS domain types
+export type CompanyStage = 'Seed' | 'Series A' | 'Series B' | 'Series C' | 'Growth' | 'Public' | 'Bootstrapped' | 'Non-Profit';
+
 export interface Company {
     id: string;
     identity_organization_id?: string;
@@ -162,6 +164,12 @@ export interface Company {
     headquarters_location?: string;
     description?: string;
     logo_url?: string;
+    stage?: CompanyStage;
+    founded_year?: number;
+    tagline?: string;
+    linkedin_url?: string;
+    twitter_url?: string;
+    glassdoor_url?: string;
     created_at: Date;
     updated_at: Date;
 }
@@ -241,6 +249,46 @@ export interface JobSkill {
     skill_id: string;
     skill?: Skill;
     is_required: boolean;
+    created_at: string;
+}
+
+// Company profile lookup types
+export interface Perk {
+    id: string;
+    name: string;
+    slug: string;
+    is_approved: boolean;
+    created_by?: string;
+    created_at: string;
+}
+
+export interface CultureTag {
+    id: string;
+    name: string;
+    slug: string;
+    is_approved: boolean;
+    created_by?: string;
+    created_at: string;
+}
+
+export interface CompanyPerk {
+    company_id: string;
+    perk_id: string;
+    perk?: Perk;
+    created_at: string;
+}
+
+export interface CompanyCultureTag {
+    company_id: string;
+    culture_tag_id: string;
+    culture_tag?: CultureTag;
+    created_at: string;
+}
+
+export interface CompanySkill {
+    company_id: string;
+    skill_id: string;
+    skill?: Skill;
     created_at: string;
 }
 
@@ -359,7 +407,7 @@ export interface Candidate {
     current_title?: string;
     current_company?: string;
     bio?: string;
-    skills?: string;
+    candidate_skills?: CandidateSkill[];
     user_id?: string | null; // If set, candidate is self-managed (has their own account); if null, recruiter-managed
     recruiter_id?: string; // SOURCER: The recruiter who brought this candidate to the platform (permanent credit for visibility, NOT editing)
     verification_status: CandidateVerificationStatus; // Verification status: unverified (default when recruiter adds), pending, verified, rejected
