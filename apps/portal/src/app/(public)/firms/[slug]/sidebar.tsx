@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import type { PublicFirm } from "../types";
 import { firmLocation } from "../types";
@@ -19,6 +20,7 @@ function extractDomain(url: string): string {
 }
 
 export default function Sidebar({ firm }: SidebarProps) {
+    const publicClient = useMemo(() => createUnauthenticatedClient(), []);
     const contactItems = [
         firm.show_contact_info && firm.contact_email
             ? { icon: "fa-duotone fa-regular fa-envelope", label: "Email", value: firm.contact_email }
@@ -90,7 +92,7 @@ export default function Sidebar({ firm }: SidebarProps) {
             <div className="sidebar-card opacity-0">
                 <MiniLeaderboard
                     entityType="recruiter"
-                    client={createUnauthenticatedClient()}
+                    client={publicClient}
                     title="Top Recruiters"
                     fullLeaderboardHref="/portal/leaderboard"
                 />

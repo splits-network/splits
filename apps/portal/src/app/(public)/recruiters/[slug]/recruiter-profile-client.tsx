@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -103,6 +103,7 @@ export default function RecruiterProfileClient({
     recruiter: RecruiterWithUser;
 }) {
     const mainRef = useRef<HTMLElement>(null);
+    const publicClient = useMemo(() => createUnauthenticatedClient(), []);
     const [activeTab, setActiveTab] = useState<ProfileTab>("about");
     const [badges, setBadges] = useState<BadgeAward[]>([]);
     const [level, setLevel] = useState<EntityLevelInfo | null>(null);
@@ -699,7 +700,7 @@ export default function RecruiterProfileClient({
                         <MiniLeaderboard
                             entityType="recruiter"
                             entityId={recruiter.id}
-                            client={createUnauthenticatedClient()}
+                            client={publicClient}
                             showToggle={!!recruiter.specialties?.length}
                             specialization={recruiter.specialties?.[0]}
                             fullLeaderboardHref="/portal/leaderboard"

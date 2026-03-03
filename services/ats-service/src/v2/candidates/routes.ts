@@ -24,7 +24,6 @@ export function registerCandidateRoutes(
                     status: { type: 'string', enum: ['active', 'archived'] },
                     source: { type: 'string' },
                     location: { type: 'string' },
-                    skills: { type: 'string' }, // comma-separated skill IDs
                 },
             },
             response: {

@@ -9,7 +9,6 @@ export interface CandidateSettings {
     linkedin_url?: string;
     github_url?: string;
     portfolio_url?: string;
-    skills?: string[];
     bio?: string;
     marketplace_profile?: MarketplaceProfile;
     marketplace_visibility?: "public" | "limited" | "hidden";

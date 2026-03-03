@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useUserProfile } from "@/contexts";
 import { redirect } from "next/navigation";
@@ -58,6 +58,8 @@ export default function BaselSettingsContent({
     const router = useRouter();
     const pathname = usePathname();
     const mainRef = useRef<HTMLElement>(null);
+
+    const publicClient = useMemo(() => createUnauthenticatedClient(), []);
 
     const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
         const tab = searchParams.get("tab");
@@ -213,7 +215,7 @@ export default function BaselSettingsContent({
                                         <MiniLeaderboard
                                             entityType="company"
                                             entityId={companyId}
-                                            client={createUnauthenticatedClient()}
+                                            client={publicClient}
                                             showToggle={false}
                                             title="Company Rankings"
                                             fullLeaderboardHref="/portal/leaderboard"

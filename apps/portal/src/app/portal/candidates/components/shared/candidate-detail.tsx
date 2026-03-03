@@ -66,6 +66,7 @@ export function DetailLoader({
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Candidate }>(
                     `/candidates/${id}`,
+                    { params: { include: "skills" } },
                 );
                 if (!signal?.cancelled) setCandidate(res.data);
             } catch (err) {

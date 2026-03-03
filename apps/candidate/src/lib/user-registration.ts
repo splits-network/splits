@@ -54,7 +54,6 @@ export interface CandidateData {
     current_title?: string | null;
     current_company?: string | null;
     bio?: string | null;
-    skills?: string | null;  // Text field in DB
 
     // Social/Portfolio Links
     linkedin_url?: string | null;

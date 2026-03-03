@@ -219,6 +219,25 @@ export class CandidateRepository {
             undefined // Pass undefined to skip post-processing filter
         );
 
+        // Batch-fetch skills if requested via include param
+        const includeList = params.include ? params.include.split(',').map(s => s.trim()) : [];
+        if (includeList.includes('skills') && enrichedData.length > 0) {
+            const candidateIds = enrichedData.map((c: any) => c.id);
+            const { data: allSkills } = await this.supabase
+                .from('candidate_skills')
+                .select('candidate_id, skill_id, source, created_at, skill:skills(id, name, slug)')
+                .in('candidate_id', candidateIds);
+
+            const skillsByCandidateId: Record<string, any[]> = {};
+            for (const s of allSkills || []) {
+                if (!skillsByCandidateId[s.candidate_id]) skillsByCandidateId[s.candidate_id] = [];
+                skillsByCandidateId[s.candidate_id].push(s);
+            }
+            for (const c of enrichedData) {
+                c.candidate_skills = skillsByCandidateId[c.id] || [];
+            }
+        }
+
         return {
             data: enrichedData,
             pagination: {
@@ -245,14 +264,26 @@ export class CandidateRepository {
             throw error;
         }
 
+        let result: any = data;
+
         // Enrich single candidate with relationship data
         if (data && clerkUserId) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
             const enriched = await this.enrichWithRecruiterRelationships([data], accessContext.recruiterId ?? undefined);
-            return enriched[0];
+            result = enriched[0];
         }
 
-        return data;
+        // Fetch skills if requested via include param
+        const includeList = include ? include.split(',').map(s => s.trim()) : [];
+        if (includeList.includes('skills') && result) {
+            const { data: skills } = await this.supabase
+                .from('candidate_skills')
+                .select('candidate_id, skill_id, source, created_at, skill:skills(id, name, slug)')
+                .eq('candidate_id', id);
+            result.candidate_skills = skills || [];
+        }
+
+        return result;
     }
 
     async findCandidateByClerkId(clerkUserId: string): Promise<any | null> {

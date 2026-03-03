@@ -44,9 +44,7 @@ export function candidateCompany(candidate: Candidate): string | undefined {
 }
 
 export function skillsList(candidate: Candidate): string[] {
-    const legacySkills = candidate.skills
-        ? candidate.skills.split(",").map((s: string) => s.trim()).filter(Boolean)
-        : [];
-    const specialties = candidate.marketplace_profile?.skills_expertise || [];
-    return Array.from(new Set([...legacySkills, ...specialties]));
+    return (candidate.candidate_skills || [])
+        .filter((cs) => cs.skill)
+        .map((cs) => cs.skill!.name);
 }

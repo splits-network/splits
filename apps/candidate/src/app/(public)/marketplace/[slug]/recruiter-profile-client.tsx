@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -181,6 +181,7 @@ export default function RecruiterProfileClient({
     recruiter: Recruiter;
 }) {
     const mainRef = useRef<HTMLElement>(null);
+    const publicClient = useMemo(() => new ApiClient(), []);
     const connectModalRef = useRef<ConnectModalHandle>(null);
     const [activeTab, setActiveTab] = useState<ProfileTab>("about");
     const [connected, setConnected] = useState(false);
@@ -836,7 +837,7 @@ export default function RecruiterProfileClient({
                         <MiniLeaderboard
                             entityType="recruiter"
                             entityId={recruiter.id}
-                            client={new ApiClient()}
+                            client={publicClient}
                             showToggle={!!recruiter.specialties?.length}
                             specialization={recruiter.specialties?.[0]}
                             fullLeaderboardHref="/portal/leaderboard"
