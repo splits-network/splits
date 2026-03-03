@@ -45,7 +45,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
     const salary = salaryDisplay(job);
     const commute = formatCommuteTypes(job.commute_types);
     const level = formatJobLevel(job.job_level);
-    const companyGamLevel = getCompanyLevel(job.company?.id);
+    const companyGamLevel = job.company?.id ? getCompanyLevel(job.company.id) : undefined;
 
     useEffect(() => {
         if (job.company?.id) {

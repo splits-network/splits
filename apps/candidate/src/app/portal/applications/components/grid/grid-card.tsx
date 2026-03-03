@@ -25,7 +25,7 @@ export function GridCard({
     const name = companyName(app);
     const salary = salaryDisplay(app);
     const { getLevel } = useGamification();
-    const companyLevel = getLevel(app.job?.company?.id);
+    const companyLevel = app.job?.company?.id ? getLevel(app.job.company.id) : undefined;
 
     return (
         <div
@@ -89,7 +89,7 @@ export function GridCard({
                         )}
                         {companyLevel && (
                             <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={companyLevel} size="xs" />
+                                <LevelBadge level={companyLevel} size="sm" />
                             </div>
                         )}
                     </div>

@@ -26,7 +26,7 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
     const jobLevel = formatJobLevel(job.job_level);
     const desc = truncateDescription(job);
     const { getLevel } = useGamification();
-    const companyLevel = getLevel(job.company?.id);
+    const companyLevel = job.company?.id ? getLevel(job.company.id) : undefined;
 
     return (
         <div
@@ -113,7 +113,7 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
                     )}
                     {companyLevel && (
                         <div className="absolute -bottom-1 -right-1">
-                            <LevelBadge level={companyLevel} size="xs" />
+                            <LevelBadge level={companyLevel} size="sm" />
                         </div>
                     )}
                 </div>

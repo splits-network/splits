@@ -37,7 +37,7 @@ export default function CandidateMatchCard({
     const company = job?.companies;
     const scoreLabel = getMatchScoreLabel(match.match_score);
     const companyName = company?.name || "Company not listed";
-    const companyLevel = getLevel(company?.id);
+    const companyLevel = company?.id ? getLevel(company.id) : undefined;
     const initials = companyName
         .split(" ")
         .map((w) => w[0])
@@ -128,7 +128,7 @@ export default function CandidateMatchCard({
                     )}
                     {companyLevel && (
                         <div className="absolute -bottom-1 -right-1">
-                            <LevelBadge level={companyLevel} size="xs" />
+                            <LevelBadge level={companyLevel} size="sm" />
                         </div>
                     )}
                 </div>
