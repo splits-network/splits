@@ -457,6 +457,21 @@ async function main() {
             return;
         }
 
+        // Skip auth for public gamification endpoints (badges, XP, leaderboards)
+        // These use optionalAuth() at the route level — try auth if present, don't fail if missing
+        if (request.method === 'GET' && (
+            request.url.startsWith('/api/v2/badges/') ||
+            request.url.startsWith('/api/v2/xp/') ||
+            request.url.startsWith('/api/v2/leaderboards')
+        )) {
+            try {
+                await authMiddleware.createMiddleware()(request, reply);
+            } catch (error) {
+                request.log.debug('No valid auth token for public gamification endpoint, continuing as anonymous');
+            }
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }
