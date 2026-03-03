@@ -8,6 +8,7 @@ import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
+import { BaselBadge } from "@splits-network/basel-ui";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import type { Job } from "../../types";
 import { formatCommuteTypes, formatJobLevel } from "../../types";
@@ -19,6 +20,8 @@ import {
     isNew,
     companyName,
     companyInitials,
+    requiredSkillNames,
+    preferredSkillNames,
 } from "./helpers";
 
 /* ── Detail Panel ── */
@@ -59,6 +62,8 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
     const preferredReqs = (job.requirements || [])
         .filter((r) => r.requirement_type === "preferred")
         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const reqSkills = requiredSkillNames(job);
+    const prefSkills = preferredSkillNames(job);
 
     // Fetch auth-dependent data when signed in
     useEffect(() => {
@@ -452,6 +457,38 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                     </div>
                 )}
 
+                {/* Required Skills */}
+                {reqSkills.length > 0 && (
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Required Skills
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                            {reqSkills.map((skill) => (
+                                <BaselBadge key={skill} color="primary" variant="soft" size="sm">
+                                    {skill}
+                                </BaselBadge>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Nice-to-Have Skills */}
+                {prefSkills.length > 0 && (
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Nice-to-Have Skills
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                            {prefSkills.map((skill) => (
+                                <BaselBadge key={skill} variant="outline" size="sm">
+                                    {skill}
+                                </BaselBadge>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Company info */}
                 <div className="border-t-2 border-base-300 pt-6">
                     <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
@@ -483,12 +520,10 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                                     {job.company.industry}
                                 </p>
                             )}
-                            {(job.company?.headquarters_location ||
-                                job.company_headquarters_location) && (
+                            {job.company?.headquarters_location && (
                                 <p className="text-sm text-base-content/50">
                                     <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                                    {job.company?.headquarters_location ||
-                                        job.company_headquarters_location}
+                                    {job.company.headquarters_location}
                                 </p>
                             )}
                         </div>
@@ -562,7 +597,7 @@ export function JobDetailLoader({ jobId, onClose }: JobDetailLoaderProps) {
                 const res = await apiClient.get<{ data: Job }>(
                     `/jobs/${jobId}`,
                     {
-                        params: { include: "company,requirements" },
+                        params: { include: "company,requirements,skills" },
                     },
                 );
                 if (!cancelled) setJob(res.data);

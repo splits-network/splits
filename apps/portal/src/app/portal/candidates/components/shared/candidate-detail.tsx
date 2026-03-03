@@ -374,6 +374,7 @@ export function CandidateDetail({
                             setShowRTRModal(false);
                             onRefresh?.();
                         }}
+                        candidateId={candidate.id}
                         candidateName={candidate.full_name || "Unknown"}
                         candidateEmail={candidate.email || ""}
                     />

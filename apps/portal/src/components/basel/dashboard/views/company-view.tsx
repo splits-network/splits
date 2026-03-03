@@ -489,12 +489,12 @@ export default function CompanyView() {
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
                                                                     <p className="text-sm font-semibold truncate">
-                                                                        {activity.candidate_name ||
+                                                                        {activity.candidate?.full_name ||
                                                                             "Candidate"}
                                                                     </p>
                                                                     <p className="text-xs text-base-content/40">
                                                                         {
-                                                                            activity.job_title
+                                                                            activity.job?.title || "Role"
                                                                         }{" "}
                                                                         --{" "}
                                                                         {activity.stage?.replace(

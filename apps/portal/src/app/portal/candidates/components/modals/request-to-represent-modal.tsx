@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { useUserProfile } from "@/contexts";
 import { ButtonLoading } from "@splits-network/shared-ui";
 
 interface RequestToRepresentModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    candidateId: string;
     candidateName: string;
     candidateEmail: string;
 }
@@ -17,15 +19,22 @@ export default function RequestToRepresentModal({
     isOpen,
     onClose,
     onSuccess,
+    candidateId,
     candidateName,
     candidateEmail,
 }: RequestToRepresentModalProps) {
     const { getToken } = useAuth();
+    const { profile } = useUserProfile();
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
     const handleSubmit = async () => {
+        if (!profile?.recruiter_id) {
+            setError("Unable to determine your recruiter profile.");
+            return;
+        }
+
         setSubmitting(true);
         setError(null);
 
@@ -34,9 +43,9 @@ export default function RequestToRepresentModal({
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.post("/candidates", {
-                email: candidateEmail,
-                full_name: candidateName,
+            await client.post("/recruiter-candidates", {
+                recruiter_id: profile.recruiter_id,
+                candidate_id: candidateId,
             });
 
             setSuccess(true);

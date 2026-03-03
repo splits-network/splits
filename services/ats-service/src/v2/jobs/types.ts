@@ -15,6 +15,7 @@ export interface JobFilters extends PaginationParams, SortParams {
     job_level?: string;
     company_id?: string;
     job_owner_filter?: 'all' | 'assigned'; // 'all' = all active jobs, 'assigned' = jobs where recruiter is job_owner_id
+    include?: string;
     filters?: Record<string, any>;
 }
 

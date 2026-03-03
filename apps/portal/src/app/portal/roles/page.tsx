@@ -124,7 +124,7 @@ export default function RolesPage() {
         defaultSortOrder: "desc",
         defaultLimit: 24,
         syncToUrl: true,
-        include: "company",
+        include: "company,skills",
     });
 
     const { registerEntities } = useGamification();

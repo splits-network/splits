@@ -31,9 +31,7 @@ export function postedAgo(job: Job): string {
 }
 
 export function companyName(job: Job): string {
-    if (job.company?.name) return job.company.name;
-    if (job.company_name) return job.company_name;
-    return "3rd Party";
+    return job.company?.name || "3rd Party Firm";
 }
 
 export function companyInitials(name: string): string {

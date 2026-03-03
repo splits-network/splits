@@ -35,7 +35,7 @@ export function postedAgo(job: Job): string {
 }
 
 export function companyName(job: Job): string {
-    return job.company?.name || job.company_name || "Company";
+    return job.company?.name || "3rd Party Firm";
 }
 
 export function companyInitials(name: string): string {
@@ -55,4 +55,16 @@ export function truncateDescription(
     return stripped.length > maxLength
         ? stripped.substring(0, maxLength) + "..."
         : stripped;
+}
+
+export function requiredSkillNames(job: Job): string[] {
+    return (job.skills || [])
+        .filter((js) => js.is_required && js.skill)
+        .map((js) => js.skill!.name);
+}
+
+export function preferredSkillNames(job: Job): string[] {
+    return (job.skills || [])
+        .filter((js) => !js.is_required && js.skill)
+        .map((js) => js.skill!.name);
 }

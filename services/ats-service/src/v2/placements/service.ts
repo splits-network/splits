@@ -380,7 +380,7 @@ export class PlacementServiceV2 {
                 .single();
             companyName = company?.name || null;
         } else {
-            companyName = job.company_name || '3rd Party';
+            companyName = '3rd Party Firm';
         }
 
         // Get all 5 recruiter role IDs from referential data (all nullable)

@@ -7,11 +7,10 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 export interface PipelineApplication {
     id: string;
     stage: string;
-    candidate_name: string;
-    job_title: string;
-    company_name: string;
     updated_at: string;
     created_at: string;
+    candidate?: { full_name: string };
+    job?: { title: string; company?: { name: string } };
 }
 
 export function usePipelineActivity() {

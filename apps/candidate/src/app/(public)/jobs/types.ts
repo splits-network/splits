@@ -1,3 +1,5 @@
+import type { JobSkill } from "@splits-network/shared-types";
+
 // ===== TYPES =====
 
 export interface JobRequirement {
@@ -25,10 +27,6 @@ export interface Job {
     status?: string;
     updated_at?: string;
     created_at?: string | Date;
-    // Denormalized company fields (fallbacks when company relation not loaded)
-    company_name?: string | null;
-    company_industry?: string | null;
-    company_headquarters_location?: string | null;
     // Relation
     company?: {
         id: string;
@@ -39,6 +37,7 @@ export interface Job {
         description?: string | null;
     };
     requirements?: JobRequirement[];
+    skills?: JobSkill[];
 }
 
 export interface JobFilters {
@@ -151,23 +150,19 @@ export function formatStatus(status?: string): string {
     return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-// Resolve company name from relation or denormalized field
+// Resolve company name from joined relation
 export function getCompanyName(job: Job): string {
-    return job.company?.name || job.company_name || "Company";
+    return job.company?.name || "3rd Party Firm";
 }
 
-// Resolve company industry from relation or denormalized field
+// Resolve company industry from joined relation
 export function getCompanyIndustry(job: Job): string | null {
-    return job.company?.industry || job.company_industry || null;
+    return job.company?.industry || null;
 }
 
-// Resolve company HQ from relation or denormalized field
+// Resolve company HQ from joined relation
 export function getCompanyHQ(job: Job): string | null {
-    return (
-        job.company?.headquarters_location ||
-        job.company_headquarters_location ||
-        null
-    );
+    return job.company?.headquarters_location || null;
 }
 
 // Check if salary should be visible to candidates

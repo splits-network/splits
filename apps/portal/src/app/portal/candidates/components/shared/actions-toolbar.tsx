@@ -222,6 +222,7 @@ export default function CandidateActionsToolbar({
                         setShowRTRModal(false);
                         refresh();
                     }}
+                    candidateId={candidate.id}
                     candidateName={candidate.full_name || "Unknown"}
                     candidateEmail={candidate.email || ""}
                 />

@@ -78,9 +78,6 @@ export class JobServiceV2 {
             if (!data.fee_percentage || data.fee_percentage < 5) {
                 throw new Error('Off-platform jobs require a minimum 5% fee');
             }
-            if (!data.company_name) {
-                throw new Error('Company name is required for off-platform jobs');
-            }
         }
 
         // Validate commute_types
