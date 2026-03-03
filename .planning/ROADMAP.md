@@ -23,7 +23,7 @@ Completed milestones documented in .planning/MILESTONES.md
 **Milestone Goal:** Enrich company profiles with tech stack, perks, culture tags, stage, and social links — then surface all of it in redesigned company cards and search.
 
 - [x] **Phase 22: Schema & Types** - Database tables, columns, RLS, and TypeScript types for all new company data (completed 2026-03-03)
-- [ ] **Phase 23: Lookup APIs** - Search/create endpoints for perks and culture tags, plus junction CRUD for skills/perks/culture
+- [x] **Phase 23: Lookup APIs** - Search/create endpoints for perks and culture tags, plus junction CRUD for skills/perks/culture (completed 2026-03-03)
 - [ ] **Phase 24: Company Enrichment APIs** - Scalar field updates, computed stats, and gateway routing
 - [ ] **Phase 25: Company Settings UI** - Form sections for all new fields in company settings
 - [ ] **Phase 26: Company Card Redesign** - Grid card, detail panel, and description section
@@ -59,9 +59,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 23-01-PLAN.md -- Perks search/create endpoints (repository, service, routes)
-- [ ] 23-02-PLAN.md -- Culture tags search/create endpoints (repository, service, routes)
-- [ ] 23-03-PLAN.md -- Company junction bulk-replace and list (skills, perks, culture tags)
+- [x] 23-01-PLAN.md -- Perks search/create endpoints (repository, service, routes)
+- [x] 23-02-PLAN.md -- Culture tags search/create endpoints (repository, service, routes)
+- [x] 23-03-PLAN.md -- Company junction bulk-replace and list (skills, perks, culture tags)
 
 ### Phase 24: Company Enrichment APIs
 **Goal**: Companies can be updated with new scalar fields, queries return computed stats, and all new routes are exposed through the gateway
@@ -132,7 +132,7 @@ Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 22. Schema & Types | v7.0 | 2/2 | Complete | 2026-03-03 |
-| 23. Lookup APIs | v7.0 | 0/3 | Not started | - |
+| 23. Lookup APIs | v7.0 | 3/3 | Complete | 2026-03-03 |
 | 24. Company Enrichment APIs | v7.0 | 0/2 | Not started | - |
 | 25. Company Settings UI | v7.0 | 0/2 | Not started | - |
 | 26. Company Card Redesign | v7.0 | 0/3 | Not started | - |

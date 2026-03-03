@@ -23,16 +23,16 @@ Requirements for company profile enrichment and card redesign. Each maps to road
 
 ### API
 
-- [ ] **API-01**: Perks search endpoint (typeahead with trigram matching, like skills)
-- [ ] **API-02**: Perks create endpoint (find-or-create with slug deduplication)
-- [ ] **API-03**: Culture tags search endpoint (typeahead with trigram matching)
-- [ ] **API-04**: Culture tags create endpoint (find-or-create with slug deduplication)
-- [ ] **API-05**: Company skills bulk-replace endpoint (`PUT /company-skills/company/:id/bulk-replace`)
-- [ ] **API-06**: Company perks bulk-replace endpoint (`PUT /company-perks/company/:id/bulk-replace`)
-- [ ] **API-07**: Company culture tags bulk-replace endpoint (`PUT /company-culture-tags/company/:id/bulk-replace`)
-- [ ] **API-08**: Company skills list endpoint (`GET /company-skills?company_id=X`)
-- [ ] **API-09**: Company perks list endpoint (`GET /company-perks?company_id=X`)
-- [ ] **API-10**: Company culture tags list endpoint (`GET /company-culture-tags?company_id=X`)
+- [x] **API-01**: Perks search endpoint (typeahead with trigram matching, like skills)
+- [x] **API-02**: Perks create endpoint (find-or-create with slug deduplication)
+- [x] **API-03**: Culture tags search endpoint (typeahead with trigram matching)
+- [x] **API-04**: Culture tags create endpoint (find-or-create with slug deduplication)
+- [x] **API-05**: Company skills bulk-replace endpoint (`PUT /api/v2/companies/:companyId/skills`)
+- [x] **API-06**: Company perks bulk-replace endpoint (`PUT /api/v2/companies/:companyId/perks`)
+- [x] **API-07**: Company culture tags bulk-replace endpoint (`PUT /api/v2/companies/:companyId/culture-tags`)
+- [x] **API-08**: Company skills list endpoint (`GET /api/v2/company-skills?company_id=X`)
+- [x] **API-09**: Company perks list endpoint (`GET /api/v2/company-perks?company_id=X`)
+- [x] **API-10**: Company culture tags list endpoint (`GET /api/v2/company-culture-tags?company_id=X`)
 - [ ] **API-11**: Company update endpoint supports new scalar fields (stage, founded_year, tagline, social links)
 - [ ] **API-12**: Company queries return computed open_roles_count from jobs table
 - [ ] **API-13**: Company queries return computed avg_salary from jobs table
