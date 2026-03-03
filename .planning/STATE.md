@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 22 of 27 (Schema & Types)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-03 — Completed 22-01-PLAN.md (migration for new tables, columns, RLS)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-03 — Completed 22-02-PLAN.md (shared-types: CompanyStage, Perk, CultureTag, junction types)
 
-Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (1/14 v7.0 plans)
+Progress: [██░░░░░░░░░░░░░░░░░░] 14% (2/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -24,7 +24,7 @@ Progress: [█░░░░░░░░░░░░░░░░░░░] 7% (1/1
 
 **v7.0:**
 - Total plans: 14 across 6 phases
-- Completed: 0
+- Completed: 2 (22-01, 22-02)
 
 ## Accumulated Context
 
@@ -37,6 +37,8 @@ v7.0 decisions: tech stack reuses skills, perks/culture as lookups, stage as enu
 | Perks as new lookup table | slug deduplication + trigram typeahead, mirrors skills pattern | Confirmed in migration |
 | Culture tags as new lookup table | same pattern as perks, open-ended culture descriptors | Confirmed in migration |
 | Stage as constrained TEXT | CHECK constraint (8 values) consistent with v4.0 commute_types/job_level approach | Confirmed in migration |
+| CompanyStage Title Case with spaces | 'Series A' not 'series_a' — display-ready values matching DB CHECK constraint verbatim | 22-02 |
+| Junction types with enrichment | CompanyPerk/CompanyCultureTag/CompanySkill follow CandidateSkill/JobSkill pattern (FK + optional join) | 22-02 |
 
 ### Pending Todos
 
@@ -48,11 +50,11 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:41:47Z
-Stopped at: Completed 22-01-PLAN.md
+Last session: 2026-03-03T22:42:22Z
+Stopped at: Completed 22-02-PLAN.md (Phase 22 complete)
 Resume file: None
-Next: Execute 22-02-PLAN.md (TypeScript types in shared-types)
+Next: Phase 23 (API layer for company profile endpoints in ats-service)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-03 (v7.0 roadmap created)*
+*Last updated: 2026-03-03 (22-02 complete, Phase 22 done)*
