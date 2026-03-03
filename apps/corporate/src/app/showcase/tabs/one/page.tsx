@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef } from "react";
+import { BaselTabBar, BaselVerticalTabBar } from "@splits-network/basel-ui";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -9,39 +10,31 @@ if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
-/* ─── Types ───────────────────────────────────────────────────────────────── */
-
-interface Tab {
-    key: string;
-    label: string;
-    icon: string;
-}
-
 /* ─── Sample Data ─────────────────────────────────────────────────────────── */
 
-const DETAIL_TABS: Tab[] = [
-    { key: "overview", label: "Overview", icon: "fa-duotone fa-regular fa-clipboard" },
-    { key: "candidate", label: "Candidate", icon: "fa-duotone fa-regular fa-user" },
-    { key: "role", label: "Role", icon: "fa-duotone fa-regular fa-briefcase" },
-    { key: "resume", label: "Resume", icon: "fa-duotone fa-regular fa-file-user" },
-    { key: "documents", label: "Documents", icon: "fa-duotone fa-regular fa-file" },
-    { key: "ai_review", label: "AI Analysis", icon: "fa-duotone fa-regular fa-brain" },
-    { key: "notes", label: "Notes", icon: "fa-duotone fa-regular fa-comments" },
-    { key: "timeline", label: "Timeline", icon: "fa-duotone fa-regular fa-timeline" },
+const DETAIL_TABS = [
+    { value: "overview", label: "Overview", icon: "fa-duotone fa-regular fa-clipboard" },
+    { value: "candidate", label: "Candidate", icon: "fa-duotone fa-regular fa-user" },
+    { value: "role", label: "Role", icon: "fa-duotone fa-regular fa-briefcase" },
+    { value: "resume", label: "Resume", icon: "fa-duotone fa-regular fa-file-user" },
+    { value: "documents", label: "Documents", icon: "fa-duotone fa-regular fa-file" },
+    { value: "ai_review", label: "AI Analysis", icon: "fa-duotone fa-regular fa-brain" },
+    { value: "notes", label: "Notes", icon: "fa-duotone fa-regular fa-comments" },
+    { value: "timeline", label: "Timeline", icon: "fa-duotone fa-regular fa-timeline" },
 ];
 
-const PROFILE_TABS: Tab[] = [
-    { key: "about", label: "About", icon: "fa-duotone fa-regular fa-user" },
-    { key: "experience", label: "Experience", icon: "fa-duotone fa-regular fa-briefcase" },
-    { key: "reviews", label: "Reviews", icon: "fa-duotone fa-regular fa-star" },
+const PROFILE_TABS = [
+    { value: "about", label: "About", icon: "fa-duotone fa-regular fa-user" },
+    { value: "experience", label: "Experience", icon: "fa-duotone fa-regular fa-briefcase" },
+    { value: "reviews", label: "Reviews", icon: "fa-duotone fa-regular fa-star" },
 ];
 
-const SETTINGS_TABS: Tab[] = [
-    { key: "general", label: "General", icon: "fa-duotone fa-regular fa-gear" },
-    { key: "notifications", label: "Notifications", icon: "fa-duotone fa-regular fa-bell" },
-    { key: "privacy", label: "Privacy", icon: "fa-duotone fa-regular fa-shield" },
-    { key: "billing", label: "Billing", icon: "fa-duotone fa-regular fa-credit-card" },
-    { key: "integrations", label: "Integrations", icon: "fa-duotone fa-regular fa-plug" },
+const SETTINGS_TABS = [
+    { value: "general", label: "General", icon: "fa-duotone fa-regular fa-gear" },
+    { value: "notifications", label: "Notifications", icon: "fa-duotone fa-regular fa-bell" },
+    { value: "privacy", label: "Privacy", icon: "fa-duotone fa-regular fa-shield" },
+    { value: "billing", label: "Billing", icon: "fa-duotone fa-regular fa-credit-card" },
+    { value: "integrations", label: "Integrations", icon: "fa-duotone fa-regular fa-plug" },
 ];
 
 const TAB_CONTENT: Record<string, { title: string; body: string }> = {
@@ -111,104 +104,6 @@ const TAB_CONTENT: Record<string, { title: string; body: string }> = {
     },
 };
 
-/* ─── Scrollable Tab Bar ─────────────────────────────────────────────────── */
-
-function ScrollableTabBar({
-    tabs,
-    active,
-    onChange,
-    badge,
-}: {
-    tabs: Tab[];
-    active: string;
-    onChange: (key: string) => void;
-    badge?: Record<string, number>;
-}) {
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(false);
-
-    const updateScrollButtons = useCallback(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-        setCanScrollLeft(el.scrollLeft > 0);
-        setCanScrollRight(
-            el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
-        );
-    }, []);
-
-    useEffect(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-        updateScrollButtons();
-        el.addEventListener("scroll", updateScrollButtons);
-        const observer = new ResizeObserver(updateScrollButtons);
-        observer.observe(el);
-        return () => {
-            el.removeEventListener("scroll", updateScrollButtons);
-            observer.disconnect();
-        };
-    }, [updateScrollButtons]);
-
-    const scrollTabs = useCallback((direction: "left" | "right") => {
-        const el = scrollRef.current;
-        if (!el) return;
-        el.scrollBy({
-            left: direction === "left" ? -160 : 160,
-            behavior: "smooth",
-        });
-    }, []);
-
-    return (
-        <div className="relative shrink-0">
-            {canScrollLeft && (
-                <button
-                    onClick={() => scrollTabs("left")}
-                    className="absolute left-0 top-0 bottom-0 z-10 flex items-center px-1.5 bg-gradient-to-r from-base-100 via-base-100 to-transparent"
-                    aria-label="Scroll tabs left"
-                >
-                    <i className="fa-duotone fa-regular fa-chevron-left text-sm text-base-content" />
-                </button>
-            )}
-            <div
-                ref={scrollRef}
-                className="overflow-x-auto"
-                style={{ scrollbarWidth: "none" }}
-                data-tab-scroll
-            >
-                <style>{`[data-tab-scroll]::-webkit-scrollbar { display: none; }`}</style>
-                <div role="tablist" className="tabs tabs-bordered min-w-max">
-                    {tabs.map((tab) => (
-                        <a
-                            key={tab.key}
-                            role="tab"
-                            className={`tab ${active === tab.key ? "tab-active" : ""}`}
-                            onClick={() => onChange(tab.key)}
-                        >
-                            <i className={`${tab.icon} mr-2`} />
-                            {tab.label}
-                            {badge?.[tab.key] != null && badge[tab.key] > 0 && (
-                                <span className="ml-1.5 text-sm uppercase tracking-[0.2em] font-bold px-1.5 py-0.5 bg-primary/15 text-primary">
-                                    {badge[tab.key]}
-                                </span>
-                            )}
-                        </a>
-                    ))}
-                </div>
-            </div>
-            {canScrollRight && (
-                <button
-                    onClick={() => scrollTabs("right")}
-                    className="absolute right-0 top-0 bottom-0 z-10 flex items-center px-1.5 bg-gradient-to-l from-base-100 via-base-100 to-transparent"
-                    aria-label="Scroll tabs right"
-                >
-                    <i className="fa-duotone fa-regular fa-chevron-right text-sm text-base-content" />
-                </button>
-            )}
-        </div>
-    );
-}
-
 /* ─── Tab Content Panel ──────────────────────────────────────────────────── */
 
 function TabContentPanel({ tabKey }: { tabKey: string }) {
@@ -232,14 +127,15 @@ function TabContentPanel({ tabKey }: { tabKey: string }) {
 function DetailTabsDemo() {
     const [active, setActive] = useState("overview");
 
+    const tabs = DETAIL_TABS.map((tab) => {
+        if (tab.value === "documents") return { ...tab, count: 3 };
+        if (tab.value === "notes") return { ...tab, count: 5 };
+        return tab;
+    });
+
     return (
         <div>
-            <ScrollableTabBar
-                tabs={DETAIL_TABS}
-                active={active}
-                onChange={setActive}
-                badge={{ documents: 3, notes: 5 }}
-            />
+            <BaselTabBar tabs={tabs} active={active} onChange={setActive} />
             <TabContentPanel tabKey={active} />
         </div>
     );
@@ -250,24 +146,7 @@ function ProfileTabsDemo() {
 
     return (
         <div>
-            <div
-                role="tablist"
-                className="tabs tabs-border overflow-x-auto"
-                style={{ scrollbarWidth: "none" }}
-                data-tab-scroll
-            >
-                {PROFILE_TABS.map((tab) => (
-                    <a
-                        key={tab.key}
-                        role="tab"
-                        className={`tab ${active === tab.key ? "tab-active" : ""}`}
-                        onClick={() => setActive(tab.key)}
-                    >
-                        <i className={`${tab.icon} mr-2`} />
-                        {tab.label}
-                    </a>
-                ))}
-            </div>
+            <BaselTabBar tabs={PROFILE_TABS} active={active} onChange={setActive} />
             <TabContentPanel tabKey={active} />
         </div>
     );
@@ -278,11 +157,7 @@ function SettingsTabsDemo() {
 
     return (
         <div>
-            <ScrollableTabBar
-                tabs={SETTINGS_TABS}
-                active={active}
-                onChange={setActive}
-            />
+            <BaselTabBar tabs={SETTINGS_TABS} active={active} onChange={setActive} />
             <TabContentPanel tabKey={active} />
         </div>
     );
@@ -293,24 +168,13 @@ function VerticalTabsDemo() {
 
     return (
         <div className="flex flex-col sm:flex-row border border-base-300">
-            <nav className="sm:w-52 shrink-0 sm:border-r border-b sm:border-b-0 border-base-300 bg-base-200">
-                <div className="flex flex-col">
-                    {SETTINGS_TABS.map((tab) => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setActive(tab.key)}
-                            className={`flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap border-l-4 ${
-                                active === tab.key
-                                    ? "bg-base-100 text-primary border-primary"
-                                    : "text-base-content/50 hover:text-base-content hover:bg-base-100/50 border-transparent"
-                            }`}
-                        >
-                            <i className={`${tab.icon} text-sm w-4 text-center`} />
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            </nav>
+            <div className="sm:w-52 shrink-0 sm:border-r border-b sm:border-b-0 border-base-300 bg-base-200">
+                <BaselVerticalTabBar
+                    tabs={SETTINGS_TABS}
+                    active={active}
+                    onChange={setActive}
+                />
+            </div>
             <div className="flex-1 p-6">
                 <TabContentPanel tabKey={active} />
             </div>
@@ -409,7 +273,7 @@ export default function TabsShowcasePage() {
                         <ul className="space-y-2 text-sm text-base-content/60">
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Uses DaisyUI <code className="text-xs bg-base-300 px-1.5 py-0.5">tabs tabs-bordered</code> as the base
+                                Use <code className="text-xs bg-base-300 px-1.5 py-0.5">BaselTabBar</code> from <code className="text-xs bg-base-300 px-1.5 py-0.5">@splits-network/basel-ui</code>
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
@@ -451,11 +315,7 @@ export default function TabsShowcasePage() {
                         <ul className="space-y-2 text-sm text-base-content/60">
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Uses DaisyUI <code className="text-xs bg-base-300 px-1.5 py-0.5">tabs tabs-border</code> with <code className="text-xs bg-base-300 px-1.5 py-0.5">tab</code> / <code className="text-xs bg-base-300 px-1.5 py-0.5">tab-active</code>
-                            </li>
-                            <li className="flex items-start gap-2">
-                                <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Same component as scrollable tabs, just fewer items
+                                Same <code className="text-xs bg-base-300 px-1.5 py-0.5">BaselTabBar</code> component as scrollable tabs, just fewer items
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
@@ -507,7 +367,11 @@ export default function TabsShowcasePage() {
                         <ul className="space-y-2 text-sm text-base-content/60">
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Always vertical with <code className="text-xs bg-base-300 px-1.5 py-0.5">border-l-4 border-primary</code> active indicator
+                                Use <code className="text-xs bg-base-300 px-1.5 py-0.5">BaselVerticalTabBar</code> from <code className="text-xs bg-base-300 px-1.5 py-0.5">@splits-network/basel-ui</code>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
+                                Active indicator is <code className="text-xs bg-base-300 px-1.5 py-0.5">border-l-4 border-primary</code>
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />

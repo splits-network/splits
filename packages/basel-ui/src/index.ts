@@ -110,6 +110,8 @@ export {
     BaselTabBar,
     type BaselTabBarProps,
     type BaselTab,
+    BaselVerticalTabBar,
+    type BaselVerticalTabBarProps,
     BaselKeyValueList,
     type BaselKeyValueListProps,
     type BaselKeyValueItem,

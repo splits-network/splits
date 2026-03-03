@@ -175,7 +175,8 @@
     background-clip: text;
 }
 
-.badge {
+.badge,
+.tab {
     @apply uppercase font-bold;
 }
 

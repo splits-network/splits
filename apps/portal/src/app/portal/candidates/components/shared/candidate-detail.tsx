@@ -22,6 +22,9 @@ import {
     skillsList,
 } from "./helpers";
 import CandidateActionsToolbar from "./actions-toolbar";
+import RequestToRepresentModal from "../modals/request-to-represent-modal";
+import { useUserProfile } from "@/contexts";
+import { ModalPortal } from "@splits-network/shared-ui";
 import {
     LevelBadge,
     BadgeGrid,
@@ -131,6 +134,8 @@ export function CandidateDetail({
 }) {
     const { getToken } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>("overview");
+    const [showRTRModal, setShowRTRModal] = useState(false);
+    const { isRecruiter } = useUserProfile();
     const { registerEntities, getLevel, getBadges } = useGamification();
 
     useEffect(() => {
@@ -339,6 +344,14 @@ export function CandidateDetail({
                         skills={skills}
                         salary={salary}
                         badges={badges}
+                        onRequestRTR={
+                            isRecruiter &&
+                            !candidate.has_active_relationship &&
+                            !candidate.has_pending_invitation &&
+                            candidate.email
+                                ? () => setShowRTRModal(true)
+                                : undefined
+                        }
                     />
                 )}
                 {activeTab === "resume" && <ResumeTab />}
@@ -350,6 +363,22 @@ export function CandidateDetail({
                 )}
                 {activeTab === "documents" && <DocumentsTab />}
             </div>
+
+            {/* RTR Modal */}
+            <ModalPortal>
+                {showRTRModal && (
+                    <RequestToRepresentModal
+                        isOpen={showRTRModal}
+                        onClose={() => setShowRTRModal(false)}
+                        onSuccess={() => {
+                            setShowRTRModal(false);
+                            onRefresh?.();
+                        }}
+                        candidateName={candidate.full_name || "Unknown"}
+                        candidateEmail={candidate.email || ""}
+                    />
+                )}
+            </ModalPortal>
         </div>
     );
 }
@@ -362,12 +391,14 @@ function OverviewTab({
     skills,
     salary,
     badges,
+    onRequestRTR,
 }: {
     candidate: Candidate;
     bioText?: string;
     skills: string[];
     salary: string | null;
     badges: import("@splits-network/shared-gamification").BadgeAward[];
+    onRequestRTR?: () => void;
 }) {
     return (
         <div className="p-6 space-y-8">
@@ -497,10 +528,23 @@ function OverviewTab({
                                 Invitation Pending
                             </p>
                         ) : (
-                            <p className="font-bold text-sm text-base-content/50 flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-user-xmark" />
-                                Unrepresented
-                            </p>
+                            <div>
+                                <p className="font-bold text-sm text-base-content/50 flex items-center gap-1.5">
+                                    <i className="fa-duotone fa-regular fa-user-xmark" />
+                                    Unrepresented
+                                </p>
+                                {onRequestRTR && (
+                                    <button
+                                        type="button"
+                                        className="text-xs font-bold text-accent hover:text-accent-content hover:bg-accent px-2 py-1 mt-1.5 uppercase tracking-wider transition-colors"
+                                        style={{ borderRadius: 0 }}
+                                        onClick={onRequestRTR}
+                                    >
+                                        <i className="fa-duotone fa-regular fa-handshake mr-1" />
+                                        Request to Represent
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
                     <div className="bg-base-100 p-4">

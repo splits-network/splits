@@ -19,6 +19,10 @@ export {
     type BaselTab,
 } from './basel-tab-bar';
 export {
+    BaselVerticalTabBar,
+    type BaselVerticalTabBarProps,
+} from './basel-vertical-tab-bar';
+export {
     BaselKeyValueList,
     type BaselKeyValueListProps,
     type BaselKeyValueItem,

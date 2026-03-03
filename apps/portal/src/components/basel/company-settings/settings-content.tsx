@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useUserProfile } from "@/contexts";
 import { redirect } from "next/navigation";
 import { LoadingState } from "@splits-network/shared-ui";
+import { BaselVerticalTabBar } from "@splits-network/basel-ui";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { CompanyTab } from "./company-tab";
@@ -14,17 +15,17 @@ import type { SettingsTab, Company } from "@/app/portal/company/settings/types";
 
 const NAV_ITEMS = [
     {
-        key: "company" as const,
+        value: "company",
         label: "Company",
         icon: "fa-duotone fa-regular fa-building",
     },
     {
-        key: "billing" as const,
+        value: "billing",
         label: "Billing",
         icon: "fa-duotone fa-regular fa-credit-card",
     },
     {
-        key: "team" as const,
+        value: "team",
         label: "Team",
         icon: "fa-duotone fa-regular fa-users",
     },
@@ -182,24 +183,11 @@ export default function BaselSettingsContent({
                 <div className="grid lg:grid-cols-5 gap-10 lg:gap-14">
                     {/* Sidebar Nav */}
                     <div className="lg:col-span-1">
-                        <nav className="space-y-1">
-                            {NAV_ITEMS.map((item) => (
-                                <button
-                                    key={item.key}
-                                    onClick={() => setActiveTab(item.key)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all text-left ${
-                                        activeTab === item.key
-                                            ? "bg-primary text-primary-content"
-                                            : "text-base-content/60 hover:bg-base-200"
-                                    }`}
-                                >
-                                    <i
-                                        className={`${item.icon} w-4 text-center`}
-                                    />
-                                    {item.label}
-                                </button>
-                            ))}
-                        </nav>
+                        <BaselVerticalTabBar
+                            tabs={NAV_ITEMS}
+                            active={activeTab}
+                            onChange={(v) => setActiveTab(v as SettingsTab)}
+                        />
                     </div>
 
                     {/* Main Panel */}

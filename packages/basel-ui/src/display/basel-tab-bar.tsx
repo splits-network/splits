@@ -31,7 +31,7 @@ export interface BaselTabBarProps {
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 /**
- * Basel tab bar — DaisyUI `tabs tabs-bordered` with scroll arrows,
+ * Basel tab bar — DaisyUI `tabs tabs-border` with scroll arrows,
  * hidden scrollbar, and optional icon + count badge per tab.
  *
  * Matches the tabs/one showcase (Pattern 01 — Scrollable Detail Tabs).
@@ -100,7 +100,7 @@ export function BaselTabBar({
                 data-basel-tab-scroll
             >
                 <style>{`[data-basel-tab-scroll]::-webkit-scrollbar { display: none; }`}</style>
-                <div role="tablist" className="tabs tabs-bordered min-w-max">
+                <div role="tablist" className="tabs tabs-border min-w-max">
                     {tabs.map((tab) => (
                         <a
                             key={tab.value}
