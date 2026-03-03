@@ -25,7 +25,7 @@ export function GridCard({
     const name = companyName(app);
     const salary = salaryDisplay(app);
     const { getLevel } = useGamification();
-    const companyLevel = getLevel(app.job?.company?.id);
+    const companyLevel = app.job?.company?.id ? getLevel(app.job.company.id) : undefined;
 
     return (
         <div

@@ -37,7 +37,7 @@ export default function CandidateMatchCard({
     const company = job?.companies;
     const scoreLabel = getMatchScoreLabel(match.match_score);
     const companyName = company?.name || "Company not listed";
-    const companyLevel = getLevel(company?.id);
+    const companyLevel = company?.id ? getLevel(company.id) : undefined;
     const initials = companyName
         .split(" ")
         .map((w) => w[0])
