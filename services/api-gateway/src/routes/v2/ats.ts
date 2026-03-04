@@ -72,6 +72,36 @@ const ATS_RESOURCES: ResourceDefinition[] = [
         basePath: '/job-skills',
         tag: 'job-skills',
     },
+    {
+        name: 'perks',
+        service: 'ats',
+        basePath: '/perks',
+        tag: 'perks',
+    },
+    {
+        name: 'culture-tags',
+        service: 'ats',
+        basePath: '/culture-tags',
+        tag: 'culture-tags',
+    },
+    {
+        name: 'company-perks',
+        service: 'ats',
+        basePath: '/company-perks',
+        tag: 'company-perks',
+    },
+    {
+        name: 'company-skills',
+        service: 'ats',
+        basePath: '/company-skills',
+        tag: 'company-skills',
+    },
+    {
+        name: 'company-culture-tags',
+        service: 'ats',
+        basePath: '/company-culture-tags',
+        tag: 'company-culture-tags',
+    },
 ];
 
 export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistry) {
@@ -138,6 +168,54 @@ function registerBulkReplaceRoutes(app: FastifyInstance, services: ServiceRegist
             const correlationId = getCorrelationId(request);
             const data = await atsService().put(
                 `/api/v2/job-skills/job/${jobId}/bulk-replace`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.put(
+        '/api/v2/companies/:companyId/perks',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { companyId } = request.params as { companyId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().put(
+                `/api/v2/companies/${companyId}/perks`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.put(
+        '/api/v2/companies/:companyId/skills',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { companyId } = request.params as { companyId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().put(
+                `/api/v2/companies/${companyId}/skills`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.put(
+        '/api/v2/companies/:companyId/culture-tags',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { companyId } = request.params as { companyId: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().put(
+                `/api/v2/companies/${companyId}/culture-tags`,
                 request.body,
                 correlationId,
                 buildAuthHeaders(request)

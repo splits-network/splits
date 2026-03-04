@@ -19,5 +19,11 @@ export interface CompanyUpdate {
     description?: string;
     website?: string;
     status?: string;
+    stage?: string | null;
+    founded_year?: number | null;
+    tagline?: string | null;
+    linkedin_url?: string | null;
+    twitter_url?: string | null;
+    glassdoor_url?: string | null;
     [key: string]: any;
 }

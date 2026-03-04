@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient, createUnauthenticatedClient } from "@/lib/api-client";
 import type { Firm, FirmMember, FirmInvitation } from "../../types";
@@ -32,6 +32,7 @@ export function FirmDetail({
     onRefresh?: () => void;
 }) {
     const [activeTab, setActiveTab] = useState<DetailTab>("members");
+    const publicClient = useMemo(() => createUnauthenticatedClient(), []);
     const { registerEntities, getLevel, getBadges } = useGamification();
 
     useEffect(() => {
@@ -137,7 +138,7 @@ export function FirmDetail({
                 <MiniLeaderboard
                     entityType="recruiter"
                     entityId={undefined}
-                    client={createUnauthenticatedClient()}
+                    client={publicClient}
                     title="Top Recruiters"
                     fullLeaderboardHref="/portal/leaderboard"
                 />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, FormEvent } from "react";
+import { useState, useEffect, useRef, useMemo, FormEvent } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { createAuthenticatedClient, ApiClient } from "@/lib/api-client";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
@@ -61,6 +61,7 @@ export function ProfileSettingsShell() {
     const { getToken } = useAuth();
     const { user: clerkUser } = useUser();
     const toast = useToast();
+    const publicClient = useMemo(() => new ApiClient(), []);
 
     const [activeSection, setActiveSection] =
         useState<ProfileSection>("profile");
@@ -146,7 +147,6 @@ export function ProfileSettingsShell() {
                 linkedin_url: data.linkedin_url || "",
                 github_url: data.github_url || "",
                 portfolio_url: data.portfolio_url || "",
-                skills: data.skills || [],
                 bio: data.bio || "",
                 marketplace_profile: data.marketplace_profile || {},
                 marketplace_visibility: data.marketplace_visibility || "public",
@@ -368,7 +368,7 @@ export function ProfileSettingsShell() {
                             <MiniLeaderboard
                                 entityType="candidate"
                                 entityId={candidateId}
-                                client={new ApiClient()}
+                                client={publicClient}
                                 showToggle={false}
                                 fullLeaderboardHref="/portal/leaderboard"
                             />

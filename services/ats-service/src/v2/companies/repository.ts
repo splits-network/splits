@@ -83,8 +83,41 @@ export class CompanyRepository {
 
         if (error) throw error;
 
+        const companyIds = (data || []).map((c: any) => c.id);
+
+        if (companyIds.length === 0) {
+            return { data: [], total: 0 };
+        }
+
+        const { data: jobRows } = await this.supabase
+            .from('jobs')
+            .select('company_id, status, salary_min, salary_max')
+            .in('company_id', companyIds);
+
+        const statsMap: Record<string, { open_roles_count: number; salary_sum: number; salary_count: number }> = {};
+        for (const job of (jobRows || [])) {
+            if (!statsMap[job.company_id]) {
+                statsMap[job.company_id] = { open_roles_count: 0, salary_sum: 0, salary_count: 0 };
+            }
+            if (job.status === 'active') {
+                statsMap[job.company_id].open_roles_count += 1;
+                if (job.salary_min != null && job.salary_max != null) {
+                    statsMap[job.company_id].salary_sum += (job.salary_min + job.salary_max) / 2;
+                    statsMap[job.company_id].salary_count += 1;
+                }
+            }
+        }
+
+        const enrichedData = (data || []).map((c: any) => ({
+            ...c,
+            open_roles_count: statsMap[c.id]?.open_roles_count ?? 0,
+            avg_salary: statsMap[c.id]?.salary_count > 0
+                ? Math.round(statsMap[c.id].salary_sum / statsMap[c.id].salary_count)
+                : null,
+        }));
+
         return {
-            data: data || [],
+            data: enrichedData,
             total: count || 0,
         };
     }
@@ -101,6 +134,19 @@ export class CompanyRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
+
+        const { data: jobRows } = await this.supabase
+            .from('jobs')
+            .select('status, salary_min, salary_max')
+            .eq('company_id', id);
+
+        const activeJobs = (jobRows || []).filter((j: any) => j.status === 'active');
+        const salaryJobs = activeJobs.filter((j: any) => j.salary_min != null && j.salary_max != null);
+        data.open_roles_count = activeJobs.length;
+        data.avg_salary = salaryJobs.length > 0
+            ? Math.round(salaryJobs.reduce((sum: number, j: any) => sum + (j.salary_min + j.salary_max) / 2, 0) / salaryJobs.length)
+            : null;
+
         return data;
     }
 

@@ -22,6 +22,8 @@ import {
     LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
+import { Presence } from "@/components/presense";
+import { usePresence } from "@/hooks/use-presence";
 
 export function GridCard({
     candidate,
@@ -42,6 +44,14 @@ export function GridCard({
     const company = candidateCompany(candidate);
     const salary = salaryDisplay(candidate);
     const skills = skillsList(candidate);
+    const candidateUserId = candidate.user_id;
+    const presence = usePresence([candidateUserId], {
+        enabled: Boolean(candidateUserId),
+    });
+
+    const presenceStatus = candidateUserId
+        ? presence[candidateUserId]?.status
+        : undefined;
 
     const stats = [
         {
@@ -75,27 +85,39 @@ export function GridCard({
             <div className="bg-base-300 border-b border-base-300 px-5 pt-5 pb-4">
                 {/* Kicker row: verification status + NEW badge + availability dot */}
                 <div className="flex items-center justify-between mb-3 gap-2">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <BaselBadge
-                            color={statusColorName(candidate.verification_status)}
-                            variant="soft"
-                            size="sm"
-                        >
-                            {formatVerificationStatus(
-                                candidate.verification_status
-                            )}
-                        </BaselBadge>
-                        {isNew(candidate) && (
-                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                                New
-                            </BaselBadge>
-                        )}
-                    </div>
                     {company && (
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate min-w-0">
                             {company}
                         </p>
                     )}
+                    <div className="flex items-center gap-2 flex-wrap min-w-0 ml-auto">
+                        <BaselBadge
+                            color={statusColorName(
+                                candidate.verification_status,
+                            )}
+                            variant="soft"
+                            size="sm"
+                        >
+                            {formatVerificationStatus(
+                                candidate.verification_status,
+                            )}
+                        </BaselBadge>
+                        {isNew(candidate) && (
+                            <BaselBadge
+                                color="warning"
+                                variant="soft"
+                                size="sm"
+                                icon="fa-sparkles"
+                            >
+                                New
+                            </BaselBadge>
+                        )}
+                        <Presence
+                            variant="badge"
+                            size="sm"
+                            status={presenceStatus}
+                        />
+                    </div>
                 </div>
 
                 {/* Avatar + Name block */}
@@ -213,15 +235,23 @@ export function GridCard({
                             </BaselBadge>
                         )}
                         {candidate.open_to_relocation && (
-                            <BaselBadge color="secondary" icon="fa-truck-moving">
+                            <BaselBadge
+                                color="secondary"
+                                icon="fa-truck-moving"
+                            >
                                 Relocatable
                             </BaselBadge>
                         )}
-                        {!candidate.open_to_remote && !candidate.open_to_relocation && (
-                            <BaselBadge variant="outline" icon="fa-building" className="opacity-30">
-                                On-Site
-                            </BaselBadge>
-                        )}
+                        {!candidate.open_to_remote &&
+                            !candidate.open_to_relocation && (
+                                <BaselBadge
+                                    variant="outline"
+                                    icon="fa-building"
+                                    className="opacity-30"
+                                >
+                                    On-Site
+                                </BaselBadge>
+                            )}
                     </div>
                 </div>
                 <div className="shrink-0" onClick={(e) => e.stopPropagation()}>

@@ -20,7 +20,7 @@ export const CANDIDATE_PROFILE_FIELDS: CandidateProfileField[] = [
     { name: 'portfolio_url', label: 'Portfolio Website', weight: 4, category: 'professional' },
     { name: 'bio', label: 'Profile Summary', weight: 10, category: 'professional' },
     { name: 'bio_rich', label: 'Detailed Bio', weight: 12, category: 'professional' },
-    { name: 'skills', label: 'Skills & Technologies', weight: 10, category: 'professional' },
+    { name: 'candidate_skills', label: 'Skills & Technologies', weight: 10, category: 'professional' },
 
     // Career Preferences (30 points)
     { name: 'desired_salary_min', label: 'Desired Salary Range', weight: 8, category: 'preferences' },
@@ -71,7 +71,9 @@ export function calculateProfileCompleteness(candidate: any): ProfileCompletenes
             value = candidate[field.name];
         }
 
-        const isComplete = value !== null && value !== undefined && value !== '';
+        const isComplete = Array.isArray(value)
+            ? value.length > 0
+            : value !== null && value !== undefined && value !== '';
 
         if (isComplete) {
             earnedPoints += field.weight;

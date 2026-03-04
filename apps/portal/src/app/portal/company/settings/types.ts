@@ -10,6 +10,12 @@ export interface Company {
     headquarters_location?: string;
     description?: string;
     logo_url?: string;
+    stage?: string;
+    founded_year?: number;
+    tagline?: string;
+    linkedin_url?: string;
+    twitter_url?: string;
+    glassdoor_url?: string;
     created_at: string;
     updated_at: string;
 }

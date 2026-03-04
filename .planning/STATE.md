@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-28)
+See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v6.0 milestone archived — planning next milestone
+**Current focus:** v7.0 Company Profile Enhancement — Phase 26: Company Card Redesign
 
 ## Current Position
 
-Phase: All phases through v6.0 complete (1-21)
-Plan: N/A
-Status: Milestone v6.0 archived
-Last activity: 2026-02-28 — v6.0 milestone archived
+Phase: 26 of 27 (Company Card Redesign)
+Plan: 0 of 3 in current phase
+Status: Ready to plan
+Last activity: 2026-03-04 — Phase 25 complete (2 plans, company settings UI)
 
-Progress: [####################] 100% (6 milestones shipped: v2.0, v3.0, v4.0, v5.0, v6.0)
+Progress: [█████████░░░░░░░░░░░] 64% (9/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -22,12 +22,23 @@ Progress: [####################] 100% (6 milestones shipped: v2.0, v3.0, v4.0, v
 - Total plans completed: 56 (36 from v2.0-v5.0 + 20 from v6.0)
 - v6.0: 292 files, +34,562/-16,650 lines, 6 phases, 20 plans
 
+**v7.0:**
+- Total plans: 14 across 6 phases
+- Completed: 9/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02)
+
 ## Accumulated Context
 
 ### Decisions
 
 See .planning/PROJECT.md Key Decisions table for full cumulative list.
-v6.0 decisions archived in .planning/milestones/v6.0-ROADMAP.md.
+v7.0 decisions: tech stack reuses skills, perks/culture as lookups, stage as enum, computed stats.
+
+| Tech stack reuses skills table | company_skills junction reuses skills; enables cross-entity skill matching | Confirmed in migration |
+| Perks as new lookup table | slug deduplication + trigram typeahead, mirrors skills pattern | Confirmed in migration |
+| Culture tags as new lookup table | same pattern as perks, open-ended culture descriptors | Confirmed in migration |
+| Stage as constrained TEXT | CHECK constraint (8 values) consistent with v4.0 commute_types/job_level approach | Confirmed in migration |
+| CompanyStage Title Case with spaces | 'Series A' not 'series_a' — display-ready values matching DB CHECK constraint verbatim | 22-02 |
+| Junction types with enrichment | CompanyPerk/CompanyCultureTag/CompanySkill follow CandidateSkill/JobSkill pattern (FK + optional join) | 22-02 |
 
 ### Pending Todos
 
@@ -35,15 +46,15 @@ None.
 
 ### Blockers/Concerns
 
-None active. Tech debt from v6.0 documented in PROJECT.md Context section.
+None active.
 
 ## Session Continuity
 
-Last session: 2026-02-28
-Stopped at: v6.0 milestone archived
+Last session: 2026-03-04
+Stopped at: Phase 25 complete — company settings UI with scalar fields + tag pickers
 Resume file: None
-Next: `/gsd:new-milestone` to start next milestone
+Next: `/basel:discuss-phase 26` or `/basel:plan-phase 26`
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-02-28 (v6.0 milestone archived)*
+*Last updated: 2026-03-04 (Phase 25 complete, ready for Phase 26)*

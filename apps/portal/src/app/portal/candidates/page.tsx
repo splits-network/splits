@@ -118,6 +118,7 @@ export default function CandidatesPage() {
         defaultSortOrder: "desc",
         defaultLimit: 24,
         syncToUrl: true,
+        include: "skills",
     });
 
     // Sync scope changes into the filter

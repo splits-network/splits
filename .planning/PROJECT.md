@@ -12,6 +12,19 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 v6.0 Admin App Extraction shipped. Platform administration fully extracted into dedicated admin app and admin gateway. Portal simplified to recruiter/company-user focus only.
 
+## Current Milestone: v7.0 Company Profile Enhancement
+
+**Goal:** Enrich company profiles with structured data (stage, tech stack, perks, culture tags, social links, tagline, founded year) and redesign company cards to match the Basel showcase editorial design.
+
+**Target features:**
+- New lookup tables for perks and culture tags (following skills pattern)
+- Tech stack via existing skills table with company_skills junction
+- Scalar company fields: stage, founded year, tagline, social links
+- Computed stats: open roles count, average salary from jobs
+- Company settings UI for managing all new fields
+- Redesigned company cards matching showcase editorial design
+- Search index enriched with new company data
+
 ## Requirements
 
 ### Validated
@@ -70,7 +83,13 @@ v6.0 Admin App Extraction shipped. Platform administration fully extracted into 
 
 ### Active
 
-(No active requirements — next milestone not yet defined)
+- Company profile enrichment with stage, founded year, tagline, social links — v7.0
+- Perks and culture tags lookup tables with slug deduplication — v7.0
+- Tech stack via company_skills junction to existing skills table — v7.0
+- Company settings UI with BaselSkillPicker for lookups — v7.0
+- Redesigned company cards matching Basel showcase editorial design — v7.0
+- Computed open roles count and average salary from jobs table — v7.0
+- Search index enriched with new company profile data — v7.0
 
 ### Out of Scope
 
@@ -145,5 +164,11 @@ v6.0 Admin App Extraction shipped. Platform administration fully extracted into 
 | Admin routes under /admin/* in domain services | Clean separation from user-scoped /api/v2/* routes. Gateway rewritePrefix strips service prefix. | ✓ Good |
 | useStandardList clientFactory option | Admin wrapper injects createAdminClient. No Clerk coupling in shared-hooks. | ✓ Good |
 
+| Tech stack reuses skills table | Tech stack items are the same domain as skills. Reusing avoids duplication and enables cross-entity matching (candidate skills vs company tech stack). | — Pending |
+| Perks as new lookup table | Perks are a distinct domain from skills. Slug-deduplication pattern with BaselSkillPicker UI. | — Pending |
+| Culture tags as new lookup table | Culture is open-ended enough to warrant a lookup. Remote-first, async-friendly, etc. | — Pending |
+| Stage as constrained enum | Small, well-known set (Seed, Series A-C, Growth, Public, etc). CHECK constraint prevents inconsistency. | — Pending |
+| Computed open roles and avg salary | Derived from jobs table at query time, not stored. Always accurate. | — Pending |
+
 ---
-*Last updated: 2026-02-28 after v6.0 milestone complete*
+*Last updated: 2026-03-03 after v7.0 milestone started*

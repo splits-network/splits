@@ -36,12 +36,27 @@ import { registerAdminAtsRoutes } from './admin/routes';
 import { SkillRepository } from './skills/repository';
 import { SkillService } from './skills/service';
 import { registerSkillRoutes } from './skills/routes';
+import { PerkRepository } from './perks/repository';
+import { PerkService } from './perks/service';
+import { registerPerkRoutes } from './perks/routes';
+import { CultureTagRepository } from './culture-tags/repository';
+import { CultureTagService } from './culture-tags/service';
+import { registerCultureTagRoutes } from './culture-tags/routes';
 import { CandidateSkillRepository } from './candidate-skills/repository';
 import { CandidateSkillService } from './candidate-skills/service';
 import { registerCandidateSkillRoutes } from './candidate-skills/routes';
 import { JobSkillRepository } from './job-skills/repository';
 import { JobSkillService } from './job-skills/service';
 import { registerJobSkillRoutes } from './job-skills/routes';
+import { CompanySkillRepository } from './company-skills/repository';
+import { CompanySkillService } from './company-skills/service';
+import { registerCompanySkillRoutes } from './company-skills/routes';
+import { CompanyPerkRepository } from './company-perks/repository';
+import { CompanyPerkService } from './company-perks/service';
+import { registerCompanyPerkRoutes } from './company-perks/routes';
+import { CompanyCultureTagRepository } from './company-culture-tags/repository';
+import { CompanyCultureTagService } from './company-culture-tags/service';
+import { registerCompanyCultureTagRoutes } from './company-culture-tags/routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -122,6 +137,26 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     const jobSkillRepository = new JobSkillRepository(jobRepository.getSupabase());
     const jobSkillService = new JobSkillService(jobSkillRepository);
     registerJobSkillRoutes(app, { service: jobSkillService });
+
+    const perkRepository = new PerkRepository(config.supabaseUrl, config.supabaseKey);
+    const perkService = new PerkService(perkRepository, perkRepository.getSupabase());
+    registerPerkRoutes(app, { service: perkService });
+
+    const cultureTagRepository = new CultureTagRepository(config.supabaseUrl, config.supabaseKey);
+    const cultureTagService = new CultureTagService(cultureTagRepository, cultureTagRepository.getSupabase());
+    registerCultureTagRoutes(app, { service: cultureTagService });
+
+    const companySkillRepository = new CompanySkillRepository(skillRepository.getSupabase());
+    const companySkillService = new CompanySkillService(companySkillRepository);
+    registerCompanySkillRoutes(app, { service: companySkillService });
+
+    const companyPerkRepository = new CompanyPerkRepository(perkRepository.getSupabase());
+    const companyPerkService = new CompanyPerkService(companyPerkRepository);
+    registerCompanyPerkRoutes(app, { service: companyPerkService });
+
+    const companyCultureTagRepository = new CompanyCultureTagRepository(cultureTagRepository.getSupabase());
+    const companyCultureTagService = new CompanyCultureTagService(companyCultureTagRepository);
+    registerCompanyCultureTagRoutes(app, { service: companyCultureTagService });
 
     // Admin routes (permissive, no access filtering)
     const adminRepository = new AdminAtsRepository(config.supabaseUrl, config.supabaseKey);
