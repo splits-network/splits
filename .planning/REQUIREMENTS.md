@@ -56,11 +56,11 @@ Requirements for company profile enrichment and card redesign. Each maps to road
 
 ### Search
 
-- [ ] **SRCH-01**: Search trigger updated to index tech stack names into company search vector
-- [ ] **SRCH-02**: Search trigger updated to index perks names into company search vector
-- [ ] **SRCH-03**: Search trigger updated to index culture tags into company search vector
-- [ ] **SRCH-04**: Search trigger updated to index stage and tagline into company search vector
-- [ ] **SRCH-05**: Junction table triggers to refresh company search index on skill/perk/culture_tag changes
+- [x] **SRCH-01**: Search trigger updated to index tech stack names into company search vector
+- [x] **SRCH-02**: Search trigger updated to index perks names into company search vector
+- [x] **SRCH-03**: Search trigger updated to index culture tags into company search vector
+- [x] **SRCH-04**: Search trigger updated to index stage and tagline into company search vector
+- [x] **SRCH-05**: Junction table triggers to refresh company search index on skill/perk/culture_tag changes
 
 ## Future Requirements
 
@@ -125,11 +125,11 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | UI-11 | Phase 26 | Complete |
 | UI-12 | Phase 26 | Complete |
 | UI-13 | Phase 26 | Complete |
-| SRCH-01 | Phase 27 | Pending |
-| SRCH-02 | Phase 27 | Pending |
-| SRCH-03 | Phase 27 | Pending |
-| SRCH-04 | Phase 27 | Pending |
-| SRCH-05 | Phase 27 | Pending |
+| SRCH-01 | Phase 27 | Complete |
+| SRCH-02 | Phase 27 | Complete |
+| SRCH-03 | Phase 27 | Complete |
+| SRCH-04 | Phase 27 | Complete |
+| SRCH-05 | Phase 27 | Complete |
 
 **Coverage:**
 - v7.0 requirements: 31 total
@@ -138,4 +138,4 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-04 after Phase 26 completion*
+*Last updated: 2026-03-04 after Phase 27 completion — all v7.0 requirements complete*

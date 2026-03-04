@@ -7,7 +7,7 @@
 - [x] **v4.0 Commute Types & Job Levels** - Phases 8-10 (shipped 2026-02-13)
 - [x] **v5.0 Custom GPT / Applicant Network** - Phases 11-15 (shipped 2026-02-13)
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
-- [ ] **v7.0 Company Profile Enhancement** - Phases 22-27 (in progress)
+- [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 
 ## Phases
 
@@ -18,7 +18,7 @@ Completed milestones documented in .planning/MILESTONES.md
 
 </details>
 
-### v7.0 Company Profile Enhancement (In Progress)
+### v7.0 Company Profile Enhancement (Complete)
 
 **Milestone Goal:** Enrich company profiles with tech stack, perks, culture tags, stage, and social links — then surface all of it in redesigned company cards and search.
 
@@ -27,7 +27,7 @@ Completed milestones documented in .planning/MILESTONES.md
 - [x] **Phase 24: Company Enrichment APIs** - Scalar field updates, computed stats, and gateway routing (completed 2026-03-03)
 - [x] **Phase 25: Company Settings UI** - Form sections for all new fields in company settings (completed 2026-03-04)
 - [x] **Phase 26: Company Card Redesign** - Grid card, detail panel, and description section (completed 2026-03-04)
-- [ ] **Phase 27: Search Index Enrichment** - Triggers to index new fields into company search vector
+- [x] **Phase 27: Search Index Enrichment** - Triggers to index new fields into company search vector (completed 2026-03-04)
 
 ## Phase Details
 
@@ -121,8 +121,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 27-01-PLAN.md -- Update company search vector and search index sync with new fields (stage, tagline, skills, perks, culture tags)
-- [ ] 27-02-PLAN.md -- Junction table cascade triggers to refresh company search on skill/perk/culture tag changes
+- [x] 27-01-PLAN.md -- Update company search vector and search index sync with new fields (stage, tagline, skills, perks, culture tags)
+- [x] 27-02-PLAN.md -- Junction table cascade triggers to refresh company search on skill/perk/culture tag changes
 
 ## Progress
 
@@ -136,4 +136,4 @@ Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
 | 24. Company Enrichment APIs | v7.0 | 2/2 | Complete | 2026-03-03 |
 | 25. Company Settings UI | v7.0 | 2/2 | Complete | 2026-03-04 |
 | 26. Company Card Redesign | v7.0 | 3/3 | Complete | 2026-03-04 |
-| 27. Search Index Enrichment | v7.0 | 0/2 | Not started | - |
+| 27. Search Index Enrichment | v7.0 | 2/2 | Complete | 2026-03-04 |
