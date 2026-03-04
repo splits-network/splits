@@ -7,6 +7,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { BaselFormField } from "@splits-network/basel-ui";
 import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
 import type { Company } from "@/app/portal/company/settings/types";
+import { CompanyDetailsSection } from "./company-details-section";
 
 const COMPANY_SIZES = [
     { value: "1-10", label: "1-10 employees" },
@@ -54,6 +55,12 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
         headquarters_location: company?.headquarters_location || "",
         description: company?.description || "",
         logo_url: company?.logo_url || "",
+        stage: company?.stage || "",
+        founded_year: company?.founded_year?.toString() || "",
+        tagline: company?.tagline || "",
+        linkedin_url: company?.linkedin_url || "",
+        twitter_url: company?.twitter_url || "",
+        glassdoor_url: company?.glassdoor_url || "",
     });
 
     const [saving, setSaving] = useState(false);
@@ -82,11 +89,23 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
 
             const client = createAuthenticatedClient(token);
 
+            const payload = {
+                ...formData,
+                founded_year: formData.founded_year
+                    ? parseInt(formData.founded_year, 10)
+                    : null,
+                stage: formData.stage || null,
+                tagline: formData.tagline || null,
+                linkedin_url: formData.linkedin_url || null,
+                twitter_url: formData.twitter_url || null,
+                glassdoor_url: formData.glassdoor_url || null,
+            };
+
             if (company) {
-                await client.patch(`/companies/${company.id}`, formData);
+                await client.patch(`/companies/${company.id}`, payload);
             } else {
                 await client.post("/companies", {
-                    ...formData,
+                    ...payload,
                     identity_organization_id: organizationId,
                 });
             }
@@ -231,6 +250,16 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
                             className="input input-bordered w-full"
                         />
                     </BaselFormField>
+
+                    <CompanyDetailsSection
+                        stage={formData.stage}
+                        founded_year={formData.founded_year}
+                        tagline={formData.tagline}
+                        linkedin_url={formData.linkedin_url}
+                        twitter_url={formData.twitter_url}
+                        glassdoor_url={formData.glassdoor_url}
+                        onChange={handleChange}
+                    />
                 </div>
 
                 <div className="flex items-center justify-between pt-6 border-t border-base-300">
