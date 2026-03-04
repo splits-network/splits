@@ -41,9 +41,10 @@ const GUARANTEE_OPTIONS = [
 interface StepCompensationProps {
     formData: FormData;
     onChange: (updates: Partial<FormData>) => void;
+    mode?: "create" | "edit";
 }
 
-export function StepCompensation({ formData, onChange }: StepCompensationProps) {
+export function StepCompensation({ formData, onChange, mode = "create" }: StepCompensationProps) {
     const toggleCommute = (value: string) => {
         const updated = formData.commute_types.includes(value)
             ? formData.commute_types.filter((t) => t !== value)
@@ -103,7 +104,11 @@ export function StepCompensation({ formData, onChange }: StepCompensationProps) 
                         value={formData.fee_percentage.toString()}
                         onChange={(e) => onChange({ fee_percentage: parseFloat(e.target.value) || 0 })}
                         placeholder="20"
+                        disabled={mode === "edit"}
                     />
+                    {mode === "edit" && (
+                        <p className="text-sm text-base-content/50 mt-1">Set by company</p>
+                    )}
                 </fieldset>
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
@@ -113,11 +118,15 @@ export function StepCompensation({ formData, onChange }: StepCompensationProps) 
                         className="select w-full"
                         value={(formData.guarantee_days ?? 0).toString()}
                         onChange={(e) => onChange({ guarantee_days: parseInt(e.target.value, 10) })}
+                        disabled={mode === "edit"}
                     >
                         {GUARANTEE_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
+                    {mode === "edit" && (
+                        <p className="text-sm text-base-content/50 mt-1">Set by company</p>
+                    )}
                 </fieldset>
             </div>
 

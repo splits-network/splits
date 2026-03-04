@@ -82,7 +82,10 @@ export default function RoleWizardModal({
     const [isRecruiterWithCompanyAccess, setIsRecruiterWithCompanyAccess] = useState(false);
     const [userFirms, setUserFirms] = useState<Array<{ id: string; name: string }>>([]);
     const [roleSource, setRoleSource] = useState<"company" | "firm">("company");
-    const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
+    const [formData, setFormData] = useState<FormData>({
+        ...INITIAL_FORM,
+        status: isRecruiter ? "pending" : "active",
+    });
 
     // Derived state
     const hasFirms = userFirms.length > 0;
@@ -126,7 +129,7 @@ export default function RoleWizardModal({
                 const job = response.data;
                 setFormData({
                     title: job.title || "", company_id: job.company_id || "", location: job.location || "",
-                    department: job.department || "", status: job.status || "active",
+                    department: job.department || "", status: isRecruiter ? "pending" : (job.status || "active"),
                     salary_min: job.salary_min?.toString() || "", salary_max: job.salary_max?.toString() || "",
                     show_salary_range: job.show_salary_range ?? true, fee_percentage: job.fee_percentage || 20,
                     guarantee_days: job.guarantee_days || 90, employment_type: job.employment_type || "full_time",
@@ -239,9 +242,9 @@ export default function RoleWizardModal({
             setCurrentStep(0);
             setError(null);
             setRoleSource("company");
-            setFormData(INITIAL_FORM);
+            setFormData({ ...INITIAL_FORM, status: isRecruiter ? "pending" : "active" });
         }
-    }, [isOpen]);
+    }, [isOpen, isRecruiter]);
 
     // ── Handlers ──
 
@@ -330,6 +333,12 @@ export default function RoleWizardModal({
             if (formData.salary_max) payload.salary_max = parseInt(formData.salary_max);
             if (formData.commute_types.length > 0) payload.commute_types = formData.commute_types;
             if (formData.job_level) payload.job_level = formData.job_level;
+
+            // On edit, don't send fee/guarantee — company controls those terms
+            if (mode === "edit") {
+                delete payload.fee_percentage;
+                delete payload.guarantee_days;
+            }
 
             let targetJobId: string;
             if (mode === "edit" && jobId) {
@@ -435,9 +444,10 @@ export default function RoleWizardModal({
                             hasBothOptions={hasBothOptions}
                             showCompanySelect={showCompanySelect}
                             mode={mode}
+                            isRecruiter={!!isRecruiter}
                         />
                     )}
-                    {currentStep === 1 && <StepCompensation formData={formData} onChange={handleChange} />}
+                    {currentStep === 1 && <StepCompensation formData={formData} onChange={handleChange} mode={mode} />}
                     {currentStep === 2 && <StepDescriptions formData={formData} onChange={handleChange} />}
                     {currentStep === 3 && <StepRequirements formData={formData} onChange={handleChange} />}
                     {currentStep === 4 && (

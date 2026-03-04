@@ -3,6 +3,7 @@
 import type { FormData, Company } from "./types";
 
 const STATUS_OPTIONS = [
+    { value: "pending", label: "Pending" },
     { value: "active", label: "Active" },
     { value: "paused", label: "Paused" },
     { value: "closed", label: "Closed" },
@@ -19,6 +20,7 @@ interface StepBasicInfoProps {
     hasBothOptions: boolean;
     showCompanySelect: boolean;
     mode: "create" | "edit";
+    isRecruiter: boolean;
 }
 
 export function StepBasicInfo({
@@ -32,6 +34,7 @@ export function StepBasicInfo({
     hasBothOptions,
     showCompanySelect,
     mode,
+    isRecruiter,
 }: StepBasicInfoProps) {
     return (
         <div className="space-y-4">
@@ -176,11 +179,17 @@ export function StepBasicInfo({
                     className="select w-full"
                     value={formData.status}
                     onChange={(e) => onChange({ status: e.target.value as FormData["status"] })}
+                    disabled={isRecruiter}
                 >
                     {STATUS_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                 </select>
+                {isRecruiter && (
+                    <p className="text-sm text-base-content/50 mt-1">
+                        Roles created by recruiters require company approval
+                    </p>
+                )}
             </fieldset>
         </div>
     );

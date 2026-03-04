@@ -132,6 +132,33 @@ export class MatchRepository {
         return { data: (data || []).map(r => this.mapRow(r)), total: count || 0 };
     }
 
+    async findMatchesForCompany(
+        companyIds: string[],
+        filters: MatchListFilters,
+    ): Promise<{ data: EnrichedCandidateRoleMatch[]; total: number }> {
+        const page = filters.page ?? 1;
+        const limit = filters.limit ?? 25;
+        const offset = (page - 1) * limit;
+
+        let query = this.supabase
+            .from('candidate_role_matches')
+            .select(`
+                *,
+                candidates(id, full_name),
+                jobs!inner(id, title, location, salary_min, salary_max, employment_type, job_level, company_id, companies(id, name, logo_url))
+            `, { count: 'exact' })
+            .in('jobs.company_id', companyIds);
+
+        query = this.applyFilters(query, filters);
+
+        const { data, error, count } = await query
+            .order('match_score', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (error) throw error;
+        return { data: (data || []).map(r => this.mapRow(r)), total: count || 0 };
+    }
+
     async findById(id: string): Promise<EnrichedCandidateRoleMatch | null> {
         const { data, error } = await this.supabase
             .from('candidate_role_matches')

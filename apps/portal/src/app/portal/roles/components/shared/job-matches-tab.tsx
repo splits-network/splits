@@ -22,7 +22,7 @@ function candidateName(match: EnrichedMatch): string {
 
 /* ─── Component ────────────────────────────────────────────────────────────── */
 
-export function JobMatchesTab({ job, isPartner }: { job: Job; isPartner: boolean }) {
+export function JobMatchesTab({ job, isPartner, isRecruiter }: { job: Job; isPartner: boolean; isRecruiter: boolean }) {
     const { getToken } = useAuth();
     const [matches, setMatches] = useState<EnrichedMatch[]>([]);
     const [loading, setLoading] = useState(true);
@@ -73,7 +73,7 @@ export function JobMatchesTab({ job, isPartner }: { job: Job; isPartner: boolean
 
     return (
         <div className="space-y-6">
-            {!isPartner && <TrueScoreUpsell />}
+            {isRecruiter && !isPartner && <TrueScoreUpsell />}
 
             {matches.length === 0 ? (
                 <div className="text-center py-12 text-base-content/40">
@@ -82,7 +82,7 @@ export function JobMatchesTab({ job, isPartner }: { job: Job; isPartner: boolean
                 </div>
             ) : (
                 <>
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
                         Matched Candidates
                     </h3>
                     <div className="space-y-[2px] bg-base-300 max-h-[60vh] overflow-y-auto">
@@ -90,7 +90,7 @@ export function JobMatchesTab({ job, isPartner }: { job: Job; isPartner: boolean
                             const factors = match.match_factors;
                             return (
                                 <div key={match.id} className="flex items-center gap-3 bg-base-100 p-4">
-                                    <div className="w-10 h-10 flex items-center justify-center bg-primary/10 border border-base-300 rounded-full text-sm font-bold text-primary">
+                                    <div className="w-10 h-10 flex items-center justify-center bg-primary/10 border border-base-300 text-sm font-bold text-primary">
                                         {candidateInitials(match)}
                                     </div>
                                     <div className="flex-1 min-w-0">

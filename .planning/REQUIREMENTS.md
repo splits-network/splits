@@ -65,26 +65,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INVITE-01 | — | Pending |
-| INVITE-02 | — | Pending |
-| INVITE-03 | — | Pending |
-| INVITE-04 | — | Pending |
-| NOTIF-01 | — | Pending |
-| NOTIF-02 | — | Pending |
-| NOTIF-03 | — | Pending |
-| NOTIF-04 | — | Pending |
-| CUI-01 | — | Pending |
-| CUI-02 | — | Pending |
-| CUI-03 | — | Pending |
-| CUI-04 | — | Pending |
-| CAND-01 | — | Pending |
-| CAND-02 | — | Pending |
+| INVITE-01 | Phase 28 | Pending |
+| INVITE-02 | Phase 28 | Pending |
+| INVITE-03 | Phase 29 | Pending |
+| INVITE-04 | Phase 29 | Pending |
+| NOTIF-01 | Phase 30 | Pending |
+| NOTIF-02 | Phase 30 | Pending |
+| NOTIF-03 | Phase 30 | Pending |
+| NOTIF-04 | Phase 30 | Pending |
+| CUI-01 | Phase 31 | Pending |
+| CUI-02 | Phase 31 | Pending |
+| CUI-03 | Phase 31 | Pending |
+| CUI-04 | Phase 31 | Pending |
+| CAND-01 | Phase 32 | Pending |
+| CAND-02 | Phase 32 | Pending |
 
 **Coverage:**
 - v8.0 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 after roadmap creation*

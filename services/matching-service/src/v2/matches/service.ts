@@ -45,6 +45,21 @@ export class MatchService {
             );
         } else if (access.candidateId) {
             result = await this.repository.findMatchesForCandidate(access.candidateId, filters);
+        } else if (access.companyIds.length > 0 || access.organizationIds.length > 0) {
+            // Resolve company IDs — prefer direct companyIds, fall back to org lookup
+            let companyIds = access.companyIds;
+            if (companyIds.length === 0 && access.organizationIds.length > 0) {
+                const { data: orgCompanies } = await this.supabase
+                    .from('companies')
+                    .select('id')
+                    .in('identity_organization_id', access.organizationIds);
+                companyIds = (orgCompanies || []).map((c: any) => c.id);
+            }
+            if (companyIds.length > 0) {
+                result = await this.repository.findMatchesForCompany(companyIds, filters);
+            } else {
+                result = { data: [], total: 0 };
+            }
         } else {
             result = { data: [], total: 0 };
         }

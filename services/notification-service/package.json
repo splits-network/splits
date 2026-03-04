@@ -13,6 +13,7 @@
         "job:monthly-report": "tsx src/jobs/send-monthly-report.ts",
         "job:candidate-reminders": "tsx src/jobs/send-candidate-reminders.ts",
         "job:recruiter-reminders": "tsx src/jobs/send-recruiter-reminders.ts",
+        "job:candidate-match-digest": "tsx src/jobs/send-candidate-match-digest.ts",
         "test": "vitest"
     },
     "dependencies": {

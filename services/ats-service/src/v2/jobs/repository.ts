@@ -110,9 +110,19 @@ export class JobRepository {
                 }
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users (company_admin, hiring_manager) see only their organization's jobs
-                // Exclude off-platform jobs (company_id is null) from company user views
-                query = query.not('company_id', 'is', null);
-                query = query.in('company.identity_organization_id', accessContext.organizationIds);
+                // Look up company IDs for their organizations, then filter at parent level
+                // (filtering on embedded `company.identity_organization_id` only nullifies the
+                //  relation without excluding the parent row, causing false "3rd Party" labels)
+                const { data: orgCompanies } = await this.supabase
+                    .from('companies')
+                    .select('id')
+                    .in('identity_organization_id', accessContext.organizationIds);
+
+                const orgCompanyIds = (orgCompanies || []).map((c: any) => c.id);
+                if (orgCompanyIds.length === 0) {
+                    return { data: [], total: 0 };
+                }
+                query = query.in('company_id', orgCompanyIds);
 
                 if (filters.job_owner_filter === 'assigned' && accessContext.identityUserId) {
                     // Further filter to only jobs where this user is the job_owner_id

@@ -163,6 +163,11 @@ export function Footer() {
                     },
                 );
             }
+
+            // Force ScrollTrigger to re-check positions — on client-side
+            // navigation the footer may already be in view when it mounts,
+            // so triggers that rely on scrolling into view would never fire.
+            ScrollTrigger.refresh();
         },
         { scope: containerRef },
     );
