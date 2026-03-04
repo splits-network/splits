@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v7.0 Company Profile Enhancement — Phase 25: Company Settings UI
+**Current focus:** v7.0 Company Profile Enhancement — Phase 26: Company Card Redesign
 
 ## Current Position
 
-Phase: 25 of 27 (Company Settings UI)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-04 — Completed 25-02-PLAN.md (tag pickers for tech stack, perks, culture tags)
+Phase: 26 of 27 (Company Card Redesign)
+Plan: 0 of 3 in current phase
+Status: Ready to plan
+Last activity: 2026-03-04 — Phase 25 complete (2 plans, company settings UI)
 
 Progress: [█████████░░░░░░░░░░░] 64% (9/14 v7.0 plans)
 
@@ -24,7 +24,7 @@ Progress: [█████████░░░░░░░░░░░] 64% (9/
 
 **v7.0:**
 - Total plans: 14 across 6 phases
-- Completed: 9 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02)
+- Completed: 9/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02)
 
 ## Accumulated Context
 
@@ -51,10 +51,10 @@ None active.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Completed 25-02-PLAN.md — tag pickers (tech stack, perks, culture tags) added to company settings
+Stopped at: Phase 25 complete — company settings UI with scalar fields + tag pickers
 Resume file: None
-Next: Phase 26
+Next: `/basel:discuss-phase 26` or `/basel:plan-phase 26`
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-04 (25-02 complete, Phase 25 Company Settings UI fully done)*
+*Last updated: 2026-03-04 (Phase 25 complete, ready for Phase 26)*
