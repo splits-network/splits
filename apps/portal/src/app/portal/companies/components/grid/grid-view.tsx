@@ -1,9 +1,14 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
 import { CompanyDetailLoader } from "../shared/company-detail";
 import { companyId } from "../shared/helpers";
 import { GridCard } from "./grid-card";
+
+type TagMap = Record<string, { skills: string[]; perks: string[] }>;
 
 export function GridView({
     items,
@@ -19,9 +24,67 @@ export function GridView({
     onRefreshAction?: () => void;
 }) {
     const isMarketplace = activeTab === "marketplace";
+    const { getToken } = useAuth();
+    const [tagMap, setTagMap] = useState<TagMap>({});
+
     const selectedItem = items.find(
         (item) => companyId(item, isMarketplace) === selectedId,
     );
+
+    useEffect(() => {
+        if (!isMarketplace || items.length === 0) return;
+
+        const companyIds = items.map((item) =>
+            companyId(item, true),
+        ).filter(Boolean);
+
+        if (companyIds.length === 0) return;
+
+        let cancelled = false;
+
+        async function fetchTags() {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) return;
+                const client = createAuthenticatedClient(token);
+
+                const results = await Promise.all(
+                    companyIds.map(async (cId) => {
+                        const [skillsRes, perksRes] = await Promise.all([
+                            client.get(`/company-skills?company_id=${cId}`),
+                            client.get(`/company-perks?company_id=${cId}`),
+                        ]);
+
+                        const skills = (skillsRes.data || [])
+                            .filter((r: any) => r.skill)
+                            .map((r: any) => r.skill.name as string);
+
+                        const perks = (perksRes.data || [])
+                            .filter((r: any) => r.perk)
+                            .map((r: any) => r.perk.name as string);
+
+                        return { cId, skills, perks };
+                    }),
+                );
+
+                if (cancelled) return;
+
+                const map: TagMap = {};
+                for (const { cId, skills, perks } of results) {
+                    map[cId] = { skills, perks };
+                }
+                setTagMap(map);
+            } catch (err) {
+                console.error("Failed to fetch company junction data:", err);
+            }
+        }
+
+        fetchTags();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [items, isMarketplace]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="relative">
@@ -41,6 +104,8 @@ export function GridView({
                             isSelected={selectedId === cId}
                             onSelect={() => onSelectAction(item)}
                             onRefresh={onRefreshAction}
+                            techStack={tagMap[cId]?.skills ?? []}
+                            perks={tagMap[cId]?.perks ?? []}
                         />
                     );
                 })}

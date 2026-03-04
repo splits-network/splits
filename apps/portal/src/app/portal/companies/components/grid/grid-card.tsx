@@ -26,12 +26,16 @@ export function GridCard({
     isSelected,
     onSelect,
     onRefresh,
+    techStack = [],
+    perks = [],
 }: {
     item: Company | CompanyRelationship;
     activeTab: CompanyTab;
     isSelected: boolean;
     onSelect: () => void;
     onRefresh?: () => void;
+    techStack?: string[];
+    perks?: string[];
 }) {
     const isMarketplace = activeTab === "marketplace";
     const name = companyName(item, isMarketplace);
@@ -151,6 +155,44 @@ export function GridCard({
                     <RelationshipStats relationship={relationship!} />
                 )}
             </div>
+
+            {/* Tech Stack (marketplace only, when data exists) */}
+            {isMarketplace && techStack.length > 0 && (
+                <div className="px-5 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        Tech Stack
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {techStack.slice(0, 6).map((tech) => (
+                            <BaselBadge key={tech} variant="outline" size="sm">{tech}</BaselBadge>
+                        ))}
+                        {techStack.length > 6 && (
+                            <span className="text-sm font-semibold text-base-content/40 self-center">
+                                +{techStack.length - 6} more
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Perks (marketplace only, when data exists) */}
+            {isMarketplace && perks.length > 0 && (
+                <div className="px-5 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        Perks
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {perks.slice(0, 4).map((perk) => (
+                            <BaselBadge key={perk} color="secondary" size="sm">{perk}</BaselBadge>
+                        ))}
+                        {perks.length > 4 && (
+                            <span className="text-sm font-semibold text-base-content/40 self-center">
+                                +{perks.length - 4} more
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Footer: actions toolbar */}
             <div className="px-5 py-3 flex items-center justify-end">
