@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 26 of 27 (Company Card Redesign)
-Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-03-04 — Phase 25 complete (2 plans, company settings UI)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-03-04 — Completed 26-01 (Company type extension + grid card redesign)
 
-Progress: [█████████░░░░░░░░░░░] 64% (9/14 v7.0 plans)
+Progress: [█████████░░░░░░░░░░░] 71% (10/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -24,7 +24,7 @@ Progress: [█████████░░░░░░░░░░░] 64% (9/
 
 **v7.0:**
 - Total plans: 14 across 6 phases
-- Completed: 9/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02)
+- Completed: 10/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01)
 
 ## Accumulated Context
 
@@ -39,6 +39,9 @@ v7.0 decisions: tech stack reuses skills, perks/culture as lookups, stage as enu
 | Stage as constrained TEXT | CHECK constraint (8 values) consistent with v4.0 commute_types/job_level approach | Confirmed in migration |
 | CompanyStage Title Case with spaces | 'Series A' not 'series_a' — display-ready values matching DB CHECK constraint verbatim | 22-02 |
 | Junction types with enrichment | CompanyPerk/CompanyCultureTag/CompanySkill follow CandidateSkill/JobSkill pattern (FK + optional join) | 22-02 |
+| Portal Company stage as string | Portal Company interface uses string (not enum) for stage — API returns plain string, portal is display-only | 26-01 |
+| Tagline replaces description in card | tagline is purpose-built for card display; description may be long-form | 26-01 |
+| Founded year replaces added-ago (marketplace) | Company age more informative than record creation date when browsing marketplace | 26-01 |
 
 ### Pending Todos
 
@@ -51,10 +54,10 @@ None active.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Phase 25 complete — company settings UI with scalar fields + tag pickers
+Stopped at: Completed 26-01 — Company type extension and grid card editorial redesign
 Resume file: None
-Next: `/basel:discuss-phase 26` or `/basel:plan-phase 26`
+Next: Execute 26-02 (list card redesign) or `/basel:plan-phase 26` for remaining plans
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-04 (Phase 25 complete, ready for Phase 26)*
+*Last updated: 2026-03-04 (26-01 complete, company type + grid card redesign)*
