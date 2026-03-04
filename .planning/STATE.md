@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 26 of 27 (Company Card Redesign)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-03-04 — Completed 26-01 (Company type extension + grid card redesign)
+Last activity: 2026-03-04 — Completed 26-02 (Company grid card tech stack + perks tag sections)
 
-Progress: [█████████░░░░░░░░░░░] 71% (10/14 v7.0 plans)
+Progress: [██████████░░░░░░░░░░] 79% (11/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -24,7 +24,7 @@ Progress: [█████████░░░░░░░░░░░] 71% (10
 
 **v7.0:**
 - Total plans: 14 across 6 phases
-- Completed: 10/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01)
+- Completed: 11/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01, 26-02)
 
 ## Accumulated Context
 
@@ -42,6 +42,8 @@ v7.0 decisions: tech stack reuses skills, perks/culture as lookups, stage as enu
 | Portal Company stage as string | Portal Company interface uses string (not enum) for stage — API returns plain string, portal is display-only | 26-01 |
 | Tagline replaces description in card | tagline is purpose-built for card display; description may be long-form | 26-01 |
 | Founded year replaces added-ago (marketplace) | Company age more informative than record creation date when browsing marketplace | 26-01 |
+| GridView owns junction fetch | tagMap pattern — view fetches, passes name arrays to cards; avoids per-card fetch stampede | 26-02 |
+| Tech stack max 6, perks max 4 | limits keep card height reasonable; +N more overflow handles excess | 26-02 |
 
 ### Pending Todos
 
@@ -54,10 +56,10 @@ None active.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Completed 26-01 — Company type extension and grid card editorial redesign
+Stopped at: Completed 26-02 — Company grid card tech stack and perks tag sections
 Resume file: None
-Next: Execute 26-02 (list card redesign) or `/basel:plan-phase 26` for remaining plans
+Next: Execute 26-03 (list card redesign)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-04 (26-01 complete, company type + grid card redesign)*
+*Last updated: 2026-03-04 (26-02 complete, grid card tech stack + perks tag sections)*
