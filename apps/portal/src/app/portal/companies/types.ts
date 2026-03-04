@@ -15,6 +15,14 @@ export interface Company {
     logo_url?: string;
     created_at: string;
     updated_at: string;
+    stage?: string;
+    founded_year?: number;
+    tagline?: string;
+    linkedin_url?: string;
+    twitter_url?: string;
+    glassdoor_url?: string;
+    open_roles_count?: number;
+    avg_salary?: number | null;
 }
 
 export interface CompanyRelationship {
