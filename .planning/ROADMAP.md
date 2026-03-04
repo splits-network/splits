@@ -118,11 +118,11 @@ Plans:
   2. Searching for a perk or culture tag name returns companies with that perk/tag
   3. Searching for a company stage or tagline text returns matching companies
   4. Adding or removing a junction record (skill/perk/culture tag) refreshes the company search index
-**Plans**: 2 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] 27-01: Update company search trigger for new fields
-- [ ] 27-02: Junction table triggers for search index refresh
+- [ ] 27-01-PLAN.md -- Update company search vector and search index sync with new fields (stage, tagline, skills, perks, culture tags)
+- [ ] 27-02-PLAN.md -- Junction table cascade triggers to refresh company search on skill/perk/culture tag changes
 
 ## Progress
 
