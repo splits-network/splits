@@ -86,11 +86,11 @@ Plans:
   2. User can enter founded year, tagline, and social links and save them
   3. User can search/add/remove tech stack skills, perks, and culture tags using BaselSkillPicker with typeahead
   4. All settings persist after page reload
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 25-01: Scalar field settings (stage, founded year, tagline, social links)
-- [ ] 25-02: Tag picker settings (tech stack, perks, culture tags)
+- [ ] 25-01-PLAN.md -- Scalar field settings (stage, founded year, tagline, social links)
+- [ ] 25-02-PLAN.md -- Tag picker settings (tech stack, perks, culture tags)
 
 ### Phase 26: Company Card Redesign
 **Goal**: Company grid cards and detail panel display all new profile data in the redesigned layout
@@ -102,7 +102,7 @@ Plans:
   3. Company grid card shows tech stack and perks as tag sections
   4. Company detail panel displays all new fields (stage, tagline, social links, tech stack, perks, culture tags)
   5. Company card includes a description/about section with line-clamped text
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 26-01: Grid card header, stats row, and description section
@@ -118,7 +118,7 @@ Plans:
   2. Searching for a perk or culture tag name returns companies with that perk/tag
   3. Searching for a company stage or tagline text returns matching companies
   4. Adding or removing a junction record (skill/perk/culture tag) refreshes the company search index
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 27-01: Update company search trigger for new fields
@@ -134,6 +134,6 @@ Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
 | 22. Schema & Types | v7.0 | 2/2 | Complete | 2026-03-03 |
 | 23. Lookup APIs | v7.0 | 3/3 | Complete | 2026-03-03 |
 | 24. Company Enrichment APIs | v7.0 | 2/2 | Complete | 2026-03-03 |
-| 25. Company Settings UI | v7.0 | 0/2 | Not started | - |
+| 25. Company Settings UI | v7.0 | 0/2 | Planned | - |
 | 26. Company Card Redesign | v7.0 | 0/3 | Not started | - |
 | 27. Search Index Enrichment | v7.0 | 0/2 | Not started | - |
