@@ -6,8 +6,9 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Company, CompanyRelationship } from "../../types";
 import { formatDate, formatCompanySize } from "../../types";
 import { statusColor } from "./status-color";
-import { companyInitials, formatStatus } from "./helpers";
+import { companyInitials, formatStatus, formatSalary } from "./helpers";
 import { LevelBadge, BadgeGrid, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge } from "@splits-network/basel-ui";
 import CompanyActionsToolbar from "./actions-toolbar";
 import CompanyContacts from "@/components/company-contacts";
 
@@ -18,11 +19,17 @@ export function CompanyDetail({
     relationship,
     onClose,
     onRefresh,
+    techStack = [],
+    perks = [],
+    cultureTags = [],
 }: {
     company: Company;
     relationship: CompanyRelationship | null;
     onClose?: () => void;
     onRefresh?: () => void;
+    techStack?: string[];
+    perks?: string[];
+    cultureTags?: string[];
 }) {
     const { registerEntities, getLevel, getBadges } = useGamification();
 
@@ -114,8 +121,8 @@ export function CompanyDetail({
 
             {/* Content */}
             <div className="p-6 space-y-8">
-                {/* Stats grid */}
-                <div className="grid grid-cols-3 gap-[2px] bg-base-300">
+                {/* Stats grid — Size, Stage, Founded, Open Roles */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Size
@@ -126,27 +133,53 @@ export function CompanyDetail({
                     </div>
                     <div className="bg-base-100 p-4">
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Relationship
+                            Stage
                         </p>
-                        <p className="text-lg font-black tracking-tight capitalize">
-                            {relationship?.relationship_type || "None"}
+                        <p className="text-lg font-black tracking-tight">
+                            {company.stage || "N/A"}
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Manage Jobs
+                            Founded
                         </p>
                         <p className="text-lg font-black tracking-tight">
-                            {relationship?.can_manage_company_jobs ? (
-                                <span className="text-success">Yes</span>
-                            ) : (
-                                "No"
-                            )}
+                            {company.founded_year || "N/A"}
                         </p>
                     </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Open Roles
+                        </p>
+                        <p className="text-lg font-black tracking-tight">
+                            {company.open_roles_count ?? 0}
+                        </p>
+                    </div>
+                    {company.avg_salary != null && (
+                        <div className="bg-base-100 p-4 col-span-2 md:col-span-4">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                                Avg Salary
+                            </p>
+                            <p className="text-lg font-black tracking-tight">
+                                {formatSalary(company.avg_salary)}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
-                {/* Description */}
+                {/* Tagline */}
+                {company.tagline && (
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Tagline
+                        </h3>
+                        <p className="text-lg italic text-base-content/70 border-l-4 border-primary pl-4">
+                            {company.tagline}
+                        </p>
+                    </div>
+                )}
+
+                {/* About / Description */}
                 {company.description && (
                     <div>
                         <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
@@ -155,6 +188,98 @@ export function CompanyDetail({
                         <p className="text-base-content/70 leading-relaxed">
                             {company.description}
                         </p>
+                    </div>
+                )}
+
+                {/* Social Links */}
+                {(company.linkedin_url || company.twitter_url || company.glassdoor_url) && (
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Social
+                        </h3>
+                        <div className="flex items-center gap-4">
+                            {company.linkedin_url && (
+                                <a
+                                    href={company.linkedin_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+                                >
+                                    <i className="fa-brands fa-linkedin text-lg" />
+                                    LinkedIn
+                                </a>
+                            )}
+                            {company.twitter_url && (
+                                <a
+                                    href={company.twitter_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+                                >
+                                    <i className="fa-brands fa-x-twitter text-lg" />
+                                    X / Twitter
+                                </a>
+                            )}
+                            {company.glassdoor_url && (
+                                <a
+                                    href={company.glassdoor_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+                                >
+                                    <i className="fa-duotone fa-regular fa-star text-lg" />
+                                    Glassdoor
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Tech Stack */}
+                {techStack.length > 0 && (
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Tech Stack
+                        </h3>
+                        <div className="flex flex-wrap gap-1.5">
+                            {techStack.map((skill) => (
+                                <BaselBadge key={skill} variant="outline" size="sm">
+                                    {skill}
+                                </BaselBadge>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Perks & Benefits */}
+                {perks.length > 0 && (
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Perks & Benefits
+                        </h3>
+                        <div className="flex flex-wrap gap-1.5">
+                            {perks.map((perk) => (
+                                <BaselBadge key={perk} color="secondary" size="sm">
+                                    {perk}
+                                </BaselBadge>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Culture & Values */}
+                {cultureTags.length > 0 && (
+                    <div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Culture & Values
+                        </h3>
+                        <div className="flex flex-wrap gap-1.5">
+                            {cultureTags.map((tag) => (
+                                <BaselBadge key={tag} color="accent" size="sm">
+                                    {tag}
+                                </BaselBadge>
+                            ))}
+                        </div>
                     </div>
                 )}
 
@@ -302,6 +427,9 @@ export function CompanyDetailLoader({
     const [company, setCompany] = useState<Company | null>(null);
     const [relationship, setRelationship] =
         useState<CompanyRelationship | null>(null);
+    const [skills, setSkills] = useState<string[]>([]);
+    const [perks, setPerks] = useState<string[]>([]);
+    const [cultureTags, setCultureTags] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -327,6 +455,37 @@ export function CompanyDetailLoader({
                     relRes.data.length > 0
                 ) {
                     setRelationship(relRes.data[0]);
+                }
+
+                // Fetch junction data in parallel
+                const [skillsRes, perksRes, cultureRes] = await Promise.all([
+                    client.get<{ data: Array<{ skill?: { name: string } }> }>(
+                        `/company-skills?company_id=${id}`,
+                    ),
+                    client.get<{ data: Array<{ perk?: { name: string } }> }>(
+                        `/company-perks?company_id=${id}`,
+                    ),
+                    client.get<{ data: Array<{ culture_tag?: { name: string } }> }>(
+                        `/company-culture-tags?company_id=${id}`,
+                    ),
+                ]);
+
+                if (!signal?.cancelled) {
+                    setSkills(
+                        skillsRes.data
+                            .filter((r) => r.skill)
+                            .map((r) => r.skill!.name),
+                    );
+                    setPerks(
+                        perksRes.data
+                            .filter((r) => r.perk)
+                            .map((r) => r.perk!.name),
+                    );
+                    setCultureTags(
+                        cultureRes.data
+                            .filter((r) => r.culture_tag)
+                            .map((r) => r.culture_tag!.name),
+                    );
                 }
             } catch (err) {
                 console.error("Failed to fetch company detail:", err);
@@ -375,6 +534,9 @@ export function CompanyDetailLoader({
             relationship={relationship}
             onClose={onClose}
             onRefresh={handleRefresh}
+            techStack={skills}
+            perks={perks}
+            cultureTags={cultureTags}
         />
     );
 }
