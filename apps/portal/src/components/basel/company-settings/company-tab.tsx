@@ -8,6 +8,7 @@ import { BaselFormField } from "@splits-network/basel-ui";
 import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
 import type { Company } from "@/app/portal/company/settings/types";
 import { CompanyDetailsSection } from "./company-details-section";
+import { CompanyTagsSection } from "./company-tags-section";
 
 const COMPANY_SIZES = [
     { value: "1-10", label: "1-10 employees" },
@@ -290,6 +291,12 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
                     </div>
                 </div>
             </form>
+
+            {company && (
+                <div className="mt-10">
+                    <CompanyTagsSection companyId={company.id} />
+                </div>
+            )}
         </div>
     );
 }
