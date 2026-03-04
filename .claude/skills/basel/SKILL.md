@@ -75,6 +75,10 @@ success, error, warning, info (+ -content variants)
 7. **Tailwind classes ONLY** - NEVER hardcode hex colors, NEVER create color constant objects
 8. **Auto-fix audit** - Auditor catches violations, designer auto-fixes, re-audit until 100% clean
 
+## Sub-Skills
+
+- `grid-card.md` — Grid card anatomy, stats grid, always-visible sections, empty states, tag badges
+
 ## Resources
 
 - Shared package: `packages/basel-ui/` (`@splits-network/basel-ui`)

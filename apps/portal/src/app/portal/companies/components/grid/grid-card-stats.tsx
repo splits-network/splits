@@ -1,6 +1,7 @@
 "use client";
 
 import type { Company, CompanyRelationship } from "../../types";
+import { formatSalary } from "../shared/helpers";
 
 const iconStyles = [
     "bg-primary text-primary-content",
@@ -42,22 +43,29 @@ function StatCell({
 export function MarketplaceStats({ company }: { company: Company }) {
     const stats = [
         {
+            label: "Roles",
+            value: String(company.open_roles_count ?? 0),
+            icon: "fa-duotone fa-regular fa-briefcase",
+        },
+        {
             label: "Size",
             value: company.company_size || "N/A",
             icon: "fa-duotone fa-regular fa-users",
         },
         {
-            label: "Industry",
-            value: company.industry || "N/A",
-            icon: "fa-duotone fa-regular fa-briefcase",
+            label: "Stage",
+            value: company.stage || "N/A",
+            icon: "fa-duotone fa-regular fa-rocket",
+        },
+        {
+            label: "Avg Salary",
+            value: formatSalary(company.avg_salary),
+            icon: "fa-duotone fa-regular fa-dollar-sign",
         },
     ];
 
     return (
-        <div
-            className="grid divide-x divide-base-300"
-            style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
-        >
+        <div className="grid grid-cols-2 divide-x divide-y divide-base-300">
             {stats.map((stat, i) => (
                 <StatCell
                     key={stat.label}

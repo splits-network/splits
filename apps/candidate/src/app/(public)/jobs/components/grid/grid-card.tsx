@@ -1,9 +1,10 @@
 "use client";
 
 import type { Job } from "../../types";
-import { formatJobLevel } from "../../types";
+import { formatJobLevel, formatCommuteTypes } from "../../types";
 import { statusSemanticColor } from "../shared/status-color";
 import { BaselBadge } from "@splits-network/basel-ui";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
     salaryDisplay,
     formatEmploymentType,
@@ -11,7 +12,6 @@ import {
     isNew,
     companyName,
     companyInitials,
-    truncateDescription,
     postedAgo,
     requiredSkillNames,
 } from "../shared/helpers";
@@ -19,6 +19,13 @@ import {
     LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
+
+const iconStyles = [
+    "bg-primary text-primary-content",
+    "bg-secondary text-secondary-content",
+    "bg-accent text-accent-content",
+    "bg-warning text-warning-content",
+];
 
 interface GridCardProps {
     job: Job;
@@ -30,11 +37,35 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const jobLevel = formatJobLevel(job.job_level);
-    const desc = truncateDescription(job);
     const skills = requiredSkillNames(job);
     const { getLevel } = useGamification();
     const companyLevel = job.company?.id ? getLevel(job.company.id) : undefined;
     const posted = postedAgo(job);
+    const desc = job.candidate_description || job.description;
+    const commute = formatCommuteTypes(job.commute_types);
+
+    const stats = [
+        {
+            label: "Salary",
+            value: salary || "TBD",
+            icon: "fa-duotone fa-regular fa-dollar-sign",
+        },
+        {
+            label: "Level",
+            value: jobLevel || "N/A",
+            icon: "fa-duotone fa-regular fa-layer-group",
+        },
+        {
+            label: "Type",
+            value: formatEmploymentType(job.employment_type),
+            icon: "fa-duotone fa-regular fa-briefcase",
+        },
+        {
+            label: "Commute",
+            value: commute || "N/A",
+            icon: "fa-duotone fa-regular fa-building",
+        },
+    ];
 
     return (
         <article
@@ -48,7 +79,7 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
         >
             {/* Header Band */}
             <div className="bg-base-300 border-b border-base-300 px-6 pt-5 pb-4">
-                {/* Kicker row: status + NEW badge */}
+                {/* Kicker row: industry + status badges */}
                 <div className="flex items-center justify-between mb-3">
                     {job.company?.industry && (
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40">
@@ -58,6 +89,7 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
                     <div className="flex items-center gap-2 flex-wrap ml-auto">
                         <BaselBadge
                             color={statusSemanticColor(job.status)}
+                            variant="soft"
                             size="sm"
                         >
                             {formatStatusLabel(job.status)}
@@ -125,41 +157,52 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
                 </div>
             </div>
 
-            {/* Description */}
-            {desc && (
-                <div className="px-6 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
-                        About
-                    </p>
-                    <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                        {desc}
-                    </p>
-                </div>
-            )}
-
-            {/* Stats Row */}
-            {salary && (
-                <div className="border-b border-base-300">
-                    <div className="grid grid-cols-1 divide-x divide-base-300">
-                        <div className="flex flex-col items-center justify-center px-1.5 py-3 gap-1 text-center min-w-0 overflow-hidden">
-                            <i className="fa-duotone fa-regular fa-dollar-sign text-primary text-sm" />
-                            <span className="text-sm font-black text-base-content leading-none truncate w-full">
-                                {salary}
-                            </span>
-                            <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate w-full">
-                                Salary
-                            </span>
-                        </div>
+            {/* About snippet */}
+            <div className="px-6 py-4 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
+                    About
+                </p>
+                {desc ? (
+                    <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                        <MarkdownRenderer content={desc} />
                     </div>
+                ) : (
+                    <p className="text-sm text-base-content/20 italic">No description added yet</p>
+                )}
+            </div>
+
+            {/* Stats Grid */}
+            <div className="border-b border-base-300">
+                <div className="grid grid-cols-2 divide-x divide-y divide-base-300">
+                    {stats.map((stat, i) => (
+                        <div
+                            key={stat.label}
+                            className="flex items-center gap-2 px-2 py-3 min-w-0 overflow-hidden"
+                        >
+                            <div
+                                className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyles[i % iconStyles.length]}`}
+                            >
+                                <i className={`${stat.icon} text-xs`} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-sm font-black text-base-content leading-none block truncate">
+                                    {stat.value}
+                                </span>
+                                <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate block">
+                                    {stat.label}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            )}
+            </div>
 
             {/* Skills */}
-            {skills.length > 0 && (
-                <div className="px-6 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                        Required Skills
-                    </p>
+            <div className="px-6 py-4 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                    Required Skills
+                </p>
+                {skills.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {skills.slice(0, 4).map((skill) => (
                             <BaselBadge key={skill} variant="outline" size="sm">
@@ -167,34 +210,15 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
                             </BaselBadge>
                         ))}
                         {skills.length > 4 && (
-                            <BaselBadge variant="outline" size="sm">
-                                +{skills.length - 4}
-                            </BaselBadge>
+                            <span className="text-sm font-semibold text-base-content/40 self-center">
+                                +{skills.length - 4} more
+                            </span>
                         )}
                     </div>
-                </div>
-            )}
-
-            {/* Detail Badges */}
-            {(job.employment_type || jobLevel) && (
-                <div className="px-6 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                        Details
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                        {job.employment_type && (
-                            <BaselBadge color="primary" icon="fa-briefcase">
-                                {formatEmploymentType(job.employment_type)}
-                            </BaselBadge>
-                        )}
-                        {jobLevel && (
-                            <BaselBadge color="secondary" icon="fa-layer-group">
-                                {jobLevel}
-                            </BaselBadge>
-                        )}
-                    </div>
-                </div>
-            )}
+                ) : (
+                    <p className="text-sm text-base-content/20 italic">No skills listed</p>
+                )}
+            </div>
 
             {/* Footer: company info */}
             <div className="mt-auto flex items-center gap-3 px-6 py-4">

@@ -7,7 +7,7 @@
 - [x] **v4.0 Commute Types & Job Levels** - Phases 8-10 (shipped 2026-02-13)
 - [x] **v5.0 Custom GPT / Applicant Network** - Phases 11-15 (shipped 2026-02-13)
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
-- [ ] **v7.0 Company Profile Enhancement** - Phases 22-27 (in progress)
+- [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 
 ## Phases
 
@@ -18,7 +18,7 @@ Completed milestones documented in .planning/MILESTONES.md
 
 </details>
 
-### v7.0 Company Profile Enhancement (In Progress)
+### v7.0 Company Profile Enhancement (Complete)
 
 **Milestone Goal:** Enrich company profiles with tech stack, perks, culture tags, stage, and social links — then surface all of it in redesigned company cards and search.
 
@@ -26,8 +26,8 @@ Completed milestones documented in .planning/MILESTONES.md
 - [x] **Phase 23: Lookup APIs** - Search/create endpoints for perks and culture tags, plus junction CRUD for skills/perks/culture (completed 2026-03-03)
 - [x] **Phase 24: Company Enrichment APIs** - Scalar field updates, computed stats, and gateway routing (completed 2026-03-03)
 - [x] **Phase 25: Company Settings UI** - Form sections for all new fields in company settings (completed 2026-03-04)
-- [ ] **Phase 26: Company Card Redesign** - Grid card, detail panel, and description section
-- [ ] **Phase 27: Search Index Enrichment** - Triggers to index new fields into company search vector
+- [x] **Phase 26: Company Card Redesign** - Grid card, detail panel, and description section (completed 2026-03-04)
+- [x] **Phase 27: Search Index Enrichment** - Triggers to index new fields into company search vector (completed 2026-03-04)
 
 ## Phase Details
 
@@ -102,12 +102,12 @@ Plans:
   3. Company grid card shows tech stack and perks as tag sections
   4. Company detail panel displays all new fields (stage, tagline, social links, tech stack, perks, culture tags)
   5. Company card includes a description/about section with line-clamped text
-**Plans**: 2 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] 26-01: Grid card header, stats row, and description section
-- [ ] 26-02: Grid card tag sections (tech stack, perks)
-- [ ] 26-03: Detail panel updated with all new fields
+- [x] 26-01-PLAN.md -- Update types + redesign grid card header, stats, and tagline
+- [x] 26-02-PLAN.md -- Grid card tech stack and perks tag sections
+- [x] 26-03-PLAN.md -- Detail panel with all new profile fields
 
 ### Phase 27: Search Index Enrichment
 **Goal**: All new company data is searchable via the existing global search infrastructure
@@ -118,11 +118,11 @@ Plans:
   2. Searching for a perk or culture tag name returns companies with that perk/tag
   3. Searching for a company stage or tagline text returns matching companies
   4. Adding or removing a junction record (skill/perk/culture tag) refreshes the company search index
-**Plans**: 2 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] 27-01: Update company search trigger for new fields
-- [ ] 27-02: Junction table triggers for search index refresh
+- [x] 27-01-PLAN.md -- Update company search vector and search index sync with new fields (stage, tagline, skills, perks, culture tags)
+- [x] 27-02-PLAN.md -- Junction table cascade triggers to refresh company search on skill/perk/culture tag changes
 
 ## Progress
 
@@ -135,5 +135,5 @@ Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
 | 23. Lookup APIs | v7.0 | 3/3 | Complete | 2026-03-03 |
 | 24. Company Enrichment APIs | v7.0 | 2/2 | Complete | 2026-03-03 |
 | 25. Company Settings UI | v7.0 | 2/2 | Complete | 2026-03-04 |
-| 26. Company Card Redesign | v7.0 | 0/3 | Not started | - |
-| 27. Search Index Enrichment | v7.0 | 0/2 | Not started | - |
+| 26. Company Card Redesign | v7.0 | 3/3 | Complete | 2026-03-04 |
+| 27. Search Index Enrichment | v7.0 | 2/2 | Complete | 2026-03-04 |

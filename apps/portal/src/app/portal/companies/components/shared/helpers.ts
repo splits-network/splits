@@ -54,3 +54,18 @@ export function formatStatus(status?: string): string {
 export function addedAgo(item: Company | CompanyRelationship): string {
     return formatRelativeTime(item.created_at);
 }
+
+export function companyFoundedYear(item: Company | CompanyRelationship, isMarketplace: boolean): number | undefined {
+    if (isMarketplace) return (item as Company).founded_year;
+    return undefined;
+}
+
+export function companyTagline(item: Company | CompanyRelationship, isMarketplace: boolean): string | undefined {
+    if (isMarketplace) return (item as Company).tagline;
+    return undefined;
+}
+
+export function formatSalary(avgSalary: number | null | undefined): string {
+    if (avgSalary == null) return "N/A";
+    return `$${Math.round(avgSalary / 1000)}k`;
+}

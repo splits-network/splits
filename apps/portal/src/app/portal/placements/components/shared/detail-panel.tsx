@@ -158,188 +158,38 @@ export function DetailPanel({
                         </div>
                     )}
 
-                {/* Collaborators / Splits */}
-                {placement.your_splits && placement.your_splits.length > 0 && (
+                {/* Split Partners */}
+                {placement.splits && placement.splits.length > 0 && (
                     <div>
                         <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
-                            Your Splits
+                            Split Partners
                         </h3>
                         <ul className="space-y-2">
-                            {placement.your_splits.flatMap((split, i) => {
-                                const isSourcer =
-                                    split.role === "candidate_sourcer" ||
-                                    split.role === "company_sourcer";
-                                const basePercentage = 6;
-                                const bonusPercentage =
-                                    split.split_percentage - basePercentage;
-
-                                if (isSourcer && bonusPercentage > 0) {
-                                    const baseAmount =
-                                        (split.split_amount * basePercentage) /
-                                        split.split_percentage;
-                                    const bonusAmount =
-                                        split.split_amount - baseAmount;
-
-                                    return [
-                                        <li
-                                            key={`${i}-base`}
-                                            className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
-                                        >
-                                            <span className="flex items-center gap-2">
-                                                <i className="fa-duotone fa-regular fa-circle-check text-primary text-xs" />
-                                                <span className="text-sm font-semibold capitalize">
-                                                    {split.role.replace(
-                                                        "_",
-                                                        " ",
-                                                    )}{" "}
-                                                    (Base)
-                                                </span>
-                                            </span>
-                                            <span className="text-sm font-bold">
-                                                {basePercentage}% &middot;{" "}
-                                                {formatCurrency(baseAmount)}
-                                            </span>
-                                        </li>,
-                                        <li
-                                            key={`${i}-bonus`}
-                                            className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
-                                        >
-                                            <span className="flex items-center gap-2">
-                                                <i className="fa-duotone fa-regular fa-circle-check text-primary text-xs" />
-                                                <span className="text-sm font-semibold capitalize">
-                                                    {split.role.replace(
-                                                        "_",
-                                                        " ",
-                                                    )}{" "}
-                                                    (Bonus)
-                                                </span>
-                                            </span>
-                                            <span className="text-sm font-bold">
-                                                {bonusPercentage}% &middot;{" "}
-                                                {formatCurrency(bonusAmount)}
-                                            </span>
-                                        </li>,
-                                    ];
-                                }
-
-                                return [
+                            {placement.splits.map((split) => {
+                                const name = split.recruiter?.user?.name || split.role.replace(/_/g, " ");
+                                const roleLabel = split.role.replace(/_/g, " ");
+                                return (
                                     <li
-                                        key={i}
+                                        key={split.id}
                                         className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
                                     >
                                         <span className="flex items-center gap-2">
                                             <i className="fa-duotone fa-regular fa-circle-check text-primary text-xs" />
-                                            <span className="text-sm font-semibold capitalize">
-                                                {split.role.replace("_", " ")}
+                                            <span className="text-sm font-semibold">
+                                                {name}
+                                                <span className="text-base-content/40 capitalize"> ({roleLabel})</span>
                                             </span>
                                         </span>
                                         <span className="text-sm font-bold">
                                             {split.split_percentage}% &middot;{" "}
                                             {formatCurrency(split.split_amount)}
                                         </span>
-                                    </li>,
-                                ];
+                                    </li>
+                                );
                             })}
                         </ul>
                     </div>
                 )}
-
-                {/* Collaborators */}
-                {placement.collaborators &&
-                    placement.collaborators.length > 0 && (
-                        <div>
-                            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
-                                Collaborators
-                            </h3>
-                            <ul className="space-y-2">
-                                {placement.collaborators.flatMap((collab) => {
-                                    const isSourcer =
-                                        collab.role === "candidate_sourcer" ||
-                                        collab.role === "company_sourcer";
-                                    const basePercentage = 6;
-                                    const bonusPercentage =
-                                        collab.split_percentage -
-                                        basePercentage;
-
-                                    if (isSourcer && bonusPercentage > 0) {
-                                        const baseAmount =
-                                            (collab.split_amount *
-                                                basePercentage) /
-                                            collab.split_percentage;
-                                        const bonusAmount =
-                                            collab.split_amount - baseAmount;
-
-                                        return [
-                                            <li
-                                                key={`${collab.id}-base`}
-                                                className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    <i className="fa-duotone fa-regular fa-user text-secondary text-xs" />
-                                                    <span className="text-sm font-semibold capitalize">
-                                                        {collab.role.replace(
-                                                            "_",
-                                                            " ",
-                                                        )}{" "}
-                                                        (Base)
-                                                    </span>
-                                                </span>
-                                                <span className="text-sm font-bold">
-                                                    {basePercentage}% &middot;{" "}
-                                                    {formatCurrency(baseAmount)}
-                                                </span>
-                                            </li>,
-                                            <li
-                                                key={`${collab.id}-bonus`}
-                                                className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    <i className="fa-duotone fa-regular fa-user text-secondary text-xs" />
-                                                    <span className="text-sm font-semibold capitalize">
-                                                        {collab.role.replace(
-                                                            "_",
-                                                            " ",
-                                                        )}{" "}
-                                                        (Bonus)
-                                                    </span>
-                                                </span>
-                                                <span className="text-sm font-bold">
-                                                    {bonusPercentage}% &middot;{" "}
-                                                    {formatCurrency(
-                                                        bonusAmount,
-                                                    )}
-                                                </span>
-                                            </li>,
-                                        ];
-                                    }
-
-                                    return [
-                                        <li
-                                            key={collab.id}
-                                            className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
-                                        >
-                                            <span className="flex items-center gap-2">
-                                                <i className="fa-duotone fa-regular fa-user text-secondary text-xs" />
-                                                <span className="text-sm font-semibold capitalize">
-                                                    {collab.role.replace(
-                                                        "_",
-                                                        " ",
-                                                    )}
-                                                </span>
-                                            </span>
-                                            <span className="text-sm font-bold">
-                                                {collab.split_percentage}%
-                                                &middot;{" "}
-                                                {formatCurrency(
-                                                    collab.split_amount,
-                                                )}
-                                            </span>
-                                        </li>,
-                                    ];
-                                })}
-                            </ul>
-                        </div>
-                    )}
 
                 {/* Failed info */}
                 {state === "failed" && placement.failed_at && (

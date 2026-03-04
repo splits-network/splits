@@ -40,27 +40,27 @@ Requirements for company profile enrichment and card redesign. Each maps to road
 
 ### UI
 
-- [ ] **UI-01**: Company settings section for stage (dropdown select)
-- [ ] **UI-02**: Company settings section for founded year (number input)
-- [ ] **UI-03**: Company settings section for tagline (text input)
-- [ ] **UI-04**: Company settings section for social links (LinkedIn, Twitter/X, Glassdoor text inputs)
-- [ ] **UI-05**: Company settings section for tech stack (BaselSkillPicker, search + create)
-- [ ] **UI-06**: Company settings section for perks (BaselSkillPicker, search + create)
-- [ ] **UI-07**: Company settings section for culture tags (BaselSkillPicker, search + create)
-- [ ] **UI-08**: Redesigned company grid card header (matches showcase — industry kicker, hiring/status badge, logo, name, location, founded year)
-- [ ] **UI-09**: Redesigned company grid card stats row (4 stats: Open Roles, Size, Stage, Avg Salary with colored icon squares)
-- [ ] **UI-10**: Redesigned company grid card tech stack tags section (BaselBadge outline)
-- [ ] **UI-11**: Redesigned company grid card perks tags section (BaselBadge secondary)
-- [ ] **UI-12**: Company detail panel updated with all new fields
-- [ ] **UI-13**: Company description section in card (About with line-clamp)
+- [x] **UI-01**: Company settings section for stage (dropdown select)
+- [x] **UI-02**: Company settings section for founded year (number input)
+- [x] **UI-03**: Company settings section for tagline (text input)
+- [x] **UI-04**: Company settings section for social links (LinkedIn, Twitter/X, Glassdoor text inputs)
+- [x] **UI-05**: Company settings section for tech stack (BaselSkillPicker, search + create)
+- [x] **UI-06**: Company settings section for perks (BaselSkillPicker, search + create)
+- [x] **UI-07**: Company settings section for culture tags (BaselSkillPicker, search + create)
+- [x] **UI-08**: Redesigned company grid card header (matches showcase — industry kicker, hiring/status badge, logo, name, location, founded year)
+- [x] **UI-09**: Redesigned company grid card stats row (4 stats: Open Roles, Size, Stage, Avg Salary with colored icon squares)
+- [x] **UI-10**: Redesigned company grid card tech stack tags section (BaselBadge outline)
+- [x] **UI-11**: Redesigned company grid card perks tags section (BaselBadge secondary)
+- [x] **UI-12**: Company detail panel updated with all new fields
+- [x] **UI-13**: Company description section in card (About with line-clamp)
 
 ### Search
 
-- [ ] **SRCH-01**: Search trigger updated to index tech stack names into company search vector
-- [ ] **SRCH-02**: Search trigger updated to index perks names into company search vector
-- [ ] **SRCH-03**: Search trigger updated to index culture tags into company search vector
-- [ ] **SRCH-04**: Search trigger updated to index stage and tagline into company search vector
-- [ ] **SRCH-05**: Junction table triggers to refresh company search index on skill/perk/culture_tag changes
+- [x] **SRCH-01**: Search trigger updated to index tech stack names into company search vector
+- [x] **SRCH-02**: Search trigger updated to index perks names into company search vector
+- [x] **SRCH-03**: Search trigger updated to index culture tags into company search vector
+- [x] **SRCH-04**: Search trigger updated to index stage and tagline into company search vector
+- [x] **SRCH-05**: Junction table triggers to refresh company search index on skill/perk/culture_tag changes
 
 ## Future Requirements
 
@@ -119,17 +119,17 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | UI-05 | Phase 25 | Complete |
 | UI-06 | Phase 25 | Complete |
 | UI-07 | Phase 25 | Complete |
-| UI-08 | Phase 26 | Pending |
-| UI-09 | Phase 26 | Pending |
-| UI-10 | Phase 26 | Pending |
-| UI-11 | Phase 26 | Pending |
-| UI-12 | Phase 26 | Pending |
-| UI-13 | Phase 26 | Pending |
-| SRCH-01 | Phase 27 | Pending |
-| SRCH-02 | Phase 27 | Pending |
-| SRCH-03 | Phase 27 | Pending |
-| SRCH-04 | Phase 27 | Pending |
-| SRCH-05 | Phase 27 | Pending |
+| UI-08 | Phase 26 | Complete |
+| UI-09 | Phase 26 | Complete |
+| UI-10 | Phase 26 | Complete |
+| UI-11 | Phase 26 | Complete |
+| UI-12 | Phase 26 | Complete |
+| UI-13 | Phase 26 | Complete |
+| SRCH-01 | Phase 27 | Complete |
+| SRCH-02 | Phase 27 | Complete |
+| SRCH-03 | Phase 27 | Complete |
+| SRCH-04 | Phase 27 | Complete |
+| SRCH-05 | Phase 27 | Complete |
 
 **Coverage:**
 - v7.0 requirements: 31 total
@@ -138,4 +138,4 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after roadmap creation*
+*Last updated: 2026-03-04 after Phase 27 completion — all v7.0 requirements complete*
