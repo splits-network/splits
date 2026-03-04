@@ -25,7 +25,7 @@ Completed milestones documented in .planning/MILESTONES.md
 - [x] **Phase 22: Schema & Types** - Database tables, columns, RLS, and TypeScript types for all new company data (completed 2026-03-03)
 - [x] **Phase 23: Lookup APIs** - Search/create endpoints for perks and culture tags, plus junction CRUD for skills/perks/culture (completed 2026-03-03)
 - [x] **Phase 24: Company Enrichment APIs** - Scalar field updates, computed stats, and gateway routing (completed 2026-03-03)
-- [ ] **Phase 25: Company Settings UI** - Form sections for all new fields in company settings
+- [x] **Phase 25: Company Settings UI** - Form sections for all new fields in company settings (completed 2026-03-04)
 - [ ] **Phase 26: Company Card Redesign** - Grid card, detail panel, and description section
 - [ ] **Phase 27: Search Index Enrichment** - Triggers to index new fields into company search vector
 
@@ -89,8 +89,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 25-01-PLAN.md -- Scalar field settings (stage, founded year, tagline, social links)
-- [ ] 25-02-PLAN.md -- Tag picker settings (tech stack, perks, culture tags)
+- [x] 25-01-PLAN.md -- Scalar field settings (stage, founded year, tagline, social links)
+- [x] 25-02-PLAN.md -- Tag picker settings (tech stack, perks, culture tags)
 
 ### Phase 26: Company Card Redesign
 **Goal**: Company grid cards and detail panel display all new profile data in the redesigned layout
@@ -134,6 +134,6 @@ Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
 | 22. Schema & Types | v7.0 | 2/2 | Complete | 2026-03-03 |
 | 23. Lookup APIs | v7.0 | 3/3 | Complete | 2026-03-03 |
 | 24. Company Enrichment APIs | v7.0 | 2/2 | Complete | 2026-03-03 |
-| 25. Company Settings UI | v7.0 | 0/2 | Planned | - |
+| 25. Company Settings UI | v7.0 | 2/2 | Complete | 2026-03-04 |
 | 26. Company Card Redesign | v7.0 | 0/3 | Not started | - |
 | 27. Search Index Enrichment | v7.0 | 0/2 | Not started | - |
