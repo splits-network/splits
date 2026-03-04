@@ -12,6 +12,8 @@ import {
     extractCompany,
     extractRelationship,
     formatStatus,
+    companyFoundedYear,
+    companyTagline,
 } from "../shared/helpers";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
@@ -37,6 +39,8 @@ export function GridCard({
     const location = companyLocation(item, isMarketplace);
     const company = extractCompany(item, isMarketplace);
     const relationship = extractRelationship(item, isMarketplace);
+    const foundedYear = companyFoundedYear(item, isMarketplace);
+    const tagline = companyTagline(item, isMarketplace);
     const { getLevel } = useGamification();
     const level = getLevel(companyId(item, isMarketplace));
 
@@ -59,6 +63,12 @@ export function GridCard({
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate">
                         {industry || "Company"}
                     </p>
+                    {isMarketplace && (item as Company).open_roles_count != null && (item as Company).open_roles_count! > 0 && (
+                        <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-success shrink-0">
+                            <span className="inline-block w-2 h-2 bg-success" />
+                            Hiring
+                        </span>
+                    )}
                     {relationship && (
                         <BaselBadge color={statusColorName(relationship.status)} size="sm" className="shrink-0">
                             {formatStatus(relationship.status)}
@@ -96,7 +106,7 @@ export function GridCard({
                     </div>
                 </div>
 
-                {/* Location + added date */}
+                {/* Location + founded/added date */}
                 <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/40">
                     {location && (
                         <span className="flex items-center gap-1.5 truncate">
@@ -107,21 +117,28 @@ export function GridCard({
                     {location && (
                         <span className="text-base-content/20">|</span>
                     )}
-                    <span className="flex items-center gap-1.5 shrink-0">
-                        <i className="fa-duotone fa-regular fa-clock text-xs" />
-                        {addedAgo(item)}
-                    </span>
+                    {foundedYear ? (
+                        <span className="flex items-center gap-1.5 shrink-0">
+                            <i className="fa-duotone fa-regular fa-calendar text-xs" />
+                            Est. {foundedYear}
+                        </span>
+                    ) : (
+                        <span className="flex items-center gap-1.5 shrink-0">
+                            <i className="fa-duotone fa-regular fa-clock text-xs" />
+                            {addedAgo(item)}
+                        </span>
+                    )}
                 </div>
             </div>
 
-            {/* Description (marketplace only, when available) */}
-            {isMarketplace && (item as Company).description && (
+            {/* Tagline (marketplace only, when available) */}
+            {isMarketplace && tagline && (
                 <div className="px-5 py-4 border-b border-base-300">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
                         About
                     </p>
                     <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                        {(item as Company).description}
+                        {tagline}
                     </p>
                 </div>
             )}
