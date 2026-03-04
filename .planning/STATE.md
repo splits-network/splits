@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 27 of 27 (Search Index Enrichment)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-03-04 — Phase 26 complete (3 plans, company card redesign)
+Plan: 2 of 2 in current phase (27-02 complete; 27-01 pending)
+Status: In progress
+Last activity: 2026-03-04 — Completed 27-02 (junction table cascade triggers)
 
-Progress: [████████████░░░░░░░░] 86% (12/14 v7.0 plans)
+Progress: [█████████████░░░░░░░] 93% (13/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -24,7 +24,7 @@ Progress: [████████████░░░░░░░░] 86% (12
 
 **v7.0:**
 - Total plans: 14 across 6 phases
-- Completed: 12/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01, 26-02, 26-03)
+- Completed: 13/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01, 26-02, 26-03, 27-02)
 
 ## Accumulated Context
 
@@ -46,6 +46,8 @@ v7.0 decisions: tech stack reuses skills, perks/culture as lookups, stage as enu
 | Tech stack max 6, perks max 4 | limits keep card height reasonable; +N more overflow handles excess | 26-02 |
 | Detail panel fetches junction data independently | Detail loader fetches its own skills/perks/culture via parallel API calls; no limit in detail view | 26-03 |
 | Tag types have distinct badge variants | outline=tech, secondary=perks, accent=culture — enables quick category scanning | 26-03 |
+| Junction cascade via touch | INSERT/DELETE on junction fires UPDATE companies SET updated_at = now() to reuse enriched parent triggers | 27-02 |
+| Separate trigger functions per junction table | Even with identical bodies today, separate functions allow future divergence without a rewrite | 27-02 |
 
 ### Pending Todos
 
@@ -58,10 +60,10 @@ None active.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Phase 26 complete — company card redesign with grid card, tag sections, detail panel
+Stopped at: Completed 27-02-PLAN.md — junction table cascade triggers for search refresh
 Resume file: None
-Next: `/basel:discuss-phase 27` or `/basel:plan-phase 27`
+Next: Execute 27-01 (company search enrichment for new v7.0 fields)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-04 (Phase 26 complete, ready for Phase 27)*
+*Last updated: 2026-03-04 (27-02 complete, junction table cascade triggers)*
