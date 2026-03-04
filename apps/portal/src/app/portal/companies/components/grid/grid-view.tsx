@@ -8,7 +8,7 @@ import { CompanyDetailLoader } from "../shared/company-detail";
 import { companyId } from "../shared/helpers";
 import { GridCard } from "./grid-card";
 
-type TagMap = Record<string, { skills: string[]; perks: string[] }>;
+type TagMap = Record<string, { skills: string[]; perks: string[]; cultureTags: string[] }>;
 
 export function GridView({
     items,
@@ -50,9 +50,10 @@ export function GridView({
 
                 const results = await Promise.all(
                     companyIds.map(async (cId) => {
-                        const [skillsRes, perksRes] = await Promise.all([
+                        const [skillsRes, perksRes, cultureRes] = await Promise.all([
                             client.get(`/company-skills?company_id=${cId}`),
                             client.get(`/company-perks?company_id=${cId}`),
+                            client.get(`/company-culture-tags?company_id=${cId}`),
                         ]);
 
                         const skills = (skillsRes.data || [])
@@ -63,15 +64,19 @@ export function GridView({
                             .filter((r: any) => r.perk)
                             .map((r: any) => r.perk.name as string);
 
-                        return { cId, skills, perks };
+                        const cultureTags = (cultureRes.data || [])
+                            .filter((r: any) => r.culture_tag)
+                            .map((r: any) => r.culture_tag.name as string);
+
+                        return { cId, skills, perks, cultureTags };
                     }),
                 );
 
                 if (cancelled) return;
 
                 const map: TagMap = {};
-                for (const { cId, skills, perks } of results) {
-                    map[cId] = { skills, perks };
+                for (const { cId, skills, perks, cultureTags } of results) {
+                    map[cId] = { skills, perks, cultureTags };
                 }
                 setTagMap(map);
             } catch (err) {
@@ -106,6 +111,7 @@ export function GridView({
                             onRefresh={onRefreshAction}
                             techStack={tagMap[cId]?.skills ?? []}
                             perks={tagMap[cId]?.perks ?? []}
+                            cultureTags={tagMap[cId]?.cultureTags ?? []}
                         />
                     );
                 })}

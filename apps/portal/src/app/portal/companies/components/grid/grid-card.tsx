@@ -15,8 +15,12 @@ import {
     companyFoundedYear,
     companyTagline,
 } from "../shared/helpers";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
 import { MarketplaceStats, RelationshipStats } from "./grid-card-stats";
 
@@ -28,6 +32,7 @@ export function GridCard({
     onRefresh,
     techStack = [],
     perks = [],
+    cultureTags = [],
 }: {
     item: Company | CompanyRelationship;
     activeTab: CompanyTab;
@@ -36,6 +41,7 @@ export function GridCard({
     onRefresh?: () => void;
     techStack?: string[];
     perks?: string[];
+    cultureTags?: string[];
 }) {
     const isMarketplace = activeTab === "marketplace";
     const name = companyName(item, isMarketplace);
@@ -67,14 +73,19 @@ export function GridCard({
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate">
                         {industry || "Company"}
                     </p>
-                    {isMarketplace && (item as Company).open_roles_count != null && (item as Company).open_roles_count! > 0 && (
-                        <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-success shrink-0">
-                            <span className="inline-block w-2 h-2 bg-success" />
-                            Hiring
-                        </span>
-                    )}
+                    {isMarketplace &&
+                        (item as Company).open_roles_count != null &&
+                        (item as Company).open_roles_count! > 0 && (
+                            <span className="badge badge-success badge-soft  gap-2">
+                                Hiring
+                            </span>
+                        )}
                     {relationship && (
-                        <BaselBadge color={statusColorName(relationship.status)} size="sm" className="shrink-0">
+                        <BaselBadge
+                            color={statusColorName(relationship.status)}
+                            size="sm"
+                            className="shrink-0"
+                        >
                             {formatStatus(relationship.status)}
                         </BaselBadge>
                     )}
@@ -135,15 +146,19 @@ export function GridCard({
                 </div>
             </div>
 
-            {/* Tagline (marketplace only, when available) */}
-            {isMarketplace && tagline && (
+            {/* Tagline / About (marketplace only, always visible) */}
+            {isMarketplace && (
                 <div className="px-5 py-4 border-b border-base-300">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
                         About
                     </p>
-                    <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                        {tagline}
-                    </p>
+                    {tagline ? (
+                        <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                            <MarkdownRenderer content={tagline} />
+                        </div>
+                    ) : (
+                        <p className="text-sm text-base-content/20 italic">No description added yet</p>
+                    )}
                 </div>
             )}
 
@@ -156,41 +171,78 @@ export function GridCard({
                 )}
             </div>
 
-            {/* Tech Stack (marketplace only, when data exists) */}
-            {isMarketplace && techStack.length > 0 && (
+            {/* Tech Stack (marketplace only, always visible) */}
+            {isMarketplace && (
                 <div className="px-5 py-4 border-b border-base-300">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
                         Tech Stack
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
-                        {techStack.slice(0, 6).map((tech) => (
-                            <BaselBadge key={tech} variant="outline" size="sm">{tech}</BaselBadge>
-                        ))}
-                        {techStack.length > 6 && (
-                            <span className="text-sm font-semibold text-base-content/40 self-center">
-                                +{techStack.length - 6} more
-                            </span>
-                        )}
-                    </div>
+                    {techStack.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                            {techStack.slice(0, 6).map((tech) => (
+                                <BaselBadge key={tech} variant="outline" size="sm">
+                                    {tech}
+                                </BaselBadge>
+                            ))}
+                            {techStack.length > 6 && (
+                                <span className="text-sm font-semibold text-base-content/40 self-center">
+                                    +{techStack.length - 6} more
+                                </span>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-base-content/20 italic">No tech stack listed</p>
+                    )}
                 </div>
             )}
 
-            {/* Perks (marketplace only, when data exists) */}
-            {isMarketplace && perks.length > 0 && (
+            {/* Perks (marketplace only, always visible) */}
+            {isMarketplace && (
                 <div className="px-5 py-4 border-b border-base-300">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
                         Perks
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
-                        {perks.slice(0, 4).map((perk) => (
-                            <BaselBadge key={perk} color="secondary" size="sm">{perk}</BaselBadge>
-                        ))}
-                        {perks.length > 4 && (
-                            <span className="text-sm font-semibold text-base-content/40 self-center">
-                                +{perks.length - 4} more
-                            </span>
-                        )}
-                    </div>
+                    {perks.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                            {perks.slice(0, 4).map((perk) => (
+                                <BaselBadge key={perk} color="secondary" size="sm">
+                                    {perk}
+                                </BaselBadge>
+                            ))}
+                            {perks.length > 4 && (
+                                <span className="text-sm font-semibold text-base-content/40 self-center">
+                                    +{perks.length - 4} more
+                                </span>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-base-content/20 italic">No perks listed</p>
+                    )}
+                </div>
+            )}
+
+            {/* Culture & Values (marketplace only, always visible) */}
+            {isMarketplace && (
+                <div className="px-5 py-4 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                        Culture & Values
+                    </p>
+                    {cultureTags.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                            {cultureTags.slice(0, 4).map((tag) => (
+                                <BaselBadge key={tag} color="accent" size="sm">
+                                    {tag}
+                                </BaselBadge>
+                            ))}
+                            {cultureTags.length > 4 && (
+                                <span className="text-sm font-semibold text-base-content/40 self-center">
+                                    +{cultureTags.length - 4} more
+                                </span>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-base-content/20 italic">No culture tags listed</p>
+                    )}
                 </div>
             )}
 

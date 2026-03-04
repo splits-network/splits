@@ -65,10 +65,7 @@ export function MarketplaceStats({ company }: { company: Company }) {
     ];
 
     return (
-        <div
-            className="grid divide-x divide-base-300"
-            style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
-        >
+        <div className="grid grid-cols-2 divide-x divide-y divide-base-300">
             {stats.map((stat, i) => (
                 <StatCell
                     key={stat.label}

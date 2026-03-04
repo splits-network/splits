@@ -4,6 +4,7 @@ import type { Job } from "../../types";
 import { formatJobLevel } from "../../types";
 import { statusBadgeColor } from "../shared/status-color";
 import { BaselBadge } from "@splits-network/basel-ui";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
     salaryDisplay,
     formatStatus,
@@ -153,48 +154,61 @@ export function GridCard({
             </div>
 
             {/* About snippet */}
-            {(job.recruiter_description || job.description) && (
-                <div className="px-6 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
-                        About
-                    </p>
-                    <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                        {job.recruiter_description || job.description}
-                    </p>
-                </div>
-            )}
+            <div className="px-6 py-4 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
+                    About
+                </p>
+                {job.recruiter_description || job.description ? (
+                    <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                        <MarkdownRenderer content={job.recruiter_description || job.description || ""} />
+                    </div>
+                ) : (
+                    <p className="text-sm text-base-content/20 italic">No description added yet</p>
+                )}
+            </div>
 
-            {/* Stats Row */}
+            {/* Stats Grid */}
             {stats.length > 0 && (
                 <div className="border-b border-base-300">
-                    <div
-                        className="grid divide-x divide-base-300"
-                        style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}
-                    >
-                        {stats.map((stat) => (
-                            <div
-                                key={stat.label}
-                                className="flex flex-col items-center justify-center px-1.5 py-3 gap-1 text-center min-w-0 overflow-hidden"
-                            >
-                                <i className={`${stat.icon} text-primary text-sm`} />
-                                <span className="text-sm font-black text-base-content leading-none truncate w-full">
-                                    {stat.value}
-                                </span>
-                                <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate w-full">
-                                    {stat.label}
-                                </span>
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-2 divide-x divide-y divide-base-300">
+                        {stats.map((stat, i) => {
+                            const iconStyles = [
+                                "bg-primary text-primary-content",
+                                "bg-secondary text-secondary-content",
+                                "bg-accent text-accent-content",
+                                "bg-warning text-warning-content",
+                            ];
+                            return (
+                                <div
+                                    key={stat.label}
+                                    className="flex items-center gap-2 px-2 py-3 min-w-0 overflow-hidden"
+                                >
+                                    <div
+                                        className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyles[i % iconStyles.length]}`}
+                                    >
+                                        <i className={`${stat.icon} text-xs`} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <span className="text-sm font-black text-base-content leading-none block truncate">
+                                            {stat.value}
+                                        </span>
+                                        <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate block">
+                                            {stat.label}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}
 
             {/* Skills */}
-            {skills.length > 0 && (
-                <div className="px-6 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                        Required Skills
-                    </p>
+            <div className="px-6 py-4 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                    Required Skills
+                </p>
+                {skills.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {skills.slice(0, 4).map((skill) => (
                             <BaselBadge key={skill} variant="outline" size="sm">
@@ -207,15 +221,17 @@ export function GridCard({
                             </BaselBadge>
                         )}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <p className="text-sm text-base-content/20 italic">No skills listed</p>
+                )}
+            </div>
 
             {/* Detail Badges */}
-            {(job.employment_type || level) && (
-                <div className="px-6 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                        Details
-                    </p>
+            <div className="px-6 py-4 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                    Details
+                </p>
+                {job.employment_type || level ? (
                     <div className="flex flex-wrap gap-2">
                         {job.employment_type && (
                             <BaselBadge color="primary" size="sm" icon="fa-briefcase">
@@ -228,8 +244,10 @@ export function GridCard({
                             </BaselBadge>
                         )}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <p className="text-sm text-base-content/20 italic">No details available</p>
+                )}
+            </div>
 
             {/* Footer: company name + actions */}
             <div className="mt-auto flex items-center justify-between gap-3 px-6 py-4">
