@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 25 of 27 (Company Settings UI)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-04 — Completed 25-01-PLAN.md (scalar fields on company settings form)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-04 — Completed 25-02-PLAN.md (tag pickers for tech stack, perks, culture tags)
 
-Progress: [████████░░░░░░░░░░░░] 57% (8/14 v7.0 plans)
+Progress: [█████████░░░░░░░░░░░] 64% (9/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -24,7 +24,7 @@ Progress: [████████░░░░░░░░░░░░] 57% (8/
 
 **v7.0:**
 - Total plans: 14 across 6 phases
-- Completed: 7 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02)
+- Completed: 9 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02)
 
 ## Accumulated Context
 
@@ -51,10 +51,10 @@ None active.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Completed 25-01-PLAN.md — scalar fields (stage, founded_year, tagline, social links) added to company settings form
+Stopped at: Completed 25-02-PLAN.md — tag pickers (tech stack, perks, culture tags) added to company settings
 Resume file: None
-Next: Execute 25-02 (lookup-based fields: perks, culture tags, tech stack)
+Next: Phase 26
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-04 (25-01 complete, scalar fields on company settings form)*
+*Last updated: 2026-03-04 (25-02 complete, Phase 25 Company Settings UI fully done)*
