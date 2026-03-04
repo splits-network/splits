@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 26 of 27 (Company Card Redesign)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-03-04 — Completed 26-02 (Company grid card tech stack + perks tag sections)
+Plan: 3 of 3 complete (Phase complete)
+Status: Phase complete
+Last activity: 2026-03-04 — Completed 26-03 (Company detail panel enrichment)
 
-Progress: [██████████░░░░░░░░░░] 79% (11/14 v7.0 plans)
+Progress: [████████████░░░░░░░░] 86% (12/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -24,7 +24,7 @@ Progress: [██████████░░░░░░░░░░] 79% (11
 
 **v7.0:**
 - Total plans: 14 across 6 phases
-- Completed: 11/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01, 26-02)
+- Completed: 12/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01, 26-02, 26-03)
 
 ## Accumulated Context
 
@@ -44,6 +44,8 @@ v7.0 decisions: tech stack reuses skills, perks/culture as lookups, stage as enu
 | Founded year replaces added-ago (marketplace) | Company age more informative than record creation date when browsing marketplace | 26-01 |
 | GridView owns junction fetch | tagMap pattern — view fetches, passes name arrays to cards; avoids per-card fetch stampede | 26-02 |
 | Tech stack max 6, perks max 4 | limits keep card height reasonable; +N more overflow handles excess | 26-02 |
+| Detail panel fetches junction data independently | Detail loader fetches its own skills/perks/culture via parallel API calls; no limit in detail view | 26-03 |
+| Tag types have distinct badge variants | outline=tech, secondary=perks, accent=culture — enables quick category scanning | 26-03 |
 
 ### Pending Todos
 
@@ -56,10 +58,10 @@ None active.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Completed 26-02 — Company grid card tech stack and perks tag sections
+Stopped at: Completed 26-03 — Company detail panel enrichment (Phase 26 complete)
 Resume file: None
-Next: Execute 26-03 (list card redesign)
+Next: Phase 27 (if planned)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-04 (26-02 complete, grid card tech stack + perks tag sections)*
+*Last updated: 2026-03-04 (26-03 complete, company detail panel enrichment — Phase 26 complete)*
