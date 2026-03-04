@@ -102,12 +102,12 @@ Plans:
   3. Company grid card shows tech stack and perks as tag sections
   4. Company detail panel displays all new fields (stage, tagline, social links, tech stack, perks, culture tags)
   5. Company card includes a description/about section with line-clamped text
-**Plans**: 2 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] 26-01: Grid card header, stats row, and description section
-- [ ] 26-02: Grid card tag sections (tech stack, perks)
-- [ ] 26-03: Detail panel updated with all new fields
+- [ ] 26-01-PLAN.md -- Update types + redesign grid card header, stats, and tagline
+- [ ] 26-02-PLAN.md -- Grid card tech stack and perks tag sections
+- [ ] 26-03-PLAN.md -- Detail panel with all new profile fields
 
 ### Phase 27: Search Index Enrichment
 **Goal**: All new company data is searchable via the existing global search infrastructure
