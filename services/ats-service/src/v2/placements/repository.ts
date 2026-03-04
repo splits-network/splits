@@ -24,6 +24,35 @@ export class PlacementRepository {
         return this.supabase;
     }
 
+    /**
+     * Build select clause with optional includes.
+     * Supports: candidate, job, company, splits
+     */
+    private buildSelectClause(include?: string): string {
+        const baseFields = `*`;
+
+        if (!include) {
+            return baseFields;
+        }
+
+        const includes = include.split(',').map(i => i.trim());
+        let selectClause = baseFields;
+
+        if (includes.includes('candidate')) {
+            selectClause += `, candidate:candidates(id, full_name, email)`;
+        }
+
+        if (includes.includes('job') || includes.includes('company')) {
+            selectClause += `, job:jobs!inner(id, title, company:companies!inner(id, name, logo_url, identity_organization_id))`;
+        }
+
+        if (includes.includes('splits')) {
+            selectClause += `, splits:placement_splits(id, role, split_percentage, split_amount, recruiter_id, recruiter:recruiters(id, user:users!recruiters_user_id_fkey(name)))`;
+        }
+
+        return selectClause;
+    }
+
     async findPlacements(
         clerkUserId: string,
         filters: PlacementFilters = {}
@@ -39,20 +68,11 @@ export class PlacementRepository {
             return { data: [], total: 0 };
         }
 
-        // Build query with enriched data
-        let query = this.supabase
+        const selectClause = this.buildSelectClause(filters.include);
 
+        let query = this.supabase
             .from('placements')
-            .select(`
-                *,
-                candidate:candidates(id, full_name, email),
-                job:jobs!inner(
-                    id, 
-                    title,
-                    company:companies!inner(id, name, identity_organization_id)
-                ),
-                application:applications(id, stage)
-            `, { count: 'exact' });
+            .select(selectClause, { count: 'exact' });
 
         // Apply access control filter
         if (accessContext.candidateId) {
@@ -135,20 +155,12 @@ export class PlacementRepository {
         };
     }
 
-    async findPlacement(id: string, clerkUserId?: string): Promise<any | null> {
-        const { data, error } = await this.supabase
+    async findPlacement(id: string, clerkUserId?: string, include?: string): Promise<any | null> {
+        const selectClause = this.buildSelectClause(include || 'candidate,job,company,splits');
 
+        const { data, error } = await this.supabase
             .from('placements')
-            .select(`
-                *,
-                candidate:candidates(id, full_name, email, phone),
-                job:jobs(
-                    id,
-                    title,
-                    company:companies(id, name)
-                ),
-                application:applications(id, stage)
-            `)
+            .select(selectClause)
             .eq('id', id)
             .single();
 

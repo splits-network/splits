@@ -19,17 +19,46 @@ import {
 } from "../shared/helpers";
 import {
     getStageDisplayWithExpired,
+    getAIScoreColor,
 } from "../shared/status-color";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
 
-function matchScoreColor(score: number | null): string {
-    if (score == null) return "text-base-content/40";
-    if (score >= 90) return "text-success";
-    if (score >= 70) return "text-primary";
-    if (score >= 50) return "text-warning";
-    return "text-error";
+const iconStyles = [
+    "bg-primary text-primary-content",
+    "bg-secondary text-secondary-content",
+    "bg-accent text-accent-content",
+    "bg-warning text-warning-content",
+];
+
+const PIPELINE_STAGES = [
+    "draft",
+    "ai_review",
+    "recruiter_review",
+    "submitted",
+    "company_review",
+    "interview",
+    "offer",
+    "hired",
+] as const;
+
+function getPipelineProgress(stage: string): { current: number; total: number } {
+    const total = PIPELINE_STAGES.length;
+    // Terminal stages
+    if (stage === "rejected" || stage === "withdrawn" || stage === "expired") {
+        return { current: 0, total };
+    }
+    // Map aliases to canonical stages
+    const normalized =
+        stage === "ai_reviewed" ? "ai_review" :
+        stage === "recruiter_request" || stage === "recruiter_proposed" ? "recruiter_review" :
+        stage === "screen" ? "submitted" :
+        stage === "company_feedback" ? "company_review" :
+        stage;
+    const idx = PIPELINE_STAGES.indexOf(normalized as typeof PIPELINE_STAGES[number]);
+    return { current: idx >= 0 ? idx + 1 : 0, total };
 }
 
 export function GridCard({
@@ -58,29 +87,57 @@ export function GridCard({
     const recruiter = recruiterName(application);
     const cInitials = companyInitials(company);
     const submittedDate = submittedDateLabel(application);
+    const desc = application.job?.recruiter_description || application.job?.description;
+
+    const stats = [
+        {
+            label: "AI Fit",
+            value: score !== null ? `${score}%` : "N/A",
+            icon: "fa-duotone fa-regular fa-bullseye",
+        },
+        {
+            label: "Salary",
+            value: salary || "TBD",
+            icon: "fa-duotone fa-regular fa-dollar-sign",
+        },
+        {
+            label: "Location",
+            value: location || "N/A",
+            icon: "fa-duotone fa-regular fa-location-dot",
+        },
+        {
+            label: "Type",
+            value: employmentType || "N/A",
+            icon: "fa-duotone fa-regular fa-briefcase",
+        },
+    ];
 
     return (
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all w-full",
-                isSelected ? "border-l-primary" : "border-l-base-300 hover:border-l-primary/50",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-md",
+                isSelected
+                    ? "border-l-primary border-primary"
+                    : "border-l-primary",
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 border-b border-base-300 px-5 pt-5 pb-4">
-                {/* Kicker row: company + status badge + NEW indicator */}
+            <div className="bg-base-300 border-b border-base-300 px-6 pt-5 pb-4">
+                {/* Kicker row: company + status badges */}
                 <div className="flex items-center justify-between mb-3">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate mr-2">
                         {company}
                     </p>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        {isNew(application) && (
-                            <BaselBadge color="warning" variant="soft" size="sm">New</BaselBadge>
-                        )}
+                    <div className="flex items-center gap-2 flex-wrap ml-auto">
                         <BaselBadge color={stage.color} variant="soft" size="sm" icon={stage.icon}>
                             {stage.label}
                         </BaselBadge>
+                        {isNew(application) && (
+                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
+                                New
+                            </BaselBadge>
+                        )}
                     </div>
                 </div>
 
@@ -91,11 +148,11 @@ export function GridCard({
                             {initials}
                         </div>
                     </div>
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0">
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5 truncate">
                             {role}
                         </p>
-                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                        <h3 className="text-xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
                         </h3>
                         {headline && (
@@ -106,7 +163,7 @@ export function GridCard({
                     </div>
                 </div>
 
-                {/* Submitted by + date row */}
+                {/* Recruiter + submitted date */}
                 <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/40">
                     {recruiter && (
                         <span className="flex items-center gap-1.5 truncate">
@@ -129,75 +186,100 @@ export function GridCard({
                 </div>
             </div>
 
-            {/* About snippet — recruiter description of the role */}
-            {(application.job?.recruiter_description || application.job?.description) && (
-                <div className="px-5 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
-                        About
+            {/* About snippet */}
+            <div className="px-6 py-4 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
+                    About
+                </p>
+                {desc ? (
+                    <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                        <MarkdownRenderer content={desc} />
+                    </div>
+                ) : (
+                    <p className="text-sm text-base-content/20 italic">No description added yet</p>
+                )}
+            </div>
+
+            {/* Pipeline Progress */}
+            <div className="px-6 py-4 border-b border-base-300">
+                <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30">
+                        Pipeline Progress
                     </p>
-                    <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                        {application.job.recruiter_description || application.job.description}
-                    </p>
+                    <span className="text-sm font-bold text-base-content/60">
+                        {(() => {
+                            const p = getPipelineProgress(application.stage);
+                            if (p.current === 0) return stage.label;
+                            return <>Step {p.current} <span className="text-base-content/30">/ {p.total}</span></>;
+                        })()}
+                    </span>
                 </div>
-            )}
-
-            {/* Stats Row */}
-            <div className="border-b border-base-300">
-                <div className="grid grid-cols-3 divide-x divide-base-300">
-                    {/* AI Fit Score */}
-                    <div className="flex flex-col items-center justify-center px-1.5 py-3.5 gap-1 text-center min-w-0 overflow-hidden">
-                        <i className={`fa-duotone fa-regular fa-bullseye text-sm ${matchScoreColor(score)}`} />
-                        <span className={`text-base font-black leading-none truncate w-full ${matchScoreColor(score)}`}>
-                            {score !== null ? `${score}%` : "--"}
-                        </span>
-                        <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none">
-                            AI Fit
-                        </span>
-                    </div>
-
-                    {/* Salary / Compensation */}
-                    <div className="flex flex-col items-center justify-center px-1.5 py-3.5 gap-1 text-center min-w-0 overflow-hidden">
-                        <i className="fa-duotone fa-regular fa-money-bill text-sm text-primary" />
-                        <span className="text-base font-black text-base-content leading-none truncate w-full">
-                            {salary || "--"}
-                        </span>
-                        <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none">
-                            Salary
-                        </span>
-                    </div>
-
-                    {/* Location */}
-                    <div className="flex flex-col items-center justify-center px-1.5 py-3.5 gap-1 text-center min-w-0 overflow-hidden">
-                        <i className="fa-duotone fa-regular fa-location-dot text-sm text-primary" />
-                        <span className="text-base font-black text-base-content leading-none truncate w-full">
-                            {location || "--"}
-                        </span>
-                        <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none">
-                            Location
-                        </span>
-                    </div>
+                <div className="flex gap-1.5">
+                    {(() => {
+                        const p = getPipelineProgress(application.stage);
+                        return Array.from({ length: p.total }).map((_, i) => (
+                            <div
+                                key={i}
+                                className={`h-2 flex-1 ${
+                                    i < p.current ? "bg-primary" : "bg-base-300"
+                                }`}
+                            />
+                        ));
+                    })()}
                 </div>
             </div>
 
-            {/* Detail Badges */}
-            {employmentType && (
-                <div className="px-5 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                        Details
-                    </p>
-                    <BaselBadge variant="outline" size="sm">{employmentType}</BaselBadge>
+            {/* Stats Grid */}
+            <div className="border-b border-base-300">
+                <div className="grid grid-cols-2 divide-x divide-y divide-base-300">
+                    {stats.map((stat, i) => (
+                        <div
+                            key={stat.label}
+                            className="flex items-center gap-2 px-2 py-3 min-w-0 overflow-hidden"
+                        >
+                            <div
+                                className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyles[i % iconStyles.length]}`}
+                            >
+                                <i className={`${stat.icon} text-xs`} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-sm font-black text-base-content leading-none block truncate">
+                                    {stat.value}
+                                </span>
+                                <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate block">
+                                    {stat.label}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            )}
+            </div>
 
-            {/* Footer: company avatar left, actions right */}
-            <div className="mt-auto px-5 py-4 flex items-center justify-between gap-3">
+            {/* Details */}
+            <div className="px-6 py-4 border-b border-base-300">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
+                    Details
+                </p>
+                {employmentType ? (
+                    <div className="flex flex-wrap gap-1.5">
+                        <BaselBadge color="primary" size="sm" icon="fa-briefcase">
+                            {employmentType}
+                        </BaselBadge>
+                    </div>
+                ) : (
+                    <p className="text-sm text-base-content/20 italic">No details available</p>
+                )}
+            </div>
+
+            {/* Footer: company avatar + actions */}
+            <div className="mt-auto flex items-center justify-between gap-3 px-6 py-4">
                 <div className="flex items-center gap-2 min-w-0">
                     <div className="relative shrink-0">
                         {application.job?.company?.logo_url ? (
                             <img
                                 src={application.job.company.logo_url}
                                 alt={company}
-                                className="w-8 h-8 object-contain bg-base-200 border border-base-300 p-0.5"
+                                className="w-8 h-8 object-contain bg-base-100 border border-base-300 p-0.5"
                             />
                         ) : (
                             <div className="w-8 h-8 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
@@ -210,9 +292,11 @@ export function GridCard({
                             </div>
                         )}
                     </div>
-                    <span className="text-xs font-semibold text-base-content/60 truncate">
-                        {company}
-                    </span>
+                    <div className="min-w-0">
+                        <span className="text-sm font-semibold text-base-content truncate block">
+                            {company}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="shrink-0" onClick={(e) => e.stopPropagation()}>

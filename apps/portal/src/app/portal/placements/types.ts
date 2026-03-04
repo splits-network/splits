@@ -5,21 +5,18 @@
  */
 import type { Placement as BasePlacement } from "@splits-network/shared-types";
 
-export interface Collaborator {
+export interface PlacementSplit {
     id: string;
-    placement_id: string;
-    recruiter_user_id: string;
-    role: "candidate_sourcer" | "company_sourcer" | "candidate_recruiter" | "company_recruiter" | "job_owner" | "sourcer" | "submitter" | "closer" | "support";
-    split_percentage: number;
-    split_amount: number;
-    notes?: string;
-    created_at: string;
-}
-
-export interface YourSplit {
     role: string;
     split_percentage: number;
     split_amount: number;
+    recruiter_id: string;
+    recruiter?: {
+        id: string;
+        user?: {
+            name: string;
+        };
+    };
 }
 
 export interface Placement extends Omit<BasePlacement, "hired_at" | "created_at" | "updated_at" | "start_date" | "end_date" | "guarantee_expires_at" | "failed_at"> {
@@ -43,11 +40,11 @@ export interface Placement extends Omit<BasePlacement, "hired_at" | "created_at"
         company?: {
             id: string;
             name: string;
+            logo_url?: string;
             identity_organization_id?: string;
         };
     };
-    collaborators?: Collaborator[];
-    your_splits?: YourSplit[];
+    splits?: PlacementSplit[];
 }
 
 export interface PlacementFilters {

@@ -9,6 +9,7 @@ export interface PlacementFilters extends PaginationParams, SortParams {
     status?: string;
     job_id?: string;
     candidate_id?: string;
+    include?: string;
 }
 
 export interface PlacementUpdate {
