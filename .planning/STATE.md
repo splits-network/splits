@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 27 of 27 (Search Index Enrichment)
-Plan: 2 of 2 in current phase (27-02 complete; 27-01 pending)
-Status: In progress
-Last activity: 2026-03-04 — Completed 27-02 (junction table cascade triggers)
+Plan: 2 of 2 in current phase (both 27-01 and 27-02 complete)
+Status: Phase complete
+Last activity: 2026-03-04 — Completed 27-01 (company search vector enrichment migration)
 
-Progress: [█████████████░░░░░░░] 93% (13/14 v7.0 plans)
+Progress: [████████████████████] 100% (14/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -24,7 +24,7 @@ Progress: [█████████████░░░░░░░] 93% (13
 
 **v7.0:**
 - Total plans: 14 across 6 phases
-- Completed: 13/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01, 26-02, 26-03, 27-02)
+- Completed: 14/14 (22-01, 22-02, 23-01, 23-02, 23-03, 24-01, 24-02, 25-01, 25-02, 26-01, 26-02, 26-03, 27-01, 27-02)
 
 ## Accumulated Context
 
@@ -46,6 +46,9 @@ v7.0 decisions: tech stack reuses skills, perks/culture as lookups, stage as enu
 | Tech stack max 6, perks max 4 | limits keep card height reasonable; +N more overflow handles excess | 26-02 |
 | Detail panel fetches junction data independently | Detail loader fetches its own skills/perks/culture via parallel API calls; no limit in detail view | 26-03 |
 | Tag types have distinct badge variants | outline=tech, secondary=perks, accent=culture — enables quick category scanning | 26-03 |
+| Search vector weights: tagline=B, skills=B, stage/perks/culture=C | tagline is descriptive (B like description); skills primary signal (B like candidate skills); stage/perks/culture categorical (C) | 27-01 |
+| BEFORE trigger queries junctions for search_vector, AFTER re-queries for context string | separation keeps company.search_vector authoritative; search_index.context needs raw text, not just vector | 27-01 |
+| Junction changes don't auto-trigger company search_vector rebuild | known limitation — only companies INSERT/UPDATE fires the BEFORE trigger; junction-only changes need explicit company touch | 27-01 |
 | Junction cascade via touch | INSERT/DELETE on junction fires UPDATE companies SET updated_at = now() to reuse enriched parent triggers | 27-02 |
 | Separate trigger functions per junction table | Even with identical bodies today, separate functions allow future divergence without a rewrite | 27-02 |
 
@@ -60,10 +63,10 @@ None active.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Completed 27-02-PLAN.md — junction table cascade triggers for search refresh
+Stopped at: Phase 27 complete — search index enrichment for company v7.0 fields (27-01 + 27-02)
 Resume file: None
-Next: Execute 27-01 (company search enrichment for new v7.0 fields)
+Next: v7.0 complete — all 14 plans done
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-04 (27-02 complete, junction table cascade triggers)*
+*Last updated: 2026-03-04 (Phase 27 complete, v7.0 all 14 plans done)*
