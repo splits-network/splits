@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 25 of 27 (Company Settings UI)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-03-03 — Phase 24 complete (2 plans, enrichment APIs + gateway routes)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-04 — Completed 25-01-PLAN.md (scalar fields on company settings form)
 
-Progress: [███████░░░░░░░░░░░░░] 50% (7/14 v7.0 plans)
+Progress: [████████░░░░░░░░░░░░] 57% (8/14 v7.0 plans)
 
 ## Performance Metrics
 
@@ -50,11 +50,11 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-03
-Stopped at: Phase 24 complete — enrichment APIs + gateway routes executed
+Last session: 2026-03-04
+Stopped at: Completed 25-01-PLAN.md — scalar fields (stage, founded_year, tagline, social links) added to company settings form
 Resume file: None
-Next: `/basel:discuss-phase 25` or `/basel:plan-phase 25`
+Next: Execute 25-02 (lookup-based fields: perks, culture tags, tech stack)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-03 (Phase 24 complete, ready for Phase 25)*
+*Last updated: 2026-03-04 (25-01 complete, scalar fields on company settings form)*
