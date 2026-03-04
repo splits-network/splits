@@ -120,7 +120,7 @@ export class PlacementRepository {
 
         if (error) throw error;
 
-        const placements = data || [];
+        const placements = (data || []) as any[];
 
         // Enrich with the current recruiter's splits from placement_splits
         if (accessContext.recruiterId && placements.length > 0) {
@@ -169,8 +169,10 @@ export class PlacementRepository {
             throw error;
         }
 
+        const placement = data as any;
+
         // Enrich with the current recruiter's splits from placement_splits
-        if (clerkUserId && data) {
+        if (clerkUserId && placement) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
             if (accessContext.recruiterId) {
                 const { data: splits } = await this.supabase
@@ -180,15 +182,15 @@ export class PlacementRepository {
                     .eq('recruiter_id', accessContext.recruiterId);
 
                 if (splits && splits.length > 0) {
-                    data.recruiter_share = splits.reduce((sum: number, s: any) => sum + s.split_amount, 0);
-                    data.your_splits = splits.map((s: any) => ({
+                    placement.recruiter_share = splits.reduce((sum: number, s: any) => sum + s.split_amount, 0);
+                    placement.your_splits = splits.map((s: any) => ({
                         role: s.role, split_percentage: s.split_percentage, split_amount: s.split_amount
                     }));
                 }
             }
         }
 
-        return data;
+        return placement;
     }
 
     async createPlacement(placement: any): Promise<any> {
