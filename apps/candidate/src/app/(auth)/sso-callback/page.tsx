@@ -5,7 +5,8 @@ import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createAuthenticatedClient } from "@/lib/api-client";
+import { createAuthenticatedClient, ApiClient } from "@/lib/api-client";
+import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -93,13 +94,50 @@ function SSOCallbackInner() {
 
                 setStatus("setting_up");
 
+                // Resolve referral code from cookie (set by proxy.ts)
+                let referredByRecruiterId: string | undefined;
+                const recCode = getRecCodeFromCookie();
+                if (recCode) {
+                    try {
+                        const unauthClient = new ApiClient();
+                        const lookupResponse: any = await unauthClient.get(
+                            `/recruiter-codes/lookup?code=${encodeURIComponent(recCode)}`,
+                        );
+                        if (lookupResponse?.data?.is_valid) {
+                            referredByRecruiterId =
+                                lookupResponse.data.recruiter_id;
+                        }
+                    } catch (lookupError) {
+                        console.warn(
+                            "[SSO] Failed to resolve rec_code:",
+                            lookupError,
+                        );
+                    }
+                }
+
                 const client = createAuthenticatedClient(token);
                 await client.post("/onboarding/init", {
                     email: user.primaryEmailAddress?.emailAddress || "",
                     name: user.fullName || user.firstName || "",
                     image_url: user.imageUrl,
                     source_app: "candidate",
+                    referred_by_recruiter_id: referredByRecruiterId,
                 });
+
+                // Log referral code usage
+                if (recCode) {
+                    try {
+                        await client.post("/recruiter-codes/log", {
+                            code: recCode,
+                            signup_type: "candidate",
+                        });
+                    } catch (logError) {
+                        console.warn(
+                            "[SSO] Failed to log rec_code usage:",
+                            logError,
+                        );
+                    }
+                }
 
                 setStatus("redirecting");
 

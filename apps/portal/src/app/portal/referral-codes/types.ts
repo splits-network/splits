@@ -6,6 +6,9 @@ export interface RecruiterCode {
     created_at: string;
     updated_at: string;
     usage_count?: number;
+    expiry_date?: string;
+    max_uses?: number;
+    uses_remaining?: number;
 }
 
 export interface ReferralCodeFilters {

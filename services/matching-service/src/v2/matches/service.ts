@@ -38,9 +38,14 @@ export class MatchService {
         if (access.isPlatformAdmin) {
             result = await this.repository.findMatches(filters);
         } else if (access.recruiterId) {
-            const isPartner = await this.isRecruiterPartner(access.recruiterId);
+            const [isPartner, recruiterJobIds, recruiterCandidateIds] = await Promise.all([
+                this.isRecruiterPartner(access.recruiterId),
+                this.getRecruiterJobIds(access.recruiterId),
+                this.getRecruiterCandidateIds(access.recruiterId),
+            ]);
             result = await this.repository.findMatchesForRecruiter(
-                access.recruiterId,
+                recruiterJobIds,
+                recruiterCandidateIds,
                 filters,
                 isPartner ? undefined : 'standard',
             );
@@ -221,6 +226,46 @@ export class MatchService {
             .eq('consent_given', true)
             .maybeSingle();
         return !!data;
+    }
+
+    private async getRecruiterCandidateIds(recruiterId: string): Promise<string[]> {
+        const { data } = await this.supabase
+            .from('recruiter_candidates')
+            .select('candidate_id')
+            .eq('recruiter_id', recruiterId)
+            .eq('status', 'active');
+        return (data || []).map((r: any) => r.candidate_id);
+    }
+
+    private async getRecruiterJobIds(recruiterId: string): Promise<string[]> {
+        // Jobs the recruiter directly owns
+        const { data: ownedJobs } = await this.supabase
+            .from('jobs')
+            .select('id')
+            .eq('job_owner_recruiter_id', recruiterId);
+
+        // Jobs at companies the recruiter actively works with
+        const { data: companyRelations } = await this.supabase
+            .from('recruiter_companies')
+            .select('company_id')
+            .eq('recruiter_id', recruiterId)
+            .eq('status', 'active');
+
+        const companyIds = (companyRelations || []).map((r: any) => r.company_id);
+        let companyJobs: any[] = [];
+        if (companyIds.length > 0) {
+            const { data } = await this.supabase
+                .from('jobs')
+                .select('id')
+                .in('company_id', companyIds);
+            companyJobs = data || [];
+        }
+
+        const allIds = [
+            ...(ownedJobs || []).map((j: any) => j.id),
+            ...companyJobs.map((j: any) => j.id),
+        ];
+        return [...new Set(allIds)];
     }
 
     private async isRecruiterPartner(recruiterId: string): Promise<boolean> {

@@ -9,7 +9,7 @@ import {
     isExpiringSoon,
     getDaysUntilExpiry,
 } from "../shared/helpers";
-import { InvitationDetail } from "../shared/invitation-detail";
+import { InvitationDetailLoader } from "../shared/invitation-detail-loader";
 import InvitationActionsToolbar from "../shared/actions-toolbar";
 
 export function TableRow({
@@ -114,8 +114,8 @@ export function TableRow({
                         colSpan={colSpan}
                         className="p-0 bg-base-100 border-t-2 border-b-2 border-base-300"
                     >
-                        <InvitationDetail
-                            invitation={invitation}
+                        <InvitationDetailLoader
+                            invitationId={invitation.id}
                             onClose={onSelect}
                             onRefresh={onRefresh}
                         />

@@ -29,3 +29,8 @@ export function copyShareLink(code: string): void {
     const url = `https://splits.network?rec_code=${code}`;
     navigator.clipboard.writeText(url);
 }
+
+export function copyCandidateShareLink(code: string): void {
+    const url = `https://applicant.network/sign-up?rec_code=${code}`;
+    navigator.clipboard.writeText(url);
+}

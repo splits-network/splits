@@ -37,6 +37,22 @@ export function statusBorder(status?: string): string {
     }
 }
 
+/** Status -> DaisyUI badge class for PanelHeader badges */
+export function statusBadgeClass(status?: string): string {
+    switch (status) {
+        case "pending":
+            return "badge-warning";
+        case "accepted":
+            return "badge-success";
+        case "expired":
+            return "badge-ghost";
+        case "revoked":
+            return "badge-error badge-outline";
+        default:
+            return "badge-warning";
+    }
+}
+
 /** Status -> FA icon class */
 export function statusIcon(status?: string): string {
     switch (status) {

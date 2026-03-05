@@ -1,48 +1,46 @@
 "use client";
 
-import type { Invitation } from "../../types";
-import { InvitationDetail } from "../shared/invitation-detail";
+import type { RecruiterCode } from "../../types";
+import { ReferralCodeDetailLoader } from "../shared/referral-code-detail-loader";
 import { GridCard } from "./grid-card";
 
 export function GridView({
-    invitations,
+    codes,
     onSelect,
     selectedId,
     onRefresh,
 }: {
-    invitations: Invitation[];
-    onSelect: (inv: Invitation) => void;
+    codes: RecruiterCode[];
+    onSelect: (code: RecruiterCode) => void;
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const selectedInvitation = invitations.find((inv) => inv.id === selectedId);
+    const selectedCode = codes.find((c) => c.id === selectedId);
 
     return (
         <div className="relative">
-            {/* Grid */}
             <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                {invitations.map((invitation) => (
+                {codes.map((code) => (
                     <GridCard
-                        key={invitation.id}
-                        invitation={invitation}
-                        isSelected={selectedId === invitation.id}
-                        onSelect={() => onSelect(invitation)}
-                        onRefresh={onRefresh}
+                        key={code.id}
+                        code={code}
+                        isSelected={selectedId === code.id}
+                        onSelect={() => onSelect(code)}
                     />
                 ))}
             </div>
 
             {/* Detail Drawer */}
-            {selectedInvitation && (
+            {selectedCode && (
                 <>
                     <div
                         className="fixed inset-0 z-40 bg-black/30 transition-opacity"
-                        onClick={() => onSelect(selectedInvitation)}
+                        onClick={() => onSelect(selectedCode)}
                     />
                     <div className="fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
-                        <InvitationDetail
-                            invitation={selectedInvitation}
-                            onClose={() => onSelect(selectedInvitation)}
+                        <ReferralCodeDetailLoader
+                            codeId={selectedCode.id}
+                            onClose={() => onSelect(selectedCode)}
                             onRefresh={onRefresh}
                         />
                     </div>

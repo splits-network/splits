@@ -121,12 +121,6 @@ const navItems: NavItemData[] = [
                 icon: "fa-duotone fa-regular fa-envelope",
                 roles: ["recruiter"],
             },
-            {
-                href: "/portal/referral-codes",
-                label: "Referral Codes",
-                icon: "fa-duotone fa-regular fa-link",
-                roles: ["recruiter"],
-            },
         ],
     },
     {
@@ -150,6 +144,13 @@ const navItems: NavItemData[] = [
                 roles: ["recruiter"],
             },
         ],
+    },
+    {
+        href: "/portal/referral-codes",
+        label: "Referral Codes",
+        icon: "fa-duotone fa-regular fa-link",
+        roles: ["recruiter"],
+        section: "management",
     },
     {
         href: "/portal/applications",

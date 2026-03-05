@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import {
     useStandardList,
     PaginationControls,
@@ -13,7 +13,7 @@ import type { RecruiterCode, ReferralCodeFilters } from "./types";
 import { ReferralCodesAnimator } from "./referral-codes-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
-import { TableView } from "./components/table/table-view";
+import { GridView } from "./components/grid/grid-view";
 import { CreateCodeModal } from "./components/modals/create-code-modal";
 
 interface StatsCode {
@@ -27,6 +27,11 @@ export default function ReferralCodesBaselPage() {
     const { getToken, isLoaded: isAuthLoaded } = useAuth();
 
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+
+    const handleSelect = useCallback((code: RecruiterCode) => {
+        setSelectedId((prev) => (prev === code.id ? null : code.id));
+    }, []);
 
     // Stats (fetched independently)
     const [stats, setStats] = useState({
@@ -267,8 +272,10 @@ export default function ReferralCodesBaselPage() {
                                 </div>
                             </div>
                         ) : (
-                            <TableView
+                            <GridView
                                 codes={codes}
+                                onSelect={handleSelect}
+                                selectedId={selectedId}
                                 onRefresh={handleRefresh}
                             />
                         )}

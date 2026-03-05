@@ -36,6 +36,9 @@ const createSchema = {
         type: 'object',
         properties: {
             label: { type: 'string', maxLength: 255 },
+            expiry_date: { type: 'string', format: 'date-time' },
+            max_uses: { type: 'integer', minimum: 1 },
+            uses_remaining: { type: 'integer', minimum: 0 },
         },
     },
 };
@@ -46,6 +49,9 @@ const updateSchema = {
         properties: {
             label: { type: 'string', maxLength: 255 },
             status: { type: 'string', enum: ['active', 'inactive'] },
+            expiry_date: { type: ['string', 'null'], format: 'date-time' },
+            max_uses: { type: ['integer', 'null'], minimum: 1 },
+            uses_remaining: { type: ['integer', 'null'], minimum: 0 },
         },
     },
 };
