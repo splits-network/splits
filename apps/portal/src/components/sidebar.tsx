@@ -139,8 +139,14 @@ const navItems: NavItemData[] = [
             },
             {
                 href: "/portal/invite-companies",
-                label: "Invitations",
-                icon: "fa-duotone fa-regular fa-building-user",
+                label: "Sent",
+                icon: "fa-duotone fa-regular fa-paper-plane",
+                roles: ["recruiter"],
+            },
+            {
+                href: "/portal/company-invitations",
+                label: "Received",
+                icon: "fa-duotone fa-regular fa-envelope",
                 roles: ["recruiter"],
             },
         ],

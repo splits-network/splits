@@ -42,10 +42,10 @@ const listSchema = {
 const inviteSchema = {
     body: {
         type: 'object',
-        required: ['company_id', 'recruiter_email'],
+        required: ['company_id', 'recruiter_id'],
         properties: {
             company_id: { type: 'string', format: 'uuid' },
-            recruiter_email: { type: 'string', format: 'email' },
+            recruiter_id: { type: 'string', format: 'uuid' },
             can_manage_company_jobs: { type: 'boolean', default: false },
             message: { type: 'string', maxLength: 500 }
         }
@@ -181,14 +181,14 @@ export async function recruiterCompanyRoutes(
             return reply.code(201).send({ data: relationship });
         } catch (error) {
             if (error instanceof Error) {
-                if (error.message.includes('not found')) {
-                    return reply.code(404).send({ 
-                        error: { code: 'RECRUITER_NOT_FOUND', message: error.message } 
+                if (error.message.includes('already')) {
+                    return reply.code(409).send({
+                        error: { code: 'RELATIONSHIP_EXISTS', message: error.message }
                     });
                 }
-                if (error.message.includes('already')) {
-                    return reply.code(409).send({ 
-                        error: { code: 'RELATIONSHIP_EXISTS', message: error.message } 
+                if (error.message.includes('Forbidden')) {
+                    return reply.code(403).send({
+                        error: { code: 'FORBIDDEN', message: error.message }
                     });
                 }
             }

@@ -57,7 +57,7 @@ export class RecruiterCompanyInvitationsConsumer {
                 }
             }
 
-            const invitationsLink = `${this.portalUrl}/portal/company-invitations`;
+            const invitationsLink = `${this.portalUrl}/portal/company-invitations?invitationId=${relationshipId}`;
 
             await this.notificationService.recruiterCompanyInvitations.sendInvitation({
                 email: recruiterContact.email,
@@ -112,7 +112,7 @@ export class RecruiterCompanyInvitationsConsumer {
                 ? await this.contactLookup.getCompanyAdminContacts(company.identity_organization_id)
                 : [];
 
-            const portalLink = `${this.portalUrl}/portal/company-invitations`;
+            const portalLink = `${this.portalUrl}/portal/company-invitations?invitationId=${relationshipId}`;
 
             for (const admin of companyAdminContacts) {
                 await this.notificationService.recruiterCompanyInvitations.sendAccepted({
@@ -167,7 +167,7 @@ export class RecruiterCompanyInvitationsConsumer {
                 ? await this.contactLookup.getCompanyAdminContacts(company.identity_organization_id)
                 : [];
 
-            const portalLink = `${this.portalUrl}/portal/company-invitations`;
+            const portalLink = `${this.portalUrl}/portal/company-invitations?invitationId=${relationshipId}`;
 
             for (const admin of companyAdminContacts) {
                 await this.notificationService.recruiterCompanyInvitations.sendDeclined({

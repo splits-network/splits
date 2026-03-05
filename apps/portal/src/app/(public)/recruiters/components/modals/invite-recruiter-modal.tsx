@@ -44,11 +44,6 @@ export default function InviteRecruiterModal({
             return;
         }
 
-        if (!displayEmail) {
-            toast.error("Recruiter email is not available");
-            return;
-        }
-
         try {
             setIsSubmitting(true);
 
@@ -61,7 +56,7 @@ export default function InviteRecruiterModal({
             const client = createAuthenticatedClient(token);
             await client.post("/recruiter-companies/invite", {
                 company_id: selectedCompanyId,
-                recruiter_email: displayEmail,
+                recruiter_id: recruiter.id,
                 can_manage_company_jobs: canManageJobs,
                 message: message.trim() || undefined,
             });
