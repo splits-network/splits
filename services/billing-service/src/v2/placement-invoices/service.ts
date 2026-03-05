@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import type { AccessContext } from '../shared/access';
-import { requireBillingAdmin } from '../shared/helpers';
+import { requireBillingAdmin, requireBillingReadAccess, isRecruiterOnly } from '../shared/helpers';
 import { PlacementSnapshotRepository } from '../placement-snapshot/repository';
 import { CompanyBillingProfileRepository } from '../company-billing/repository';
 import { CompanyBillingProfileService } from '../company-billing/service';
@@ -42,7 +42,21 @@ export class PlacementInvoiceService {
 
     async getByPlacementId(placementId: string, clerkUserId: string): Promise<PlacementInvoice | null> {
         const access = await this.resolveAccessContext(clerkUserId);
-        requireBillingAdmin(access);
+        requireBillingReadAccess(access);
+
+        // Recruiters can only see invoices for placements where they have a split
+        if (isRecruiterOnly(access)) {
+            const { count } = await this.supabase
+                .from('placement_splits')
+                .select('*', { count: 'exact', head: true })
+                .eq('placement_id', placementId)
+                .eq('recruiter_id', access.recruiterId);
+
+            if (!count || count === 0) {
+                throw new Error('You do not have access to this placement invoice');
+            }
+        }
+
         return this.invoiceRepository.getByPlacementId(placementId);
     }
 

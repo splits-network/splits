@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { BaselTabBar } from "@splits-network/basel-ui";
+import { BaselTabBar, PanelHeader, type PanelStat } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
@@ -11,7 +11,7 @@ import {
     formatAvailability,
     formatVerificationStatus,
 } from "../../types";
-import { statusColor } from "./status-color";
+import { statusColorName } from "./status-color";
 import {
     salaryDisplay,
     isNew,
@@ -41,6 +41,16 @@ const TABS = [
     { value: "applications", label: "Applications", icon: "fa-duotone fa-regular fa-briefcase" },
     { value: "documents", label: "Documents", icon: "fa-duotone fa-regular fa-file-lines" },
 ];
+
+/* ─── Badge class mapping ──────────────────────────────────────────────── */
+
+const VERIFICATION_BADGE_CLASS: Record<string, string> = {
+    success: "badge-success",
+    warning: "badge-warning badge-soft badge-outline",
+    info: "badge-info badge-soft",
+    error: "badge-error",
+    neutral: "badge-ghost",
+};
 
 /* ─── Detail Loading Wrapper ────────────────────────────────────────────── */
 
@@ -193,132 +203,80 @@ export function CandidateDetail({
         candidate.bio ||
         candidate.description;
 
+    /* Build header badges */
+    const verificationColor = statusColorName(candidate.verification_status);
+    const headerBadges = [
+        {
+            label: formatVerificationStatus(candidate.verification_status),
+            className: VERIFICATION_BADGE_CLASS[verificationColor] || "badge-ghost",
+        },
+        ...(isNew(candidate)
+            ? [{ label: "New", className: "badge-warning badge-soft badge-outline" }]
+            : []),
+    ];
+
+    /* Build meta items */
+    const meta = [
+        candidate.email && {
+            icon: "fa-duotone fa-regular fa-envelope",
+            text: candidate.email,
+            href: `mailto:${candidate.email}`,
+        },
+        candidate.phone && {
+            icon: "fa-duotone fa-regular fa-phone",
+            text: candidate.phone,
+        },
+        candidate.location && {
+            icon: "fa-duotone fa-regular fa-location-dot",
+            text: candidate.location,
+        },
+    ].filter(Boolean) as { icon: string; text: string; href?: string }[];
+
+    /* Build stats (available data only) */
+    const stats: PanelStat[] = [
+        ...(skills.length > 0
+            ? [{ label: "Skills", value: String(skills.length), icon: "fa-duotone fa-regular fa-code" }]
+            : []),
+    ];
+
+    /* Social links */
+    const socialLinks = [
+        candidate.linkedin_url && {
+            href: candidate.linkedin_url,
+            icon: "fa-brands fa-linkedin",
+            label: "LinkedIn",
+        },
+        candidate.github_url && {
+            href: candidate.github_url,
+            icon: "fa-brands fa-github",
+            label: "GitHub",
+        },
+        candidate.portfolio_url && {
+            href: candidate.portfolio_url,
+            icon: "fa-duotone fa-regular fa-globe",
+            label: "Portfolio",
+        },
+    ].filter(Boolean) as { href: string; icon: string; label: string }[];
+
     return (
         <div className="flex flex-col h-full min-h-0 bg-base-100">
-            {/* Header */}
-            <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-6 py-4">
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
-                        {/* Initials square */}
-                        <div className="relative flex-shrink-0">
-                            <div className="w-14 h-14 flex items-center justify-center bg-primary text-primary-content font-black text-lg">
-                                {initials}
-                            </div>
-                            {level && (
-                                <div className="absolute -bottom-1.5 -right-2">
-                                    <LevelBadge level={level} size="sm" />
-                                </div>
-                            )}
+            {/* Dark header */}
+            <PanelHeader
+                kicker={company || ""}
+                badges={headerBadges}
+                avatar={{ initials }}
+                avatarOverlay={
+                    level ? (
+                        <div className="absolute -bottom-1.5 -right-2">
+                            <LevelBadge level={level} size="sm" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                                {isNew(candidate) && (
-                                    <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
-                                        New
-                                    </span>
-                                )}
-                                <span
-                                    className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
-                                >
-                                    {formatVerificationStatus(
-                                        candidate.verification_status,
-                                    )}
-                                </span>
-                            </div>
-                            <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-1">
-                                {name}
-                            </h2>
-                            <div className="flex flex-wrap items-center gap-2 text-sm">
-                                <span className="font-semibold text-primary">
-                                    {title || "Title not set"}
-                                </span>
-                                {company && (
-                                    <>
-                                        <span className="text-base-content/40">
-                                            |
-                                        </span>
-                                        <span className="text-base-content/70">
-                                            {company}
-                                        </span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                    {onClose && (
-                        <button
-                            onClick={onClose}
-                            className="btn btn-sm btn-square btn-ghost"
-                        >
-                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
-                        </button>
-                    )}
-                </div>
-
-                {/* Contact row */}
-                <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-base-content/60">
-                    {candidate.email && (
-                        <a
-                            href={`mailto:${candidate.email}`}
-                            className="flex items-center gap-1.5 hover:text-primary transition-colors"
-                        >
-                            <i className="fa-duotone fa-regular fa-envelope" />
-                            {candidate.email}
-                        </a>
-                    )}
-                    {candidate.phone && (
-                        <span className="flex items-center gap-1.5">
-                            <i className="fa-duotone fa-regular fa-phone" />
-                            {candidate.phone}
-                        </span>
-                    )}
-                    {candidate.location && (
-                        <span className="flex items-center gap-1.5">
-                            <i className="fa-duotone fa-regular fa-location-dot" />
-                            {candidate.location}
-                        </span>
-                    )}
-                </div>
-
-                {/* Social links */}
-                <div className="flex flex-wrap gap-3 mt-3">
-                    {candidate.linkedin_url && (
-                        <a
-                            href={candidate.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
-                        >
-                            <i className="fa-brands fa-linkedin" />
-                            LinkedIn
-                        </a>
-                    )}
-                    {candidate.github_url && (
-                        <a
-                            href={candidate.github_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
-                        >
-                            <i className="fa-brands fa-github" />
-                            GitHub
-                        </a>
-                    )}
-                    {candidate.portfolio_url && (
-                        <a
-                            href={candidate.portfolio_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
-                        >
-                            <i className="fa-duotone fa-regular fa-globe" />
-                            Portfolio
-                        </a>
-                    )}
-                </div>
-
-                {/* Actions */}
-                <div className="mt-4">
+                    ) : undefined
+                }
+                title={name}
+                subtitle={title || "Title not set"}
+                meta={meta}
+                stats={stats}
+                actions={
                     <CandidateActionsToolbar
                         candidate={candidate}
                         variant="descriptive"
@@ -326,8 +284,27 @@ export function CandidateDetail({
                         onRefresh={onRefresh}
                         showActions={{ viewDetails: false }}
                     />
+                }
+                onClose={onClose}
+            />
+
+            {/* Social links row */}
+            {socialLinks.length > 0 && (
+                <div className="flex items-center gap-4 px-6 py-3 border-b border-base-300 bg-base-100">
+                    {socialLinks.map((link) => (
+                        <a
+                            key={link.label}
+                            href={link.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-bold text-base-content/50 hover:text-primary flex items-center gap-1.5"
+                        >
+                            <i className={link.icon} />
+                            {link.label}
+                        </a>
+                    ))}
                 </div>
-            </div>
+            )}
 
             {/* Tab Bar */}
             <BaselTabBar
@@ -403,22 +380,22 @@ function OverviewTab({
     onRequestRTR?: () => void;
 }) {
     return (
-        <div className="p-6 space-y-8">
+        <div className="space-y-8 p-6">
             {/* About / Bio */}
             {bioText ? (
-                <div className="border-l-4 border-primary pl-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                <div className="border-l-4 border-l-primary pl-6">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
                         About
-                    </h3>
+                    </p>
                     <p className="text-sm text-base-content/70 leading-relaxed whitespace-pre-line">
                         {bioText}
                     </p>
                 </div>
             ) : (
-                <div className="border-l-4 border-base-300 pl-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                <div className="border-l-4 border-l-base-300 pl-6">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
                         About
-                    </h3>
+                    </p>
                     <p className="text-sm text-base-content/40 italic">
                         No biography added. Edit the profile to include one.
                     </p>
@@ -427,9 +404,9 @@ function OverviewTab({
 
             {/* Career Preferences */}
             <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                     Career Preferences
-                </h3>
+                </p>
                 <div className="grid grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
@@ -483,9 +460,9 @@ function OverviewTab({
 
             {/* Skills & Expertise */}
             <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                     Skills & Expertise
-                </h3>
+                </p>
                 {skills.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                         {skills.map((skill, i) => (
@@ -506,9 +483,9 @@ function OverviewTab({
 
             {/* Profile Status Grid */}
             <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                     Profile Status
-                </h3>
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
@@ -553,7 +530,7 @@ function OverviewTab({
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Verification
                         </p>
-                        <p className="font-bold text-sm">
+                        <p className="font-bold text-sm capitalize">
                             {formatVerificationStatus(
                                 candidate.verification_status,
                             )}
@@ -596,9 +573,9 @@ function OverviewTab({
             {/* Achievements */}
             {badges.length > 0 && (
                 <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Achievements
-                    </h3>
+                    </p>
                     <BadgeGrid badges={badges} maxVisible={6} />
                 </div>
             )}

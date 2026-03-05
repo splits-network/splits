@@ -8,7 +8,10 @@ import { CompanyDetailLoader } from "../shared/company-detail";
 import { companyId } from "../shared/helpers";
 import { GridCard } from "./grid-card";
 
-type TagMap = Record<string, { skills: string[]; perks: string[]; cultureTags: string[] }>;
+type TagMap = Record<
+    string,
+    { skills: string[]; perks: string[]; cultureTags: string[] }
+>;
 
 export function GridView({
     items,
@@ -34,9 +37,9 @@ export function GridView({
     useEffect(() => {
         if (!isMarketplace || items.length === 0) return;
 
-        const companyIds = items.map((item) =>
-            companyId(item, true),
-        ).filter(Boolean);
+        const companyIds = items
+            .map((item) => companyId(item, true))
+            .filter(Boolean);
 
         if (companyIds.length === 0) return;
 
@@ -50,11 +53,14 @@ export function GridView({
 
                 const results = await Promise.all(
                     companyIds.map(async (cId) => {
-                        const [skillsRes, perksRes, cultureRes] = await Promise.all([
-                            client.get(`/company-skills?company_id=${cId}`),
-                            client.get(`/company-perks?company_id=${cId}`),
-                            client.get(`/company-culture-tags?company_id=${cId}`),
-                        ]);
+                        const [skillsRes, perksRes, cultureRes] =
+                            await Promise.all([
+                                client.get(`/company-skills?company_id=${cId}`),
+                                client.get(`/company-perks?company_id=${cId}`),
+                                client.get(
+                                    `/company-culture-tags?company_id=${cId}`,
+                                ),
+                            ]);
 
                         const skills = (skillsRes.data || [])
                             .filter((r: any) => r.skill)
@@ -124,7 +130,7 @@ export function GridView({
                         className="fixed inset-0 z-40 bg-black/30 transition-opacity"
                         onClick={() => onSelectAction(selectedItem)}
                     />
-                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
                         <CompanyDetailLoader
                             companyId={selectedId}
                             onClose={() => onSelectAction(selectedItem)}

@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import { IEventPublisher } from '../shared/events';
-import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers';
+import { buildPaginationResponse, requireBillingAdmin, requireBillingReadAccess, isRecruiterOnly } from '../shared/helpers';
 import type { AccessContext } from '../shared/access';
 import { PlacementSnapshotRepository } from '../placement-snapshot/repository';
 import { PlacementSnapshot } from '../placement-snapshot/types';
@@ -39,7 +39,13 @@ export class PayoutServiceV2 {
         pagination: ReturnType<typeof buildPaginationResponse>;
     }> {
         const access = await this.resolveAccessContext(clerkUserId);
-        requireBillingAdmin(access);
+        requireBillingReadAccess(access);
+
+        // Recruiters can only see their own transactions
+        if (isRecruiterOnly(access)) {
+            filters = { ...filters, recruiter_id: access.recruiterId! };
+        }
+
         const page = filters.page ?? 1;
         const limit = filters.limit ?? 25;
         const { data, total } = await this.transactionRepository.listTransactions(filters);

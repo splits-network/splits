@@ -10,9 +10,9 @@ import {
     formatNotificationTime,
     getNotificationIcon,
 } from "@/lib/notifications";
-import ApplicationDetails from "@/app/portal/applications/components/shared/details";
+import { ApplicationDetailsEmbed } from "@/app/portal/applications/components/shared/application-details-embed";
 import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
-import { DetailPanel as PlacementDetailPanel } from "@/app/portal/placements/components/shared/detail-panel";
+import { DetailLoader as PlacementDetailLoader } from "@/app/portal/placements/components/shared/placement-detail";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
 
 interface DetailPanelProps {
@@ -223,11 +223,11 @@ function FeatureDetails({
 }) {
     switch (category) {
         case "application":
-            return <ApplicationDetails itemId={entityId} />;
+            return <ApplicationDetailsEmbed itemId={entityId} />;
         case "candidate":
             return <CandidateDetailLoader candidateId={entityId} onClose={() => {}} />;
         case "placement":
-            return <PlacementDetailsLoaderWrapper placementId={entityId} />;
+            return <PlacementDetailLoader placementId={entityId} onClose={() => {}} />;
         case "proposal":
         case "collaboration":
             return <RoleDetailsLoader roleId={entityId} />;
@@ -236,54 +236,6 @@ function FeatureDetails({
     }
 }
 
-/**
- * Loads a placement by ID and renders the detail view.
- */
-function PlacementDetailsLoaderWrapper({ placementId }: { placementId: string }) {
-    const { getToken } = useAuth();
-    const [placement, setPlacement] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-
-    const fetchPlacement = useCallback(async () => {
-        setLoading(true);
-        try {
-            const token = await getToken();
-            if (!token) return;
-            const client = createAuthenticatedClient(token);
-            const res = await client.get(`/placements/${placementId}`, {
-                params: { include: "candidate,job,company" },
-            });
-            setPlacement(res.data);
-        } catch (err) {
-            console.error("Failed to fetch placement:", err);
-        } finally {
-            setLoading(false);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [placementId]);
-
-    useEffect(() => {
-        fetchPlacement();
-    }, [fetchPlacement]);
-
-    if (loading) {
-        return (
-            <div className="p-6">
-                <LoadingState message="Loading placement details..." />
-            </div>
-        );
-    }
-
-    if (!placement) {
-        return (
-            <div className="p-6 text-center text-base-content/40">
-                <p>Placement not found</p>
-            </div>
-        );
-    }
-
-    return <PlacementDetailPanel placement={placement} />;
-}
 
 /**
  * Loads a role/job and renders DetailsView.

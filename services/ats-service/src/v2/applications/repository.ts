@@ -507,7 +507,7 @@ export class ApplicationRepository {
         const { data, error } = await this.supabase
 
             .from('ai_reviews')
-            .select('id')
+            .select('*')
             .eq('application_id', applicationId)
             .order('created_at', { ascending: false })
             .limit(1)

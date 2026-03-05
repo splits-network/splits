@@ -12,7 +12,7 @@ import {
     formatStatus,
     isNew,
 } from "../shared/helpers";
-import { DetailPanel } from "../shared/detail-panel";
+import { DetailLoader } from "../shared/placement-detail";
 
 const COLUMNS = [
     "",
@@ -131,11 +131,12 @@ export function TableView({
                                             colSpan={COLUMNS.length}
                                             className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
                                         >
-                                            <DetailPanel
-                                                placement={placement}
+                                            <DetailLoader
+                                                placementId={placement.id}
                                                 onClose={() =>
                                                     onSelect(placement)
                                                 }
+                                                onRefresh={onRefresh}
                                             />
                                         </td>
                                     </tr>
