@@ -3,7 +3,7 @@
 import type { EnrichedMatch } from "../../types";
 import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
-import { MatchDetailPanel } from "../shared/match-detail-panel";
+import { MatchDetailLoader } from "../shared/match-detail-loader";
 
 export function SplitView({
     matches,
@@ -42,14 +42,14 @@ export function SplitView({
 
             {/* Right detail -- MobileDetailOverlay handles mobile portal */}
             <MobileDetailOverlay
-                isOpen={!!selectedMatch}
+                isOpen={!!selectedId}
                 className="md:w-3/5 w-full bg-base-100"
             >
-                {selectedMatch ? (
-                    <MatchDetailPanel
-                        match={selectedMatch}
+                {selectedId ? (
+                    <MatchDetailLoader
+                        matchId={selectedId}
                         isPartner={isPartner}
-                        onClose={() => onSelect(selectedMatch)}
+                        onClose={() => selectedMatch && onSelect(selectedMatch)}
                         onDismiss={onDismiss}
                         dismissing={dismissing}
                     />

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function TrueScoreUpsell() {
     return (
-        <div className="relative overflow-hidden rounded-lg border border-base-300 p-4">
+        <div className="relative overflow-hidden border border-base-300 p-4">
             {/* Blurred background content */}
             <div className="blur-sm select-none pointer-events-none">
                 <div className="flex items-center gap-2 mb-2">
