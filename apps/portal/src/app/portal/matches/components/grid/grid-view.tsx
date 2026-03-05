@@ -2,7 +2,7 @@
 
 import type { EnrichedMatch } from "../../types";
 import { GridCard } from "./grid-card";
-import { MatchDetailPanel } from "../shared/match-detail-panel";
+import { MatchDetailLoader } from "../shared/match-detail-loader";
 
 export function GridView({
     matches,
@@ -43,8 +43,8 @@ export function GridView({
                         onClick={() => onSelect(selectedMatch)}
                     />
                     <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
-                        <MatchDetailPanel
-                            match={selectedMatch}
+                        <MatchDetailLoader
+                            matchId={selectedMatch.id}
                             isPartner={isPartner}
                             onClose={() => onSelect(selectedMatch)}
                             onDismiss={onDismiss}

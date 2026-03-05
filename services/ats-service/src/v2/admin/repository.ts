@@ -198,7 +198,7 @@ export class AdminAtsRepository {
     }
 
     async getJobCountsByStatus(): Promise<Record<string, number>> {
-        const statuses = ['active', 'draft', 'paused', 'closed', 'filled'];
+        const statuses = ['draft', 'pending', 'early', 'active', 'priority', 'paused', 'filled', 'closed'];
         const results = await Promise.all(
             statuses.map((s) =>
                 this.supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', s),

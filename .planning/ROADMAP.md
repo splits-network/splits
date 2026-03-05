@@ -8,6 +8,7 @@
 - [x] **v5.0 Custom GPT / Applicant Network** - Phases 11-15 (shipped 2026-02-13)
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
+- [ ] **v8.0 Company Experience Enhancement** - Phases 28-32 (in progress)
 
 ## Phases
 
@@ -28,6 +29,16 @@ Completed milestones documented in .planning/MILESTONES.md
 - [x] **Phase 25: Company Settings UI** - Form sections for all new fields in company settings (completed 2026-03-04)
 - [x] **Phase 26: Company Card Redesign** - Grid card, detail panel, and description section (completed 2026-03-04)
 - [x] **Phase 27: Search Index Enrichment** - Triggers to index new fields into company search vector (completed 2026-03-04)
+
+### v8.0 Company Experience Enhancement (Active)
+
+**Milestone Goal:** Make the portal a first-class experience for company users — invite matched candidates to apply, send email and in-app notifications to both parties, tailor the role detail tabs per user role, and surface top matches on the company dashboard.
+
+- [ ] **Phase 28: Schema & Types** - Migration for `invited` status, `invited_by`/`invited_at` columns, and TypeScript types
+- [ ] **Phase 29: Invite API & Event** - Invite endpoint in matching-service, RabbitMQ event published
+- [ ] **Phase 30: Notifications** - Notification-service consumers, in-app notifications, and email templates for candidate and recruiter
+- [ ] **Phase 31: Portal UI** - Invite button, invited badge, role-aware tabs, and company dashboard top matches widget
+- [ ] **Phase 32: Candidate UI** - Invited badge on match cards, invited matches sorted to top
 
 ## Phase Details
 
@@ -124,10 +135,83 @@ Plans:
 - [x] 27-01-PLAN.md -- Update company search vector and search index sync with new fields (stage, tagline, skills, perks, culture tags)
 - [x] 27-02-PLAN.md -- Junction table cascade triggers to refresh company search on skill/perk/culture tag changes
 
+### Phase 28: Schema & Types
+**Goal**: The database and TypeScript types support the `invited` match status, invite tracking columns, and all downstream code can reference the new values
+**Depends on**: Nothing (foundation phase for v8.0)
+**Requirements**: INVITE-01, INVITE-02
+**Success Criteria** (what must be TRUE):
+  1. Running the migration adds `invited` to the candidate_role_matches CHECK constraint without breaking existing status values
+  2. The candidate_role_matches table has `invited_by` (user_id) and `invited_at` (timestamp) columns with appropriate nullability
+  3. TypeScript types in shared-types include `invited` in the match status union and expose `invitedBy` and `invitedAt` on match DTOs
+**Plans:** 2 plans
+
+Plans:
+- [ ] 28-01-PLAN.md -- Migration: invited status in CHECK constraint, invited_by and invited_at columns
+- [ ] 28-02-PLAN.md -- TypeScript types: match status union updated, DTO extended in shared-types
+
+### Phase 29: Invite API & Event
+**Goal**: Company users can trigger an invite through the API and a RabbitMQ event carries full context for downstream consumers
+**Depends on**: Phase 28
+**Requirements**: INVITE-03, INVITE-04
+**Success Criteria** (what must be TRUE):
+  1. A company user calling `PATCH /api/v2/matches/:id/invite` sets the match status to `invited`, records `invited_by` and `invited_at`, and returns the updated match
+  2. Calling the endpoint as a non-company user (recruiter, candidate, platform admin) returns 403
+  3. Calling the endpoint for a match that belongs to a different company returns 403
+  4. A `match.invited` event is published to RabbitMQ after a successful invite containing match, job, candidate, and inviter context
+**Plans:** 2 plans
+
+Plans:
+- [ ] 29-01-PLAN.md -- Invite endpoint in matching-service (repository, service, route, authorization)
+- [ ] 29-02-PLAN.md -- Gateway route for invite endpoint + RabbitMQ event publishing
+
+### Phase 30: Notifications
+**Goal**: Both the candidate and recruiter are notified in-app and by email when a candidate is invited to apply
+**Depends on**: Phase 29
+**Requirements**: NOTIF-01, NOTIF-02, NOTIF-03, NOTIF-04
+**Success Criteria** (what must be TRUE):
+  1. After an invite, the candidate sees an in-app notification linking to the match
+  2. After an invite, the recruiter who owns the job sees an in-app notification with match and candidate context
+  3. The candidate receives an email with role details and a CTA to view their match
+  4. The recruiter receives an email with match details and candidate information
+**Plans:** 2 plans
+
+Plans:
+- [ ] 30-01-PLAN.md -- Notification-service consumers for match.invited (in-app notifications for candidate and recruiter)
+- [ ] 30-02-PLAN.md -- Email templates and Resend dispatch for candidate invite and recruiter alert
+
+### Phase 31: Portal UI
+**Goal**: Company users see an invite action on match rows, invited matches are visually marked, tabs are tailored to the company persona, and the dashboard shows top matches
+**Depends on**: Phase 29
+**Requirements**: CUI-01, CUI-02, CUI-03, CUI-04
+**Success Criteria** (what must be TRUE):
+  1. A company user viewing the Matches tab on a role detail sees an "Invite to Apply" button on each non-invited match row
+  2. Matches where status is `invited` display an "Invited" badge showing when the invite was sent
+  3. A company user viewing a role detail does not see the Recruiter Brief tab and does not see fee percentages in the Financials tab
+  4. The company dashboard displays a "Top Matches" widget listing the highest-scored matches across all company roles
+**Plans:** 2 plans
+
+Plans:
+- [ ] 31-01-PLAN.md -- Invite button and invited badge in role detail Matches tab + role-aware tab visibility
+- [ ] 31-02-PLAN.md -- Company dashboard top matches widget
+
+### Phase 32: Candidate UI
+**Goal**: Candidates can immediately see which roles they have been invited to apply for, with invited matches surfaced first
+**Depends on**: Phase 28
+**Requirements**: CAND-01, CAND-02
+**Success Criteria** (what must be TRUE):
+  1. A candidate viewing their matches list sees an "Invited" badge on any match with `invited` status
+  2. Invited matches appear at the top of the matches list ahead of all other matches
+**Plans:** 1 plan
+
+Plans:
+- [ ] 32-01-PLAN.md -- Invited badge on candidate match cards + sort invited matches to top
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
+Phases execute in numeric order: 28 -> 29 -> 30 -> 31 -> 32
+
+Note: Phase 31 and Phase 32 both depend on Phase 28 (types) and Phase 29 (API) but are independent of each other and can execute in parallel.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -137,3 +221,8 @@ Phases execute in numeric order: 22 -> 23 -> 24 -> 25 -> 26 -> 27
 | 25. Company Settings UI | v7.0 | 2/2 | Complete | 2026-03-04 |
 | 26. Company Card Redesign | v7.0 | 3/3 | Complete | 2026-03-04 |
 | 27. Search Index Enrichment | v7.0 | 2/2 | Complete | 2026-03-04 |
+| 28. Schema & Types | v8.0 | 0/2 | Pending | — |
+| 29. Invite API & Event | v8.0 | 0/2 | Pending | — |
+| 30. Notifications | v8.0 | 0/2 | Pending | — |
+| 31. Portal UI | v8.0 | 0/2 | Pending | — |
+| 32. Candidate UI | v8.0 | 0/1 | Pending | — |

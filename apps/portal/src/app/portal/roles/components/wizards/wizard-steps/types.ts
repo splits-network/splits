@@ -25,7 +25,9 @@ export interface FormData {
     source_firm_id?: string;
     location: string;
     department: string;
-    status: 'active' | 'paused' | 'closed';
+    status: 'draft' | 'pending' | 'early' | 'active' | 'priority' | 'paused' | 'filled' | 'closed';
+    activates_at: string;
+    closes_at: string;
 
     // Step 2: Compensation
     salary_min: string;

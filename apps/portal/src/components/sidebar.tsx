@@ -121,12 +121,6 @@ const navItems: NavItemData[] = [
                 icon: "fa-duotone fa-regular fa-envelope",
                 roles: ["recruiter"],
             },
-            {
-                href: "/portal/referral-codes",
-                label: "Referral Codes",
-                icon: "fa-duotone fa-regular fa-link",
-                roles: ["recruiter"],
-            },
         ],
     },
     {
@@ -145,11 +139,24 @@ const navItems: NavItemData[] = [
             },
             {
                 href: "/portal/invite-companies",
-                label: "Invitations",
-                icon: "fa-duotone fa-regular fa-building-user",
+                label: "Sent",
+                icon: "fa-duotone fa-regular fa-paper-plane",
+                roles: ["recruiter"],
+            },
+            {
+                href: "/portal/company-invitations",
+                label: "Received",
+                icon: "fa-duotone fa-regular fa-envelope",
                 roles: ["recruiter"],
             },
         ],
+    },
+    {
+        href: "/portal/referral-codes",
+        label: "Referral Codes",
+        icon: "fa-duotone fa-regular fa-link",
+        roles: ["recruiter"],
+        section: "management",
     },
     {
         href: "/portal/applications",

@@ -19,7 +19,8 @@ Automatically match the target page to the correct Designer One showcase referen
 | Dashboard/analytics | `showcase/dashboards/one/page.tsx` |
 | Data tables/lists | `showcase/tables/one/page.tsx` |
 | Forms/inputs | `showcase/forms/one/page.tsx` |
-| Detail views | `showcase/details/one/page.tsx` |
+| Detail views (full page) | `showcase/details/one/page.tsx` |
+| Detail panels (drawer/split) | `showcase/detail-panel/one/panels/` (see `detail-panel.md` sub-skill) |
 | Pricing pages | `showcase/pricing/one/page.tsx` |
 | Modal dialogs | `showcase/modals/one/page.tsx` |
 | User profiles | `showcase/profiles/one/page.tsx` |

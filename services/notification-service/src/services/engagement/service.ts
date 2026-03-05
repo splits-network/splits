@@ -10,6 +10,8 @@ import {
     CandidateReminderData,
     recruiterInactivityReminderEmail,
     RecruiterReminderData,
+    candidateMatchDigestEmail,
+    CandidateMatchDigestData,
 } from '../../templates/engagement';
 
 export class EngagementEmailService {
@@ -126,6 +128,27 @@ export class EngagementEmailService {
             payload: {
                 candidateName: data.candidateName,
                 daysSinceActivity: data.daysSinceActivity,
+            },
+        });
+    }
+
+    async sendCandidateMatchDigest(
+        email: string,
+        data: CandidateMatchDigestData & { userId?: string }
+    ): Promise<void> {
+        const html = candidateMatchDigestEmail(data);
+        const hasMatches = data.totalNewMatches > 0;
+        const subject = hasMatches
+            ? `Your weekly job matches — ${data.weekStartDate}`
+            : `No new matches this week — ${data.weekStartDate}`;
+
+        await this.sendEmail(email, subject, html, {
+            eventType: 'engagement.candidate_match_digest',
+            userId: data.userId,
+            payload: {
+                candidateName: data.candidateName,
+                totalNewMatches: data.totalNewMatches,
+                weekStartDate: data.weekStartDate,
             },
         });
     }

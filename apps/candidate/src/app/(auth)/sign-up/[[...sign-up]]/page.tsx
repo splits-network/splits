@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import gsap from "gsap";
-import { createAuthenticatedClient } from "@/lib/api-client";
+import { createAuthenticatedClient, ApiClient } from "@/lib/api-client";
+import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
 
 export default function SignUpPage() {
     const { getToken, isLoaded, isSignedIn } = useAuth();
@@ -18,6 +19,7 @@ export default function SignUpPage() {
 
     const [redirectUrl] = useState(() => searchParams.get("redirect_url"));
     const isFromInvitation = redirectUrl?.includes("/invitation/");
+    const recCode = searchParams.get("rec_code") || getRecCodeFromCookie();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -29,7 +31,56 @@ export default function SignUpPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    const [referralCode, setReferralCode] = useState(recCode || "");
+    const [referralStatus, setReferralStatus] = useState<
+        "idle" | "validating" | "valid" | "invalid"
+    >("idle");
+    const [referralRecruiter, setReferralRecruiter] = useState<{
+        id: string;
+        name: string;
+    } | null>(null);
+    const [referralError, setReferralError] = useState("");
+
     const stepRef = useRef<HTMLDivElement>(null);
+
+    // Validate referral code with debounce
+    useEffect(() => {
+        if (!referralCode || referralCode.length < 8) {
+            setReferralStatus("idle");
+            setReferralRecruiter(null);
+            setReferralError("");
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            setReferralStatus("validating");
+            try {
+                const client = new ApiClient();
+                const response: any = await client.get(
+                    `/recruiter-codes/lookup?code=${encodeURIComponent(referralCode)}`,
+                );
+                if (response?.data?.is_valid) {
+                    setReferralStatus("valid");
+                    setReferralRecruiter(response.data.recruiter);
+                    setReferralError("");
+                    document.cookie = `rec_code=${encodeURIComponent(referralCode)}; path=/; max-age=${30 * 24 * 60 * 60}; samesite=lax`;
+                } else {
+                    setReferralStatus("invalid");
+                    setReferralRecruiter(null);
+                    setReferralError(
+                        response?.data?.error_message ||
+                            "Invalid referral code",
+                    );
+                }
+            } catch {
+                setReferralStatus("invalid");
+                setReferralRecruiter(null);
+                setReferralError("Unable to validate referral code");
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [referralCode]);
 
     // Redirect if already signed in (matches sign-in page pattern)
     useEffect(() => {
@@ -47,6 +98,27 @@ export default function SignUpPage() {
             try {
                 const token = await getToken();
                 if (token) {
+                    // Resolve referral code to recruiter ID
+                    let referredByRecruiterId: string | undefined;
+                    const codeToUse = referralCode || recCode;
+                    if (codeToUse) {
+                        try {
+                            const unauthClient = new ApiClient();
+                            const lookupResponse: any = await unauthClient.get(
+                                `/recruiter-codes/lookup?code=${encodeURIComponent(codeToUse)}`,
+                            );
+                            if (lookupResponse?.data?.is_valid) {
+                                referredByRecruiterId =
+                                    lookupResponse.data.recruiter_id;
+                            }
+                        } catch (lookupError) {
+                            console.warn(
+                                "[SignUp] Failed to resolve rec_code:",
+                                lookupError,
+                            );
+                        }
+                    }
+
                     const client = createAuthenticatedClient(token);
                     await client.post("/onboarding/init", {
                         email:
@@ -56,7 +128,23 @@ export default function SignUpPage() {
                             `${firstName} ${lastName}`.trim(),
                         image_url: user?.imageUrl,
                         source_app: "candidate",
+                        referred_by_recruiter_id: referredByRecruiterId,
                     });
+
+                    // Log referral code usage for new signups
+                    if (codeToUse) {
+                        try {
+                            await client.post("/recruiter-codes/log", {
+                                code: codeToUse,
+                                signup_type: "candidate",
+                            });
+                        } catch (logError) {
+                            console.warn(
+                                "[SignUp] Failed to log rec_code usage:",
+                                logError,
+                            );
+                        }
+                    }
                 }
             } catch (initError) {
                 console.error(
@@ -68,7 +156,7 @@ export default function SignUpPage() {
             router.push(redirectUrl || "/onboarding");
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [redirectUrl, email, firstName, lastName, router],
+        [redirectUrl, email, firstName, lastName, router, referralCode],
     );
 
     const handleSignOut = async () => {
@@ -388,6 +476,50 @@ export default function SignUpPage() {
                     <p className="text-xs text-base-content/40 mt-1.5">
                         Must be at least 8 characters
                     </p>
+                </fieldset>
+
+                <fieldset>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
+                        Referral Code
+                        <span className="text-base-content/30 font-normal normal-case tracking-normal ml-1">
+                            (optional)
+                        </span>
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="e.g. abc12345"
+                        className={`input input-bordered w-full tracking-wider ${
+                            referralStatus === "valid"
+                                ? "input-success"
+                                : referralStatus === "invalid"
+                                  ? "input-error"
+                                  : ""
+                        }`}
+                        value={referralCode}
+                        onChange={(e) =>
+                            setReferralCode(e.target.value.toLowerCase().trim())
+                        }
+                        disabled={isLoading}
+                        maxLength={8}
+                    />
+                    {referralStatus === "validating" && (
+                        <p className="text-xs text-base-content/50 mt-1.5 flex items-center gap-1">
+                            <span className="loading loading-spinner loading-xs" />
+                            Validating...
+                        </p>
+                    )}
+                    {referralStatus === "valid" && referralRecruiter && (
+                        <p className="text-xs text-success mt-1.5 flex items-center gap-1">
+                            <i className="fa-duotone fa-regular fa-circle-check" />
+                            Referred by {referralRecruiter.name}
+                        </p>
+                    )}
+                    {referralStatus === "invalid" && (
+                        <p className="text-xs text-error mt-1.5 flex items-center gap-1">
+                            <i className="fa-duotone fa-regular fa-circle-xmark" />
+                            {referralError}
+                        </p>
+                    )}
                 </fieldset>
 
                 <button

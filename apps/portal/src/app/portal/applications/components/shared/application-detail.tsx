@@ -3,10 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { ApplicationDetailPanel } from "./application-detail-panel";
 import type { Application } from "../../types";
-import Details from "./details";
-// Reuse the original ActionsToolbar -- it contains all the business logic + modals
-import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 
 interface DetailLoaderProps {
     applicationId: string;
@@ -32,7 +30,7 @@ export function DetailLoader({
             const response = await client.get(
                 `/applications/${id}`,
                 {
-                    params: { include: "candidate,job,company,ai_review" },
+                    params: { include: "candidate,job,company,recruiter,ai_review,documents,audit_log" },
                 },
             );
             if (!signal?.cancelled) setApplication(response.data || null);
@@ -76,31 +74,10 @@ export function DetailLoader({
     if (!application) return null;
 
     return (
-        <div className="flex flex-col h-full bg-base-100">
-            {/* Action bar */}
-            <div className="p-4 border-b-2 border-base-300">
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                        <ActionsToolbar
-                            application={application as any}
-                            variant="descriptive"
-                            size="sm"
-                            showActions={{ viewDetails: false }}
-                            onRefresh={handleRefresh}
-                        />
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="btn btn-sm btn-square btn-ghost flex-shrink-0"
-                    >
-                        <i className="fa-duotone fa-regular fa-xmark text-lg" />
-                    </button>
-                </div>
-            </div>
-            {/* Detail content */}
-            <div className="min-h-0 flex-1 overflow-y-auto">
-                <Details itemId={application.id} onRefresh={handleRefresh} />
-            </div>
-        </div>
+        <ApplicationDetailPanel
+            application={application}
+            onClose={onClose}
+            onRefresh={handleRefresh}
+        />
     );
 }

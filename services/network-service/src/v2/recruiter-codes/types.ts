@@ -23,6 +23,10 @@ export interface RecruiterCode {
     };
     // Aggregated
     usage_count?: number;
+    // Settings
+    expiry_date?: string;
+    max_uses?: number;
+    uses_remaining?: number;
 }
 
 export interface RecruiterCodeFilters {
@@ -37,11 +41,17 @@ export interface RecruiterCodeFilters {
 
 export interface CreateRecruiterCodeRequest {
     label?: string;
+    expiry_date?: string;
+    max_uses?: number;
+    uses_remaining?: number;
 }
 
 export interface RecruiterCodeUpdate {
     label?: string;
     status?: 'active' | 'inactive';
+    expiry_date?: string | null;
+    max_uses?: number | null;
+    uses_remaining?: number | null;
 }
 
 export interface RecruiterCodeLogEntry {

@@ -70,6 +70,34 @@ export async function registerMatchRoutes(app: FastifyInstance, config: Config) 
         }
     });
 
+    // POST /api/v2/matches/:id/invite — invite candidate to apply
+    app.post('/api/v2/matches/:id/invite', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+            const result = await service.inviteCandidate(clerkUserId, id);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            const code = error.message === 'Candidate already invited for this match' ? 409
+                : error.message.includes('Not authorized') ? 403 : 400;
+            return reply.code(code).send({ error: { message: error.message } });
+        }
+    });
+
+    // PATCH /api/v2/matches/:id/deny-invite — deny an invite
+    app.patch('/api/v2/matches/:id/deny-invite', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+            const match = await service.denyInvite(clerkUserId, id);
+            return reply.send({ data: match });
+        } catch (error: any) {
+            const code = error.message.includes('Not authorized') ? 403
+                : error.message === 'No pending invite' ? 409 : 400;
+            return reply.code(code).send({ error: { message: error.message } });
+        }
+    });
+
     // POST /api/v2/matches/refresh — admin: trigger refresh for entity
     app.post('/api/v2/matches/refresh', async (request: FastifyRequest, reply: FastifyReply) => {
         try {

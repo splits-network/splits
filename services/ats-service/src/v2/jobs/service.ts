@@ -98,10 +98,17 @@ export class JobServiceV2 {
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
 
+        const status = data.status || 'draft';
+
+        // Early status requires an activates_at date
+        if (status === 'early' && !data.activates_at) {
+            throw new Error('activates_at is required when setting status to early');
+        }
+
         const job = await this.repository.createJob({
             ...data,
             job_owner_id: userContext.identityUserId,
-            status: data.status || 'draft',
+            status,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         }, clerkUserId);
@@ -149,6 +156,14 @@ export class JobServiceV2 {
                 updates.status,
                 userRole
             );
+
+            // Early status requires an activates_at date
+            if (updates.status === 'early') {
+                const activatesAt = updates.activates_at ?? currentJob.activates_at;
+                if (!activatesAt) {
+                    throw new Error('activates_at is required when setting status to early');
+                }
+            }
         }
 
         // // If closing job, require reason
@@ -254,26 +269,24 @@ export class JobServiceV2 {
     private async validateStatusTransition(
         fromStatus: string,
         toStatus: string,
-        userRole?: string
+        _userRole?: string
     ): Promise<void> {
         // Define allowed transitions
         const allowedTransitions: Record<string, string[]> = {
-            draft: ['active', 'closed'],
-            active: ['paused', 'closed', 'filled'],
-            paused: ['active', 'closed', 'filled'],
-            closed: ['active', 'filled'], // Can reopen
-            filled: ['active', 'closed'],
+            draft:    ['early', 'pending', 'active', 'closed'],
+            pending:  ['active', 'paused', 'closed'],
+            early:    ['active', 'priority', 'paused', 'closed'],
+            active:   ['priority', 'early', 'paused', 'filled', 'closed'],
+            priority: ['active', 'paused', 'filled', 'closed'],
+            paused:   ['active', 'early', 'priority', 'filled', 'closed'],
+            filled:   ['active', 'closed'],
+            closed:   ['active', 'draft'],
         };
 
         if (!allowedTransitions[fromStatus]?.includes(toStatus)) {
             throw new Error(
                 `Invalid status transition: ${fromStatus} -> ${toStatus}`
             );
-        }
-
-        // Role-based restrictions (example - customize as needed)
-        if (toStatus === 'closed' && userRole === 'hiring_manager') {
-            throw new Error('Only admins can close jobs');
         }
     }
 

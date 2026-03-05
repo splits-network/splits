@@ -49,7 +49,7 @@ export interface RecruiterCompanyFilters {
 }
 
 export interface InviteRecruiterRequest {
-    recruiter_email: string;
+    recruiter_id: string;
     company_id: string;
     can_manage_company_jobs?: boolean;
     message?: string; // Optional invitation message

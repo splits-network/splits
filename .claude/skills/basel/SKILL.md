@@ -78,6 +78,7 @@ success, error, warning, info (+ -content variants)
 ## Sub-Skills
 
 - `grid-card.md` — Grid card anatomy, stats grid, always-visible sections, empty states, tag badges
+- `detail-panel.md` — Detail panel anatomy, dark header, stats strip, tabs, migration process, feature showcase lookup
 
 ## Resources
 

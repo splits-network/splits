@@ -19,6 +19,20 @@ export interface StripeConnectAccountStatus {
         delay_days?: number;
     } | null;
     pending_balance?: number;
+    individual?: {
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+        phone?: string;
+        dob?: { day?: number; month?: number; year?: number };
+        address?: {
+            line1?: string;
+            city?: string;
+            state?: string;
+            postal_code?: string;
+        };
+        ssn_last_4_provided?: boolean;
+    } | null;
 }
 
 export interface StripePayout {

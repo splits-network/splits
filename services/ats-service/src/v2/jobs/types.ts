@@ -32,6 +32,8 @@ export interface JobUpdate {
     salary_max?: number;
     salary_currency?: string;
     status?: string;
+    activates_at?: string | null;
+    closes_at?: string | null;
     closed_reason?: string;
     [key: string]: any;
 }

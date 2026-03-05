@@ -65,6 +65,9 @@ export class RecruiterCodeServiceV2 {
 
         const code = await this.repository.create(accessContext.recruiterId, {
             label: request.label,
+            expiry_date: request.expiry_date,
+            max_uses: request.max_uses,
+            uses_remaining: request.uses_remaining,
         });
 
         await this.eventPublisher?.publish('recruiter_code.created', {

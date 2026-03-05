@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useStripeConnectStatus } from "@/hooks/use-stripe-connect-status";
 import { BaselAlertBox, BaselStatusPill } from "@splits-network/basel-ui";
 import { ConnectModal } from "@/components/basel/profile/connect-modal";
+import { EditConnectModal } from "@/components/basel/profile/edit-connect-modal";
 import { PayoutAccountCard } from "./payout-account-card";
 import { PayoutHistoryList } from "./payout-history-list";
 
@@ -13,10 +14,17 @@ export function PayoutsTab() {
     const connectStatus = useStripeConnectStatus();
     const [connectModalOpen, setConnectModalOpen] = useState(false);
     const [connectOpenCount, setConnectOpenCount] = useState(0);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editOpenCount, setEditOpenCount] = useState(0);
 
     const openConnectModal = () => {
         setConnectOpenCount((c) => c + 1);
         setConnectModalOpen(true);
+    };
+
+    const openEditModal = () => {
+        setEditOpenCount((c) => c + 1);
+        setEditModalOpen(true);
     };
 
     if (connectStatus.loading) {
@@ -171,11 +179,22 @@ export function PayoutsTab() {
                         {/* Left: Account status (60%) */}
                         <div className="lg:col-span-3">
                             {connectStatus.bankAccount ? (
-                                <PayoutAccountCard
-                                    bankAccount={connectStatus.bankAccount}
-                                    payoutSchedule={connectStatus.payoutSchedule}
-                                    pendingBalance={connectStatus.pendingBalance}
-                                />
+                                <div>
+                                    <PayoutAccountCard
+                                        bankAccount={connectStatus.bankAccount}
+                                        payoutSchedule={connectStatus.payoutSchedule}
+                                        pendingBalance={connectStatus.pendingBalance}
+                                    />
+                                    {connectStatus.accountType === "custom" && (
+                                        <button
+                                            className="btn btn-ghost btn-sm mt-3"
+                                            onClick={openEditModal}
+                                        >
+                                            <i className="fa-duotone fa-regular fa-pen-to-square" />
+                                            Edit Payout Details
+                                        </button>
+                                    )}
+                                </div>
                             ) : (
                                 <div className="bg-base-200 border border-base-300 border-l-4 border-l-success p-6">
                                     <div className="flex items-center gap-3">
@@ -225,11 +244,19 @@ export function PayoutsTab() {
                 </>
             )}
 
-            {/* Connect Modal */}
+            {/* Setup Modal — status-routed flow for new accounts */}
             <ConnectModal
                 key={connectOpenCount}
                 isOpen={connectModalOpen}
                 onClose={() => setConnectModalOpen(false)}
+            />
+
+            {/* Edit Modal — direct wizard, no status routing */}
+            <EditConnectModal
+                key={editOpenCount}
+                isOpen={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                connectStatus={connectStatus}
             />
         </div>
     );

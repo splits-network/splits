@@ -14,7 +14,7 @@ import {
     isNewMatch,
 } from "../../types";
 import { MatchScoreBadge } from "@/components/matches/match-score-badge";
-import { MatchDetailPanel } from "../shared/match-detail-panel";
+import { MatchDetailLoader } from "../shared/match-detail-loader";
 
 const COLUMNS = [
     "",
@@ -138,8 +138,8 @@ export function TableView({
                                             colSpan={COLUMNS.length}
                                             className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
                                         >
-                                            <MatchDetailPanel
-                                                match={match}
+                                            <MatchDetailLoader
+                                                matchId={match.id}
                                                 isPartner={isPartner}
                                                 onClose={() => onSelect(match)}
                                                 onDismiss={onDismiss}

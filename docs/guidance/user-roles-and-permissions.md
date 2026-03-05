@@ -413,7 +413,9 @@ Splits Network implements a role-based access control (RBAC) system with four pr
   - View application stages for candidates they submitted
   - Track submission progress (submitted → screen → interview → offer → hired/rejected)
   - Receive notifications on stage changes
-  - Cannot manually move candidates between stages (company-only action)
+  - Can advance applications through stages up to (but NOT including) `offer` on company jobs
+  - On **firm jobs** (no `company_id`, has `source_firm_id`), recruiters have full stage control including offer/hire/reject
+  - See "Application Stage Management Rules" section below for full details
 
 - **Placements & Earnings:**
   - View placement confirmations where they are the recruiter of record
@@ -443,10 +445,11 @@ Splits Network implements a role-based access control (RBAC) system with four pr
   - Cannot view company-side candidate feedback before acceptance
   - Cannot see salary data until placement is confirmed
 
-- **Stage Management:**
-  - Cannot manually change application stages (read-only view)
-  - Cannot mark candidates as "hired" or create placements
-  - Cannot reject or disqualify applications
+- **Stage Management (Company Jobs):**
+  - Can advance stages up through `interview` — CANNOT advance to `offer`, `hired`, or `rejected` at offer stage or later
+  - Cannot mark candidates as "hired" or create placements on company jobs
+  - CAN reject applications at pre-offer stages (screen, recruiter_review, etc.)
+  - See "Application Stage Management Rules" section for full breakdown
 
 - **Access Requirements:**
   - Must have **active recruiter status** to view jobs and submit candidates
@@ -579,7 +582,7 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 | Search candidates | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Submit candidates | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ |
 | View submissions | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ |
-| Move stages | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ |
+| Move stages | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
 | Claim sourcing | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | **Placements** |
 | Create placements | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ |
@@ -766,7 +769,65 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 
 ---
 
-## 6. Role Assignment & Management
+## 6. Application Stage Management Rules
+
+### 6.1 Job Type Detection
+
+Jobs fall into two categories based on ownership:
+
+- **Company Job**: Has `company_id` set, no `source_firm_id` — owned by an on-platform company
+- **Firm Job**: Has `source_firm_id` set, no `company_id` — owned by a recruiting firm (no on-platform company attached)
+
+Note: `job_owner_recruiter_id` indicates a recruiter created the job on behalf of a company — this does NOT make it a firm job.
+
+### 6.2 Stage Progression by Role
+
+#### Application Stages (in order):
+
+1. `draft` → `ai_review` → `ai_reviewed` (candidate self-service)
+2. `recruiter_request` → `recruiter_proposed` → `recruiter_review` (recruiter involvement)
+3. `screen` → `submitted` → `company_review` → `company_feedback` → `interview` (company review)
+4. `offer` (offer extended)
+5. `hired` / `rejected` / `withdrawn` / `expired` (terminal)
+
+#### Company Jobs — Recruiter Restrictions:
+
+| Action | Pre-Offer Stages | Offer & Later (offer, hired, rejected) |
+|--------|:----------------:|:--------------------------------------:|
+| Advance to next stage | ✅ (up through interview) | ❌ Business user only |
+| Reject application | ✅ | ❌ Business user only |
+| Hire (create placement) | N/A | ❌ Business user only |
+
+**The cutoff**: Recruiters CANNOT advance an application to `offer` or beyond. Once at `offer`, only the business user (company_admin, hiring_manager) or platform_admin can act.
+
+#### Firm Jobs — Full Recruiter Control:
+
+On firm jobs (no `company_id`, has `source_firm_id`), the recruiting firm acts as both recruiter AND company. The firm recruiter has **full stage management** including:
+- Advancing through ALL stages (including offer)
+- Hiring candidates (creating placements)
+- Rejecting applications at any stage
+
+#### Platform Admins:
+
+Platform admins can manage all stages on all job types (no restrictions).
+
+### 6.3 Enforcement Layers
+
+This rule must be enforced at:
+
+1. **Frontend gate system**: `apps/portal/src/app/portal/applications/lib/permission-utils.ts` — controls which actions are available per role/stage/job-type
+2. **Actions toolbar UI**: `apps/portal/src/app/portal/applications/components/shared/actions-toolbar.tsx` — renders buttons based on permissions
+3. **Backend service layer**: `services/ats-service/src/v2/applications/` — validates stage transitions server-side
+
+### 6.4 Key Implementation Notes
+
+- The `canTakeActionOnApplication()` function in `permission-utils.ts` must check job type (company vs firm) when determining recruiter permissions
+- The function needs access to `source_firm_id` and `company_id` from the job to make this determination
+- For firm jobs, treat the recruiter role as having the same stage management powers as a company user
+
+---
+
+## 7. Role Assignment & Management
 
 ### 6.1 Initial Role Assignment
 
@@ -816,16 +877,16 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 
 ---
 
-## 7. Authentication & Authorization Flow
+## 8. Authentication & Authorization Flow
 
-### 7.1 Authentication (Who are you?)
+### 8.1 Authentication (Who are you?)
 
 1. User authenticates via Clerk (sign-in, SSO, etc.)
 2. Clerk issues JWT session token
 3. API Gateway verifies token with Clerk
 4. Gateway resolves user identity via Identity Service
 
-### 7.2 Authorization (What can you do?)
+### 8.2 Authorization (What can you do?)
 
 1. Gateway retrieves user's memberships from Identity Service
 2. Memberships include organization_id and role for each
@@ -854,7 +915,7 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
    ```
 5. Business logic applies additional data scoping based on role
 
-### 7.3 Context Switching (Future Enhancement)
+### 8.3 Context Switching (Future Enhancement)
 
 For users with multiple memberships:
 - UI provides organization switcher
@@ -864,7 +925,7 @@ For users with multiple memberships:
 
 ---
 
-## 8. Security Considerations
+## 9. Security Considerations
 
 ### 8.1 Principle of Least Privilege
 
@@ -895,7 +956,7 @@ All role-based actions are logged:
 
 ---
 
-## 9. Implementation References
+## 10. Implementation References
 
 ### 9.1 Key Files
 
@@ -992,7 +1053,7 @@ export type TeamRole = 'owner' | 'admin' | 'member' | 'collaborator';
 
 ---
 
-## 10. Future Enhancements
+## 11. Future Enhancements
 
 ### 10.1 Custom Roles (Backlog)
 

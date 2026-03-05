@@ -273,25 +273,6 @@ export class RecruiterCompanyRepository {
     }
 
     /**
-     * Find recruiter by email for invitation purposes
-     */
-    async findRecruiterByEmail(email: string): Promise<any> {
-        const { data, error } = await this.supabase
-            
-            .from('recruiters')
-            .select(`
-                id,
-                user_id,
-                user:users!recruiters_user_id_fkey!inner(name, email)
-            `)
-            .eq('user.email', email)
-            .maybeSingle();
-
-        if (error) throw error;
-        return data;
-    }
-
-    /**
      * Check if active relationship exists
      */
     async hasActiveRelationship(recruiterId: string, companyId: string): Promise<boolean> {

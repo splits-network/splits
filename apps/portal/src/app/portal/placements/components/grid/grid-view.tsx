@@ -2,7 +2,7 @@
 
 import type { Placement } from "../../types";
 import { GridCard } from "./grid-card";
-import { DetailPanel } from "../shared/detail-panel";
+import { DetailLoader } from "../shared/placement-detail";
 
 export function GridView({
     placements,
@@ -15,7 +15,8 @@ export function GridView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const selectedPlacement = placements.find((p) => p.id === selectedId) ?? null;
+    const selectedPlacement =
+        placements.find((p) => p.id === selectedId) ?? null;
 
     return (
         <div className="relative">
@@ -38,10 +39,11 @@ export function GridView({
                         className="fixed inset-0 z-40 bg-black/30 transition-opacity"
                         onClick={() => onSelect(selectedPlacement)}
                     />
-                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
-                        <DetailPanel
-                            placement={selectedPlacement}
+                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+                        <DetailLoader
+                            placementId={selectedPlacement.id}
                             onClose={() => onSelect(selectedPlacement)}
+                            onRefresh={onRefresh}
                         />
                     </div>
                 </>

@@ -22,6 +22,20 @@ export function statusColor(invitation: Invitation): string {
     return "bg-info/15 text-info";
 }
 
+/** Invitation status -> DaisyUI badge class for PanelHeader */
+export function statusBadgeClass(invitation: Invitation): string {
+    const isExpired =
+        invitation.invitation_expires_at &&
+        new Date(invitation.invitation_expires_at) < new Date();
+
+    if (invitation.consent_given) return "badge-success";
+    if (invitation.declined_at) return "badge-error";
+    if (invitation.status === "terminated" || invitation.status === "cancelled")
+        return "badge-error badge-outline";
+    if (invitation.status === "expired" || isExpired) return "badge-ghost";
+    return "badge-warning";
+}
+
 /** Invitation status -> border color class */
 export function statusBorder(invitation: Invitation): string {
     const isExpired =

@@ -3,7 +3,7 @@
 import type { Placement } from "../../types";
 import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
-import { DetailPanel } from "../shared/detail-panel";
+import { DetailLoader } from "../shared/placement-detail";
 
 export function SplitView({
     placements,
@@ -42,9 +42,10 @@ export function SplitView({
                 className="md:w-3/5 w-full bg-base-100"
             >
                 {selectedPlacement ? (
-                    <DetailPanel
-                        placement={selectedPlacement}
+                    <DetailLoader
+                        placementId={selectedPlacement.id}
                         onClose={() => onSelect(selectedPlacement)}
+                        onRefresh={onRefresh}
                     />
                 ) : (
                     <div className="h-full flex items-center justify-center p-12">

@@ -116,6 +116,29 @@ export class StripeConnectService {
             // Balance may not be available for all account states
         }
 
+        // Extract individual details for pre-population (custom accounts only)
+        const individual = account.type === 'custom' && (account as any).individual ? (() => {
+            const ind = (account as any).individual;
+            return {
+                first_name: ind.first_name || undefined,
+                last_name: ind.last_name || undefined,
+                email: ind.email || undefined,
+                phone: ind.phone || undefined,
+                dob: ind.dob ? {
+                    day: ind.dob.day || undefined,
+                    month: ind.dob.month || undefined,
+                    year: ind.dob.year || undefined,
+                } : undefined,
+                address: ind.address ? {
+                    line1: ind.address.line1 || undefined,
+                    city: ind.address.city || undefined,
+                    state: ind.address.state || undefined,
+                    postal_code: ind.address.postal_code || undefined,
+                } : undefined,
+                ssn_last_4_provided: !!ind.ssn_last_4_provided,
+            };
+        })() : null;
+
         return {
             account_id: account.id,
             account_type: (account.type as 'express' | 'custom') || 'custom',
@@ -128,6 +151,7 @@ export class StripeConnectService {
             bank_account: bankAccountSummary,
             payout_schedule: payoutSchedule,
             pending_balance: pendingBalance,
+            individual,
         };
     }
 
@@ -141,22 +165,28 @@ export class StripeConnectService {
             throw new Error('Cannot update details on Express accounts. Use the onboarding link instead.');
         }
 
-        await this.stripe.accounts.update(status.account_id, {
-            individual: {
-                first_name: details.first_name,
-                last_name: details.last_name,
-                email: details.email,
-                phone: details.phone,
-                dob: details.dob,
-                ssn_last_4: details.ssn_last_4,
-                address: {
-                    line1: details.address.line1,
-                    city: details.address.city,
-                    state: details.address.state,
-                    postal_code: details.address.postal_code,
-                    country: 'US',
-                },
+        const individualUpdate: Record<string, any> = {
+            first_name: details.first_name,
+            last_name: details.last_name,
+            email: details.email,
+            phone: details.phone,
+            dob: details.dob,
+            address: {
+                line1: details.address.line1,
+                city: details.address.city,
+                state: details.address.state,
+                postal_code: details.address.postal_code,
+                country: 'US',
             },
+        };
+
+        // Only include SSN if provided (skip on edit when already on file)
+        if (details.ssn_last_4) {
+            individualUpdate.ssn_last_4 = details.ssn_last_4;
+        }
+
+        await this.stripe.accounts.update(status.account_id, {
+            individual: individualUpdate,
         });
 
         return this.getAccountStatus(clerkUserId);

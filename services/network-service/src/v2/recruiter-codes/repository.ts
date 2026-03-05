@@ -145,7 +145,7 @@ export class RecruiterCodeRepository {
 
     async create(
         recruiterId: string,
-        data: { label?: string }
+        data: { label?: string; expiry_date?: string; max_uses?: number; uses_remaining?: number }
     ): Promise<RecruiterCode> {
         // Generate unique code
         let code = generateCode();
@@ -168,6 +168,9 @@ export class RecruiterCodeRepository {
             code,
             label: data.label || null,
             status: 'active' as const,
+            expiry_date: data.expiry_date ?? null,
+            max_uses: data.max_uses ?? null,
+            uses_remaining: data.uses_remaining ?? null,
         };
 
         const { data: result, error } = await this.supabase

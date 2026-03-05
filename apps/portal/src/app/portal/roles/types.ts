@@ -6,7 +6,7 @@ import {
 } from "@splits-network/shared-types";
 
 // Local type definitions (these exist in shared-types/models but aren't exported from index)
-export type JobStatus = "active" | "paused" | "filled" | "closed";
+export type JobStatus = "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed";
 export type EmploymentType = "full_time" | "contract" | "temporary";
 
 /**
@@ -53,6 +53,8 @@ export interface Job {
     status: JobStatus | string;
 
     // Timestamps
+    activates_at?: string | null;
+    closes_at?: string | null;
     created_at: string | Date;
     updated_at?: string | Date;
 

@@ -178,6 +178,18 @@ export {
     type BaselRefreshButtonProps,
 } from './lists';
 
+// Panel components (detail panel header, tabs)
+export {
+    PanelHeader,
+    type PanelHeaderProps,
+    type PanelStat,
+    type PanelHeaderBadge,
+    type PanelHeaderMeta,
+    PanelTabs,
+    type PanelTabsProps,
+    type PanelTab,
+} from './panels';
+
 // Color utilities
 export {
     type BaselSemanticColor,

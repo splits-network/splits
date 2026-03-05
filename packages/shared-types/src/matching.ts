@@ -1,6 +1,7 @@
 export type MatchTier = 'standard' | 'true';
 export type MatchStatus = 'active' | 'dismissed' | 'applied';
 export type MatchScoreLabel = 'excellent' | 'strong' | 'good' | 'fair';
+export type InviteStatus = 'sent' | 'denied' | 'applied';
 
 export interface MatchScoreLabelConfig {
     key: MatchScoreLabel;
@@ -54,6 +55,9 @@ export interface EnrichedMatch {
     generated_by: string;
     dismissed_by: string | null;
     dismissed_at: string | null;
+    invited_by: string | null;
+    invited_at: string | null;
+    invite_status: InviteStatus | null;
     created_at: string;
     updated_at: string;
     candidate: {

@@ -270,6 +270,9 @@ export class ApplicationServiceV2 {
                 updates.stage,
                 currentApplication
             );
+
+            // Enforce role-based stage authorization (company vs firm job rules)
+            this.authorizeStageTransition(updates.stage, userContext, currentApplication);
         }
 
         // Auto-set submitted_at when transitioning to a submission stage for the first time
@@ -498,6 +501,45 @@ export class ApplicationServiceV2 {
         if (context.recruiterId) return 'recruiter';
         if (context.candidateId) return 'candidate';
         return 'system';
+    }
+
+    /**
+     * Enforce role-based stage authorization based on job type (company vs firm).
+     *
+     * Company jobs: recruiters cannot advance to offer/hired or reject at offer+.
+     * Firm jobs (no company_id, has source_firm_id): recruiters have full stage control.
+     * Platform admins: unrestricted on all job types.
+     */
+    private authorizeStageTransition(
+        targetStage: string,
+        userContext: { isPlatformAdmin: boolean; companyIds: string[]; recruiterId: string | null },
+        application: any
+    ): void {
+        if (userContext.isPlatformAdmin) return;
+
+        const job = application.job;
+        const isFirmJob = !job?.company_id && !!job?.source_firm_id;
+
+        // Firm jobs: recruiters have full control, no restrictions
+        if (isFirmJob) return;
+
+        // Company jobs: enforce recruiter restrictions
+        const isRecruiter = !!userContext.recruiterId && userContext.companyIds.length === 0;
+        if (!isRecruiter) return;
+
+        // Recruiters cannot advance to offer or hired on company jobs
+        if (targetStage === 'offer' || targetStage === 'hired') {
+            throw new Error(
+                `Recruiters cannot advance applications to "${targetStage}" on company jobs. Only company users can manage offer and later stages.`
+            );
+        }
+
+        // Recruiters cannot reject at offer stage or later on company jobs
+        if (targetStage === 'rejected' && application.stage === 'offer') {
+            throw new Error(
+                'Recruiters cannot reject applications at offer stage on company jobs.'
+            );
+        }
     }
 
     /**
@@ -917,6 +959,9 @@ export class ApplicationServiceV2 {
         }
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
+
+        // Enforce role-based authorization (company vs firm job rules)
+        this.authorizeStageTransition('hired', userContext, application);
 
         // Build update payload (notes are now created via application_notes table)
         const updateData: any = {

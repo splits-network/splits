@@ -68,10 +68,22 @@ export class JobRepository {
             if (accessContext.isPlatformAdmin) {
                 // Platform admins see all jobs
             } else if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
-                // Recruiters see all active jobs (marketplace model)
-                // OR only jobs where they have active involvement if job_owner_filter is 'assigned'
+                // Recruiters see active + priority jobs (marketplace model)
+                // Partner-tier recruiters also see early-access jobs
                 // NOTE: Check recruiter FIRST before company roles, even if they have both
-                query = query.eq('status', 'active');
+                const { data: sub } = await this.supabase
+                    .from('subscriptions')
+                    .select('plan:plans(tier)')
+                    .eq('recruiter_id', accessContext.recruiterId)
+                    .eq('status', 'active')
+                    .maybeSingle();
+
+                const tier = (sub?.plan as any)?.tier ?? 'starter';
+                const visibleStatuses = tier === 'partner'
+                    ? ['active', 'priority', 'early']
+                    : ['active', 'priority'];
+
+                query = query.in('status', visibleStatuses);
                 if (filters.job_owner_filter === 'assigned') {
                     // Filter to jobs where recruiter has:
                     // 1. Is the job_owner_recruiter_id or company_recruiter_id (they created/own the job)
@@ -110,24 +122,34 @@ export class JobRepository {
                 }
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users (company_admin, hiring_manager) see only their organization's jobs
-                // Exclude off-platform jobs (company_id is null) from company user views
-                query = query.not('company_id', 'is', null);
-                query = query.in('company.identity_organization_id', accessContext.organizationIds);
+                // Look up company IDs for their organizations, then filter at parent level
+                // (filtering on embedded `company.identity_organization_id` only nullifies the
+                //  relation without excluding the parent row, causing false "3rd Party" labels)
+                const { data: orgCompanies } = await this.supabase
+                    .from('companies')
+                    .select('id')
+                    .in('identity_organization_id', accessContext.organizationIds);
+
+                const orgCompanyIds = (orgCompanies || []).map((c: any) => c.id);
+                if (orgCompanyIds.length === 0) {
+                    return { data: [], total: 0 };
+                }
+                query = query.in('company_id', orgCompanyIds);
 
                 if (filters.job_owner_filter === 'assigned' && accessContext.identityUserId) {
                     // Further filter to only jobs where this user is the job_owner_id
                     query = query.eq('job_owner_id', accessContext.identityUserId);
                 }
             } else if (accessContext.candidateId) {
-                // Candidates see all active jobs
-                query = query.eq('status', 'active');
+                // Candidates see active and priority jobs
+                query = query.in('status', ['active', 'priority']);
             } else {
                 // No role found - return empty
                 return { data: [], total: 0 };
             }
         } else {
-            // Unauthenticated - show active jobs only
-            query = query.eq('status', 'active');
+            // Unauthenticated - show active and priority jobs
+            query = query.in('status', ['active', 'priority']);
         }
 
         // Apply full-text search
@@ -231,7 +253,7 @@ export class JobRepository {
             .eq('id', id);
 
         if (!clerkUserId) {
-            query = query.eq('status', 'active');
+            query = query.in('status', ['active', 'priority']);
         }
 
         const { data, error } = await query.single();
@@ -524,7 +546,7 @@ export class JobRepository {
             `)
             .eq('company_id', companyId)
             .or(`job_owner_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`)
-            .in('status', ['active', 'paused'])
+            .in('status', ['active', 'early', 'priority', 'paused'])
             .order('created_at', { ascending: false });
 
         if (error) throw error;

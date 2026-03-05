@@ -20,7 +20,7 @@ export function GridView({
     return (
         <div className="relative">
             {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                 {invitations.map((invitation) => (
                     <GridCard
                         key={invitation.id}
@@ -39,7 +39,7 @@ export function GridView({
                         className="fixed inset-0 z-40 bg-black/30 transition-opacity"
                         onClick={() => onSelect(selectedInvitation)}
                     />
-                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
                         <InvitationDetail
                             invitation={selectedInvitation}
                             onClose={() => onSelect(selectedInvitation)}

@@ -40,7 +40,7 @@ async function main() {
     const atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://localhost:3002';
     const networkServiceUrl = process.env.NETWORK_SERVICE_URL || 'http://localhost:3003';
     const candidateWebsiteUrl = process.env.CANDIDATE_WEBSITE_URL || 'http://localhost:3101';
-    const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
+    const portalUrl = process.env.PORTAL_URL || process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,

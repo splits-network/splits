@@ -62,6 +62,17 @@ export interface StripeConnectStatusState {
     payoutSchedule: { interval: string; weekly_anchor?: string; monthly_anchor?: number; delay_days?: number } | null;
     pendingBalance: number;
 
+    // Individual details (for pre-populating edit form)
+    individual: {
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+        phone?: string;
+        dob?: { day?: number; month?: number; year?: number };
+        address?: { line1?: string; city?: string; state?: string; postal_code?: string };
+        ssn_last_4_provided?: boolean;
+    } | null;
+
     // Computed state for UI
     status: ConnectStatus;
 
@@ -115,6 +126,15 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
         bankAccount: { bank_name: string; last4: string; account_type: string } | null;
         payoutSchedule: { interval: string; weekly_anchor?: string; monthly_anchor?: number; delay_days?: number } | null;
         pendingBalance: number;
+        individual: {
+            first_name?: string;
+            last_name?: string;
+            email?: string;
+            phone?: string;
+            dob?: { day?: number; month?: number; year?: number };
+            address?: { line1?: string; city?: string; state?: string; postal_code?: string };
+            ssn_last_4_provided?: boolean;
+        } | null;
     }>({
         hasAccount: false,
         accountId: null,
@@ -131,6 +151,7 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
         bankAccount: null,
         payoutSchedule: null,
         pendingBalance: 0,
+        individual: null,
     });
 
     const fetchStatus = useCallback(async () => {
@@ -167,6 +188,7 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
                     bankAccount: data.bank_account || null,
                     payoutSchedule: data.payout_schedule || null,
                     pendingBalance: data.pending_balance || 0,
+                    individual: data.individual || null,
                 });
             }
         } catch (err: any) {

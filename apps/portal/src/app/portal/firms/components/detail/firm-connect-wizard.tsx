@@ -183,7 +183,7 @@ export function FirmConnectWizard({
             );
 
             if (tokenError || !bankToken) {
-                throw new Error(tokenError?.message || "Failed to tokenize bank details");
+                throw new Error(tokenError?.message || "Failed to verify bank details. Please check your information and try again.");
             }
 
             await connectStatus.addBankAccount({ token: bankToken.id });
@@ -195,6 +195,7 @@ export function FirmConnectWizard({
             }
         } catch (err: any) {
             setSubmitError(err?.message || "Something went wrong. Please try again.");
+            setCurrentStep(2);
         } finally {
             setSubmitting(false);
         }

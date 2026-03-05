@@ -94,26 +94,20 @@ export class RecruiterCompanyServiceV2 {
         clerkUserId: string
     ): Promise<RecruiterCompany> {
         const userContext = await this.accessResolver.resolve(clerkUserId);
-        
-        // Find recruiter by email
-        const recruiter = await this.repository.findRecruiterByEmail(request.recruiter_email);
-        if (!recruiter) {
-            throw new Error(`Recruiter not found with email: ${request.recruiter_email}`);
-        }
 
         // Check if relationship already exists
         const existingActive = await this.repository.hasActiveRelationship(
-            recruiter.id,
+            request.recruiter_id,
             request.company_id
         );
-        
+
         if (existingActive) {
             throw new Error('Recruiter is already actively working with this company');
         }
 
         // Create pending relationship
         const relationship = await this.repository.create({
-            recruiter_id: recruiter.id,
+            recruiter_id: request.recruiter_id,
             company_id: request.company_id,
             relationship_type: 'recruiter',
             can_manage_company_jobs: request.can_manage_company_jobs || false,
@@ -123,8 +117,7 @@ export class RecruiterCompanyServiceV2 {
         // Publish invitation event for notification service
         await this.eventPublisher?.publish('recruiter_company.invited', {
             relationshipId: relationship.id,
-            recruiterEmail: request.recruiter_email,
-            recruiterId: recruiter.id,
+            recruiterId: request.recruiter_id,
             companyId: request.company_id,
             canManageJobs: request.can_manage_company_jobs || false,
             invitedBy: userContext.identityUserId,

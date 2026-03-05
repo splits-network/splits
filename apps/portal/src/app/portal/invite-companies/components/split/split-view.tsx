@@ -2,7 +2,7 @@
 
 import type { CompanyInvitation } from "../../types";
 import { MobileDetailOverlay } from "@/components/standard-lists";
-import { InvitationDetail } from "../shared/invitation-detail";
+import { InvitationDetailLoader } from "../shared/invitation-detail-loader";
 import { SplitItem } from "./split-item";
 
 export function SplitView({
@@ -38,8 +38,8 @@ export function SplitView({
                 className="md:w-3/5 w-full bg-base-100"
             >
                 {selectedInv ? (
-                    <InvitationDetail
-                        invitation={selectedInv}
+                    <InvitationDetailLoader
+                        invitationId={selectedInv.id}
                         onClose={() => onSelect(selectedInv)}
                         onRefresh={onRefresh}
                     />

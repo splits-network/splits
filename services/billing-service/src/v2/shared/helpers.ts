@@ -42,6 +42,24 @@ export function requireBillingAdmin(access: AccessContext): void {
     }
 }
 
+/**
+ * Check if user has read access to placement billing data.
+ * Billing admins can read all; recruiters can read their own placements.
+ */
+export function requireBillingReadAccess(access: AccessContext): void {
+    if (isBillingAdmin(access)) return;
+    if (access.recruiterId) return; // Recruiter — service must scope data to their placements
+    throw new Error('Insufficient permissions to view billing data');
+}
+
+/**
+ * True when user is a recruiter without billing admin privileges.
+ * Used to scope queries to only their own placement data.
+ */
+export function isRecruiterOnly(access: AccessContext): boolean {
+    return !isBillingAdmin(access) && !!access.recruiterId;
+}
+
 // ============================================
 // PAGINATION
 // ============================================

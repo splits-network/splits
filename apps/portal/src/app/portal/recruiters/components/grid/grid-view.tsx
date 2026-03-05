@@ -42,7 +42,7 @@ export function GridView({
                     />
 
                     {/* Slide-over Panel */}
-                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-[480px] lg:w-1/3 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
                         <DetailLoader
                             recruiterId={selectedRecruiter.id}
                             onClose={() => onSelectAction(selectedRecruiter)}

@@ -30,6 +30,9 @@ export class MatchRepository {
             generated_by: row.generated_by,
             dismissed_by: row.dismissed_by,
             dismissed_at: row.dismissed_at,
+            invited_by: row.invited_by ?? null,
+            invited_at: row.invited_at ?? null,
+            invite_status: row.invite_status ?? null,
             created_at: row.created_at,
             updated_at: row.updated_at,
             candidate: row.candidates ?? null,
@@ -80,7 +83,8 @@ export class MatchRepository {
     }
 
     async findMatchesForRecruiter(
-        recruiterId: string,
+        recruiterJobIds: string[],
+        recruiterCandidateIds: string[],
         filters: MatchListFilters,
         tierLimit?: 'standard',
     ): Promise<{ data: EnrichedCandidateRoleMatch[]; total: number }> {
@@ -88,14 +92,25 @@ export class MatchRepository {
         const limit = filters.limit ?? 25;
         const offset = (page - 1) * limit;
 
+        // Build OR conditions on main table columns only
+        const orConditions: string[] = [];
+
+        if (recruiterJobIds.length > 0) {
+            orConditions.push(`job_id.in.(${recruiterJobIds.join(',')})`);
+        }
+
+        if (recruiterCandidateIds.length > 0) {
+            orConditions.push(`candidate_id.in.(${recruiterCandidateIds.join(',')})`);
+        }
+
+        if (orConditions.length === 0) {
+            return { data: [], total: 0 };
+        }
+
         let query = this.supabase
             .from('candidate_role_matches')
-            .select(`
-                *,
-                candidates(id, full_name),
-                jobs!inner(id, title, location, salary_min, salary_max, employment_type, job_level, job_owner_recruiter_id, companies(id, name, logo_url))
-            `, { count: 'exact' })
-            .eq('jobs.job_owner_recruiter_id', recruiterId);
+            .select(this.ENRICHED_SELECT, { count: 'exact' })
+            .or(orConditions.join(','));
 
         if (tierLimit) query = query.eq('match_tier', tierLimit);
         query = this.applyFilters(query, filters);
@@ -121,6 +136,33 @@ export class MatchRepository {
             .select(this.ENRICHED_SELECT, { count: 'exact' })
             .eq('candidate_id', candidateId)
             .eq('match_tier', 'standard');
+
+        query = this.applyFilters(query, filters);
+
+        const { data, error, count } = await query
+            .order('match_score', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (error) throw error;
+        return { data: (data || []).map(r => this.mapRow(r)), total: count || 0 };
+    }
+
+    async findMatchesForCompany(
+        companyIds: string[],
+        filters: MatchListFilters,
+    ): Promise<{ data: EnrichedCandidateRoleMatch[]; total: number }> {
+        const page = filters.page ?? 1;
+        const limit = filters.limit ?? 25;
+        const offset = (page - 1) * limit;
+
+        let query = this.supabase
+            .from('candidate_role_matches')
+            .select(`
+                *,
+                candidates(id, full_name),
+                jobs!inner(id, title, location, salary_min, salary_max, employment_type, job_level, company_id, companies(id, name, logo_url))
+            `, { count: 'exact' })
+            .in('jobs.company_id', companyIds);
 
         query = this.applyFilters(query, filters);
 

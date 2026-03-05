@@ -36,6 +36,40 @@ export function registerMatchingRoutes(app: FastifyInstance, services: ServiceRe
         },
     );
 
+    // Custom route: invite candidate to apply
+    app.post(
+        '/api/v2/matches/:id/invite',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const data = await serviceClient().post(
+                `/api/v2/matches/${id}/invite`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request),
+            );
+            return reply.send(data);
+        },
+    );
+
+    // Custom route: deny an invite
+    app.patch(
+        '/api/v2/matches/:id/deny-invite',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const data = await serviceClient().patch(
+                `/api/v2/matches/${id}/deny-invite`,
+                request.body,
+                correlationId,
+                buildAuthHeaders(request),
+            );
+            return reply.send(data);
+        },
+    );
+
     // Custom route: admin refresh
     app.post(
         '/api/v2/matches/refresh',
