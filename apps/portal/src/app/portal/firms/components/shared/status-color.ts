@@ -58,3 +58,19 @@ export function memberStatusColor(status?: string): string {
             return "bg-base-content/15 text-base-content/50";
     }
 }
+
+/** Invitation status -> DaisyUI semantic badge classes */
+export function invitationStatusColor(status?: string): string {
+    switch (status) {
+        case "pending":
+            return "bg-info/15 text-info";
+        case "accepted":
+            return "bg-success/15 text-success";
+        case "expired":
+            return "bg-warning/15 text-warning";
+        case "revoked":
+            return "bg-error/15 text-error";
+        default:
+            return "bg-base-content/15 text-base-content/50";
+    }
+}

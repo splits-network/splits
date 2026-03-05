@@ -393,7 +393,7 @@ export class FirmRepository {
     async cancelFirmInvitation(firmId: string, invitationId: string): Promise<void> {
         const { error } = await this.supabase
             .from('firm_invitations')
-            .update({ status: 'cancelled' })
+            .update({ status: 'revoked' })
             .eq('id', invitationId)
             .eq('firm_id', firmId)
             .eq('status', 'pending');

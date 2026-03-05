@@ -8,7 +8,7 @@ import { BaselConfirmModal, BaselEmptyState } from "@splits-network/basel-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Firm, FirmMember, FirmInvitation } from "../../types";
 import { formatMemberRole, formatMemberStatus, formatDate } from "../../types";
-import { memberRoleColor, memberStatusColor } from "../shared/status-color";
+import { memberRoleColor, memberStatusColor, invitationStatusColor } from "../shared/status-color";
 import { firmInitials } from "../shared/helpers";
 import { InviteMemberModal } from "../modals/invite-member-modal";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
@@ -40,6 +40,9 @@ export function MembersSection({
 
     const pendingInvitations = invitations.filter(
         (inv) => inv.status === "pending",
+    );
+    const nonPendingInvitations = invitations.filter(
+        (inv) => inv.status !== "pending",
     );
 
     const handleRemoveMember = async () => {
@@ -209,31 +212,30 @@ export function MembersSection({
                 )}
             </section>
 
-            {/* ── Pending Invitations Section ── */}
-            {pendingInvitations.length > 0 && (
+            {/* ── Invitations Section ── */}
+            {invitations.length > 0 && (
                 <section>
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40">
-                            Pending Invitations
+                            Invitations
                             <span className="ml-2 text-base-content/30">
-                                ({pendingInvitations.length})
+                                ({invitations.length})
                             </span>
                         </h3>
                     </div>
 
                     <div className="border border-base-300">
+                        {/* Pending invitations first — with actions */}
                         {pendingInvitations.map((invitation, idx) => {
                             const expired = isExpired(invitation.expires_at);
+                            const isLast = idx === pendingInvitations.length - 1 && nonPendingInvitations.length === 0;
                             return (
                                 <div
                                     key={invitation.id}
                                     className={`flex items-center gap-4 p-4 ${
-                                        idx < pendingInvitations.length - 1
-                                            ? "border-b border-base-200"
-                                            : ""
+                                        !isLast ? "border-b border-base-200" : ""
                                     }`}
                                 >
-                                    {/* Envelope avatar */}
                                     <div
                                         className="w-10 h-10 bg-base-200 border border-base-300 border-dashed flex items-center justify-center text-sm flex-shrink-0"
                                         style={{ borderRadius: 0 }}
@@ -241,16 +243,13 @@ export function MembersSection({
                                         <i className="fa-duotone fa-regular fa-envelope text-base-content/40" />
                                     </div>
 
-                                    {/* Email + invite date */}
                                     <div className="flex-1 min-w-0">
                                         <p className="font-bold text-sm truncate text-base-content/70">
                                             {invitation.email}
                                         </p>
                                         <p className="text-sm text-base-content/40 truncate">
                                             Invited{" "}
-                                            {formatDate(
-                                                invitation.created_at,
-                                            )}
+                                            {formatDate(invitation.created_at)}
                                             {expired && (
                                                 <span className="text-warning ml-2">
                                                     (expired)
@@ -259,25 +258,22 @@ export function MembersSection({
                                         </p>
                                     </div>
 
-                                    {/* Role badge */}
                                     <span
                                         className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberRoleColor(invitation.role)}`}
                                     >
                                         {formatMemberRole(invitation.role)}
                                     </span>
 
-                                    {/* Status badge */}
                                     <span
                                         className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${
                                             expired
-                                                ? "text-warning/70 bg-warning/10"
-                                                : "text-info/70 bg-info/10"
+                                                ? invitationStatusColor("expired")
+                                                : invitationStatusColor("pending")
                                         }`}
                                     >
                                         {expired ? "Expired" : "Pending"}
                                     </span>
 
-                                    {/* Resend button */}
                                     <button
                                         className="btn btn-ghost btn-xs"
                                         style={{ borderRadius: 0 }}
@@ -294,7 +290,6 @@ export function MembersSection({
                                         )}
                                     </button>
 
-                                    {/* Cancel button */}
                                     <button
                                         className="btn btn-ghost btn-xs btn-square"
                                         style={{ borderRadius: 0 }}
@@ -305,6 +300,48 @@ export function MembersSection({
                                     >
                                         <i className="fa-duotone fa-regular fa-xmark text-base-content/40" />
                                     </button>
+                                </div>
+                            );
+                        })}
+
+                        {/* Non-pending invitations — no actions */}
+                        {nonPendingInvitations.map((invitation, idx) => {
+                            const isLast = idx === nonPendingInvitations.length - 1;
+                            return (
+                                <div
+                                    key={invitation.id}
+                                    className={`flex items-center gap-4 p-4 opacity-60 ${
+                                        !isLast ? "border-b border-base-200" : ""
+                                    }`}
+                                >
+                                    <div
+                                        className="w-10 h-10 bg-base-200 border border-base-300 border-dashed flex items-center justify-center text-sm flex-shrink-0"
+                                        style={{ borderRadius: 0 }}
+                                    >
+                                        <i className="fa-duotone fa-regular fa-envelope text-base-content/40" />
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-bold text-sm truncate text-base-content/70">
+                                            {invitation.email}
+                                        </p>
+                                        <p className="text-sm text-base-content/40 truncate">
+                                            Invited{" "}
+                                            {formatDate(invitation.created_at)}
+                                        </p>
+                                    </div>
+
+                                    <span
+                                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberRoleColor(invitation.role)}`}
+                                    >
+                                        {formatMemberRole(invitation.role)}
+                                    </span>
+
+                                    <span
+                                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${invitationStatusColor(invitation.status)}`}
+                                    >
+                                        {invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}
+                                    </span>
                                 </div>
                             );
                         })}

@@ -246,14 +246,14 @@ export function PayoutsTab() {
 
             {/* Setup Modal — status-routed flow for new accounts */}
             <ConnectModal
-                key={connectOpenCount}
+                key={`connect-${connectOpenCount}`}
                 isOpen={connectModalOpen}
                 onClose={() => setConnectModalOpen(false)}
             />
 
             {/* Edit Modal — direct wizard, no status routing */}
             <EditConnectModal
-                key={editOpenCount}
+                key={`edit-${editOpenCount}`}
                 isOpen={editModalOpen}
                 onClose={() => setEditModalOpen(false)}
                 connectStatus={connectStatus}
