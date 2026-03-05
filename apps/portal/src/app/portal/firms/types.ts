@@ -73,7 +73,7 @@ export interface FirmMember {
     };
 }
 
-export type InvitationStatus = "pending" | "accepted" | "declined" | "cancelled";
+export type InvitationStatus = "pending" | "accepted" | "expired" | "revoked";
 
 export interface FirmInvitation {
     id: string;

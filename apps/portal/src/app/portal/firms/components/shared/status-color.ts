@@ -3,7 +3,21 @@
  * Uses DaisyUI semantic tokens only.
  */
 
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
+
 export type ViewMode = "table" | "grid" | "split";
+
+/** Firm status -> BaselSemanticColor for use with BaselBadge */
+export function firmStatusBadgeColor(status?: string): BaselSemanticColor {
+    switch (status) {
+        case "active":
+            return "success";
+        case "suspended":
+            return "error";
+        default:
+            return "neutral";
+    }
+}
 
 /** Firm status -> DaisyUI semantic badge/text classes */
 export function statusColor(status?: string): string {
@@ -29,32 +43,48 @@ export function statusBorder(status?: string): string {
     }
 }
 
-/** Member role -> DaisyUI semantic badge classes */
-export function memberRoleColor(role?: string): string {
+/** Member role -> BaselSemanticColor for use with BaselBadge */
+export function memberRoleBadgeColor(role?: string): BaselSemanticColor {
     switch (role) {
         case "owner":
-            return "bg-primary/15 text-primary";
+            return "primary";
         case "admin":
-            return "bg-secondary/15 text-secondary";
+            return "secondary";
         case "member":
-            return "bg-success/15 text-success";
+            return "success";
         case "collaborator":
-            return "bg-info/15 text-info";
+            return "info";
         default:
-            return "bg-base-content/15 text-base-content/50";
+            return "neutral";
     }
 }
 
-/** Member status -> DaisyUI semantic badge classes */
-export function memberStatusColor(status?: string): string {
+/** Member status -> BaselSemanticColor for use with BaselBadge */
+export function memberStatusBadgeColor(status?: string): BaselSemanticColor {
     switch (status) {
         case "active":
-            return "bg-success/15 text-success";
+            return "success";
         case "invited":
-            return "bg-warning/15 text-warning";
+            return "warning";
         case "removed":
-            return "bg-error/15 text-error";
+            return "error";
         default:
-            return "bg-base-content/15 text-base-content/50";
+            return "neutral";
+    }
+}
+
+/** Invitation status -> BaselSemanticColor for use with BaselBadge */
+export function invitationStatusBadgeColor(status?: string): BaselSemanticColor {
+    switch (status) {
+        case "pending":
+            return "info";
+        case "accepted":
+            return "success";
+        case "expired":
+            return "warning";
+        case "revoked":
+            return "error";
+        default:
+            return "neutral";
     }
 }

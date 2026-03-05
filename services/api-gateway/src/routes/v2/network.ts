@@ -80,6 +80,7 @@ export function registerNetworkRoutes(app: FastifyInstance, services: ServiceReg
     // Register public routes first (no auth required)
     registerPublicFirmGatewayRoutes(app, services);
     registerPublicRecruiterGatewayRoutes(app, services);
+    registerFirmInvitationAcceptanceRoutes(app, services);
 
     // Register custom routes FIRST before generic CRUD routes
     registerRecruiterCandidateInvitationRoutes(app, services);
@@ -527,6 +528,57 @@ function registerFirmRoutes(app: FastifyInstance, services: ServiceRegistry) {
                 return reply.send(result);
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to transfer ownership');
+            }
+        }
+    );
+}
+
+/**
+ * Register firm invitation acceptance routes (public preview + authenticated accept)
+ */
+function registerFirmInvitationAcceptanceRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const networkService = () => services.get('network');
+
+    // Public preview — no auth required
+    app.get(
+        '/api/v2/firm-invitations/:token/preview',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { token } = request.params as { token: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    `/api/v2/firm-invitations/${token}/preview`,
+                    undefined,
+                    correlationId
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: 'Failed to load invitation preview' } });
+            }
+        }
+    );
+
+    // Accept invitation — auth required
+    app.post(
+        '/api/v2/firm-invitations/:token/accept',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { token } = request.params as { token: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    `/api/v2/firm-invitations/${token}/accept`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: 'Failed to accept invitation' } });
             }
         }
     );

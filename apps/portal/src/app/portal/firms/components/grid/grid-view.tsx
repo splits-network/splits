@@ -1,7 +1,7 @@
 "use client";
 
 import type { Firm } from "../../types";
-import { FirmDetailLoader } from "../shared/firm-detail";
+import { FirmDetailLoader } from "../shared/firm-detail-loader";
 import { GridCard } from "./grid-card";
 
 export function GridView({
@@ -20,7 +20,7 @@ export function GridView({
     return (
         <div className="relative">
             {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5">
+            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4">
                 {firms.map((firm) => (
                     <GridCard
                         key={firm.id}

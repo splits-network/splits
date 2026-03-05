@@ -9,7 +9,7 @@ import {
     createdAgo,
     memberCountDisplay,
 } from "../shared/helpers";
-import { FirmDetailLoader } from "../shared/firm-detail";
+import { FirmDetailLoader } from "../shared/firm-detail-loader";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
