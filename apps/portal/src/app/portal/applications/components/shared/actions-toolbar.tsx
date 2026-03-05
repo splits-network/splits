@@ -114,6 +114,8 @@ export default function ActionsToolbar({
         ? presence[candidateUserId]?.status
         : undefined;
 
+    const isFirmJob = !application.job?.company_id && !!application.job?.source_firm_id;
+
     const permissions = useMemo(() => {
         return canTakeActionOnApplication(
             application.stage as ApplicationStage,
@@ -122,6 +124,7 @@ export default function ActionsToolbar({
             isAdmin || false,
             application.candidate_recruiter_id,
             (application as any).expired_at,
+            isFirmJob,
         );
     }, [
         application.stage,
@@ -130,6 +133,7 @@ export default function ActionsToolbar({
         isRecruiter,
         isCompanyUser,
         isAdmin,
+        isFirmJob,
     ]);
 
     const handleStartChat = async () => {

@@ -38,6 +38,7 @@ export function canTakeActionOnApplication(
     isPlatformAdmin: boolean,
     candidateRecruiterId?: string | null,
     expiredAt?: string | null,
+    isFirmJob: boolean = false,
 ): ApplicationPermissions {
     // Default no-action response
     const noActions: ApplicationPermissions = {
@@ -72,7 +73,7 @@ export function canTakeActionOnApplication(
         };
     }
     // Determine base permissions by stage
-    const permissions = getPermissionsByStage(stage, isRecruiter, isCompanyUser, isPlatformAdmin, candidateRecruiterId);
+    const permissions = getPermissionsByStage(stage, isRecruiter, isCompanyUser, isPlatformAdmin, candidateRecruiterId, isFirmJob);
 
     // Anyone who can approve or reject can also add notes
     permissions.canAddNote = permissions.canApprove || permissions.canReject || isPlatformAdmin;
@@ -85,7 +86,8 @@ function getPermissionsByStage(
     isRecruiter: boolean,
     isCompanyUser: boolean,
     isPlatformAdmin: boolean,
-    candidateRecruiterId?: string | null
+    candidateRecruiterId?: string | null,
+    isFirmJob: boolean = false,
 ): ApplicationPermissions {
     const base: ApplicationPermissions = {
         canApprove: false,
@@ -98,6 +100,10 @@ function getPermissionsByStage(
         stageLabel: getStageLabel(stage),
         waitingMessage: '',
     };
+
+    // On firm jobs (no company, recruiter firm owns the job), the recruiter
+    // has the same stage management powers as a company user.
+    const recruiterHasFullControl = isRecruiter && isFirmJob;
 
     switch (stage) {
         case 'screen':
@@ -116,8 +122,8 @@ function getPermissionsByStage(
         case 'submitted':
             return {
                 ...base,
-                canApprove: isCompanyUser || isPlatformAdmin,
-                canReject: isCompanyUser || isPlatformAdmin,
+                canApprove: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
+                canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canRequestPrescreen: !candidateRecruiterId && (isCompanyUser || isPlatformAdmin),
                 approveButtonText: 'Accept for Company Review',
                 rejectButtonText: 'Reject Application',
@@ -127,8 +133,8 @@ function getPermissionsByStage(
         case 'company_review':
             return {
                 ...base,
-                canApprove: isCompanyUser || isPlatformAdmin,
-                canReject: isCompanyUser || isPlatformAdmin,
+                canApprove: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
+                canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canMoveToOffer: true, // Special: can skip interview
                 approveButtonText: 'Move to Interview',
                 rejectButtonText: 'Reject Application',
@@ -177,8 +183,8 @@ function getPermissionsByStage(
         case 'interview':
             return {
                 ...base,
-                canApprove: isCompanyUser || isPlatformAdmin,
-                canReject: isCompanyUser || isPlatformAdmin,
+                canApprove: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
+                canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 approveButtonText: 'Extend Offer',
                 rejectButtonText: 'Reject Application',
                 waitingMessage: 'Application is in the interview stage.',
@@ -187,8 +193,8 @@ function getPermissionsByStage(
         case 'offer':
             return {
                 ...base,
-                canApprove: isCompanyUser || isPlatformAdmin,
-                canReject: isCompanyUser || isPlatformAdmin,
+                canApprove: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
+                canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 approveButtonText: 'Mark as Hired',
                 rejectButtonText: 'Reject Application',
                 waitingMessage: 'Application is in the offer stage.',
