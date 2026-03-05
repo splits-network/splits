@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Firm } from "../../types";
 import { formatCurrency } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { firmStatusBadgeColor } from "../shared/status-color";
 import {
     formatStatus,
     firmInitials,
@@ -11,6 +11,7 @@ import {
 } from "../shared/helpers";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 export function GridCard({
     firm,
@@ -52,7 +53,7 @@ export function GridCard({
     ];
 
     return (
-        <div
+        <article
             onClick={onSelect}
             className={[
                 "group cursor-pointer flex flex-col h-full bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-lg",
@@ -63,11 +64,14 @@ export function GridCard({
         >
             {/* Header Band */}
             <div className="bg-base-300 border-b border-base-300 px-6 pt-5 pb-4">
-                {/* Status badge row */}
-                <div className="flex items-center justify-end mb-3">
-                    <span className={`badge ${statusColor(firm.status)}`}>
+                {/* Kicker row: industries on left, status on right */}
+                <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 truncate mr-2">
+                        {(firm.industries || []).slice(0, 2).join(" · ") || "Recruiting Firm"}
+                    </p>
+                    <BaselBadge color={firmStatusBadgeColor(firm.status)} variant="soft" size="sm">
                         {formatStatus(firm.status)}
-                    </span>
+                    </BaselBadge>
                 </div>
 
                 {/* Logo + Name block */}
@@ -91,6 +95,9 @@ export function GridCard({
                         )}
                     </div>
                     <div className="min-w-0">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
+                            Recruiting Firm
+                        </p>
                         <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {firm.name}
                         </h3>
@@ -135,11 +142,11 @@ export function GridCard({
                             const iconStyle = iconStyles[i % iconStyles.length];
                             return (
                                 <div key={stat.label} className="flex items-center gap-2.5 px-3 py-4">
-                                    <div className={`w-8 h-8 flex items-center justify-center shrink-0 ${iconStyle}`}>
+                                    <div className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyle}`}>
                                         <i className={`${stat.icon} text-xs`} />
                                     </div>
                                     <div>
-                                        <span className="text-lg font-black text-base-content leading-none block">
+                                        <span className="text-sm font-black text-base-content leading-none block">
                                             {stat.value}
                                         </span>
                                         <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
@@ -153,55 +160,57 @@ export function GridCard({
                 </div>
 
                 {/* Specialties + Industries */}
-                {((firm.specialties || []).length > 0 || (firm.industries || []).length > 0) && (
-                    <div className="px-6 py-5 border-b border-base-300 space-y-4">
-                        {(firm.specialties || []).length > 0 && (
-                            <div>
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                                    Specialties
-                                </p>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {(firm.specialties || []).slice(0, 4).map((spec) => (
-                                        <span key={spec} className="badge badge-primary badge-soft badge-outline">
-                                            {spec}
-                                        </span>
-                                    ))}
-                                    {(firm.specialties || []).length > 4 && (
-                                        <span className="badge badge-ghost">
-                                            +{(firm.specialties || []).length - 4}
-                                        </span>
-                                    )}
-                                </div>
+                <div className="px-6 py-5 border-b border-base-300 space-y-4">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                            Specialties
+                        </p>
+                        {(firm.specialties || []).length > 0 ? (
+                            <div className="flex flex-wrap gap-1.5">
+                                {(firm.specialties || []).slice(0, 4).map((spec) => (
+                                    <BaselBadge key={spec} color="primary" variant="soft" size="sm">
+                                        {spec}
+                                    </BaselBadge>
+                                ))}
+                                {(firm.specialties || []).length > 4 && (
+                                    <span className="px-2 py-0.5 text-xs font-bold text-base-content/40">
+                                        +{(firm.specialties || []).length - 4}
+                                    </span>
+                                )}
                             </div>
-                        )}
-                        {(firm.industries || []).length > 0 && (
-                            <div>
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                                    Industries
-                                </p>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {(firm.industries || []).slice(0, 3).map((ind) => (
-                                        <span key={ind} className="badge badge-soft badge-outline">
-                                            {ind}
-                                        </span>
-                                    ))}
-                                    {(firm.industries || []).length > 3 && (
-                                        <span className="badge badge-ghost">
-                                            +{(firm.industries || []).length - 3}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
+                        ) : (
+                            <p className="text-sm text-base-content/30 italic">Not provided</p>
                         )}
                     </div>
-                )}
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                            Industries
+                        </p>
+                        {(firm.industries || []).length > 0 ? (
+                            <div className="flex flex-wrap gap-1.5">
+                                {(firm.industries || []).slice(0, 3).map((ind) => (
+                                    <BaselBadge key={ind} variant="outline" size="sm">
+                                        {ind}
+                                    </BaselBadge>
+                                ))}
+                                {(firm.industries || []).length > 3 && (
+                                    <span className="px-2 py-0.5 text-xs font-bold text-base-content/40">
+                                        +{(firm.industries || []).length - 3}
+                                    </span>
+                                )}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-base-content/30 italic">Not provided</p>
+                        )}
+                    </div>
+                </div>
 
                 {/* Partnership Badges */}
-                {hasPartnerSignal && (
-                    <div className="px-6 py-5 border-b border-base-300">
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                            Partnership
-                        </p>
+                <div className="px-6 py-5 border-b border-base-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
+                        Partnership
+                    </p>
+                    {hasPartnerSignal ? (
                         <div className="flex flex-wrap gap-2">
                             {firm.candidate_firm && (
                                 <span className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-content">
@@ -216,13 +225,15 @@ export function GridCard({
                                 </span>
                             )}
                         </div>
-                    </div>
-                )}
+                    ) : (
+                        <p className="text-sm text-base-content/30 italic">No partnerships</p>
+                    )}
+                </div>
             </div>
 
             {/* Footer: actions */}
             <div
-                className="mt-auto flex items-center justify-between gap-3 px-6 py-4 border-t border-base-200"
+                className="mt-auto flex items-center justify-between gap-3 px-6 py-4 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
                 <Link
@@ -242,6 +253,6 @@ export function GridCard({
                     }}
                 />
             </div>
-        </div>
+        </article>
     );
 }

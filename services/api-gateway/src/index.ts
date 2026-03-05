@@ -457,6 +457,11 @@ async function main() {
             return;
         }
 
+        // Skip auth for public firm invitation preview
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/firm-invitations/') && request.url.endsWith('/preview')) {
+            return;
+        }
+
         // Skip auth for public gamification endpoints (badges, XP, leaderboards)
         // These use optionalAuth() at the route level — try auth if present, don't fail if missing
         if (request.method === 'GET' && (

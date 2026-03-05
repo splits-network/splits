@@ -8,8 +8,9 @@ import { useToast } from "@/lib/toast-context";
 import { ModalPortal, ButtonLoading } from "@splits-network/shared-ui";
 import type { Firm, FirmMember } from "../../types";
 import { formatCurrency, formatDate } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { firmStatusBadgeColor } from "../shared/status-color";
 import { formatStatus, memberCountDisplay } from "../shared/helpers";
+import { BaselBadge } from "@splits-network/basel-ui";
 import TransferOwnershipModal from "../modals/transfer-ownership-modal";
 import { FirmProfileWizard } from "../modals/firm-profile-wizard";
 
@@ -73,11 +74,9 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
                         </p>
-                        <span
-                            className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(firm.status)}`}
-                        >
+                        <BaselBadge color={firmStatusBadgeColor(firm.status)} variant="soft" size="sm">
                             {formatStatus(firm.status)}
-                        </span>
+                        </BaselBadge>
                     </div>
                     <div className="bg-base-100 p-4">
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">

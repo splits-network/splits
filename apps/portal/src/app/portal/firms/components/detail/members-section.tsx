@@ -8,7 +8,8 @@ import { BaselConfirmModal, BaselEmptyState } from "@splits-network/basel-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Firm, FirmMember, FirmInvitation } from "../../types";
 import { formatMemberRole, formatMemberStatus, formatDate } from "../../types";
-import { memberRoleColor, memberStatusColor, invitationStatusColor } from "../shared/status-color";
+import { memberRoleBadgeColor, memberStatusBadgeColor, invitationStatusBadgeColor } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import { firmInitials } from "../shared/helpers";
 import { InviteMemberModal } from "../modals/invite-member-modal";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
@@ -180,18 +181,14 @@ export function MembersSection({
                                 </div>
 
                                 {/* Role badge */}
-                                <span
-                                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberRoleColor(member.role)}`}
-                                >
+                                <BaselBadge color={memberRoleBadgeColor(member.role)} variant="soft" size="sm">
                                     {formatMemberRole(member.role)}
-                                </span>
+                                </BaselBadge>
 
                                 {/* Status badge */}
-                                <span
-                                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberStatusColor(member.status)}`}
-                                >
+                                <BaselBadge color={memberStatusBadgeColor(member.status)} variant="soft" size="sm">
                                     {formatMemberStatus(member.status)}
-                                </span>
+                                </BaselBadge>
 
                                 {/* Remove button (non-owner only) */}
                                 {member.role !== "owner" && (
@@ -258,21 +255,13 @@ export function MembersSection({
                                         </p>
                                     </div>
 
-                                    <span
-                                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberRoleColor(invitation.role)}`}
-                                    >
+                                    <BaselBadge color={memberRoleBadgeColor(invitation.role)} variant="soft" size="sm">
                                         {formatMemberRole(invitation.role)}
-                                    </span>
+                                    </BaselBadge>
 
-                                    <span
-                                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${
-                                            expired
-                                                ? invitationStatusColor("expired")
-                                                : invitationStatusColor("pending")
-                                        }`}
-                                    >
+                                    <BaselBadge color={expired ? invitationStatusBadgeColor("expired") : invitationStatusBadgeColor("pending")} variant="soft" size="sm">
                                         {expired ? "Expired" : "Pending"}
-                                    </span>
+                                    </BaselBadge>
 
                                     <button
                                         className="btn btn-ghost btn-xs"
@@ -331,17 +320,13 @@ export function MembersSection({
                                         </p>
                                     </div>
 
-                                    <span
-                                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${memberRoleColor(invitation.role)}`}
-                                    >
+                                    <BaselBadge color={memberRoleBadgeColor(invitation.role)} variant="soft" size="sm">
                                         {formatMemberRole(invitation.role)}
-                                    </span>
+                                    </BaselBadge>
 
-                                    <span
-                                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${invitationStatusColor(invitation.status)}`}
-                                    >
+                                    <BaselBadge color={invitationStatusBadgeColor(invitation.status)} variant="soft" size="sm">
                                         {invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}
-                                    </span>
+                                    </BaselBadge>
                                 </div>
                             );
                         })}

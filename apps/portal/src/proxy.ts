@@ -24,6 +24,7 @@ export default clerkMiddleware(async (auth, request) => {
         pathname.startsWith('/sign-in') ||
         pathname.startsWith('/sso-callback') ||
         pathname.startsWith('/accept-invitation') ||
+        pathname.startsWith('/firms/invitations') ||
         pathname.startsWith('/api/v2/plans') ||
         pathname.startsWith('/api/v2/jobs') ||
         pathname.startsWith('/api/v2/recruiters') ||
@@ -51,6 +52,7 @@ export const config = {
         '/portal/(.*)',     // Main authenticated portal
         '/onboarding(.*)',  // Full-page onboarding wizard
         '/accept-invitation(.*)', // Invitation acceptance
+        '/firms/invitations/(.*)', // Firm invitation acceptance
         //'/join(.*)', // Join platform (handled conditionally in page)
 
         // V2 API routes (authentication handled conditionally in middleware)

@@ -2,7 +2,7 @@
 
 import type { Firm } from "../../types";
 import { MobileDetailOverlay } from "@/components/standard-lists";
-import { FirmDetailLoader } from "../shared/firm-detail";
+import { FirmDetailLoader } from "../shared/firm-detail-loader";
 import { SplitItem } from "./split-item";
 
 export function SplitView({

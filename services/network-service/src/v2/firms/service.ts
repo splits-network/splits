@@ -323,6 +323,80 @@ export class FirmServiceV2 {
         return invitation;
     }
 
+    // ── Firm Invitation Acceptance (public + authenticated) ──
+
+    async getFirmInvitationPreview(token: string): Promise<any> {
+        const invitation = await this.repository.findFirmInvitationByToken(token);
+        if (!invitation) {
+            throw { statusCode: 404, message: 'Invitation not found' };
+        }
+
+        return {
+            id: invitation.id,
+            organization_name: invitation.firm?.name || null,
+            organization_slug: invitation.firm?.slug || null,
+            role: invitation.role,
+            status: invitation.status,
+            expires_at: invitation.expires_at,
+        };
+    }
+
+    async acceptFirmInvitation(
+        token: string,
+        clerkUserId: string,
+        userEmail: string
+    ): Promise<void> {
+        const invitation = await this.repository.findFirmInvitationByToken(token);
+        if (!invitation) {
+            throw { statusCode: 404, message: 'Invitation not found' };
+        }
+
+        if (invitation.status !== 'pending') {
+            throw { statusCode: 400, message: 'Invitation already used or revoked' };
+        }
+
+        if (new Date(invitation.expires_at) < new Date()) {
+            throw { statusCode: 400, message: 'Invitation has expired' };
+        }
+
+        if (userEmail.toLowerCase() !== invitation.email.toLowerCase()) {
+            throw { statusCode: 403, message: 'Email does not match invitation' };
+        }
+
+        // Resolve clerk user to internal user, then to recruiter
+        const internalUserId = await this.repository.resolveInternalUserId(clerkUserId);
+        const recruiter = await this.repository.getRecruiterByUserId(internalUserId);
+        if (!recruiter) {
+            throw { statusCode: 400, message: 'You must have a recruiter profile to join a firm' };
+        }
+
+        // Check if already a member
+        const existingMember = await this.repository.findFirmMemberByRecruiterId(
+            invitation.firm_id,
+            recruiter.id
+        );
+        if (existingMember) {
+            throw { statusCode: 409, message: 'You are already a member of this firm' };
+        }
+
+        // Create firm member and mark invitation accepted
+        await this.repository.createFirmMemberFromInvitation(
+            invitation.firm_id,
+            recruiter.id,
+            invitation.role
+        );
+
+        await this.repository.acceptFirmInvitation(invitation.id);
+
+        await this.eventPublisher.publish('firm.invitation.accepted', {
+            firmId: invitation.firm_id,
+            invitationId: invitation.id,
+            recruiterId: recruiter.id,
+            role: invitation.role,
+            acceptedBy: clerkUserId,
+        });
+    }
+
     // ── Public (unauthenticated) ──
 
     async getPublicFirms(filters: PublicFirmFilters): Promise<PaginationResponse<any>> {

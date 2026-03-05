@@ -421,6 +421,53 @@ export class FirmRepository {
         return data;
     }
 
+    async findFirmInvitationByToken(token: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('firm_invitations')
+            .select(`
+                id, firm_id, email, role, status, token, expires_at, created_at,
+                firm:firms!inner(id, name, slug)
+            `)
+            .eq('token', token)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async acceptFirmInvitation(invitationId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('firm_invitations')
+            .update({
+                status: 'accepted',
+                accepted_at: new Date().toISOString(),
+            })
+            .eq('id', invitationId);
+
+        if (error) throw error;
+    }
+
+    async createFirmMemberFromInvitation(
+        firmId: string,
+        recruiterId: string,
+        role: string
+    ): Promise<any> {
+        const { data, error } = await this.supabase
+            .from('firm_members')
+            .insert({
+                firm_id: firmId,
+                recruiter_id: recruiterId,
+                role,
+                status: 'active',
+                joined_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
     async getRecruiterByUserId(userId: string): Promise<{ id: string; user_id: string } | null> {
         const { data, error } = await this.supabase
             .from('recruiters')

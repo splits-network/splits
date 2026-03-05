@@ -221,6 +221,41 @@ export function registerFirmRoutes(
         }
     });
 
+    // ── Firm Invitation Acceptance (public + authenticated) ──
+
+    // PREVIEW invitation (public, no auth)
+    app.get('/api/v2/firm-invitations/:token/preview', async (request, reply) => {
+        try {
+            const { token } = request.params as { token: string };
+            const preview = await config.firmService.getFirmInvitationPreview(token);
+            return reply.send({ data: preview });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Internal server error' });
+        }
+    });
+
+    // ACCEPT invitation (requires auth)
+    app.post('/api/v2/firm-invitations/:token/accept', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { token } = request.params as { token: string };
+            const body = request.body as { user_email: string };
+
+            if (!body.user_email) {
+                return reply.code(400).send({ error: 'user_email is required' });
+            }
+
+            await config.firmService.acceptFirmInvitation(token, clerkUserId, body.user_email);
+            return reply.send({ success: true });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Internal server error' });
+        }
+    });
+
     // ── Invitations ──
 
     // LIST invitations
