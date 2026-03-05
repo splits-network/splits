@@ -115,9 +115,9 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
         pendingBalance: 0,
     });
 
-    const fetchStatus = useCallback(async () => {
+    const fetchStatus = useCallback(async (silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) setLoading(true);
             setError(null);
 
             const token = await getToken();
@@ -159,7 +159,7 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
                 setError(err?.message || "Failed to load payout status");
             }
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [firmId]);
@@ -188,7 +188,7 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
 
         const api = createAuthenticatedClient(token);
         await api.patch(`/firm-stripe-connect/${firmId}/account`, data);
-        await fetchStatus();
+        await fetchStatus(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [firmId, fetchStatus]);
 
@@ -198,7 +198,7 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
 
         const api = createAuthenticatedClient(token);
         await api.post(`/firm-stripe-connect/${firmId}/bank-account`, data);
-        await fetchStatus();
+        await fetchStatus(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [firmId, fetchStatus]);
 
@@ -208,7 +208,7 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
 
         const api = createAuthenticatedClient(token);
         const response: any = await api.post(`/firm-stripe-connect/${firmId}/accept-tos`);
-        await fetchStatus();
+        await fetchStatus(true);
         return {
             needs_identity_verification: !!response?.data?.needs_identity_verification,
         };

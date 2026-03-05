@@ -2,59 +2,85 @@
 
 import { useState, useCallback } from "react";
 import { useUser } from "@clerk/nextjs";
-import type { FirmConnectStatusState, UpdateFirmDetailsPayload } from "@/hooks/use-firm-connect-status";
-import { BaselAlertBox, BaselWizardModal } from "@splits-network/basel-ui";
-import { IdentityVerificationView, WIZARD_STEPS } from "./firm-connect-views";
 import {
-    CompanyRepStep,
+    type StripeConnectStatusState,
+    type UpdateDetailsPayload,
+} from "@/hooks/use-stripe-connect-status";
+import { ModalPortal } from "@splits-network/shared-ui";
+import { BaselAlertBox, BaselWizardModal } from "@splits-network/basel-ui";
+import {
+    type PersonalInfo,
+    type AddressInfo,
+    type BankInfo,
+    WIZARD_STEPS,
+} from "./connect-wizard-types";
+import {
+    PersonalInfoStep,
     AddressStep,
     BankAccountStep,
     ReviewStep,
-    type CompanyInfo,
-    type RepresentativeInfo,
-    type AddressInfo,
-    type BankInfo,
-} from "./firm-connect-steps";
+} from "./connect-wizard-steps";
 
-export function FirmConnectWizard({
+/* ─── Types ──────────────────────────────────────────────────────────────── */
+
+interface EditConnectModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    /** Pre-loaded connect status from parent — no hooks, no routing */
+    connectStatus: StripeConnectStatusState;
+}
+
+/* ─── Component ─────────────────────────────────────────────────────────── */
+
+export function EditConnectModal({ isOpen, onClose, connectStatus }: EditConnectModalProps) {
+    return (
+        <ModalPortal>
+            {isOpen && (
+                <EditWizard
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    connectStatus={connectStatus}
+                />
+            )}
+        </ModalPortal>
+    );
+}
+
+/* ─── Edit Wizard ───────────────────────────────────────────────────────── */
+
+function EditWizard({
     isOpen,
     onClose,
     connectStatus,
-    firmName,
 }: {
     isOpen: boolean;
     onClose: () => void;
-    connectStatus: FirmConnectStatusState;
-    firmName?: string;
+    connectStatus: StripeConnectStatusState;
 }) {
     const { user } = useUser();
     const [currentStep, setCurrentStep] = useState(0);
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
-    const [showVerification, setShowVerification] = useState(false);
 
-    const [company, setCompany] = useState<CompanyInfo>({
-        companyName: firmName || "",
-        companyPhone: "",
-        companyTaxId: "",
-    });
+    const ind = connectStatus.individual;
 
-    const [representative, setRepresentative] = useState<RepresentativeInfo>({
-        firstName: user?.firstName || "",
-        lastName: user?.lastName || "",
-        email: user?.primaryEmailAddress?.emailAddress || "",
-        phone: user?.primaryPhoneNumber?.phoneNumber || "",
-        dobMonth: "",
-        dobDay: "",
-        dobYear: "",
+    // Pre-populate from Stripe individual data, fall back to Clerk user
+    const [personal, setPersonal] = useState<PersonalInfo>({
+        firstName: ind?.first_name || user?.firstName || "",
+        lastName: ind?.last_name || user?.lastName || "",
+        email: ind?.email || user?.primaryEmailAddress?.emailAddress || "",
+        phone: ind?.phone || user?.primaryPhoneNumber?.phoneNumber || "",
+        dobMonth: ind?.dob?.month ? String(ind.dob.month) : "",
+        dobDay: ind?.dob?.day ? String(ind.dob.day) : "",
+        dobYear: ind?.dob?.year ? String(ind.dob.year) : "",
         ssnLast4: "",
     });
 
     const [address, setAddress] = useState<AddressInfo>({
-        line1: "",
-        city: "",
-        state: "",
-        postalCode: "",
+        line1: ind?.address?.line1 || "",
+        city: ind?.address?.city || "",
+        state: ind?.address?.state || "",
+        postalCode: ind?.address?.postal_code || "",
     });
 
     const [bank, setBank] = useState<BankInfo>({
@@ -67,26 +93,29 @@ export function FirmConnectWizard({
     const [tosAccepted, setTosAccepted] = useState(false);
 
     const effectiveHolderName =
-        bank.accountHolderName || company.companyName || `${representative.firstName} ${representative.lastName}`.trim();
+        bank.accountHolderName ||
+        `${personal.firstName} ${personal.lastName}`.trim();
 
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const ssnAlreadyProvided = !!ind?.ssn_last_4_provided;
 
     const validateStep = useCallback(
         (step: number): boolean => {
             const newErrors: Record<string, string> = {};
 
             if (step === 0) {
-                if (!representative.firstName.trim()) newErrors.firstName = "First name is required";
-                if (!representative.lastName.trim()) newErrors.lastName = "Last name is required";
-                if (!representative.email.trim()) newErrors.email = "Email is required";
-                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(representative.email))
+                if (!personal.firstName.trim()) newErrors.firstName = "First name is required";
+                if (!personal.lastName.trim()) newErrors.lastName = "Last name is required";
+                if (!personal.email.trim()) newErrors.email = "Email is required";
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personal.email))
                     newErrors.email = "Invalid email address";
-                if (!representative.phone.trim()) newErrors.phone = "Phone number is required";
-                if (!representative.dobMonth) newErrors.dobMonth = "Month is required";
-                if (!representative.dobDay) newErrors.dobDay = "Day is required";
-                if (!representative.dobYear) newErrors.dobYear = "Year is required";
-                if (!representative.ssnLast4.trim()) newErrors.ssnLast4 = "SSN last 4 is required";
-                else if (!/^\d{4}$/.test(representative.ssnLast4))
+                if (!personal.phone.trim()) newErrors.phone = "Phone number is required";
+                if (!personal.dobMonth) newErrors.dobMonth = "Month is required";
+                if (!personal.dobDay) newErrors.dobDay = "Day is required";
+                if (!personal.dobYear) newErrors.dobYear = "Year is required";
+                if (!personal.ssnLast4.trim() && !ssnAlreadyProvided)
+                    newErrors.ssnLast4 = "SSN last 4 is required";
+                else if (personal.ssnLast4.trim() && !/^\d{4}$/.test(personal.ssnLast4))
                     newErrors.ssnLast4 = "Must be exactly 4 digits";
             }
 
@@ -105,7 +134,8 @@ export function FirmConnectWizard({
                 if (!bank.routingNumber.trim()) newErrors.routingNumber = "Routing number is required";
                 else if (!/^\d{9}$/.test(bank.routingNumber))
                     newErrors.routingNumber = "Must be exactly 9 digits";
-                if (!bank.accountNumber.trim()) newErrors.accountNumber = "Account number is required";
+                if (!bank.accountNumber.trim())
+                    newErrors.accountNumber = "Account number is required";
                 if (!bank.confirmAccountNumber.trim())
                     newErrors.confirmAccountNumber = "Please confirm account number";
                 else if (bank.accountNumber !== bank.confirmAccountNumber)
@@ -119,7 +149,7 @@ export function FirmConnectWizard({
             setErrors(newErrors);
             return Object.keys(newErrors).length === 0;
         },
-        [representative, address, bank, effectiveHolderName, tosAccepted]
+        [personal, address, bank, effectiveHolderName, tosAccepted, ssnAlreadyProvided]
     );
 
     const handleNext = () => {
@@ -141,20 +171,18 @@ export function FirmConnectWizard({
         setSubmitError(null);
 
         try {
-            const detailsPayload: UpdateFirmDetailsPayload = {
-                company_name: company.companyName,
-                company_phone: company.companyPhone || undefined,
-                company_tax_id: company.companyTaxId || undefined,
-                first_name: representative.firstName,
-                last_name: representative.lastName,
-                email: representative.email,
-                phone: representative.phone,
+            // 1. Update personal details + address
+            const detailsPayload: UpdateDetailsPayload = {
+                first_name: personal.firstName,
+                last_name: personal.lastName,
+                email: personal.email,
+                phone: personal.phone,
                 dob: {
-                    month: parseInt(representative.dobMonth),
-                    day: parseInt(representative.dobDay),
-                    year: parseInt(representative.dobYear),
+                    month: parseInt(personal.dobMonth),
+                    day: parseInt(personal.dobDay),
+                    year: parseInt(personal.dobYear),
                 },
-                ssn_last_4: representative.ssnLast4,
+                ssn_last_4: personal.ssnLast4 || "",
                 address: {
                     line1: address.line1,
                     city: address.city,
@@ -164,6 +192,7 @@ export function FirmConnectWizard({
             };
             await connectStatus.updateDetails(detailsPayload);
 
+            // 2. Add bank account (tokenized via Stripe.js)
             const { loadStripe } = await import("@stripe/stripe-js");
             const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
             if (!publishableKey) throw new Error("Stripe publishable key not configured");
@@ -178,44 +207,33 @@ export function FirmConnectWizard({
                     routing_number: bank.routingNumber,
                     account_number: bank.accountNumber,
                     account_holder_name: effectiveHolderName,
-                    account_holder_type: "company",
+                    account_holder_type: "individual",
                 } as any,
             );
 
             if (tokenError || !bankToken) {
-                throw new Error(tokenError?.message || "Failed to verify bank details. Please check your information and try again.");
+                throw new Error(tokenError?.message || "Failed to tokenize bank details");
             }
 
             await connectStatus.addBankAccount({ token: bankToken.id });
 
-            const tosResult = await connectStatus.acceptTos();
+            // 3. Accept TOS
+            await connectStatus.acceptTos();
 
-            if (tosResult.needs_identity_verification) {
-                setShowVerification(true);
-            }
+            // Done — close the modal
+            onClose();
         } catch (err: any) {
             setSubmitError(err?.message || "Something went wrong. Please try again.");
-            setCurrentStep(2);
         } finally {
             setSubmitting(false);
         }
     };
 
-    if (showVerification) {
-        return (
-            <IdentityVerificationView
-                isOpen={isOpen}
-                onClose={onClose}
-                connectStatus={connectStatus}
-            />
-        );
-    }
-
     return (
         <BaselWizardModal
             isOpen={isOpen}
             onClose={onClose}
-            title="Set Up Firm Payouts"
+            title="Edit Payout Details"
             icon="fa-building-columns"
             steps={WIZARD_STEPS}
             currentStep={currentStep}
@@ -224,8 +242,8 @@ export function FirmConnectWizard({
             onSubmit={handleSubmit}
             submitting={submitting}
             nextDisabled={false}
-            submitLabel="Submit & Verify"
-            submittingLabel="Submitting..."
+            submitLabel="Save Changes"
+            submittingLabel="Saving..."
             maxWidth="max-w-2xl"
         >
             {submitError && (
@@ -235,12 +253,11 @@ export function FirmConnectWizard({
             )}
 
             {currentStep === 0 && (
-                <CompanyRepStep
-                    company={company}
-                    representative={representative}
-                    onCompanyChange={setCompany}
-                    onRepChange={setRepresentative}
+                <PersonalInfoStep
+                    data={personal}
+                    onChange={setPersonal}
                     errors={errors}
+                    ssnAlreadyProvided={ssnAlreadyProvided}
                 />
             )}
 
@@ -258,13 +275,13 @@ export function FirmConnectWizard({
                     onChange={setBank}
                     holderName={effectiveHolderName}
                     errors={errors}
+                    existingBank={connectStatus.bankAccount}
                 />
             )}
 
             {currentStep === 3 && (
                 <ReviewStep
-                    company={company}
-                    representative={representative}
+                    personal={personal}
                     address={address}
                     bank={bank}
                     holderName={effectiveHolderName}
