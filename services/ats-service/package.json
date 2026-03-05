@@ -12,7 +12,8 @@
         "test": "vitest",
         "clean": "rm -rf dist *.tsbuildinfo",
         "job:complete-expired-guarantees": "node dist/jobs/complete-expired-guarantees.js",
-        "job:backfill-guarantee-expires": "node dist/jobs/backfill-guarantee-expires.js"
+        "job:backfill-guarantee-expires": "node dist/jobs/backfill-guarantee-expires.js",
+        "job:auto-transition-job-statuses": "node dist/jobs/auto-transition-job-statuses.js"
     },
     "dependencies": {
         "@fastify/swagger": "^9.5.0",

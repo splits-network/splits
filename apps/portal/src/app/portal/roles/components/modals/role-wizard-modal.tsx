@@ -32,7 +32,9 @@ const INITIAL_FORM: FormData = {
     company_id: "",
     location: "",
     department: "",
-    status: "active",
+    status: "draft",
+    activates_at: "",
+    closes_at: "",
     salary_min: "",
     salary_max: "",
     show_salary_range: true,
@@ -84,7 +86,7 @@ export default function RoleWizardModal({
     const [roleSource, setRoleSource] = useState<"company" | "firm">("company");
     const [formData, setFormData] = useState<FormData>({
         ...INITIAL_FORM,
-        status: isRecruiter ? "pending" : "active",
+        status: "draft",
     });
 
     // Derived state
@@ -129,7 +131,9 @@ export default function RoleWizardModal({
                 const job = response.data;
                 setFormData({
                     title: job.title || "", company_id: job.company_id || "", location: job.location || "",
-                    department: job.department || "", status: isRecruiter ? "pending" : (job.status || "active"),
+                    department: job.department || "", status: job.status || "draft",
+                    activates_at: job.activates_at ? new Date(job.activates_at).toISOString().slice(0, 16) : "",
+                    closes_at: job.closes_at ? new Date(job.closes_at).toISOString().slice(0, 16) : "",
                     salary_min: job.salary_min?.toString() || "", salary_max: job.salary_max?.toString() || "",
                     show_salary_range: job.show_salary_range ?? true, fee_percentage: job.fee_percentage || 20,
                     guarantee_days: job.guarantee_days || 90, employment_type: job.employment_type || "full_time",
@@ -242,7 +246,7 @@ export default function RoleWizardModal({
             setCurrentStep(0);
             setError(null);
             setRoleSource("company");
-            setFormData({ ...INITIAL_FORM, status: isRecruiter ? "pending" : "active" });
+            setFormData({ ...INITIAL_FORM, status: "draft" });
         }
     }, [isOpen, isRecruiter]);
 
@@ -270,6 +274,7 @@ export default function RoleWizardModal({
             if (!formData.title.trim()) { setError("A job title is required to continue."); return; }
             if (!formData.company_id && !isOffPlatform) { setError("Select a company to continue."); return; }
             if (isOffPlatform && !formData.source_firm_id) { setError("Select a firm to continue."); return; }
+            if (formData.status === "early" && !formData.activates_at) { setError("An activation date is required for Early Access status."); return; }
         }
         setError(null);
         setCurrentStep((prev) => Math.min(prev + 1, WIZARD_STEPS.length - 1));
@@ -316,6 +321,8 @@ export default function RoleWizardModal({
             } else {
                 payload.company_id = formData.company_id;
             }
+            if (formData.activates_at) payload.activates_at = new Date(formData.activates_at).toISOString();
+            if (formData.closes_at) payload.closes_at = new Date(formData.closes_at).toISOString();
             Object.assign(payload, {
                 status: formData.status, employment_type: formData.employment_type,
                 open_to_relocation: formData.open_to_relocation, show_salary_range: formData.show_salary_range,

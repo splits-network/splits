@@ -138,7 +138,11 @@ export const COMMUTE_TYPES = [
 ] as const;
 
 export const JOB_STATUSES = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'early', label: 'Early Access' },
   { value: 'active', label: 'Active' },
+  { value: 'priority', label: 'Priority' },
   { value: 'paused', label: 'Paused' },
   { value: 'filled', label: 'Filled' },
   { value: 'closed', label: 'Closed' },

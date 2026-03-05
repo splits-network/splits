@@ -12,6 +12,7 @@ import { buildPaginationResponse } from '../shared/helpers';
 import { MatchRepository } from './repository';
 import { MatchListFilters } from './types';
 import { MatchingOrchestrator } from './matching-orchestrator';
+import { findCandidateRecruiter, verifyInvitePermission } from './invite-helpers';
 
 export class MatchService {
     constructor(
@@ -132,6 +133,94 @@ export class MatchService {
 
         const count = await this.orchestrator.runBatchCatchup(limit);
         return { message: `Batch refresh completed for ${count} jobs` };
+    }
+
+    async inviteCandidate(clerkUserId: string, matchId: string) {
+        const access = await this.requireAuth(clerkUserId);
+        const match = await this.repository.findById(matchId);
+        if (!match) throw new Error('Match not found');
+
+        await verifyInvitePermission(this.supabase, access, match);
+
+        if (match.invite_status === 'sent') {
+            throw new Error('Candidate already invited for this match');
+        }
+
+        const recruiterRelation = await findCandidateRecruiter(this.supabase, match.candidate_id);
+
+        const updated = await this.repository.updateMatch(matchId, {
+            invited_by: access.identityUserId,
+            invited_at: new Date().toISOString(),
+            invite_status: 'sent',
+        });
+
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('match.invited', {
+                match_id: matchId,
+                candidate_id: match.candidate_id,
+                job_id: match.job_id,
+                invited_by: access.identityUserId,
+                match_score: match.match_score,
+                match_factors: match.match_factors,
+                recruiter_id: recruiterRelation?.recruiter_id || null,
+                recruiter_user_id: recruiterRelation?.recruiter_user_id || null,
+                candidate_name: match.candidate?.full_name || null,
+                job_title: match.job?.title || null,
+                company_name: match.job?.companies?.name || null,
+            });
+        }
+
+        return {
+            ...updated,
+            recruiter_user_id: recruiterRelation?.recruiter_user_id || null,
+        };
+    }
+
+    async denyInvite(clerkUserId: string, matchId: string) {
+        const access = await this.requireAuth(clerkUserId);
+        const match = await this.repository.findById(matchId);
+        if (!match) throw new Error('Match not found');
+        if (match.invite_status !== 'sent') throw new Error('No pending invite');
+
+        // Recruiter can deny for represented candidate, candidate can deny for themselves
+        if (!access.isPlatformAdmin) {
+            const isCandidate = access.candidateId === match.candidate_id;
+            const isRecruiter = access.recruiterId
+                ? await this.isRecruiterForCandidate(access.recruiterId, match.candidate_id)
+                : false;
+            if (!isCandidate && !isRecruiter) throw new Error('Not authorized to deny this invite');
+        }
+
+        const updated = await this.repository.updateMatch(matchId, {
+            invite_status: 'denied',
+        });
+
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('match.invite_denied', {
+                match_id: matchId,
+                candidate_id: match.candidate_id,
+                job_id: match.job_id,
+                denied_by: access.identityUserId,
+                invited_by: match.invited_by,
+                job_title: match.job?.title || null,
+                company_name: match.job?.companies?.name || null,
+                candidate_name: match.candidate?.full_name || null,
+            });
+        }
+
+        return updated;
+    }
+
+    private async isRecruiterForCandidate(recruiterId: string, candidateId: string): Promise<boolean> {
+        const { data } = await this.supabase
+            .from('recruiter_candidates')
+            .select('id')
+            .eq('recruiter_id', recruiterId)
+            .eq('candidate_id', candidateId)
+            .eq('status', 'active')
+            .eq('consent_given', true)
+            .maybeSingle();
+        return !!data;
     }
 
     private async isRecruiterPartner(recruiterId: string): Promise<boolean> {

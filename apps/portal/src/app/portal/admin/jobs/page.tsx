@@ -18,7 +18,7 @@ import { AdminPageHeader, useAdminConfirm } from '../components';
 interface Job {
     id: string;
     title: string;
-    status: 'draft' | 'active' | 'paused' | 'closed' | 'filled';
+    status: 'draft' | 'pending' | 'early' | 'active' | 'priority' | 'paused' | 'filled' | 'closed';
     location?: string;
     salary_min?: number;
     salary_max?: number;
@@ -118,12 +118,18 @@ export default function JobsAdminPage() {
     function StatusBadge({ status }: { status: Job['status'] }) {
         const colors: Record<string, string> = {
             draft: 'badge-ghost',
+            pending: 'badge-warning',
+            early: 'badge-accent',
             active: 'badge-success',
+            priority: 'badge-primary',
             paused: 'badge-warning',
             closed: 'badge-neutral',
             filled: 'badge-info',
         };
-        return <span className={`badge ${colors[status] || 'badge-ghost'}`}>{status}</span>;
+        const labels: Record<string, string> = {
+            early: 'Early Access',
+        };
+        return <span className={`badge ${colors[status] || 'badge-ghost'}`}>{labels[status] || status}</span>;
     }
 
     function formatSalary(min?: number, max?: number) {
@@ -188,11 +194,14 @@ export default function JobsAdminPage() {
                     onChange={(e) => setFilters({ ...filters, status: e.target.value as JobFilters['status'] || undefined })}
                 >
                     <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="paused">Paused</option>
-                    <option value="closed">Closed</option>
-                    <option value="filled">Filled</option>
                     <option value="draft">Draft</option>
+                    <option value="pending">Pending</option>
+                    <option value="early">Early Access</option>
+                    <option value="active">Active</option>
+                    <option value="priority">Priority</option>
+                    <option value="paused">Paused</option>
+                    <option value="filled">Filled</option>
+                    <option value="closed">Closed</option>
                 </select>
             </div>
 
@@ -263,7 +272,7 @@ export default function JobsAdminPage() {
                                             </td>
                                             <td>
                                                 <div className="flex gap-1">
-                                                    {job.status === 'active' && (
+                                                    {['early', 'active', 'priority'].includes(job.status) && (
                                                         <>
                                                             <button
                                                                 onClick={() => updateJobStatus(job.id, 'paused')}
@@ -283,12 +292,12 @@ export default function JobsAdminPage() {
                                                             </button>
                                                         </>
                                                     )}
-                                                    {(job.status === 'paused' || job.status === 'closed') && (
+                                                    {['draft', 'pending', 'paused', 'closed', 'filled'].includes(job.status) && (
                                                         <button
                                                             onClick={() => updateJobStatus(job.id, 'active')}
                                                             className="btn btn-xs btn-ghost text-success"
                                                             disabled={updatingId === job.id}
-                                                            title="Reopen"
+                                                            title={job.status === 'draft' ? 'Publish' : 'Reopen'}
                                                         >
                                                             {updatingId === job.id ? (
                                                                 <span className="loading loading-spinner loading-xs"></span>

@@ -85,7 +85,11 @@ export function ControlsBar({
                         className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
                     >
                         <option value="">All Status</option>
+                        <option value="draft">Draft</option>
+                        <option value="pending">Pending</option>
+                        <option value="early">Early Access</option>
                         <option value="active">Active</option>
+                        <option value="priority">Priority</option>
                         <option value="paused">Paused</option>
                         <option value="filled">Filled</option>
                         <option value="closed">Closed</option>

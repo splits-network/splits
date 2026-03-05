@@ -1,5 +1,6 @@
 export type MatchTier = 'standard' | 'true';
 export type MatchStatus = 'active' | 'dismissed' | 'applied';
+export type InviteStatus = 'sent' | 'denied' | 'applied';
 
 export interface CandidateRoleMatch {
     id: string;
@@ -16,6 +17,9 @@ export interface CandidateRoleMatch {
     generated_by: string;
     dismissed_by: string | null;
     dismissed_at: string | null;
+    invited_by: string | null;
+    invited_at: string | null;
+    invite_status: InviteStatus | null;
     created_at: string;
     updated_at: string;
 }

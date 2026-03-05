@@ -68,7 +68,8 @@ export default function RoleActionsToolbar({
     const [isSharing, setIsSharing] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
-    const [pendingStatus, setPendingStatus] = useState<"active" | "paused" | "filled" | "closed" | null>(null);
+    const [pendingStatus, setPendingStatus] = useState<"draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed" | null>(null);
+    const [activatesAtInput, setActivatesAtInput] = useState("");
 
     /* ── Permissions ── */
 
@@ -93,23 +94,34 @@ export default function RoleActionsToolbar({
     /* ── Status Change ── */
 
     const handleStatusChange = (
-        newStatus: "active" | "paused" | "filled" | "closed",
+        newStatus: "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed",
     ) => {
+        if (newStatus === "early") setActivatesAtInput("");
         setPendingStatus(newStatus);
     };
 
     const confirmStatusChange = async () => {
         if (!pendingStatus) return;
         const newStatus = pendingStatus;
-        setPendingStatus(null);
 
+        // Validate activates_at for early status
+        if (newStatus === "early" && !activatesAtInput) {
+            toast.error("An activation date is required for Early Access status");
+            return;
+        }
+
+        setPendingStatus(null);
         setUpdatingStatus(true);
         setStatusAction(newStatus);
         try {
             const token = await getToken();
             if (!token) throw new Error("No auth token");
             const client = createAuthenticatedClient(token);
-            await client.patch(`/jobs/${job.id}`, { status: newStatus });
+            const payload: Record<string, any> = { status: newStatus };
+            if (newStatus === "early" && activatesAtInput) {
+                payload.activates_at = new Date(activatesAtInput).toISOString();
+            }
+            await client.patch(`/jobs/${job.id}`, payload);
             toast.success(`Role status updated to ${newStatus}!`);
             onUpdateItem?.(job.id, { status: newStatus });
             refresh();
@@ -191,9 +203,11 @@ export default function RoleActionsToolbar({
 
     /* ── Quick Status Button (icon-only) ── */
 
+    const isLiveStatus = ["early", "active", "priority"].includes(job.status);
+
     const renderQuickStatusButton = () => {
         if (variant !== "icon-only" || !actions.statusActions) return null;
-        if (job.status === "active") {
+        if (isLiveStatus) {
             return (
                 <Button
                     icon="fa-duotone fa-regular fa-pause"
@@ -219,6 +233,19 @@ export default function RoleActionsToolbar({
                 />
             );
         }
+        if (job.status === "draft") {
+            return (
+                <Button
+                    icon="fa-duotone fa-regular fa-play"
+                    variant="btn-success"
+                    size={size}
+                    onClick={() => handleStatusChange("active")}
+                    disabled={updatingStatus}
+                    loading={updatingStatus && statusAction === "active"}
+                    title="Publish Role"
+                />
+            );
+        }
         return null;
     };
 
@@ -239,46 +266,55 @@ export default function RoleActionsToolbar({
         return () => document.removeEventListener("click", handleClick);
     }, []);
 
+    type StatusItem = {
+        key: string;
+        status: "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed";
+        label: string;
+        icon: string;
+        btnClass: string;
+    };
+
     const statusItems = useMemo(() => {
-        const items: {
-            key: string;
-            status: "active" | "paused" | "filled" | "closed";
-            label: string;
-            icon: string;
-            btnClass: string;
-        }[] = [];
-        if (job.status !== "active")
-            items.push({
-                key: "activate",
-                status: "active",
-                label: "Activate",
-                icon: "fa-duotone fa-regular fa-play",
-                btnClass: "text-success",
-            });
-        if (job.status === "active")
-            items.push({
-                key: "pause",
-                status: "paused",
-                label: "Pause",
-                icon: "fa-duotone fa-regular fa-pause",
-                btnClass: "text-warning",
-            });
-        if (job.status !== "filled")
-            items.push({
-                key: "filled",
-                status: "filled",
-                label: "Mark Filled",
-                icon: "fa-duotone fa-regular fa-check",
-                btnClass: "text-info",
-            });
-        if (job.status !== "closed")
-            items.push({
-                key: "closed",
-                status: "closed",
-                label: "Close",
-                icon: "fa-duotone fa-regular fa-xmark",
-                btnClass: "text-error",
-            });
+        const items: StatusItem[] = [];
+
+        if (job.status === "draft") {
+            items.push({ key: "early", status: "early", label: "Publish (Early Access)", icon: "fa-duotone fa-regular fa-lock-open", btnClass: "text-accent" });
+            items.push({ key: "active", status: "active", label: "Publish Live", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            items.push({ key: "pending", status: "pending", label: "Submit for Approval", icon: "fa-duotone fa-regular fa-paper-plane", btnClass: "text-warning" });
+        }
+        if (job.status === "pending") {
+            items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
+        }
+        if (job.status === "early") {
+            items.push({ key: "active", status: "active", label: "Go Live", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            items.push({ key: "priority", status: "priority", label: "Promote", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
+            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
+        }
+        if (job.status === "active") {
+            items.push({ key: "priority", status: "priority", label: "Promote to Priority", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
+            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
+        }
+        if (job.status === "priority") {
+            items.push({ key: "active", status: "active", label: "Demote to Active", icon: "fa-duotone fa-regular fa-arrow-down", btnClass: "text-success" });
+            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
+        }
+        if (job.status === "paused") {
+            items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            items.push({ key: "priority", status: "priority", label: "Promote", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
+        }
+        if (job.status === "filled" || job.status === "closed") {
+            items.push({ key: "active", status: "active", label: "Reopen", icon: "fa-duotone fa-regular fa-rotate-left", btnClass: "text-success" });
+        }
+
+        // Terminal options — always available unless already in that state
+        if (job.status !== "filled" && !["draft", "pending"].includes(job.status)) {
+            items.push({ key: "filled", status: "filled", label: "Mark Filled", icon: "fa-duotone fa-regular fa-check", btnClass: "text-info" });
+        }
+        if (job.status !== "closed") {
+            items.push({ key: "closed", status: "closed", label: "Close", icon: "fa-duotone fa-regular fa-xmark", btnClass: "text-error" });
+        }
+
         return items;
     }, [job.status]);
 
@@ -339,9 +375,25 @@ export default function RoleActionsToolbar({
                 onConfirm={confirmStatusChange}
                 title="Change Role Status"
                 icon="fa-triangle-exclamation"
-                confirmColor={pendingStatus === "closed" ? "btn-error" : "btn-primary"}
+                confirmColor={pendingStatus === "closed" ? "btn-error" : pendingStatus === "paused" ? "btn-warning" : "btn-primary"}
             >
                 <p>Are you sure you want to change the status to {pendingStatus}?</p>
+                {pendingStatus === "early" && (
+                    <fieldset className="fieldset mt-4">
+                        <legend className="fieldset-legend">Activation Date</legend>
+                        <input
+                            type="datetime-local"
+                            className="input input-bordered w-full"
+                            value={activatesAtInput}
+                            onChange={(e) => setActivatesAtInput(e.target.value)}
+                            min={new Date().toISOString().slice(0, 16)}
+                            required
+                        />
+                        <p className="label text-sm text-base-content/60">
+                            The role will automatically go live on this date.
+                        </p>
+                    </fieldset>
+                )}
             </BaselConfirmModal>
             <ModalPortal>
                 {showEditModal && (
@@ -415,7 +467,7 @@ export default function RoleActionsToolbar({
             });
         }
         if (actions.statusActions) {
-            if (job.status === "active") {
+            if (isLiveStatus) {
                 speedDialActions.push({
                     key: "status",
                     icon: "fa-duotone fa-regular fa-pause",
@@ -430,6 +482,16 @@ export default function RoleActionsToolbar({
                     key: "status",
                     icon: "fa-duotone fa-regular fa-play",
                     label: "Activate Role",
+                    variant: "btn-success",
+                    loading: updatingStatus && statusAction === "active",
+                    disabled: updatingStatus,
+                    onClick: () => handleStatusChange("active"),
+                });
+            } else if (job.status === "draft") {
+                speedDialActions.push({
+                    key: "status",
+                    icon: "fa-duotone fa-regular fa-play",
+                    label: "Publish Role",
                     variant: "btn-success",
                     loading: updatingStatus && statusAction === "active",
                     disabled: updatingStatus,

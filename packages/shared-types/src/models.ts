@@ -174,7 +174,7 @@ export interface Company {
     updated_at: Date;
 }
 
-export type JobStatus = 'active' | 'paused' | 'filled' | 'closed';
+export type JobStatus = 'draft' | 'pending' | 'early' | 'active' | 'priority' | 'paused' | 'filled' | 'closed';
 
 export type EmploymentType = 'full_time' | 'contract' | 'temporary';
 
@@ -208,6 +208,8 @@ export interface Job {
     job_owner_recruiter_id?: string; // Job owner (Specs Owner role) - recruiter who posted job (recruiter-only, external postings only)
     source_firm_id?: string | null; // Recruiting firm that owns this job (firm jobs have no company_id)
     status: JobStatus;
+    activates_at?: string | null;
+    closes_at?: string | null;
     created_at: Date;
     updated_at: Date;
     company?: Company;  // Enriched data from service layer

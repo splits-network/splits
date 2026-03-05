@@ -25,6 +25,7 @@ import { SecurityEventConsumer } from './consumers/security/consumer';
 import { RecruiterCodesEventConsumer } from './consumers/recruiter-codes/consumer';
 import { DocumentsEventConsumer } from './consumers/documents/consumer';
 import { GamificationEventConsumer } from './consumers/gamification/consumer';
+import { MatchesEventConsumer } from './consumers/matches/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -61,6 +62,7 @@ export class DomainEventConsumer {
     private recruiterCodesConsumer: RecruiterCodesEventConsumer;
     private documentsConsumer: DocumentsEventConsumer;
     private gamificationConsumer: GamificationEventConsumer;
+    private matchesConsumer: MatchesEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -214,6 +216,14 @@ export class DomainEventConsumer {
         );
         this.gamificationConsumer = new GamificationEventConsumer(
             logger,
+            contactLookup,
+            dataLookup
+        );
+        this.matchesConsumer = new MatchesEventConsumer(
+            notificationService.matches,
+            logger,
+            portalUrl,
+            candidateWebsiteUrl,
             contactLookup,
             dataLookup
         );
@@ -388,6 +398,10 @@ export class DomainEventConsumer {
             // Health monitoring events
             await this.channel.bindQueue(this.queue, this.exchange, 'system.health.service_unhealthy');
             await this.channel.bindQueue(this.queue, this.exchange, 'system.health.service_recovered');
+
+            // Match invite events
+            await this.channel.bindQueue(this.queue, this.exchange, 'match.invited');
+            await this.channel.bindQueue(this.queue, this.exchange, 'match.invite_denied');
 
             // Gamification events
             await this.channel.bindQueue(this.queue, this.exchange, 'badge.awarded');
@@ -759,6 +773,14 @@ export class DomainEventConsumer {
                 break;
             case 'system.health.service_recovered':
                 await this.healthConsumer.handleServiceRecovered(event);
+                break;
+
+            // Matches domain — invite to apply
+            case 'match.invited':
+                await this.matchesConsumer.handleMatchInvited(event);
+                break;
+            case 'match.invite_denied':
+                await this.matchesConsumer.handleMatchInviteDenied(event);
                 break;
 
             // Gamification domain

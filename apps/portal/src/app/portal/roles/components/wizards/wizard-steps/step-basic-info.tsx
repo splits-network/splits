@@ -3,9 +3,13 @@
 import type { FormData, Company } from "./types";
 
 const STATUS_OPTIONS = [
+    { value: "draft", label: "Draft" },
     { value: "pending", label: "Pending" },
+    { value: "early", label: "Early Access" },
     { value: "active", label: "Active" },
+    { value: "priority", label: "Priority" },
     { value: "paused", label: "Paused" },
+    { value: "filled", label: "Filled" },
     { value: "closed", label: "Closed" },
 ];
 
@@ -171,26 +175,55 @@ export function StepBasicInfo({
                 </fieldset>
             </div>
 
-            <fieldset className="fieldset">
-                <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
-                    Status *
-                </legend>
-                <select
-                    className="select w-full"
-                    value={formData.status}
-                    onChange={(e) => onChange({ status: e.target.value as FormData["status"] })}
-                    disabled={isRecruiter}
-                >
-                    {STATUS_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                </select>
-                {isRecruiter && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
+                        Status *
+                    </legend>
+                    <select
+                        className="select w-full"
+                        value={formData.status}
+                        onChange={(e) => onChange({ status: e.target.value as FormData["status"] })}
+                    >
+                        {STATUS_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </select>
+                </fieldset>
+
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
+                        Activation Date{formData.status === "early" ? " *" : ""}
+                    </legend>
+                    <input
+                        type="datetime-local"
+                        className="input w-full"
+                        value={formData.activates_at}
+                        onChange={(e) => onChange({ activates_at: e.target.value })}
+                        min={new Date().toISOString().slice(0, 16)}
+                        required={formData.status === "early"}
+                    />
                     <p className="text-sm text-base-content/50 mt-1">
-                        Roles created by recruiters require company approval
+                        The role will automatically go live on this date.
                     </p>
-                )}
-            </fieldset>
+                </fieldset>
+
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
+                        Close Date
+                    </legend>
+                    <input
+                        type="datetime-local"
+                        className="input w-full"
+                        value={formData.closes_at}
+                        onChange={(e) => onChange({ closes_at: e.target.value })}
+                        min={new Date().toISOString().slice(0, 16)}
+                    />
+                    <p className="text-sm text-base-content/50 mt-1">
+                        Optional. The role will automatically close on this date.
+                    </p>
+                </fieldset>
+            </div>
         </div>
     );
 }

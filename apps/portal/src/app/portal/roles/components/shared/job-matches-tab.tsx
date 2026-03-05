@@ -1,31 +1,53 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { MatchScoreBadge } from "@/components/matches/match-score-badge";
+import { startChatConversation, sendChatMessage } from "@/lib/chat-start";
 import { TrueScoreUpsell } from "@/components/matches/true-score-upsell";
+import { MatchCard } from "./match-card";
+import { useMatchActions } from "../../hooks/use-match-actions";
 import type { EnrichedMatch } from "@splits-network/shared-types";
 import type { Job } from "../../types";
 
 /* ─── Helpers ──────────────────────────────────────────────────────────────── */
 
-function candidateInitials(match: EnrichedMatch): string {
-    const name = match.candidate?.full_name;
-    if (!name) return "?";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-}
-
-function candidateName(match: EnrichedMatch): string {
-    return match.candidate?.full_name || "Unknown Candidate";
+function buildInviteMessage(match: EnrichedMatch, job: Job): string {
+    const factors = match.match_factors;
+    const factorLines = [
+        factors.salary_overlap ? "Salary: Match" : "Salary: Mismatch",
+        factors.location_compatible
+            ? "Location: Compatible"
+            : "Location: Incompatible",
+        factors.job_level_match ? "Level: Match" : "Level: Mismatch",
+        `Skills: ${factors.skills_match_pct}% match`,
+    ];
+    return [
+        `Hi, we're interested in ${match.candidate?.full_name || "your candidate"} for the ${job.title} role (Match Score: ${Math.round(match.match_score)}%).`,
+        "",
+        "Key match factors:",
+        ...factorLines.map((f) => `- ${f}`),
+        "",
+        "Please review and submit the candidate if appropriate.",
+    ].join("\n");
 }
 
 /* ─── Component ────────────────────────────────────────────────────────────── */
 
-export function JobMatchesTab({ job, isPartner, isRecruiter }: { job: Job; isPartner: boolean; isRecruiter: boolean }) {
+export function JobMatchesTab({
+    job,
+    isPartner,
+    isRecruiter,
+}: {
+    job: Job;
+    isPartner: boolean;
+    isRecruiter: boolean;
+}) {
     const { getToken } = useAuth();
+    const { inviteCandidate, dismissMatch } = useMatchActions();
     const [matches, setMatches] = useState<EnrichedMatch[]>([]);
     const [loading, setLoading] = useState(true);
+    const [invitingId, setInvitingId] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -35,18 +57,20 @@ export function JobMatchesTab({ job, isPartner, isRecruiter }: { job: Job; isPar
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: EnrichedMatch[] }>("/matches", {
-                    params: {
-                        job_id: job.id,
-                        status: "active",
-                        sort_by: "match_score",
-                        sort_order: "desc",
-                        limit: 20,
+                const res = await client.get<{ data: EnrichedMatch[] }>(
+                    "/matches",
+                    {
+                        params: {
+                            job_id: job.id,
+                            status: "active",
+                            sort_by: "match_score",
+                            sort_order: "desc",
+                            limit: 20,
+                        },
                     },
-                });
-                if (!cancelled) {
+                );
+                if (!cancelled)
                     setMatches(Array.isArray(res.data) ? res.data : []);
-                }
             } catch {
                 // Gracefully handle errors
             } finally {
@@ -59,6 +83,61 @@ export function JobMatchesTab({ job, isPartner, isRecruiter }: { job: Job; isPar
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [job.id]);
+
+    const handleInvite = useCallback(
+        async (matchId: string) => {
+            setInvitingId(matchId);
+            try {
+                const result = await inviteCandidate(matchId);
+                const recruiterUserId = result?.data?.recruiter_user_id;
+
+                // Send chat message to recruiter if candidate is represented
+                if (recruiterUserId) {
+                    try {
+                        const match = matches.find((m) => m.id === matchId);
+                        const convId = await startChatConversation(
+                            getToken,
+                            recruiterUserId,
+                            { job_id: job.id },
+                        );
+                        if (match)
+                            await sendChatMessage(
+                                getToken,
+                                convId,
+                                buildInviteMessage(match, job),
+                            );
+                    } catch {
+                        // Chat is best-effort — invite already succeeded
+                    }
+                }
+
+                // Update local state
+                setMatches((prev) =>
+                    prev.map((m) =>
+                        m.id === matchId
+                            ? { ...m, invite_status: "sent" as const }
+                            : m,
+                    ),
+                );
+            } catch {
+                // Could show toast error
+            } finally {
+                setInvitingId(null);
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },
+        [matches, job],
+    );
+
+    const handleDismiss = useCallback(async (matchId: string) => {
+        try {
+            await dismissMatch(matchId);
+            setMatches((prev) => prev.filter((m) => m.id !== matchId));
+        } catch {
+            // Could show toast error
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (loading) {
         return (
@@ -78,45 +157,25 @@ export function JobMatchesTab({ job, isPartner, isRecruiter }: { job: Job; isPar
             {matches.length === 0 ? (
                 <div className="text-center py-12 text-base-content/40">
                     <i className="fa-duotone fa-regular fa-bullseye text-3xl mb-3 block" />
-                    <p className="text-sm font-semibold">No matched candidates yet</p>
+                    <p className="text-sm font-semibold">
+                        No matched candidates yet
+                    </p>
                 </div>
             ) : (
                 <>
                     <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
                         Matched Candidates
                     </h3>
-                    <div className="space-y-[2px] bg-base-300 max-h-[60vh] overflow-y-auto">
-                        {matches.map((match) => {
-                            const factors = match.match_factors;
-                            return (
-                                <div key={match.id} className="flex items-center gap-3 bg-base-100 p-4">
-                                    <div className="w-10 h-10 flex items-center justify-center bg-primary/10 border border-base-300 text-sm font-bold text-primary">
-                                        {candidateInitials(match)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-sm truncate">{candidateName(match)}</p>
-                                        <div className="flex flex-wrap gap-1 mt-1">
-                                            {factors.salary_overlap && (
-                                                <span className="badge badge-success badge-outline badge-sm">Salary</span>
-                                            )}
-                                            {factors.location_compatible && (
-                                                <span className="badge badge-success badge-outline badge-sm">Location</span>
-                                            )}
-                                            {factors.job_level_match && (
-                                                <span className="badge badge-success badge-outline badge-sm">Level</span>
-                                            )}
-                                            {!factors.salary_overlap && (
-                                                <span className="badge badge-error badge-outline badge-sm">Salary</span>
-                                            )}
-                                            {!factors.location_compatible && (
-                                                <span className="badge badge-error badge-outline badge-sm">Location</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <MatchScoreBadge score={match.match_score} size="sm" />
-                                </div>
-                            );
-                        })}
+                    <div className="space-y-[2px] bg-base-300">
+                        {matches.map((match) => (
+                            <MatchCard
+                                key={match.id}
+                                match={match}
+                                onInvite={handleInvite}
+                                onDismiss={handleDismiss}
+                                isInviting={invitingId === match.id}
+                            />
+                        ))}
                     </div>
                 </>
             )}

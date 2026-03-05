@@ -48,7 +48,11 @@ export function getApplicationStageClass(stage: string | null | undefined): stri
  */
 export function getJobStatusBadge(status: string): string {
     const styles: Record<string, string> = {
+        draft: 'badge-ghost',
+        pending: 'badge-warning',
+        early: 'badge-accent',
         active: 'badge-success',
+        priority: 'badge-primary',
         paused: 'badge-warning',
         filled: 'badge-info',
         closed: 'badge-neutral',
@@ -62,7 +66,11 @@ export function getJobStatusBadge(status: string): string {
  */
 export function getJobStatus(status: string): string {
     const labels: Record<string, string> = {
+        draft: 'Draft',
+        pending: 'Pending',
+        early: 'Early Access',
         active: 'Active',
+        priority: 'Priority',
         paused: 'Paused',
         filled: 'Filled',
         closed: 'Closed',

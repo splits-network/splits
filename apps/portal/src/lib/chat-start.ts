@@ -26,3 +26,19 @@ export async function startChatConversation(
     }
     return conversation.id as string;
 }
+
+export async function sendChatMessage(
+    getToken: () => Promise<string | null>,
+    conversationId: string,
+    body: string,
+): Promise<void> {
+    const token = await getToken();
+    if (!token) {
+        throw new Error("Not authenticated");
+    }
+    const client = createAuthenticatedClient(token);
+    await client.post(`/chat/conversations/${conversationId}/messages`, {
+        body,
+        clientMessageId: crypto.randomUUID(),
+    });
+}
