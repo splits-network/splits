@@ -10,7 +10,10 @@ import {
     memberCountDisplay,
 } from "../shared/helpers";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
 
 export function GridCard({
@@ -27,10 +30,10 @@ export function GridCard({
     const { getLevel } = useGamification();
     const firmLevel = firm.id ? getLevel(firm.id) : undefined;
     const initials = firmInitials(firm.name);
-    const location = [
-        firm.headquarters_city,
-        firm.headquarters_state,
-    ].filter(Boolean).join(", ") || null;
+    const location =
+        [firm.headquarters_city, firm.headquarters_state]
+            .filter(Boolean)
+            .join(", ") || null;
 
     const hasPartnerSignal = firm.candidate_firm || firm.company_firm;
 
@@ -67,9 +70,14 @@ export function GridCard({
                 {/* Kicker row: industries on left, status on right */}
                 <div className="flex items-center justify-between mb-3">
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 truncate mr-2">
-                        {(firm.industries || []).slice(0, 2).join(" · ") || "Recruiting Firm"}
+                        {(firm.industries || []).slice(0, 2).join(" · ") ||
+                            "Recruiting Firm"}
                     </p>
-                    <BaselBadge color={firmStatusBadgeColor(firm.status)} variant="soft" size="sm">
+                    <BaselBadge
+                        color={firmStatusBadgeColor(firm.status)}
+                        variant="soft"
+                        size="sm"
+                    >
                         {formatStatus(firm.status)}
                     </BaselBadge>
                 </div>
@@ -131,7 +139,9 @@ export function GridCard({
                 <div className="border-b border-base-300">
                     <div
                         className="grid divide-x divide-base-300"
-                        style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
+                        style={{
+                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                        }}
                     >
                         {stats.map((stat, i) => {
                             const iconStyles = [
@@ -141,8 +151,13 @@ export function GridCard({
                             ];
                             const iconStyle = iconStyles[i % iconStyles.length];
                             return (
-                                <div key={stat.label} className="flex items-center gap-2.5 px-3 py-4">
-                                    <div className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyle}`}>
+                                <div
+                                    key={stat.label}
+                                    className="flex items-center gap-2.5 px-3 py-4"
+                                >
+                                    <div
+                                        className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyle}`}
+                                    >
                                         <i className={`${stat.icon} text-xs`} />
                                     </div>
                                     <div>
@@ -167,11 +182,18 @@ export function GridCard({
                         </p>
                         {(firm.specialties || []).length > 0 ? (
                             <div className="flex flex-wrap gap-1.5">
-                                {(firm.specialties || []).slice(0, 4).map((spec) => (
-                                    <BaselBadge key={spec} color="primary" variant="soft" size="sm">
-                                        {spec}
-                                    </BaselBadge>
-                                ))}
+                                {(firm.specialties || [])
+                                    .slice(0, 4)
+                                    .map((spec) => (
+                                        <BaselBadge
+                                            key={spec}
+                                            color="primary"
+                                            variant="soft"
+                                            size="sm"
+                                        >
+                                            {spec}
+                                        </BaselBadge>
+                                    ))}
                                 {(firm.specialties || []).length > 4 && (
                                     <span className="px-2 py-0.5 text-xs font-bold text-base-content/40">
                                         +{(firm.specialties || []).length - 4}
@@ -179,7 +201,9 @@ export function GridCard({
                                 )}
                             </div>
                         ) : (
-                            <p className="text-sm text-base-content/30 italic">Not provided</p>
+                            <p className="text-sm text-base-content/30 italic">
+                                Not provided
+                            </p>
                         )}
                     </div>
                     <div>
@@ -188,11 +212,17 @@ export function GridCard({
                         </p>
                         {(firm.industries || []).length > 0 ? (
                             <div className="flex flex-wrap gap-1.5">
-                                {(firm.industries || []).slice(0, 3).map((ind) => (
-                                    <BaselBadge key={ind} variant="outline" size="sm">
-                                        {ind}
-                                    </BaselBadge>
-                                ))}
+                                {(firm.industries || [])
+                                    .slice(0, 3)
+                                    .map((ind) => (
+                                        <BaselBadge
+                                            key={ind}
+                                            variant="outline"
+                                            size="sm"
+                                        >
+                                            {ind}
+                                        </BaselBadge>
+                                    ))}
                                 {(firm.industries || []).length > 3 && (
                                     <span className="px-2 py-0.5 text-xs font-bold text-base-content/40">
                                         +{(firm.industries || []).length - 3}
@@ -200,7 +230,9 @@ export function GridCard({
                                 )}
                             </div>
                         ) : (
-                            <p className="text-sm text-base-content/30 italic">Not provided</p>
+                            <p className="text-sm text-base-content/30 italic">
+                                Not provided
+                            </p>
                         )}
                     </div>
                 </div>
@@ -226,7 +258,9 @@ export function GridCard({
                             )}
                         </div>
                     ) : (
-                        <p className="text-sm text-base-content/30 italic">No partnerships</p>
+                        <p className="text-sm text-base-content/30 italic">
+                            No partnerships
+                        </p>
                     )}
                 </div>
             </div>
@@ -237,7 +271,7 @@ export function GridCard({
                 onClick={(e) => e.stopPropagation()}
             >
                 <Link
-                    href={`/portal/firms/${firm.id}`}
+                    href={`/firms/${firm.slug}`}
                     className="btn btn-sm btn-link gap-1"
                 >
                     View Profile
