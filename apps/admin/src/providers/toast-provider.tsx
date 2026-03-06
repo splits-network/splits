@@ -65,7 +65,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         <ToastContext.Provider value={ctx}>
             {children}
             {toasts.length > 0 && (
-                <div className="toast toast-end toast-bottom z-50">
+                <div className="toast toast-end toast-bottom">
                     {toasts.map((toast) => (
                         <div
                             key={toast.id}

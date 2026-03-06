@@ -67,7 +67,7 @@ export function BaselHeader({
     return (
         <div
             ref={ref}
-            className={`${position} top-0 left-0 right-0 z-50 ${className || ""}`}
+            className={`${position} top-0 left-0 right-0 ${className || ""}`}
         >
             <header
                 className={`header-bar transition-all duration-300 ${

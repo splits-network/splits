@@ -35,7 +35,7 @@ export function Snackbar({
     return (
         <div
             className={[
-                'toast toast-bottom toast-center z-50',
+                'toast toast-bottom toast-center',
                 'transition-all duration-300',
                 visible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
                 className,
