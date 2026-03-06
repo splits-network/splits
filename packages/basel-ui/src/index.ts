@@ -156,6 +156,34 @@ export {
     useArticleAnimations,
 } from './content';
 
+// Animation presets, hooks, and utilities
+export {
+    easing,
+    duration,
+    stagger,
+    scrollTrigger,
+    fadeUp,
+    fadeIn,
+    scaleIn,
+    slideFromLeft,
+    slideFromRight,
+    popIn,
+    hoverLift,
+    hoverScale,
+    iconWiggle,
+    prefersReducedMotion,
+    getAnimationDuration,
+    createStagger,
+    useScrollFadeUp,
+    useScrollStagger,
+    useScrollScaleIn,
+    useParallax,
+    useScrollTimeline,
+    useAnimatedCounter,
+    initGsapDefaults,
+    GsapInit,
+} from './animations';
+
 // Consent components
 export {
     BaselCookieConsent,

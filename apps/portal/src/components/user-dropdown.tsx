@@ -10,8 +10,14 @@ import { UserDropdown as BaselUserDropdown } from "@splits-network/basel-ui";
 
 export function UserDropdown() {
     const { user } = useUser();
-    const { logout, isAdmin, isRecruiter, isCompanyUser, isCandidate, hasRole } =
-        useUserProfile();
+    const {
+        logout,
+        isAdmin,
+        isRecruiter,
+        isCompanyUser,
+        isCandidate,
+        hasRole,
+    } = useUserProfile();
     const router = useRouter();
 
     if (!user) return null;
@@ -24,7 +30,9 @@ export function UserDropdown() {
     const rawUserName =
         user.fullName || user.emailAddresses[0]?.emailAddress || "User";
     const userName =
-        rawUserName.length > 30 ? `${rawUserName.slice(0, 30)}...` : rawUserName;
+        rawUserName.length > 30
+            ? `${rawUserName.slice(0, 30)}...`
+            : rawUserName;
     const rawUserEmail = user.emailAddresses[0]?.emailAddress;
     const userEmail = rawUserEmail
         ? rawUserEmail.length > 30
@@ -82,7 +90,7 @@ export function UserDropdown() {
         if (isCompanyUser) {
             items.push({
                 href: "/portal/company/settings",
-                icon: "fa-duotone fa-regular fa-building-gear",
+                icon: "fa-duotone fa-regular fa-building",
                 label: "Company Settings",
                 description: "Manage your company",
             });

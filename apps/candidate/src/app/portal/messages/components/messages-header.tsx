@@ -29,7 +29,7 @@ export function MessagesHeader({
 
             const $ = (s: string) => headerRef.current!.querySelectorAll(s);
             const $1 = (s: string) => headerRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             tl.fromTo(
                 $1(".msg-kicker"),

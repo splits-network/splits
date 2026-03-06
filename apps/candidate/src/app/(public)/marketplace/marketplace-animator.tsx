@@ -35,7 +35,7 @@ export default function MarketplaceAnimator({
                 mainRef.current!.querySelector(sel);
 
             const tl = gsap.timeline({
-                defaults: { ease: "power3.out" },
+                defaults: { ease: "power3.out", clearProps: "transform" },
             });
 
             // Hero kicker

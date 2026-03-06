@@ -5,7 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "../shared/animation-utils";
+import { duration, easing, stagger } from "@splits-network/basel-ui";
 
 // Register plugins
 if (typeof window !== "undefined") {
@@ -33,7 +33,7 @@ export function HeroSection() {
             // ==========================================================================
             // ENTRANCE ANIMATION - Staggered reveal on page load
             // ==========================================================================
-            const entranceTl = gsap.timeline({ delay: 0.2 });
+            const entranceTl = gsap.timeline({ defaults: { clearProps: "transform" }, delay: 0.2 });
 
             // Headline - fade up with slight scale
             entranceTl.fromTo(

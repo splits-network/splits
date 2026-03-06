@@ -121,7 +121,7 @@ export default function FirmProfileClient({ firm }: FirmProfileClientProps) {
             const $1 = (sel: string) => pageRef.current!.querySelector(sel);
             const $ = (sel: string) => pageRef.current!.querySelectorAll(sel);
 
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             const avatar = $1(".firm-avatar");
             if (avatar) {

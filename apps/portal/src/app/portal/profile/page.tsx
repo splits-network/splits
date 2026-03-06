@@ -220,7 +220,7 @@ export default function ProfileBaselPage() {
 
             const $ = (s: string) => mainRef.current!.querySelectorAll(s);
             const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             const kicker = $1(".settings-kicker");
             if (kicker) {

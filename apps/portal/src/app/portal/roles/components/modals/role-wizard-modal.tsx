@@ -107,7 +107,7 @@ export default function RoleWizardModal({
         const backdrop = backdropRef.current;
         const box = containerRef.current;
         if (!backdrop || !box) return;
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
         tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 });
         tl.fromTo(box, { opacity: 0, y: 40, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, clearProps: "transform" }, "-=0.15");
     }, [isOpen]);
@@ -261,7 +261,7 @@ export default function RoleWizardModal({
         const backdrop = backdropRef.current;
         const box = containerRef.current;
         if (backdrop && box) {
-            const tl = gsap.timeline({ defaults: { ease: "power2.in" }, onComplete: onClose });
+            const tl = gsap.timeline({ defaults: { ease: "power2.in", clearProps: "transform" }, onComplete: onClose });
             tl.to(box, { opacity: 0, y: 30, scale: 0.97, duration: 0.25 });
             tl.to(backdrop, { opacity: 0, duration: 0.2 }, "-=0.1");
         } else {

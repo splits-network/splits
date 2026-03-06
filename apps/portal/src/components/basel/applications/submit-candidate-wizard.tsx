@@ -139,7 +139,7 @@ export default function BaselSubmitCandidateWizard({
         const box = containerRef.current;
         if (!backdrop || !box) return;
 
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
         tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 });
         tl.fromTo(
             box,
@@ -465,7 +465,7 @@ export default function BaselSubmitCandidateWizard({
 
         if (backdrop && box) {
             const tl = gsap.timeline({
-                defaults: { ease: "power2.in" },
+                defaults: { ease: "power2.in", clearProps: "transform" },
                 onComplete: onClose,
             });
             tl.to(box, { opacity: 0, y: 30, scale: 0.97, duration: 0.25 });

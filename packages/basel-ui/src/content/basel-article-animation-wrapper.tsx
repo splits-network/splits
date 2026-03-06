@@ -9,7 +9,7 @@
  */
 
 import { useRef } from 'react';
-import { useArticleAnimations } from './animations/use-article-animations';
+import { useArticleAnimations } from '../animations/use-article-animations';
 
 export interface BaselArticleAnimationWrapperProps {
     children: React.ReactNode;

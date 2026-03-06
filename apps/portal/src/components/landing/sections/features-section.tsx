@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { duration, easing, stagger } from '../shared/animation-utils';
+import { duration, easing, stagger } from '@splits-network/basel-ui';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);

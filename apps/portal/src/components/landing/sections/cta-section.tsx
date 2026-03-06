@@ -5,7 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { duration, easing } from "../shared/animation-utils";
+import { duration, easing } from "@splits-network/basel-ui";
 import { AuthenticatedCTAWrapper } from "@/components/auth/authenticated-cta-wrapper";
 
 if (typeof window !== "undefined") {

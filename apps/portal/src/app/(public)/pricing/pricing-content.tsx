@@ -125,7 +125,7 @@ export function PricingContent() {
                 containerRef.current!.querySelector(sel);
 
             // ═══ HERO ═══════════════════════════════════════════════════
-            const heroTl = gsap.timeline({ defaults: { ease: E.strong } });
+            const heroTl = gsap.timeline({ defaults: { ease: E.strong, clearProps: "transform" } });
 
             const heroKicker = $1(".hero-kicker");
             if (heroKicker) {

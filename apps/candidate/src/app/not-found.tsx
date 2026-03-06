@@ -28,7 +28,7 @@ export default function NotFound() {
             const $1 = (s: string) => mainRef.current!.querySelector(s);
 
             const tl = gsap.timeline({
-                defaults: { ease: "power3.out" },
+                defaults: { ease: "power3.out", clearProps: "transform" },
             });
 
             const kicker = $1(".nf-kicker");

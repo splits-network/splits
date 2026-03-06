@@ -83,7 +83,7 @@ export default function IntegrationsMarketplacePage() {
 
             const $ = (s: string) => containerRef.current!.querySelectorAll(s);
             const $1 = (s: string) => containerRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             const kicker = $1(".mkt-kicker");
             if (kicker)

@@ -31,7 +31,7 @@ export function StatusAnimator({ children }: { children: ReactNode }) {
             const $$ = (sel: string) => Array.from(c.querySelectorAll(sel));
 
             // Hero
-            const heroTl = gsap.timeline({ defaults: { ease: E.smooth } });
+            const heroTl = gsap.timeline({ defaults: { ease: E.smooth, clearProps: "transform" } });
 
             const heroBadge = $1(".bs-hero-badge");
             if (heroBadge) {

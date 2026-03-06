@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { duration, easing } from '@/components/landing/shared/animation-utils';
+import { duration, easing } from '@splits-network/basel-ui';
 import { useCalculator } from './use-calculator';
 import { useSplitsRates } from './use-splits-rates';
 import { FeeInput } from './fee-input';

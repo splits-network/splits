@@ -31,7 +31,7 @@ export default function LegalPageAnimations({ children }: { children: React.Reac
 
             /* ── HERO ─────────────────────────────────────────── */
             const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
+                defaults: { ease: "power3.out", clearProps: "transform" },
             });
 
             const heroKicker = $1(".hero-kicker");

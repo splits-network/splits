@@ -9,7 +9,7 @@ import {
     easing,
     stagger,
     prefersReducedMotion,
-} from "@/components/landing/shared/animation-utils";
+} from "@splits-network/basel-ui";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -104,7 +104,7 @@ export function InterviewPrepContent() {
             const description =
                 heroRef.current.querySelector(".hero-description");
 
-            const tl = gsap.timeline();
+            const tl = gsap.timeline({ defaults: { clearProps: "transform" } });
             if (icon)
                 tl.fromTo(
                     icon,
@@ -153,6 +153,7 @@ export function InterviewPrepContent() {
             const icons = tipsRef.current.querySelectorAll(".tip-icon");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: { trigger: tipsRef.current, start: "top 80%" },
             });
             if (heading)
@@ -207,6 +208,7 @@ export function InterviewPrepContent() {
                 questionsRef.current.querySelectorAll(".question-item");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: questionsRef.current,
                     start: "top 80%",
@@ -261,6 +263,7 @@ export function InterviewPrepContent() {
             const items = starRef.current.querySelectorAll(".star-item");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: { trigger: starRef.current, start: "top 80%" },
             });
             if (heading)

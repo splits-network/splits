@@ -1,11 +1,18 @@
 'use client';
 
+/**
+ * Shared GSAP animation hooks.
+ *
+ * Consolidated from apps/portal/src/components/landing/effects/use-gsap.ts.
+ * All hooks include `clearProps: "transform"` to prevent residual inline
+ * transforms from creating CSS stacking contexts.
+ */
+
 import { useRef, useCallback } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Ensure plugins are registered
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
@@ -28,8 +35,8 @@ interface ScrollRevealOptions {
 }
 
 /**
- * Hook for scroll-triggered fade-up animations
- * Automatically triggers when element enters viewport
+ * Hook for scroll-triggered fade-up animations.
+ * Automatically triggers when element enters viewport.
  */
 export function useScrollFadeUp<T extends HTMLElement = HTMLDivElement>(
   options: ScrollRevealOptions = {}
@@ -49,16 +56,14 @@ export function useScrollFadeUp<T extends HTMLElement = HTMLDivElement>(
 
     gsap.fromTo(
       ref.current,
-      {
-        opacity: 0,
-        y: yOffset,
-      },
+      { opacity: 0, y: yOffset },
       {
         opacity: 1,
         y: 0,
         duration,
         delay,
         ease: 'power2.out',
+        clearProps: 'transform',
         scrollTrigger: {
           trigger: ref.current,
           start,
@@ -72,8 +77,8 @@ export function useScrollFadeUp<T extends HTMLElement = HTMLDivElement>(
 }
 
 /**
- * Hook for scroll-triggered staggered animations on children
- * Each child element animates in sequence
+ * Hook for scroll-triggered staggered animations on children.
+ * Each child element animates in sequence.
  */
 export function useScrollStagger<T extends HTMLElement = HTMLDivElement>(
   childSelector: string,
@@ -98,10 +103,7 @@ export function useScrollStagger<T extends HTMLElement = HTMLDivElement>(
 
     gsap.fromTo(
       children,
-      {
-        opacity: 0,
-        y: yOffset,
-      },
+      { opacity: 0, y: yOffset },
       {
         opacity: 1,
         y: 0,
@@ -109,6 +111,7 @@ export function useScrollStagger<T extends HTMLElement = HTMLDivElement>(
         delay,
         stagger,
         ease: 'power2.out',
+        clearProps: 'transform',
         scrollTrigger: {
           trigger: ref.current,
           start,
@@ -122,7 +125,7 @@ export function useScrollStagger<T extends HTMLElement = HTMLDivElement>(
 }
 
 /**
- * Hook for scroll-triggered scale-in animations
+ * Hook for scroll-triggered scale-in animations.
  */
 export function useScrollScaleIn<T extends HTMLElement = HTMLDivElement>(
   options: Omit<ScrollRevealOptions, 'yOffset'> & { scale?: number } = {}
@@ -142,16 +145,14 @@ export function useScrollScaleIn<T extends HTMLElement = HTMLDivElement>(
 
     gsap.fromTo(
       ref.current,
-      {
-        opacity: 0,
-        scale,
-      },
+      { opacity: 0, scale },
       {
         opacity: 1,
         scale: 1,
         duration,
         delay,
         ease: 'back.out(1.4)',
+        clearProps: 'transform',
         scrollTrigger: {
           trigger: ref.current,
           start,
@@ -165,11 +166,14 @@ export function useScrollScaleIn<T extends HTMLElement = HTMLDivElement>(
 }
 
 /**
- * Hook for scroll-linked parallax effect
- * Element moves slower/faster than scroll speed
+ * Hook for scroll-linked parallax effect.
+ * Element moves slower/faster than scroll speed.
+ *
+ * Note: parallax uses scrub (continuous scroll-linked animation),
+ * so clearProps is NOT applied — the transform must persist during scroll.
  */
 export function useParallax<T extends HTMLElement = HTMLDivElement>(
-  speed: number = 0.5 // 0 = no movement, 1 = normal scroll, >1 = faster
+  speed: number = 0.5
 ) {
   const ref = useRef<T>(null);
 
@@ -192,8 +196,8 @@ export function useParallax<T extends HTMLElement = HTMLDivElement>(
 }
 
 /**
- * Hook for creating a GSAP timeline with scroll trigger
- * Returns refs and timeline builder for complex animations
+ * Hook for creating a GSAP timeline with scroll trigger.
+ * Returns refs and timeline builder for complex animations.
  */
 export function useScrollTimeline<T extends HTMLElement = HTMLDivElement>(
   options: {
@@ -216,7 +220,6 @@ export function useScrollTimeline<T extends HTMLElement = HTMLDivElement>(
   const buildTimeline = useCallback((builder: (tl: gsap.core.Timeline) => void) => {
     if (!containerRef.current) return;
 
-    // Kill existing timeline if any
     if (timelineRef.current) {
       timelineRef.current.kill();
     }
@@ -238,7 +241,7 @@ export function useScrollTimeline<T extends HTMLElement = HTMLDivElement>(
 }
 
 /**
- * Hook for animating a counter from 0 to target value
+ * Hook for animating a counter from 0 to target value.
  */
 export function useAnimatedCounter(
   targetValue: number,

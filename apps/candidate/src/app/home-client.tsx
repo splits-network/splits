@@ -139,7 +139,7 @@ export default function HomeBaselClient({ faqs }: HomeBaselClientProps) {
 
             // ── Hero ────────────────────────────────────────────
             const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
+                defaults: { ease: "power3.out", clearProps: "transform" },
             });
 
             heroTl

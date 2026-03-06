@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
-import { ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
+import { ThemeScript, ThemeProvider, GsapInit } from "@splits-network/basel-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { PortalActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { JsonLd } from "@splits-network/shared-ui";
@@ -180,6 +180,7 @@ export default async function RootLayout({
                     ></Script>
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-200">
+                    <GsapInit />
                     <QueryProvider>
                         <ThemeProvider>
                             <UserProfileProvider

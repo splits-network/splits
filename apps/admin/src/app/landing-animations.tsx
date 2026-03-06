@@ -49,7 +49,7 @@ export function LandingAnimations({ children }: { children: React.ReactNode }) {
             );
 
             /* Hero */
-            const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const heroTl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
             heroTl
                 .fromTo(
                     $1(".hero-kicker"),

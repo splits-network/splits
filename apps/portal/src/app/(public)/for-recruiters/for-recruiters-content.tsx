@@ -13,7 +13,7 @@ import {
     fadeUp,
     scaleIn,
     popIn,
-} from "@/components/landing/shared/animation-utils";
+} from "@splits-network/basel-ui";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
