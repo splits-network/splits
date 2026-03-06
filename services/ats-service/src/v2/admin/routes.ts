@@ -5,6 +5,11 @@ interface AdminAtsRoutesConfig {
     adminService: AdminAtsService;
 }
 
+function parseFilters(params: any): Record<string, any> {
+    if (!params.filters) return {};
+    return typeof params.filters === 'string' ? JSON.parse(params.filters) : params.filters;
+}
+
 export function registerAdminAtsRoutes(
     app: FastifyInstance,
     config: AdminAtsRoutesConfig
@@ -15,15 +20,16 @@ export function registerAdminAtsRoutes(
     app.get('/admin/jobs', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const params = request.query as any;
+            const filters = parseFilters(params);
             const result = await adminService.listJobsAdmin({
                 page: params.page ? parseInt(params.page, 10) : 1,
                 limit: params.limit ? parseInt(params.limit, 10) : 25,
-                search: params.search,
+                search: params.search || filters.search,
                 sort_by: params.sort_by,
                 sort_order: params.sort_order,
-                status: params.status,
-                commute_type: params.commute_type,
-                job_level: params.job_level,
+                status: params.status || filters.status,
+                commute_type: params.commute_type || filters.commute_type,
+                job_level: params.job_level || filters.job_level,
             });
             reply.send(result);
         } catch (error) {
@@ -78,13 +84,14 @@ export function registerAdminAtsRoutes(
     app.get('/admin/applications', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const params = request.query as any;
+            const filters = parseFilters(params);
             const result = await adminService.listApplicationsAdmin({
                 page: params.page ? parseInt(params.page, 10) : 1,
                 limit: params.limit ? parseInt(params.limit, 10) : 25,
-                search: params.search,
+                search: params.search || filters.search,
                 sort_by: params.sort_by,
                 sort_order: params.sort_order,
-                stage: params.stage,
+                stage: params.stage || filters.stage,
             });
             reply.send(result);
         } catch (error) {
@@ -96,10 +103,11 @@ export function registerAdminAtsRoutes(
     app.get('/admin/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const params = request.query as any;
+            const filters = parseFilters(params);
             const result = await adminService.listCandidatesAdmin({
                 page: params.page ? parseInt(params.page, 10) : 1,
                 limit: params.limit ? parseInt(params.limit, 10) : 25,
-                search: params.search,
+                search: params.search || filters.search,
                 sort_by: params.sort_by,
                 sort_order: params.sort_order,
             });
@@ -113,13 +121,13 @@ export function registerAdminAtsRoutes(
     app.get('/admin/assignments', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const params = request.query as any;
+            const filters = parseFilters(params);
             const result = await adminService.listAssignmentsAdmin({
                 page: params.page ? parseInt(params.page, 10) : 1,
                 limit: params.limit ? parseInt(params.limit, 10) : 25,
-                search: params.search,
+                search: params.search || filters.search,
                 sort_by: params.sort_by,
                 sort_order: params.sort_order,
-                status: params.status,
             });
             reply.send(result);
         } catch (error) {
@@ -131,13 +139,14 @@ export function registerAdminAtsRoutes(
     app.get('/admin/placements', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const params = request.query as any;
+            const filters = parseFilters(params);
             const result = await adminService.listPlacementsAdmin({
                 page: params.page ? parseInt(params.page, 10) : 1,
                 limit: params.limit ? parseInt(params.limit, 10) : 25,
-                search: params.search,
+                search: params.search || filters.search,
                 sort_by: params.sort_by,
                 sort_order: params.sort_order,
-                status: params.status,
+                state: params.state || filters.status,
             });
             reply.send(result);
         } catch (error) {
