@@ -457,6 +457,11 @@ async function main() {
             return;
         }
 
+        // Skip auth for public invitation preview (accept-invitation page)
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/invitations/') && request.url.endsWith('/preview')) {
+            return;
+        }
+
         // Skip auth for public firm invitation preview
         if (request.method === 'GET' && request.url.startsWith('/api/v2/firm-invitations/') && request.url.endsWith('/preview')) {
             return;
