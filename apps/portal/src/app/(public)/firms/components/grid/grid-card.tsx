@@ -165,10 +165,7 @@ function CardBody({
             {/* Stats Row */}
             {stats.length > 0 && (
                 <div className="border-b border-base-300">
-                    <div
-                        className="grid divide-x divide-base-300"
-                        style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
-                    >
+                    <div className="grid grid-cols-2 [&>*:nth-child(even)]:border-l [&>*:nth-child(even)]:border-l-base-300 [&>*:nth-child(n+3)]:border-t [&>*:nth-child(n+3)]:border-t-base-300">
                         {stats.map((stat, i) => {
                             const iconStyles = [
                                 "bg-primary text-primary-content",
