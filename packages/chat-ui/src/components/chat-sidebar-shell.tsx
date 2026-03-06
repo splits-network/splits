@@ -163,7 +163,7 @@ export function ChatSidebarShell({
     return (
         <div
             ref={sidebarRef}
-            className={`fixed bottom-0 right-0 z-[998] shadow-md hidden md:block overflow-y-auto
+            className={`fixed bottom-0 right-0 shadow-md hidden md:block overflow-y-auto
                 max-h-[80vh] ${isMinimized ? "h-12" : "h-auto"} transition-[width,opacity] duration-300 ease-in-out
                 `}
             style={{

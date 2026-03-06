@@ -102,7 +102,7 @@ export function MatchCandidatePopup({ candidateId, candidateName }: Props) {
             {open && createPortal(
                 <div
                     ref={popupRef}
-                    className="fixed z-[9999] bg-base-100 shadow-2xl border border-base-300 w-[min(420px,90vw)] max-h-[70vh] overflow-y-auto"
+                    className="fixed bg-base-100 shadow-2xl border border-base-300 w-[min(420px,90vw)] max-h-[70vh] overflow-y-auto"
                     style={{ top: pos.top, left: pos.left }}
                 >
                     {loading ? (

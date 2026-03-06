@@ -174,7 +174,7 @@ function DesktopNavContent({ items }: { items: NavItem[] }) {
                         {item.subItems && (
                             <div
                                 tabIndex={0}
-                                className={`dropdown-content bg-base-100 border border-base-300 shadow-lg py-2 z-50 ${
+                                className={`dropdown-content bg-base-100 border border-base-300 shadow-lg py-2 ${
                                     item.subItems.length > 3
                                         ? "w-[520px]"
                                         : "w-[300px]"
@@ -238,7 +238,7 @@ function SearchPanel() {
             </div>
             <div
                 tabIndex={0}
-                className="dropdown-content w-80 bg-base-100 border border-base-300 shadow-lg p-3 z-50 mt-2"
+                className="dropdown-content w-80 bg-base-100 border border-base-300 shadow-lg p-3 mt-2"
             >
                 <label className="input input-sm w-full">
                     <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50" />

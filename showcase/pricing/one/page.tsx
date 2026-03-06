@@ -270,7 +270,7 @@ export default function PricingOne() {
             </section>
 
             {/* Pricing Cards */}
-            <section className="container mx-auto px-6 lg:px-12 -mt-8 relative z-20">
+            <section className="container mx-auto px-6 lg:px-12 -mt-8 relative">
                 <div className="grid md:grid-cols-3 gap-0">
                     {plans.map((plan) => (
                         <div

@@ -489,7 +489,7 @@ export default function TablesOne() {
                                             </button>
                                             <ul
                                                 tabIndex={0}
-                                                className="dropdown-content menu p-1 shadow bg-base-100 border border-base-300 w-40 z-50"
+                                                className="dropdown-content menu p-1 shadow bg-base-100 border border-base-300 w-40"
                                             >
                                                 <li>
                                                     <button className="text-xs">

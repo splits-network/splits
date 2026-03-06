@@ -224,7 +224,7 @@ export function GlobalSearchBar() {
             {/* Dropdown */}
             {showDropdown && (
                 <div
-                    className="absolute top-full left-0 right-0 mt-1 bg-base-100 shadow-lg border border-base-300 rounded-box z-50 max-h-96 overflow-y-auto"
+                    className="absolute top-full left-0 right-0 mt-1 bg-base-100 shadow-lg border border-base-300 rounded-box max-h-96 overflow-y-auto"
                     onMouseDown={(e) => e.preventDefault()} // Prevent blur when clicking dropdown
                 >
                     {/* Loading state */}

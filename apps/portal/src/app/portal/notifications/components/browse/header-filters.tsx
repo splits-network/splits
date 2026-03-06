@@ -85,7 +85,7 @@ export default function HeaderFilters({
                 </div>
                 <div
                     tabIndex={0}
-                    className="dropdown-content menu p-4 shadow-lg bg-base-100 rounded-box w-64 z-50"
+                    className="dropdown-content menu p-4 shadow-lg bg-base-100 rounded-box w-64"
                 >
                     <fieldset className="fieldset mb-3">
                         <legend className="fieldset-legend">Category</legend>

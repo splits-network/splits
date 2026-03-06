@@ -498,7 +498,7 @@ export function Sidebar() {
             />
 
             {/* Mobile bottom dock */}
-            <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-neutral border-t border-neutral-content/10">
+            <div className="lg:hidden fixed inset-x-0 bottom-0 bg-neutral border-t border-neutral-content/10">
                 <div className="flex items-center justify-around px-1 py-2">
                     {(() => {
                         const dockItems = navItems
@@ -581,7 +581,7 @@ export function Sidebar() {
                                         More
                                     </span>
                                 </summary>
-                                <ul className="dropdown-content z-50 mb-2 p-2 w-52 bg-neutral border border-neutral-content/10 shadow-lg">
+                                <ul className="dropdown-content mb-2 p-2 w-52 bg-neutral border border-neutral-content/10 shadow-lg">
                                     {moreItems.map((item) => (
                                         <li key={item.href}>
                                             <button

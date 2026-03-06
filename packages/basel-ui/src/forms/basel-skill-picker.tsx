@@ -228,7 +228,7 @@ export function BaselSkillPicker({
                 {isOpen && totalItems > 0 && (
                     <div
                         ref={dropdownRef}
-                        className="absolute z-50 top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 shadow-lg max-h-60 overflow-y-auto"
+                        className="absolute top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 shadow-lg max-h-60 overflow-y-auto"
                     >
                         <ul className="menu menu-sm p-1 gap-0.5">
                             {filteredResults.map((skill, i) => (

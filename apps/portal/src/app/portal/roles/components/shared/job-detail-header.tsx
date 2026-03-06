@@ -53,7 +53,7 @@ export function JobHeroHeader({
                 {onClose && (
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 btn btn-sm btn-square btn-ghost text-neutral-content/60 hover:text-neutral-content z-10"
+                        className="absolute top-4 right-4 btn btn-sm btn-square btn-ghost text-neutral-content/60 hover:text-neutral-content"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>

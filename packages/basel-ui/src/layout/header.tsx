@@ -101,7 +101,7 @@ export function BaselHeader({
                                 </div>
                                 <div
                                     tabIndex={0}
-                                    className="dropdown-content bg-base-100 border border-base-300 shadow-lg z-50 w-screen max-w-sm p-4 mt-2"
+                                    className="dropdown-content bg-base-100 border border-base-300 shadow-lg w-screen max-w-sm p-4 mt-2"
                                 >
                                     {mobileMenu}
                                 </div>

@@ -14,7 +14,7 @@ export default function RecruiterCardsShowcase() {
         return (
             <div>
                 {/* Toggle bar */}
-                <div className="sticky top-0 z-[60] bg-neutral text-neutral-content">
+                <div className="sticky top-0 bg-neutral text-neutral-content">
                     <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
                         <h1 className="text-sm font-black uppercase tracking-wider">Recruiter Design Showcase</h1>
                         <div className="flex gap-1">

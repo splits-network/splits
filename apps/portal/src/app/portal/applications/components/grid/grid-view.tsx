@@ -37,10 +37,10 @@ export function GridView({
             {selectedApplication && (
                 <>
                     <div
-                        className="fixed inset-0 z-40 bg-black/30 transition-opacity"
+                        className="fixed inset-0 bg-black/30 transition-opacity"
                         onClick={() => onSelect(selectedApplication)}
                     />
-                    <div className="fixed top-0 right-0 z-50 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+                    <div className="fixed top-0 right-0 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
                         <DetailLoader
                             applicationId={selectedApplication.id}
                             onClose={() => onSelect(selectedApplication)}

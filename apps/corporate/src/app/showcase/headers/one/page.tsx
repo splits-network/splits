@@ -219,7 +219,7 @@ export default function HeadersOne() {
                 HEADER — Split-Screen Editorial Navigation
                ═══════════════════════════════════════════════════════ */}
             <header
-                className={`header-bar fixed top-0 left-0 right-0 z-50 transition-all duration-300 opacity-0 ${
+                className={`header-bar fixed top-0 left-0 right-0 transition-all duration-300 opacity-0 ${
                     scrolled
                         ? "bg-base-100/95 backdrop-blur-md shadow-sm border-b border-base-300"
                         : "bg-transparent"
@@ -281,7 +281,7 @@ export default function HeadersOne() {
                                                 {/* Dropdown */}
                                                 {activeDropdown ===
                                                     link.label && (
-                                                    <div className="absolute top-full left-0 mt-1 w-64 bg-base-100 border border-base-300 shadow-lg py-2 z-50">
+                                                    <div className="absolute top-full left-0 mt-1 w-64 bg-base-100 border border-base-300 shadow-lg py-2">
                                                         <div className="px-4 py-2 border-b border-base-300 mb-1">
                                                             <span className="text-sm font-semibold uppercase tracking-widest text-base-content/40">
                                                                 {link.label}
@@ -337,7 +337,7 @@ export default function HeadersOne() {
                                 </button>
 
                                 {searchOpen && (
-                                    <div className="absolute top-full right-0 mt-2 w-80 bg-base-100 border border-base-300 shadow-lg p-3 z-50">
+                                    <div className="absolute top-full right-0 mt-2 w-80 bg-base-100 border border-base-300 shadow-lg p-3">
                                         <div className="relative">
                                             <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm" />
                                             <input
@@ -416,7 +416,7 @@ export default function HeadersOne() {
                                 </button>
 
                                 {userMenuOpen && (
-                                    <div className="absolute top-full right-0 mt-1 w-56 bg-base-100 border border-base-300 shadow-lg py-2 z-50">
+                                    <div className="absolute top-full right-0 mt-1 w-56 bg-base-100 border border-base-300 shadow-lg py-2">
                                         <div className="px-4 py-3 border-b border-base-300">
                                             <div className="text-sm font-bold">
                                                 {userMenu.name}

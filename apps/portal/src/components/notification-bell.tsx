@@ -349,7 +349,7 @@ export default function NotificationBell() {
             {/* Dropdown Panel */}
             {isOpen && (
                 <div
-                    className="fixed inset-x-2 top-[var(--header-h,3.5rem)] sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-96 bg-base-100 border border-base-300 shadow-lg z-[100]"
+                    className="fixed inset-x-2 top-[var(--header-h,3.5rem)] sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-96 bg-base-100 border border-base-300 shadow-lg"
                     style={{ borderRadius: 0 }}
                 >
                     {/* Header */}

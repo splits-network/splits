@@ -165,7 +165,7 @@ export function FirmActionsToolbar({
                     <span className="hidden md:inline">Status</span>
                 </summary>
                 <ul
-                    className="dropdown-content menu bg-base-100 border-2 border-base-300 shadow-md p-2 w-48 z-50 mt-1"
+                    className="dropdown-content menu bg-base-100 border-2 border-base-300 shadow-md p-2 w-48 mt-1"
                     style={{ borderRadius: 0 }}
                 >
                     {statusItems.map((item) => (

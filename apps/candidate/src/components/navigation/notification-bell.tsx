@@ -162,7 +162,7 @@ export default function NotificationBell() {
 
             <div
                 tabIndex={-1}
-                className="dropdown-content z-50 mt-3 w-96 shadow bg-base-100 rounded-box border border-base-300"
+                className="dropdown-content mt-3 w-96 shadow bg-base-100 rounded-box border border-base-300"
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-base-300">

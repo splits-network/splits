@@ -337,7 +337,7 @@ export default function AddCandidateModal({
                                     {showSuggestions && (
                                         <div
                                             ref={suggestionsRef}
-                                            className="absolute z-50 w-full mt-1 border-2 border-base-300 bg-base-100 shadow-md max-h-48 overflow-y-auto"
+                                            className="absolute w-full mt-1 border-2 border-base-300 bg-base-100 shadow-md max-h-48 overflow-y-auto"
                                         >
                                             <div className="px-3 py-1.5 border-b border-base-200">
                                                 <span className="text-xs font-black uppercase tracking-wider text-base-content/40">

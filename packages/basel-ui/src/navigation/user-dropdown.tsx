@@ -158,7 +158,7 @@ export function UserDropdown({
 
             {/* ── Dropdown Panel ────────────────────────────────── */}
             {isOpen && (
-                <div className="absolute top-full right-0 mt-1 w-64 bg-base-100 border border-base-300 shadow-lg py-2 z-[100]">
+                <div className="absolute top-full right-0 mt-1 w-64 bg-base-100 border border-base-300 shadow-lg py-2">
                     {/* User header */}
                     <div className="px-4 py-3 border-b border-base-300">
                         <div className="flex items-center gap-3">
