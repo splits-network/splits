@@ -145,18 +145,12 @@ export function ChatSidebarShell({
         </div>
     );
 
-    // Mobile: portal to body as fullscreen overlay
-    if (isMobile && mounted) {
-        return createPortal(
-            <div
-                ref={overlayRef}
-                className="fixed inset-0 z-[999] bg-base-100 max-h-[80vh]"
-                style={{ transform: isOpen ? undefined : "translateX(100%)" }}
-            >
-                {sidebarContent}
-            </div>,
-            document.body,
-        );
+    // Mobile: don't render the floating sidebar at all.
+    // On mobile, chat triggers should navigate to the full messages page instead.
+    // The floating overlay has z-index stacking context issues with sticky headers
+    // that prevent users from closing it.
+    if (isMobile) {
+        return null;
     }
 
     // Desktop: fixed panel pinned to the right edge of the viewport
