@@ -81,8 +81,8 @@ export class RecruiterCandidateRepository {
         // Example: "brandon active engineer" matches any Brandon who is active or has engineering keywords
         if (search) {
             // Use PostgreSQL full-text search with tsquery
-            // Converts "brandon active engineer" to "brandon & active & engineer"
-            const tsquery = search.split(/\s+/).filter(t => t.trim()).join(' & ');
+            // Normalize special chars to match indexing, then AND-join for tsquery
+            const tsquery = search.replace(/[@+._\-\/:]/g, ' ').trim().split(/\s+/).filter(t => t).join(' & ');
             query = query.textSearch('search_vector', tsquery, {
                 type: 'websearch',
                 config: 'english'

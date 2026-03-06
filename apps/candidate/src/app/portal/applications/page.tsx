@@ -37,8 +37,8 @@ export default function ApplicationsBaselPage() {
         const v = searchParams.get("view");
         return v === "table" || v === "grid" || v === "split" ? v : "grid";
     });
-    const [selectedId, setSelectedId] = useState<string | null>(() =>
-        searchParams.get("appId"),
+    const [selectedId, setSelectedId] = useState<string | null>(
+        () => searchParams.get("appId") || searchParams.get("applicationId"),
     );
 
     /* ── URL sync ── */

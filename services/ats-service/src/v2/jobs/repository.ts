@@ -155,8 +155,8 @@ export class JobRepository {
         // Apply full-text search
         let useRelevanceSort = false;
         if (params.search) {
-            // Convert search query to tsquery format (AND logic for multiple words)
-            const tsquery = params.search?.split(/\s+/).filter(t => t.trim()).join(' & ');
+            // Normalize special chars to match indexing, then AND-join for tsquery
+            const tsquery = params.search?.replace(/[@+._\-\/:]/g, ' ').trim().split(/\s+/).filter(t => t).join(' & ');
 
             // Use PostgreSQL full-text search with search_vector column
             query = query.textSearch('search_vector', tsquery, {

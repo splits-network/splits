@@ -16,6 +16,7 @@ import { usePipelineActivity } from "@/app/portal/dashboard/hooks/use-pipeline-a
 import type { PipelineApplication } from "@/app/portal/dashboard/hooks/use-pipeline-activity";
 import { useTopRoles } from "@/app/portal/dashboard/hooks/use-top-roles";
 import { useTopMatches } from "@/app/portal/dashboard/hooks/use-top-matches";
+import { usePlacementTrendData } from "@/app/portal/dashboard/hooks/use-placement-trend-data";
 import { MatchScoreBadge } from "@/components/matches/match-score-badge";
 import { useDashboardRealtime } from "@/app/portal/dashboard/hooks/use-dashboard-realtime";
 import {
@@ -29,6 +30,7 @@ import { ChartLoadingState } from "@splits-network/shared-ui";
 import { PeriodSelector } from "@/components/basel/dashboard/shared/period-selector";
 import { KpiGrid } from "@/components/basel/dashboard/shared/kpi-grid";
 import { BaselAnimator } from "@/app/portal/dashboard/basel-animator";
+import { MarketplaceProfileBanner } from "@/components/basel/dashboard/marketplace-profile-banner";
 
 /* ── Lazy-loaded chart components ──────────────────────────────────────────── */
 
@@ -136,12 +138,18 @@ export default function RecruiterView() {
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: any[] }>("/firms/my-firms");
+                const res = await client.get<{ data: any[] }>(
+                    "/firms/my-firms",
+                );
                 if (!cancelled && res.data?.length > 0) setCanCreateRole(true);
-            } catch { /* not a firm member */ }
+            } catch {
+                /* not a firm member */
+            }
         }
         checkFirm();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [manageableCompanyIds.length]);
 
@@ -174,6 +182,11 @@ export default function RecruiterView() {
         loading: matchesLoading,
         refresh: refreshMatches,
     } = useTopMatches();
+    const {
+        data: placementTrendData,
+        loading: placementTrendLoading,
+        refresh: refreshPlacementTrend,
+    } = usePlacementTrendData(trendPeriod);
 
     /* Realtime */
     const handleStatsUpdate = useCallback(() => {
@@ -187,7 +200,14 @@ export default function RecruiterView() {
         refreshRoles();
         refreshPipeline();
         refreshMatches();
-    }, [refreshStats, refreshRoles, refreshPipeline, refreshMatches]);
+        refreshPlacementTrend();
+    }, [
+        refreshStats,
+        refreshRoles,
+        refreshPipeline,
+        refreshMatches,
+        refreshPlacementTrend,
+    ]);
 
     useDashboardRealtime({
         enabled: !!userId,
@@ -252,9 +272,13 @@ export default function RecruiterView() {
                     </div>
                 </section>
 
+                {/* ── Marketplace Profile Reminder ── */}
+                <MarketplaceProfileBanner />
+
                 {/* ── SECTION 2: KPIs ── */}
-                <section className="bg-base-200 py-4 lg:py-6 px-4 lg:px-6">
-                    <KpiGrid cols={5}>
+                <section className="bg-base-200 py-4 lg:py-6 px-4 lg:px-6 space-y-3">
+                    {/* Primary metrics */}
+                    <KpiGrid cols={4}>
                         <BaselKpiCard
                             label="Pipeline Value"
                             value={
@@ -277,16 +301,6 @@ export default function RecruiterView() {
                             {...formatTrend(stats.trends?.active_roles)}
                         />
                         <BaselKpiCard
-                            label="Submissions MTD"
-                            value={
-                                statsLoading
-                                    ? "--"
-                                    : stats.submissions_mtd.toLocaleString()
-                            }
-                            icon="fa-duotone fa-regular fa-paper-plane"
-                            color="accent"
-                        />
-                        <BaselKpiCard
                             label="Placements YTD"
                             value={
                                 statsLoading
@@ -305,9 +319,25 @@ export default function RecruiterView() {
                                     : formatCurrency(stats.total_earnings_ytd)
                             }
                             icon="fa-duotone fa-regular fa-coins"
+                            color="accent"
+                        />
+                    </KpiGrid>
+
+                    {/* Secondary metrics — compact */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+                        <BaselKpiCard
+                            size="compact"
+                            label="Submissions MTD"
+                            value={
+                                statsLoading
+                                    ? "--"
+                                    : stats.submissions_mtd.toLocaleString()
+                            }
+                            icon="fa-duotone fa-regular fa-paper-plane"
                             color="primary"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Candidates Active"
                             value={
                                 statsLoading
@@ -321,6 +351,7 @@ export default function RecruiterView() {
                             )}
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Offers Pending"
                             value={
                                 statsLoading
@@ -331,6 +362,7 @@ export default function RecruiterView() {
                             color="warning"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Pending Payouts"
                             value={
                                 statsLoading
@@ -341,6 +373,7 @@ export default function RecruiterView() {
                             color="secondary"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Needs Attention"
                             value={
                                 statsLoading
@@ -351,6 +384,7 @@ export default function RecruiterView() {
                             color="error"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Awaiting Review"
                             value={
                                 statsLoading
@@ -361,12 +395,17 @@ export default function RecruiterView() {
                             color="accent"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="New Matches"
-                            value={matchesLoading ? "--" : String(topMatches.length)}
+                            value={
+                                matchesLoading
+                                    ? "--"
+                                    : String(topMatches.length)
+                            }
                             icon="fa-duotone fa-regular fa-bullseye"
                             color="info"
                         />
-                    </KpiGrid>
+                    </div>
                 </section>
 
                 {/* ── SECTION 3: Charts ── */}
@@ -457,8 +496,8 @@ export default function RecruiterView() {
                             className="lg:col-span-2"
                         >
                             <PlacementTrendChart
-                                data={[]}
-                                loading={statsLoading}
+                                data={placementTrendData}
+                                loading={placementTrendLoading}
                                 height={200}
                             />
                         </BaselChartCard>
@@ -597,18 +636,29 @@ export default function RecruiterView() {
                                 )}
                             </BaselSidebarCard>
 
-                            <BaselSidebarCard title="Top Matches" accentColor="secondary">
+                            <BaselSidebarCard
+                                title="Top Matches"
+                                accentColor="secondary"
+                            >
                                 {matchesLoading ? (
                                     <ChartLoadingState height={200} />
                                 ) : topMatches.length === 0 ? (
                                     <p className="text-sm text-base-content/40 py-4 text-center">
-                                        No matches yet. Matches appear when candidates are scored against roles.
+                                        No matches yet. Matches appear when
+                                        candidates are scored against roles.
                                     </p>
                                 ) : (
                                     <div className="space-y-3">
                                         {topMatches.map((match) => {
-                                            const fullName = match.candidate?.full_name || "Unknown";
-                                            const initials = fullName.split(" ").map(n => n[0]).join("").slice(0, 2) || "?";
+                                            const fullName =
+                                                match.candidate?.full_name ||
+                                                "Unknown";
+                                            const initials =
+                                                fullName
+                                                    .split(" ")
+                                                    .map((n) => n[0])
+                                                    .join("")
+                                                    .slice(0, 2) || "?";
                                             const name = fullName;
                                             return (
                                                 <Link
@@ -622,20 +672,32 @@ export default function RecruiterView() {
                                                         </div>
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="font-semibold text-sm truncate">{name}</p>
+                                                        <p className="font-semibold text-sm truncate">
+                                                            {name}
+                                                        </p>
                                                         <p className="text-sm text-base-content/60 truncate">
-                                                            {match.job?.title || "Unknown Role"}
+                                                            {match.job?.title ||
+                                                                "Unknown Role"}
                                                         </p>
                                                     </div>
-                                                    <MatchScoreBadge score={match.match_score} size="sm" />
+                                                    <MatchScoreBadge
+                                                        score={
+                                                            match.match_score
+                                                        }
+                                                        size="sm"
+                                                    />
                                                 </Link>
                                             );
                                         })}
                                     </div>
                                 )}
                                 <div className="mt-3 pt-3 border-t border-base-200 text-center">
-                                    <Link href="/portal/matches" className="btn btn-sm btn-ghost btn-block">
-                                        View all matches <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
+                                    <Link
+                                        href="/portal/matches"
+                                        className="btn btn-sm btn-ghost btn-block"
+                                    >
+                                        View all matches{" "}
+                                        <i className="fa-duotone fa-regular fa-arrow-right ml-1" />
                                     </Link>
                                 </div>
                             </BaselSidebarCard>

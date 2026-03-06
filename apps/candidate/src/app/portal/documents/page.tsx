@@ -423,7 +423,7 @@ function DocumentsContent() {
     // ===== RENDER =====
 
     return (
-        <main ref={mainRef} className="overflow-hidden min-h-screen">
+        <main ref={mainRef} className="">
             {/* ── EDITORIAL HERO ── */}
             <section className="relative bg-neutral text-neutral-content py-10 sm:py-16 lg:py-20">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-12">
@@ -558,7 +558,9 @@ function DocumentsContent() {
                                                         <h3 className="font-bold text-sm sm:text-base text-base-content truncate">
                                                             {doc.file_name}
                                                         </h3>
-                                                        {isPrimaryResume(doc) && (
+                                                        {isPrimaryResume(
+                                                            doc,
+                                                        ) && (
                                                             <span className="bg-primary/10 text-primary px-2 py-0.5 text-xs font-bold shrink-0">
                                                                 <i className="fa-duotone fa-regular fa-star mr-1" />
                                                                 {/* COPY: primary resume badge */}
@@ -615,7 +617,8 @@ function DocumentsContent() {
                                                                     <i className="fa-duotone fa-regular fa-star" />
                                                                     <span className="sm:inline hidden">
                                                                         {/* COPY: set primary button */}
-                                                                        Set Primary
+                                                                        Set
+                                                                        Primary
                                                                     </span>
                                                                 </>
                                                             )}

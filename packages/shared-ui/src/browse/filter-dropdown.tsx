@@ -39,7 +39,7 @@ export function BrowseFilterDropdown<F extends BrowseFilters>({
             </div>
             <div
                 tabIndex={0}
-                className="dropdown-content menu p-4 shadow-lg bg-base-100 rounded-box w-80 z-[50] border border-base-200 gap-4"
+                className="dropdown-content menu p-4 shadow-lg bg-base-100 rounded-box w-80 border border-base-200 gap-4"
             >
                 <div className="flex justify-between items-center pb-2 border-b border-base-200">
                     <span className="font-semibold">Filters</span>

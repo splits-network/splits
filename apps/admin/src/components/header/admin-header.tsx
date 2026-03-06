@@ -10,7 +10,7 @@ type AdminHeaderProps = {
 
 export function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
     return (
-        <header className="fixed top-0 left-0 right-0 z-30 flex h-14 items-center gap-4 bg-base-200 border-b border-base-300 px-4">
+        <header className="fixed top-0 left-0 right-0 flex h-14 items-center gap-4 bg-base-200 border-b border-base-300 px-4">
             {/* Mobile hamburger */}
             <button
                 type="button"

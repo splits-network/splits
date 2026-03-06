@@ -13,6 +13,7 @@ export interface PanelStat {
 export interface PanelHeaderBadge {
     label: string;
     className: string;
+    icon?: string;
 }
 
 export interface PanelHeaderMeta {
@@ -57,6 +58,8 @@ export function PanelHeader({
     actions,
     onClose,
 }: PanelHeaderProps) {
+    const hasStats = stats && stats.length > 0;
+
     return (
         <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
             {/* Diagonal accent */}
@@ -65,7 +68,7 @@ export function PanelHeader({
                 style={{ clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)" }}
             />
 
-            <div className="relative px-6 pt-6 pb-0">
+            <div className={`relative px-6 pt-6 ${hasStats ? "" : "pb-5"}`}>
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-6">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40 truncate">
@@ -73,7 +76,15 @@ export function PanelHeader({
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
                         {badges?.map((b) => (
-                            <span key={b.label} className={`badge ${b.className}`}>
+                            <span
+                                key={b.label}
+                                className={`badge ${b.className}`}
+                            >
+                                {b.icon && (
+                                    <i
+                                        className={`fa-duotone fa-regular fa-${b.icon} mr-1`}
+                                    />
+                                )}
                                 {b.label}
                             </span>
                         ))}
@@ -92,9 +103,17 @@ export function PanelHeader({
                 <div className="flex items-end gap-5">
                     {avatar && (
                         <div className="relative shrink-0">
-                            <div className="w-20 h-20 bg-primary text-primary-content flex items-center justify-center text-2xl font-black tracking-tight select-none border-2 border-primary">
-                                {avatar.initials}
-                            </div>
+                            {avatar.imageUrl ? (
+                                <img
+                                    src={avatar.imageUrl}
+                                    alt={title}
+                                    className="w-20 h-20 object-contain border-2 border-primary"
+                                />
+                            ) : (
+                                <div className="w-20 h-20 bg-primary text-primary-content flex items-center justify-center text-2xl font-black tracking-tight select-none border-2 border-primary">
+                                    {avatar.initials}
+                                </div>
+                            )}
                             {avatarOverlay}
                         </div>
                     )}
@@ -116,12 +135,19 @@ export function PanelHeader({
                                             href={m.href}
                                             className="flex items-center gap-1.5 hover:text-primary transition-colors"
                                         >
-                                            <i className={`${m.icon} text-xs`} />
+                                            <i
+                                                className={`${m.icon} text-xs`}
+                                            />
                                             {m.text}
                                         </a>
                                     ) : (
-                                        <span key={i} className="flex items-center gap-1.5">
-                                            <i className={`${m.icon} text-xs`} />
+                                        <span
+                                            key={i}
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <i
+                                                className={`${m.icon} text-xs`}
+                                            />
                                             {m.text}
                                         </span>
                                     ),
@@ -135,13 +161,18 @@ export function PanelHeader({
                 {actions && <div className="mt-5">{actions}</div>}
 
                 {/* Stats strip */}
-                {stats && stats.length > 0 && (
+                {hasStats && (
                     <div
-                        className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
-                        style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
+                        className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6 "
+                        style={{
+                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                        }}
                     >
                         {stats.map((stat, i) => (
-                            <div key={stat.label} className="flex items-center gap-2.5 px-3 py-4">
+                            <div
+                                key={stat.label}
+                                className="flex items-center gap-2.5 px-3 py-4"
+                            >
                                 <div
                                     className={`w-9 h-9 flex items-center justify-center shrink-0 ${ICON_STYLES[i % ICON_STYLES.length]}`}
                                 >

@@ -45,6 +45,9 @@ export default function SignUpPage() {
 
     // Validate referral code with debounce
     useEffect(() => {
+        if (referralCode.toUpperCase().startsWith("SPLITS-")) {
+            return;
+        }
         if (!referralCode || referralCode.length < 8) {
             setReferralStatus("idle");
             setReferralRecruiter(null);
@@ -496,11 +499,18 @@ export default function SignUpPage() {
                                   : ""
                         }`}
                         value={referralCode}
-                        onChange={(e) =>
-                            setReferralCode(e.target.value.toLowerCase().trim())
-                        }
+                        onChange={(e) => {
+                            const val = e.target.value.trim();
+                            if (val.toUpperCase().startsWith("SPLITS-")) {
+                                setReferralCode(val);
+                                setReferralStatus("invalid");
+                                setReferralError("invitation_code");
+                                return;
+                            }
+                            setReferralCode(val.toLowerCase());
+                        }}
                         disabled={isLoading}
-                        maxLength={8}
+                        maxLength={13}
                     />
                     {referralStatus === "validating" && (
                         <p className="text-xs text-base-content/50 mt-1.5 flex items-center gap-1">
@@ -514,7 +524,16 @@ export default function SignUpPage() {
                             Referred by {referralRecruiter.name}
                         </p>
                     )}
-                    {referralStatus === "invalid" && (
+                    {referralError === "invitation_code" && (
+                        <p className="text-sm text-warning mt-1.5">
+                            This looks like a company invitation code. Please use the{" "}
+                            <Link href="/join" className="link link-primary">
+                                Join page
+                            </Link>{" "}
+                            to accept your invitation.
+                        </p>
+                    )}
+                    {referralStatus === "invalid" && referralError !== "invitation_code" && (
                         <p className="text-xs text-error mt-1.5 flex items-center gap-1">
                             <i className="fa-duotone fa-regular fa-circle-xmark" />
                             {referralError}

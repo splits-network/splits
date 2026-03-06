@@ -268,7 +268,7 @@ export function ServiceStatusBanner({
     return (
         <div
             ref={containerRef}
-            className="sticky z-40"
+            className="sticky"
             style={{ top: "var(--header-h, 0px)" }}
         >
             {disruptions.length > 0 && (

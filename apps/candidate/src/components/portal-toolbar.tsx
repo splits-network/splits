@@ -8,7 +8,7 @@ export function PortalToolbar() {
     if (!title && !titleChildren) return null;
 
     return (
-        <div className="sticky top-[68px] z-40">
+        <div className="sticky top-[68px]">
             <div className="flex flex-wrap items-center gap-3 px-6 py-2 border-b border-base-300 bg-base-100">
                 {/* Title on the left */}
                 {title && (

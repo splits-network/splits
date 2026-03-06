@@ -51,7 +51,12 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.normal,
+                        clearProps: "transform",
+                    },
                 );
             }
 
@@ -77,7 +82,12 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     subtitle,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: D.slow, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.slow,
+                        clearProps: "transform",
+                    },
                     "-=0.5",
                 );
             }
@@ -87,7 +97,12 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
                 heroTl.fromTo(
                     statBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: D.normal,
+                        clearProps: "transform",
+                    },
                     "-=0.3",
                 );
             }
@@ -130,7 +145,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
     );
 
     return (
-        <div ref={containerRef} className="overflow-hidden min-h-screen">
+        <div ref={containerRef} className="">
             {children}
         </div>
     );

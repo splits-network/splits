@@ -457,8 +457,19 @@ async function main() {
             return;
         }
 
+        // Skip auth for public invitation preview (accept-invitation page)
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/invitations/') && request.url.endsWith('/preview')) {
+            return;
+        }
+
         // Skip auth for public firm invitation preview
         if (request.method === 'GET' && request.url.startsWith('/api/v2/firm-invitations/') && request.url.endsWith('/preview')) {
+            return;
+        }
+
+        // Skip auth for public recruiter code lookup (signup referral flow)
+        // GET /api/v2/recruiter-codes/lookup - validate referral code during signup
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/recruiter-codes/lookup')) {
             return;
         }
 

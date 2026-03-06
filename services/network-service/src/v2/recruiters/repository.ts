@@ -56,8 +56,10 @@ export class RecruiterRepository {
         // Apply full-text search using tsvector
         if (params.search) {
             const tsquery = params.search
+                .replace(/[@+._\-\/:]/g, ' ')
+                .trim()
                 .split(/\s+/)
-                .filter((t: string) => t.trim())
+                .filter((t: string) => t)
                 .join(' & ');
             query = query.textSearch('search_vector', tsquery, {
                 type: 'websearch',

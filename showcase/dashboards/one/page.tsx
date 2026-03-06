@@ -1452,7 +1452,7 @@ export default function DashboardOne() {
                 {/* ═══════════════════════════════════════════════════════
                     SIDEBAR
                    ═══════════════════════════════════════════════════════ */}
-                <div className="drawer-side z-40">
+                <div className="drawer-side">
                     <label
                         htmlFor="dashboard-drawer"
                         aria-label="close sidebar"

@@ -324,7 +324,7 @@ export function BaselSidebar({
         <>
             {/* ── Desktop: fixed sidebar, positioned below header ── */}
             <div
-                className={`hidden lg:block fixed left-0 z-40 ${width}`}
+                className={`hidden lg:block fixed left-0 ${width}`}
                 style={{
                     top: "calc(var(--header-h, 4rem) + var(--banner-h, 0px))",
                     height: "calc(100vh - var(--header-h, 4rem) - var(--banner-h, 0px))",

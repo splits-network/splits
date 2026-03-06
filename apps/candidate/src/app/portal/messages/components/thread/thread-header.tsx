@@ -85,7 +85,7 @@ export function ThreadHeader({
                         >
                             <i className="fa-duotone fa-ellipsis-vertical" />
                         </button>
-                        <ul className="dropdown-content menu p-2 shadow bg-base-100 w-52 z-50">
+                        <ul className="dropdown-content menu p-2 shadow bg-base-100 w-52">
                             <li>
                                 <button onClick={onMute}>
                                     <i className="fa-duotone fa-volume" />

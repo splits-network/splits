@@ -39,7 +39,7 @@ export function SplitView({ jobs, selectedId, onSelect }: SplitViewProps) {
                 {selectedJob ? (
                     <>
                         {/* Mobile: full-screen overlay */}
-                        <div className="fixed inset-0 z-[999] flex flex-col bg-base-100 md:hidden">
+                        <div className="fixed inset-0 flex flex-col bg-base-100 md:hidden">
                             <div className="flex-1 overflow-y-auto">
                                 <JobDetailLoader
                                     jobId={selectedJob.id}

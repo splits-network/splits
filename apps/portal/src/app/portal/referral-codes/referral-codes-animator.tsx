@@ -52,7 +52,12 @@ export function ReferralCodesAnimator({
                 heroTl.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        clearProps: "transform",
+                    },
                 );
             }
 
@@ -78,7 +83,12 @@ export function ReferralCodesAnimator({
                 heroTl.fromTo(
                     subtitle,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.7,
+                        clearProps: "transform",
+                    },
                     "-=0.5",
                 );
             }
@@ -88,7 +98,12 @@ export function ReferralCodesAnimator({
                 heroTl.fromTo(
                     statBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        clearProps: "transform",
+                    },
                     "-=0.3",
                 );
             }
@@ -131,7 +146,7 @@ export function ReferralCodesAnimator({
     );
 
     return (
-        <main ref={mainRef} className="overflow-hidden min-h-screen">
+        <main ref={mainRef} className="">
             {children}
         </main>
     );

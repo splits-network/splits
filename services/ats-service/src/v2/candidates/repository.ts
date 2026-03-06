@@ -189,8 +189,9 @@ export class CandidateRepository {
 
         // Apply full-text search across all candidate fields
         if (search) {
-            // Multi-word search: split and join with ' & ' for AND logic
-            const tsquery = search.split(/\s+/).filter(t => t.trim()).join(' & ');
+            // Normalize special chars (email @._- , URL /:) to spaces to match indexing,
+            // then split into AND-joined terms for tsquery
+            const tsquery = search.replace(/[@+._\-\/:]/g, ' ').trim().split(/\s+/).filter(t => t).join(' & ');
             query = query.textSearch('search_vector', tsquery, {
                 type: 'websearch',
                 config: 'english'

@@ -52,8 +52,8 @@ export class GptActionRepository {
         // Apply filters
         if (keywords) {
             // Use full-text search on search_vector
-            // Convert to tsquery format
-            const tsquery = keywords.split(/\s+/).filter(Boolean).join(' & ');
+            // Normalize special chars to match indexing, then AND-join for tsquery
+            const tsquery = keywords.replace(/[@+._\-\/:]/g, ' ').trim().split(/\s+/).filter(Boolean).join(' & ');
             query = query.textSearch('search_vector', tsquery, {
                 type: 'websearch',
                 config: 'english',

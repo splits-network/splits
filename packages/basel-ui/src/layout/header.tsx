@@ -67,7 +67,7 @@ export function BaselHeader({
     return (
         <div
             ref={ref}
-            className={`${position} top-0 left-0 right-0 z-50 ${className || ""}`}
+            className={`${position} top-0 left-0 right-0 ${className || ""}`}
         >
             <header
                 className={`header-bar transition-all duration-300 ${
@@ -101,7 +101,7 @@ export function BaselHeader({
                                 </div>
                                 <div
                                     tabIndex={0}
-                                    className="dropdown-content bg-base-100 border border-base-300 shadow-lg z-50 w-screen max-w-sm p-4 mt-2"
+                                    className="dropdown-content bg-base-100 border border-base-300 shadow-lg w-screen max-w-sm p-4 mt-2"
                                 >
                                     {mobileMenu}
                                 </div>

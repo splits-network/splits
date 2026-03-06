@@ -44,8 +44,10 @@ export default function CreateInvitationModal({
                 send_email: sendEmail && !!invitedEmail,
             });
 
-            setCreatedInvitation(data.data);
             toast.success("Invitation created successfully");
+            onSuccess();
+            handleClose();
+            return;
         } catch (e: any) {
             toast.error(
                 e?.response?.data?.error?.message ||

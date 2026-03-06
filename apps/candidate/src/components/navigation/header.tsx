@@ -177,7 +177,7 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
                                 </div>
                                 <div
                                     tabIndex={0}
-                                    className={`dropdown-content bg-base-100 border border-base-300 shadow-lg py-2 z-50 ${
+                                    className={`dropdown-content bg-base-100 border border-base-300 shadow-lg py-2 ${
                                         item.subItems.length > 3
                                             ? "w-80"
                                             : "w-64"

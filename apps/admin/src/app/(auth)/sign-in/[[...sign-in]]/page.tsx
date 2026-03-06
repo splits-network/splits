@@ -1,6 +1,6 @@
 "use client";
 
-import { useSignIn, useAuth, GoogleOneTap } from "@clerk/nextjs";
+import { useSignIn, useAuth } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useEffect } from "react";
 
@@ -104,7 +104,6 @@ export default function SignInPage() {
             )}
 
             <div className="mb-6">
-                <GoogleOneTap />
                 <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
