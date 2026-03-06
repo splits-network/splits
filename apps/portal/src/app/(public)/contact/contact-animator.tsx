@@ -31,7 +31,7 @@ export function ContactAnimator({ children }: { children: ReactNode }) {
             const $$ = (sel: string) => Array.from(c.querySelectorAll(sel));
 
             // ─── HERO ────────────────────────────────────────────────
-            const heroTl = gsap.timeline({ defaults: { ease: E.smooth } });
+            const heroTl = gsap.timeline({ defaults: { ease: E.smooth, clearProps: "transform" } });
 
             const heroKicker = $1(".bc-hero-kicker");
             if (heroKicker) {

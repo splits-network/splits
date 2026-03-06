@@ -111,7 +111,7 @@ function SearchPageInner() {
 
             const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
             const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-            const tl = gsap.timeline({ defaults: { ease: E.editorial } });
+            const tl = gsap.timeline({ defaults: { ease: E.editorial, clearProps: "transform" } });
 
             const kicker = $1(".search-kicker");
             if (kicker)

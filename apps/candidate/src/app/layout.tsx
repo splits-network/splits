@@ -6,7 +6,7 @@ import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
 import { getHeaderNav, getFooterNav } from "@/lib/content";
 import CookieConsent from "@/components/cookie-consent";
-import { ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
+import { ThemeScript, ThemeProvider, GsapInit } from "@splits-network/basel-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
 import { CandidateActivityTrackerWrapper } from "@/components/activity-tracker-wrapper";
 import { ToastProvider } from "@/lib/toast-context";
@@ -184,6 +184,7 @@ export default async function RootLayout({
                     ></Script>
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-200">
+                    <GsapInit />
                     <ThemeProvider>
                         <UserProfileProvider initialProfile={initialProfile}>
                             <GamificationWrapper>

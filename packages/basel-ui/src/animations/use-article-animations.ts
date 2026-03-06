@@ -5,6 +5,7 @@
  *
  * Extracted from apps/corporate/src/app/showcase/articles/one/page.tsx.
  * Targets CSS class names used by the block components.
+ * All non-scrub animations include clearProps: "transform".
  */
 
 import { RefObject } from 'react';
@@ -33,7 +34,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
             // ── HERO ────────────────────────────────────────────
             $('.hero-section').forEach((heroSection) => {
                 const heroTl = gsap.timeline({
-                    defaults: { ease: 'power3.out' },
+                    defaults: { ease: 'power3.out', clearProps: 'transform' },
                 });
 
                 const heroKicker = heroSection.querySelector('.hero-kicker');
@@ -91,9 +92,10 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                     gsap.fromTo(
                         heroImgWrap,
                         { opacity: 0, scale: 1.08 },
-                        { opacity: 1, scale: 1, duration: 1.4, ease: 'power2.out', delay: 0.2 }
+                        { opacity: 1, scale: 1, duration: 1.4, ease: 'power2.out', delay: 0.2, clearProps: 'transform' }
                     );
 
+                    // Parallax — scrub-based, no clearProps
                     const heroImg = heroImgWrap.querySelector('img');
                     if (heroImg) {
                         gsap.to(heroImg, {
@@ -120,6 +122,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                         y: 0,
                         duration: 0.8,
                         ease: 'power3.out',
+                        clearProps: 'transform',
                         scrollTrigger: { trigger: block, start: 'top 80%' },
                     }
                 );
@@ -135,6 +138,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                         x: 0,
                         duration: 0.8,
                         ease: 'power3.out',
+                        clearProps: 'transform',
                         scrollTrigger: { trigger: el, start: 'top 70%' },
                     }
                 );
@@ -149,6 +153,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                         x: 0,
                         duration: 0.8,
                         ease: 'power3.out',
+                        clearProps: 'transform',
                         scrollTrigger: { trigger: el, start: 'top 70%' },
                     }
                 );
@@ -163,6 +168,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                         x: 0,
                         duration: 0.8,
                         ease: 'power3.out',
+                        clearProps: 'transform',
                         scrollTrigger: { trigger: el, start: 'top 70%' },
                     }
                 );
@@ -177,6 +183,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                         x: 0,
                         duration: 0.8,
                         ease: 'power3.out',
+                        clearProps: 'transform',
                         scrollTrigger: { trigger: el, start: 'top 70%' },
                     }
                 );
@@ -192,6 +199,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                         scale: 1,
                         duration: 0.9,
                         ease: 'power3.out',
+                        clearProps: 'transform',
                         scrollTrigger: { trigger: quote, start: 'top 80%' },
                     }
                 );
@@ -207,10 +215,12 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                         y: 0,
                         duration: 1,
                         ease: 'power2.out',
+                        clearProps: 'transform',
                         scrollTrigger: { trigger: imgEl, start: 'top 85%' },
                     }
                 );
 
+                // Parallax — scrub-based, no clearProps
                 const innerImg = imgEl.querySelector('img');
                 if (innerImg) {
                     gsap.to(innerImg, {
@@ -239,6 +249,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                             duration: 0.6,
                             stagger: 0.1,
                             ease: 'power2.out',
+                            clearProps: 'transform',
                             scrollTrigger: { trigger: statsBar, start: 'top 85%' },
                         }
                     );
@@ -255,6 +266,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                         y: 0,
                         duration: 0.5,
                         ease: 'power2.out',
+                        clearProps: 'transform',
                         scrollTrigger: { trigger: card, start: 'top 85%' },
                     }
                 );
@@ -272,6 +284,7 @@ export function useArticleAnimations(containerRef: RefObject<HTMLElement | null>
                             y: 0,
                             duration: 1,
                             ease: 'power3.out',
+                            clearProps: 'transform',
                             scrollTrigger: { trigger: ctaSection, start: 'top 80%' },
                         }
                     );

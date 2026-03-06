@@ -9,7 +9,7 @@ import {
     easing,
     stagger,
     prefersReducedMotion,
-} from "@/components/landing/shared/animation-utils";
+} from "@splits-network/basel-ui";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -104,7 +104,7 @@ export function SuccessStoriesContent() {
             const description =
                 heroRef.current.querySelector(".hero-description");
 
-            const tl = gsap.timeline();
+            const tl = gsap.timeline({ defaults: { clearProps: "transform" } });
             if (icon)
                 tl.fromTo(
                     icon,
@@ -152,6 +152,7 @@ export function SuccessStoriesContent() {
             const icons = statsRef.current.querySelectorAll(".stat-icon");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: { trigger: statsRef.current, start: "top 85%" },
             });
             if (cards.length > 0)
@@ -190,6 +191,7 @@ export function SuccessStoriesContent() {
             const cards = storiesRef.current.querySelectorAll(".story-card");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: storiesRef.current,
                     start: "top 80%",

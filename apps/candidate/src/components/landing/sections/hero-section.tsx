@@ -5,7 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "../shared/animation-utils";
+import { duration, easing, stagger } from "@splits-network/basel-ui";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -28,7 +28,7 @@ export function HeroSection() {
             ).matches;
             if (prefersReducedMotion) return;
 
-            const tl = gsap.timeline({ defaults: { ease: easing.smooth } });
+            const tl = gsap.timeline({ defaults: { ease: easing.smooth, clearProps: "transform" } });
 
             // Headline staggered word reveal
             tl.fromTo(

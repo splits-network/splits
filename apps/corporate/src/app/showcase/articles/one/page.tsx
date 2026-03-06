@@ -48,7 +48,7 @@ export default function ArticleOnePage() {
 
             // ── HERO ────────────────────────────────────────────
             const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
+                defaults: { ease: "power3.out", clearProps: "transform" },
             });
 
             heroTl

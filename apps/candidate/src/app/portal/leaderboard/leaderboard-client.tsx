@@ -116,7 +116,7 @@ export default function LeaderboardClient() {
             }
 
             const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             tl.fromTo($1(".lb-kicker"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" })
                 .fromTo(

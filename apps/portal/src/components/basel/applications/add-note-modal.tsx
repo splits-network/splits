@@ -105,7 +105,7 @@ export default function BaselAddNoteModal({
         const body = bodyRef.current;
         if (!backdrop || !box) return;
 
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
         tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 });
         tl.fromTo(
             box,
@@ -133,7 +133,7 @@ export default function BaselAddNoteModal({
 
         if (backdrop && box) {
             const tl = gsap.timeline({
-                defaults: { ease: "power2.in" },
+                defaults: { ease: "power2.in", clearProps: "transform" },
                 onComplete: () => {
                     setMessageText("");
                     setNoteType("general");

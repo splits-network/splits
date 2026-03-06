@@ -9,7 +9,7 @@ import {
     easing,
     stagger,
     prefersReducedMotion,
-} from "@/components/landing/shared/animation-utils";
+} from "@splits-network/basel-ui";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -106,7 +106,7 @@ export function SalaryInsightsContent() {
             const description =
                 heroRef.current.querySelector(".hero-description");
 
-            const tl = gsap.timeline();
+            const tl = gsap.timeline({ defaults: { clearProps: "transform" } });
             if (icon)
                 tl.fromTo(
                     icon,
@@ -156,6 +156,7 @@ export function SalaryInsightsContent() {
             const icons = salariesRef.current.querySelectorAll(".salary-icon");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: salariesRef.current,
                     start: "top 80%",
@@ -211,6 +212,7 @@ export function SalaryInsightsContent() {
             const cards = factorsRef.current.querySelectorAll(".factor-card");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: factorsRef.current,
                     start: "top 80%",

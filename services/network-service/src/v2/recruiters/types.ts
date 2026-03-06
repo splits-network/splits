@@ -10,6 +10,7 @@ export interface RecruiterFilters extends PaginationParams, SortParams {
     specialization?: string;
     filters?: {
         marketplace_enabled?: boolean;
+        company_ids?: string[];
     };
     include?: string;
 }

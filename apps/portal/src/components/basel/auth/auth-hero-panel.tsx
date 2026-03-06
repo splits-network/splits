@@ -53,7 +53,7 @@ export function AuthHeroPanel() {
             const $1 = (s: string) => panelRef.current!.querySelector(s);
 
             const tl = gsap.timeline({
-                defaults: { ease: "power3.out" },
+                defaults: { ease: "power3.out", clearProps: "transform" },
                 delay: 0.3,
             });
 
@@ -95,7 +95,7 @@ export function AuthHeroPanel() {
                     headlineIndex.current =
                         (headlineIndex.current + 1) % HEADLINES.length;
 
-                    const rl = gsap.timeline();
+                    const rl = gsap.timeline({ defaults: { clearProps: "transform" } });
                     rl.to(headlineRef.current, {
                         opacity: 0,
                         y: -12,

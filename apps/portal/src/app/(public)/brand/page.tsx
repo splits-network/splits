@@ -167,7 +167,7 @@ export default function BrandBaselPage() {
             const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             // ── Hero entrance ─────────────────────────────────────
-            const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const heroTl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             heroTl
                 .fromTo(

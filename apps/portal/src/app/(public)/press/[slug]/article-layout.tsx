@@ -49,7 +49,7 @@ export function ArticleLayout({
             const $1 = (s: string) => mainRef.current!.querySelector(s);
 
             /* ── Hero timeline ─────────────────────────────── */
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             tl.fromTo(
                 $1(".article-kicker"),

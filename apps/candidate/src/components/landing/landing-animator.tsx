@@ -50,7 +50,7 @@ export function LandingAnimator({ children }: LandingAnimatorProps) {
             const heroHeadline = q(".hero-headline");
             if (heroHeadline) {
                 const tl = gsap.timeline({
-                    defaults: { ease: EASE.smooth },
+                    defaults: { ease: EASE.smooth, clearProps: "transform" },
                 });
                 tl.fromTo(
                     heroHeadline,

@@ -65,7 +65,7 @@ export function FirmsAnimator({ children, contentRef }: FirmsAnimatorProps) {
             const $1 = (sel: string) => mainRef.current!.querySelector(sel);
 
             const tl = gsap.timeline({
-                defaults: { ease: "power3.out" },
+                defaults: { ease: "power3.out", clearProps: "transform" },
             });
 
             // Hero kicker

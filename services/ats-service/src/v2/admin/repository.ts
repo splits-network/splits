@@ -49,7 +49,7 @@ export class AdminAtsRepository {
 
         let query = this.supabase
             .from('jobs')
-            .select('*, company:companies!inner(id, name, logo_url)', { count: 'exact' });
+            .select('*, company:companies(id, name, logo_url)', { count: 'exact' });
 
         if (params.search) {
             query = query.or(`title.ilike.%${params.search}%,description.ilike.%${params.search}%`);
@@ -60,7 +60,7 @@ export class AdminAtsRepository {
         }
 
         if (params.commute_type) {
-            query = query.eq('commute_type', params.commute_type);
+            query = query.contains('commute_types', [params.commute_type]);
         }
 
         if (params.job_level) {
@@ -121,7 +121,7 @@ export class AdminAtsRepository {
 
         if (params.search) {
             query = query.or(
-                `first_name.ilike.%${params.search}%,last_name.ilike.%${params.search}%,email.ilike.%${params.search}%`
+                `full_name.ilike.%${params.search}%,email.ilike.%${params.search}%`
             );
         }
 
@@ -135,16 +135,12 @@ export class AdminAtsRepository {
 
     async listAssignmentsAdmin(params: AdminListParams): Promise<AdminListResponse<any>> {
         const { page, limit, offset } = paginate(params);
-        const sortBy = params.sort_by || 'created_at';
+        const sortBy = params.sort_by || 'assigned_at';
         const ascending = params.sort_order === 'asc';
 
         let query = this.supabase
-            .from('assignments')
+            .from('role_assignments')
             .select('*, job:jobs(id, title)', { count: 'exact' });
-
-        if (params.status) {
-            query = query.eq('status', params.status);
-        }
 
         query = query.order(sortBy, { ascending }).range(offset, offset + limit - 1);
 
@@ -163,8 +159,8 @@ export class AdminAtsRepository {
             .from('placements')
             .select('*', { count: 'exact' });
 
-        if (params.status) {
-            query = query.eq('status', params.status);
+        if (params.state) {
+            query = query.eq('state', params.state);
         }
 
         if (params.search) {
@@ -219,7 +215,7 @@ export class AdminAtsRepository {
             this.supabase.from('jobs').select('id', { count: 'exact', head: true }),
             this.supabase.from('applications').select('id', { count: 'exact', head: true }),
             this.supabase.from('candidates').select('id', { count: 'exact', head: true }),
-            this.supabase.from('assignments').select('id', { count: 'exact', head: true }),
+            this.supabase.from('role_assignments').select('id', { count: 'exact', head: true }),
             this.supabase.from('placements').select('id', { count: 'exact', head: true }),
         ]);
 

@@ -6,6 +6,7 @@ import {
     useState,
     useEffect,
     useCallback,
+    useMemo,
     type ReactNode,
 } from "react";
 import { useAuth } from "@clerk/nextjs";
@@ -15,6 +16,7 @@ import type { Company, CompanyRecruiterRelationship } from "../types";
 
 interface CompanyContextValue {
     companies: Company[];
+    companyIds: string[];
     canInvite: boolean;
     recruiterRelationships: Map<string, CompanyRecruiterRelationship>;
     refreshRelationships: () => void;
@@ -59,6 +61,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isCompanyUser, isAdmin, profile?.organization_ids]);
 
+    const companyIds = useMemo(() => companies.map((c) => c.id), [companies]);
     const canInvite = (isCompanyUser || isAdmin) && companies.length > 0;
 
     const loadRelationships = useCallback(async () => {
@@ -112,6 +115,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     return (
         <CompanyContext value={{
             companies,
+            companyIds,
             canInvite,
             recruiterRelationships,
             refreshRelationships: loadRelationships,

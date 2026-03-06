@@ -79,6 +79,21 @@ export class RecruiterRepository {
             query = query.eq('marketplace_enabled', params.filters?.marketplace_enabled);
         }
 
+        // Filter by company relationship (for "My Recruiters" toggle)
+        if (params.filters?.company_ids?.length) {
+            const { data: rels } = await this.supabase
+                .from('recruiter_companies')
+                .select('recruiter_id')
+                .in('company_id', params.filters.company_ids)
+                .eq('status', 'active');
+
+            const recruiterIds = rels?.map(r => r.recruiter_id) || [];
+            if (recruiterIds.length === 0) {
+                return { data: [], total: 0 };
+            }
+            query = query.in('id', recruiterIds);
+        }
+
         // Apply sorting
         const sortBy = params.sort_by || 'created_at';
         const sortOrder = params.sort_order?.toLowerCase() === 'asc' ? true : false;

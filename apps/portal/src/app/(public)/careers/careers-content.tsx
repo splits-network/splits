@@ -8,7 +8,7 @@ import {
     duration,
     easing,
     stagger,
-} from "@/components/landing/shared/animation-utils";
+} from "@splits-network/basel-ui";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -99,6 +99,7 @@ export function CareersContent() {
             const content = comingSoonRef.current.querySelector(".coming-soon-content");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: comingSoonRef.current,
                     start: "top 85%",
@@ -149,6 +150,7 @@ export function CareersContent() {
             const icons = whyRef.current.querySelectorAll(".card-icon");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: whyRef.current,
                     start: "top 80%",
@@ -214,6 +216,7 @@ export function CareersContent() {
             const cards = areasRef.current.querySelectorAll(".area-card");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: areasRef.current,
                     start: "top 80%",
@@ -264,6 +267,7 @@ export function CareersContent() {
             const cards = valuesRef.current.querySelectorAll(".value-card");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: valuesRef.current,
                     start: "top 80%",

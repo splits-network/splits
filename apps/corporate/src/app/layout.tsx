@@ -5,6 +5,7 @@ import { ActivityTracker } from "@splits-network/shared-ui";
 import {
     ThemeScript,
     ThemeProvider,
+    GsapInit,
     BaselCookieConsent,
 } from "@splits-network/basel-ui";
 import { JsonLd } from "@splits-network/shared-ui";
@@ -131,6 +132,7 @@ export default async function RootLayout({
                 ></Script>
             </head>
             <body className="antialiased flex flex-col min-h-screen">
+                <GsapInit />
                 <ThemeProvider>
                     <Header navItems={headerNav?.items} />
                     <main className="flex-grow">{children}</main>

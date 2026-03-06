@@ -1,6 +1,5 @@
-// Re-export all animation presets, hooks, and utilities from shared package
+// Animation presets and utilities
 export {
-    // Presets
     easing,
     duration,
     stagger,
@@ -17,12 +16,23 @@ export {
     prefersReducedMotion,
     getAnimationDuration,
     createStagger,
-    // Hooks
+} from './presets';
+
+// GSAP animation hooks
+export {
     useScrollFadeUp,
     useScrollStagger,
     useScrollScaleIn,
     useParallax,
     useScrollTimeline,
     useAnimatedCounter,
-    initGsapDefaults,
-} from '@splits-network/basel-ui';
+} from './use-gsap-animations';
+
+// Article-specific animations
+export { useArticleAnimations } from './use-article-animations';
+
+// Global GSAP defaults initializer
+export { initGsapDefaults } from './gsap-defaults';
+
+// Drop-in client component for root layouts
+export { GsapInit } from './gsap-init';

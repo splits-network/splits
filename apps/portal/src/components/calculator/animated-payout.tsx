@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
-import { duration, easing } from '@/components/landing/shared/animation-utils';
+import { duration, easing } from '@splits-network/basel-ui';
 
 interface AnimatedPayoutProps {
   value: number;

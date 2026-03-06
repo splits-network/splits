@@ -107,7 +107,7 @@ export default function BaselSettingsContent({
             const $1 = (s: string) => mainRef.current!.querySelector(s);
             const $ = (s: string) => mainRef.current!.querySelectorAll(s);
 
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             tl.fromTo(
                 $1(".settings-kicker"),

@@ -10,7 +10,7 @@ import {
     duration,
     easing,
     stagger,
-} from "@/components/landing/shared/animation-utils";
+} from "@splits-network/basel-ui";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -140,6 +140,7 @@ export function BlogContent() {
             );
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: comingSoonRef.current,
                     start: "top 85%",
@@ -190,6 +191,7 @@ export function BlogContent() {
             const icons = topicsRef.current.querySelectorAll(".card-icon");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: topicsRef.current,
                     start: "top 80%",
@@ -288,6 +290,7 @@ export function BlogContent() {
                 resourcesRef.current.querySelectorAll(".resource-card");
 
             const tl = gsap.timeline({
+                defaults: { clearProps: "transform" },
                 scrollTrigger: {
                     trigger: resourcesRef.current,
                     start: "top 80%",

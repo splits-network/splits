@@ -1202,7 +1202,7 @@ export default function DashboardOne() {
 
             // ── Header entrance ──────────────────────────────────
             const headerTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
+                defaults: { ease: "power3.out", clearProps: "transform" },
             });
 
             headerTl

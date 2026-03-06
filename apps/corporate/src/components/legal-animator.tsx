@@ -28,7 +28,7 @@ export function LegalBaselAnimator({ children }: { children: ReactNode }) {
             const $$ = (sel: string) => Array.from(c.querySelectorAll(sel));
 
             // ─── HERO ────────────────────────────────────────────────
-            const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const heroTl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             const heroKicker = $1(".bl-hero-kicker");
             if (heroKicker) {

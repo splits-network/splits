@@ -34,7 +34,7 @@ export function AuthShell({ children }: AuthShellProps) {
         const ctx = gsap.context(() => {
             const $1 = (s: string) => shellRef.current!.querySelector(s);
 
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             const logo = $1(".auth-logo");
             if (logo) {

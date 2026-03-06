@@ -77,7 +77,7 @@ function animateModalOpen(
     boxEl: HTMLElement | null,
 ) {
     if (!backdropEl || !boxEl) return;
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
     tl.fromTo(backdropEl, { opacity: 0 }, { opacity: 1, duration: 0.3 });
     tl.fromTo(
         boxEl,
@@ -97,7 +97,7 @@ function animateModalClose(
         return;
     }
     const tl = gsap.timeline({
-        defaults: { ease: "power2.in" },
+        defaults: { ease: "power2.in", clearProps: "transform" },
         onComplete,
     });
     tl.to(boxEl, { opacity: 0, y: 30, scale: 0.97, duration: 0.25 });
@@ -142,7 +142,7 @@ export default function ModalsOne() {
         ).matches;
         if (prefersReducedMotion) return;
 
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
         tl.fromTo(
             pageRef.current.querySelector(".page-kicker"),
             { opacity: 0, y: 20 },

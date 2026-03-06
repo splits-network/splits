@@ -80,7 +80,7 @@ export default function ApplicationWizardModal({
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
             return;
 
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
         tl.fromTo(
             backdropRef.current,
             { opacity: 0 },
@@ -117,7 +117,7 @@ export default function ApplicationWizardModal({
                 return;
             }
             const tl = gsap.timeline({
-                defaults: { ease: "power2.in" },
+                defaults: { ease: "power2.in", clearProps: "transform" },
                 onComplete,
             });
             tl.to(boxRef.current, {

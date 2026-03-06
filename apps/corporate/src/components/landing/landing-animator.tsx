@@ -44,7 +44,7 @@ export function LandingAnimator({ children }: LandingAnimatorProps) {
             // ════════════════════════════════════════
             // HERO
             // ════════════════════════════════════════
-            const heroTl = gsap.timeline({ defaults: { ease: E.smooth } });
+            const heroTl = gsap.timeline({ defaults: { ease: E.smooth, clearProps: "transform" } });
 
             heroTl.fromTo(
                 $1(".hero-headline"),

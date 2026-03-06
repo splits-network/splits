@@ -10,7 +10,7 @@
 import { useRef } from 'react';
 import type { ContentBlock } from '@splits-network/shared-types';
 import { BaselArticleRenderer } from './basel-article-renderer';
-import { useArticleAnimations } from './animations/use-article-animations';
+import { useArticleAnimations } from '../animations/use-article-animations';
 
 export interface BaselArticleAnimatedProps {
     blocks: ContentBlock[];

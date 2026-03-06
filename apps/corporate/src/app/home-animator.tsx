@@ -45,7 +45,7 @@ export function HomeBaselAnimator({ children }: { children: React.ReactNode }) {
             if (!c) return;
 
             // ─── HERO ────────────────────────────────────────────────
-            const heroTl = gsap.timeline({ defaults: { ease: E.smooth } });
+            const heroTl = gsap.timeline({ defaults: { ease: E.smooth, clearProps: "transform" } });
 
             const heroKicker = $1(".bh-hero-kicker", c);
             const heroWords = $$(".bh-hero-word", c);

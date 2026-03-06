@@ -1,5 +1,9 @@
 /**
- * Animation utilities and presets for consistent animations across landing page
+ * GSAP Animation Presets
+ *
+ * Consolidated from apps/portal, apps/corporate, apps/candidate animation-utils.ts.
+ * All transform-based presets include `clearProps: "transform"` to prevent
+ * residual inline transforms from creating CSS stacking contexts.
  *
  * Style: Medium Impact
  * - Noticeable reveals that catch attention without overwhelming
@@ -88,11 +92,12 @@ export const scrollTrigger = {
 
 // =============================================================================
 // ANIMATION PRESETS (for gsap.fromTo)
+// All include clearProps: "transform" to remove residual transforms
 // =============================================================================
 
 export const fadeUp = {
   from: { opacity: 0, y: 40 },
-  to: { opacity: 1, y: 0, duration: duration.normal, ease: easing.smooth },
+  to: { opacity: 1, y: 0, clearProps: 'transform', duration: duration.normal, ease: easing.smooth },
 } as const;
 
 export const fadeIn = {
@@ -102,22 +107,22 @@ export const fadeIn = {
 
 export const scaleIn = {
   from: { opacity: 0, scale: 0.9 },
-  to: { opacity: 1, scale: 1, duration: duration.normal, ease: easing.bounce },
+  to: { opacity: 1, scale: 1, clearProps: 'transform', duration: duration.normal, ease: easing.bounce },
 } as const;
 
 export const slideFromLeft = {
   from: { opacity: 0, x: -50 },
-  to: { opacity: 1, x: 0, duration: duration.normal, ease: easing.smooth },
+  to: { opacity: 1, x: 0, clearProps: 'transform', duration: duration.normal, ease: easing.smooth },
 } as const;
 
 export const slideFromRight = {
   from: { opacity: 0, x: 50 },
-  to: { opacity: 1, x: 0, duration: duration.normal, ease: easing.smooth },
+  to: { opacity: 1, x: 0, clearProps: 'transform', duration: duration.normal, ease: easing.smooth },
 } as const;
 
 export const popIn = {
   from: { opacity: 0, scale: 0 },
-  to: { opacity: 1, scale: 1, duration: duration.fast, ease: easing.bounce },
+  to: { opacity: 1, scale: 1, clearProps: 'transform', duration: duration.fast, ease: easing.bounce },
 } as const;
 
 // =============================================================================
@@ -126,12 +131,14 @@ export const popIn = {
 
 export const hoverLift = {
   y: -4,
+  clearProps: 'transform',
   duration: duration.fast,
   ease: easing.smooth,
 } as const;
 
 export const hoverScale = {
   scale: 1.02,
+  clearProps: 'transform',
   duration: duration.fast,
   ease: easing.smooth,
 } as const;
@@ -144,6 +151,7 @@ export const iconWiggle = {
     { rotation: -5 },
     { rotation: 0 },
   ],
+  clearProps: 'transform',
   duration: 0.5,
   ease: easing.smooth,
 } as const;

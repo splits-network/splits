@@ -133,7 +133,7 @@ export default function ProfilesOne() {
                 return;
             const $ = (s: string) => mainRef.current!.querySelectorAll(s);
             const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
             tl.fromTo(
                 $1(".profile-avatar"),
                 { opacity: 0, scale: 0.9 },

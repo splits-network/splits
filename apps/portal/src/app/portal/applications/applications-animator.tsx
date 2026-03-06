@@ -43,7 +43,7 @@ export function ApplicationsAnimator({ children }: { children: ReactNode }) {
 
             // Hero entrance timeline
             const heroTl = gsap.timeline({
-                defaults: { ease: E.smooth },
+                defaults: { ease: E.smooth, clearProps: "transform" },
             });
 
             const kicker = $1(".hero-kicker");

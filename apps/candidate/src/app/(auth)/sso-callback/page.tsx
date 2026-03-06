@@ -194,7 +194,7 @@ function SSOCallbackInner() {
             const $ = (s: string) => mainRef.current!.querySelectorAll(s);
             const $1 = (s: string) => mainRef.current!.querySelector(s);
 
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
 
             const logo = $1(".sso-logo");
             if (logo)
