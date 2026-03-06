@@ -33,6 +33,7 @@ export interface RecruiterWithUser extends MarketplaceRecruiterDTO {
 export interface MarketplaceFilters {
     status?: string;
     marketplace_enabled?: boolean;
+    company_ids?: string[];
 }
 
 /**

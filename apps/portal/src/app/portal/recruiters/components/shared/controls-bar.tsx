@@ -21,6 +21,7 @@ interface ControlsBarProps {
     viewMode: BaselViewMode;
     onViewModeChange: (mode: BaselViewMode) => void;
     canInvite: boolean;
+    companyIds: string[];
     onInvite: () => void;
     recruiterCount: number;
     totalCount: number;
@@ -36,16 +37,36 @@ export function ControlsBar({
     viewMode,
     onViewModeChange,
     canInvite,
+    companyIds,
     onInvite,
     recruiterCount,
     totalCount,
     loading,
     refresh,
 }: ControlsBarProps) {
+    const showingMyRecruiters = !!filters.company_ids?.length;
+
     return (
         <BaselControlsBarShell
             filters={
                 <>
+                    {canInvite && (
+                        <div className="join">
+                            <button
+                                className={`join-item btn btn-sm rounded-none ${!showingMyRecruiters ? "btn-active" : ""}`}
+                                onClick={() => onFilterChange("company_ids", undefined)}
+                            >
+                                All Recruiters
+                            </button>
+                            <button
+                                className={`join-item btn btn-sm rounded-none ${showingMyRecruiters ? "btn-active" : ""}`}
+                                onClick={() => onFilterChange("company_ids", companyIds)}
+                            >
+                                My Recruiters
+                            </button>
+                        </div>
+                    )}
+
                     <SearchInput
                         value={searchInput}
                         onChange={onSearchChange}

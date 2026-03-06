@@ -75,7 +75,7 @@ function RecruitersContent() {
     }, [selectedRecruiterId, viewMode, pathname, router]);
 
     /* ── Permissions ── */
-    const { canInvite } = useCompanyContext();
+    const { canInvite, companyIds } = useCompanyContext();
 
     /* ── Data ── */
     const {
@@ -165,6 +165,7 @@ function RecruitersContent() {
                 viewMode={viewMode}
                 onViewModeChange={handleViewModeChange}
                 canInvite={canInvite}
+                companyIds={companyIds}
                 onInvite={() => {
                     /* handled by controls bar invite button flow */
                 }}
