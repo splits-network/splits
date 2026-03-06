@@ -76,8 +76,15 @@ export function PanelHeader({
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
                         {badges?.map((b) => (
-                            <span key={b.label} className={`badge ${b.className}`}>
-                                {b.icon && <i className={`fa-duotone fa-regular fa-${b.icon} mr-1`} />}
+                            <span
+                                key={b.label}
+                                className={`badge ${b.className}`}
+                            >
+                                {b.icon && (
+                                    <i
+                                        className={`fa-duotone fa-regular fa-${b.icon} mr-1`}
+                                    />
+                                )}
                                 {b.label}
                             </span>
                         ))}
@@ -128,12 +135,19 @@ export function PanelHeader({
                                             href={m.href}
                                             className="flex items-center gap-1.5 hover:text-primary transition-colors"
                                         >
-                                            <i className={`${m.icon} text-xs`} />
+                                            <i
+                                                className={`${m.icon} text-xs`}
+                                            />
                                             {m.text}
                                         </a>
                                     ) : (
-                                        <span key={i} className="flex items-center gap-1.5">
-                                            <i className={`${m.icon} text-xs`} />
+                                        <span
+                                            key={i}
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <i
+                                                className={`${m.icon} text-xs`}
+                                            />
                                             {m.text}
                                         </span>
                                     ),
@@ -149,11 +163,16 @@ export function PanelHeader({
                 {/* Stats strip */}
                 {hasStats && (
                     <div
-                        className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
-                        style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
+                        className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6 "
+                        style={{
+                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                        }}
                     >
                         {stats.map((stat, i) => (
-                            <div key={stat.label} className="flex items-center gap-2.5 px-3 py-4">
+                            <div
+                                key={stat.label}
+                                className="flex items-center gap-2.5 px-3 py-4"
+                            >
                                 <div
                                     className={`w-9 h-9 flex items-center justify-center shrink-0 ${ICON_STYLES[i % ICON_STYLES.length]}`}
                                 >
