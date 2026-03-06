@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useSignIn, useAuth } from '@clerk/nextjs';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { FormEvent, useState, useEffect } from 'react';
+import { useSignIn, useAuth, GoogleOneTap } from "@clerk/nextjs";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useState, useEffect } from "react";
 
 export default function SignInPage() {
     const { isLoaded, signIn, setActive } = useSignIn();
@@ -10,26 +10,26 @@ export default function SignInPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const redirectUrl = searchParams.get('redirect_url');
+    const redirectUrl = searchParams.get("redirect_url");
 
     useEffect(() => {
         if (isLoaded && isSignedIn) {
-            router.push(redirectUrl || '/secure');
+            router.push(redirectUrl || "/secure");
         }
     }, [isLoaded, isSignedIn, router, redirectUrl]);
 
     const signInWithGoogle = () => {
         if (!isLoaded) return;
         signIn.authenticateWithRedirect({
-            strategy: 'oauth_google',
-            redirectUrl: '/sso-callback',
-            redirectUrlComplete: redirectUrl || '/secure',
+            strategy: "oauth_google",
+            redirectUrl: "/sso-callback",
+            redirectUrlComplete: redirectUrl || "/secure",
         });
     };
 
@@ -37,7 +37,7 @@ export default function SignInPage() {
         e.preventDefault();
         if (!isLoaded) return;
 
-        setError('');
+        setError("");
         setIsLoading(true);
 
         try {
@@ -46,30 +46,39 @@ export default function SignInPage() {
                 password,
             });
 
-            if (signInAttempt.status === 'complete') {
+            if (signInAttempt.status === "complete") {
                 await setActive({ session: signInAttempt.createdSessionId });
-                router.push(redirectUrl || '/secure');
+                router.push(redirectUrl || "/secure");
             } else {
-                setError(`Authentication incomplete (${signInAttempt.status}). Please contact support.`);
+                setError(
+                    `Authentication incomplete (${signInAttempt.status}). Please contact support.`,
+                );
             }
         } catch (err: any) {
             if (err.errors && err.errors.length > 0) {
                 const clerkError = err.errors[0];
                 switch (clerkError.code) {
-                    case 'form_identifier_not_found':
-                        setError('No account found with this email address.');
+                    case "form_identifier_not_found":
+                        setError("No account found with this email address.");
                         break;
-                    case 'form_password_incorrect':
-                        setError('Incorrect password. Please try again.');
+                    case "form_password_incorrect":
+                        setError("Incorrect password. Please try again.");
                         break;
-                    case 'too_many_requests':
-                        setError('Too many sign-in attempts. Please wait a moment and try again.');
+                    case "too_many_requests":
+                        setError(
+                            "Too many sign-in attempts. Please wait a moment and try again.",
+                        );
                         break;
                     default:
-                        setError(clerkError.message || 'Invalid email or password.');
+                        setError(
+                            clerkError.message || "Invalid email or password.",
+                        );
                 }
             } else {
-                setError(err.message || 'An unexpected error occurred. Please try again.');
+                setError(
+                    err.message ||
+                        "An unexpected error occurred. Please try again.",
+                );
             }
         } finally {
             setIsLoading(false);
@@ -79,7 +88,9 @@ export default function SignInPage() {
     return (
         <>
             <div className="mb-6">
-                <h2 className="text-2xl font-black tracking-tight">Admin Sign In</h2>
+                <h2 className="text-2xl font-black tracking-tight">
+                    Admin Sign In
+                </h2>
                 <p className="text-sm text-base-content/50 mt-1">
                     Sign in with your admin account.
                 </p>
@@ -93,19 +104,24 @@ export default function SignInPage() {
             )}
 
             <div className="mb-6">
+                <GoogleOneTap />
                 <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
                     onClick={signInWithGoogle}
                 >
                     <i className="fa-brands fa-google text-lg" />
-                    <span className="text-sm font-semibold">Continue with Google</span>
+                    <span className="text-sm font-semibold">
+                        Continue with Google
+                    </span>
                 </button>
             </div>
 
             <div className="flex items-center gap-3 mb-6">
                 <div className="flex-1 h-px bg-base-300" />
-                <span className="text-xs text-base-content/30 uppercase tracking-widest">or</span>
+                <span className="text-xs text-base-content/30 uppercase tracking-widest">
+                    or
+                </span>
                 <div className="flex-1 h-px bg-base-300" />
             </div>
 
@@ -123,7 +139,7 @@ export default function SignInPage() {
                             value={email}
                             onChange={(e) => {
                                 setEmail(e.target.value);
-                                setError('');
+                                setError("");
                             }}
                             placeholder="you@company.com"
                             className="grow"
@@ -139,11 +155,11 @@ export default function SignInPage() {
                     <label className="input input-bordered w-full">
                         <i className="fa-duotone fa-regular fa-lock opacity-50" />
                         <input
-                            type={showPassword ? 'text' : 'password'}
+                            type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => {
                                 setPassword(e.target.value);
-                                setError('');
+                                setError("");
                             }}
                             placeholder="Enter your password"
                             className="grow"
@@ -154,7 +170,9 @@ export default function SignInPage() {
                             onClick={() => setShowPassword(!showPassword)}
                             className="text-base-content/30 hover:text-base-content/60"
                         >
-                            <i className={`fa-duotone fa-regular fa-eye${showPassword ? '-slash' : ''}`} />
+                            <i
+                                className={`fa-duotone fa-regular fa-eye${showPassword ? "-slash" : ""}`}
+                            />
                         </button>
                     </label>
                 </fieldset>
@@ -170,7 +188,7 @@ export default function SignInPage() {
                             Signing in...
                         </>
                     ) : (
-                        'Sign In'
+                        "Sign In"
                     )}
                 </button>
             </form>
