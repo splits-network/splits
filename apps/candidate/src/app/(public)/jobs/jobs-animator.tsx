@@ -159,7 +159,7 @@ export function JobsAnimator({
     );
 
     return (
-        <main ref={mainRef} className="overflow-hidden min-h-screen">
+        <main ref={mainRef} className="">
             {children}
         </main>
     );

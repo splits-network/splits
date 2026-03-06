@@ -457,7 +457,7 @@ export default function ListsOnePage() {
     );
 
     return (
-        <main ref={mainRef} className="overflow-hidden min-h-screen">
+        <main ref={mainRef} className="">
             {/* ═══════════════════════════════════════════════════════
                 HERO — Compact split-screen header
                ═══════════════════════════════════════════════════════ */}

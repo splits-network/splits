@@ -7,6 +7,7 @@ import { BaselWizardModal, BaselAlertBox } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
+import { useUserProfile } from "@/contexts";
 import type {
     Job,
     Candidate,
@@ -52,6 +53,7 @@ export default function BaselSubmitCandidateWizard({
 }: BaselSubmitCandidateWizardProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+    const { isRecruiter } = useUserProfile();
 
     // Wizard state
     const [currentStep, setCurrentStep] = useState(0);
@@ -85,6 +87,7 @@ export default function BaselSubmitCandidateWizard({
     const [candidatePage, setCandidatePage] = useState(1);
     const [candidateTotalPages, setCandidateTotalPages] = useState(1);
     const [candidateTotalCount, setCandidateTotalCount] = useState(0);
+    const [suggestedCandidates, setSuggestedCandidates] = useState<Candidate[]>([]);
 
     // Details state
     const [pitch, setPitch] = useState("");
@@ -263,12 +266,15 @@ export default function BaselSubmitCandidateWizard({
                     search: debouncedCandidateSearch || undefined,
                     sort_by: "created_at",
                     sort_order: "desc",
+                    ...(isRecruiter ? { scope: "mine" } : {}),
                 };
 
                 const response = await client.get("/candidates", { params });
 
+                let resultCount = 0;
                 if (response.data?.data) {
                     setCandidates(response.data.data);
+                    resultCount = response.data.data.length;
                     if (response.data.pagination) {
                         setCandidateTotalPages(
                             response.data.pagination.total_pages || 1,
@@ -276,15 +282,32 @@ export default function BaselSubmitCandidateWizard({
                         setCandidateTotalCount(
                             response.data.pagination.total || 0,
                         );
+                        resultCount = response.data.pagination.total || 0;
                     }
                 } else if (Array.isArray(response.data)) {
                     setCandidates(response.data);
                     setCandidateTotalPages(1);
                     setCandidateTotalCount(response.data.length);
+                    resultCount = response.data.length;
                 } else {
                     setCandidates([]);
                     setCandidateTotalPages(1);
                     setCandidateTotalCount(0);
+                }
+
+                // For recruiters with no represented candidates, fetch suggestions
+                if (isRecruiter && resultCount === 0 && !debouncedCandidateSearch) {
+                    try {
+                        const suggestResponse = await client.get("/candidates", {
+                            params: { limit: 5, sort_by: "created_at", sort_order: "desc" },
+                        });
+                        const suggestions = suggestResponse.data?.data || (Array.isArray(suggestResponse.data) ? suggestResponse.data : []);
+                        setSuggestedCandidates(suggestions.slice(0, 5));
+                    } catch {
+                        setSuggestedCandidates([]);
+                    }
+                } else {
+                    setSuggestedCandidates([]);
                 }
             } catch (err: any) {
                 console.error("Failed to load candidates:", err);
@@ -295,7 +318,7 @@ export default function BaselSubmitCandidateWizard({
         }
 
         loadCandidates();
-    }, [currentStepId, candidatePage, debouncedCandidateSearch]);
+    }, [currentStepId, candidatePage, debouncedCandidateSearch, isRecruiter]);
 
     /* ── Load candidate documents ──────────────────────────────────────── */
 
@@ -513,6 +536,8 @@ export default function BaselSubmitCandidateWizard({
                     candidateTotalPages={candidateTotalPages}
                     candidateTotalCount={candidateTotalCount}
                     onPageChange={setCandidatePage}
+                    isRecruiter={isRecruiter}
+                    suggestedCandidates={suggestedCandidates}
                 />
             )}
 

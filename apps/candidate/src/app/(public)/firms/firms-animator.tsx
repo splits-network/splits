@@ -74,7 +74,12 @@ export function FirmsAnimator({ children, contentRef }: FirmsAnimatorProps) {
                 tl.fromTo(
                     kicker,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        clearProps: "transform",
+                    },
                 );
             }
 
@@ -102,7 +107,12 @@ export function FirmsAnimator({ children, contentRef }: FirmsAnimatorProps) {
                 tl.fromTo(
                     subtitle,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.7,
+                        clearProps: "transform",
+                    },
                     "-=0.5",
                 );
             }
@@ -113,7 +123,12 @@ export function FirmsAnimator({ children, contentRef }: FirmsAnimatorProps) {
                 tl.fromTo(
                     statBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        clearProps: "transform",
+                    },
                     "-=0.3",
                 );
             }
@@ -124,7 +139,12 @@ export function FirmsAnimator({ children, contentRef }: FirmsAnimatorProps) {
                 tl.fromTo(
                     controlsBar,
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        clearProps: "transform",
+                    },
                     "-=0.2",
                 );
             }
@@ -135,7 +155,12 @@ export function FirmsAnimator({ children, contentRef }: FirmsAnimatorProps) {
                 tl.fromTo(
                     contentArea,
                     { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7, clearProps: "transform" },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.7,
+                        clearProps: "transform",
+                    },
                     "-=0.3",
                 );
             }
@@ -161,7 +186,7 @@ export function FirmsAnimator({ children, contentRef }: FirmsAnimatorProps) {
     );
 
     return (
-        <main ref={mainRef} className="overflow-hidden min-h-screen">
+        <main ref={mainRef} className="">
             {children}
         </main>
     );
