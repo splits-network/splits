@@ -94,13 +94,9 @@ export class AdminAtsRepository {
         let query = this.supabase
             .from('applications')
             .select(
-                '*, job:jobs(id, title), candidate:candidates(id, first_name, last_name, email)',
+                '*, job:jobs(id, title), candidate:candidates(id, full_name, email)',
                 { count: 'exact' }
             );
-
-        if (params.status) {
-            query = query.eq('status', params.status);
-        }
 
         if (params.stage) {
             query = query.eq('stage', params.stage);

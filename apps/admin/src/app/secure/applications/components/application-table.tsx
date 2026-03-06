@@ -5,11 +5,9 @@ import { AdminDataTable, type Column } from '@/components/shared';
 type Application = {
     id: string;
     stage: string | null;
-    status: string;
     candidate?: {
         id: string;
-        first_name: string;
-        last_name: string;
+        full_name: string;
         email: string;
     } | null;
     job?: {
@@ -44,13 +42,6 @@ const STAGE_BADGE: Record<string, string> = {
     withdrawn: 'badge-ghost',
 };
 
-const STATUS_BADGE: Record<string, string> = {
-    active: 'badge-success',
-    pending: 'badge-warning',
-    closed: 'badge-ghost',
-    rejected: 'badge-error',
-};
-
 function formatDate(iso: string) {
     return new Date(iso).toLocaleDateString('en-US', {
         month: 'short',
@@ -67,7 +58,7 @@ export function ApplicationTable({ data, loading, sortField, sortDir, onSort }: 
             render: (item) => item.candidate ? (
                 <div>
                     <p className="font-medium text-sm">
-                        {item.candidate.first_name} {item.candidate.last_name}
+                        {item.candidate.full_name}
                     </p>
                     <p className="text-sm text-base-content/50">{item.candidate.email}</p>
                 </div>
@@ -96,15 +87,6 @@ export function ApplicationTable({ data, loading, sortField, sortDir, onSort }: 
                 </span>
             ) : (
                 <span className="text-base-content/40 text-sm">—</span>
-            ),
-        },
-        {
-            key: 'status',
-            label: 'Status',
-            render: (item) => (
-                <span className={`badge badge-sm capitalize ${STATUS_BADGE[item.status] ?? 'badge-ghost'}`}>
-                    {item.status}
-                </span>
             ),
         },
         {

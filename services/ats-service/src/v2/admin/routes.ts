@@ -84,7 +84,6 @@ export function registerAdminAtsRoutes(
                 search: params.search,
                 sort_by: params.sort_by,
                 sort_order: params.sort_order,
-                status: params.status,
                 stage: params.stage,
             });
             reply.send(result);
