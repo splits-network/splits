@@ -276,8 +276,9 @@ export default function RecruiterView() {
                 <MarketplaceProfileBanner />
 
                 {/* ── SECTION 2: KPIs ── */}
-                <section className="bg-base-200 py-4 lg:py-6 px-4 lg:px-6">
-                    <KpiGrid cols={5}>
+                <section className="bg-base-200 py-4 lg:py-6 px-4 lg:px-6 space-y-3">
+                    {/* Primary metrics */}
+                    <KpiGrid cols={4}>
                         <BaselKpiCard
                             label="Pipeline Value"
                             value={
@@ -300,16 +301,6 @@ export default function RecruiterView() {
                             {...formatTrend(stats.trends?.active_roles)}
                         />
                         <BaselKpiCard
-                            label="Submissions MTD"
-                            value={
-                                statsLoading
-                                    ? "--"
-                                    : stats.submissions_mtd.toLocaleString()
-                            }
-                            icon="fa-duotone fa-regular fa-paper-plane"
-                            color="accent"
-                        />
-                        <BaselKpiCard
                             label="Placements YTD"
                             value={
                                 statsLoading
@@ -328,9 +319,25 @@ export default function RecruiterView() {
                                     : formatCurrency(stats.total_earnings_ytd)
                             }
                             icon="fa-duotone fa-regular fa-coins"
+                            color="accent"
+                        />
+                    </KpiGrid>
+
+                    {/* Secondary metrics — compact */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+                        <BaselKpiCard
+                            size="compact"
+                            label="Submissions MTD"
+                            value={
+                                statsLoading
+                                    ? "--"
+                                    : stats.submissions_mtd.toLocaleString()
+                            }
+                            icon="fa-duotone fa-regular fa-paper-plane"
                             color="primary"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Candidates Active"
                             value={
                                 statsLoading
@@ -344,6 +351,7 @@ export default function RecruiterView() {
                             )}
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Offers Pending"
                             value={
                                 statsLoading
@@ -354,6 +362,7 @@ export default function RecruiterView() {
                             color="warning"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Pending Payouts"
                             value={
                                 statsLoading
@@ -364,6 +373,7 @@ export default function RecruiterView() {
                             color="secondary"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Needs Attention"
                             value={
                                 statsLoading
@@ -374,6 +384,7 @@ export default function RecruiterView() {
                             color="error"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="Awaiting Review"
                             value={
                                 statsLoading
@@ -384,6 +395,7 @@ export default function RecruiterView() {
                             color="accent"
                         />
                         <BaselKpiCard
+                            size="compact"
                             label="New Matches"
                             value={
                                 matchesLoading
@@ -393,7 +405,7 @@ export default function RecruiterView() {
                             icon="fa-duotone fa-regular fa-bullseye"
                             color="info"
                         />
-                    </KpiGrid>
+                    </div>
                 </section>
 
                 {/* ── SECTION 3: Charts ── */}

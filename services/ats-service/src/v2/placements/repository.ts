@@ -92,7 +92,7 @@ export class PlacementRepository {
 
         // Apply filters
         if (filters.search) {
-            const tsquery = filters.search.split(/\s+/).filter((t: string) => t.trim()).join(' & ');
+            const tsquery = filters.search.replace(/[@+._\-\/:]/g, ' ').trim().split(/\s+/).filter((t: string) => t).join(' & ');
             query = query.textSearch('search_vector', tsquery, {
                 type: 'websearch',
                 config: 'english'

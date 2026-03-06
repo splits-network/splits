@@ -22,6 +22,8 @@ export interface BaselKpiCardProps {
     trend?: string;
     /** Whether the trend is positive */
     trendUp?: boolean;
+    /** Card size: "default" for hero KPIs, "compact" for secondary metrics */
+    size?: "default" | "compact";
     /** Additional className on the container */
     className?: string;
     /** Ref forwarded to the container for GSAP targeting */
@@ -33,8 +35,8 @@ export interface BaselKpiCardProps {
 /**
  * Basel KPI card — the definitive Basel dashboard stat card.
  *
- * Features `border-t-4` top accent, square icon container, massive `font-black`
- * value, small uppercase label, and optional trend indicator.
+ * **default**: `border-t-4` top accent, square icon, massive `font-black` value.
+ * **compact**: `border-l-4` left accent, horizontal layout, smaller footprint.
  *
  * CSS hook: `.kpi-card`
  */
@@ -45,35 +47,73 @@ export function BaselKpiCard({
     color = "primary",
     trend,
     trendUp,
+    size = "default",
     className,
     containerRef,
 }: BaselKpiCardProps) {
+    if (size === "compact") {
+        return (
+            <div
+                ref={containerRef}
+                className={`kpi-card bg-base-100 border-l-4 ${semanticBorder[color]} px-3 py-2 ${className || ""}`}
+            >
+                <div className="flex items-center gap-3 mb-0.5">
+                    <div
+                        className={`w-8 h-8 ${semanticBg10[color]} flex items-center justify-center shrink-0`}
+                    >
+                        <i className={`${icon} text-sm ${semanticText[color]}`} />
+                    </div>
+                    <div className="flex-1 flex items-baseline justify-end gap-2">
+                        <div className="text-xl font-black tracking-tight text-base-content leading-none">
+                            {value}
+                        </div>
+                        {trend && (
+                            <div
+                                className={`flex items-center gap-1 text-sm font-semibold ${trendUp ? "text-success" : "text-error"}`}
+                            >
+                                <i
+                                    className={`fa-solid ${trendUp ? "fa-arrow-up" : "fa-arrow-down"} text-xs`}
+                                />
+                                {trend}
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="text-sm uppercase tracking-wider text-base-content/50">
+                    {label}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div
             ref={containerRef}
-            className={`kpi-card bg-base-100 border-t-4 ${semanticBorder[color]} p-6 ${className || ""}`}
+            className={`kpi-card bg-base-100 border-t-4 ${semanticBorder[color]} p-5 ${className || ""}`}
         >
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-4 mb-1">
                 <div
-                    className={`w-12 h-12 ${semanticBg10[color]} flex items-center justify-center`}
+                    className={`w-12 h-12 ${semanticBg10[color]} flex items-center justify-center shrink-0`}
                 >
                     <i className={`${icon} text-xl ${semanticText[color]}`} />
                 </div>
-                {trend && (
-                    <div
-                        className={`flex items-center gap-1 text-sm font-semibold ${trendUp ? "text-success" : "text-error"}`}
-                    >
-                        <i
-                            className={`fa-solid ${trendUp ? "fa-arrow-up" : "fa-arrow-down"} text-xs`}
-                        />
-                        {trend}
+                <div className="flex-1 flex items-baseline justify-end gap-2">
+                    <div className="text-2xl md:text-3xl font-black tracking-tight text-base-content leading-none">
+                        {value}
                     </div>
-                )}
+                    {trend && (
+                        <div
+                            className={`flex items-center gap-1 text-sm font-semibold ${trendUp ? "text-success" : "text-error"}`}
+                        >
+                            <i
+                                className={`fa-solid ${trendUp ? "fa-arrow-up" : "fa-arrow-down"} text-xs`}
+                            />
+                            {trend}
+                        </div>
+                    )}
+                </div>
             </div>
-            <div className="text-3xl md:text-4xl font-black tracking-tight text-base-content">
-                {value}
-            </div>
-            <div className="text-sm uppercase tracking-wider text-base-content/50 mt-1">
+            <div className="text-sm uppercase tracking-wider text-base-content/50">
                 {label}
             </div>
         </div>

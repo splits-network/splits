@@ -63,10 +63,11 @@ export class SearchService {
             throw new ValidationError('Query must be a string');
         }
 
-        // Sanitize: trim, remove null bytes, collapse whitespace
+        // Sanitize: trim, remove null bytes, normalize special chars to match indexing
         let sanitized = q
             .trim()
             .replace(/\0/g, '') // Remove null bytes
+            .replace(/[@+._\-\/:]/g, ' ') // Normalize special chars to match tsvector indexing
             .replace(/\s+/g, ' '); // Collapse consecutive whitespace
 
         // Limit length

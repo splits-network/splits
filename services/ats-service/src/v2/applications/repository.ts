@@ -146,8 +146,8 @@ export class ApplicationRepository {
 
         // Apply full-text search across all application fields
         if (filters.search) {
-            // Multi-word search: split and join with ' & ' for AND logic
-            const tsquery = filters.search.split(/\s+/).filter((t: string) => t.trim()).join(' & ');
+            // Normalize special chars to match indexing, then AND-join for tsquery
+            const tsquery = filters.search.replace(/[@+._\-\/:]/g, ' ').trim().split(/\s+/).filter((t: string) => t).join(' & ');
             query = query.textSearch('search_vector', tsquery, {
                 type: 'websearch',
                 config: 'english'
