@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import gsap from "gsap";
@@ -395,12 +396,22 @@ function MobileMenuContent({
 
 function ChatTrigger() {
     const sidebar = useChatSidebarOptional();
+    const router = useRouter();
     if (!sidebar) return null;
+
+    const handleClick = () => {
+        // On mobile, navigate to full messages page instead of opening sidebar widget
+        if (window.innerWidth < 768) {
+            router.push("/portal/messages");
+        } else {
+            sidebar.openToList();
+        }
+    };
 
     return (
         <button
             type="button"
-            onClick={sidebar.openToList}
+            onClick={handleClick}
             className="btn btn-ghost btn-md btn-square"
             aria-label="Open messages"
             title="Messages"
