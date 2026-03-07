@@ -5,12 +5,10 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useUserProfile } from "@/contexts";
 import { redirect } from "next/navigation";
 import { LoadingState } from "@splits-network/shared-ui";
-import { BaselVerticalTabBar } from "@splits-network/basel-ui";
+import { BaselVerticalTabBar, useScrollReveal } from "@splits-network/basel-ui";
 import { MiniLeaderboard, AchievementsSection } from "@splits-network/shared-gamification";
 import { useAuth } from "@clerk/nextjs";
 import { createUnauthenticatedClient, createAuthenticatedClient } from "@/lib/api-client";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { CompanyTab } from "./company-tab";
 import { BillingTab } from "./billing-tab";
 import { TeamTab } from "./team-tab";
@@ -92,56 +90,7 @@ export default function BaselSettingsContent({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab, pathname, router]);
 
-    /* ── GSAP animations ─────────────────────────────────────────────────── */
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(
-                    mainRef.current.querySelectorAll("[class*='opacity-0']"),
-                    { opacity: 1 },
-                );
-                return;
-            }
-
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            tl.fromTo(
-                $1(".settings-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
-            )
-                .fromTo(
-                    $(".settings-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                        clearProps: "transform",
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".settings-desc"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
-                    "-=0.4",
-                )
-                .fromTo(
-                    $1(".settings-body"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     /* ── Guards ───────────────────────────────────────────────────────────── */
     if (isLoading) {
@@ -171,18 +120,18 @@ export default function BaselSettingsContent({
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="settings-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                             Company
                         </p>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                            <span className="settings-title-word inline-block opacity-0">
+                            <span className="scroll-reveal fade-up inline-block">
                                 Company
                             </span>{" "}
-                            <span className="settings-title-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up inline-block text-primary">
                                 settings.
                             </span>
                         </h1>
-                        <p className="settings-desc text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="scroll-reveal fade-up text-base text-neutral-content/50 max-w-xl">
                             Manage your company profile, billing configuration,
                             and team members in one place.
                         </p>
@@ -191,7 +140,7 @@ export default function BaselSettingsContent({
             </section>
 
             {/* ── Body ───────────────────────────────────────────────────── */}
-            <section className="settings-body opacity-0 container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+            <section className="scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-10 lg:py-14">
                 <div className="grid lg:grid-cols-5 gap-10 lg:gap-14">
                     {/* Sidebar Nav */}
                     <div className="lg:col-span-1">

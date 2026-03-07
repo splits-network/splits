@@ -4,10 +4,7 @@ import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { BaselFooter } from "@splits-network/basel-ui";
+import { BaselFooter, useScrollReveal } from "@splits-network/basel-ui";
 import type {
     FooterNavConfig,
     FooterSection,
@@ -15,10 +12,6 @@ import type {
     FooterTrustStat,
     FooterLinkItem,
 } from "@splits-network/shared-types";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 /* ─── Default Footer Data (fallback when CMS is unavailable) ─────────────── */
 
@@ -137,127 +130,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
         }
     };
 
-    // GSAP scroll-triggered animations
-    useGSAP(
-        () => {
-            if (!containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                containerRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => {
-                        gsap.set(el, { opacity: 1 });
-                    });
-                return;
-            }
-
-            const $ = (sel: string) =>
-                containerRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                containerRef.current!.querySelector(sel);
-
-            // CTA band
-            const ctaBand = $1(".footer-cta-band");
-            if (ctaBand) {
-                gsap.fromTo(
-                    ctaBand,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: { trigger: ctaBand, start: "top 85%" },
-                    },
-                );
-            }
-
-            // Newsletter section
-            const newsletter = $1(".footer-newsletter");
-            if (newsletter) {
-                gsap.fromTo(
-                    newsletter,
-                    { opacity: 0, x: -40 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.7,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: newsletter,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            }
-
-            // Footer columns stagger
-            gsap.fromTo(
-                $(".footer-col"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    stagger: 0.08,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".footer-columns"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            // Trust stats bar
-            gsap.fromTo(
-                $(".footer-stat"),
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.4,
-                    stagger: 0.08,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".footer-stats-bar"),
-                        start: "top 90%",
-                    },
-                },
-            );
-
-            // Social icons
-            gsap.fromTo(
-                $(".social-icon"),
-                { opacity: 0, scale: 0.8 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 0.3,
-                    stagger: 0.06,
-                    ease: "back.out(1.7)",
-                    scrollTrigger: {
-                        trigger: $1(".social-row"),
-                        start: "top 90%",
-                    },
-                },
-            );
-
-            // Bottom bar
-            const bottom = $1(".footer-bottom");
-            if (bottom) {
-                gsap.fromTo(
-                    bottom,
-                    { opacity: 0 },
-                    {
-                        opacity: 1,
-                        duration: 0.6,
-                        ease: "power2.out",
-                        scrollTrigger: { trigger: bottom, start: "top 95%" },
-                    },
-                );
-            }
-        },
-        { scope: containerRef },
-    );
+    useScrollReveal(containerRef);
 
     return (
         <div className={hasSidebar ? "lg:ml-64" : ""}>
@@ -375,7 +248,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     title={social.label}
-                                    className="social-icon w-9 h-9 bg-neutral-content/5 hover:bg-primary hover:text-primary-content flex items-center justify-center transition-all opacity-0"
+                                    className="social-icon scroll-reveal pop-in w-9 h-9 bg-neutral-content/5 hover:bg-primary hover:text-primary-content flex items-center justify-center transition-all"
                                 >
                                     <i className={`${social.icon} text-sm`} />
                                 </a>
@@ -388,7 +261,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                         {sections.map((section) => (
                             <div
                                 key={section.title}
-                                className="footer-col opacity-0"
+                                className="footer-col scroll-reveal fade-up"
                             >
                                 <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
                                     <span className="w-4 h-0.5 bg-primary" />
@@ -415,7 +288,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                         {trustStats.map((stat) => (
                             <div
                                 key={stat.label}
-                                className="footer-stat text-center opacity-0"
+                                className="footer-stat scroll-reveal fade-up text-center"
                             >
                                 <div className="text-2xl font-black text-primary">
                                     {stat.value}
@@ -428,7 +301,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                     </>
                 }
                 bottomBar={
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 opacity-0">
+                    <div className="scroll-reveal fade-in flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-1 text-sm opacity-30">
                             <i className="fa-duotone fa-regular fa-copyright" />
                             <span>

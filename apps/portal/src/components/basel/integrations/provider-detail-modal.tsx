@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useEffect } from "react";
 import { BaselStatusPill } from "@splits-network/basel-ui";
 import type {
     IntegrationProvider,
@@ -101,39 +99,9 @@ export function ProviderDetailModal({
     onConnect,
     onClose,
 }: ProviderDetailModalProps) {
-    const overlayRef = useRef<HTMLDivElement>(null);
-    const panelRef = useRef<HTMLDivElement>(null);
     const isConnected = connection?.status === "active";
     const features = CATEGORY_FEATURES[provider.category] ?? [];
     const scopes = provider.oauth_scopes ?? [];
-
-    /* ── GSAP entrance ───────────────────────────────────────────────── */
-
-    useGSAP(
-        () => {
-            if (!overlayRef.current || !panelRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-
-            gsap.fromTo(
-                overlayRef.current,
-                { opacity: 0 },
-                { opacity: 1, duration: 0.2 },
-            );
-            gsap.fromTo(
-                panelRef.current,
-                { opacity: 0, x: 40 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.35,
-                    ease: "power3.out",
-                    clearProps: "transform",
-                },
-            );
-        },
-        { scope: overlayRef },
-    );
 
     /* ── Close on Escape ─────────────────────────────────────────────── */
 
@@ -147,11 +115,7 @@ export function ProviderDetailModal({
 
     return (
         <div
-            ref={overlayRef}
-            className="fixed inset-0 z-50 flex justify-end"
-            onClick={(e) => {
-                if (e.target === overlayRef.current) onClose();
-            }}
+            className="fixed inset-0 z-50 flex justify-end animate-[fadeIn_0.2s_ease-out]"
         >
             {/* Backdrop */}
             <div
@@ -161,8 +125,7 @@ export function ProviderDetailModal({
 
             {/* Slide-over panel */}
             <div
-                ref={panelRef}
-                className="relative w-full max-w-lg bg-base-100 shadow-2xl overflow-y-auto"
+                className="relative w-full max-w-lg bg-base-100 shadow-2xl overflow-y-auto animate-[slideInRight_0.35s_ease-out]"
             >
                 {/* Header */}
                 <div className="sticky top-0  bg-neutral text-neutral-content p-6">

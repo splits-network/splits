@@ -1,28 +1,5 @@
-// Re-export all animation presets, hooks, and utilities from shared package
+// Re-export CSS animation hooks from shared package
 export {
-    // Presets
-    easing,
-    duration,
-    stagger,
-    scrollTrigger,
-    fadeUp,
-    fadeIn,
-    scaleIn,
-    slideFromLeft,
-    slideFromRight,
-    popIn,
-    hoverLift,
-    hoverScale,
-    iconWiggle,
-    prefersReducedMotion,
-    getAnimationDuration,
-    createStagger,
-    // Hooks
-    useScrollFadeUp,
-    useScrollStagger,
-    useScrollScaleIn,
-    useParallax,
-    useScrollTimeline,
+    useScrollReveal,
     useAnimatedCounter,
-    initGsapDefaults,
 } from '@splits-network/basel-ui';

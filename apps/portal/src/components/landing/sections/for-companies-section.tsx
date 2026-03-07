@@ -2,14 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal, useAnimatedCounter } from "@splits-network/basel-ui";
 
 const benefits = [
     {
@@ -63,162 +56,10 @@ const dashboardRoles = [
 
 export function ForCompaniesSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const benefitsRef = useRef<HTMLDivElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
-    const dashboardRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
+    useScrollReveal(sectionRef);
 
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Dashboard card - slides in from left with depth (opposite of recruiters)
-            gsap.fromTo(
-                dashboardRef.current,
-                { opacity: 0, x: -60, rotateY: 5 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    rotateY: 0,
-                    duration: duration.hero,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 70%",
-                    },
-                },
-            );
-
-            // Dashboard rows stagger in
-            const dashboardRows =
-                dashboardRef.current?.querySelectorAll(".dashboard-row");
-            if (dashboardRows) {
-                gsap.fromTo(
-                    dashboardRows,
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.fast,
-                        ease: easing.smooth,
-                        stagger: stagger.normal,
-                        delay: 0.4,
-                        scrollTrigger: {
-                            trigger: sectionRef.current,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-
-            // Stats counter animation
-            const statValue =
-                dashboardRef.current?.querySelector(".stat-value");
-            if (statValue) {
-                const target = 15;
-                gsap.fromTo(
-                    { value: 0 },
-                    { value: target },
-                    {
-                        duration: 1.2,
-                        ease: easing.smooth,
-                        delay: 0.8,
-                        scrollTrigger: {
-                            trigger: dashboardRef.current,
-                            start: "top 75%",
-                        },
-                        onUpdate: function () {
-                            if (statValue) {
-                                statValue.textContent = Math.floor(
-                                    this.targets()[0].value,
-                                ).toString();
-                            }
-                        },
-                    },
-                );
-            }
-
-            // Heading animation - slides from right (opposite of recruiters)
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, x: 40 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 70%",
-                    },
-                },
-            );
-
-            // Benefits list - staggered pop in from right
-            const benefitItems =
-                benefitsRef.current?.querySelectorAll(".benefit-item");
-            if (benefitItems) {
-                gsap.fromTo(
-                    benefitItems,
-                    { opacity: 0, x: 30 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.fast,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                        scrollTrigger: {
-                            trigger: benefitsRef.current,
-                            start: "top 75%",
-                        },
-                    },
-                );
-
-                // Icons pop with bounce
-                const icons =
-                    benefitsRef.current?.querySelectorAll(".benefit-icon");
-                if (icons) {
-                    gsap.fromTo(
-                        icons,
-                        { scale: 0 },
-                        {
-                            scale: 1,
-                            duration: duration.fast,
-                            ease: easing.bounce,
-                            stagger: stagger.tight,
-                            delay: 0.1,
-                            scrollTrigger: {
-                                trigger: benefitsRef.current,
-                                start: "top 75%",
-                            },
-                        },
-                    );
-                }
-            }
-
-            // CTA button
-            gsap.fromTo(
-                ctaRef.current,
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: ctaRef.current,
-                        start: "top 85%",
-                    },
-                },
-            );
-        },
-        { scope: sectionRef },
-    );
+    const counterRef = useAnimatedCounter(15);
 
     return (
         <section
@@ -230,8 +71,7 @@ export function ForCompaniesSection() {
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-7xl mx-auto">
                     {/* Dashboard Preview - on left for companies (reversed from recruiters) */}
                     <div
-                        ref={dashboardRef}
-                        className="relative opacity-0 order-2 lg:order-1"
+                        className="scroll-reveal slide-from-left relative order-2 lg:order-1"
                         style={{ perspective: "1000px" }}
                     >
                         <div className="card bg-base-100 text-base-content shadow-2xl">
@@ -252,11 +92,11 @@ export function ForCompaniesSection() {
                                 </div>
 
                                 {/* Role List */}
-                                <div className="space-y-3 mb-4">
+                                <div className="space-y-3 mb-4 stagger-children">
                                     {dashboardRoles.map((role, index) => (
                                         <div
                                             key={index}
-                                            className="dashboard-row p-3 bg-base-200 rounded-lg opacity-0"
+                                            className="scroll-reveal fade-up p-3 bg-base-200 rounded-lg"
                                         >
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>
@@ -294,8 +134,8 @@ export function ForCompaniesSection() {
                                             <div className="text-xs text-base-content/60 uppercase tracking-wider">
                                                 Total Candidates
                                             </div>
-                                            <div className="stat-value text-3xl font-bold text-secondary">
-                                                0
+                                            <div className="text-3xl font-bold text-secondary">
+                                                <span ref={counterRef}>0</span>
                                             </div>
                                             <div className="text-xs text-base-content/60 mt-1">
                                                 across 3 active roles
@@ -316,7 +156,7 @@ export function ForCompaniesSection() {
 
                     {/* Content - on right for companies */}
                     <div className="order-1 lg:order-2">
-                        <div ref={headingRef} className="opacity-0">
+                        <div className="scroll-reveal slide-from-right">
                             <p className="text-sm uppercase tracking-wider opacity-70 mb-3">
                                 For Companies
                             </p>
@@ -333,13 +173,13 @@ export function ForCompaniesSection() {
                             </p>
                         </div>
 
-                        <div ref={benefitsRef} className="space-y-4 mb-10">
+                        <div className="space-y-4 mb-10 stagger-children">
                             {benefits.map((benefit, index) => (
                                 <div
                                     key={index}
-                                    className="benefit-item flex items-start gap-4 opacity-0"
+                                    className="scroll-reveal fade-up flex items-start gap-4"
                                 >
-                                    <div className="benefit-icon w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                                         <i
                                             className={`${benefit.icon} text-sm`}
                                         ></i>
@@ -351,7 +191,7 @@ export function ForCompaniesSection() {
                             ))}
                         </div>
 
-                        <div ref={ctaRef} className="opacity-0">
+                        <div className="scroll-reveal fade-up">
                             <Link
                                 href="/sign-up"
                                 className="btn btn-lg bg-white text-secondary hover:bg-white/90 border-0 shadow-lg"

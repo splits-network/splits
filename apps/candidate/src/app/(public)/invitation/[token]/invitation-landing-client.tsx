@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { ApiClient } from "@/lib/api-client";
 
 /* ─── Types ───────────────────────────────────────────────────────────────── */
@@ -135,59 +134,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
             });
     }, [token]);
 
-    /* ── GSAP entrance ── */
-    useGSAP(
-        () => {
-            if (state.kind !== "ready" || !mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
-                return;
-            }
-
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            tl.fromTo(
-                $1(".landing-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".landing-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".landing-subtitle"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                )
-                .fromTo(
-                    $(".landing-card"),
-                    { opacity: 0, y: 25 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $(".landing-sidebar"),
-                    { opacity: 0, x: 20 },
-                    { opacity: 1, x: 0, duration: 0.5, stagger: 0.1 },
-                    "-=0.4",
-                );
-        },
-        { scope: mainRef, dependencies: [state.kind] },
-    );
+    useScrollReveal(mainRef);
 
     /* ── Loading ── */
     if (state.kind === "loading") {
@@ -235,21 +182,21 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="landing-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="scroll-reveal fade-up landing-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                             Your Invitation
                         </p>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                            <span className="landing-title-word inline-block opacity-0">
+                            <span className="scroll-reveal fade-up landing-title-word inline-block">
                                 {invitation.recruiter_name}
                             </span>{" "}
-                            <span className="landing-title-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up landing-title-word inline-block text-primary">
                                 wants to
                             </span>{" "}
-                            <span className="landing-title-word inline-block opacity-0">
+                            <span className="scroll-reveal fade-up landing-title-word inline-block">
                                 represent you
                             </span>
                         </h1>
-                        <p className="landing-subtitle text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="scroll-reveal fade-up landing-subtitle text-base text-neutral-content/50 max-w-xl">
                             You have been invited to join Applicant Network,
                             where recruiters compete to find the right
                             opportunities for you. Review the details below,
@@ -265,7 +212,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                     {/* ── Main Panel ── */}
                     <div className="lg:col-span-3 space-y-10">
                         {/* About Your Recruiter */}
-                        <div className="landing-card opacity-0">
+                        <div className="scroll-reveal fade-up landing-card">
                             <h2 className="text-2xl font-black tracking-tight mb-1">
                                 About Your Recruiter
                             </h2>
@@ -297,7 +244,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                         </div>
 
                         {/* What is Applicant Network? */}
-                        <div className="landing-card opacity-0">
+                        <div className="scroll-reveal fade-up landing-card">
                             <h2 className="text-2xl font-black tracking-tight mb-1">
                                 What is Applicant Network?
                             </h2>
@@ -330,7 +277,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                         </div>
 
                         {/* What Does This Agreement Mean? */}
-                        <div className="landing-card opacity-0">
+                        <div className="scroll-reveal fade-up landing-card">
                             <h2 className="text-2xl font-black tracking-tight mb-1">
                                 What Does This Agreement Mean?
                             </h2>
@@ -364,7 +311,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                         </div>
 
                         {/* Expiry Warning */}
-                        <div className="landing-card opacity-0 border-l-4 border-warning bg-warning/5 p-4 flex items-start gap-3">
+                        <div className="scroll-reveal fade-up landing-card border-l-4 border-warning bg-warning/5 p-4 flex items-start gap-3">
                             <i className="fa-duotone fa-regular fa-clock text-warning mt-0.5"></i>
                             <div>
                                 <p className="text-sm font-bold">
@@ -383,7 +330,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                     {/* ── Sidebar ── */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Recruiter Card */}
-                        <div className="landing-sidebar opacity-0 bg-base-200 border-t-4 border-primary p-6">
+                        <div className="scroll-reveal slide-from-right landing-sidebar bg-base-200 border-t-4 border-primary p-6">
                             <h3 className="text-sm font-black uppercase tracking-wider mb-4">
                                 Your Recruiter
                             </h3>
@@ -410,7 +357,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                         </div>
 
                         {/* CTA Card */}
-                        <div className="landing-sidebar opacity-0 bg-base-200 p-6">
+                        <div className="scroll-reveal slide-from-right landing-sidebar bg-base-200 p-6">
                             <h3 className="text-sm font-black uppercase tracking-wider mb-4">
                                 Get Started
                             </h3>
@@ -430,7 +377,7 @@ export default function InvitationLandingClient({ token }: { token: string }) {
                         </div>
 
                         {/* Trust Signals */}
-                        <div className="landing-sidebar opacity-0 bg-base-200 p-6">
+                        <div className="scroll-reveal slide-from-right landing-sidebar bg-base-200 p-6">
                             <div className="space-y-3">
                                 <div className="flex items-center gap-3 text-xs text-base-content/60">
                                     <i className="fa-duotone fa-regular fa-lock text-success"></i>

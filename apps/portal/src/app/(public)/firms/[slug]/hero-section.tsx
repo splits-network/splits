@@ -56,13 +56,13 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                     </p>
                     <div className="flex items-center gap-4">
                         {firm.candidate_firm && (
-                            <span className="firm-meta opacity-0 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary">
+                            <span className="scroll-reveal fade-up flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary">
                                 <i className="fa-duotone fa-regular fa-handshake text-sm" />
                                 Candidate Partners
                             </span>
                         )}
                         {firm.company_firm && (
-                            <span className="firm-meta opacity-0 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-success">
+                            <span className="scroll-reveal fade-up flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-success">
                                 <i className="fa-duotone fa-regular fa-paper-plane text-sm" />
                                 Company Partners
                             </span>
@@ -73,7 +73,7 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                 {/* Logo + Identity */}
                 <div className="flex flex-col lg:flex-row lg:items-end gap-8">
                     <div className="flex items-end gap-5 flex-1">
-                        <div className="firm-avatar opacity-0 relative shrink-0">
+                        <div className="scroll-reveal scale-in relative shrink-0">
                             {firm.logo_url ? (
                                 <img
                                     src={firm.logo_url}
@@ -95,12 +95,12 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1">
                                 Recruiting Firm
                             </p>
-                            <h1 className="firm-name opacity-0 text-4xl lg:text-5xl font-black tracking-tight leading-none text-neutral-content mb-3">
+                            <h1 className="scroll-reveal fade-up text-4xl lg:text-5xl font-black tracking-tight leading-none text-neutral-content mb-3">
                                 {firm.name}
                             </h1>
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
                                 {location && (
-                                    <span className="firm-meta opacity-0 flex items-center gap-1.5">
+                                    <span className="scroll-reveal fade-up flex items-center gap-1.5">
                                         <i className="fa-duotone fa-regular fa-location-dot text-xs" />
                                         {location}
                                     </span>
@@ -108,7 +108,7 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                                 {firm.founded_year && (
                                     <>
                                         <span className="text-neutral-content/20">|</span>
-                                        <span className="firm-meta opacity-0 flex items-center gap-1.5">
+                                        <span className="scroll-reveal fade-up flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-calendar text-xs" />
                                             Est. {firm.founded_year}
                                         </span>
@@ -117,7 +117,7 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                                 {firm.website_url && (
                                     <>
                                         <span className="text-neutral-content/20">|</span>
-                                        <span className="firm-meta opacity-0 flex items-center gap-1.5">
+                                        <span className="scroll-reveal fade-up flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-globe text-xs" />
                                             {extractDomain(firm.website_url)}
                                         </span>
@@ -132,14 +132,14 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                         {connected ? (
                             <a
                                 href="/portal/messages"
-                                className="firm-action opacity-0 btn btn-primary btn-sm font-bold uppercase tracking-wider"
+                                className="scroll-reveal fade-up btn btn-primary btn-sm font-bold uppercase tracking-wider"
                             >
                                 <i className="fa-duotone fa-regular fa-comments" />
                                 Message
                             </a>
                         ) : (
                             <button
-                                className="firm-action opacity-0 btn btn-primary btn-sm font-bold uppercase tracking-wider"
+                                className="scroll-reveal fade-up btn btn-primary btn-sm font-bold uppercase tracking-wider"
                                 onClick={onRequestPartnership}
                             >
                                 <i className="fa-duotone fa-regular fa-handshake" />
@@ -151,13 +151,13 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                                 href={firm.website_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="firm-action opacity-0 btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider"
+                                className="scroll-reveal fade-up btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider"
                             >
                                 <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                                 Website
                             </a>
                         )}
-                        <button className="firm-action opacity-0 btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider">
+                        <button className="scroll-reveal fade-up btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider">
                             <i className="fa-duotone fa-regular fa-share-nodes" />
                             Share
                         </button>
@@ -176,7 +176,7 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                             ];
                             const iconStyle = iconStyles[i % iconStyles.length];
                             return (
-                                <div key={stat.label} className="stat-block opacity-0 flex items-center gap-3 px-4 py-4">
+                                <div key={stat.label} className="scroll-reveal fade-up flex items-center gap-3 px-4 py-4">
                                     <div className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}>
                                         <i className={`${stat.icon} text-base`} />
                                     </div>

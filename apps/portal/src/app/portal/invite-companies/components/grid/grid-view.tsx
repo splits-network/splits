@@ -18,36 +18,34 @@ export function GridView({
     const selectedInv = invitations.find((inv) => inv.id === selectedId);
 
     return (
-        <div className="relative">
-            {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                {invitations.map((inv) => (
-                    <GridCard
-                        key={inv.id}
-                        invitation={inv}
-                        isSelected={selectedId === inv.id}
-                        onSelect={() => onSelectAction(inv)}
-                        onRefresh={onRefreshAction}
-                    />
-                ))}
+        <div className="drawer drawer-end">
+            <input type="checkbox" className="drawer-toggle" checked={!!selectedInv} readOnly />
+            <div className="drawer-content">
+                {/* Grid */}
+                <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                    {invitations.map((inv) => (
+                        <GridCard
+                            key={inv.id}
+                            invitation={inv}
+                            isSelected={selectedId === inv.id}
+                            onSelect={() => onSelectAction(inv)}
+                            onRefresh={onRefreshAction}
+                        />
+                    ))}
+                </div>
             </div>
-
-            {/* Detail Drawer */}
-            {selectedInv && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/30 transition-opacity"
-                        onClick={() => onSelectAction(selectedInv)}
-                    />
-                    <div className="fixed top-0 right-0 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+            <div className="drawer-side z-50">
+                <div className="drawer-overlay" onClick={() => selectedInv && onSelectAction(selectedInv)} aria-label="close drawer" />
+                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
+                    {selectedInv && (
                         <InvitationDetailLoader
                             invitationId={selectedInv.id}
                             onClose={() => onSelectAction(selectedInv)}
                             onRefresh={onRefreshAction}
                         />
-                    </div>
-                </>
-            )}
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

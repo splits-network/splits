@@ -1,15 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { BaselTabBar, BaselVerticalTabBar } from "@splits-network/basel-ui";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
-
+import {BaselTabBar, BaselVerticalTabBar, useScrollReveal } from "@splits-network/basel-ui";
 /* ─── Sample Data ─────────────────────────────────────────────────────────── */
 
 const DETAIL_TABS = [
@@ -187,40 +179,7 @@ function VerticalTabsDemo() {
 export default function TabsShowcasePage() {
     const mainRef = useRef<HTMLElement>(null);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
-                return;
-            }
-
-            mainRef.current
-                .querySelectorAll(".showcase-section")
-                .forEach((section) => {
-                    gsap.fromTo(
-                        section,
-                        { opacity: 0, y: 30 },
-                        {
-                            opacity: 1,
-                            y: 0,
-                            duration: 0.6,
-                            ease: "power3.out",
-                            clearProps: "transform",
-                            scrollTrigger: {
-                                trigger: section,
-                                start: "top 85%",
-                            },
-                        },
-                    );
-                });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -249,7 +208,7 @@ export default function TabsShowcasePage() {
 
             <div className="max-w-5xl mx-auto px-8 py-12 space-y-16">
                 {/* ── 1. Scrollable Detail Tabs ──────────────────────── */}
-                <section className="showcase-section opacity-0">
+                <section className="showcase-section scroll-reveal fade-up">
                     <div className="mb-6">
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-2">
                             Pattern 01
@@ -292,7 +251,7 @@ export default function TabsShowcasePage() {
                 </section>
 
                 {/* ── 2. Profile Tabs (Few Items) ────────────────────── */}
-                <section className="showcase-section opacity-0">
+                <section className="showcase-section scroll-reveal fade-up">
                     <div className="mb-6">
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-2">
                             Pattern 02
@@ -326,7 +285,7 @@ export default function TabsShowcasePage() {
                 </section>
 
                 {/* ── 3. Settings / Mid-Count Tabs ───────────────────── */}
-                <section className="showcase-section opacity-0">
+                <section className="showcase-section scroll-reveal fade-up">
                     <div className="mb-6">
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-2">
                             Pattern 03
@@ -344,7 +303,7 @@ export default function TabsShowcasePage() {
                 </section>
 
                 {/* ── 4. Vertical / Sidebar Tabs ─────────────────────── */}
-                <section className="showcase-section opacity-0">
+                <section className="showcase-section scroll-reveal fade-up">
                     <div className="mb-6">
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-2">
                             Pattern 04
@@ -386,7 +345,7 @@ export default function TabsShowcasePage() {
                 </section>
 
                 {/* ── Decision Guide ─────────────────────────────────── */}
-                <section className="showcase-section opacity-0">
+                <section className="showcase-section scroll-reveal fade-up">
                     <div className="mb-6">
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-2">
                             Reference

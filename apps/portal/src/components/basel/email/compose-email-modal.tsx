@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { OAuthConnectionPublic } from "@splits-network/shared-types";
 import { ModalPortal } from "@splits-network/shared-ui";
@@ -37,8 +35,6 @@ export default function ComposeEmailModal({
     onSent,
 }: ComposeEmailModalProps) {
     const { getToken } = useAuth();
-    const panelRef = useRef<HTMLDivElement>(null);
-    const backdropRef = useRef<HTMLDivElement>(null);
 
     /* ── State ── */
     const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
@@ -54,36 +50,6 @@ export default function ComposeEmailModal({
     const [cc, setCc] = useState("");
     const [subject, setSubject] = useState(initialSubject || "");
     const [body, setBody] = useState("");
-
-    /* ── GSAP entrance ── */
-    useGSAP(
-        () => {
-            if (!panelRef.current || !backdropRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(panelRef.current, { x: 0, opacity: 1 });
-                gsap.set(backdropRef.current, { opacity: 1 });
-                return;
-            }
-            gsap.fromTo(
-                backdropRef.current,
-                { opacity: 0 },
-                { opacity: 1, duration: 0.3, ease: "power3.out" },
-            );
-            gsap.fromTo(
-                panelRef.current,
-                { x: "100%", opacity: 0 },
-                {
-                    x: 0,
-                    opacity: 1,
-                    duration: 0.4,
-                    ease: "power3.out",
-                    delay: 0.1,
-                    clearProps: "transform",
-                },
-            );
-        },
-        { dependencies: [] },
-    );
 
     /* ── Fetch email connections ── */
     const fetchConnections = useCallback(async () => {
@@ -167,15 +133,13 @@ export default function ComposeEmailModal({
         <ModalPortal>
             {/* Backdrop */}
             <div
-                ref={backdropRef}
-                className="fixed inset-0 z-50 bg-black/40 opacity-0"
+                className="fixed inset-0 z-50 bg-black/40 animate-[fadeIn_0.3s_ease-out]"
                 onClick={onClose}
             />
 
             {/* Slide-over panel */}
             <div
-                ref={panelRef}
-                className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-base-100 shadow-2xl flex flex-col opacity-0"
+                className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-base-100 shadow-2xl flex flex-col animate-[slideInRight_0.4s_ease-out]"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}

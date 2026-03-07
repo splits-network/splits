@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* --- Data ----------------------------------------------------------------- */
 
@@ -127,46 +121,7 @@ export default function SettingsOne() {
         setTimeout(() => setSaved(false), 2000);
     };
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-            tl.fromTo(
-                $1(".settings-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".settings-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".settings-desc"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                )
-                .fromTo(
-                    $1(".settings-content"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -180,18 +135,18 @@ export default function SettingsOne() {
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="settings-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="settings-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                             Account
                         </p>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                            <span className="settings-title-word inline-block opacity-0">
+                            <span className="settings-title-word inline-block scroll-reveal hero-word">
                                 Your
                             </span>{" "}
-                            <span className="settings-title-word inline-block opacity-0 text-primary">
+                            <span className="settings-title-word inline-block scroll-reveal hero-word text-primary">
                                 settings.
                             </span>
                         </h1>
-                        <p className="settings-desc text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="settings-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
                             Manage your profile, security, notifications, and
                             integrations all in one place.
                         </p>
@@ -200,7 +155,7 @@ export default function SettingsOne() {
             </section>
 
             {/* Content */}
-            <section className="settings-content opacity-0 container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+            <section className="settings-content scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-10 lg:py-14">
                 <div className="grid lg:grid-cols-5 gap-10 lg:gap-14">
                     {/* Sidebar Nav */}
                     <div className="lg:col-span-1">

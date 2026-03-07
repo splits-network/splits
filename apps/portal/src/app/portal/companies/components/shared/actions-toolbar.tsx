@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { Company, CompanyRelationship } from "../../types";
-import RequestConnectionModal from "../modals/request-connection-modal";
+import RequestRepresentationModal from "../modals/request-connection-modal";
 import TerminateModal from "../modals/terminate-company-modal";
 
 export interface CompanyActionsToolbarProps {
@@ -42,7 +42,7 @@ export default function CompanyActionsToolbar({
     const modals = (
         <ModalPortal>
             {showRequestModal && (
-                <RequestConnectionModal
+                <RequestRepresentationModal
                     isOpen={showRequestModal}
                     onClose={() => setShowRequestModal(false)}
                     company={company}
@@ -76,9 +76,9 @@ export default function CompanyActionsToolbar({
 
         if (!hasConnection) {
             speedDialActions.push({
-                key: "connect",
-                icon: "fa-duotone fa-regular fa-link",
-                label: "Request Connection",
+                key: "represent",
+                icon: "fa-duotone fa-regular fa-handshake",
+                label: "Request to Represent",
                 variant: "btn-primary",
                 onClick: () => setShowRequestModal(true),
             });
@@ -96,7 +96,7 @@ export default function CompanyActionsToolbar({
             speedDialActions.push({
                 key: "pending",
                 icon: "fa-duotone fa-regular fa-clock",
-                label: "Connection Pending",
+                label: "Request Pending",
                 variant: "btn-ghost",
                 disabled: true,
             });
@@ -131,15 +131,16 @@ export default function CompanyActionsToolbar({
             <div
                 className={`flex flex-wrap items-center ${getLayoutClass()} ${className}`}
             >
-                {/* Connect */}
+                {/* Request to Represent */}
                 {!hasConnection && (
                     <button
                         onClick={() => setShowRequestModal(true)}
                         className={`btn ${getSizeClass()} btn-primary gap-2`}
                         style={{ borderRadius: 0 }}
+                        title="Request to represent this company"
                     >
-                        <i className="fa-duotone fa-regular fa-link" />
-                        <span className="hidden md:inline">Connect</span>
+                        <i className="fa-duotone fa-regular fa-handshake" />
+                        <span className="hidden md:inline">Represent</span>
                     </button>
                 )}
 
@@ -155,15 +156,16 @@ export default function CompanyActionsToolbar({
                     </button>
                 )}
 
-                {/* Pending */}
+                {/* Request Pending */}
                 {relationship?.status === "pending" && (
                     <button
                         className={`btn ${getSizeClass()} btn-ghost gap-2`}
                         style={{ borderRadius: 0 }}
                         disabled
+                        title="Your representation request is awaiting review"
                     >
                         <i className="fa-duotone fa-regular fa-clock" />
-                        <span className="hidden md:inline">Pending</span>
+                        <span className="hidden md:inline">Awaiting Review</span>
                     </button>
                 )}
 

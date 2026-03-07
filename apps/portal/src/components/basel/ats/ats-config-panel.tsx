@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { BaselStatusPill, BaselConfirmModal } from "@splits-network/basel-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -91,8 +89,6 @@ export default function ATSConfigPanel({
     onClose,
 }: ATSConfigPanelProps) {
     const { getToken } = useAuth();
-    const panelRef = useRef<HTMLDivElement>(null);
-    const backdropRef = useRef<HTMLDivElement>(null);
 
     /* ── State ── */
     const [integrations, setIntegrations] = useState<ATSIntegrationPublic[]>(
@@ -107,36 +103,6 @@ export default function ATSConfigPanel({
     );
     const [detailIntegration, setDetailIntegration] =
         useState<ATSIntegrationPublic | null>(null);
-
-    /* ── GSAP entrance ── */
-    useGSAP(
-        () => {
-            if (!panelRef.current || !backdropRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(panelRef.current, { x: 0, opacity: 1 });
-                gsap.set(backdropRef.current, { opacity: 1 });
-                return;
-            }
-            gsap.fromTo(
-                backdropRef.current,
-                { opacity: 0 },
-                { opacity: 1, duration: 0.3, ease: "power3.out" },
-            );
-            gsap.fromTo(
-                panelRef.current,
-                { x: "100%", opacity: 0 },
-                {
-                    x: 0,
-                    opacity: 1,
-                    duration: 0.4,
-                    ease: "power3.out",
-                    delay: 0.1,
-                    clearProps: "transform",
-                },
-            );
-        },
-        { dependencies: [] },
-    );
 
     /* ── Fetch integrations ── */
     const fetchIntegrations = useCallback(async () => {
@@ -169,14 +135,12 @@ export default function ATSConfigPanel({
     return (
         <ModalPortal>
             <div
-                ref={backdropRef}
-                className="fixed inset-0 z-50 bg-black/40 opacity-0"
+                className="fixed inset-0 z-50 bg-black/40 animate-[fadeIn_0.3s_ease-out]"
                 onClick={onClose}
             />
 
             <div
-                ref={panelRef}
-                className="fixed inset-y-0 right-0 z-50 w-full max-w-2xl bg-base-100 shadow-2xl flex flex-col opacity-0"
+                className="fixed inset-y-0 right-0 z-50 w-full max-w-2xl bg-base-100 shadow-2xl flex flex-col animate-[slideInRight_0.4s_ease-out]"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}

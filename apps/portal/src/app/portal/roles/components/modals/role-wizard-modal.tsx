@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { useToast } from "@/lib/toast-context";
@@ -94,28 +92,6 @@ export default function RoleWizardModal({
     const hasBothOptions = isRecruiterWithCompanyAccess && hasFirms;
     const isOffPlatform = isRecruiter && hasFirms && roleSource === "firm";
     const showCompanySelect = isAdmin || (isRecruiterWithCompanyAccess && companies.length > 1);
-
-    // GSAP refs
-    const containerRef = useRef<HTMLDivElement>(null);
-    const backdropRef = useRef<HTMLDivElement>(null);
-    const stepContentRef = useRef<HTMLDivElement>(null);
-
-    // ── GSAP Animations ──
-
-    useGSAP(() => {
-        if (!isOpen) return;
-        const backdrop = backdropRef.current;
-        const box = containerRef.current;
-        if (!backdrop || !box) return;
-        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-        tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-        tl.fromTo(box, { opacity: 0, y: 40, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, clearProps: "transform" }, "-=0.15");
-    }, [isOpen]);
-
-    useGSAP(() => {
-        if (!isOpen || !stepContentRef.current) return;
-        gsap.fromTo(stepContentRef.current, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", clearProps: "transform" });
-    }, [currentStep, isOpen]);
 
     // ── Load existing job data (edit mode) ──
 
@@ -258,15 +234,7 @@ export default function RoleWizardModal({
 
     const handleClose = useCallback(() => {
         if (submitting) return;
-        const backdrop = backdropRef.current;
-        const box = containerRef.current;
-        if (backdrop && box) {
-            const tl = gsap.timeline({ defaults: { ease: "power2.in", clearProps: "transform" }, onComplete: onClose });
-            tl.to(box, { opacity: 0, y: 30, scale: 0.97, duration: 0.25 });
-            tl.to(backdrop, { opacity: 0, duration: 0.2 }, "-=0.1");
-        } else {
-            onClose();
-        }
+        onClose();
     }, [submitting, onClose]);
 
     const handleNext = useCallback(() => {
@@ -417,9 +385,6 @@ export default function RoleWizardModal({
             submitLabel={mode === "edit" ? "Update Role" : "Create Role"}
             submittingLabel={mode === "edit" ? "Updating..." : "Creating..."}
             maxWidth="max-w-3xl"
-            containerRef={containerRef}
-            backdropRef={backdropRef}
-            stepContentRef={stepContentRef}
         >
             {error && (
                 <BaselAlertBox variant="error" className="mb-5">

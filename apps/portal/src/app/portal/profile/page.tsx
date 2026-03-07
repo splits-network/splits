@@ -3,8 +3,7 @@
 import { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
 import { LoadingState } from "@splits-network/shared-ui";
@@ -99,7 +98,6 @@ export default function ProfileBaselPage() {
 
     const [active, setActive] = useState<Section>(initialSection);
     const mainRef = useRef<HTMLElement>(null);
-    const contentRef = useRef<HTMLDivElement>(null);
 
     const handleSectionChange = (section: Section) => {
         setActive(section);
@@ -206,103 +204,7 @@ export default function ProfileBaselPage() {
         return groups;
     }, [isRecruiter, isCompanyAdmin, isPlatformAdmin]);
 
-    /* ── GSAP: page load animation ───────────────────────────────────────── */
-
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => gsap.set(el, { opacity: 1 }));
-                return;
-            }
-
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            const kicker = $1(".settings-kicker");
-            if (kicker) {
-                tl.fromTo(
-                    kicker,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.5,
-                        clearProps: "transform",
-                    },
-                );
-            }
-
-            const titleWords = $(".settings-title-word");
-            if (titleWords.length) {
-                tl.fromTo(
-                    titleWords,
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                        clearProps: "transform",
-                    },
-                    "-=0.3",
-                );
-            }
-
-            const desc = $1(".settings-desc");
-            if (desc) {
-                tl.fromTo(
-                    desc,
-                    { opacity: 0, y: 15 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.5,
-                        clearProps: "transform",
-                    },
-                    "-=0.4",
-                );
-            }
-
-            const content = $1(".settings-content");
-            if (content) {
-                tl.fromTo(
-                    content,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        clearProps: "transform",
-                    },
-                    "-=0.2",
-                );
-            }
-        },
-        { scope: mainRef },
-    );
-
-    /* ── GSAP: section change animation ──────────────────────────────────── */
-
-    useGSAP(
-        () => {
-            if (!contentRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            gsap.from(contentRef.current, {
-                opacity: 0,
-                x: 20,
-                duration: 0.3,
-                ease: "power2.out",
-                clearProps: "transform,opacity",
-            });
-        },
-        { dependencies: [active], scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     /* ── Loading state ───────────────────────────────────────────────────── */
 
@@ -384,7 +286,7 @@ export default function ProfileBaselPage() {
             </div>
 
             {/* ── Main Panel ──────────────────────────────────────────── */}
-            <div className="lg:col-span-4" ref={contentRef}>
+            <div className="lg:col-span-4">
                 {/* Save indicator for marketplace sections */}
                 {isRecruiter && isMarketplaceSection && (
                     <MarketplaceSaveIndicator />
@@ -454,18 +356,18 @@ export default function ProfileBaselPage() {
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="settings-kicker text-sm font-semibold uppercase tracking-widest text-secondary mb-4 opacity-0">
+                        <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-widest text-secondary mb-4">
                             Account
                         </p>
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-none tracking-tight mb-4">
-                            <span className="settings-title-word inline-block opacity-0">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-none tracking-tight mb-4 stagger-children">
+                            <span className="scroll-reveal fade-up inline-block">
                                 Your
                             </span>{" "}
-                            <span className="settings-title-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up inline-block text-primary">
                                 settings.
                             </span>
                         </h1>
-                        <p className="settings-desc text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="scroll-reveal fade-up text-base text-neutral-content/50 max-w-xl">
                             Manage your profile, security, notifications, and
                             integrations all in one place.
                         </p>
@@ -474,7 +376,7 @@ export default function ProfileBaselPage() {
             </section>
 
             {/* ── Content ────────────────────────────────────────────────── */}
-            <section className="settings-content opacity-0 container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+            <section className="scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-10 lg:py-14">
                 {isRecruiter ? (
                     <MarketplaceSettingsProvider>
                         {contentPanel}

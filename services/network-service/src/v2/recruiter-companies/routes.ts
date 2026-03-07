@@ -39,6 +39,18 @@ const listSchema = {
     }
 };
 
+const permissionsSchema = {
+    type: 'object',
+    properties: {
+        can_view_jobs: { type: 'boolean' },
+        can_create_jobs: { type: 'boolean' },
+        can_edit_jobs: { type: 'boolean' },
+        can_advance_candidates: { type: 'boolean' },
+        can_view_applications: { type: 'boolean' },
+        can_submit_candidates: { type: 'boolean' },
+    }
+};
+
 const inviteSchema = {
     body: {
         type: 'object',
@@ -47,6 +59,7 @@ const inviteSchema = {
             company_id: { type: 'string', format: 'uuid' },
             recruiter_id: { type: 'string', format: 'uuid' },
             can_manage_company_jobs: { type: 'boolean', default: false },
+            permissions: permissionsSchema,
             message: { type: 'string', maxLength: 500 }
         }
     }
@@ -57,7 +70,8 @@ const respondSchema = {
         type: 'object',
         required: ['accept'],
         properties: {
-            accept: { type: 'boolean' }
+            accept: { type: 'boolean' },
+            permissions: permissionsSchema
         }
     }
 };
@@ -76,6 +90,7 @@ const updateSchema = {
         type: 'object',
         properties: {
             can_manage_company_jobs: { type: 'boolean' },
+            permissions: permissionsSchema,
             status: { type: 'string', enum: ['active', 'terminated'] }
         }
     }
@@ -209,10 +224,10 @@ export async function recruiterCompanyRoutes(
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { id } = request.params as { id: string };
-        const { accept } = request.body as AcceptInvitationRequest;
+        const { accept, permissions } = request.body as AcceptInvitationRequest;
 
         try {
-            const relationship = await service.respondToInvitation(id, accept, clerkUserId);
+            const relationship = await service.respondToInvitation(id, accept, clerkUserId, permissions);
             return reply.send({ data: relationship });
         } catch (error: any) {
             // Log the full error for debugging

@@ -159,7 +159,7 @@ export default function HomeBaselPage() {
                 <section className="bh-hero-section relative min-h-[92vh] flex items-center bg-base-100">
                     {/* Right image panel — 40% on desktop */}
                     <div
-                        className="bh-hero-img absolute inset-0 lg:left-[58%] opacity-0"
+                        className="bh-hero-img absolute inset-0 lg:left-[58%] scroll-reveal fade-up"
                         style={{
                             clipPath:
                                 "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
@@ -176,26 +176,26 @@ export default function HomeBaselPage() {
                     {/* Content panel — 60% on desktop */}
                     <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                         <div className="max-w-2xl">
-                            <p className="bh-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                            <p className="bh-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 scroll-reveal fade-up">
                                 Employment Networks
                             </p>
 
                             <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-8">
-                                <span className="bh-hero-word inline-block opacity-0 text-base-content">
+                                <span className="bh-hero-word inline-block scroll-reveal fade-up text-base-content">
                                     Two
                                 </span>{" "}
-                                <span className="bh-hero-word inline-block opacity-0 text-base-content">
+                                <span className="bh-hero-word inline-block scroll-reveal fade-up text-base-content">
                                     platforms.
                                 </span>{" "}
-                                <span className="bh-hero-word inline-block opacity-0 text-primary">
+                                <span className="bh-hero-word inline-block scroll-reveal fade-up text-primary">
                                     One
                                 </span>{" "}
-                                <span className="bh-hero-word inline-block opacity-0 text-base-content">
+                                <span className="bh-hero-word inline-block scroll-reveal fade-up text-base-content">
                                     ecosystem.
                                 </span>
                             </h1>
 
-                            <p className="bh-hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
+                            <p className="bh-hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                                 Splits Network for recruiters and companies.
                                 Applicant Network for candidates. A connected
                                 ecosystem built for transparent, modern
@@ -205,21 +205,21 @@ export default function HomeBaselPage() {
                             <div className="flex flex-wrap gap-4">
                                 <a
                                     href="https://splits.network/sign-up"
-                                    className="bh-hero-cta btn btn-primary btn-lg shadow-md opacity-0"
+                                    className="bh-hero-cta btn btn-primary btn-lg shadow-md scroll-reveal fade-up"
                                 >
                                     <i className="fa-duotone fa-regular fa-rocket" />
                                     Join as Recruiter
                                 </a>
                                 <a
                                     href="https://applicant.network/sign-up"
-                                    className="bh-hero-cta btn btn-secondary btn-lg shadow-md opacity-0"
+                                    className="bh-hero-cta btn btn-secondary btn-lg shadow-md scroll-reveal fade-up"
                                 >
                                     <i className="fa-duotone fa-regular fa-user-plus" />
                                     Find a Job
                                 </a>
                                 <a
                                     href="#how-it-works"
-                                    className="bh-hero-cta btn btn-ghost btn-lg opacity-0"
+                                    className="bh-hero-cta btn btn-ghost btn-lg scroll-reveal fade-up"
                                 >
                                     Learn More
                                     <i className="fa-duotone fa-regular fa-arrow-down" />
@@ -236,7 +236,7 @@ export default function HomeBaselPage() {
                     <div className="container mx-auto px-6">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                             {STATS.map((stat, i) => (
-                                <div key={i} className="bh-stat-item opacity-0">
+                                <div key={i} className="bh-stat-item scroll-reveal fade-up">
                                     <div className="text-3xl md:text-4xl font-black tracking-tight">
                                         {stat.value}
                                     </div>
@@ -256,7 +256,7 @@ export default function HomeBaselPage() {
                     <div className="container mx-auto px-6 lg:px-12">
                         <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                             {/* Text — 3 of 5 columns (60%) */}
-                            <div className="bh-problem-text lg:col-span-3 opacity-0">
+                            <div className="bh-problem-text lg:col-span-3 scroll-reveal fade-up">
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
                                     The Industry Problem
                                 </p>
@@ -291,7 +291,7 @@ export default function HomeBaselPage() {
                                     ].map((pain, i) => (
                                         <div
                                             key={i}
-                                            className="bh-problem-pain flex items-start gap-4 opacity-0"
+                                            className="bh-problem-pain flex items-start gap-4 scroll-reveal fade-up"
                                         >
                                             <div className="w-10 h-10 flex-shrink-0 bg-error/10 flex items-center justify-center">
                                                 <i
@@ -312,7 +312,7 @@ export default function HomeBaselPage() {
                             </div>
 
                             {/* Image — 2 of 5 columns (40%) */}
-                            <div className="bh-problem-img lg:col-span-2 opacity-0">
+                            <div className="bh-problem-img lg:col-span-2 scroll-reveal fade-up">
                                 <div
                                     className="relative overflow-hidden"
                                     style={{
@@ -340,7 +340,7 @@ export default function HomeBaselPage() {
                     className="bh-hiw-section py-28 bg-neutral text-neutral-content"
                 >
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="bh-hiw-heading max-w-3xl mb-20 opacity-0">
+                        <div className="bh-hiw-heading max-w-3xl mb-20 scroll-reveal fade-up">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                                 How It Works
                             </p>
@@ -355,7 +355,7 @@ export default function HomeBaselPage() {
                             {STEPS.map((step, i) => (
                                 <div
                                     key={i}
-                                    className="bh-hiw-step flex gap-6 opacity-0"
+                                    className="bh-hiw-step flex gap-6 scroll-reveal fade-up"
                                 >
                                     <div className="flex-shrink-0">
                                         <span className="text-6xl font-black text-secondary/30 leading-none">
@@ -392,7 +392,7 @@ export default function HomeBaselPage() {
                         <div className="grid lg:grid-cols-2 gap-16 items-center">
                             {/* Content */}
                             <div>
-                                <div className="bh-recruiter-header opacity-0">
+                                <div className="bh-recruiter-header scroll-reveal fade-up">
                                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                         <i className="fa-duotone fa-regular fa-user-tie mr-2" />
                                         For Recruiters
@@ -416,7 +416,7 @@ export default function HomeBaselPage() {
                                     {RECRUITER_FEATURES.map((f, i) => (
                                         <div
                                             key={i}
-                                            className="bh-recruiter-feature border-l-4 border-primary bg-base-200 p-6 flex items-start gap-4 opacity-0"
+                                            className="bh-recruiter-feature border-l-4 border-primary bg-base-200 p-6 flex items-start gap-4 scroll-reveal fade-up"
                                         >
                                             <div className="w-10 h-10 flex-shrink-0 bg-primary/10 flex items-center justify-center">
                                                 <i
@@ -435,7 +435,7 @@ export default function HomeBaselPage() {
                                     ))}
                                 </div>
 
-                                <div className="bh-recruiter-cta mt-10 opacity-0">
+                                <div className="bh-recruiter-cta mt-10 scroll-reveal fade-up">
                                     <a
                                         href="https://splits.network/sign-up"
                                         className="btn btn-primary btn-lg shadow-md"
@@ -447,7 +447,7 @@ export default function HomeBaselPage() {
                             </div>
 
                             {/* Mock UI visual */}
-                            <div className="bh-recruiter-visual opacity-0">
+                            <div className="bh-recruiter-visual scroll-reveal fade-up">
                                 <div className="border-l-4 border-primary bg-base-200 p-8 shadow-md">
                                     <div className="flex items-center justify-between mb-6">
                                         <h4 className="text-sm font-bold uppercase tracking-wider text-primary">
@@ -509,7 +509,7 @@ export default function HomeBaselPage() {
                     <div className="container mx-auto px-6 lg:px-12">
                         <div className="grid lg:grid-cols-2 gap-16 items-center">
                             {/* Mock UI visual (left on desktop) */}
-                            <div className="bh-candidate-visual opacity-0 order-2 lg:order-1">
+                            <div className="bh-candidate-visual scroll-reveal fade-up order-2 lg:order-1">
                                 <div className="border-l-4 border-secondary bg-base-100 p-8 shadow-md">
                                     <div className="flex items-center justify-between mb-6">
                                         <h4 className="text-sm font-bold uppercase tracking-wider text-secondary">
@@ -560,7 +560,7 @@ export default function HomeBaselPage() {
 
                             {/* Content (right on desktop) */}
                             <div className="order-1 lg:order-2">
-                                <div className="bh-candidate-header opacity-0">
+                                <div className="bh-candidate-header scroll-reveal fade-up">
                                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                                         <i className="fa-duotone fa-regular fa-user mr-2" />
                                         For Candidates
@@ -583,7 +583,7 @@ export default function HomeBaselPage() {
                                     {CANDIDATE_FEATURES.map((f, i) => (
                                         <div
                                             key={i}
-                                            className="bh-candidate-feature border-l-4 border-secondary bg-base-100 p-6 flex items-start gap-4 opacity-0"
+                                            className="bh-candidate-feature border-l-4 border-secondary bg-base-100 p-6 flex items-start gap-4 scroll-reveal fade-up"
                                         >
                                             <div className="w-10 h-10 flex-shrink-0 bg-secondary/10 flex items-center justify-center">
                                                 <i
@@ -602,7 +602,7 @@ export default function HomeBaselPage() {
                                     ))}
                                 </div>
 
-                                <div className="bh-candidate-cta mt-10 opacity-0">
+                                <div className="bh-candidate-cta mt-10 scroll-reveal fade-up">
                                     <a
                                         href="https://applicant.network/sign-up"
                                         className="btn btn-secondary btn-lg shadow-md"
@@ -627,7 +627,7 @@ export default function HomeBaselPage() {
                         <div className="grid lg:grid-cols-2 gap-16 items-center">
                             {/* Content */}
                             <div>
-                                <div className="bh-company-header opacity-0">
+                                <div className="bh-company-header scroll-reveal fade-up">
                                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent mb-4">
                                         <i className="fa-duotone fa-regular fa-building mr-2" />
                                         For Companies
@@ -650,7 +650,7 @@ export default function HomeBaselPage() {
                                     {COMPANY_FEATURES.map((f, i) => (
                                         <div
                                             key={i}
-                                            className="bh-company-feature border-l-4 border-accent bg-base-200 p-6 flex items-start gap-4 opacity-0"
+                                            className="bh-company-feature border-l-4 border-accent bg-base-200 p-6 flex items-start gap-4 scroll-reveal fade-up"
                                         >
                                             <div className="w-10 h-10 flex-shrink-0 bg-accent/10 flex items-center justify-center">
                                                 <i
@@ -669,7 +669,7 @@ export default function HomeBaselPage() {
                                     ))}
                                 </div>
 
-                                <div className="bh-company-cta mt-10 opacity-0">
+                                <div className="bh-company-cta mt-10 scroll-reveal fade-up">
                                     <a
                                         href="https://splits.network/sign-up"
                                         className="btn btn-accent btn-lg shadow-md"
@@ -681,7 +681,7 @@ export default function HomeBaselPage() {
                             </div>
 
                             {/* Mock UI visual */}
-                            <div className="bh-company-visual opacity-0">
+                            <div className="bh-company-visual scroll-reveal fade-up">
                                 <div className="border-l-4 border-accent bg-base-200 p-8 shadow-md">
                                     <div className="flex items-center justify-between mb-6">
                                         <h4 className="text-sm font-bold uppercase tracking-wider text-accent">
@@ -749,7 +749,7 @@ export default function HomeBaselPage() {
                     <div className="container mx-auto px-6 lg:px-12">
                         <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                             {/* Image — 2 of 5 columns (40%) */}
-                            <div className="bh-editorial-img lg:col-span-2 opacity-0">
+                            <div className="bh-editorial-img lg:col-span-2 scroll-reveal fade-up">
                                 <div
                                     className="relative overflow-hidden"
                                     style={{
@@ -766,7 +766,7 @@ export default function HomeBaselPage() {
                             </div>
 
                             {/* Text — 3 of 5 columns (60%) */}
-                            <div className="bh-editorial-text lg:col-span-3 opacity-0">
+                            <div className="bh-editorial-text lg:col-span-3 scroll-reveal fade-up">
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                     The Ecosystem
                                 </p>
@@ -824,7 +824,7 @@ export default function HomeBaselPage() {
                    ══════════════════════════════════════════════════════════ */}
                 <section className="bh-testimonials-section py-28 bg-base-100">
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="bh-testimonials-heading max-w-3xl mb-16 opacity-0">
+                        <div className="bh-testimonials-heading max-w-3xl mb-16 scroll-reveal fade-up">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 What People Say
                             </p>
@@ -839,7 +839,7 @@ export default function HomeBaselPage() {
                             {TESTIMONIALS.map((t, i) => (
                                 <div
                                     key={i}
-                                    className="bh-testimonial-card border-l-4 border-primary bg-base-200 p-8 opacity-0"
+                                    className="bh-testimonial-card border-l-4 border-primary bg-base-200 p-8 scroll-reveal fade-up"
                                 >
                                     <i className="fa-duotone fa-regular fa-quote-left text-3xl text-primary/20 mb-4 block" />
                                     <p className="text-base-content/80 leading-relaxed mb-6 italic">
@@ -887,7 +887,7 @@ export default function HomeBaselPage() {
                    ══════════════════════════════════════════════════════════ */}
                 <section className="bh-final-cta py-28 bg-primary text-primary-content">
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="bh-final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                        <div className="bh-final-cta-content max-w-4xl mx-auto text-center scroll-reveal fade-up">
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
                                 Ready to transform
                                 <br />

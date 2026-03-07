@@ -88,7 +88,7 @@ export default function MatchPreviewWidget({
     loading,
 }: MatchPreviewWidgetProps) {
     return (
-        <section className="py-12 bg-base-200 match-preview opacity-0">
+        <section className="py-12 bg-base-200 match-preview scroll-reveal fade-up">
             <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                 <div className="flex items-end justify-between mb-8">
                     <div>

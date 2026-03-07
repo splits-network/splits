@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Data ───────────────────────────────────────────────────────────────── */
 
@@ -126,60 +120,7 @@ export default function ProfilesOne() {
         "about" | "experience" | "reviews"
     >("about");
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-            tl.fromTo(
-                $1(".profile-avatar"),
-                { opacity: 0, scale: 0.9 },
-                { opacity: 1, scale: 1, duration: 0.5 },
-            )
-                .fromTo(
-                    $1(".profile-name"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $(".profile-meta"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.05 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $(".profile-stat"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.2",
-                )
-                .fromTo(
-                    $(".profile-action"),
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.3, stagger: 0.06 },
-                    "-=0.2",
-                );
-
-            $(".profile-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        scrollTrigger: { trigger: section, start: "top 85%" },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -194,7 +135,7 @@ export default function ProfilesOne() {
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="flex flex-col lg:flex-row lg:items-end gap-8">
                         <div className="flex items-start gap-6 flex-1">
-                            <div className="profile-avatar opacity-0 relative">
+                            <div className="profile-avatar scroll-reveal scale-in relative">
                                 <div className="w-24 h-24 lg:w-28 lg:h-28 bg-primary text-primary-content flex items-center justify-center font-black text-3xl">
                                     {profile.initials}
                                 </div>
@@ -207,7 +148,7 @@ export default function ProfilesOne() {
                                     </div>
                                 )}
                             </div>
-                            <div className="profile-name opacity-0">
+                            <div className="profile-name scroll-reveal fade-up">
                                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-2">
                                     {profile.name}
                                 </h1>
@@ -227,7 +168,7 @@ export default function ProfilesOne() {
                                     ].map((m) => (
                                         <span
                                             key={m.text}
-                                            className="profile-meta opacity-0 flex items-center gap-1.5 text-sm text-neutral-content/40"
+                                            className="profile-meta scroll-reveal fade-up flex items-center gap-1.5 text-sm text-neutral-content/40"
                                         >
                                             <i
                                                 className={`${m.icon} text-xs`}
@@ -239,15 +180,15 @@ export default function ProfilesOne() {
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            <button className="profile-action opacity-0 btn btn-primary">
+                            <button className="profile-action scroll-reveal fade-up btn btn-primary">
                                 <i className="fa-duotone fa-regular fa-comments" />{" "}
                                 Message
                             </button>
-                            <button className="profile-action opacity-0 btn btn-ghost border-neutral-content/20">
+                            <button className="profile-action scroll-reveal fade-up btn btn-ghost border-neutral-content/20">
                                 <i className="fa-duotone fa-regular fa-user-plus" />{" "}
                                 Connect
                             </button>
-                            <button className="profile-action opacity-0 btn btn-ghost border-neutral-content/20">
+                            <button className="profile-action scroll-reveal fade-up btn btn-ghost border-neutral-content/20">
                                 <i className="fa-duotone fa-regular fa-share-nodes" />{" "}
                                 Share
                             </button>
@@ -259,7 +200,7 @@ export default function ProfilesOne() {
                         {profile.stats.map((stat) => (
                             <div
                                 key={stat.label}
-                                className="profile-stat opacity-0 bg-neutral-content/5 p-4 flex items-center gap-3"
+                                className="profile-stat scroll-reveal fade-up bg-neutral-content/5 p-4 flex items-center gap-3"
                             >
                                 <div className="w-10 h-10 bg-primary/20 flex items-center justify-center">
                                     <i
@@ -305,7 +246,7 @@ export default function ProfilesOne() {
                     <div className="lg:col-span-3">
                         {activeTab === "about" && (
                             <>
-                                <div className="profile-section opacity-0 mb-10">
+                                <div className="profile-section scroll-reveal fade-up mb-10">
                                     <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-user text-primary" />{" "}
                                         About
@@ -314,7 +255,7 @@ export default function ProfilesOne() {
                                         {profile.bio}
                                     </p>
                                 </div>
-                                <div className="profile-section opacity-0 mb-10">
+                                <div className="profile-section scroll-reveal fade-up mb-10">
                                     <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-bullseye text-primary" />{" "}
                                         Specializations
@@ -343,7 +284,7 @@ export default function ProfilesOne() {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="profile-section opacity-0">
+                                <div className="profile-section scroll-reveal fade-up">
                                     <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-clock-rotate-left text-primary" />{" "}
                                         Recent Activity
@@ -373,7 +314,7 @@ export default function ProfilesOne() {
                         )}
 
                         {activeTab === "experience" && (
-                            <div className="profile-section opacity-0">
+                            <div className="profile-section scroll-reveal fade-up">
                                 <h2 className="text-xl font-black tracking-tight mb-6 flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-briefcase text-primary" />{" "}
                                     Experience
@@ -413,7 +354,7 @@ export default function ProfilesOne() {
                         )}
 
                         {activeTab === "reviews" && (
-                            <div className="profile-section opacity-0">
+                            <div className="profile-section scroll-reveal fade-up">
                                 <h2 className="text-xl font-black tracking-tight mb-6 flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-star text-primary" />{" "}
                                     Reviews

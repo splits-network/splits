@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import { ThemeScript, ThemeProvider, GsapInit } from "@splits-network/basel-ui";
+import { ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
 import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -53,7 +53,6 @@ export default function RootLayout({
                 />
             </head>
             <body className="antialiased flex flex-col min-h-screen">
-                <GsapInit />
                 <ThemeProvider>
                     <Header />
                     <main className="flex-grow">{children}</main>

@@ -4,4 +4,3 @@ export {
     BaselArticleAnimationWrapper,
     type BaselArticleAnimationWrapperProps,
 } from './basel-article-animation-wrapper';
-export { useArticleAnimations } from '../animations/use-article-animations';

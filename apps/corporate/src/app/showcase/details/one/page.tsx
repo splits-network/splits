@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Mock Data ──────────────────────────────────────────────────────────── */
 
@@ -164,61 +158,7 @@ export default function DetailsOne() {
         "overview",
     );
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-            tl.fromTo(
-                $1(".detail-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".detail-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $(".detail-meta"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $(".detail-action"),
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.3, stagger: 0.06 },
-                    "-=0.2",
-                );
-
-            $(".detail-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        scrollTrigger: { trigger: section, start: "top 85%" },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -233,7 +173,7 @@ export default function DetailsOne() {
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         {/* Breadcrumb */}
-                        <div className="detail-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6 opacity-0">
+                        <div className="detail-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6 scroll-reveal fade-up">
                             <a
                                 href="#"
                                 className="hover:text-neutral-content transition-colors"
@@ -260,11 +200,11 @@ export default function DetailsOne() {
                             </div>
                             <div>
                                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
-                                    <span className="detail-title-word inline-block opacity-0">
+                                    <span className="detail-title-word inline-block scroll-reveal hero-word">
                                         {job.title}
                                     </span>
                                 </h1>
-                                <p className="detail-meta opacity-0 text-lg text-neutral-content/60 mt-2">
+                                <p className="detail-meta scroll-reveal fade-up text-lg text-neutral-content/60 mt-2">
                                     {job.company}
                                 </p>
                             </div>
@@ -296,7 +236,7 @@ export default function DetailsOne() {
                             ].map((tag) => (
                                 <span
                                     key={tag.text}
-                                    className="detail-meta opacity-0 flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
+                                    className="detail-meta scroll-reveal fade-up flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
                                 >
                                     <i
                                         className={`${tag.icon} text-xs text-secondary`}
@@ -308,24 +248,24 @@ export default function DetailsOne() {
 
                         {/* Actions */}
                         <div className="flex flex-wrap gap-3">
-                            <button className="detail-action opacity-0 btn btn-primary">
+                            <button className="detail-action scroll-reveal fade-up btn btn-primary">
                                 <i className="fa-duotone fa-regular fa-paper-plane" />{" "}
                                 Submit Candidate
                             </button>
                             <button
                                 onClick={() => setSaved(!saved)}
-                                className={`detail-action opacity-0 btn ${saved ? "btn-secondary" : "btn-ghost border-neutral-content/20"}`}
+                                className={`detail-action scroll-reveal fade-up btn ${saved ? "btn-secondary" : "btn-ghost border-neutral-content/20"}`}
                             >
                                 <i
                                     className={`fa-${saved ? "solid" : "regular"} fa-bookmark`}
                                 />{" "}
                                 {saved ? "Saved" : "Save"}
                             </button>
-                            <button className="detail-action opacity-0 btn btn-ghost border-neutral-content/20">
+                            <button className="detail-action scroll-reveal fade-up btn btn-ghost border-neutral-content/20">
                                 <i className="fa-duotone fa-regular fa-share-nodes" />{" "}
                                 Share
                             </button>
-                            <button className="detail-action opacity-0 btn btn-ghost border-neutral-content/20">
+                            <button className="detail-action scroll-reveal fade-up btn btn-ghost border-neutral-content/20">
                                 <i className="fa-duotone fa-regular fa-print" />{" "}
                                 Print
                             </button>
@@ -405,7 +345,7 @@ export default function DetailsOne() {
                     <div className="lg:col-span-3">
                         {activeTab === "overview" && (
                             <>
-                                <div className="detail-section opacity-0 mb-10">
+                                <div className="detail-section scroll-reveal fade-up mb-10">
                                     <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-file-lines text-primary" />{" "}
                                         About This Role
@@ -415,7 +355,7 @@ export default function DetailsOne() {
                                     </div>
                                 </div>
 
-                                <div className="detail-section opacity-0 mb-10">
+                                <div className="detail-section scroll-reveal fade-up mb-10">
                                     <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-list-check text-primary" />{" "}
                                         Responsibilities
@@ -434,7 +374,7 @@ export default function DetailsOne() {
                                     </div>
                                 </div>
 
-                                <div className="detail-section opacity-0 mb-10">
+                                <div className="detail-section scroll-reveal fade-up mb-10">
                                     <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-code text-primary" />{" "}
                                         Required Skills
@@ -464,7 +404,7 @@ export default function DetailsOne() {
                                     </div>
                                 </div>
 
-                                <div className="detail-section opacity-0">
+                                <div className="detail-section scroll-reveal fade-up">
                                     <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-gift text-primary" />{" "}
                                         Benefits
@@ -487,7 +427,7 @@ export default function DetailsOne() {
                         )}
 
                         {activeTab === "activity" && (
-                            <div className="detail-section opacity-0">
+                            <div className="detail-section scroll-reveal fade-up">
                                 <h2 className="text-xl font-black tracking-tight mb-6 flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-clock-rotate-left text-primary" />{" "}
                                     Activity Timeline

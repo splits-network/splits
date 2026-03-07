@@ -1,9 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import {
     BaselDynamicPricingSection,
     BaselComparisonTable,
@@ -11,16 +9,6 @@ import {
 } from "@/components/basel/pricing";
 import { pricingFaqs } from "./pricing-faq-data";
 import { PricingFaqAccordion } from "./pricing-faq-accordion";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
-
-/* ─── Constants ───────────────────────────────────────────────────────────── */
-
-const D = { fast: 0.3, normal: 0.6, slow: 0.9, hero: 1.2 };
-const E = { smooth: "power2.out", strong: "power3.out" };
-const S = { tight: 0.08, normal: 0.12, loose: 0.2 };
 
 const keyStats = [
     {
@@ -105,440 +93,10 @@ const comparisonFeatures = [
 
 export function PricingContent() {
     const containerRef = useRef<HTMLDivElement>(null);
+    useScrollReveal(containerRef);
 
-    useGSAP(
-        () => {
-            if (!containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(
-                    containerRef.current.querySelectorAll(
-                        "[class*='opacity-0']",
-                    ),
-                    { opacity: 1 },
-                );
-                return;
-            }
-
-            const $ = (sel: string) =>
-                containerRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                containerRef.current!.querySelector(sel);
-
-            // ═══ HERO ═══════════════════════════════════════════════════
-            const heroTl = gsap.timeline({ defaults: { ease: E.strong, clearProps: "transform" } });
-
-            const heroKicker = $1(".hero-kicker");
-            if (heroKicker) {
-                heroTl.fromTo(
-                    heroKicker,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal },
-                );
-            }
-            const heroWords = $(".hero-headline-word");
-            if (heroWords.length) {
-                heroTl.fromTo(
-                    heroWords,
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: D.hero,
-                        stagger: S.normal,
-                    },
-                    "-=0.3",
-                );
-            }
-            const heroBody = $1(".hero-body");
-            if (heroBody) {
-                heroTl.fromTo(
-                    heroBody,
-                    { opacity: 0, y: 25 },
-                    { opacity: 1, y: 0, duration: D.normal },
-                    "-=0.5",
-                );
-            }
-            const heroCtaRow = $1(".hero-cta-row");
-            if (heroCtaRow) {
-                heroTl.fromTo(
-                    heroCtaRow,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: D.normal },
-                    "-=0.2",
-                );
-            }
-
-            // Hero image panel reveal
-            const heroImgWrap = $1(".hero-img-wrap");
-            if (heroImgWrap) {
-                gsap.fromTo(
-                    heroImgWrap,
-                    { opacity: 0, scale: 1.08 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 1.4,
-                        ease: E.smooth,
-                        delay: 0.2,
-                    },
-                );
-            }
-
-            // Hero image parallax
-            const heroImg = $1(".hero-img-wrap img");
-            if (heroImg) {
-                gsap.to(heroImg, {
-                    yPercent: 12,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: $1(".hero-section"),
-                        start: "top top",
-                        end: "bottom top",
-                        scrub: true,
-                    },
-                });
-            }
-
-            // ═══ STATS BAR ══════════════════════════════════════════════
-            const statsSection = $1(".pricing-stats");
-            if (statsSection) {
-                gsap.fromTo(
-                    $(".stat-block"),
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.strong,
-                        stagger: S.normal,
-                        scrollTrigger: {
-                            trigger: statsSection,
-                            start: "top 90%",
-                        },
-                    },
-                );
-            }
-
-            // ═══ INTRO (editorial split) ══════════════════════════════
-            const introText = $1(".intro-text");
-            if (introText) {
-                gsap.fromTo(
-                    introText,
-                    { opacity: 0, x: -60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: D.slow,
-                        ease: E.strong,
-                        scrollTrigger: {
-                            trigger: $1(".pricing-intro"),
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-            const introSidebar = $1(".intro-sidebar");
-            if (introSidebar) {
-                gsap.fromTo(
-                    introSidebar,
-                    { opacity: 0, x: 60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: D.slow,
-                        ease: E.strong,
-                        scrollTrigger: {
-                            trigger: $1(".pricing-intro"),
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-
-            // ═══ PULL QUOTES ════════════════════════════════════════════
-            $(".pullquote").forEach((quote) => {
-                gsap.fromTo(
-                    quote,
-                    { opacity: 0, x: -40 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: D.slow,
-                        ease: E.strong,
-                        scrollTrigger: {
-                            trigger: quote,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            });
-
-            // ═══ PRICING CARDS ══════════════════════════════════════════
-            const cardsHeading = $1(".pricing-cards-heading");
-            if (cardsHeading) {
-                gsap.fromTo(
-                    cardsHeading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.smooth,
-                        scrollTrigger: {
-                            trigger: $1(".pricing-cards-section"),
-                            start: "top 75%",
-                        },
-                    },
-                );
-            }
-            const pricingGrid = $1(".pricing-cards-grid");
-            if (pricingGrid) {
-                gsap.fromTo(
-                    pricingGrid,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.smooth,
-                        scrollTrigger: {
-                            trigger: pricingGrid,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            }
-
-            // ═══ ROI CALCULATOR ═══════════════════════════════════════
-            const calcText = $1(".calc-editorial-text");
-            if (calcText) {
-                gsap.fromTo(
-                    calcText,
-                    { opacity: 0, x: -50 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: D.slow,
-                        ease: E.strong,
-                        scrollTrigger: {
-                            trigger: $1(".roi-calculator-section"),
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-            const calcWidget = $1(".calc-widget");
-            if (calcWidget) {
-                gsap.fromTo(
-                    calcWidget,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.strong,
-                        scrollTrigger: {
-                            trigger: $1(".roi-calculator-section"),
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-
-            // ═══ COMPANIES ══════════════════════════════════════════════
-            const companiesText = $1(".companies-text");
-            if (companiesText) {
-                gsap.fromTo(
-                    companiesText,
-                    { opacity: 0, x: 60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: D.slow,
-                        ease: E.strong,
-                        scrollTrigger: {
-                            trigger: $1(".companies-section"),
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-            gsap.fromTo(
-                $(".companies-card"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: D.normal,
-                    ease: E.strong,
-                    stagger: S.loose,
-                    scrollTrigger: {
-                        trigger: $1(".companies-grid"),
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // ═══ IMAGE BREAK ════════════════════════════════════════════
-            const imageCaption = $1(".image-caption");
-            if (imageCaption) {
-                gsap.fromTo(
-                    imageCaption,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.slow,
-                        ease: E.smooth,
-                        scrollTrigger: {
-                            trigger: imageCaption,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            }
-
-            // ═══ FEATURE COMPARISON ═════════════════════════════════════
-            const comparisonHeading = $1(".comparison-heading");
-            if (comparisonHeading) {
-                gsap.fromTo(
-                    comparisonHeading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.smooth,
-                        scrollTrigger: {
-                            trigger: $1(".feature-comparison"),
-                            start: "top 75%",
-                        },
-                    },
-                );
-            }
-            const comparisonTable = $1(".comparison-table");
-            if (comparisonTable) {
-                gsap.fromTo(
-                    comparisonTable,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.smooth,
-                        scrollTrigger: {
-                            trigger: comparisonTable,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // ═══ FAQ ════════════════════════════════════════════════════
-            const faqHeading = $1(".faq-heading");
-            if (faqHeading) {
-                gsap.fromTo(
-                    faqHeading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.smooth,
-                        scrollTrigger: {
-                            trigger: $1(".pricing-faq"),
-                            start: "top 75%",
-                        },
-                    },
-                );
-            }
-            gsap.fromTo(
-                $(".faq-card"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: D.normal,
-                    ease: E.strong,
-                    stagger: S.normal,
-                    scrollTrigger: {
-                        trigger: $1(".faq-grid"),
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // ═══ FINAL QUOTE ════════════════════════════════════════════
-            const finalQuote = $1(".final-quote");
-            if (finalQuote) {
-                gsap.fromTo(
-                    finalQuote,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.slow,
-                        ease: E.smooth,
-                        scrollTrigger: {
-                            trigger: finalQuote,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            }
-
-            // ═══ CTA ════════════════════════════════════════════════════
-            const ctaSection = $1(".pricing-cta");
-            if (ctaSection) {
-                gsap.fromTo(
-                    $1(".cta-content"),
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.hero,
-                        ease: E.strong,
-                        scrollTrigger: {
-                            trigger: ctaSection,
-                            start: "top 80%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $(".cta-card"),
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        ease: E.strong,
-                        stagger: S.loose,
-                        delay: 0.3,
-                        scrollTrigger: {
-                            trigger: ctaSection,
-                            start: "top 80%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $1(".cta-footer"),
-                    { opacity: 0 },
-                    {
-                        opacity: 1,
-                        duration: D.normal,
-                        ease: E.smooth,
-                        delay: 0.6,
-                        scrollTrigger: {
-                            trigger: ctaSection,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: containerRef },
-    );
+    // NOTE: Hero image parallax effect removed (was scrub-based GSAP ScrollTrigger).
+    // All entrance animations now handled by scroll-reveal CSS classes.
 
     return (
         <div ref={containerRef}>
@@ -548,7 +106,7 @@ export function PricingContent() {
             <section className="hero-section relative min-h-[92vh] flex items-center bg-neutral overflow-hidden">
                 {/* Right image panel — behind on mobile, 40% on desktop */}
                 <div
-                    className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
+                    className="scroll-reveal scale-in absolute inset-0 lg:left-[58%]"
                     style={{
                         clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
@@ -572,34 +130,34 @@ export function PricingContent() {
                 {/* Content panel — left-aligned, 60% */}
                 <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                        <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
                             Pricing
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="hero-headline-word inline-block opacity-0 text-neutral-content">
+                            <span className="scroll-reveal fade-up inline-block text-neutral-content">
                                 Predictable
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-neutral-content">
+                            <span className="scroll-reveal fade-up inline-block text-neutral-content">
                                 costs.
                             </span>
                             <br />
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up inline-block text-primary">
                                 Compounding
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-neutral-content">
+                            <span className="scroll-reveal fade-up inline-block text-neutral-content">
                                 returns.
                             </span>
                         </h1>
 
-                        <p className="hero-body text-lg md:text-xl text-neutral-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
+                        <p className="scroll-reveal fade-up text-lg md:text-xl text-neutral-content/70 leading-relaxed max-w-xl mb-10">
                             Three tiers. One transparent model. Your
                             subscription is the only recurring cost -- placement
                             earnings are yours to keep. Start free, scale when
                             the math makes sense.
                         </p>
 
-                        <div className="hero-cta-row flex flex-wrap items-center gap-4 opacity-0">
+                        <div className="scroll-reveal fade-up flex flex-wrap items-center gap-4">
                             <a
                                 href="/sign-up"
                                 className="btn btn-primary btn-lg uppercase tracking-wider text-sm shadow-md"
@@ -623,7 +181,7 @@ export function PricingContent() {
                     {keyStats.map((stat, index) => (
                         <div
                             key={index}
-                            className={`stat-block p-8 md:p-10 bg-base-200 border-l-4 ${stat.semantic} opacity-0`}
+                            className={`scroll-reveal fade-up p-8 md:p-10 bg-base-200 border-l-4 ${stat.semantic}`}
                         >
                             <div className="text-4xl md:text-5xl font-black mb-2 text-base-content">
                                 {stat.value}
@@ -643,7 +201,7 @@ export function PricingContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-20 items-start">
                         {/* Text — 3 of 5 columns (60%) */}
-                        <div className="intro-text lg:col-span-3 opacity-0">
+                        <div className="scroll-reveal slide-from-left lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 Our Philosophy
                             </p>
@@ -684,7 +242,7 @@ export function PricingContent() {
                         </div>
 
                         {/* Sidebar — 2 of 5 columns (40%) */}
-                        <div className="intro-sidebar lg:col-span-2 opacity-0">
+                        <div className="scroll-reveal slide-from-right lg:col-span-2">
                             <div className="bg-base-200 p-8 md:p-10 border-l-4 border-primary">
                                 <h3 className="font-black text-lg uppercase tracking-wide mb-6 text-base-content">
                                     The Splits Model
@@ -739,7 +297,7 @@ export function PricingContent() {
             <section className="py-20 md:py-28 overflow-hidden bg-neutral">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 items-center">
-                        <div className="pullquote lg:col-span-4 border-l-4 border-secondary pl-8 md:pl-12 opacity-0">
+                        <div className="scroll-reveal slide-from-left lg:col-span-4 border-l-4 border-secondary pl-8 md:pl-12">
                             <p className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-[0.95] text-neutral-content">
                                 The platform charges a subscription. It does not
                                 take a cut of your placements. That distinction
@@ -766,7 +324,7 @@ export function PricingContent() {
             <section className="pricing-cards-section py-28 overflow-hidden bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
                     {/* Left-aligned kicker/headline (editorial, not centered) */}
-                    <div className="pricing-cards-heading max-w-3xl mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mb-16">
                         <span className="inline-block px-4 py-1 text-sm font-bold uppercase tracking-[0.2em] mb-4 bg-accent text-accent-content">
                             Select a Tier
                         </span>
@@ -776,7 +334,7 @@ export function PricingContent() {
                         </h2>
                     </div>
 
-                    <div className="pricing-cards-grid opacity-0">
+                    <div className="scroll-reveal fade-up">
                         <BaselDynamicPricingSection
                             showBillingToggle={true}
                             defaultAnnual={false}
@@ -803,7 +361,7 @@ export function PricingContent() {
             <section className="roi-calculator-section py-28 overflow-hidden bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
                     {/* Editorial intro — left-aligned, narrow */}
-                    <div className="calc-editorial-text max-w-2xl mb-16 opacity-0">
+                    <div className="scroll-reveal slide-from-left max-w-2xl mb-16">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                             Earnings Projection
                         </p>
@@ -821,7 +379,7 @@ export function PricingContent() {
                     </div>
 
                     {/* Calculator widget — full width */}
-                    <div className="calc-widget opacity-0">
+                    <div className="scroll-reveal fade-up">
                         <BaselCalculator variant="page" animate={false} />
                     </div>
                 </div>
@@ -839,7 +397,7 @@ export function PricingContent() {
                 <div className="absolute inset-0 bg-neutral/75" />
 
                 <div className="relative  flex items-center h-full px-6 lg:px-12">
-                    <div className="image-caption container mx-auto opacity-0">
+                    <div className="scroll-reveal fade-up container mx-auto">
                         <p className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[0.95] text-neutral-content max-w-3xl">
                             Invest in your tier.{" "}
                             <span className="text-warning">
@@ -857,7 +415,7 @@ export function PricingContent() {
             <section className="companies-section py-28 overflow-hidden bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
                     {/* Section heading — right-aligned for editorial contrast */}
-                    <div className="companies-text lg:ml-auto max-w-2xl mb-16 opacity-0">
+                    <div className="scroll-reveal slide-from-right lg:ml-auto max-w-2xl mb-16">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-warning mb-4">
                             Hiring Companies
                         </p>
@@ -876,7 +434,7 @@ export function PricingContent() {
                     {/* Asymmetric grid — 3/5 + 2/5 split */}
                     <div className="companies-grid grid lg:grid-cols-5 gap-8">
                         {/* Free to Post — larger card (3 cols) */}
-                        <div className="companies-card lg:col-span-3 p-10 md:p-12 border-l-4 border-secondary bg-base-200 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up lg:col-span-3 p-10 md:p-12 border-l-4 border-secondary bg-base-200 shadow-sm">
                             <div className="w-14 h-14 flex items-center justify-center mb-6 bg-secondary">
                                 <i className="fa-duotone fa-regular fa-building text-2xl text-secondary-content" />
                             </div>
@@ -908,7 +466,7 @@ export function PricingContent() {
                         </div>
 
                         {/* Pay on Hire — narrower card (2 cols) */}
-                        <div className="companies-card lg:col-span-2 p-10 md:p-12 border-l-4 border-warning bg-base-200 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up lg:col-span-2 p-10 md:p-12 border-l-4 border-warning bg-base-200 shadow-sm">
                             <div className="w-14 h-14 flex items-center justify-center mb-6 bg-warning">
                                 <i className="fa-duotone fa-regular fa-handshake text-2xl text-warning-content" />
                             </div>
@@ -957,7 +515,7 @@ export function PricingContent() {
             <section className="py-20 md:py-28 overflow-hidden bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="lg:ml-auto max-w-3xl">
-                        <div className="pullquote border-l-4 border-primary pl-8 md:pl-12 opacity-0">
+                        <div className="scroll-reveal slide-from-left border-l-4 border-primary pl-8 md:pl-12">
                             <p className="text-3xl md:text-4xl font-black uppercase tracking-tight leading-[0.95] text-base-content">
                                 A single placement on Pro covers months of
                                 subscription costs. On Partner, the margin is
@@ -981,7 +539,7 @@ export function PricingContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         {/* Heading block — 2 of 5 cols */}
-                        <div className="comparison-heading lg:col-span-2 opacity-0">
+                        <div className="scroll-reveal fade-up lg:col-span-2">
                             <span className="inline-block px-4 py-1 text-sm font-bold uppercase tracking-[0.2em] mb-4 bg-primary text-primary-content">
                                 Full Breakdown
                             </span>
@@ -999,7 +557,7 @@ export function PricingContent() {
                         </div>
 
                         {/* Table — 3 of 5 cols */}
-                        <div className="comparison-table lg:col-span-3 opacity-0">
+                        <div className="scroll-reveal fade-up lg:col-span-3">
                             <BaselComparisonTable
                                 features={comparisonFeatures}
                             />
@@ -1015,7 +573,7 @@ export function PricingContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
                         {/* Heading — 2 of 5 cols, left-aligned */}
-                        <div className="faq-heading lg:col-span-2 opacity-0">
+                        <div className="scroll-reveal fade-up lg:col-span-2">
                             <span className="inline-block px-4 py-1 text-sm font-bold uppercase tracking-[0.2em] mb-4 bg-secondary text-secondary-content">
                                 Common Questions
                             </span>
@@ -1044,7 +602,7 @@ export function PricingContent() {
             <section className="py-20 md:py-28 overflow-hidden bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <div className="final-quote border-l-4 border-warning pl-8 md:pl-12 opacity-0">
+                        <div className="scroll-reveal fade-up border-l-4 border-warning pl-8 md:pl-12">
                             <p className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-[0.95] text-base-content">
                                 Transparent pricing is not a feature. It is a
                                 prerequisite. Every fee is disclosed before any
@@ -1075,7 +633,7 @@ export function PricingContent() {
 
                 <div className="container mx-auto px-6 lg:px-12 relative ">
                     {/* Editorial heading — left-aligned */}
-                    <div className="cta-content max-w-3xl mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mb-16">
                         <span className="inline-block px-4 py-1 text-sm font-bold uppercase tracking-[0.2em] mb-6 bg-primary text-primary-content">
                             Begin Here
                         </span>
@@ -1092,7 +650,7 @@ export function PricingContent() {
                     {/* CTA cards — 3-col with generous padding */}
                     <div className="grid md:grid-cols-3 gap-8 mb-16">
                         {/* Recruiters */}
-                        <div className="cta-card p-10 border-l-4 border-primary bg-base-100/5 border border-base-content/10 opacity-0">
+                        <div className="scroll-reveal fade-up p-10 border-l-4 border-primary bg-base-100/5 border border-base-content/10">
                             <div className="w-16 h-16 mb-6 flex items-center justify-center bg-primary">
                                 <i className="fa-duotone fa-regular fa-user-tie text-2xl text-primary-content" />
                             </div>
@@ -1112,7 +670,7 @@ export function PricingContent() {
                         </div>
 
                         {/* Companies */}
-                        <div className="cta-card p-10 border-l-4 border-warning bg-base-100/5 border border-base-content/10 opacity-0">
+                        <div className="scroll-reveal fade-up p-10 border-l-4 border-warning bg-base-100/5 border border-base-content/10">
                             <div className="w-16 h-16 mb-6 flex items-center justify-center bg-warning">
                                 <i className="fa-duotone fa-regular fa-building text-2xl text-warning-content" />
                             </div>
@@ -1131,7 +689,7 @@ export function PricingContent() {
                         </div>
 
                         {/* Candidates */}
-                        <div className="cta-card p-10 border-l-4 border-secondary bg-base-100/5 border border-base-content/10 opacity-0">
+                        <div className="scroll-reveal fade-up p-10 border-l-4 border-secondary bg-base-100/5 border border-base-content/10">
                             <div className="w-16 h-16 mb-6 flex items-center justify-center bg-secondary">
                                 <i className="fa-duotone fa-regular fa-user text-2xl text-secondary-content" />
                             </div>
@@ -1151,7 +709,7 @@ export function PricingContent() {
                         </div>
                     </div>
 
-                    <div className="cta-footer opacity-0">
+                    <div className="scroll-reveal fade-in">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                             <p className="text-sm text-neutral-content/50">
                                 No credit card required for Starter. Upgrade or

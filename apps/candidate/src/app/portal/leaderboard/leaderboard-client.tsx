@@ -11,8 +11,7 @@ import {
     LeaderboardNextMilestone,
 } from "@splits-network/shared-gamification";
 import type { LeaderboardEntryInfo, EntityLevelInfo } from "@splits-network/shared-gamification";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { LeaderboardHero } from "./leaderboard-hero";
 import { LeaderboardList } from "./leaderboard-list";
 
@@ -104,42 +103,7 @@ export default function LeaderboardClient() {
     }, [entries, getLevel]);
     const myLevel = myEntityId ? getLevel(myEntityId) : undefined;
 
-    /* ── Mount animation ─────────────────────────────────────────────────── */
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
-                return;
-            }
-
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            tl.fromTo($1(".lb-kicker"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" })
-                .fromTo(
-                    mainRef.current!.querySelectorAll(".lb-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    { opacity: 1, y: 0, rotateX: 0, duration: 0.8, stagger: 0.1, clearProps: "transform" },
-                    "-=0.3",
-                )
-                .fromTo($1(".lb-subtitle"), { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" }, "-=0.4")
-                .fromTo($1(".lb-stat-bar"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" }, "-=0.2")
-                .fromTo($1(".lb-body"), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" }, "-=0.2");
-        },
-        { scope: mainRef },
-    );
-
-    /* ── Sidebar card animation ──────────────────────────────────────────── */
-    useGSAP(() => {
-        if (!mainRef.current || loading) return;
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        const cards = mainRef.current.querySelectorAll(".lb-sidebar-card");
-        if (cards.length === 0) return;
-        gsap.fromTo(cards, { opacity: 0, x: 30 }, { opacity: 1, x: 0, stagger: 0.12, duration: 0.5, ease: "power3.out", clearProps: "transform" });
-    }, { scope: mainRef, dependencies: [loading, myRank] });
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -148,7 +112,7 @@ export default function LeaderboardClient() {
                 subtitle="Recruiters are watching. Your XP reflects how you engage and how serious you are about your next move."
             />
 
-            <section className="lb-body opacity-0 container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+            <section className="scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-10 lg:py-14">
                 {/* Frosted glass filter bar */}
                 <div className="sticky top-0 z-10 backdrop-blur-md bg-base-100/90 border-b border-base-300 -mx-6 px-6 py-4 flex flex-wrap gap-6 lg:-mx-12 lg:px-12 mb-8">
                     <fieldset className="fieldset">

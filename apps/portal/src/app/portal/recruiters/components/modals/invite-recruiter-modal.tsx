@@ -5,6 +5,9 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { ButtonLoading } from "@splits-network/shared-ui";
+import { PermissionConfigurator } from "@/app/portal/invitation/shared/permission-configurator";
+import { DEFAULT_PERMISSIONS } from "@/app/portal/invitation/shared/types";
+import type { RecruiterCompanyPermissions } from "@/app/portal/invitation/shared/types";
 import type { RecruiterWithUser, Company } from "../../types";
 import { getDisplayName } from "../../types";
 
@@ -32,7 +35,7 @@ export default function InviteRecruiterModal({
     const [selectedCompanyId, setSelectedCompanyId] = useState(
         companies.length === 1 ? companies[0].id : "",
     );
-    const [canManageJobs, setCanManageJobs] = useState(false);
+    const [permissions, setPermissions] = useState<RecruiterCompanyPermissions>({ ...DEFAULT_PERMISSIONS });
     const [message, setMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,7 +60,8 @@ export default function InviteRecruiterModal({
             await client.post("/recruiter-companies/invite", {
                 company_id: selectedCompanyId,
                 recruiter_id: recruiter.id,
-                can_manage_company_jobs: canManageJobs,
+                can_manage_company_jobs: permissions.can_create_jobs || permissions.can_edit_jobs,
+                permissions,
                 message: message.trim() || undefined,
             });
 
@@ -79,7 +83,7 @@ export default function InviteRecruiterModal({
 
     return (
         <dialog className="modal modal-open">
-            <div className="modal-box max-w-md bg-base-100 border-2 border-base-300 shadow-md" style={{ borderRadius: 0 }}>
+            <div className="modal-box max-w-lg bg-base-100 border-2 border-base-300 shadow-md" style={{ borderRadius: 0 }}>
                 <form method="dialog">
                     <button
                         type="button"
@@ -149,25 +153,13 @@ export default function InviteRecruiterModal({
                     </fieldset>
 
                     {/* Permissions */}
-                    <fieldset className="fieldset mb-4">
-                        <label className="label cursor-pointer justify-start gap-3">
-                            <input
-                                type="checkbox"
-                                className="checkbox checkbox-primary"
-                                checked={canManageJobs}
-                                onChange={(e) =>
-                                    setCanManageJobs(e.target.checked)
-                                }
-                            />
-                            <span className="label-text font-bold">
-                                Allow recruiter to manage company jobs
-                            </span>
-                        </label>
-                        <p className="text-sm text-base-content/50 ml-9">
-                            If enabled, the recruiter can create and edit job
-                            postings for your company.
-                        </p>
-                    </fieldset>
+                    <div className="mb-4">
+                        <PermissionConfigurator
+                            permissions={permissions}
+                            onChange={setPermissions}
+                            recruiterName={displayName}
+                        />
+                    </div>
 
                     {/* Optional Message */}
                     <fieldset className="fieldset mb-6">

@@ -29,21 +29,21 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
                 <div className="grid lg:grid-cols-5 gap-10 items-end">
                     {/* Left: Title */}
                     <div className="lg:col-span-3">
-                        <p className="mkt-kicker text-sm font-semibold uppercase tracking-widest text-secondary mb-4 opacity-0">
+                        <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-widest text-secondary mb-4">
                             Integrations
                         </p>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-none tracking-tight mb-4">
-                            <span className="mkt-title-word inline-block opacity-0">
+                            <span className="scroll-reveal fade-up inline-block">
                                 Connect
                             </span>{" "}
-                            <span className="mkt-title-word inline-block opacity-0">
+                            <span className="scroll-reveal fade-up inline-block">
                                 your
                             </span>{" "}
-                            <span className="mkt-title-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up inline-block text-primary">
                                 tools.
                             </span>
                         </h1>
-                        <p className="mkt-desc text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="scroll-reveal fade-up text-base text-neutral-content/50 max-w-xl">
                             Link your calendar, email, and recruiting tools to
                             streamline your workflow and keep everything in
                             sync.
@@ -52,7 +52,7 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
 
                     {/* Right: Stats strip */}
                     <div className="lg:col-span-2 flex gap-6 lg:justify-end">
-                        <div className="mkt-desc opacity-0">
+                        <div className="scroll-reveal fade-up">
                             <p className="text-3xl font-black text-primary">
                                 {activeCount}
                             </p>
@@ -61,7 +61,7 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
                             </p>
                         </div>
                         <div className="w-px bg-neutral-content/10" />
-                        <div className="mkt-desc opacity-0">
+                        <div className="scroll-reveal fade-up">
                             <p className="text-3xl font-black text-secondary">
                                 4
                             </p>

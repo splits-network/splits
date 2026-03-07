@@ -7,8 +7,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createAuthenticatedClient, ApiClient } from "@/lib/api-client";
 import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 type SSOStatus = "authenticating" | "setting_up" | "redirecting" | "error";
 
@@ -185,72 +184,7 @@ function SSOCallbackInner() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     ]);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            const logo = $1(".sso-logo");
-            if (logo)
-                tl.fromTo(
-                    logo,
-                    { opacity: 0, scale: 0.9 },
-                    { opacity: 1, scale: 1, duration: 0.5 },
-                );
-
-            const heading = $1(".sso-heading");
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.3",
-                );
-
-            const statusCard = $1(".sso-status");
-            if (statusCard)
-                tl.fromTo(
-                    statusCard,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.2",
-                );
-
-            const steps = $(".sso-step");
-            if (steps.length)
-                tl.fromTo(
-                    steps,
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.2",
-                );
-
-            const stats = $(".sso-stat");
-            if (stats.length)
-                tl.fromTo(
-                    stats,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 },
-                    "-=0.2",
-                );
-
-            const testimonial = $1(".sso-testimonial");
-            if (testimonial)
-                tl.fromTo(
-                    testimonial,
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4 },
-                    "-=0.1",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     const getStatusContent = () => {
         switch (status) {
@@ -300,14 +234,14 @@ function SSOCallbackInner() {
             <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-base-100">
                 <div className="w-full max-w-md">
                     {/* Logo */}
-                    <div className="sso-logo opacity-0 mb-10">
+                    <div className="sso-logo scroll-reveal pop-in mb-10">
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             A
                         </div>
                     </div>
 
                     {/* Heading */}
-                    <div className="sso-heading opacity-0 mb-8">
+                    <div className="sso-heading scroll-reveal fade-up mb-8">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
                             Applicant Network
                         </p>
@@ -320,7 +254,7 @@ function SSOCallbackInner() {
                     </div>
 
                     {/* Status Card */}
-                    <div className="sso-status opacity-0">
+                    <div className="sso-status scroll-reveal fade-up">
                         {status === "error" ? (
                             <div className="border-l-4 border-error bg-error/5 p-6">
                                 <div className="flex items-center gap-4 mb-3">
@@ -362,7 +296,7 @@ function SSOCallbackInner() {
                         {STEPS.map((step, i) => (
                             <div
                                 key={step.key}
-                                className="sso-step opacity-0 flex items-center gap-2 flex-1"
+                                className="sso-step scroll-reveal fade-up flex items-center gap-2 flex-1"
                             >
                                 <div
                                     className={`w-8 h-8 flex items-center justify-center text-sm flex-shrink-0 transition-colors ${
@@ -434,7 +368,7 @@ function SSOCallbackInner() {
                     {STATS.map((stat) => (
                         <div
                             key={stat.label}
-                            className="sso-stat opacity-0 flex items-center gap-4 p-4 bg-neutral-content/5"
+                            className="sso-stat scroll-reveal fade-up flex items-center gap-4 p-4 bg-neutral-content/5"
                         >
                             <div className="w-10 h-10 bg-primary/20 flex items-center justify-center flex-shrink-0">
                                 <i className={`${stat.icon} text-primary`} />
@@ -451,7 +385,7 @@ function SSOCallbackInner() {
                     ))}
                 </div>
 
-                <div className="sso-testimonial opacity-0 relative ">
+                <div className="sso-testimonial scroll-reveal fade-up relative ">
                     <div className="border-l-4 border-primary pl-4">
                         <p className="text-sm text-neutral-content/60 italic mb-3">
                             &ldquo;I had three recruiters presenting me to

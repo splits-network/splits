@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
 import {
     BaselModal,
     BaselModalHeader,
@@ -89,73 +87,15 @@ export default function BaselAddNoteModal({
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const containerRef = useRef<HTMLDivElement>(null);
-    const backdropRef = useRef<HTMLDivElement>(null);
-    const bodyRef = useRef<HTMLDivElement>(null);
-
     const visibilityOptions = getVisibilityOptions(creatorType);
-
-    /* ── GSAP entrance animation ──────────────────────────────────────── */
-
-    useGSAP(() => {
-        if (!isOpen) return;
-
-        const backdrop = backdropRef.current;
-        const box = containerRef.current;
-        const body = bodyRef.current;
-        if (!backdrop || !box) return;
-
-        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-        tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-        tl.fromTo(
-            box,
-            { opacity: 0, y: 40, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.4, clearProps: "transform" },
-            "-=0.15",
-        );
-        if (body) {
-            tl.fromTo(
-                body,
-                { opacity: 0, y: 10 },
-                { opacity: 1, y: 0, duration: 0.3, clearProps: "transform" },
-                "-=0.2",
-            );
-        }
-    }, [isOpen]);
-
-    /* ── Animated close ───────────────────────────────────────────────── */
 
     const handleClose = useCallback(() => {
         if (submitting) return;
-
-        const backdrop = backdropRef.current;
-        const box = containerRef.current;
-
-        if (backdrop && box) {
-            const tl = gsap.timeline({
-                defaults: { ease: "power2.in", clearProps: "transform" },
-                onComplete: () => {
-                    setMessageText("");
-                    setNoteType("general");
-                    setVisibility("shared");
-                    setError(null);
-                    onClose();
-                },
-            });
-            tl.to(box, {
-                opacity: 0,
-                y: 30,
-                scale: 0.97,
-                duration: 0.25,
-            });
-            tl.to(backdrop, { opacity: 0, duration: 0.2 }, "-=0.1");
-        } else {
-            setMessageText("");
-            setNoteType("general");
-            setVisibility("shared");
-            setError(null);
-            onClose();
-        }
+        setMessageText("");
+        setNoteType("general");
+        setVisibility("shared");
+        setError(null);
+        onClose();
     }, [submitting, onClose]);
 
     /* ── Form submission ──────────────────────────────────────────────── */
@@ -201,8 +141,6 @@ export default function BaselAddNoteModal({
             isOpen={isOpen}
             onClose={handleClose}
             maxWidth="max-w-2xl"
-            containerRef={containerRef}
-            backdropRef={backdropRef}
         >
             <BaselModalHeader
                 title="Record a Note"
@@ -214,7 +152,7 @@ export default function BaselAddNoteModal({
             />
 
             <form onSubmit={handleSubmit}>
-                <BaselModalBody containerRef={bodyRef}>
+                <BaselModalBody>
                     <div className="space-y-5">
                         {/* Reply indicator */}
                         {replyToNoteId && (

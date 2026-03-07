@@ -1,6 +1,5 @@
 import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { LeaderboardRow, LevelBadge } from "@splits-network/shared-gamification";
 import type { LeaderboardEntryInfo, EntityLevelInfo } from "@splits-network/shared-gamification";
 import { LoadingState } from "@splits-network/shared-ui";
@@ -16,29 +15,7 @@ export function LeaderboardList({ entries, myEntityId, loading, levelMap }: Lead
     const listRef = useRef<HTMLDivElement>(null);
     const filteredEntries = entries.filter((e) => e.rank > 3);
 
-    useGSAP(
-        () => {
-            if (!listRef.current || loading) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-            const rows = listRef.current.querySelectorAll(".lb-row");
-            if (rows.length === 0) return;
-
-            gsap.fromTo(
-                rows,
-                { opacity: 0, x: -16 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.4,
-                    stagger: 0.04,
-                    ease: "power3.out",
-                    clearProps: "transform",
-                },
-            );
-        },
-        { scope: listRef, dependencies: [entries, loading] },
-    );
+    useScrollReveal(listRef);
 
     if (loading) {
         return <LoadingState message="Loading leaderboard..." />;
@@ -72,7 +49,7 @@ export function LeaderboardList({ entries, myEntityId, loading, levelMap }: Lead
                 className="bg-base-200 border border-base-300 border-l-4 border-l-primary shadow-sm rounded-none divide-y divide-base-300"
             >
                 {filteredEntries.map((entry) => (
-                    <div key={entry.id} className="collapse rounded-none bg-base-100 lb-row opacity-0">
+                    <div key={entry.id} className="collapse rounded-none bg-base-100 scroll-reveal fade-up">
                         <input type="checkbox" />
                         <div className="collapse-title p-0">
                             <LeaderboardRow

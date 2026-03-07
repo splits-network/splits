@@ -1,14 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const recruiterPains = [
     {
@@ -57,77 +50,8 @@ const companyPains = [
 
 export function ProblemSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const columnsRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading animation
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // Columns stagger in
-            const columns = columnsRef.current?.querySelectorAll(".pain-column");
-            if (columns) {
-                gsap.fromTo(
-                    columns,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.loose,
-                        scrollTrigger: {
-                            trigger: columnsRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // Pain items within each column
-            const painItems = columnsRef.current?.querySelectorAll(".pain-item");
-            if (painItems) {
-                gsap.fromTo(
-                    painItems,
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.fast,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                        delay: 0.3,
-                        scrollTrigger: {
-                            trigger: columnsRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     return (
         <section
@@ -136,8 +60,7 @@ export function ProblemSection() {
         >
             <div className="container mx-auto px-4">
                 <div
-                    ref={headingRef}
-                    className="text-center mb-16 opacity-0 max-w-3xl mx-auto"
+                    className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto"
                 >
                     <p className="text-sm uppercase tracking-wider opacity-60 mb-3">
                         The Industry Problem
@@ -153,22 +76,21 @@ export function ProblemSection() {
                 </div>
 
                 <div
-                    ref={columnsRef}
-                    className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+                    className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto stagger-children"
                 >
                     {/* Recruiters Column */}
-                    <div className="pain-column bg-base-100/5 rounded-2xl p-6 border border-base-100/10 opacity-0">
+                    <div className="scroll-reveal fade-up pain-column bg-base-100/5 rounded-2xl p-6 border border-base-100/10">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-user-tie text-xl text-primary"></i>
                             </div>
                             <h3 className="font-bold text-xl">For Recruiters</h3>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-4 stagger-children">
                             {recruiterPains.map((pain, index) => (
                                 <div
                                     key={index}
-                                    className="pain-item flex items-start gap-3 opacity-0"
+                                    className="scroll-reveal slide-from-left pain-item flex items-start gap-3"
                                 >
                                     <i
                                         className={`${pain.icon} text-error mt-1`}
@@ -182,18 +104,18 @@ export function ProblemSection() {
                     </div>
 
                     {/* Candidates Column */}
-                    <div className="pain-column bg-base-100/5 rounded-2xl p-6 border border-base-100/10 opacity-0">
+                    <div className="scroll-reveal fade-up pain-column bg-base-100/5 rounded-2xl p-6 border border-base-100/10">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-user text-xl text-secondary"></i>
                             </div>
                             <h3 className="font-bold text-xl">For Candidates</h3>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-4 stagger-children">
                             {candidatePains.map((pain, index) => (
                                 <div
                                     key={index}
-                                    className="pain-item flex items-start gap-3 opacity-0"
+                                    className="scroll-reveal slide-from-left pain-item flex items-start gap-3"
                                 >
                                     <i
                                         className={`${pain.icon} text-error mt-1`}
@@ -207,18 +129,18 @@ export function ProblemSection() {
                     </div>
 
                     {/* Companies Column */}
-                    <div className="pain-column bg-base-100/5 rounded-2xl p-6 border border-base-100/10 opacity-0">
+                    <div className="scroll-reveal fade-up pain-column bg-base-100/5 rounded-2xl p-6 border border-base-100/10">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-building text-xl text-accent"></i>
                             </div>
                             <h3 className="font-bold text-xl">For Companies</h3>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-4 stagger-children">
                             {companyPains.map((pain, index) => (
                                 <div
                                     key={index}
-                                    className="pain-item flex items-start gap-3 opacity-0"
+                                    className="scroll-reveal slide-from-left pain-item flex items-start gap-3"
                                 >
                                     <i
                                         className={`${pain.icon} text-error mt-1`}

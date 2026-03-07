@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Unsplash images ─────────────────────────────────────────────────────── */
 const img = {
@@ -35,250 +29,7 @@ const meta = {
 export default function ArticleOnePage() {
     const mainRef = useRef<HTMLElement>(null);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            // ── HERO ────────────────────────────────────────────
-            const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
-            });
-
-            heroTl
-                .fromTo(
-                    $1(".hero-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                )
-                .fromTo(
-                    $(".hero-headline-word"),
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 1,
-                        stagger: 0.12,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".hero-subtitle"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
-                    "-=0.5",
-                )
-                .fromTo(
-                    $(".hero-meta-item"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
-                    "-=0.3",
-                );
-
-            // Hero image parallax
-            gsap.fromTo(
-                $1(".hero-img-wrap"),
-                { opacity: 0, scale: 1.08 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 1.4,
-                    ease: "power2.out",
-                    delay: 0.2,
-                },
-            );
-
-            gsap.to($1(".hero-img-wrap img"), {
-                yPercent: 12,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: $1(".hero-section"),
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: true,
-                },
-            });
-
-            // ── SECTION REVEALS ─────────────────────────────────
-            $(".article-block").forEach((block) => {
-                gsap.fromTo(
-                    block,
-                    { opacity: 0, y: 50 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: block,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            });
-
-            // ── SPLIT-SCREEN SECTIONS ───────────────────────────
-            $(".split-text-left").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: -60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-img-right").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: 60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-text-right").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: 60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-img-left").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: -60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            // ── PULL QUOTES ─────────────────────────────────────
-            $(".pull-quote-block").forEach((quote) => {
-                gsap.fromTo(
-                    quote,
-                    { opacity: 0, scale: 0.96 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 0.9,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: quote,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            });
-
-            // ── INLINE IMAGES ───────────────────────────────────
-            $(".inline-image").forEach((imgEl) => {
-                gsap.fromTo(
-                    imgEl,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 1,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: imgEl,
-                            start: "top 85%",
-                        },
-                    },
-                );
-
-                // Parallax on the actual image inside
-                const innerImg = imgEl.querySelector("img");
-                if (innerImg) {
-                    gsap.to(innerImg, {
-                        yPercent: 10,
-                        ease: "none",
-                        scrollTrigger: {
-                            trigger: imgEl,
-                            start: "top bottom",
-                            end: "bottom top",
-                            scrub: true,
-                        },
-                    });
-                }
-            });
-
-            // ── STATS BAR ──────────────────────────────────────
-            gsap.fromTo(
-                $(".stat-item"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    stagger: 0.1,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".stats-bar"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            // ── CTA ─────────────────────────────────────────────
-            gsap.fromTo(
-                $1(".final-cta-content"),
-                { opacity: 0, y: 50 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".final-cta"),
-                        start: "top 80%",
-                    },
-                },
-            );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="overflow-hidden">
@@ -288,7 +39,7 @@ export default function ArticleOnePage() {
             <section className="hero-section relative min-h-[92vh] flex items-center bg-base-100">
                 {/* Right image panel -- sits behind on mobile, 40% on desktop */}
                 <div
-                    className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
+                    className="hero-img-wrap absolute inset-0 lg:left-[58%] scroll-reveal scale-in"
                     style={{
                         clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
@@ -304,37 +55,37 @@ export default function ArticleOnePage() {
                 {/* Content panel -- 60% on desktop */}
                 <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 scroll-reveal fade-up">
                             <i className="fa-duotone fa-regular fa-newspaper mr-2"></i>
                             {meta.category}
                         </p>
 
                         <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word text-base-content lg:text-base-content">
                                 The Future
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word text-base-content lg:text-base-content">
                                 of
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word text-primary">
                                 Recruiting.
                             </span>
                         </h1>
 
-                        <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8 opacity-0">
+                        <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8 scroll-reveal fade-up">
                             {meta.subtitle}
                         </p>
 
                         <div className="flex flex-wrap items-center gap-6">
-                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50 scroll-reveal fade-up">
                                 <i className="fa-duotone fa-regular fa-user-pen mr-1"></i>
                                 {meta.author}
                             </span>
-                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50 scroll-reveal fade-up">
                                 <i className="fa-duotone fa-regular fa-calendar mr-1"></i>
                                 {meta.date}
                             </span>
-                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50 scroll-reveal fade-up">
                                 <i className="fa-duotone fa-regular fa-clock mr-1"></i>
                                 {meta.readTime}
                             </span>
@@ -346,7 +97,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 FULL-BLEED HERO IMAGE
                ═══════════════════════════════════════════════════════ */}
-            <section className="inline-image relative h-[40vh] md:h-[50vh] overflow-hidden opacity-0">
+            <section className="inline-image relative h-[40vh] md:h-[50vh] overflow-hidden scroll-reveal scale-in">
                 <img
                     src={img.hero}
                     alt="Modern recruiting collaboration"
@@ -368,7 +119,7 @@ export default function ArticleOnePage() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                         {/* Text -- 3 of 5 columns (60%) */}
-                        <div className="split-text-left lg:col-span-3 opacity-0">
+                        <div className="split-text-left lg:col-span-3 scroll-reveal slide-from-left">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
                                 01 -- The Industry Problem
                             </p>
@@ -411,7 +162,7 @@ export default function ArticleOnePage() {
                         </div>
 
                         {/* Image -- 2 of 5 columns (40%) */}
-                        <div className="split-img-right lg:col-span-2 opacity-0">
+                        <div className="split-img-right lg:col-span-2 scroll-reveal slide-from-right">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -434,7 +185,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 1
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content opacity-0">
+            <section className="pull-quote-block py-20 bg-neutral text-neutral-content scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -458,7 +209,7 @@ export default function ArticleOnePage() {
                ═══════════════════════════════════════════════════════ */}
             <section className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto scroll-reveal fade-up">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             02 -- The Model
                         </p>
@@ -502,7 +253,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 INLINE IMAGE — Dashboard / Technology
                ═══════════════════════════════════════════════════════ */}
-            <section className="inline-image relative h-[35vh] md:h-[45vh] overflow-hidden opacity-0">
+            <section className="inline-image relative h-[35vh] md:h-[45vh] overflow-hidden scroll-reveal scale-in">
                 <img
                     src={img.dashboard}
                     alt="Data analytics and technology platform"
@@ -525,7 +276,7 @@ export default function ArticleOnePage() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                         {/* Image -- 2 of 5 columns (40%) */}
-                        <div className="split-img-left lg:col-span-2 opacity-0">
+                        <div className="split-img-left lg:col-span-2 scroll-reveal slide-from-left">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -542,7 +293,7 @@ export default function ArticleOnePage() {
                         </div>
 
                         {/* Text -- 3 of 5 columns (60%) */}
-                        <div className="split-text-right lg:col-span-3 opacity-0">
+                        <div className="split-text-right lg:col-span-3 scroll-reveal slide-from-right">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 03 -- The Growth
                             </p>
@@ -608,7 +359,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 2
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-primary text-primary-content opacity-0">
+            <section className="pull-quote-block py-20 bg-primary text-primary-content scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto text-center">
                         <i className="fa-duotone fa-regular fa-quote-left text-4xl text-primary-content/20 mb-6 block"></i>
@@ -639,7 +390,7 @@ export default function ArticleOnePage() {
                             { value: "40%", label: "Less Admin Overhead" },
                             { value: "92%", label: "Partner Satisfaction" },
                         ].map((stat, i) => (
-                            <div key={i} className="stat-item opacity-0">
+                            <div key={i} className="stat-item scroll-reveal fade-up">
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {stat.value}
                                 </div>
@@ -658,7 +409,7 @@ export default function ArticleOnePage() {
                ═══════════════════════════════════════════════════════ */}
             <section className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto scroll-reveal fade-up">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             04 -- The Catalyst
                         </p>
@@ -711,7 +462,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 INLINE IMAGE — Handshake
                ═══════════════════════════════════════════════════════ */}
-            <section className="inline-image relative h-[35vh] md:h-[45vh] overflow-hidden opacity-0">
+            <section className="inline-image relative h-[35vh] md:h-[45vh] overflow-hidden scroll-reveal scale-in">
                 <img
                     src={img.handshake}
                     alt="Partnership and collaboration"
@@ -734,7 +485,7 @@ export default function ArticleOnePage() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                         {/* Text -- 3 of 5 columns (60%) */}
-                        <div className="split-text-left lg:col-span-3 opacity-0">
+                        <div className="split-text-left lg:col-span-3 scroll-reveal slide-from-left">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                                 05 -- The Evidence
                             </p>
@@ -775,7 +526,7 @@ export default function ArticleOnePage() {
                         </div>
 
                         {/* Image -- 2 of 5 columns (40%) */}
-                        <div className="split-img-right lg:col-span-2 opacity-0">
+                        <div className="split-img-right lg:col-span-2 scroll-reveal slide-from-right">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -798,7 +549,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 3
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content opacity-0">
+            <section className="pull-quote-block py-20 bg-neutral text-neutral-content scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -822,7 +573,7 @@ export default function ArticleOnePage() {
                ═══════════════════════════════════════════════════════ */}
             <section className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="article-block max-w-3xl mx-auto scroll-reveal fade-up">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             06 -- The Takeaway
                         </p>
@@ -884,7 +635,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 FULL-BLEED IMAGE BREAK
                ═══════════════════════════════════════════════════════ */}
-            <section className="inline-image relative h-[40vh] md:h-[50vh] overflow-hidden opacity-0">
+            <section className="inline-image relative h-[40vh] md:h-[50vh] overflow-hidden scroll-reveal scale-in">
                 <img
                     src={img.collaboration}
                     alt="Team collaborating on the future of recruiting"
@@ -906,7 +657,7 @@ export default function ArticleOnePage() {
                ═══════════════════════════════════════════════════════ */}
             <section className="final-cta py-28 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                    <div className="final-cta-content max-w-4xl mx-auto text-center scroll-reveal fade-up">
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
                             Ready to transform
                             <br />

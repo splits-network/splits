@@ -12,7 +12,7 @@ export interface BaselControlsBarShellProps {
 
 export function BaselControlsBarShell({ filters, statusLeft, statusRight, className }: BaselControlsBarShellProps) {
     return (
-        <section className={`controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0 ${className ?? ''}`}>
+        <section className={`controls-bar scroll-reveal fade-in sticky top-0 bg-base-100 border-b-2 border-base-300 ${className ?? ''}`}>
             <div className="container mx-auto px-6 lg:px-12 py-4">
                 <div className="flex flex-col gap-3">
                     {/* Row 1: Search + Filters + Actions */}

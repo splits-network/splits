@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* --- Page ----------------------------------------------------------------- */
 
@@ -12,46 +11,7 @@ export default function AuthOne() {
     const [showPassword, setShowPassword] = useState(false);
     const [agreeTerms, setAgreeTerms] = useState(false);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-            tl.fromTo(
-                $1(".auth-logo"),
-                { opacity: 0, scale: 0.9 },
-                { opacity: 1, scale: 1, duration: 0.5 },
-            )
-                .fromTo(
-                    $1(".auth-heading"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".auth-form"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.2",
-                )
-                .fromTo(
-                    $(".auth-social"),
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.2",
-                )
-                .fromTo(
-                    $(".auth-stat"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen flex">
@@ -59,14 +19,14 @@ export default function AuthOne() {
             <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-base-100">
                 <div className="w-full max-w-md">
                     {/* Logo */}
-                    <div className="auth-logo opacity-0 mb-10">
+                    <div className="auth-logo scroll-reveal scale-in mb-10">
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             S
                         </div>
                     </div>
 
                     {/* Heading */}
-                    <div className="auth-heading opacity-0 mb-8">
+                    <div className="auth-heading scroll-reveal fade-up mb-8">
                         {mode === "login" && (
                             <>
                                 <h1 className="text-3xl font-black tracking-tight mb-2">
@@ -101,17 +61,17 @@ export default function AuthOne() {
                     </div>
 
                     {/* Form */}
-                    <div className="auth-form opacity-0">
+                    <div className="auth-form scroll-reveal fade-up">
                         {/* Social login */}
                         {mode !== "forgot" && (
                             <div className="space-y-3 mb-6">
-                                <button className="auth-social opacity-0 btn btn-ghost w-full border border-base-300 justify-start gap-3">
+                                <button className="auth-social scroll-reveal fade-up btn btn-ghost w-full border border-base-300 justify-start gap-3">
                                     <i className="fa-brands fa-google text-lg" />
                                     <span className="text-sm font-semibold">
                                         Continue with Google
                                     </span>
                                 </button>
-                                <button className="auth-social opacity-0 btn btn-ghost w-full border border-base-300 justify-start gap-3">
+                                <button className="auth-social scroll-reveal fade-up btn btn-ghost w-full border border-base-300 justify-start gap-3">
                                     <i className="fa-brands fa-linkedin-in text-lg" />
                                     <span className="text-sm font-semibold">
                                         Continue with LinkedIn
@@ -334,7 +294,7 @@ export default function AuthOne() {
                     ].map((stat) => (
                         <div
                             key={stat.label}
-                            className="auth-stat opacity-0 flex items-center gap-4 p-4 bg-neutral-content/5"
+                            className="auth-stat scroll-reveal fade-up flex items-center gap-4 p-4 bg-neutral-content/5"
                         >
                             <div className="w-10 h-10 bg-primary/20 flex items-center justify-center flex-shrink-0">
                                 <i className={`${stat.icon} text-primary`} />

@@ -70,7 +70,7 @@ export default function CookiePolicyContent() {
             <section className="hero-section relative min-h-[92vh] flex items-center bg-base-100">
                 {/* Right image panel -- 40% on desktop */}
                 <div
-                    className="hero-img-wrap absolute inset-0 lg:left-[58%]"
+                    className="scroll-reveal scale-in hero-img-wrap absolute inset-0 lg:left-[58%]"
                     style={{
                         clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
@@ -86,30 +86,30 @@ export default function CookiePolicyContent() {
                 {/* Content panel -- 60% on desktop */}
                 <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
+                        <p className="scroll-reveal fade-up hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
                             <i className="fa-duotone fa-regular fa-cookie-bite mr-2"></i>
                             Legal
                         </p>
 
                         <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="hero-headline-word inline-block text-base-content lg:text-base-content">
+                            <span className="scroll-reveal fade-up hero-headline-word inline-block text-base-content lg:text-base-content">
                                 Cookie
                             </span>{" "}
-                            <span className="hero-headline-word inline-block text-primary">
+                            <span className="scroll-reveal fade-up hero-headline-word inline-block text-primary">
                                 Policy.
                             </span>
                         </h1>
 
-                        <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8">
+                        <p className="scroll-reveal fade-up hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8">
                             {meta.subtitle}
                         </p>
 
                         <div className="flex flex-wrap items-center gap-6">
-                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50">
+                            <span className="scroll-reveal fade-up hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50">
                                 <i className="fa-duotone fa-regular fa-building mr-1"></i>
                                 {meta.entity}
                             </span>
-                            <span className="hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50">
+                            <span className="scroll-reveal fade-up hero-meta-item text-xs uppercase tracking-[0.15em] text-base-content/50">
                                 <i className="fa-duotone fa-regular fa-calendar mr-1"></i>
                                 Last Updated: {meta.lastUpdated}
                             </span>
@@ -123,7 +123,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section className="py-20 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 <i className="fa-duotone fa-regular fa-list mr-2"></i>
@@ -161,7 +161,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="what-are-cookies" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             01 -- What Are Cookies
                         </p>
@@ -224,7 +224,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="how-we-use-cookies" className="py-28 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             02 -- How We Use Cookies
                         </p>
@@ -307,7 +307,7 @@ export default function CookiePolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 1
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content">
+            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -329,7 +329,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="types-of-cookies" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             03 -- Types of Cookies
                         </p>
@@ -485,7 +485,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="third-party-cookies" className="py-28 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             04 -- Third-Party Cookies
                         </p>
@@ -538,7 +538,7 @@ export default function CookiePolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 2
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-primary text-primary-content">
+            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto text-center">
                         <i className="fa-duotone fa-regular fa-quote-left text-4xl text-primary-content/20 mb-6 block"></i>
@@ -558,7 +558,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="cookie-management" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             05 -- Cookie Management
                         </p>
@@ -685,7 +685,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="your-consent" className="py-28 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             06 -- Your Consent
                         </p>
@@ -725,7 +725,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="do-not-track" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             07 -- Do Not Track
                         </p>
@@ -757,7 +757,7 @@ export default function CookiePolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 3
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content">
+            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -779,7 +779,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="mobile-devices" className="py-28 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             08 -- Mobile Devices
                         </p>
@@ -829,7 +829,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section id="changes-to-policy" className="py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto">
+                    <div className="scroll-reveal fade-up article-block max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             09 -- Changes to Policy
                         </p>
@@ -862,7 +862,7 @@ export default function CookiePolicyContent() {
                ═══════════════════════════════════════════════════════ */}
             <section className="final-cta py-28 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="final-cta-content max-w-4xl mx-auto text-center">
+                    <div className="scroll-reveal fade-up final-cta-content max-w-4xl mx-auto text-center">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary-content/50 mb-6">
                             <i className="fa-duotone fa-regular fa-envelope mr-2"></i>
                             Contact Us

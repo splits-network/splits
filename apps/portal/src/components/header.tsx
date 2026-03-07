@@ -1,22 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
 import { useChatSidebarOptional } from "@splits-network/chat-ui";
 import type { NavItem } from "@splits-network/shared-types";
 import { UserDropdown } from "./user-dropdown";
 import NotificationBell from "./notification-bell";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 /* ─── Default Navigation Data (fallback when CMS is unavailable) ─────────── */
 
@@ -155,7 +147,7 @@ function DesktopNavContent({ items }: { items: NavItem[] }) {
                         <Link
                             key={item.label}
                             href={item.href}
-                            className="nav-link-item opacity-0 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                            className="nav-link-item px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
                         >
                             {item.label}
                         </Link>
@@ -167,7 +159,7 @@ function DesktopNavContent({ items }: { items: NavItem[] }) {
                         <div
                             tabIndex={0}
                             role="button"
-                            className="nav-link-item opacity-0 flex items-center gap-1.5 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                            className="nav-link-item flex items-center gap-1.5 px-3 py-2 text-md font-semibold text-base-content/70 hover:text-base-content transition-colors"
                         >
                             {item.label}
                             <i className="fa-solid fa-chevron-down text-sm" />
@@ -229,7 +221,7 @@ function DesktopNavContent({ items }: { items: NavItem[] }) {
 
 function SearchPanel() {
     return (
-        <div className="header-right-item opacity-0 dropdown dropdown-end">
+        <div className="header-right-item dropdown dropdown-end">
             <div
                 tabIndex={0}
                 role="button"
@@ -396,22 +388,12 @@ function MobileMenuContent({
 
 function ChatTrigger() {
     const sidebar = useChatSidebarOptional();
-    const router = useRouter();
     if (!sidebar) return null;
-
-    const handleClick = () => {
-        // On mobile, navigate to full messages page instead of opening sidebar widget
-        if (window.innerWidth < 768) {
-            router.push("/portal/messages");
-        } else {
-            sidebar.openToList();
-        }
-    };
 
     return (
         <button
             type="button"
-            onClick={handleClick}
+            onClick={sidebar.openToList}
             className="btn btn-ghost btn-md btn-square"
             aria-label="Open messages"
             title="Messages"
@@ -462,84 +444,6 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
         return () => observer.disconnect();
     }, []);
 
-    // GSAP entrance animations
-    useGSAP(
-        () => {
-            if (!containerRef.current) return;
-
-            const clearOpacity = (els: NodeListOf<Element> | null) => {
-                els?.forEach((el) => el.classList.remove("opacity-0"));
-            };
-
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                clearOpacity(
-                    containerRef.current.querySelectorAll(
-                        "[class*='opacity-0']",
-                    ),
-                );
-                return;
-            }
-
-            const $ = (sel: string) =>
-                containerRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                containerRef.current!.querySelector(sel);
-
-            // Logo
-            const logo = $1(".header-logo");
-            if (logo) {
-                logo.classList.remove("opacity-0");
-                gsap.fromTo(
-                    logo,
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.5,
-                        ease: "power2.out",
-                        delay: 0.2,
-                        clearProps: "transform",
-                    },
-                );
-            }
-
-            // Nav links stagger
-            const navLinks = $(".nav-link-item");
-            clearOpacity(navLinks);
-            gsap.fromTo(
-                navLinks,
-                { opacity: 0, y: -10 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.4,
-                    stagger: 0.06,
-                    ease: "power2.out",
-                    delay: 0.3,
-                    clearProps: "transform",
-                },
-            );
-
-            // Right side items
-            const rightItems = $(".header-right-item");
-            clearOpacity(rightItems);
-            gsap.fromTo(
-                rightItems,
-                { opacity: 0, x: 20 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.4,
-                    stagger: 0.08,
-                    ease: "power2.out",
-                    delay: 0.4,
-                    clearProps: "transform",
-                },
-            );
-        },
-        { scope: containerRef },
-    );
-
     const showSignedIn = mounted && isLoaded && isSignedIn;
 
     return (
@@ -551,7 +455,7 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                 <span className="mx-4">
                     <Link
                         href="/"
-                        className="header-logo flex-shrink-0 opacity-0"
+                        className="header-logo flex-shrink-0"
                     >
                         <Image
                             src="/logo.svg"
@@ -573,11 +477,10 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
                     </div>
 
                     {/* Theme toggle */}
-                    <ThemeToggle className="header-right-item opacity-0" />
+                    <ThemeToggle className="header-right-item" />
 
-                    {/* Auth actions — stable wrapper so GSAP animation
-                        persists across Clerk auth state re-renders */}
-                    <div className="header-right-item opacity-0 flex items-center gap-2">
+                    {/* Auth actions */}
+                    <div className="header-right-item flex items-center gap-2">
                         {showSignedIn ? (
                             <>
                                 <Link

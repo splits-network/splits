@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Empty State Data ───────────────────────────────────────────────────── */
 
@@ -131,54 +125,7 @@ const emptyStates = [
 export default function EmptyOne() {
     const mainRef = useRef<HTMLElement>(null);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-            tl.fromTo(
-                $1(".empty-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".empty-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".empty-desc"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                );
-
-            $(".empty-card").forEach((card) => {
-                gsap.fromTo(
-                    card,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        ease: "power3.out",
-                        scrollTrigger: { trigger: card, start: "top 85%" },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -192,18 +139,18 @@ export default function EmptyOne() {
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="empty-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="empty-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                             Empty States
                         </p>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                            <span className="empty-title-word inline-block opacity-0">
+                            <span className="empty-title-word inline-block scroll-reveal hero-word">
                                 Designing for
                             </span>{" "}
-                            <span className="empty-title-word inline-block opacity-0 text-primary">
+                            <span className="empty-title-word inline-block scroll-reveal hero-word text-primary">
                                 nothing.
                             </span>
                         </h1>
-                        <p className="empty-desc text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="empty-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
                             Empty states are opportunities. They guide users
                             forward, explain context, and turn dead ends into
                             starting points.
@@ -215,7 +162,7 @@ export default function EmptyOne() {
             {/* Empty State Showcases */}
             <section className="container mx-auto px-6 lg:px-12 py-10 lg:py-14 space-y-16">
                 {emptyStates.map((state) => (
-                    <div key={state.id} className="empty-card opacity-0">
+                    <div key={state.id} className="empty-card scroll-reveal fade-up">
                         {/* Label */}
                         <div className="flex items-center gap-3 mb-4">
                             <span className="px-3 py-1 bg-base-200 text-sm font-semibold uppercase tracking-widest text-base-content/40">

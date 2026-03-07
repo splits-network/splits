@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Data ───────────────────────────────────────────────────────────────── */
 
@@ -176,258 +170,7 @@ const stats = [
 
 export function PartnersBaselContent() {
     const mainRef = useRef<HTMLElement>(null);
-
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) {
-                mainRef.current.querySelectorAll(".opacity-0").forEach((el) => {
-                    (el as HTMLElement).style.opacity = "1";
-                });
-                return;
-            }
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            /* ── HERO ──────────────────────────────────────────── */
-            const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out", clearProps: "transform" },
-            });
-
-            heroTl
-                .fromTo(
-                    $1(".hero-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                )
-                .fromTo(
-                    $(".hero-headline-word"),
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 1,
-                        stagger: 0.12,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".hero-subtitle"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
-                    "-=0.5",
-                )
-                .fromTo(
-                    $(".hero-meta-item"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
-                    "-=0.3",
-                );
-
-            // Hero image scale reveal + parallax
-            gsap.fromTo(
-                $1(".hero-img-wrap"),
-                { opacity: 0, scale: 1.08 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 1.4,
-                    ease: "power2.out",
-                    delay: 0.2,
-                },
-            );
-
-            const heroImg = $1(".hero-img-wrap img");
-            if (heroImg) {
-                gsap.to(heroImg, {
-                    yPercent: 12,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: $1(".hero-section"),
-                        start: "top top",
-                        end: "bottom top",
-                        scrub: true,
-                    },
-                });
-            }
-
-            /* ── SECTION REVEALS ───────────────────────────────── */
-            $(".article-block").forEach((block) => {
-                gsap.fromTo(
-                    block,
-                    { opacity: 0, y: 50 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: block,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            });
-
-            /* ── SPLIT-SCREEN SECTIONS ─────────────────────────── */
-            $(".split-text-left").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: -60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-img-right").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: 60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-text-right").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: 60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            $(".split-img-left").forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, x: -60 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            });
-
-            /* ── PULL QUOTES ───────────────────────────────────── */
-            $(".pull-quote-block").forEach((quote) => {
-                gsap.fromTo(
-                    quote,
-                    { opacity: 0, scale: 0.96 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 0.9,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: quote,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            });
-
-            /* ── INLINE IMAGES ─────────────────────────────────── */
-            $(".inline-image").forEach((imgEl) => {
-                gsap.fromTo(
-                    imgEl,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 1,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: imgEl,
-                            start: "top 85%",
-                        },
-                    },
-                );
-
-                const innerImg = imgEl.querySelector("img");
-                if (innerImg) {
-                    gsap.to(innerImg, {
-                        yPercent: 10,
-                        ease: "none",
-                        scrollTrigger: {
-                            trigger: imgEl,
-                            start: "top bottom",
-                            end: "bottom top",
-                            scrub: true,
-                        },
-                    });
-                }
-            });
-
-            /* ── STATS BAR ─────────────────────────────────────── */
-            gsap.fromTo(
-                $(".stat-item"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    stagger: 0.1,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".stats-bar"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            /* ── CTA ───────────────────────────────────────────── */
-            gsap.fromTo(
-                $1(".final-cta-content"),
-                { opacity: 0, y: 50 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".final-cta"),
-                        start: "top 80%",
-                    },
-                },
-            );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="overflow-hidden">
@@ -437,7 +180,7 @@ export function PartnersBaselContent() {
             <section className="hero-section relative min-h-[92vh] flex items-center bg-base-100">
                 {/* Right image panel -- sits behind on mobile, 40% on desktop */}
                 <div
-                    className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
+                    className="scroll-reveal scale-in absolute inset-0 lg:left-[58%]"
                     style={{
                         clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
@@ -453,28 +196,28 @@ export function PartnersBaselContent() {
                 {/* Content panel -- 60% on desktop */}
                 <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                        <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
                             <i className="fa-duotone fa-regular fa-handshake mr-2"></i>
                             {/* COPY: Hero kicker text */}
                             Partnerships
                         </p>
 
                         <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                            <span className="scroll-reveal fade-up inline-block text-base-content lg:text-base-content">
                                 {/* COPY: Headline word 1 */}
                                 Grow
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                            <span className="scroll-reveal fade-up inline-block text-base-content lg:text-base-content">
                                 {/* COPY: Headline word 2 */}
                                 the Network
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up inline-block text-primary">
                                 {/* COPY: Headline word 3, accented */}
                                 With Us.
                             </span>
                         </h1>
 
-                        <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8 opacity-0">
+                        <p className="scroll-reveal fade-up text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-8">
                             {/* COPY: Hero subtitle describing the partner program */}
                             Splits Network is building its founding partner
                             cohort. Recruiting firms, technology providers, and
@@ -483,16 +226,16 @@ export function PartnersBaselContent() {
                         </p>
 
                         <div className="flex flex-wrap items-center gap-6">
-                            <span className="hero-meta-item text-sm uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                            <span className="scroll-reveal fade-up text-sm uppercase tracking-[0.15em] text-base-content/50">
                                 <i className="fa-duotone fa-regular fa-users mr-1"></i>
                                 {/* COPY: Meta item 1 */}3 Partnership Tiers
                             </span>
-                            <span className="hero-meta-item text-sm uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                            <span className="scroll-reveal fade-up text-sm uppercase tracking-[0.15em] text-base-content/50">
                                 <i className="fa-duotone fa-regular fa-dollar-sign mr-1"></i>
                                 {/* COPY: Meta item 2 */}
                                 Revenue Share Model
                             </span>
-                            <span className="hero-meta-item text-sm uppercase tracking-[0.15em] text-base-content/50 opacity-0">
+                            <span className="scroll-reveal fade-up text-sm uppercase tracking-[0.15em] text-base-content/50">
                                 <i className="fa-duotone fa-regular fa-rocket mr-1"></i>
                                 {/* COPY: Meta item 3 */}
                                 Founding Cohort Open
@@ -505,7 +248,7 @@ export function PartnersBaselContent() {
             {/* ═══════════════════════════════════════════════════════════
                 2. FULL-BLEED IMAGE BREAK
                ═══════════════════════════════════════════════════════════ */}
-            <section className="inline-image relative h-[40vh] md:h-[50vh] overflow-hidden opacity-0">
+            <section className="scroll-reveal fade-up relative h-[40vh] md:h-[50vh] overflow-hidden">
                 <img
                     src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80"
                     alt="Team gathered around a shared workspace, focused on a collaborative planning session"
@@ -528,7 +271,7 @@ export function PartnersBaselContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                         {/* Text -- 3 of 5 columns (60%) */}
-                        <div className="split-text-left lg:col-span-3 opacity-0">
+                        <div className="scroll-reveal slide-from-left lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 {/* COPY: Section 1 kicker */}
                                 01 -- The Ecosystem
@@ -563,7 +306,7 @@ export function PartnersBaselContent() {
                         </div>
 
                         {/* Image -- 2 of 5 columns (40%) */}
-                        <div className="split-img-right lg:col-span-2 opacity-0">
+                        <div className="scroll-reveal slide-from-right lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -582,7 +325,7 @@ export function PartnersBaselContent() {
                     </div>
 
                     {/* Partner type cards below */}
-                    <div className="article-block grid md:grid-cols-3 gap-8 mt-16 opacity-0">
+                    <div className="scroll-reveal fade-up grid md:grid-cols-3 gap-8 mt-16">
                         {partnerTypes.map((type, i) => (
                             <div
                                 key={i}
@@ -610,7 +353,7 @@ export function PartnersBaselContent() {
             {/* ═══════════════════════════════════════════════════════════
                 4. PULL QUOTE 1
                ═══════════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content opacity-0">
+            <section className="scroll-reveal scale-in py-20 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -638,7 +381,7 @@ export function PartnersBaselContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         {/* Image -- 2 of 5 columns (40%) */}
-                        <div className="split-img-left lg:col-span-2 opacity-0">
+                        <div className="scroll-reveal slide-from-left lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -655,7 +398,7 @@ export function PartnersBaselContent() {
                         </div>
 
                         {/* Text -- 3 of 5 columns (60%) */}
-                        <div className="split-text-right lg:col-span-3 opacity-0">
+                        <div className="scroll-reveal slide-from-right lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                                 {/* COPY: Section 2 kicker */}
                                 02 -- The Returns
@@ -711,7 +454,7 @@ export function PartnersBaselContent() {
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                         {stats.map((stat, i) => (
-                            <div key={i} className="stat-item opacity-0">
+                            <div key={i} className="scroll-reveal fade-up">
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {/* COPY: Stat value */}
                                     {stat.value}
@@ -731,7 +474,7 @@ export function PartnersBaselContent() {
                ═══════════════════════════════════════════════════════════ */}
             <section className="py-20 md:py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="article-block max-w-3xl mx-auto opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mx-auto">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             {/* COPY: Section 3 kicker */}
                             03 -- The Paths
@@ -785,7 +528,7 @@ export function PartnersBaselContent() {
             {/* ═══════════════════════════════════════════════════════════
                 8. PULL QUOTE 2 (centered variant)
                ═══════════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-primary text-primary-content opacity-0">
+            <section className="scroll-reveal scale-in py-20 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto text-center">
                         <i className="fa-duotone fa-regular fa-quote-left text-4xl text-primary-content/20 mb-6 block"></i>
@@ -810,7 +553,7 @@ export function PartnersBaselContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                         {/* Text -- 3 of 5 columns (60%) */}
-                        <div className="split-text-left lg:col-span-3 opacity-0">
+                        <div className="scroll-reveal slide-from-left lg:col-span-3">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 {/* COPY: Section 4 kicker */}
                                 04 -- Getting Started
@@ -847,7 +590,7 @@ export function PartnersBaselContent() {
                         </div>
 
                         {/* Image -- 2 of 5 columns (40%) */}
-                        <div className="split-img-right lg:col-span-2 opacity-0">
+                        <div className="scroll-reveal slide-from-right lg:col-span-2">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -870,7 +613,7 @@ export function PartnersBaselContent() {
             {/* ═══════════════════════════════════════════════════════════
                 10. FULL-BLEED IMAGE -- Statement
                ═══════════════════════════════════════════════════════════ */}
-            <section className="inline-image relative h-[40vh] md:h-[50vh] overflow-hidden opacity-0">
+            <section className="scroll-reveal fade-up relative h-[40vh] md:h-[50vh] overflow-hidden">
                 <img
                     src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80"
                     alt="Abstract aerial view of interconnected city lights forming a network pattern"
@@ -894,7 +637,7 @@ export function PartnersBaselContent() {
                ═══════════════════════════════════════════════════════════ */}
             <section className="final-cta py-20 md:py-28 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                    <div className="scroll-reveal fade-up max-w-4xl mx-auto text-center">
                         <h2 className="text-3xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
                             {/* COPY: CTA headline */}
                             Join the founding

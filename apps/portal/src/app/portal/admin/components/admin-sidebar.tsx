@@ -516,7 +516,7 @@ export function AdminSidebar() {
                 className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${
                     isMobileOpen
                         ? "opacity-100"
-                        : "opacity-0 pointer-events-none"
+                        : "scroll-reveal fade-up pointer-events-none"
                 }`}
             >
                 {/* Backdrop */}

@@ -18,34 +18,32 @@ export function GridView({
     const selectedCode = codes.find((c) => c.id === selectedId);
 
     return (
-        <div className="relative">
-            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                {codes.map((code) => (
-                    <GridCard
-                        key={code.id}
-                        code={code}
-                        isSelected={selectedId === code.id}
-                        onSelect={() => onSelect(code)}
-                    />
-                ))}
+        <div className="drawer drawer-end">
+            <input type="checkbox" className="drawer-toggle" checked={!!selectedCode} readOnly />
+            <div className="drawer-content">
+                <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                    {codes.map((code) => (
+                        <GridCard
+                            key={code.id}
+                            code={code}
+                            isSelected={selectedId === code.id}
+                            onSelect={() => onSelect(code)}
+                        />
+                    ))}
+                </div>
             </div>
-
-            {/* Detail Drawer */}
-            {selectedCode && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/30 transition-opacity"
-                        onClick={() => onSelect(selectedCode)}
-                    />
-                    <div className="fixed top-0 right-0 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+            <div className="drawer-side z-50">
+                <div className="drawer-overlay" onClick={() => selectedCode && onSelect(selectedCode)} aria-label="close drawer" />
+                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
+                    {selectedCode && (
                         <ReferralCodeDetailLoader
                             codeId={selectedCode.id}
                             onClose={() => onSelect(selectedCode)}
                             onRefresh={onRefresh}
                         />
-                    </div>
-                </>
-            )}
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

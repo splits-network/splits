@@ -117,23 +117,23 @@ export function ContactContent() {
             <section className="bc-hero relative py-28 bg-neutral text-neutral-content overflow-hidden">
                 <div className="container mx-auto px-6 lg:px-12 relative ">
                     <div className="max-w-3xl">
-                        <p className="bc-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                        <p className="bc-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
                             <i className="fa-duotone fa-regular fa-headset mr-2" />
                             Support
                         </p>
 
-                        <h1 className="bc-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-8 opacity-0">
+                        <h1 className="bc-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-8 scroll-reveal fade-up">
                             We&apos;re here to{" "}
                             <span className="text-primary">help.</span>
                         </h1>
 
-                        <p className="bc-hero-body text-lg md:text-xl opacity-70 leading-relaxed mb-8 max-w-xl opacity-0">
+                        <p className="bc-hero-body text-lg md:text-xl opacity-70 leading-relaxed mb-8 max-w-xl scroll-reveal fade-up">
                             Account questions, billing issues, technical
                             problems, or ideas for the platform. Reach the team
                             that builds and runs Splits Network directly.
                         </p>
 
-                        <div className="bc-hero-stat inline-flex items-center gap-3 border-l-4 border-secondary bg-neutral-content/5 px-6 py-3 opacity-0">
+                        <div className="bc-hero-stat inline-flex items-center gap-3 border-l-4 border-secondary bg-neutral-content/5 px-6 py-3 scroll-reveal fade-up">
                             <i className="fa-duotone fa-regular fa-clock text-secondary" />
                             <span className="text-sm font-semibold opacity-70">
                                 Most requests resolved within 4 hours
@@ -151,7 +151,7 @@ export function ContactContent() {
                     <div className="max-w-6xl mx-auto">
                         <div className="grid lg:grid-cols-2 gap-12">
                             {/* FORM */}
-                            <div className="bc-form-container opacity-0">
+                            <div className="bc-form-container scroll-reveal fade-up">
                                 <div className="border-l-4 border-primary bg-base-200 p-8 shadow-sm">
                                     <div className="mb-8">
                                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-2">
@@ -351,7 +351,7 @@ export function ContactContent() {
                                     return (
                                         <div
                                             key={method.title}
-                                            className={`bc-info-card border-l-4 border-${color} bg-base-200 p-6 shadow-sm opacity-0`}
+                                            className={`bc-info-card border-l-4 border-${color} bg-base-200 p-6 shadow-sm scroll-reveal fade-up`}
                                         >
                                             <h3 className="flex items-center gap-2 text-lg font-bold mb-4">
                                                 <i
@@ -398,7 +398,7 @@ export function ContactContent() {
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                         {METRICS.map((m, i) => (
-                            <div key={i} className="bc-metric-item opacity-0">
+                            <div key={i} className="bc-metric-item scroll-reveal fade-up">
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {m.value}
                                 </div>
@@ -416,7 +416,7 @@ export function ContactContent() {
                ══════════════════════════════════════════════════════════ */}
             <section className="bc-cta py-24 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="bc-cta-content text-center max-w-3xl mx-auto opacity-0">
+                    <div className="bc-cta-content text-center max-w-3xl mx-auto scroll-reveal fade-up">
                         <h2 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-tight mb-6">
                             Need something{" "}
                             <span className="text-primary">else?</span>

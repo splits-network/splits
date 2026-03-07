@@ -1,17 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import {
-    duration,
-    easing,
-    stagger,
-    prefersReducedMotion,
-} from "@splits-network/basel-ui";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const trends = [
     {
@@ -126,293 +116,22 @@ const takeaways = [
 ];
 
 export function IndustryTrendsContent() {
-    const heroRef = useRef<HTMLDivElement>(null);
-    const trendsRef = useRef<HTMLDivElement>(null);
-    const sectorsRef = useRef<HTMLDivElement>(null);
-    const skillsRef = useRef<HTMLDivElement>(null);
-    const takeawaysRef = useRef<HTMLDivElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
-
-    // Hero animation
-    useGSAP(
-        () => {
-            if (!heroRef.current || prefersReducedMotion()) return;
-            const icon = heroRef.current.querySelector(".hero-icon");
-            const heading = heroRef.current.querySelector("h1");
-            const description =
-                heroRef.current.querySelector(".hero-description");
-
-            const tl = gsap.timeline({ defaults: { clearProps: "transform" } });
-            if (icon)
-                tl.fromTo(
-                    icon,
-                    { opacity: 0, scale: 0 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                    },
-                );
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, x: -30 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.4",
-                );
-            if (description)
-                tl.fromTo(
-                    description,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: heroRef },
-    );
-
-    // Trends animation
-    useGSAP(
-        () => {
-            if (!trendsRef.current || prefersReducedMotion()) return;
-            const heading = trendsRef.current.querySelector(".section-heading");
-            const cards = trendsRef.current.querySelectorAll(".trend-card");
-            const icons = trendsRef.current.querySelectorAll(".trend-icon");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: { trigger: trendsRef.current, start: "top 80%" },
-            });
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (cards.length > 0)
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, y: 40, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.3",
-                );
-            if (icons.length > 0)
-                tl.fromTo(
-                    icons,
-                    { scale: 0 },
-                    {
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.6",
-                );
-        },
-        { scope: trendsRef },
-    );
-
-    // Sectors animation
-    useGSAP(
-        () => {
-            if (!sectorsRef.current || prefersReducedMotion()) return;
-            const heading =
-                sectorsRef.current.querySelector(".section-heading");
-            const cards = sectorsRef.current.querySelectorAll(".sector-card");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: sectorsRef.current,
-                    start: "top 80%",
-                },
-            });
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (cards.length > 0)
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, x: -40 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.normal,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: sectorsRef },
-    );
-
-    // Skills animation
-    useGSAP(
-        () => {
-            if (!skillsRef.current || prefersReducedMotion()) return;
-            const heading = skillsRef.current.querySelector(".section-heading");
-            const card = skillsRef.current.querySelector(".skills-card");
-            const bars = skillsRef.current.querySelectorAll(".skill-bar");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: { trigger: skillsRef.current, start: "top 80%" },
-            });
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (card)
-                tl.fromTo(
-                    card,
-                    { opacity: 0, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.3",
-                );
-            if (bars.length > 0)
-                tl.fromTo(
-                    bars,
-                    { scaleX: 0 },
-                    {
-                        scaleX: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: skillsRef },
-    );
-
-    // Takeaways animation
-    useGSAP(
-        () => {
-            if (!takeawaysRef.current || prefersReducedMotion()) return;
-            const card = takeawaysRef.current.querySelector(".takeaways-card");
-            const items =
-                takeawaysRef.current.querySelectorAll(".takeaway-item");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: takeawaysRef.current,
-                    start: "top 80%",
-                },
-            });
-            if (card)
-                tl.fromTo(
-                    card,
-                    { opacity: 0, y: 30, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (items.length > 0)
-                tl.fromTo(
-                    items,
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.fast,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: takeawaysRef },
-    );
-
-    // CTA animation
-    useGSAP(
-        () => {
-            if (!ctaRef.current || prefersReducedMotion()) return;
-            const card = ctaRef.current.querySelector(".cta-card");
-            gsap.fromTo(
-                card,
-                { opacity: 0, y: 30, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: ctaRef.current,
-                        start: "top 85%",
-                    },
-                },
-            );
-        },
-        { scope: ctaRef },
-    );
+    const containerRef = useRef<HTMLDivElement>(null);
+    useScrollReveal(containerRef);
 
     return (
-        <div className="min-h-screen bg-base-200">
+        <div ref={containerRef} className="min-h-screen bg-base-200">
             {/* Header */}
-            <div
-                ref={heroRef}
-                className="bg-gradient-to-br from-accent to-secondary text-white py-16 overflow-hidden"
-            >
+            <div className="bg-gradient-to-br from-accent to-secondary text-white py-16 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
-                        <div className="flex items-center gap-2 mb-4">
-                            <i className="hero-icon fa-duotone fa-regular fa-display-chart-up text-3xl"></i>
+                        <div className="scroll-reveal fade-in flex items-center gap-2 mb-4">
+                            <i className="fa-duotone fa-regular fa-display-chart-up text-3xl"></i>
                             <h1 className="text-4xl font-bold">
                                 Industry Trends
                             </h1>
                         </div>
-                        <p className="hero-description text-xl opacity-90">
+                        <p className="scroll-reveal fade-up text-xl opacity-90">
                             Stay ahead of the curve with insights into the
                             evolving job market and emerging opportunities.
                         </p>
@@ -423,19 +142,19 @@ export function IndustryTrendsContent() {
             {/* Content */}
             <div className="container mx-auto px-4 py-12">
                 {/* Major Trends */}
-                <div ref={trendsRef} className="mb-16 overflow-hidden">
-                    <h2 className="section-heading text-3xl font-bold mb-8">
+                <div className="mb-16 overflow-hidden">
+                    <h2 className="scroll-reveal fade-up text-3xl font-bold mb-8">
                         Major Trends Shaping 2025
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
                         {trends.map((trend, index) => (
                             <div
                                 key={index}
-                                className="trend-card card bg-base-100 shadow hover:shadow-lg transition-shadow"
+                                className="scroll-reveal fade-up card bg-base-100 shadow hover:shadow-lg transition-shadow"
                             >
                                 <div className="card-body">
                                     <div
-                                        className={`trend-icon w-14 h-14 rounded-full bg-${trend.color}/20 flex items-center justify-center mb-4`}
+                                        className={`w-14 h-14 rounded-full bg-${trend.color}/20 flex items-center justify-center mb-4`}
                                     >
                                         <i
                                             className={`fa-duotone fa-regular fa-${trend.icon} text-${trend.color} text-2xl`}
@@ -462,15 +181,15 @@ export function IndustryTrendsContent() {
                 </div>
 
                 {/* Hot Sectors */}
-                <div ref={sectorsRef} className="mb-16 overflow-hidden">
-                    <h2 className="section-heading text-3xl font-bold mb-8">
+                <div className="mb-16 overflow-hidden">
+                    <h2 className="scroll-reveal fade-up text-3xl font-bold mb-8">
                         Fastest Growing Sectors
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-children">
                         {sectors.map((sector, index) => (
                             <div
                                 key={index}
-                                className="sector-card card bg-base-100 shadow"
+                                className="scroll-reveal slide-from-left card bg-base-100 shadow"
                             >
                                 <div className="card-body">
                                     <div className="flex items-center gap-4 mb-4">
@@ -512,11 +231,11 @@ export function IndustryTrendsContent() {
                 </div>
 
                 {/* In-Demand Skills */}
-                <div ref={skillsRef} className="mb-16 overflow-hidden">
-                    <h2 className="section-heading text-3xl font-bold mb-8">
+                <div className="mb-16 overflow-hidden">
+                    <h2 className="scroll-reveal fade-up text-3xl font-bold mb-8">
                         Most In-Demand Skills
                     </h2>
-                    <div className="skills-card card bg-base-100 shadow">
+                    <div className="scroll-reveal scale-in card bg-base-100 shadow">
                         <div className="card-body">
                             <div className="space-y-6">
                                 {skills.map((skill, index) => (
@@ -536,7 +255,7 @@ export function IndustryTrendsContent() {
                                         </div>
                                         <div className="w-full bg-base-300 rounded-full h-3 overflow-hidden">
                                             <div
-                                                className="skill-bar bg-gradient-to-r from-primary to-secondary h-3 rounded-full origin-left"
+                                                className="bg-gradient-to-r from-primary to-secondary h-3 rounded-full origin-left transition-all duration-1000"
                                                 style={{
                                                     width: `${skill.demand}%`,
                                                 }}
@@ -550,8 +269,8 @@ export function IndustryTrendsContent() {
                 </div>
 
                 {/* Key Takeaways */}
-                <div ref={takeawaysRef} className="mb-16 overflow-hidden">
-                    <div className="takeaways-card card bg-gradient-to-br from-primary to-secondary text-primary-content shadow">
+                <div className="mb-16 overflow-hidden">
+                    <div className="scroll-reveal fade-up card bg-gradient-to-br from-primary to-secondary text-primary-content shadow">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
                                 <i className="fa-duotone fa-regular fa-lightbulb"></i>
@@ -561,7 +280,7 @@ export function IndustryTrendsContent() {
                                 {takeaways.map((item, index) => (
                                     <li
                                         key={index}
-                                        className="takeaway-item flex items-start gap-3"
+                                        className="flex items-start gap-3"
                                     >
                                         <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                         <span>{item}</span>
@@ -573,8 +292,8 @@ export function IndustryTrendsContent() {
                 </div>
 
                 {/* CTA */}
-                <div ref={ctaRef} className="text-center overflow-hidden">
-                    <div className="cta-card card bg-base-100 shadow max-w-2xl mx-auto">
+                <div className="text-center overflow-hidden">
+                    <div className="scroll-reveal fade-up card bg-base-100 shadow max-w-2xl mx-auto">
                         <div className="card-body">
                             <h2 className="card-title text-2xl justify-center mb-2">
                                 Find opportunities in growing industries

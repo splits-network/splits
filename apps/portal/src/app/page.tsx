@@ -160,7 +160,7 @@ export default async function HomePage() {
                 <section className="hero-section relative min-h-[92vh] flex items-center bg-base-100">
                     {/* Right image panel — sits behind on mobile, 40% on desktop */}
                     <div
-                        className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
+                        className="hero-img-wrap absolute inset-0 lg:left-[58%] scroll-reveal fade-up"
                         style={{
                             clipPath:
                                 "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
@@ -178,29 +178,29 @@ export default async function HomePage() {
                     {/* Content panel — 60% on desktop */}
                     <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                         <div className="max-w-2xl">
-                            <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                            <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 scroll-reveal fade-up">
                                 Split-Fee Marketplace
                             </p>
 
                             <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-8">
-                                <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                                <span className="hero-headline-word inline-block scroll-reveal fade-up text-base-content lg:text-base-content">
                                     Post
                                 </span>{" "}
-                                <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                                <span className="hero-headline-word inline-block scroll-reveal fade-up text-base-content lg:text-base-content">
                                     roles.
                                 </span>{" "}
-                                <span className="hero-headline-word inline-block opacity-0 text-primary">
+                                <span className="hero-headline-word inline-block scroll-reveal fade-up text-primary">
                                     Split
                                 </span>{" "}
-                                <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                                <span className="hero-headline-word inline-block scroll-reveal fade-up text-base-content lg:text-base-content">
                                     the
                                 </span>{" "}
-                                <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                                <span className="hero-headline-word inline-block scroll-reveal fade-up text-base-content lg:text-base-content">
                                     fee.
                                 </span>
                             </h1>
 
-                            <p className="hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
+                            <p className="hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                                 The recruiting platform where companies define
                                 terms once, specialized recruiters engage by
                                 niche, and every placement is tracked from
@@ -210,21 +210,21 @@ export default async function HomePage() {
                             <div className="flex flex-wrap gap-4">
                                 <Link
                                     href="/sign-up"
-                                    className="hero-cta btn btn-primary btn-lg shadow-lg opacity-0"
+                                    className="hero-cta btn btn-primary btn-lg shadow-lg scroll-reveal fade-up"
                                 >
                                     <i className="fa-duotone fa-regular fa-rocket" />
                                     Post a Role
                                 </Link>
                                 <Link
                                     href="/sign-up"
-                                    className="hero-cta btn btn-secondary btn-lg shadow-lg opacity-0"
+                                    className="hero-cta btn btn-secondary btn-lg shadow-lg scroll-reveal fade-up"
                                 >
                                     <i className="fa-duotone fa-regular fa-user-plus" />
                                     Start Recruiting
                                 </Link>
                                 <a
                                     href="#how-it-works"
-                                    className="hero-cta btn btn-ghost btn-lg opacity-0"
+                                    className="hero-cta btn btn-ghost btn-lg scroll-reveal fade-up"
                                 >
                                     See How It Works
                                     <i className="fa-duotone fa-regular fa-arrow-down" />
@@ -241,7 +241,7 @@ export default async function HomePage() {
                     <div className="container mx-auto px-6">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                             {stats.map((stat, i) => (
-                                <div key={i} className="stat-item opacity-0">
+                                <div key={i} className="stat-item scroll-reveal fade-up">
                                     <div className="text-3xl md:text-4xl font-black tracking-tight">
                                         {stat.value}
                                     </div>
@@ -261,7 +261,7 @@ export default async function HomePage() {
                     <div className="container mx-auto px-6 lg:px-12">
                         <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                             {/* Text — 3 of 5 columns (60%) */}
-                            <div className="problem-text lg:col-span-3 opacity-0">
+                            <div className="problem-text lg:col-span-3 scroll-reveal fade-up">
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
                                     The Old Way
                                 </p>
@@ -295,7 +295,7 @@ export default async function HomePage() {
                                     ].map((pain, i) => (
                                         <div
                                             key={i}
-                                            className="problem-pain flex items-start gap-4 opacity-0"
+                                            className="problem-pain flex items-start gap-4 scroll-reveal fade-up"
                                         >
                                             <div className="w-10 h-10 flex-shrink-0 bg-error/10 flex items-center justify-center">
                                                 <i
@@ -311,7 +311,7 @@ export default async function HomePage() {
                             </div>
 
                             {/* Image — 2 of 5 columns (40%) */}
-                            <div className="problem-img lg:col-span-2 opacity-0">
+                            <div className="problem-img lg:col-span-2 scroll-reveal fade-up">
                                 <div
                                     className="relative overflow-hidden"
                                     style={{
@@ -339,7 +339,7 @@ export default async function HomePage() {
                     className="hiw-section py-28 bg-neutral text-neutral-content"
                 >
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="hiw-heading max-w-3xl mb-20 opacity-0">
+                        <div className="hiw-heading max-w-3xl mb-20 scroll-reveal fade-up">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                                 How It Works
                             </p>
@@ -354,7 +354,7 @@ export default async function HomePage() {
                             {splitSteps.map((step, i) => (
                                 <div
                                     key={i}
-                                    className="hiw-step flex gap-6 opacity-0"
+                                    className="hiw-step flex gap-6 scroll-reveal fade-up"
                                 >
                                     <div className="flex-shrink-0">
                                         <span className="text-6xl font-black text-secondary/30 leading-none">
@@ -385,7 +385,7 @@ export default async function HomePage() {
                    ═══════════════════════════════════════════════════════ */}
                 <section className="platforms-section py-28 bg-base-100">
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="platforms-heading max-w-3xl mx-auto text-center mb-20 opacity-0">
+                        <div className="platforms-heading max-w-3xl mx-auto text-center mb-20 scroll-reveal fade-up">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 Who It&rsquo;s For
                             </p>
@@ -404,7 +404,7 @@ export default async function HomePage() {
                                         p.color === "primary"
                                             ? "border-primary"
                                             : "border-secondary"
-                                    } bg-base-200 p-10 opacity-0`}
+                                    } bg-base-200 p-10 scroll-reveal fade-up`}
                                 >
                                     <div className="flex items-center gap-4 mb-6">
                                         <div
@@ -470,7 +470,7 @@ export default async function HomePage() {
                     <div className="container mx-auto px-6 lg:px-12">
                         <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                             {/* Image — 2 of 5 columns (40%) */}
-                            <div className="editorial-img lg:col-span-2 opacity-0">
+                            <div className="editorial-img lg:col-span-2 scroll-reveal fade-up">
                                 <div
                                     className="relative overflow-hidden"
                                     style={{
@@ -487,7 +487,7 @@ export default async function HomePage() {
                             </div>
 
                             {/* Text — 3 of 5 columns (60%) */}
-                            <div className="editorial-text lg:col-span-3 opacity-0">
+                            <div className="editorial-text lg:col-span-3 scroll-reveal fade-up">
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                     How It&rsquo;s Built
                                 </p>
@@ -546,7 +546,7 @@ export default async function HomePage() {
                    ═══════════════════════════════════════════════════════ */}
                 <section className="testimonials-section py-28 bg-base-100">
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="testimonials-heading max-w-3xl mb-16 opacity-0">
+                        <div className="testimonials-heading max-w-3xl mb-16 scroll-reveal fade-up">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 From the Platform
                             </p>
@@ -561,7 +561,7 @@ export default async function HomePage() {
                             {testimonials.map((t, i) => (
                                 <div
                                     key={i}
-                                    className="testimonial-card border-l-4 border-primary bg-base-200 p-8 opacity-0"
+                                    className="testimonial-card border-l-4 border-primary bg-base-200 p-8 scroll-reveal fade-up"
                                 >
                                     <i className="fa-duotone fa-regular fa-quote-left text-3xl text-primary/20 mb-4 block" />
                                     <p className="text-base-content/80 leading-relaxed mb-6 italic">
@@ -609,7 +609,7 @@ export default async function HomePage() {
                    ═══════════════════════════════════════════════════════ */}
                 <section className="faq-section py-28 bg-base-100">
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="faq-heading max-w-3xl mb-16 opacity-0">
+                        <div className="faq-heading max-w-3xl mb-16 scroll-reveal fade-up">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 Common Questions
                             </p>
@@ -624,7 +624,7 @@ export default async function HomePage() {
                             {portalFaqs.map((faq, i) => (
                                 <div
                                     key={i}
-                                    className="faq-item border-l-4 border-primary bg-base-200 opacity-0"
+                                    className="faq-item border-l-4 border-primary bg-base-200 scroll-reveal fade-up"
                                 >
                                     <details className="group">
                                         <summary className="flex items-center justify-between cursor-pointer p-6 font-bold text-base text-base-content">
@@ -648,7 +648,7 @@ export default async function HomePage() {
                    ═══════════════════════════════════════════════════════ */}
                 <section className="final-cta py-28 bg-primary text-primary-content">
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                        <div className="final-cta-content max-w-4xl mx-auto text-center scroll-reveal fade-up">
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
                                 The platform is live.
                                 <br />

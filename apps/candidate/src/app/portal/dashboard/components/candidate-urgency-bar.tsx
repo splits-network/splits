@@ -41,7 +41,7 @@ export default function CandidateUrgencyBar({
 
     return (
         <div
-            className={`urgency-bar border-l-4 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 ${colorClasses} opacity-0`}
+            className={`urgency-bar border-l-4 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 ${colorClasses} scroll-reveal fade-up`}
         >
             <div className="container mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 w-full">
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">

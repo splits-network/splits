@@ -1,9 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useEffect, type ReactNode } from "react";
 import { useChatSidebar } from "../context/chat-sidebar-context";
 import { ChatSidebarHeader } from "./chat-sidebar-header";
 import { ChatSidebarList } from "./chat-sidebar-list";
@@ -19,20 +16,6 @@ export interface ChatSidebarShellProps {
 }
 
 const SIDEBAR_WIDTH = 420;
-const MOBILE_BREAKPOINT = 768;
-
-function useIsMobile() {
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-        check();
-        window.addEventListener("resize", check);
-        return () => window.removeEventListener("resize", check);
-    }, []);
-
-    return isMobile;
-}
 
 export function ChatSidebarShell({
     threadRenderer,
@@ -41,15 +24,6 @@ export function ChatSidebarShell({
 }: ChatSidebarShellProps) {
     const { isOpen, isMinimized, view, activeConversationId, close } =
         useChatSidebar();
-
-    const isMobile = useIsMobile();
-    const sidebarRef = useRef<HTMLDivElement>(null);
-    const overlayRef = useRef<HTMLDivElement>(null);
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Escape key to close
     useEffect(() => {
@@ -61,103 +35,9 @@ export function ChatSidebarShell({
         return () => document.removeEventListener("keydown", handleEscape);
     }, [isOpen, close]);
 
-    // GSAP animation for desktop sidebar
-    useGSAP(
-        () => {
-            if (isMobile || !sidebarRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                sidebarRef.current.style.width = isOpen
-                    ? `${SIDEBAR_WIDTH}px`
-                    : "0px";
-                sidebarRef.current.style.opacity = isOpen ? "1" : "0";
-                return;
-            }
-
-            if (isOpen) {
-                gsap.fromTo(
-                    sidebarRef.current,
-                    { width: 0, opacity: 0 },
-                    {
-                        width: SIDEBAR_WIDTH,
-                        opacity: 1,
-                        duration: 0.35,
-                        ease: "power3.out",
-                    },
-                );
-            } else {
-                gsap.to(sidebarRef.current, {
-                    width: 0,
-                    opacity: 0,
-                    duration: 0.25,
-                    ease: "power3.in",
-                });
-            }
-        },
-        { dependencies: [isOpen, isMobile], scope: sidebarRef },
-    );
-
-    // GSAP animation for mobile overlay
-    useGSAP(
-        () => {
-            if (!isMobile || !overlayRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                overlayRef.current.style.transform = isOpen
-                    ? "translateX(0)"
-                    : "translateX(100%)";
-                return;
-            }
-
-            if (isOpen) {
-                gsap.fromTo(
-                    overlayRef.current,
-                    { x: "100%" },
-                    { x: "0%", duration: 0.3, ease: "power3.out" },
-                );
-            } else {
-                gsap.to(overlayRef.current, {
-                    x: "100%",
-                    duration: 0.2,
-                    ease: "power3.in",
-                });
-            }
-        },
-        { dependencies: [isOpen, isMobile], scope: overlayRef },
-    );
-
-    const sidebarContent = (
-        <div className="flex flex-col h-full bg-base-100 border-l-4 border-primary">
-            <ChatSidebarHeader messagesPagePath={messagesPagePath} />
-            {!isMinimized && (
-                <>
-                    {view === "list" && (
-                        <ChatSidebarList currentUserId={currentUserId} />
-                    )}
-                    {view === "thread" && activeConversationId && (
-                        <ChatSidebarThread
-                            conversationId={activeConversationId}
-                            messagesPagePath={messagesPagePath}
-                        >
-                            {threadRenderer(activeConversationId)}
-                        </ChatSidebarThread>
-                    )}
-                </>
-            )}
-        </div>
-    );
-
-    // Mobile: don't render the floating sidebar at all.
-    // On mobile, chat triggers should navigate to the full messages page instead.
-    // The floating overlay has z-index stacking context issues with sticky headers
-    // that prevent users from closing it.
-    if (isMobile) {
-        return null;
-    }
-
-    // Desktop: fixed panel pinned to the right edge of the viewport
     return (
         <div
-            ref={sidebarRef}
-            className={`fixed bottom-0 right-0 shadow-md hidden md:block overflow-y-auto
+            className={`fixed bottom-0 right-0 shadow-md overflow-y-auto
                 max-h-[80vh] ${isMinimized ? "h-12" : "h-auto"} transition-[width,opacity] duration-300 ease-in-out
                 `}
             style={{
@@ -165,7 +45,26 @@ export function ChatSidebarShell({
                 opacity: isOpen ? 1 : 0,
             }}
         >
-            {isOpen && sidebarContent}
+            {isOpen && (
+                <div className="flex flex-col h-full bg-base-100 border-l-4 border-primary overflow-hidden">
+                    <ChatSidebarHeader messagesPagePath={messagesPagePath} />
+                    {!isMinimized && (
+                        <div className="flex-1 min-h-0 flex flex-col">
+                            {view === "list" && (
+                                <ChatSidebarList currentUserId={currentUserId} />
+                            )}
+                            {view === "thread" && activeConversationId && (
+                                <ChatSidebarThread
+                                    conversationId={activeConversationId}
+                                    messagesPagePath={messagesPagePath}
+                                >
+                                    {threadRenderer(activeConversationId)}
+                                </ChatSidebarThread>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

@@ -170,7 +170,7 @@ export default function MatchesPage() {
     }
 
     return (
-        <MatchesAnimator contentRef={contentRef}>
+        <MatchesAnimator>
             <HeaderSection stats={stats} />
 
             <ControlsBar
@@ -187,7 +187,7 @@ export default function MatchesPage() {
             />
 
             {/* Content Area */}
-            <section className="content-area opacity-0 p-4">
+            <section className="content-area scroll-reveal fade-in p-4">
                 <div ref={contentRef}>
                     {loading && matches.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">

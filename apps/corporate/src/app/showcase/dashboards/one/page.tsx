@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Mock Data ───────────────────────────────────────────────────────────── */
 
@@ -1189,253 +1183,7 @@ export default function DashboardOne() {
     );
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            // ── Header entrance ──────────────────────────────────
-            const headerTl = gsap.timeline({
-                defaults: { ease: "power3.out", clearProps: "transform" },
-            });
-
-            headerTl
-                .fromTo(
-                    $1(".dash-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                )
-                .fromTo(
-                    $(".dash-headline-word"),
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 1,
-                        stagger: 0.12,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".dash-subtitle"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
-                    "-=0.5",
-                );
-
-            // ── KPI cards stagger ────────────────────────────────
-            gsap.fromTo(
-                $(".kpi-card"),
-                { opacity: 0, y: 40, scale: 0.96 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.6,
-                    stagger: 0.1,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".kpi-grid"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            // ── Charts section ───────────────────────────────────
-            gsap.fromTo(
-                $1(".charts-heading"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".charts-section"),
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            gsap.fromTo(
-                $(".chart-card"),
-                { opacity: 0, y: 50 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    stagger: 0.12,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".charts-grid"),
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // ── Advanced Analytics heading ────────────────────────
-            gsap.fromTo(
-                $1(".advanced-heading"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".advanced-section"),
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            gsap.fromTo(
-                $(".advanced-card"),
-                { opacity: 0, y: 50 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    stagger: 0.12,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".advanced-grid"),
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // ── Deep Insights heading ─────────────────────────────
-            gsap.fromTo(
-                $1(".insights-heading"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".insights-section"),
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            gsap.fromTo(
-                $(".insights-card"),
-                { opacity: 0, y: 50 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    stagger: 0.12,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".insights-grid"),
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // ── Activity & Actions split ─────────────────────────
-            gsap.fromTo(
-                $1(".activity-panel"),
-                { opacity: 0, x: -60 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.8,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".split-section"),
-                        start: "top 70%",
-                    },
-                },
-            );
-            gsap.fromTo(
-                $1(".actions-panel"),
-                { opacity: 0, x: 60 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.8,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".split-section"),
-                        start: "top 70%",
-                    },
-                },
-            );
-
-            // ── Activity items stagger ───────────────────────────
-            gsap.fromTo(
-                $(".activity-item"),
-                { opacity: 0, x: -20 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.4,
-                    stagger: 0.06,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".activity-list"),
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // ── Action cards stagger ─────────────────────────────
-            gsap.fromTo(
-                $(".action-card"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    stagger: 0.1,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".actions-grid"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            // ── Sidebar nav items stagger ────────────────────────
-            gsap.fromTo(
-                $(".sidebar-nav-item"),
-                { opacity: 0, x: -20 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.4,
-                    stagger: 0.06,
-                    ease: "power2.out",
-                    delay: 0.3,
-                },
-            );
-
-            gsap.fromTo(
-                $1(".sidebar-brand"),
-                { opacity: 0, y: -10 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    ease: "power3.out",
-                    delay: 0.1,
-                },
-            );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="overflow-hidden">
@@ -1460,7 +1208,7 @@ export default function DashboardOne() {
                     ></label>
                     <aside className="w-64 min-h-screen bg-neutral text-neutral-content flex flex-col">
                         {/* Brand */}
-                        <div className="sidebar-brand p-6 pb-4 opacity-0">
+                        <div className="sidebar-brand p-6 pb-4 scroll-reveal fade-up">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 bg-primary flex items-center justify-center flex-shrink-0">
                                     <i className="fa-duotone fa-regular fa-chart-mixed text-primary-content text-sm"></i>
@@ -1488,7 +1236,7 @@ export default function DashboardOne() {
                                 {sidebarNav.map((item, i) => (
                                     <li key={i}>
                                         <button
-                                            className={`sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-200 opacity-0 ${
+                                            className={`sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-200 scroll-reveal fade-up ${
                                                 item.active
                                                     ? "bg-primary text-primary-content font-bold"
                                                     : "text-neutral-content/70 hover:bg-neutral-content/5 hover:text-neutral-content"
@@ -1554,23 +1302,23 @@ export default function DashboardOne() {
                             </label>
 
                             <div className="max-w-3xl">
-                                <p className="dash-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                                <p className="dash-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 scroll-reveal fade-up">
                                     Recruiting Dashboard
                                 </p>
 
                                 <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                                    <span className="dash-headline-word inline-block opacity-0 text-base-content">
+                                    <span className="dash-headline-word inline-block scroll-reveal hero-word text-base-content">
                                         Your
                                     </span>{" "}
-                                    <span className="dash-headline-word inline-block opacity-0 text-primary">
+                                    <span className="dash-headline-word inline-block scroll-reveal hero-word text-primary">
                                         recruiting
                                     </span>{" "}
-                                    <span className="dash-headline-word inline-block opacity-0 text-base-content">
+                                    <span className="dash-headline-word inline-block scroll-reveal hero-word text-base-content">
                                         at a glance.
                                     </span>
                                 </h1>
 
-                                <p className="dash-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl opacity-0">
+                                <p className="dash-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl scroll-reveal fade-up">
                                     Real-time metrics, pipeline visibility, and
                                     actionable insights across your entire
                                     recruiting operation.
@@ -1605,7 +1353,7 @@ export default function DashboardOne() {
                                 {kpis.map((kpi, i) => (
                                     <div
                                         key={i}
-                                        className={`kpi-card bg-base-100 border-t-4 border-${kpi.color} p-6 opacity-0`}
+                                        className={`kpi-card bg-base-100 border-t-4 border-${kpi.color} p-6 scroll-reveal fade-up`}
                                     >
                                         <div className="flex items-start justify-between mb-4">
                                             <div
@@ -1641,7 +1389,7 @@ export default function DashboardOne() {
                ═══════════════════════════════════════════════════════ */}
                     <section className="charts-section py-20 lg:py-28 bg-base-100">
                         <div className="container mx-auto px-6 lg:px-12">
-                            <div className="charts-heading max-w-3xl mb-16 opacity-0">
+                            <div className="charts-heading max-w-3xl mb-16 scroll-reveal fade-up">
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                     Analytics
                                 </p>
@@ -1652,7 +1400,7 @@ export default function DashboardOne() {
 
                             <div className="charts-grid grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 {/* Applications Over Time */}
-                                <div className="chart-card lg:col-span-2 bg-base-200 p-8 opacity-0">
+                                <div className="chart-card lg:col-span-2 bg-base-200 p-8 scroll-reveal fade-up">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
                                             <h3 className="text-lg font-bold text-base-content">
@@ -1676,7 +1424,7 @@ export default function DashboardOne() {
                                 </div>
 
                                 {/* Jobs by Status */}
-                                <div className="chart-card bg-base-200 p-8 opacity-0">
+                                <div className="chart-card bg-base-200 p-8 scroll-reveal fade-up">
                                     <div className="mb-6">
                                         <h3 className="text-lg font-bold text-base-content">
                                             Jobs by Status
@@ -1691,7 +1439,7 @@ export default function DashboardOne() {
                                 </div>
 
                                 {/* Placements by Month */}
-                                <div className="chart-card lg:col-span-2 bg-base-200 p-8 opacity-0">
+                                <div className="chart-card lg:col-span-2 bg-base-200 p-8 scroll-reveal fade-up">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
                                             <h3 className="text-lg font-bold text-base-content">
@@ -1712,7 +1460,7 @@ export default function DashboardOne() {
                                 </div>
 
                                 {/* Revenue Trend */}
-                                <div className="chart-card bg-base-200 p-8 opacity-0">
+                                <div className="chart-card bg-base-200 p-8 scroll-reveal fade-up">
                                     <div className="mb-6">
                                         <h3 className="text-lg font-bold text-base-content">
                                             Revenue Trend
@@ -1737,7 +1485,7 @@ export default function DashboardOne() {
                ═══════════════════════════════════════════════════════ */}
                     <section className="advanced-section py-20 lg:py-28 bg-base-200">
                         <div className="container mx-auto px-6 lg:px-12">
-                            <div className="advanced-heading max-w-3xl mb-16 opacity-0">
+                            <div className="advanced-heading max-w-3xl mb-16 scroll-reveal fade-up">
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                                     Advanced Analytics
                                 </p>
@@ -1748,7 +1496,7 @@ export default function DashboardOne() {
 
                             <div className="advanced-grid grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 {/* Application Funnel */}
-                                <div className="advanced-card bg-base-100 p-8 border-t-4 border-coral opacity-0">
+                                <div className="advanced-card bg-base-100 p-8 border-t-4 border-coral scroll-reveal fade-up">
                                     <div className="flex items-start gap-4 mb-6">
                                         <div className="w-10 h-10 bg-primary/10 flex items-center justify-center flex-shrink-0">
                                             <i className="fa-duotone fa-regular fa-filter text-primary"></i>
@@ -1766,7 +1514,7 @@ export default function DashboardOne() {
                                 </div>
 
                                 {/* Top Recruiters */}
-                                <div className="advanced-card bg-base-100 p-8 border-t-4 border-secondary opacity-0">
+                                <div className="advanced-card bg-base-100 p-8 border-t-4 border-secondary scroll-reveal fade-up">
                                     <div className="flex items-start gap-4 mb-6">
                                         <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center flex-shrink-0">
                                             <i className="fa-duotone fa-regular fa-trophy text-secondary"></i>
@@ -1784,7 +1532,7 @@ export default function DashboardOne() {
                                 </div>
 
                                 {/* Hiring Pipeline */}
-                                <div className="advanced-card lg:col-span-2 bg-base-100 p-8 border-t-4 border-yellow opacity-0">
+                                <div className="advanced-card lg:col-span-2 bg-base-100 p-8 border-t-4 border-yellow scroll-reveal fade-up">
                                     <div className="flex items-start gap-4 mb-6">
                                         <div className="w-10 h-10 bg-accent/10 flex items-center justify-center flex-shrink-0">
                                             <i className="fa-duotone fa-regular fa-diagram-project text-accent"></i>
@@ -1810,7 +1558,7 @@ export default function DashboardOne() {
                ═══════════════════════════════════════════════════════ */}
                     <section className="insights-section py-20 lg:py-28 bg-base-100">
                         <div className="container mx-auto px-6 lg:px-12">
-                            <div className="insights-heading max-w-3xl mb-16 opacity-0">
+                            <div className="insights-heading max-w-3xl mb-16 scroll-reveal fade-up">
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                     Deep Insights
                                 </p>
@@ -1821,7 +1569,7 @@ export default function DashboardOne() {
 
                             <div className="insights-grid grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 {/* Geographic Distribution */}
-                                <div className="insights-card bg-base-200 p-8 opacity-0">
+                                <div className="insights-card bg-base-200 p-8 scroll-reveal fade-up">
                                     <div className="flex items-start gap-4 mb-6">
                                         <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center flex-shrink-0">
                                             <i className="fa-duotone fa-regular fa-earth-americas text-secondary"></i>
@@ -1839,7 +1587,7 @@ export default function DashboardOne() {
                                 </div>
 
                                 {/* Time to Hire */}
-                                <div className="insights-card bg-base-200 p-8 opacity-0">
+                                <div className="insights-card bg-base-200 p-8 scroll-reveal fade-up">
                                     <div className="flex items-start gap-4 mb-6">
                                         <div className="w-10 h-10 bg-primary/10 flex items-center justify-center flex-shrink-0">
                                             <i className="fa-duotone fa-regular fa-stopwatch text-primary"></i>
@@ -1867,7 +1615,7 @@ export default function DashboardOne() {
                         <div className="container mx-auto px-6 lg:px-12">
                             <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
                                 {/* Activity Feed */}
-                                <div className="activity-panel lg:col-span-3 opacity-0">
+                                <div className="activity-panel lg:col-span-3 scroll-reveal fade-up">
                                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                         Recent Activity
                                     </p>
@@ -1879,7 +1627,7 @@ export default function DashboardOne() {
                                         {activityFeed.map((item, i) => (
                                             <div
                                                 key={i}
-                                                className="activity-item flex items-start gap-4 p-4 border-b border-base-300 hover:bg-base-100 transition-colors opacity-0"
+                                                className="activity-item flex items-start gap-4 p-4 border-b border-base-300 hover:bg-base-100 transition-colors scroll-reveal fade-up"
                                             >
                                                 <div className="w-10 h-10 bg-base-100 flex items-center justify-center flex-shrink-0">
                                                     <i
@@ -1904,7 +1652,7 @@ export default function DashboardOne() {
                                 </div>
 
                                 {/* Quick Actions */}
-                                <div className="actions-panel lg:col-span-2 opacity-0">
+                                <div className="actions-panel lg:col-span-2 scroll-reveal fade-up">
                                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                                         Quick Actions
                                     </p>
@@ -1916,7 +1664,7 @@ export default function DashboardOne() {
                                         {quickActions.map((action, i) => (
                                             <button
                                                 key={i}
-                                                className={`action-card w-full text-left border-l-4 border-${action.color} bg-base-100 p-6 hover:bg-base-100/80 transition-colors opacity-0`}
+                                                className={`action-card w-full text-left border-l-4 border-${action.color} bg-base-100 p-6 hover:bg-base-100/80 transition-colors scroll-reveal fade-up`}
                                             >
                                                 <div className="flex items-start gap-4">
                                                     <div

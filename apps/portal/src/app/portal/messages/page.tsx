@@ -51,7 +51,7 @@ function MessagesContent() {
 
             <section className="bg-base-100">
                 <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
-                    <div className="listings-content opacity-0">
+                    <div className="listings-content scroll-reveal fade-in">
                         <SplitView />
                     </div>
                 </div>

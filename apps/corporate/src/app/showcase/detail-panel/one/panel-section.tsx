@@ -11,7 +11,7 @@ interface PanelSectionProps {
 
 export function PanelSection({ title, description, children, className }: PanelSectionProps) {
     return (
-        <section className={`detail-section opacity-0 mb-16 ${className || ""}`}>
+        <section className={`detail-section scroll-reveal fade-up mb-16 ${className || ""}`}>
             <div className="mb-6">
                 <h2 className="text-2xl font-black tracking-tight mb-2">{title}</h2>
                 <p className="text-sm text-base-content/50">{description}</p>

@@ -20,38 +20,35 @@ export function GridView({
     const selectedJob = jobs.find((j) => j.id === selectedId) ?? null;
 
     return (
-        <div className="relative">
-            {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                {jobs.map((job) => (
-                    <GridCard
-                        key={job.id}
-                        job={job}
-                        isSelected={selectedId === job.id}
-                        onSelect={() => onSelectAction(job)}
-                        onRefresh={onRefreshAction}
-                        onUpdateItem={onUpdateItemAction}
-                    />
-                ))}
+        <div className="drawer drawer-end">
+            <input type="checkbox" className="drawer-toggle" checked={!!selectedJob} readOnly />
+            <div className="drawer-content">
+                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                    {jobs.map((job) => (
+                        <GridCard
+                            key={job.id}
+                            job={job}
+                            isSelected={selectedId === job.id}
+                            onSelect={() => onSelectAction(job)}
+                            onRefresh={onRefreshAction}
+                            onUpdateItem={onUpdateItemAction}
+                        />
+                    ))}
+                </div>
             </div>
-
-            {/* Detail Drawer */}
-            {selectedJob && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/30 transition-opacity"
-                        onClick={() => onSelectAction(selectedJob)}
-                    />
-                    <div className="fixed top-0 right-0 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+            <div className="drawer-side z-50">
+                <div className="drawer-overlay" onClick={() => selectedJob && onSelectAction(selectedJob)} aria-label="close drawer" />
+                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
+                    {selectedJob && (
                         <DetailLoader
                             jobId={selectedJob.id}
                             onClose={() => onSelectAction(selectedJob)}
                             onRefresh={onRefreshAction}
                             onUpdateItem={onUpdateItemAction}
                         />
-                    </div>
-                </>
-            )}
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import gsap from "gsap";
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Types ───────────────────────────────────────────────────────────────── */
 
@@ -77,14 +77,13 @@ function animateModalOpen(
     boxEl: HTMLElement | null,
 ) {
     if (!backdropEl || !boxEl) return;
-    const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-    tl.fromTo(backdropEl, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-    tl.fromTo(
-        boxEl,
-        { opacity: 0, y: 40, scale: 0.96 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.4 },
-        "-=0.15",
-    );
+    requestAnimationFrame(() => {
+        backdropEl.style.transition = "opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1)";
+        backdropEl.style.opacity = "1";
+        boxEl.style.transition = "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
+        boxEl.style.opacity = "1";
+        boxEl.style.transform = "translateY(0) scale(1)";
+    });
 }
 
 function animateModalClose(
@@ -96,12 +95,12 @@ function animateModalClose(
         onComplete();
         return;
     }
-    const tl = gsap.timeline({
-        defaults: { ease: "power2.in", clearProps: "transform" },
-        onComplete,
-    });
-    tl.to(boxEl, { opacity: 0, y: 30, scale: 0.97, duration: 0.25 });
-    tl.to(backdropEl, { opacity: 0, duration: 0.2 }, "-=0.1");
+    boxEl.style.transition = "opacity 0.25s cubic-bezier(0.55, 0, 1, 0.45), transform 0.25s cubic-bezier(0.55, 0, 1, 0.45)";
+    boxEl.style.opacity = "0";
+    boxEl.style.transform = "translateY(30px) scale(0.97)";
+    backdropEl.style.transition = "opacity 0.2s cubic-bezier(0.55, 0, 1, 0.45)";
+    backdropEl.style.opacity = "0";
+    setTimeout(onComplete, 250);
 }
 
 /* ─── Page Component ──────────────────────────────────────────────────────── */
@@ -135,38 +134,7 @@ export default function ModalsOne() {
     /* ── Page entry animation ── */
     const pageRef = useRef<HTMLElement>(null);
 
-    useEffect(() => {
-        if (!pageRef.current) return;
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
-        if (prefersReducedMotion) return;
-
-        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-        tl.fromTo(
-            pageRef.current.querySelector(".page-kicker"),
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.6 },
-        );
-        tl.fromTo(
-            pageRef.current.querySelectorAll(".page-headline-word"),
-            { opacity: 0, y: 80, rotateX: 40 },
-            { opacity: 1, y: 0, rotateX: 0, duration: 1, stagger: 0.12 },
-            "-=0.3",
-        );
-        tl.fromTo(
-            pageRef.current.querySelector(".page-body"),
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 0.7 },
-            "-=0.5",
-        );
-        tl.fromTo(
-            pageRef.current.querySelectorAll(".modal-trigger"),
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 },
-            "-=0.3",
-        );
-    }, []);
+    useScrollReveal(pageRef);
 
     /* ── Modal open animations ── */
     useEffect(() => {
@@ -193,11 +161,14 @@ export default function ModalsOne() {
     /* ── Wizard step transition ── */
     useEffect(() => {
         if (showWizard && wizardStepRef.current) {
-            gsap.fromTo(
-                wizardStepRef.current,
-                { opacity: 0, x: 20 },
-                { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" },
-            );
+            const el = wizardStepRef.current;
+            el.style.opacity = "0";
+            el.style.transform = "translateX(20px)";
+            requestAnimationFrame(() => {
+                el.style.transition = "opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1), transform 0.3s cubic-bezier(0.33, 1, 0.68, 1)";
+                el.style.opacity = "1";
+                el.style.transform = "translateX(0)";
+            });
         }
     }, [wizardStep, showWizard]);
 
@@ -295,26 +266,26 @@ export default function ModalsOne() {
             <div className="py-28 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="page-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                        <p className="page-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
                             Component Showcase
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="page-headline-word inline-block opacity-0">
+                            <span className="page-headline-word inline-block scroll-reveal hero-word">
                                 Modal
                             </span>{" "}
-                            <span className="page-headline-word inline-block opacity-0 text-primary">
+                            <span className="page-headline-word inline-block scroll-reveal hero-word text-primary">
                                 patterns
                             </span>{" "}
-                            <span className="page-headline-word inline-block opacity-0">
+                            <span className="page-headline-word inline-block scroll-reveal hero-word">
                                 that
                             </span>{" "}
-                            <span className="page-headline-word inline-block opacity-0">
+                            <span className="page-headline-word inline-block scroll-reveal hero-word">
                                 work.
                             </span>
                         </h1>
 
-                        <p className="page-body text-lg md:text-xl text-neutral-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
+                        <p className="page-body text-lg md:text-xl text-neutral-content/70 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                             Standard forms, multi-step wizards, and confirmation
                             dialogs. Built with DaisyUI, animated with GSAP, and
                             designed for the real world.
@@ -330,7 +301,7 @@ export default function ModalsOne() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                         {/* Standard Modal Card */}
-                        <div className="modal-trigger border-t-4 border-coral bg-base-100 p-8 opacity-0">
+                        <div className="modal-trigger border-t-4 border-coral bg-base-100 p-8 scroll-reveal fade-up">
                             <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mb-5">
                                 <i className="fa-duotone fa-regular fa-file-lines text-2xl text-primary"></i>
                             </div>
@@ -352,7 +323,7 @@ export default function ModalsOne() {
                         </div>
 
                         {/* Wizard Modal Card */}
-                        <div className="modal-trigger border-t-4 border-secondary bg-base-100 p-8 opacity-0">
+                        <div className="modal-trigger border-t-4 border-secondary bg-base-100 p-8 scroll-reveal fade-up">
                             <div className="w-14 h-14 bg-secondary/10 flex items-center justify-center mb-5">
                                 <i className="fa-duotone fa-regular fa-hat-wizard text-2xl text-secondary"></i>
                             </div>
@@ -373,7 +344,7 @@ export default function ModalsOne() {
                         </div>
 
                         {/* Confirm Modal Card */}
-                        <div className="modal-trigger border-t-4 border-error bg-base-100 p-8 opacity-0">
+                        <div className="modal-trigger border-t-4 border-error bg-base-100 p-8 scroll-reveal fade-up">
                             <div className="w-14 h-14 bg-error/10 flex items-center justify-center mb-5">
                                 <i className="fa-duotone fa-regular fa-triangle-exclamation text-2xl text-error"></i>
                             </div>
@@ -405,11 +376,13 @@ export default function ModalsOne() {
                     <div
                         ref={standardBackdropRef}
                         className="modal-backdrop bg-neutral/60"
+                        style={{ opacity: 0 }}
                         onClick={closeStandard}
                     ></div>
                     <div
                         ref={standardBoxRef}
                         className="modal-box max-w-2xl bg-base-100 p-0 overflow-hidden"
+                        style={{ opacity: 0, transform: "translateY(40px) scale(0.96)" }}
                     >
                         {/* Header */}
                         <div className="bg-neutral text-neutral-content px-8 py-6">
@@ -681,11 +654,13 @@ export default function ModalsOne() {
                     <div
                         ref={wizardBackdropRef}
                         className="modal-backdrop bg-neutral/60"
+                        style={{ opacity: 0 }}
                         onClick={closeWizard}
                     ></div>
                     <div
                         ref={wizardBoxRef}
                         className="modal-box max-w-2xl bg-base-100 p-0 overflow-hidden"
+                        style={{ opacity: 0, transform: "translateY(40px) scale(0.96)" }}
                     >
                         {/* Header */}
                         <div className="bg-neutral text-neutral-content px-8 py-6">
@@ -1175,11 +1150,13 @@ export default function ModalsOne() {
                     <div
                         ref={confirmBackdropRef}
                         className="modal-backdrop bg-neutral/60"
+                        style={{ opacity: 0 }}
                         onClick={closeConfirm}
                     ></div>
                     <div
                         ref={confirmBoxRef}
                         className="modal-box max-w-md bg-base-100 p-0 overflow-hidden"
+                        style={{ opacity: 0, transform: "translateY(40px) scale(0.96)" }}
                     >
                         {confirmDeleted ? (
                             /* Deleted state */

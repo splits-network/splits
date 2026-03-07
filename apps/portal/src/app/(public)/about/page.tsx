@@ -117,7 +117,7 @@ export default function AboutPage() {
         <ScrollAnimator>
             {/* Hero Section */}
             <section className="hero bg-gradient-to-r from-primary to-accent text-primary-content py-20 overflow-hidden">
-                <div className="hero-content text-center max-w-5xl opacity-0">
+                <div className="hero-content text-center max-w-5xl scroll-reveal fade-up">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
                             About Splits Network
@@ -140,7 +140,7 @@ export default function AboutPage() {
                             className="grid md:grid-cols-2 gap-12 mb-16"
                             data-animate-stagger
                         >
-                            <div className="card bg-primary text-primary-content shadow hover:-translate-y-1 hover:shadow-lg transition-all opacity-0">
+                            <div className="card bg-primary text-primary-content shadow hover:-translate-y-1 hover:shadow-lg transition-all scroll-reveal fade-up">
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
                                         <i className="fa-duotone fa-regular fa-bullseye"></i>
@@ -156,7 +156,7 @@ export default function AboutPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-secondary text-secondary-content shadow hover:-translate-y-1 hover:shadow-lg transition-all opacity-0">
+                            <div className="card bg-secondary text-secondary-content shadow hover:-translate-y-1 hover:shadow-lg transition-all scroll-reveal fade-up">
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
                                         <i className="fa-duotone fa-regular fa-telescope"></i>
@@ -176,10 +176,10 @@ export default function AboutPage() {
 
                         {/* Story */}
                         <div className="prose lg:prose-xl mx-auto">
-                            <h2 className="text-3xl font-bold text-center mb-8 opacity-0">
+                            <h2 className="text-3xl font-bold text-center mb-8 scroll-reveal fade-up">
                                 Our Story
                             </h2>
-                            <p className="text-lg text-base-content/80 opacity-0">
+                            <p className="text-lg text-base-content/80 scroll-reveal fade-up">
                                 Splits Network was born from years of
                                 frustration with the split placement process. As
                                 recruiters ourselves, we experienced firsthand
@@ -187,7 +187,7 @@ export default function AboutPage() {
                                 losing track of candidates, and dealing with
                                 unclear fee agreements.
                             </p>
-                            <p className="text-lg text-base-content/80 opacity-0">
+                            <p className="text-lg text-base-content/80 scroll-reveal fade-up">
                                 We saw talented recruiters avoiding split
                                 placements entirely—not because they didn't want
                                 to collaborate, but because the tools didn't
@@ -196,7 +196,7 @@ export default function AboutPage() {
                                 multiple external recruiters without a unified
                                 system.
                             </p>
-                            <p className="text-lg text-base-content/80 opacity-0">
+                            <p className="text-lg text-base-content/80 scroll-reveal fade-up">
                                 So we built Splits Network: a platform designed
                                 specifically for split placements, not
                                 retrofitted from general-purpose ATS systems. We
@@ -211,7 +211,7 @@ export default function AboutPage() {
             {/* Core Values */}
             <section className="py-20 bg-base-200 overflow-hidden">
                 <div className="container mx-auto px-4">
-                    <div className="text-center mb-16 opacity-0">
+                    <div className="text-center mb-16 scroll-reveal fade-up">
                         <h2 className="text-4xl font-bold mb-4">
                             Our Core Values
                         </h2>
@@ -226,7 +226,7 @@ export default function AboutPage() {
                         {coreValues.map((value, index) => (
                             <div
                                 key={index}
-                                className="card bg-base-100 shadow hover:-translate-y-1 hover:shadow-lg transition-all opacity-0"
+                                className="card bg-base-100 shadow hover:-translate-y-1 hover:shadow-lg transition-all scroll-reveal fade-up"
                             >
                                 <div className="card-body text-center">
                                     <div
@@ -253,14 +253,14 @@ export default function AboutPage() {
             <section className="py-20 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-4xl font-bold text-center mb-12 opacity-0">
+                        <h2 className="text-4xl font-bold text-center mb-12 scroll-reveal fade-up">
                             Why We're Different
                         </h2>
                         <div className="space-y-6" data-animate-stagger>
                             {whyDifferent.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="card bg-base-200 shadow hover:-translate-y-1 hover:shadow-lg transition-all opacity-0"
+                                    className="card bg-base-200 shadow hover:-translate-y-1 hover:shadow-lg transition-all scroll-reveal fade-up"
                                 >
                                     <div className="card-body">
                                         <h3 className="card-title text-xl">
@@ -283,7 +283,7 @@ export default function AboutPage() {
             {/* Team Section */}
             <section className="py-20 bg-neutral text-neutral-content overflow-hidden">
                 <div className="container mx-auto px-4">
-                    <div className="text-center mb-12 opacity-0">
+                    <div className="text-center mb-12 scroll-reveal fade-up">
                         <h2 className="text-4xl font-bold mb-4">
                             Meet the Team
                         </h2>
@@ -298,7 +298,7 @@ export default function AboutPage() {
                         {teamMembers.map((member, index) => (
                             <div
                                 key={index}
-                                className="card bg-base-100 text-base-content shadow opacity-0"
+                                className="card bg-base-100 text-base-content shadow scroll-reveal fade-up"
                             >
                                 <div className="card-body text-center">
                                     <div className="avatar avatar-placeholder mx-auto mb-4">
@@ -323,7 +323,7 @@ export default function AboutPage() {
                             </div>
                         ))}
                     </div>
-                    <div className="text-center mt-12 opacity-0">
+                    <div className="text-center mt-12 scroll-reveal fade-up">
                         <Link
                             href="/careers"
                             className="btn btn-primary btn-lg hover:scale-105 transition-all"
@@ -338,7 +338,7 @@ export default function AboutPage() {
             {/* CTA Section */}
             <section className="py-20 bg-primary text-primary-content overflow-hidden">
                 <div className="container mx-auto px-4 text-center">
-                    <div className="opacity-0">
+                    <div className="scroll-reveal fade-up">
                         <h2 className="text-4xl font-bold mb-6">
                             Ready to Join the Movement?
                         </h2>
@@ -350,14 +350,14 @@ export default function AboutPage() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             href="/sign-up"
-                            className="btn btn-lg btn-neutral hover:scale-105 transition-all opacity-0"
+                            className="btn btn-lg btn-neutral hover:scale-105 transition-all scroll-reveal fade-up"
                         >
                             <i className="fa-duotone fa-regular fa-user-tie"></i>
                             Join as a Recruiter
                         </Link>
                         <Link
                             href="/sign-up"
-                            className="btn btn-lg btn-secondary hover:scale-105 transition-all opacity-0"
+                            className="btn btn-lg btn-secondary hover:scale-105 transition-all scroll-reveal fade-up"
                         >
                             <i className="fa-duotone fa-regular fa-building"></i>
                             Post Roles as a Company

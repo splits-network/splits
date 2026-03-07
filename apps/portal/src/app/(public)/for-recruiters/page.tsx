@@ -208,7 +208,7 @@ export default function ForRecruitersPage() {
                             data-animate-stagger
                         >
                             {recruiterBenefits.map((benefit) => (
-                                <div key={benefit.title} className="opacity-0">
+                                <div key={benefit.title} className="scroll-reveal fade-up">
                                     <div className="card bg-base-100 shadow-lg h-full hover:-translate-y-1 hover:shadow-lg transition-all">
                                         <div className="card-body text-center">
                                             <div className="text-5xl mb-4">
@@ -412,7 +412,7 @@ export default function ForRecruitersPage() {
                             {processSteps.map((step, index) => (
                                 <div
                                     key={step.step}
-                                    className={`opacity-0 relative flex items-center mb-16 ${
+                                    className={`scroll-reveal fade-up relative flex items-center mb-16 ${
                                         index % 2 === 0
                                             ? "md:flex-row-reverse"
                                             : ""
@@ -594,7 +594,7 @@ export default function ForRecruitersPage() {
                                 className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto"
                                 data-animate-stagger
                             >
-                                <div className="stat opacity-0">
+                                <div className="stat scroll-reveal fade-up">
                                     <div className="stat-title">
                                         Quick Setup
                                     </div>
@@ -605,7 +605,7 @@ export default function ForRecruitersPage() {
                                         From signup to first application
                                     </div>
                                 </div>
-                                <div className="stat opacity-0">
+                                <div className="stat scroll-reveal fade-up">
                                     <div className="stat-title">Zero Risk</div>
                                     <div className="stat-value text-secondary">
                                         $0
@@ -614,7 +614,7 @@ export default function ForRecruitersPage() {
                                         Start completely free forever
                                     </div>
                                 </div>
-                                <div className="stat opacity-0">
+                                <div className="stat scroll-reveal fade-up">
                                     <div className="stat-title">Support</div>
                                     <div className="stat-value text-accent">
                                         24/7

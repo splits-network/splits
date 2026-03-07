@@ -19,36 +19,34 @@ export function GridView({
         candidates.find((c) => c.id === selectedId) ?? null;
 
     return (
-        <div className="relative">
-            {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                {candidates.map((candidate) => (
-                    <GridCard
-                        key={candidate.id}
-                        candidate={candidate}
-                        isSelected={selectedId === candidate.id}
-                        onSelect={() => onSelect(candidate)}
-                        onRefresh={onRefresh}
-                    />
-                ))}
+        <div className="drawer drawer-end">
+            <input type="checkbox" className="drawer-toggle" checked={!!selectedCandidate} readOnly />
+            <div className="drawer-content">
+                {/* Grid */}
+                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                    {candidates.map((candidate) => (
+                        <GridCard
+                            key={candidate.id}
+                            candidate={candidate}
+                            isSelected={selectedId === candidate.id}
+                            onSelect={() => onSelect(candidate)}
+                            onRefresh={onRefresh}
+                        />
+                    ))}
+                </div>
             </div>
-
-            {/* Detail Drawer */}
-            {selectedCandidate && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/30 transition-opacity"
-                        onClick={() => onSelect(selectedCandidate)}
-                    />
-                    <div className="fixed top-0 right-0 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+            <div className="drawer-side z-50">
+                <div className="drawer-overlay" onClick={() => selectedCandidate && onSelect(selectedCandidate)} aria-label="close drawer" />
+                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
+                    {selectedCandidate && (
                         <DetailLoader
                             candidateId={selectedCandidate.id}
                             onClose={() => onSelect(selectedCandidate)}
                             onRefresh={onRefresh}
                         />
-                    </div>
-                </>
-            )}
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

@@ -30,33 +30,33 @@ export default function HeaderSection({
             <div className="container mx-auto px-6 lg:px-12 relative ">
                 <div className="max-w-4xl">
                     {/* Kicker */}
-                    <p className="hero-kicker opacity-0 text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
+                    <p className="hero-kicker scroll-reveal fade-up text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                         <i className="fa-duotone fa-regular fa-users-between-lines mr-2" />
                         Recruiter Marketplace
                     </p>
 
                     {/* Headline */}
                     <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="hero-headline-word opacity-0 inline-block">
+                        <span className="hero-headline-word scroll-reveal fade-up inline-block">
                             Find your
                         </span>{" "}
-                        <span className="hero-headline-word opacity-0 inline-block text-primary">
+                        <span className="hero-headline-word scroll-reveal fade-up inline-block text-primary">
                             perfect
                         </span>{" "}
-                        <span className="hero-headline-word opacity-0 inline-block">
+                        <span className="hero-headline-word scroll-reveal fade-up inline-block">
                             recruiter.
                         </span>
                     </h1>
 
                     {/* Subtitle */}
-                    <p className="hero-subtitle opacity-0 text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10">
+                    <p className="hero-subtitle scroll-reveal fade-up text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10">
                         Connect with expert recruiters who specialize in your
                         industry. Browse profiles, check reputation scores, and
                         start your next career move.
                     </p>
 
                     {/* Search bar */}
-                    <div className="search-bar opacity-0 max-w-xl">
+                    <div className="search-bar scroll-reveal fade-up max-w-xl">
                         <div className="relative">
                             <i className="fa-duotone fa-regular fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-content/30 text-sm" />
                             <input
@@ -79,7 +79,7 @@ export default function HeaderSection({
                     </div>
 
                     {/* Stats */}
-                    <div className="header-stat-bar flex flex-wrap gap-8 mt-10 opacity-0">
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-10 scroll-reveal fade-up">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-users text-primary-content" />

@@ -1,9 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { PanelSection } from "./panel-section";
 import { RecruiterPanel } from "./panels/recruiter-panel";
 import { CandidatePanel } from "./panels/candidate-panel";
@@ -15,56 +12,17 @@ import { FirmPanel } from "./panels/firm-panel";
 import { MatchPanel } from "./panels/match-panel";
 import { InvitationPanel } from "./panels/invitation-panel";
 import { ReferralPanel } from "./panels/referral-panel";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 export default function DetailPanelShowcase() {
     const mainRef = useRef<HTMLElement>(null);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current.querySelectorAll(".opacity-0").forEach((el) => {
-                    (el as HTMLElement).style.opacity = "1";
-                });
-                return;
-            }
-
-            const sections = mainRef.current.querySelectorAll(".detail-section");
-            sections.forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        clearProps: "transform",
-                        scrollTrigger: { trigger: section, start: "top 85%" },
-                    },
-                );
-            });
-
-            const hero = mainRef.current.querySelector(".hero-section");
-            if (hero) {
-                gsap.fromTo(
-                    hero,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", clearProps: "transform" },
-                );
-            }
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Hero */}
-            <section className="hero-section opacity-0 relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="hero-section scroll-reveal fade-up relative bg-neutral text-neutral-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{ clipPath: "polygon(20% 0,100% 0,100% 100%,0% 100%)" }}

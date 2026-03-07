@@ -9,7 +9,6 @@ import {
     LoadingState,
     ErrorState,
 } from "@/hooks/use-standard-list";
-import gsap from "gsap";
 import MarketplaceAnimator from "./marketplace-animator";
 import HeaderSection from "./components/header-section";
 import { ControlsBar } from "./components/controls-bar";
@@ -116,27 +115,23 @@ export default function MarketplaceClient({
 
             // Fade out current content, switch view, fade in
             if (contentRef.current) {
-                gsap.to(contentRef.current, {
-                    opacity: 0,
-                    y: 15,
-                    duration: 0.2,
-                    ease: "power2.in",
-                    onComplete: () => {
-                        setViewMode(newMode);
-                        setSelectedRecruiter(null);
+                const el = contentRef.current;
+                el.style.transition = "opacity 0.2s ease-in, transform 0.2s ease-in";
+                el.style.opacity = "0";
+                el.style.transform = "translateY(15px)";
 
-                        gsap.fromTo(
-                            contentRef.current,
-                            { opacity: 0, y: 15 },
-                            {
-                                opacity: 1,
-                                y: 0,
-                                duration: 0.35,
-                                ease: "power3.out",
-                            },
-                        );
-                    },
-                });
+                const onEnd = () => {
+                    el.removeEventListener("transitionend", onEnd);
+                    setViewMode(newMode);
+                    setSelectedRecruiter(null);
+
+                    requestAnimationFrame(() => {
+                        el.style.transition = "opacity 0.35s cubic-bezier(0.33,1,0.68,1), transform 0.35s cubic-bezier(0.33,1,0.68,1)";
+                        el.style.opacity = "1";
+                        el.style.transform = "translateY(0)";
+                    });
+                };
+                el.addEventListener("transitionend", onEnd, { once: true });
             } else {
                 setViewMode(newMode);
                 setSelectedRecruiter(null);
@@ -182,7 +177,7 @@ export default function MarketplaceClient({
             />
 
             {/* Content Area */}
-            <section className="content-area py-10 opacity-0">
+            <section className="content-area scroll-reveal fade-in py-10">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div ref={contentRef}>
                         {error ? (

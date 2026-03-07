@@ -6,7 +6,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { RecruiterCompany, RecruiterCompanyCreate, RecruiterCompanyUpdate, RecruiterCompanyFilters } from './types';
+import { RecruiterCompany, RecruiterCompanyCreate, RecruiterCompanyUpdate, RecruiterCompanyFilters, RecruiterCompanyPermissions } from './types';
 
 export class RecruiterCompanyRepository {
     constructor(private supabase: SupabaseClient) {}
@@ -309,12 +309,12 @@ export class RecruiterCompanyRepository {
      * Create a recruiter-initiated connection request (bypasses org-based authorization)
      */
     async createConnectionRequest(
-        data: RecruiterCompanyCreate,
+        data: RecruiterCompanyCreate & { request_message?: string; terms_acknowledged_at?: string; terms_acknowledged_by?: string },
     ): Promise<RecruiterCompany> {
         const relationshipData = {
             ...data,
             status: 'pending' as const,
-            can_manage_company_jobs: data.can_manage_company_jobs || false
+            can_manage_company_jobs: data.can_manage_company_jobs || false,
         };
 
         const { data: result, error } = await this.supabase
@@ -342,18 +342,20 @@ export class RecruiterCompanyRepository {
 
     /**
      * Get company IDs a recruiter can manage jobs for
+     * Uses both legacy can_manage_company_jobs and new permissions.can_create_jobs
      */
     async getManageableCompanyIds(recruiterId: string): Promise<string[]> {
         const { data, error } = await this.supabase
             .from('recruiter_companies')
-            .select('company_id')
+            .select('company_id, permissions')
             .eq('recruiter_id', recruiterId)
-            .eq('status', 'active')
-            .eq('can_manage_company_jobs', true);
+            .eq('status', 'active');
 
         if (error) throw error;
 
-        return (data || []).map(row => row.company_id);
+        return (data || [])
+            .filter(row => row.permissions?.can_create_jobs || row.permissions?.can_edit_jobs)
+            .map(row => row.company_id);
     }
 
     /**
@@ -364,17 +366,60 @@ export class RecruiterCompanyRepository {
             .from('recruiter_companies')
             .select(`
                 company_id,
+                permissions,
                 company:companies!inner(id, name)
             `)
             .eq('recruiter_id', recruiterId)
-            .eq('status', 'active')
-            .eq('can_manage_company_jobs', true);
+            .eq('status', 'active');
 
         if (error) throw error;
 
-        return (data || []).map(row => ({
-            id: (row.company as any).id,
-            name: (row.company as any).name
-        }));
+        return (data || [])
+            .filter(row => row.permissions?.can_create_jobs || row.permissions?.can_edit_jobs)
+            .map(row => ({
+                id: (row.company as any).id,
+                name: (row.company as any).name
+            }));
+    }
+
+    /**
+     * Check if a recruiter has a specific permission for a company
+     */
+    async hasPermission(
+        recruiterId: string,
+        companyId: string,
+        permission: keyof RecruiterCompanyPermissions
+    ): Promise<boolean> {
+        const { data, error } = await this.supabase
+            .from('recruiter_companies')
+            .select('permissions')
+            .eq('recruiter_id', recruiterId)
+            .eq('company_id', companyId)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return false;
+
+        return data.permissions?.[permission] === true;
+    }
+
+    /**
+     * Get all permissions for a recruiter-company relationship
+     */
+    async getPermissions(
+        recruiterId: string,
+        companyId: string
+    ): Promise<RecruiterCompanyPermissions | null> {
+        const { data, error } = await this.supabase
+            .from('recruiter_companies')
+            .select('permissions')
+            .eq('recruiter_id', recruiterId)
+            .eq('company_id', companyId)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (error) throw error;
+        return data?.permissions || null;
     }
 }

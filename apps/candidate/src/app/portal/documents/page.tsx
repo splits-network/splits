@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, Suspense, useMemo } from "react";
+import { useState, useRef, Suspense, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { useStandardList } from "@/hooks/use-standard-list";
 import { formatDate } from "@/lib/utils";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -295,130 +294,7 @@ function DocumentsContent() {
         },
     ];
 
-    // ===== GSAP ANIMATION =====
-
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-
-            if (prefersReducedMotion) {
-                const hidden = mainRef.current.querySelectorAll(
-                    "[class*='opacity-0']",
-                );
-                gsap.set(hidden, { opacity: 1 });
-                return;
-            }
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            const tl = gsap.timeline({
-                defaults: { ease: "power3.out", clearProps: "transform" },
-            });
-
-            // Hero kicker
-            const kicker = $1(".hero-kicker");
-            if (kicker) {
-                tl.fromTo(
-                    kicker,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                );
-            }
-
-            // Headline words
-            const words = $(".hero-headline-word");
-            if (words.length) {
-                tl.fromTo(
-                    words,
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 1,
-                        stagger: 0.12,
-                    },
-                    "-=0.3",
-                );
-            }
-
-            // Body text
-            const body = $1(".hero-body");
-            if (body) {
-                tl.fromTo(
-                    body,
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
-                    "-=0.5",
-                );
-            }
-
-            // Upload card
-            const uploadCard = $1(".upload-cta");
-            if (uploadCard) {
-                tl.fromTo(
-                    uploadCard,
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.3",
-                );
-            }
-
-            // Tab bar
-            const tabBar = $1(".tab-bar-section");
-            if (tabBar) {
-                tl.fromTo(
-                    tabBar,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.2",
-                );
-            }
-
-            // Tips sidebar
-            const tips = $1(".tips-section");
-            if (tips) {
-                tl.fromTo(
-                    tips,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.2",
-                );
-            }
-        },
-        { scope: mainRef },
-    );
-
-    // Animate document cards when they load or filter changes
-    useEffect(() => {
-        if (!mainRef.current || loading || filteredDocuments.length === 0)
-            return;
-
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
-        if (prefersReducedMotion) return;
-
-        const cards = mainRef.current.querySelectorAll(".doc-card");
-        if (!cards.length) return;
-
-        gsap.fromTo(
-            cards,
-            { opacity: 0, y: 20 },
-            {
-                opacity: 1,
-                y: 0,
-                duration: 0.4,
-                stagger: 0.06,
-                ease: "power3.out",
-            },
-        );
-    }, [loading, filteredDocuments]);
+    useScrollReveal(mainRef);
 
     // ===== RENDER =====
 
@@ -428,23 +304,23 @@ function DocumentsContent() {
             <section className="relative bg-neutral text-neutral-content py-10 sm:py-16 lg:py-20">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-12">
                     <div className="max-w-4xl">
-                        <p className="hero-kicker text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 sm:mb-6 opacity-0">
+                        <p className="scroll-reveal fade-up text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 sm:mb-6">
                             {/* COPY: kicker label above the headline */}
                             Document Library
                         </p>
 
                         <h1 className="text-3xl sm:text-5xl md:text-6xl font-black leading-[0.92] tracking-tight mb-4 sm:mb-6">
-                            <span className="hero-headline-word inline-block opacity-0">
+                            <span className="scroll-reveal fade-up inline-block">
                                 {/* COPY: headline first segment */}
                                 Every application starts
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up inline-block text-primary">
                                 {/* COPY: headline accent segment */}
                                 here.
                             </span>
                         </h1>
 
-                        <p className="hero-body text-base sm:text-lg text-neutral-content/70 leading-relaxed max-w-xl mb-4 opacity-0">
+                        <p className="scroll-reveal fade-up text-base sm:text-lg text-neutral-content/70 leading-relaxed max-w-xl mb-4">
                             {/* COPY: hero body paragraph */}
                             Your resumes, cover letters, and portfolios in one
                             place. Upload once, attach to any application, and
@@ -479,7 +355,7 @@ function DocumentsContent() {
                     {/* LEFT COLUMN — Upload + Tabs + Cards */}
                     <div>
                         {/* ── UPLOAD CTA CARD ── */}
-                        <div className="upload-cta border-l-4 border-primary bg-base-100 shadow-sm p-5 sm:p-8 mb-8 opacity-0">
+                        <div className="scroll-reveal fade-up border-l-4 border-primary bg-base-100 shadow-sm p-5 sm:p-8 mb-8">
                             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary/10 flex items-center justify-center shrink-0">
                                     <i className="fa-duotone fa-regular fa-cloud-arrow-up text-primary text-xl sm:text-2xl" />
@@ -508,7 +384,7 @@ function DocumentsContent() {
                         </div>
 
                         {/* ── TAB BAR ── */}
-                        <div className="tab-bar-section border-b-2 border-base-300 mb-8 opacity-0">
+                        <div className="scroll-reveal fade-up border-b-2 border-base-300 mb-8">
                             <BaselTabBar
                                 tabs={tabs}
                                 active={filterType}
@@ -697,7 +573,7 @@ function DocumentsContent() {
 
                     {/* RIGHT COLUMN — Tips sidebar (below documents on mobile, sticky sidebar on desktop) */}
                     <div>
-                        <div className="tips-section border-l-4 border-info bg-info/5 p-5 sm:p-6 opacity-0 lg:sticky lg:top-6">
+                        <div className="scroll-reveal fade-up border-l-4 border-info bg-info/5 p-5 sm:p-6 lg:sticky lg:top-6">
                             <p className="text-sm font-bold uppercase tracking-[0.2em] text-info mb-4">
                                 <i className="fa-duotone fa-regular fa-lightbulb mr-2" />
                                 {/* COPY: tips section kicker */}

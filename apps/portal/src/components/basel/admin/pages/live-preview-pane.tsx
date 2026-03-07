@@ -48,7 +48,7 @@ export function LivePreviewPane({ blocks }: LivePreviewPaneProps) {
                 </button>
             </div>
 
-            {/* Preview content — override opacity-0 since GSAP animations are skipped in editor */}
+            {/* Preview content — override scroll-reveal fade-up since GSAP animations are skipped in editor */}
             <div className="flex-1 overflow-y-auto p-4">
                 <div
                     className={`bg-base-100 shadow mx-auto transition-all ${

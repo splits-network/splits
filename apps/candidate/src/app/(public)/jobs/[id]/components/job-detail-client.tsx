@@ -2,9 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -27,10 +25,6 @@ import {
     type JobRequirement,
 } from "../../types";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 interface JobDetailClientProps {
     job: Job;
@@ -129,80 +123,7 @@ export default function JobDetailClient({
         .filter((r) => r.requirement_type === "preferred")
         .sort((a, b) => a.sort_order - b.sort_order);
 
-    /* ─── GSAP Animations ─────────────────────────────────────────────── */
-
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current.querySelectorAll(".opacity-0").forEach((el) => {
-                    (el as HTMLElement).style.opacity = "1";
-                });
-                return;
-            }
-
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-            const kicker = $1(".detail-kicker");
-            if (kicker) {
-                tl.fromTo(
-                    kicker,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                );
-            }
-            const titleWords = $(".detail-title-word");
-            if (titleWords.length) {
-                tl.fromTo(
-                    titleWords,
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                );
-            }
-            const metas = $(".detail-meta");
-            if (metas.length) {
-                tl.fromTo(
-                    metas,
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.3",
-                );
-            }
-            const actions = $(".detail-action");
-            if (actions.length) {
-                tl.fromTo(
-                    actions,
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.3, stagger: 0.06 },
-                    "-=0.2",
-                );
-            }
-
-            $(".detail-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        scrollTrigger: { trigger: section, start: "top 85%" },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     /* ─── Handlers ────────────────────────────────────────────────────── */
 
@@ -306,7 +227,7 @@ export default function JobDetailClient({
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         {/* Breadcrumb */}
-                        <div className="detail-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6 opacity-0">
+                        <div className="scroll-reveal fade-up detail-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6">
                             <Link
                                 href="/jobs"
                                 className="hover:text-neutral-content transition-colors"
@@ -350,11 +271,11 @@ export default function JobDetailClient({
                             </div>
                             <div>
                                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
-                                    <span className="detail-title-word inline-block opacity-0">
+                                    <span className="scroll-reveal fade-up detail-title-word inline-block">
                                         {job.title}
                                     </span>
                                 </h1>
-                                <p className="detail-meta opacity-0 text-lg text-neutral-content/60 mt-2">
+                                <p className="scroll-reveal fade-up detail-meta text-lg text-neutral-content/60 mt-2">
                                     {companyDisplay}
                                 </p>
                             </div>
@@ -366,7 +287,7 @@ export default function JobDetailClient({
                                 {metaTags.map((tag, i) => (
                                     <span
                                         key={`${i}-${tag.text}`}
-                                        className="detail-meta opacity-0 flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
+                                        className="scroll-reveal fade-up detail-meta flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
                                     >
                                         <i
                                             className={`${tag.icon} text-xs text-secondary`}
@@ -380,7 +301,7 @@ export default function JobDetailClient({
                         {/* Actions */}
                         <div className="flex flex-wrap gap-3">
                             <button
-                                className={`detail-action opacity-0 btn ${buttonConfig.disabled ? "btn-disabled" : "btn-primary"}`}
+                                className={`scroll-reveal fade-up detail-action btn ${buttonConfig.disabled ? "btn-disabled" : "btn-primary"}`}
                                 onClick={buttonConfig.action}
                                 disabled={buttonConfig.disabled}
                             >
@@ -392,7 +313,7 @@ export default function JobDetailClient({
                             <button
                                 onClick={handleSaveToggle}
                                 disabled={isSaving}
-                                className={`detail-action opacity-0 btn ${saved ? "btn-secondary" : "btn-ghost border-neutral-content/20"}`}
+                                className={`scroll-reveal fade-up detail-action btn ${saved ? "btn-secondary" : "btn-ghost border-neutral-content/20"}`}
                             >
                                 {isSaving ? (
                                     <i className="fa-duotone fa-solid fa-spinner-third animate-spin" />
@@ -404,7 +325,7 @@ export default function JobDetailClient({
                                 {saved ? "Saved" : "Save"}
                             </button>
                             <button
-                                className="detail-action opacity-0 btn btn-ghost border-neutral-content/20"
+                                className="scroll-reveal fade-up detail-action btn btn-ghost border-neutral-content/20"
                                 onClick={handleShare}
                                 disabled={isSharing}
                             >
@@ -458,7 +379,7 @@ export default function JobDetailClient({
                     {/* ── Main Column ─────────────────────────── */}
                     <div className="lg:col-span-3">
                         {/* Description */}
-                        <div className="detail-section opacity-0 mb-10">
+                        <div className="scroll-reveal fade-up detail-section mb-10">
                             <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                 <i className="fa-duotone fa-regular fa-file-lines text-primary" />
                                 About This Role
@@ -476,7 +397,7 @@ export default function JobDetailClient({
 
                         {/* Mandatory Requirements */}
                         {mandatoryReqs.length > 0 && (
-                            <div className="detail-section opacity-0 mb-10">
+                            <div className="scroll-reveal fade-up detail-section mb-10">
                                 <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-list-check text-primary" />
                                     Requirements
@@ -501,7 +422,7 @@ export default function JobDetailClient({
 
                         {/* Preferred Requirements */}
                         {preferredReqs.length > 0 && (
-                            <div className="detail-section opacity-0 mb-10">
+                            <div className="scroll-reveal fade-up detail-section mb-10">
                                 <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-star text-primary" />
                                     Nice to Have
@@ -521,7 +442,7 @@ export default function JobDetailClient({
 
                         {/* No requirements fallback */}
                         {!mandatoryReqs.length && !preferredReqs.length && (
-                            <div className="detail-section opacity-0 mb-10">
+                            <div className="scroll-reveal fade-up detail-section mb-10">
                                 <h2 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-list-check text-primary" />
                                     Requirements

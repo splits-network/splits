@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { usePresence } from "@/hooks/use-presence";
 import { useUserProfile } from "@/contexts";
 import { ApiClient } from "@/lib/api-client";
@@ -73,149 +72,8 @@ export default function CandidateDashboard({
 
     const contentRef = useRef<HTMLDivElement>(null);
 
-    /* ── Animate data-dependent sections once loading completes ── */
-    useGSAP(
-        () => {
-            if (dataLoading || profileLoading || !contentRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-
-            if (prefersReducedMotion) {
-                const hidden = contentRef.current.querySelectorAll(
-                    "[class*='opacity-0']",
-                );
-                gsap.set(hidden, { opacity: 1 });
-                return;
-            }
-
-            const $ = (sel: string) =>
-                contentRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => contentRef.current!.querySelector(sel);
-
-            /* KPI cards stagger */
-            const kpiCards = $(".kpi-card");
-            if (kpiCards.length) {
-                gsap.fromTo(
-                    kpiCards,
-                    { opacity: 0, y: 40, scale: 0.96 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: 0.6,
-                        stagger: 0.1,
-                        ease: "power3.out",
-                        clearProps: "transform",
-                    },
-                );
-            }
-
-            /* Urgency bar */
-            const urgency = $1(".urgency-bar");
-            if (urgency) {
-                gsap.fromTo(
-                    urgency,
-                    { opacity: 0, y: -20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.5,
-                        ease: "power3.out",
-                        clearProps: "transform",
-                    },
-                );
-            }
-
-            /* Match preview widget */
-            const matchPreview = $1(".match-preview");
-            if (matchPreview) {
-                gsap.fromTo(
-                    matchPreview,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        delay: 0.15,
-                        clearProps: "transform",
-                    },
-                );
-            }
-
-            /* Chart sections stagger */
-            const chartCards = $(".chart-card");
-            if (chartCards.length) {
-                gsap.fromTo(
-                    chartCards,
-                    { opacity: 0, y: 50 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        stagger: 0.12,
-                        ease: "power3.out",
-                        delay: 0.2,
-                        clearProps: "transform",
-                    },
-                );
-            }
-
-            /* Feed + sidebar */
-            const feedPanel = $1(".feed-panel");
-            if (feedPanel) {
-                gsap.fromTo(
-                    feedPanel,
-                    { opacity: 0, x: -40 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        delay: 0.3,
-                        clearProps: "transform",
-                    },
-                );
-            }
-
-            const sidebarPanel = $1(".sidebar-panel");
-            if (sidebarPanel) {
-                gsap.fromTo(
-                    sidebarPanel,
-                    { opacity: 0, x: 40 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        delay: 0.3,
-                        clearProps: "transform",
-                    },
-                );
-            }
-
-            /* Quick actions */
-            const actionCards = $(".action-card");
-            if (actionCards.length) {
-                gsap.fromTo(
-                    actionCards,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.5,
-                        stagger: 0.08,
-                        ease: "power3.out",
-                        delay: 0.5,
-                        clearProps: "transform",
-                    },
-                );
-            }
-        },
-        { scope: contentRef, dependencies: [dataLoading, profileLoading] },
-    );
+    /* ── Scroll-reveal animations ── */
+    useScrollReveal(contentRef);
 
     const recentActivityCount = useMemo(() => {
         const thirtyDaysAgo = new Date();
@@ -383,7 +241,7 @@ export default function CandidateDashboard({
                             {kpis.map((kpi, i) => {
                                 const content = (
                                     <div
-                                        className={`kpi-card bg-base-100 border-t-4 ${kpi.borderClass} p-6 opacity-0 group transition-transform ${kpi.href ? "hover:-translate-y-0.5" : ""}`}
+                                        className={`kpi-card scroll-reveal fade-up bg-base-100 border-t-4 ${kpi.borderClass} p-6 group transition-transform ${kpi.href ? "hover:-translate-y-0.5" : ""}`}
                                     >
                                         <div className="flex items-start justify-between mb-3">
                                             <div
@@ -437,13 +295,13 @@ export default function CandidateDashboard({
             <section className="py-12 bg-base-100">
                 <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        <div className="lg:col-span-7 chart-card opacity-0">
+                        <div className="lg:col-span-7 chart-card scroll-reveal fade-up">
                             <CandidatePipelineChart
                                 applications={applications}
                                 loading={dataLoading}
                             />
                         </div>
-                        <div className="lg:col-span-5 chart-card opacity-0">
+                        <div className="lg:col-span-5 chart-card scroll-reveal fade-up">
                             <JobSearchMomentumChart
                                 recentActivityCount={recentActivityCount}
                                 responseRate={stats.responseRate}
@@ -472,7 +330,7 @@ export default function CandidateDashboard({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {/* Application Trends */}
-                        <div className="chart-card bg-base-100 p-8 lg:col-span-1 opacity-0">
+                        <div className="chart-card scroll-reveal fade-up bg-base-100 p-8 lg:col-span-1">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
                                     <h3 className="text-lg font-bold text-base-content">
@@ -493,7 +351,7 @@ export default function CandidateDashboard({
                         </div>
 
                         {/* Application Status */}
-                        <div className="chart-card bg-base-100 p-8 opacity-0">
+                        <div className="chart-card scroll-reveal fade-up bg-base-100 p-8">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
                                     <h3 className="text-lg font-bold text-base-content">
@@ -512,7 +370,7 @@ export default function CandidateDashboard({
                         </div>
 
                         {/* Activity Heatmap */}
-                        <div className="chart-card bg-base-100 p-8 md:col-span-2 lg:col-span-1 opacity-0">
+                        <div className="chart-card scroll-reveal fade-up bg-base-100 p-8 md:col-span-2 lg:col-span-1">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
                                     <h3 className="text-lg font-bold text-base-content">
@@ -538,7 +396,7 @@ export default function CandidateDashboard({
                 <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         {/* Left: Feed */}
-                        <div className="lg:col-span-7 feed-panel opacity-0">
+                        <div className="lg:col-span-7 feed-panel scroll-reveal slide-from-left">
                             <NextStepsFeed
                                 applications={applications}
                                 loading={dataLoading}
@@ -546,7 +404,7 @@ export default function CandidateDashboard({
                         </div>
 
                         {/* Right: Recruiter + Quick Actions */}
-                        <div className="lg:col-span-5 sidebar-panel space-y-8 opacity-0">
+                        <div className="lg:col-span-5 sidebar-panel scroll-reveal slide-from-right space-y-8">
                             {/* My Recruiter Card */}
                             <div className="bg-base-200 p-8">
                                 <div className="flex items-center justify-between mb-6">

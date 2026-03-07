@@ -98,47 +98,54 @@ export function GridView({
     }, [items, isMarketplace]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div className="relative">
-            {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                {items.map((item) => {
-                    const cId = companyId(item, isMarketplace);
-                    return (
-                        <GridCard
-                            key={
-                                isMarketplace
-                                    ? (item as Company).id
-                                    : (item as CompanyRelationship).id
-                            }
-                            item={item}
-                            activeTab={activeTab}
-                            isSelected={selectedId === cId}
-                            onSelect={() => onSelectAction(item)}
-                            onRefresh={onRefreshAction}
-                            techStack={tagMap[cId]?.skills ?? []}
-                            perks={tagMap[cId]?.perks ?? []}
-                            cultureTags={tagMap[cId]?.cultureTags ?? []}
-                        />
-                    );
-                })}
+        <div className="drawer drawer-end">
+            <input
+                type="checkbox"
+                className="drawer-toggle"
+                checked={!!(selectedItem && selectedId)}
+                readOnly
+            />
+            <div className="drawer-content">
+                {/* Grid */}
+                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {items.map((item) => {
+                        const cId = companyId(item, isMarketplace);
+                        return (
+                            <GridCard
+                                key={
+                                    isMarketplace
+                                        ? (item as Company).id
+                                        : (item as CompanyRelationship).id
+                                }
+                                item={item}
+                                activeTab={activeTab}
+                                isSelected={selectedId === cId}
+                                onSelect={() => onSelectAction(item)}
+                                onRefresh={onRefreshAction}
+                                techStack={tagMap[cId]?.skills ?? []}
+                                perks={tagMap[cId]?.perks ?? []}
+                                cultureTags={tagMap[cId]?.cultureTags ?? []}
+                            />
+                        );
+                    })}
+                </div>
             </div>
-
-            {/* Detail Drawer */}
-            {selectedItem && selectedId && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/30 transition-opacity"
-                        onClick={() => onSelectAction(selectedItem)}
-                    />
-                    <div className="fixed top-0 right-0 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+            <div className="drawer-side z-50">
+                <div
+                    className="drawer-overlay"
+                    onClick={() => selectedItem && onSelectAction(selectedItem)}
+                    aria-label="close drawer"
+                />
+                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
+                    {selectedItem && selectedId && (
                         <CompanyDetailLoader
                             companyId={selectedId}
                             onClose={() => onSelectAction(selectedItem)}
                             onRefresh={onRefreshAction}
                         />
-                    </div>
-                </>
-            )}
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,14 +1,9 @@
 "use client";
 
 import { useRef, useState, useCallback, useMemo } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { mockJobs } from "@/data/mock-jobs";
 import type { JobListing } from "@/types/job-listing";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin();
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -350,26 +345,19 @@ export default function ListsOnePage() {
                 return;
             }
 
-            gsap.to(contentRef.current, {
-                opacity: 0,
-                y: 15,
-                duration: 0.2,
-                ease: "power2.in",
-                onComplete: () => {
-                    setViewMode(newMode);
-                    setSelectedJob(null);
-                    gsap.fromTo(
-                        contentRef.current,
-                        { opacity: 0, y: 15 },
-                        {
-                            opacity: 1,
-                            y: 0,
-                            duration: 0.35,
-                            ease: "power3.out",
-                        },
-                    );
-                },
-            });
+            const el = contentRef.current;
+            el.style.transition = "opacity 0.2s cubic-bezier(0.55, 0, 1, 0.45), transform 0.2s cubic-bezier(0.55, 0, 1, 0.45)";
+            el.style.opacity = "0";
+            el.style.transform = "translateY(15px)";
+            setTimeout(() => {
+                setViewMode(newMode);
+                setSelectedJob(null);
+                requestAnimationFrame(() => {
+                    el.style.transition = "opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)";
+                    el.style.opacity = "1";
+                    el.style.transform = "translateY(0)";
+                });
+            }, 200);
         },
         [viewMode],
     );
@@ -380,81 +368,7 @@ export default function ListsOnePage() {
     }, []);
 
     // Hero animations
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            // Hero entrance
-            const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
-            });
-
-            heroTl
-                .fromTo(
-                    $1(".hero-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                )
-                .fromTo(
-                    $(".hero-headline-word"),
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 1,
-                        stagger: 0.12,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".hero-subtitle"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
-                    "-=0.5",
-                )
-                .fromTo(
-                    $(".hero-stat"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
-                    "-=0.3",
-                );
-
-            // Controls bar
-            gsap.fromTo(
-                $1(".controls-bar"),
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: "power3.out",
-                    delay: 0.8,
-                },
-            );
-
-            // Content area
-            gsap.fromTo(
-                $1(".content-area"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    delay: 1,
-                },
-            );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="">
@@ -464,24 +378,24 @@ export default function ListsOnePage() {
             <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
                             <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                             Job Listings
                         </p>
 
                         <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                            <span className="hero-headline-word inline-block opacity-0">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word">
                                 Find your
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word text-primary">
                                 next
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word">
                                 opportunity.
                             </span>
                         </h1>
 
-                        <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 opacity-0">
+                        <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                             Browse open roles from top companies. Transparent
                             splits, real communication, and a single connected
                             marketplace.
@@ -514,7 +428,7 @@ export default function ListsOnePage() {
                                     label: "Remote",
                                 },
                             ].map((stat, i) => (
-                                <div key={i} className="hero-stat opacity-0">
+                                <div key={i} className="hero-stat scroll-reveal fade-up">
                                     <div className="text-2xl font-black tracking-tight text-primary">
                                         {stat.value}
                                     </div>
@@ -539,7 +453,7 @@ export default function ListsOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 CONTROLS BAR — Search, Filters, View Toggle
                ═══════════════════════════════════════════════════════ */}
-            <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 opacity-0">
+            <section className="controls-bar sticky top-0 bg-base-100 border-b-2 border-base-300 scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                         {/* Search + Filters */}
@@ -648,7 +562,7 @@ export default function ListsOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 CONTENT AREA
                ═══════════════════════════════════════════════════════ */}
-            <section className="content-area opacity-0">
+            <section className="content-area scroll-reveal fade-up">
                 <div ref={contentRef}>
                     {filteredJobs.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">

@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
 /* ─── Types ───────────────────────────────────────────────────────────────── */
@@ -216,61 +215,8 @@ export default function InvitationWizardClient({ token }: { token: string }) {
         setCurrentStep((s) => Math.max(s - 1, 0));
     };
 
-    /* ── GSAP entrance ── */
-    useGSAP(
-        () => {
-            if (loading || !mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
-                return;
-            }
+    useScrollReveal(mainRef);
 
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            tl.fromTo(
-                $1(".wizard-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".wizard-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".wizard-subtitle"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                )
-                .fromTo(
-                    $(".step-ind"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".wizard-container"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef, dependencies: [loading] },
-    );
-
-    /* ── Loading ── */
     if (loading) {
         return (
             <main className="min-h-[70vh] flex items-center justify-center">
@@ -284,7 +230,6 @@ export default function InvitationWizardClient({ token }: { token: string }) {
         );
     }
 
-    /* ── Error (no invitation data) ── */
     if (error && !invitation) {
         return (
             <main className="min-h-[70vh] flex items-center justify-center p-6">
@@ -343,21 +288,21 @@ export default function InvitationWizardClient({ token }: { token: string }) {
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="wizard-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="scroll-reveal fade-up wizard-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                             Invitation
                         </p>
                         <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.92] tracking-tight mb-4">
-                            <span className="wizard-title-word inline-block opacity-0">
+                            <span className="scroll-reveal fade-up wizard-title-word inline-block">
                                 Review your
                             </span>{" "}
-                            <span className="wizard-title-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up wizard-title-word inline-block text-primary">
                                 representation
                             </span>{" "}
-                            <span className="wizard-title-word inline-block opacity-0">
+                            <span className="scroll-reveal fade-up wizard-title-word inline-block">
                                 agreement
                             </span>
                         </h1>
-                        <p className="wizard-subtitle text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="scroll-reveal fade-up wizard-subtitle text-base text-neutral-content/50 max-w-xl">
                             {invitation.recruiter_name} has invited you to join
                             their network. Walk through the details below and
                             decide how you would like to respond.
@@ -376,7 +321,7 @@ export default function InvitationWizardClient({ token }: { token: string }) {
                                 onClick={() => {
                                     if (i < currentStep) setCurrentStep(i);
                                 }}
-                                className={`step-ind opacity-0 flex items-center gap-3 px-6 py-4 border-b-2 transition-all text-sm font-semibold whitespace-nowrap ${
+                                className={`scroll-reveal fade-up step-ind flex items-center gap-3 px-6 py-4 border-b-2 transition-all text-sm font-semibold whitespace-nowrap ${
                                     i === currentStep
                                         ? "border-primary text-primary"
                                         : i < currentStep
@@ -410,7 +355,7 @@ export default function InvitationWizardClient({ token }: { token: string }) {
 
             {/* ── Wizard Content ── */}
             <section className="container mx-auto px-6 lg:px-12 py-10 lg:py-14">
-                <div className="wizard-container opacity-0 grid lg:grid-cols-5 gap-10 lg:gap-16">
+                <div className="scroll-reveal fade-up wizard-container grid lg:grid-cols-5 gap-10 lg:gap-16">
                     {/* ── Main Panel ── */}
                     <div className="lg:col-span-3">
                         {/* Step 1: Your Recruiter */}

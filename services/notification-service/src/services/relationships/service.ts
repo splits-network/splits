@@ -89,13 +89,13 @@ export class RelationshipsEmailService {
     ): Promise<void> {
         const html = connectionRequestedEmail(data);
 
-        await this.sendEmail(email, `Connection request from ${data.recruiterName}`, html, {
+        await this.sendEmail(email, `Representation request from ${data.recruiterName}`, html, {
             eventType: 'relationship.connection_requested',
             userId: data.userId,
             payload: { company_id: data.companyId },
             category: 'relationships',
             actionUrl: data.connectionUrl,
-            actionLabel: 'Review Connection Request',
+            actionLabel: 'Review Representation Request',
         });
     }
 

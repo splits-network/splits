@@ -154,7 +154,7 @@ function RecruitersContent() {
     }
 
     return (
-        <RecruitersAnimator contentRef={contentRef}>
+        <RecruitersAnimator>
             <HeaderSection stats={stats} />
 
             <ControlsBar
@@ -180,7 +180,7 @@ function RecruitersContent() {
                     {/* Content Area */}
                     <div
                         ref={contentRef}
-                        className="content-area opacity-0 p-4"
+                        className="content-area scroll-reveal fade-in p-4"
                     >
                         {loading && recruiters.length === 0 ? (
                             <LoadingState message="Loading recruiters..." />

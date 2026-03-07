@@ -2,22 +2,8 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { AuthenticatedCTAWrapper } from "@/components/auth/authenticated-cta-wrapper";
-import {
-    duration,
-    easing,
-    stagger,
-    fadeUp,
-    scaleIn,
-    popIn,
-} from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 const coreValues = [
     {
@@ -116,424 +102,16 @@ const teamMembers = [
 ];
 
 export function AboutContent() {
-    const heroRef = useRef<HTMLElement>(null);
-    const missionRef = useRef<HTMLElement>(null);
-    const valuesRef = useRef<HTMLElement>(null);
-    const differentRef = useRef<HTMLElement>(null);
-    const teamRef = useRef<HTMLElement>(null);
-    const ctaRef = useRef<HTMLElement>(null);
-
-    // Hero animations
-    useGSAP(
-        () => {
-            if (!heroRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const content = heroRef.current.querySelector(".hero-content");
-            gsap.fromTo(
-                content,
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.hero,
-                    ease: easing.smooth,
-                },
-            );
-        },
-        { scope: heroRef },
-    );
-
-    // Mission & Vision section animations
-    useGSAP(
-        () => {
-            if (!missionRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Mission/Vision cards scale in
-            const cards = missionRef.current.querySelectorAll(".mission-card");
-            gsap.fromTo(
-                cards,
-                { opacity: 0, y: 40, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.bounce,
-                    stagger: stagger.loose,
-                    scrollTrigger: {
-                        trigger: missionRef.current,
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // Icons pop
-            const icons = missionRef.current.querySelectorAll(".mission-icon");
-            gsap.fromTo(icons, popIn.from, {
-                ...popIn.to,
-                stagger: stagger.loose,
-                delay: 0.3,
-                scrollTrigger: {
-                    trigger: missionRef.current,
-                    start: "top 80%",
-                },
-            });
-
-            // Story heading fade up
-            const storyHeading =
-                missionRef.current.querySelector(".story-heading");
-            if (storyHeading) {
-                gsap.fromTo(storyHeading, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: storyHeading,
-                        start: "top 85%",
-                    },
-                });
-            }
-
-            // Story paragraphs stagger
-            const storyParagraphs =
-                missionRef.current.querySelectorAll(".story-paragraph");
-            gsap.fromTo(
-                storyParagraphs,
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    stagger: stagger.normal,
-                    scrollTrigger: {
-                        trigger: storyParagraphs[0],
-                        start: "top 85%",
-                    },
-                },
-            );
-        },
-        { scope: missionRef },
-    );
-
-    // Core Values section animations
-    useGSAP(
-        () => {
-            if (!valuesRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade up
-            const heading = valuesRef.current.querySelector(".section-heading");
-            if (heading) {
-                gsap.fromTo(heading, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: valuesRef.current,
-                        start: "top 80%",
-                    },
-                });
-            }
-
-            // Value cards stagger in
-            const cards = valuesRef.current.querySelectorAll(".value-card");
-            gsap.fromTo(
-                cards,
-                { opacity: 0, y: 40, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.bounce,
-                    stagger: stagger.tight,
-                    scrollTrigger: {
-                        trigger: valuesRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // Icons pop
-            const icons = valuesRef.current.querySelectorAll(".value-icon");
-            gsap.fromTo(icons, popIn.from, {
-                ...popIn.to,
-                stagger: stagger.tight,
-                delay: 0.2,
-                scrollTrigger: {
-                    trigger: valuesRef.current,
-                    start: "top 75%",
-                },
-            });
-        },
-        { scope: valuesRef },
-    );
-
-    // Why Different section animations
-    useGSAP(
-        () => {
-            if (!differentRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade up
-            const heading =
-                differentRef.current.querySelector(".section-heading");
-            if (heading) {
-                gsap.fromTo(heading, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: differentRef.current,
-                        start: "top 80%",
-                    },
-                });
-            }
-
-            // Cards slide in from alternating sides
-            const cards =
-                differentRef.current.querySelectorAll(".different-card");
-            cards.forEach((card, index) => {
-                const fromX = index % 2 === 0 ? -50 : 50;
-                gsap.fromTo(
-                    card,
-                    { opacity: 0, x: fromX },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        scrollTrigger: {
-                            trigger: card,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            });
-
-            // Icons pop
-            const icons =
-                differentRef.current.querySelectorAll(".different-icon");
-            icons.forEach((icon, index) => {
-                gsap.fromTo(icon, popIn.from, {
-                    ...popIn.to,
-                    delay: 0.2,
-                    scrollTrigger: {
-                        trigger: icon.closest(".different-card"),
-                        start: "top 85%",
-                    },
-                });
-            });
-        },
-        { scope: differentRef },
-    );
-
-    // Team section animations
-    useGSAP(
-        () => {
-            if (!teamRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade up
-            const heading = teamRef.current.querySelector(".section-heading");
-            if (heading) {
-                gsap.fromTo(heading, fadeUp.from, {
-                    ...fadeUp.to,
-                    scrollTrigger: {
-                        trigger: teamRef.current,
-                        start: "top 80%",
-                    },
-                });
-            }
-
-            // Team cards stagger in
-            const cards = teamRef.current.querySelectorAll(".team-card");
-            gsap.fromTo(
-                cards,
-                { opacity: 0, y: 40, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.bounce,
-                    stagger: stagger.normal,
-                    scrollTrigger: {
-                        trigger: teamRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // Avatars pop
-            const avatars = teamRef.current.querySelectorAll(".team-avatar");
-            gsap.fromTo(
-                avatars,
-                { opacity: 0, scale: 0 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: duration.fast,
-                    ease: easing.bounce,
-                    stagger: stagger.normal,
-                    delay: 0.3,
-                    scrollTrigger: {
-                        trigger: teamRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // CTA button
-            const ctaButton = teamRef.current.querySelector(".team-cta");
-            if (ctaButton) {
-                gsap.fromTo(
-                    ctaButton,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        delay: 0.5,
-                        scrollTrigger: {
-                            trigger: teamRef.current,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: teamRef },
-    );
-
-    // CTA section animations
-    useGSAP(
-        () => {
-            if (!ctaRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const content = ctaRef.current.querySelector(".cta-content");
-            if (content) {
-                gsap.fromTo(
-                    content,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.hero,
-                        ease: easing.smooth,
-                        scrollTrigger: {
-                            trigger: ctaRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            const buttons = ctaRef.current.querySelectorAll(".cta-btn");
-            gsap.fromTo(
-                buttons,
-                { opacity: 0, y: 20, scale: 0.9 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.bounce,
-                    stagger: stagger.normal,
-                    delay: 0.3,
-                    scrollTrigger: {
-                        trigger: ctaRef.current,
-                        start: "top 80%",
-                    },
-                },
-            );
-        },
-        { scope: ctaRef },
-    );
-
-    // Hover handlers for cards
-    const handleCardEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-        gsap.to(e.currentTarget, {
-            y: -8,
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            duration: 0.3,
-            ease: "power2.out",
-        });
-        const icon = e.currentTarget.querySelector(
-            ".value-icon, .different-icon, .mission-icon",
-        );
-        if (icon) {
-            gsap.to(icon, {
-                scale: 1.15,
-                rotation: 5,
-                duration: 0.3,
-                ease: "back.out(1.4)",
-            });
-        }
-    };
-
-    const handleCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-        gsap.to(e.currentTarget, {
-            y: 0,
-            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-            duration: 0.3,
-            ease: "power2.out",
-        });
-        const icon = e.currentTarget.querySelector(
-            ".value-icon, .different-icon, .mission-icon",
-        );
-        if (icon) {
-            gsap.to(icon, {
-                scale: 1,
-                rotation: 0,
-                duration: 0.3,
-                ease: "power2.out",
-            });
-        }
-    };
-
-    // Hover handlers for CTA buttons
-    const handleButtonEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        gsap.to(e.currentTarget, {
-            scale: 1.05,
-            duration: 0.2,
-            ease: "power2.out",
-        });
-    };
-
-    const handleButtonLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        gsap.to(e.currentTarget, {
-            scale: 1,
-            duration: 0.2,
-            ease: "power2.out",
-        });
-    };
+    const containerRef = useRef<HTMLDivElement>(null);
+    useScrollReveal(containerRef);
 
     return (
-        <>
+        <div ref={containerRef}>
             {/* Hero Section */}
             <section
-                ref={heroRef}
                 className="hero bg-gradient-to-r from-primary to-accent text-primary-content py-20 overflow-hidden"
             >
-                <div className="hero-content text-center max-w-5xl opacity-0">
+                <div className="scroll-reveal fade-up text-center max-w-5xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
                             About Splits Network
@@ -550,16 +128,15 @@ export function AboutContent() {
 
             {/* Mission & Vision */}
             <section
-                ref={missionRef}
+
                 className="py-20 bg-base-100 overflow-hidden"
             >
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
                         <div className="grid md:grid-cols-2 gap-12 mb-16">
                             <div
-                                className="mission-card card bg-primary text-primary-content shadow cursor-pointer opacity-0"
-                                onMouseEnter={handleCardEnter}
-                                onMouseLeave={handleCardLeave}
+                                className="scroll-reveal fade-up card bg-primary text-primary-content shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+
                             >
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
@@ -577,9 +154,8 @@ export function AboutContent() {
                                 </div>
                             </div>
                             <div
-                                className="mission-card card bg-secondary text-secondary-content shadow cursor-pointer opacity-0"
-                                onMouseEnter={handleCardEnter}
-                                onMouseLeave={handleCardLeave}
+                                className="scroll-reveal fade-up card bg-secondary text-secondary-content shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+
                             >
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
@@ -600,10 +176,10 @@ export function AboutContent() {
 
                         {/* Story */}
                         <div className="prose lg:prose-xl mx-auto">
-                            <h2 className="story-heading text-3xl font-bold text-center mb-8 opacity-0">
+                            <h2 className="scroll-reveal fade-up text-3xl font-bold text-center mb-8">
                                 Our Story
                             </h2>
-                            <p className="story-paragraph text-lg text-base-content/80 opacity-0">
+                            <p className="scroll-reveal fade-up text-lg text-base-content/80">
                                 Splits Network was born from years of
                                 frustration with the split placement process. As
                                 recruiters ourselves, we experienced firsthand
@@ -611,7 +187,7 @@ export function AboutContent() {
                                 losing track of candidates, and dealing with
                                 unclear fee agreements.
                             </p>
-                            <p className="story-paragraph text-lg text-base-content/80 opacity-0">
+                            <p className="scroll-reveal fade-up text-lg text-base-content/80">
                                 We saw talented recruiters avoiding split
                                 placements entirely—not because they didn't want
                                 to collaborate, but because the tools didn't
@@ -620,7 +196,7 @@ export function AboutContent() {
                                 multiple external recruiters without a unified
                                 system.
                             </p>
-                            <p className="story-paragraph text-lg text-base-content/80 opacity-0">
+                            <p className="scroll-reveal fade-up text-lg text-base-content/80">
                                 So we built Splits Network: a platform designed
                                 specifically for split placements, not
                                 retrofitted from general-purpose ATS systems. We
@@ -634,11 +210,11 @@ export function AboutContent() {
 
             {/* Core Values */}
             <section
-                ref={valuesRef}
+
                 className="py-20 bg-base-200 overflow-hidden"
             >
                 <div className="container mx-auto px-4">
-                    <div className="section-heading text-center mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl font-bold mb-4">
                             Our Core Values
                         </h2>
@@ -650,9 +226,8 @@ export function AboutContent() {
                         {coreValues.map((value, index) => (
                             <div
                                 key={index}
-                                className="value-card card bg-base-100 shadow cursor-pointer opacity-0"
-                                onMouseEnter={handleCardEnter}
-                                onMouseLeave={handleCardLeave}
+                                className="scroll-reveal fade-up card bg-base-100 shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+
                             >
                                 <div className="card-body text-center">
                                     <div
@@ -677,21 +252,20 @@ export function AboutContent() {
 
             {/* Why We're Different */}
             <section
-                ref={differentRef}
+
                 className="py-20 bg-base-100 overflow-hidden"
             >
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold text-center mb-12 opacity-0">
+                        <h2 className="scroll-reveal fade-up text-4xl font-bold text-center mb-12">
                             Why We're Different
                         </h2>
                         <div className="space-y-6">
                             {whyDifferent.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="different-card card bg-base-200 shadow cursor-pointer opacity-0"
-                                    onMouseEnter={handleCardEnter}
-                                    onMouseLeave={handleCardLeave}
+                                    className="scroll-reveal fade-up card bg-base-200 shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+
                                 >
                                     <div className="card-body">
                                         <h3 className="card-title text-xl">
@@ -713,11 +287,11 @@ export function AboutContent() {
 
             {/* Team Section */}
             <section
-                ref={teamRef}
+
                 className="py-20 bg-neutral text-neutral-content overflow-hidden"
             >
                 <div className="container mx-auto px-4">
-                    <div className="section-heading text-center mb-12 opacity-0">
+                    <div className="scroll-reveal fade-up text-center mb-12">
                         <h2 className="text-4xl font-bold mb-4">
                             Meet the Team
                         </h2>
@@ -729,10 +303,10 @@ export function AboutContent() {
                         {teamMembers.map((member, index) => (
                             <div
                                 key={index}
-                                className="team-card card bg-base-100 text-base-content shadow opacity-0"
+                                className="scroll-reveal fade-up card bg-base-100 text-base-content shadow"
                             >
                                 <div className="card-body text-center">
-                                    <div className="team-avatar avatar avatar-placeholder mx-auto mb-4 opacity-0">
+                                    <div className="scroll-reveal pop-in avatar avatar-placeholder mx-auto mb-4">
                                         <div
                                             className={`bg-${member.color} text-${member.color}-content rounded-full w-24`}
                                         >
@@ -754,12 +328,11 @@ export function AboutContent() {
                             </div>
                         ))}
                     </div>
-                    <div className="team-cta text-center mt-12 opacity-0">
+                    <div className="scroll-reveal fade-up text-center mt-12">
                         <Link
                             href="/careers"
                             className="btn btn-primary btn-lg"
-                            onMouseEnter={handleButtonEnter}
-                            onMouseLeave={handleButtonLeave}
+
                         >
                             <i className="fa-duotone fa-regular fa-user-plus"></i>
                             Join Our Team
@@ -770,12 +343,12 @@ export function AboutContent() {
 
             {/* CTA Section */}
             <section
-                ref={ctaRef}
+
                 className="py-20 bg-primary text-primary-content overflow-hidden"
             >
                 <AuthenticatedCTAWrapper>
                     <div className="container mx-auto px-4 text-center">
-                        <div className="cta-content opacity-0">
+                        <div className="scroll-reveal fade-up">
                             <h2 className="text-4xl font-bold mb-6">
                                 Ready to Join the Movement?
                             </h2>
@@ -787,18 +360,16 @@ export function AboutContent() {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link
                                 href="/sign-up"
-                                className="cta-btn btn btn-lg btn-neutral opacity-0"
-                                onMouseEnter={handleButtonEnter}
-                                onMouseLeave={handleButtonLeave}
+                                className="scroll-reveal pop-in btn btn-lg btn-neutral transition-transform duration-200 hover:scale-105"
+
                             >
                                 <i className="fa-duotone fa-regular fa-user-tie"></i>
                                 Join as a Recruiter
                             </Link>
                             <Link
                                 href="/sign-up"
-                                className="cta-btn btn btn-lg btn-secondary opacity-0"
-                                onMouseEnter={handleButtonEnter}
-                                onMouseLeave={handleButtonLeave}
+                                className="scroll-reveal pop-in btn btn-lg btn-secondary transition-transform duration-200 hover:scale-105"
+
                             >
                                 <i className="fa-duotone fa-regular fa-building"></i>
                                 Post Roles as a Company
@@ -807,6 +378,6 @@ export function AboutContent() {
                     </div>
                 </AuthenticatedCTAWrapper>
             </section>
-        </>
+        </div>
     );
 }

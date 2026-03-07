@@ -56,7 +56,7 @@ export default function CandidateMatchCard({
     const factors = match.match_factors;
 
     return (
-        <article className="match-card flex flex-col bg-base-100 border border-base-300 border-l-4 border-l-primary transition-all shadow-sm hover:shadow-md opacity-0">
+        <article className="match-card flex flex-col bg-base-100 border border-base-300 border-l-4 border-l-primary transition-all shadow-sm hover:shadow-md scroll-reveal fade-up">
             {/* Header Band */}
             <div className="bg-base-300 border-b border-base-300 px-5 pt-5 pb-4">
                 {/* Kicker row: score label + status badge */}

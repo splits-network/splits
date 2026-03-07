@@ -2,17 +2,8 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { AuthenticatedCTAWrapper } from "@/components/auth/authenticated-cta-wrapper";
-import {
-    duration,
-    easing,
-    stagger,
-} from "@splits-network/basel-ui";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const blogTopics = [
     {
@@ -91,281 +82,16 @@ const resourceLinks = [
 ];
 
 export function BlogContent() {
-    const heroRef = useRef<HTMLDivElement>(null);
-    const comingSoonRef = useRef<HTMLDivElement>(null);
-    const topicsRef = useRef<HTMLDivElement>(null);
-    const newsletterRef = useRef<HTMLDivElement>(null);
-    const resourcesRef = useRef<HTMLDivElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
-
-    // Hero animation - no scroll trigger (visible on load)
-    useGSAP(
-        () => {
-            if (!heroRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const content = heroRef.current.querySelector(".hero-content");
-            if (content) {
-                gsap.fromTo(
-                    content,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.hero,
-                        ease: easing.smooth,
-                    },
-                );
-            }
-        },
-        { scope: heroRef },
-    );
-
-    // Coming Soon animation
-    useGSAP(
-        () => {
-            if (!comingSoonRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const icon =
-                comingSoonRef.current.querySelector(".coming-soon-icon");
-            const content = comingSoonRef.current.querySelector(
-                ".coming-soon-content",
-            );
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: comingSoonRef.current,
-                    start: "top 85%",
-                },
-            });
-
-            if (icon) {
-                tl.fromTo(
-                    icon,
-                    { scale: 0, rotation: -15 },
-                    {
-                        scale: 1,
-                        rotation: 0,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                    },
-                );
-            }
-
-            if (content) {
-                tl.fromTo(
-                    content,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.3",
-                );
-            }
-        },
-        { scope: comingSoonRef },
-    );
-
-    // Topics animation
-    useGSAP(
-        () => {
-            if (!topicsRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const heading = topicsRef.current.querySelector(".section-heading");
-            const cards = topicsRef.current.querySelectorAll(".topic-card");
-            const icons = topicsRef.current.querySelectorAll(".card-icon");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: topicsRef.current,
-                    start: "top 80%",
-                },
-            });
-
-            if (heading) {
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            }
-
-            if (cards.length > 0) {
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, y: 40, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.normal,
-                    },
-                    "-=0.3",
-                );
-            }
-
-            if (icons.length > 0) {
-                tl.fromTo(
-                    icons,
-                    { scale: 0 },
-                    {
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.6",
-                );
-            }
-        },
-        { scope: topicsRef },
-    );
-
-    // Newsletter animation
-    useGSAP(
-        () => {
-            if (!newsletterRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const card =
-                newsletterRef.current.querySelector(".newsletter-card");
-
-            gsap.fromTo(
-                card,
-                { opacity: 0, y: 40, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: newsletterRef.current,
-                        start: "top 80%",
-                    },
-                },
-            );
-        },
-        { scope: newsletterRef },
-    );
-
-    // Resources animation
-    useGSAP(
-        () => {
-            if (!resourcesRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const heading =
-                resourcesRef.current.querySelector(".section-heading");
-            const cards =
-                resourcesRef.current.querySelectorAll(".resource-card");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: resourcesRef.current,
-                    start: "top 80%",
-                },
-            });
-
-            if (heading) {
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            }
-
-            if (cards.length > 0) {
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, y: 30, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                        stagger: stagger.normal,
-                    },
-                    "-=0.3",
-                );
-            }
-        },
-        { scope: resourcesRef },
-    );
-
-    // CTA animation
-    useGSAP(
-        () => {
-            if (!ctaRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const content = ctaRef.current.querySelector(".cta-content");
-
-            gsap.fromTo(
-                content,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: ctaRef.current,
-                        start: "top 85%",
-                    },
-                },
-            );
-        },
-        { scope: ctaRef },
-    );
+    const containerRef = useRef<HTMLDivElement>(null);
+    useScrollReveal(containerRef);
 
     return (
-        <>
+        <div ref={containerRef}>
             {/* Hero Section */}
             <section
-                ref={heroRef}
                 className="hero bg-gradient-to-r from-info to-secondary text-info-content py-20 overflow-hidden"
             >
-                <div className="hero-content text-center max-w-5xl">
+                <div className="scroll-reveal fade-up text-center max-w-5xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
                             Splits Network Blog
@@ -380,15 +106,14 @@ export function BlogContent() {
 
             {/* Coming Soon Message */}
             <section
-                ref={comingSoonRef}
                 className="py-20 bg-base-100 overflow-hidden"
             >
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
-                        <div className="mb-12">
-                            <i className="coming-soon-icon fa-duotone fa-regular fa-pen-to-square text-8xl text-primary opacity-20"></i>
+                        <div className="scroll-reveal pop-in mb-12">
+                            <i className="fa-duotone fa-regular fa-pen-to-square text-8xl text-primary opacity-20"></i>
                         </div>
-                        <div className="coming-soon-content">
+                        <div className="scroll-reveal fade-up">
                             <h2 className="text-4xl font-bold mb-6">
                                 Blog Coming Soon
                             </h2>
@@ -411,23 +136,22 @@ export function BlogContent() {
 
             {/* What to Expect */}
             <section
-                ref={topicsRef}
                 className="py-20 bg-base-200 overflow-hidden"
             >
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold mb-12 text-center">
+                        <h2 className="scroll-reveal fade-up text-4xl font-bold mb-12 text-center">
                             What We'll Cover
                         </h2>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 stagger-children">
                             {blogTopics.map((topic, index) => (
                                 <div
                                     key={index}
-                                    className="topic-card card bg-base-100 shadow"
+                                    className="scroll-reveal fade-up card bg-base-100 shadow"
                                 >
                                     <div className="card-body">
                                         <div
-                                            className={`card-icon w-12 h-12 rounded-full ${topic.bgColor} flex items-center justify-center mb-4`}
+                                            className={`w-12 h-12 rounded-full ${topic.bgColor} flex items-center justify-center mb-4`}
                                         >
                                             <i
                                                 className={`fa-duotone fa-regular ${topic.icon} ${topic.iconColor} text-xl`}
@@ -449,12 +173,11 @@ export function BlogContent() {
 
             {/* Newsletter Signup */}
             <section
-                ref={newsletterRef}
                 className="py-20 bg-base-100 overflow-hidden"
             >
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl mx-auto">
-                        <div className="newsletter-card card bg-primary text-primary-content shadow">
+                        <div className="scroll-reveal scale-in card bg-primary text-primary-content shadow">
                             <div className="card-body p-12 text-center">
                                 <i className="fa-duotone fa-regular fa-envelope-open-text text-5xl mb-6 opacity-80"></i>
                                 <h2 className="card-title justify-center text-3xl mb-4">
@@ -492,12 +215,11 @@ export function BlogContent() {
 
             {/* In the Meantime */}
             <section
-                ref={resourcesRef}
                 className="py-20 bg-neutral text-neutral-content overflow-hidden"
             >
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto text-center">
-                        <div className="section-heading">
+                        <div className="scroll-reveal fade-up">
                             <h2 className="text-4xl font-bold mb-8">
                                 In the Meantime
                             </h2>
@@ -506,7 +228,7 @@ export function BlogContent() {
                                 blog content
                             </p>
                         </div>
-                        <div className="grid md:grid-cols-3 gap-6">
+                        <div className="grid md:grid-cols-3 gap-6 stagger-children">
                             {resourceLinks.map((resource, index) => {
                                 const CardWrapper = resource.isExternal
                                     ? "a"
@@ -515,7 +237,7 @@ export function BlogContent() {
                                     <CardWrapper
                                         key={index}
                                         href={resource.href}
-                                        className="resource-card card bg-base-100 text-base-content shadow hover:shadow-2xl transition-shadow"
+                                        className="scroll-reveal fade-up card bg-base-100 text-base-content shadow hover:shadow-2xl transition-shadow"
                                     >
                                         <div className="card-body text-center">
                                             <i
@@ -538,11 +260,10 @@ export function BlogContent() {
 
             {/* CTA Section */}
             <section
-                ref={ctaRef}
                 className="py-20 bg-primary text-primary-content overflow-hidden"
             >
                 <AuthenticatedCTAWrapper>
-                    <div className="cta-content container mx-auto px-4 text-center">
+                    <div className="scroll-reveal fade-up container mx-auto px-4 text-center">
                         <h2 className="text-4xl font-bold mb-6">
                             Ready to Get Started?
                         </h2>
@@ -569,6 +290,6 @@ export function BlogContent() {
                     </div>
                 </AuthenticatedCTAWrapper>
             </section>
-        </>
+        </div>
     );
 }

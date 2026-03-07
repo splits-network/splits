@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useGamification } from "@splits-network/shared-gamification";
 import { BaselTabBar } from "@splits-network/basel-ui";
@@ -12,11 +11,6 @@ import HeroSection from "./hero-section";
 import ContentTabs, { type TabKey } from "./content-tabs";
 import Sidebar from "./sidebar";
 import FirmConnectModal, { type FirmConnectModalHandle } from "./firm-connect-modal";
-
-if (typeof window !== "undefined") {
-    const { ScrollTrigger } = require("gsap/ScrollTrigger");
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "about", label: "About", icon: "fa-duotone fa-regular fa-building" },
@@ -82,115 +76,7 @@ export default function FirmProfileClient({
         return () => { cancelled = true; };
     }, [isSignedIn, contactUserId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    useGSAP(
-        () => {
-            if (!pageRef.current) return;
-
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(
-                    pageRef.current.querySelectorAll("[class*='opacity-0']"),
-                    { opacity: 1 },
-                );
-                return;
-            }
-
-            const $1 = (sel: string) => pageRef.current!.querySelector(sel);
-            const $ = (sel: string) => pageRef.current!.querySelectorAll(sel);
-
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            const avatar = $1(".firm-avatar");
-            if (avatar) {
-                tl.fromTo(
-                    avatar,
-                    { opacity: 0, scale: 0.9 },
-                    { opacity: 1, scale: 1, duration: 0.5, clearProps: "transform" },
-                );
-            }
-
-            const name = $1(".firm-name");
-            if (name) {
-                tl.fromTo(
-                    name,
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" },
-                    "-=0.3",
-                );
-            }
-
-            const kickers = $(".hero-kicker");
-            if (kickers.length) {
-                tl.fromTo(
-                    kickers,
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, clearProps: "transform" },
-                    "-=0.3",
-                );
-            }
-
-            const meta = $(".firm-meta");
-            if (meta.length) {
-                tl.fromTo(
-                    meta,
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, clearProps: "transform" },
-                    "-=0.2",
-                );
-            }
-
-            const statBlocks = $(".stat-block");
-            if (statBlocks.length) {
-                tl.fromTo(
-                    statBlocks,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, clearProps: "transform" },
-                    "-=0.2",
-                );
-            }
-
-            const actions = $(".firm-action");
-            if (actions.length) {
-                tl.fromTo(
-                    actions,
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.3, stagger: 0.06, clearProps: "transform" },
-                    "-=0.2",
-                );
-            }
-
-            const sections = $(".profile-section");
-            sections.forEach((el) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.5,
-                        clearProps: "transform",
-                        scrollTrigger: { trigger: el, start: "top 85%" },
-                    },
-                );
-            });
-
-            const cards = $(".sidebar-card");
-            cards.forEach((el, i) => {
-                gsap.fromTo(
-                    el,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.4,
-                        delay: i * 0.1,
-                        clearProps: "transform",
-                        scrollTrigger: { trigger: el, start: "top 90%" },
-                    },
-                );
-            });
-        },
-        { scope: pageRef, dependencies: [activeTab], revertOnUpdate: true },
-    );
+    useScrollReveal(pageRef);
 
     return (
         <div ref={pageRef} className="min-h-screen bg-base-100">

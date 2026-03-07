@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeProvider, ThemeScript, GsapInit } from "@splits-network/basel-ui";
+import { ThemeProvider, ThemeScript } from "@splits-network/basel-ui";
 import { QueryProvider } from "@/providers/query-provider";
 import "./globals.css";
 
@@ -49,7 +49,6 @@ export default function RootLayout({
                     />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
-                    <GsapInit />
                     <QueryProvider>
                         <ThemeProvider>{children}</ThemeProvider>
                     </QueryProvider>

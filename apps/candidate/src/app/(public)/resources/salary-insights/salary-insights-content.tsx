@@ -1,17 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import {
-    duration,
-    easing,
-    stagger,
-    prefersReducedMotion,
-} from "@splits-network/basel-ui";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const insights = [
     {
@@ -92,200 +82,22 @@ const factors = [
 ];
 
 export function SalaryInsightsContent() {
-    const heroRef = useRef<HTMLDivElement>(null);
-    const salariesRef = useRef<HTMLDivElement>(null);
-    const factorsRef = useRef<HTMLDivElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
-
-    // Hero animation
-    useGSAP(
-        () => {
-            if (!heroRef.current || prefersReducedMotion()) return;
-            const icon = heroRef.current.querySelector(".hero-icon");
-            const heading = heroRef.current.querySelector("h1");
-            const description =
-                heroRef.current.querySelector(".hero-description");
-
-            const tl = gsap.timeline({ defaults: { clearProps: "transform" } });
-            if (icon)
-                tl.fromTo(
-                    icon,
-                    { opacity: 0, scale: 0 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                    },
-                );
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, x: -30 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.4",
-                );
-            if (description)
-                tl.fromTo(
-                    description,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: heroRef },
-    );
-
-    // Salaries animation
-    useGSAP(
-        () => {
-            if (!salariesRef.current || prefersReducedMotion()) return;
-            const heading =
-                salariesRef.current.querySelector(".section-heading");
-            const cards = salariesRef.current.querySelectorAll(".salary-card");
-            const icons = salariesRef.current.querySelectorAll(".salary-icon");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: salariesRef.current,
-                    start: "top 80%",
-                },
-            });
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (cards.length > 0)
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, y: 40, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.3",
-                );
-            if (icons.length > 0)
-                tl.fromTo(
-                    icons,
-                    { scale: 0 },
-                    {
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.6",
-                );
-        },
-        { scope: salariesRef },
-    );
-
-    // Factors animation
-    useGSAP(
-        () => {
-            if (!factorsRef.current || prefersReducedMotion()) return;
-            const heading =
-                factorsRef.current.querySelector(".section-heading");
-            const cards = factorsRef.current.querySelectorAll(".factor-card");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: factorsRef.current,
-                    start: "top 80%",
-                },
-            });
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (cards.length > 0)
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, x: -30 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.normal,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: factorsRef },
-    );
-
-    // CTA animation
-    useGSAP(
-        () => {
-            if (!ctaRef.current || prefersReducedMotion()) return;
-            const card = ctaRef.current.querySelector(".cta-card");
-            gsap.fromTo(
-                card,
-                { opacity: 0, y: 30, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: ctaRef.current,
-                        start: "top 85%",
-                    },
-                },
-            );
-        },
-        { scope: ctaRef },
-    );
+    const containerRef = useRef<HTMLDivElement>(null);
+    useScrollReveal(containerRef);
 
     return (
-        <div className="min-h-screen bg-base-200">
+        <div ref={containerRef} className="min-h-screen bg-base-200">
             {/* Header */}
-            <div
-                ref={heroRef}
-                className="bg-gradient-to-br from-success to-accent text-white py-16 overflow-hidden"
-            >
+            <div className="bg-gradient-to-br from-success to-accent text-white py-16 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
-                        <div className="flex items-center gap-2 mb-4">
-                            <i className="hero-icon fa-duotone fa-regular fa-chart-line text-3xl"></i>
+                        <div className="scroll-reveal fade-in flex items-center gap-2 mb-4">
+                            <i className="fa-duotone fa-regular fa-chart-line text-3xl"></i>
                             <h1 className="text-4xl font-bold">
                                 Salary Insights
                             </h1>
                         </div>
-                        <p className="hero-description text-xl opacity-90">
+                        <p className="scroll-reveal fade-up text-xl opacity-90">
                             Real salary data and compensation trends to help you
                             know your worth.
                         </p>
@@ -295,20 +107,20 @@ export function SalaryInsightsContent() {
 
             {/* Salary Data */}
             <div className="container mx-auto px-4 py-12">
-                <div ref={salariesRef} className="mb-16 overflow-hidden">
-                    <h2 className="section-heading text-3xl font-bold mb-8">
+                <div className="mb-16 overflow-hidden">
+                    <h2 className="scroll-reveal fade-up text-3xl font-bold mb-8">
                         Average Salaries by Role
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
                         {insights.map((insight, index) => (
                             <div
                                 key={index}
-                                className={`salary-card card bg-base-100 shadow border-t-4 border-${insight.color}`}
+                                className={`scroll-reveal fade-up card bg-base-100 shadow border-t-4 border-${insight.color}`}
                             >
                                 <div className="card-body">
                                     <div className="flex items-center gap-3 mb-4">
                                         <div
-                                            className={`salary-icon w-12 h-12 rounded-full bg-${insight.color}/20 flex items-center justify-center`}
+                                            className={`w-12 h-12 rounded-full bg-${insight.color}/20 flex items-center justify-center`}
                                         >
                                             <i
                                                 className={`fa-duotone fa-regular fa-${insight.icon} text-${insight.color} text-xl`}
@@ -349,15 +161,15 @@ export function SalaryInsightsContent() {
                 </div>
 
                 {/* Factors Affecting Salary */}
-                <div ref={factorsRef} className="mb-16 overflow-hidden">
-                    <h2 className="section-heading text-3xl font-bold mb-8">
+                <div className="mb-16 overflow-hidden">
+                    <h2 className="scroll-reveal fade-up text-3xl font-bold mb-8">
                         What Affects Your Salary?
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-children">
                         {factors.map((factor, index) => (
                             <div
                                 key={index}
-                                className="factor-card card bg-base-100 shadow"
+                                className="scroll-reveal slide-from-left card bg-base-100 shadow"
                             >
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
@@ -380,8 +192,8 @@ export function SalaryInsightsContent() {
                 </div>
 
                 {/* CTA */}
-                <div ref={ctaRef} className="text-center overflow-hidden">
-                    <div className="cta-card card bg-gradient-to-br from-primary to-secondary text-primary-content max-w-2xl mx-auto">
+                <div className="text-center overflow-hidden">
+                    <div className="scroll-reveal fade-up card bg-gradient-to-br from-primary to-secondary text-primary-content max-w-2xl mx-auto">
                         <div className="card-body">
                             <h2 className="card-title text-2xl justify-center mb-2">
                                 Find your next opportunity

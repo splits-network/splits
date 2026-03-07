@@ -1,10 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
 import { RoleCardEditorial } from "./role-card-editorial";
 import { CandidateCardEditorial } from "./candidate-card-editorial";
 import { ApplicationCardEditorial } from "./application-card-editorial";
@@ -19,10 +15,7 @@ import {
     SAMPLE_COMPANIES,
     SAMPLE_MATCHES,
 } from "./data";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Section wrapper ────────────────────────────────────────────────────── */
 
@@ -40,7 +33,7 @@ function CardSection({
     accentColor?: string;
 }) {
     return (
-        <div className="cards-section opacity-0 mb-20">
+        <div className="cards-section scroll-reveal fade-up mb-20">
             <div className="mb-8">
                 <p
                     className={`text-sm font-semibold uppercase tracking-[0.2em] ${accentColor} mb-1`}
@@ -64,72 +57,7 @@ function CardSection({
 export default function CardsOne() {
     const mainRef = useRef<HTMLElement>(null);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
-                return;
-            }
-
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-            tl.fromTo(
-                $1(".cards-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
-            )
-                .fromTo(
-                    $(".cards-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                        clearProps: "transform",
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".cards-desc"),
-                    { opacity: 0, y: 15 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.5,
-                        clearProps: "transform",
-                    },
-                    "-=0.4",
-                );
-
-            $(".cards-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        clearProps: "transform",
-                        scrollTrigger: {
-                            trigger: section,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -143,18 +71,18 @@ export default function CardsOne() {
                 />
                 <div className="relative container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="cards-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="cards-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                             Design System — Editorial Cards
                         </p>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                            <span className="cards-title-word inline-block opacity-0">
+                            <span className="cards-title-word inline-block scroll-reveal hero-word">
                                 Card
                             </span>{" "}
-                            <span className="cards-title-word inline-block opacity-0 text-primary">
+                            <span className="cards-title-word inline-block scroll-reveal hero-word text-primary">
                                 showcase.
                             </span>
                         </h1>
-                        <p className="cards-desc text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="cards-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
                             The complete editorial card library for the Splits
                             Network platform. Each card follows Basel design
                             principles — sharp corners, typography-driven
@@ -265,7 +193,7 @@ export default function CardsOne() {
                 </CardSection>
 
                 {/* ── Divider ────────────────────────────────────────── */}
-                <div className="cards-section opacity-0 mb-20">
+                <div className="cards-section scroll-reveal fade-up mb-20">
                     <div className="border-t border-base-300 pt-12">
                         <div className="flex items-center gap-4 mb-2">
                             <div className="w-12 h-1 bg-base-300" />
@@ -421,7 +349,7 @@ const briefCandidates = [
 
 function BriefJobCards() {
     return (
-        <div className="cards-section opacity-0 mb-14">
+        <div className="cards-section scroll-reveal fade-up mb-14">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/30 mb-1">
@@ -482,7 +410,7 @@ function BriefJobCards() {
 
 function BriefRecruiterCards() {
     return (
-        <div className="cards-section opacity-0 mb-14">
+        <div className="cards-section scroll-reveal fade-up mb-14">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/30 mb-1">
@@ -546,7 +474,7 @@ function BriefRecruiterCards() {
 
 function BriefCompanyCards() {
     return (
-        <div className="cards-section opacity-0 mb-14">
+        <div className="cards-section scroll-reveal fade-up mb-14">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/30 mb-1">
@@ -609,7 +537,7 @@ function BriefCompanyCards() {
 
 function BriefCandidateCards() {
     return (
-        <div className="cards-section opacity-0">
+        <div className="cards-section scroll-reveal fade-up">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/30 mb-1">

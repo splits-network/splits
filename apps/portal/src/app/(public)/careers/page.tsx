@@ -165,7 +165,7 @@ export default function CareersPage() {
             <section className="py-20 bg-base-200 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
-                        <h2 className="text-4xl font-bold mb-12 text-center opacity-0">
+                        <h2 className="text-4xl font-bold mb-12 text-center scroll-reveal fade-up">
                             Why Splits Network?
                         </h2>
                         <div
@@ -203,7 +203,7 @@ export default function CareersPage() {
             <section className="py-20 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-4xl font-bold mb-12 text-center opacity-0">
+                        <h2 className="text-4xl font-bold mb-12 text-center scroll-reveal fade-up">
                             Areas We'll Be Hiring
                         </h2>
                         <div
@@ -237,7 +237,7 @@ export default function CareersPage() {
             <section className="py-20 bg-neutral text-neutral-content overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-4xl font-bold mb-12 text-center opacity-0">
+                        <h2 className="text-4xl font-bold mb-12 text-center scroll-reveal fade-up">
                             What We Value
                         </h2>
                         <div className="space-y-6" data-animate-stagger>

@@ -40,7 +40,7 @@ export default function Sidebar({ firm }: SidebarProps) {
         <aside className="space-y-6">
             {/* Contact card */}
             {contactItems.length > 0 && (
-                <div className="sidebar-card opacity-0 bg-base-200 border border-base-300 border-l-4 border-l-primary">
+                <div className="scroll-reveal fade-up bg-base-200 border border-base-300 border-l-4 border-l-primary">
                     <div className="px-6 py-4 border-b border-base-300">
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                             Contact
@@ -76,7 +76,7 @@ export default function Sidebar({ firm }: SidebarProps) {
             )}
 
             {/* Milestones card — Coming Soon */}
-            <div className="sidebar-card opacity-0 bg-base-200 border border-base-300">
+            <div className="scroll-reveal fade-up bg-base-200 border border-base-300">
                 <div className="px-6 py-4 border-b border-base-300">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                         Milestones
@@ -89,7 +89,7 @@ export default function Sidebar({ firm }: SidebarProps) {
             </div>
 
             {/* Leaderboard card */}
-            <div className="sidebar-card opacity-0">
+            <div className="scroll-reveal fade-up">
                 <MiniLeaderboard
                     entityType="recruiter"
                     client={publicClient}
@@ -100,7 +100,7 @@ export default function Sidebar({ firm }: SidebarProps) {
 
             {/* Markets Served card */}
             {firm.geo_focus.length > 0 && (
-                <div className="sidebar-card opacity-0 bg-base-200 border border-base-300">
+                <div className="scroll-reveal fade-up bg-base-200 border border-base-300">
                     <div className="px-6 py-4 border-b border-base-300">
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                             Markets Served

@@ -45,7 +45,7 @@ export default function TeamTab({ firm }: TeamTabProps) {
 
     if (loading) {
         return (
-            <div className="profile-section opacity-0 flex justify-center py-12">
+            <div className="scroll-reveal fade-up profile-section flex justify-center py-12">
                 <span className="loading loading-spinner loading-md text-primary" />
             </div>
         );
@@ -53,7 +53,7 @@ export default function TeamTab({ firm }: TeamTabProps) {
 
     if (members.length === 0) {
         return (
-            <div className="profile-section opacity-0 text-center py-12">
+            <div className="scroll-reveal fade-up profile-section text-center py-12">
                 <i className="fa-duotone fa-regular fa-users text-3xl text-base-content/15 mb-3 block" />
                 <p className="text-sm text-base-content/50">No team members to display.</p>
             </div>
@@ -61,7 +61,7 @@ export default function TeamTab({ firm }: TeamTabProps) {
     }
 
     return (
-        <div className="profile-section opacity-0">
+        <div className="scroll-reveal fade-up profile-section">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-8">
                 Team Members
             </p>

@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
@@ -173,52 +172,7 @@ export default function FormsOne() {
             p.includes(b) ? p.filter((x) => x !== b) : [...p, b],
         );
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-            tl.fromTo(
-                $1(".form-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".form-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".form-subtitle"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                )
-                .fromTo(
-                    $(".step-ind"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".form-container"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     const FieldError = ({ field }: { field: string }) =>
         errors[field] ? (
@@ -312,22 +266,22 @@ export default function FormsOne() {
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="form-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="form-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                             Create Job Posting
                         </p>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                            <span className="form-title-word inline-block opacity-0">
+                            <span className="form-title-word inline-block scroll-reveal hero-word">
                                 Post a
                             </span>{" "}
-                            <span className="form-title-word inline-block opacity-0 text-primary">
+                            <span className="form-title-word inline-block scroll-reveal hero-word text-primary">
                                 new role
                             </span>{" "}
                             <br className="hidden md:block" />
-                            <span className="form-title-word inline-block opacity-0">
+                            <span className="form-title-word inline-block scroll-reveal hero-word">
                                 to the marketplace.
                             </span>
                         </h1>
-                        <p className="form-subtitle text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="form-subtitle text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
                             Define the role, set your terms, and let the network
                             find the perfect candidates.
                         </p>
@@ -345,7 +299,7 @@ export default function FormsOne() {
                                 onClick={() => {
                                     if (i < currentStep) setCurrentStep(i);
                                 }}
-                                className={`step-ind opacity-0 flex items-center gap-3 px-6 py-4 border-b-2 transition-all text-sm font-semibold whitespace-nowrap ${
+                                className={`step-ind scroll-reveal fade-up flex items-center gap-3 px-6 py-4 border-b-2 transition-all text-sm font-semibold whitespace-nowrap ${
                                     i === currentStep
                                         ? "border-coral text-primary"
                                         : i < currentStep
@@ -379,7 +333,7 @@ export default function FormsOne() {
 
             {/* ── Form Content ────────────────────────────────── */}
             <section className="container mx-auto px-6 lg:px-12 py-10 lg:py-14">
-                <div className="form-container opacity-0 grid lg:grid-cols-5 gap-10 lg:gap-16">
+                <div className="form-container scroll-reveal fade-up grid lg:grid-cols-5 gap-10 lg:gap-16">
                     <div className="lg:col-span-3">
                         {/* Step 0: Basics */}
                         {currentStep === 0 && (
