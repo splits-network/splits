@@ -129,7 +129,11 @@ export default function IntegrationsMarketplacePage() {
     /* ── Derived data ────────────────────────────────────────────────── */
 
     const filteredProviders = providers.filter(
-        (p) => category === "all" || p.category === category,
+        (p) =>
+            category === "all" ||
+            p.category === category ||
+            (p.category === "combo" &&
+                (category === "calendar" || category === "email")),
     );
 
     const getConnectionForProvider = (slug: string) =>
@@ -154,13 +158,13 @@ export default function IntegrationsMarketplacePage() {
             value: "calendar",
             label: "Calendar",
             icon: "fa-duotone fa-regular fa-calendar",
-            count: providers.filter((p) => p.category === "calendar").length,
+            count: providers.filter((p) => p.category === "calendar" || p.category === "combo").length,
         },
         {
             value: "email",
             label: "Email",
             icon: "fa-duotone fa-regular fa-envelope",
-            count: providers.filter((p) => p.category === "email").length,
+            count: providers.filter((p) => p.category === "email" || p.category === "combo").length,
         },
         {
             value: "ats",

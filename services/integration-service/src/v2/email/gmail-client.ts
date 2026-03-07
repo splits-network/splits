@@ -70,6 +70,16 @@ export class GmailClient {
     }
 
     /**
+     * Get message metadata only (subject, from, date, snippet) — much lighter than full.
+     */
+    async getMessageMetadata(accessToken: string, messageId: string): Promise<GmailMessage> {
+        return this.request(
+            accessToken,
+            `/users/me/messages/${messageId}?format=metadata&metadataHeaders=Subject&metadataHeaders=From`,
+        );
+    }
+
+    /**
      * Get a thread with all messages.
      */
     async getThread(accessToken: string, threadId: string): Promise<GmailThread> {

@@ -3,7 +3,7 @@ import { ConnectionRepository } from '../connections/repository';
 import { TokenRefreshService } from '../calendar/token-refresh';
 import { GmailClient, GmailMessage } from './gmail-client';
 import { MicrosoftMailClient, MicrosoftMailMessage } from './microsoft-mail-client';
-import type { EmailMessage, EmailThread, EmailListResponse } from '@splits-network/shared-types';
+import type { EmailMessage, EmailThread, EmailListResponse, EmailListItem } from '@splits-network/shared-types';
 
 /* ── Unified send params ─────────────────────────────────────────────── */
 
@@ -34,7 +34,7 @@ export class EmailService {
     }
 
     /**
-     * List messages — returns lightweight references for pagination.
+     * List messages with preview data (subject, from, date, snippet).
      */
     async listMessages(
         connectionId: string,
@@ -50,10 +50,31 @@ export class EmailService {
                 maxResults: opts.maxResults,
                 pageToken: opts.pageToken,
             });
-            return {
-                messages: res.messages.map(m => ({ id: m.id, threadId: m.threadId })),
-                next_page_token: res.nextPageToken,
-            };
+
+            // Hydrate each message with metadata (parallel, lightweight)
+            const messages: EmailListItem[] = await Promise.all(
+                (res.messages ?? []).map(async (m) => {
+                    try {
+                        const meta = await this.gmailClient.getMessageMetadata(token, m.id);
+                        const getHeader = (name: string) =>
+                            meta.payload.headers.find(h => h.name.toLowerCase() === name.toLowerCase())?.value;
+                        const from = getHeader('From');
+                        return {
+                            id: m.id,
+                            threadId: m.threadId,
+                            subject: getHeader('Subject'),
+                            snippet: meta.snippet,
+                            from: from ? this.parseEmailAddress(from) : undefined,
+                            date: new Date(parseInt(meta.internalDate, 10)).toISOString(),
+                            isRead: !(meta.labelIds?.includes('UNREAD') ?? false),
+                        };
+                    } catch {
+                        return { id: m.id, threadId: m.threadId };
+                    }
+                }),
+            );
+
+            return { messages, next_page_token: res.nextPageToken };
         }
 
         if (connection.provider_slug.startsWith('microsoft_')) {
@@ -63,9 +84,17 @@ export class EmailService {
                 maxResults: opts.maxResults,
                 skip,
             });
-            // Microsoft doesn't have threadId in list response — use conversationId
+
             return {
-                messages: res.messages.map(m => ({ id: m.id, threadId: m.conversationId })),
+                messages: res.messages.map(m => ({
+                    id: m.id,
+                    threadId: m.conversationId,
+                    subject: m.subject,
+                    snippet: m.bodyPreview,
+                    from: m.from ? { name: m.from.emailAddress.name, email: m.from.emailAddress.address } : undefined,
+                    date: m.receivedDateTime,
+                    isRead: m.isRead,
+                })),
                 next_page_token: res.nextLink
                     ? String((skip ?? 0) + (opts.maxResults ?? 25))
                     : undefined,
@@ -139,6 +168,7 @@ export class EmailService {
     ): Promise<EmailMessage | null> {
         const connection = await this.authorize(connectionId, clerkUserId);
         const token = await this.tokenRefresh.getValidToken(connectionId);
+        const body = this.appendFooter(params.body, params.bodyType);
 
         if (connection.provider_slug.startsWith('google_')) {
             const sent = await this.gmailClient.sendMessage(token, {
@@ -146,7 +176,7 @@ export class EmailService {
                 cc: params.cc,
                 bcc: params.bcc,
                 subject: params.subject,
-                body: params.body,
+                body,
                 bodyType: params.bodyType,
                 inReplyTo: params.inReplyTo,
                 threadId: params.threadId,
@@ -164,14 +194,14 @@ export class EmailService {
         if (connection.provider_slug.startsWith('microsoft_')) {
             if (params.inReplyTo) {
                 // Reply to existing message
-                await this.microsoftClient.replyToMessage(token, params.inReplyTo, params.body);
+                await this.microsoftClient.replyToMessage(token, params.inReplyTo, body);
             } else {
                 await this.microsoftClient.sendMessage(token, {
                     to: params.to,
                     cc: params.cc,
                     bcc: params.bcc,
                     subject: params.subject,
-                    body: params.body,
+                    body,
                     bodyType: params.bodyType,
                 });
             }
@@ -258,6 +288,16 @@ export class EmailService {
             bodyHtml: msg.body.contentType === 'HTML' ? msg.body.content : undefined,
             webLink: msg.webLink,
         };
+    }
+
+    private appendFooter(body: string, bodyType?: 'text' | 'html'): string {
+        if (bodyType === 'html') {
+            return body +
+                '<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e5e5;font-size:12px;color:#999;">' +
+                'Sent via <a href="https://splits.network" style="color:#999;">Splits Network</a>' +
+                ' \u2014 The split-fee recruiting marketplace</div>';
+        }
+        return body + '\n\n---\nSent via Splits Network (https://splits.network) \u2014 The split-fee recruiting marketplace';
     }
 
     private parseEmailAddress(raw: string): { name?: string; email: string } {

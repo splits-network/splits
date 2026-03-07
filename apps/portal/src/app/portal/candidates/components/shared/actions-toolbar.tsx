@@ -22,6 +22,7 @@ import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import RequestToRepresentModal from "../modals/request-to-represent-modal";
 import VerificationModal from "../modals/verification-modal";
 import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
+import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -35,6 +36,7 @@ export interface CandidateActionsToolbarProps {
         message?: boolean;
         sendJobOpportunity?: boolean;
         scheduleInterview?: boolean;
+        sendEmail?: boolean;
         verify?: boolean;
         endRepresentation?: boolean;
         requestRepresentation?: boolean;
@@ -67,7 +69,7 @@ export default function CandidateActionsToolbar({
 }: CandidateActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { isAdmin, isRecruiter } = useUserProfile();
+    const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
     const chatSidebar = useChatSidebar();
     const refresh = onRefresh ?? (() => {});
 
@@ -76,6 +78,7 @@ export default function CandidateActionsToolbar({
     const [showTerminateModal, setShowTerminateModal] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [showEmailModal, setShowEmailModal] = useState(false);
     const [showRTRModal, setShowRTRModal] = useState(false);
 
     /* ── Loading states ── */
@@ -154,7 +157,9 @@ export default function CandidateActionsToolbar({
         sendJobOpportunity:
             showActions.sendJobOpportunity !== false && canSendJobOpportunity,
         scheduleInterview:
-            showActions.scheduleInterview !== false && (isRecruiter || isAdmin),
+            showActions.scheduleInterview !== false && (isRecruiter || isCompanyUser || isAdmin),
+        sendEmail:
+            showActions.sendEmail !== false && (isRecruiter || isCompanyUser || isAdmin),
         verify: showActions.verify !== false && canVerifyCandidate,
         endRepresentation:
             showActions.endRepresentation !== false &&
@@ -238,6 +243,16 @@ export default function CandidateActionsToolbar({
                     }}
                 />
             )}
+            {showEmailModal && (
+                <ComposeEmailModal
+                    toEmail={candidate.email || undefined}
+                    onClose={() => setShowEmailModal(false)}
+                    onSent={() => {
+                        setShowEmailModal(false);
+                        refresh();
+                    }}
+                />
+            )}
         </ModalPortal>
     );
 
@@ -262,6 +277,15 @@ export default function CandidateActionsToolbar({
                 label: "Schedule Interview",
                 variant: "btn-info",
                 onClick: () => setShowScheduleModal(true),
+            });
+        }
+        if (actions.sendEmail) {
+            speedDialActions.push({
+                key: "send-email",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Send Email",
+                variant: "btn-secondary",
+                onClick: () => setShowEmailModal(true),
             });
         }
         if (actions.verify && candidate.verification_status !== "verified") {
@@ -358,6 +382,19 @@ export default function CandidateActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-calendar-plus" />
                         <span className="hidden md:inline">Schedule</span>
+                    </button>
+                )}
+
+                {/* Send Email */}
+                {actions.sendEmail && (
+                    <button
+                        onClick={() => setShowEmailModal(true)}
+                        className={`btn ${getSizeClass()} btn-secondary gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title="Send Email"
+                    >
+                        <i className="fa-duotone fa-regular fa-envelope" />
+                        <span className="hidden md:inline">Email</span>
                     </button>
                 )}
 

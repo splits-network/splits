@@ -79,7 +79,8 @@ export default function ScheduleInterviewModal({
             };
             const calendarConns = (res.data ?? []).filter(
                 (c) =>
-                    c.provider_slug.includes("calendar") &&
+                    (c.provider_slug.includes("calendar") ||
+                        c.provider_slug.includes("combo")) &&
                     c.status === "active",
             );
             setConnections(calendarConns);

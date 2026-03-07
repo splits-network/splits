@@ -21,6 +21,7 @@ import BaselAddNoteModal from "@/components/basel/applications/add-note-modal";
 import RequestChangesModal from "../modals/request-changes-modal";
 import PreScreenRequestModal from "../modals/pre-screen-request-modal";
 import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
+import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
@@ -99,6 +100,7 @@ export default function ActionsToolbar({
     const [showRequestChangesModal, setShowRequestChangesModal] =
         useState(false);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [showEmailModal, setShowEmailModal] = useState(false);
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
@@ -397,10 +399,11 @@ export default function ActionsToolbar({
             showActions.requestChanges !== false &&
             permissions.canRequestChanges,
         scheduleInterview:
-            (isRecruiter || isAdmin) &&
+            (isRecruiter || isCompanyUser || isAdmin) &&
             ["screen", "company_review", "interview", "offer"].includes(
                 application.stage ?? "",
             ),
+        sendEmail: isRecruiter || isCompanyUser || isAdmin,
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -474,6 +477,21 @@ export default function ActionsToolbar({
                     }}
                 />
             )}
+            {showEmailModal && (
+                <ComposeEmailModal
+                    toEmail={application.candidate?.email || undefined}
+                    subject={
+                        application.job?.title
+                            ? `Re: ${application.job.title}`
+                            : undefined
+                    }
+                    onClose={() => setShowEmailModal(false)}
+                    onSent={() => {
+                        setShowEmailModal(false);
+                        refresh();
+                    }}
+                />
+            )}
         </ModalPortal>
     );
 
@@ -507,6 +525,15 @@ export default function ActionsToolbar({
                 label: "Schedule Interview",
                 variant: "btn-info",
                 onClick: () => setShowScheduleModal(true),
+            });
+        }
+        if (actions.sendEmail) {
+            speedDialActions.push({
+                key: "send-email",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Send Email",
+                variant: "btn-secondary",
+                onClick: () => setShowEmailModal(true),
             });
         }
         if (actions.requestChanges) {
@@ -648,6 +675,15 @@ export default function ActionsToolbar({
                 onClick: () => setShowScheduleModal(true),
             });
         }
+        if (actions.sendEmail) {
+            speedDialActions.push({
+                key: "send-email",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Send Email",
+                variant: "btn-secondary",
+                onClick: () => setShowEmailModal(true),
+            });
+        }
         if (actions.requestPrescreen) {
             speedDialActions.push({
                 key: "prescreen",
@@ -722,6 +758,16 @@ export default function ActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-calendar-plus" />
                         Schedule
+                    </button>
+                )}
+                {actions.sendEmail && (
+                    <button
+                        onClick={() => setShowEmailModal(true)}
+                        className={`btn ${sizeClass} btn-secondary gap-2`}
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-envelope" />
+                        Email
                     </button>
                 )}
                 {actions.requestChanges && (
