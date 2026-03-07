@@ -76,14 +76,28 @@ export function registerAnalyzeResumeTool(
                 return toolError('No resume available. Upload your resume in the chat or at applicant.network/portal/profile');
             }
 
-            // Call ai-service
+            // Resolve job description (recruiter_description is the internal/full version)
+            const jobDescription = job.recruiter_description || job.description || '';
+
+            if (!jobDescription && (!job.requirements || job.requirements.length === 0)) {
+                return toolError('This job has no description or requirements — resume analysis needs something to compare against.');
+            }
+
+            // ai-service skips ATS enrichment only when job_description is truthy.
+            // If description is empty but requirements exist, synthesize a minimal description
+            // so ai-service doesn't try to fetch via the synthetic application_id.
+            const effectiveDescription = jobDescription
+                || `Requirements: ${(job.requirements || []).map((r: any) => r.description).join('; ')}`;
+
+            // Call ai-service — must provide all fields so it doesn't try to enrich
+            // via ATS (the application_id here is synthetic, not a real DB record)
             const aiPayload = {
                 application_id: `gpt-analysis-${candidateId}-${jobId}-${Date.now()}`,
                 candidate_id: candidateId,
                 job_id: jobId,
                 resume_text: resumeText,
-                job_description: job.description,
-                job_title: job.title,
+                job_description: effectiveDescription,
+                job_title: job.title || 'Unknown Position',
                 required_skills: (job.requirements || [])
                     .filter((r: any) => r.requirement_type === 'mandatory')
                     .map((r: any) => r.description),
@@ -104,7 +118,11 @@ export function registerAnalyzeResumeTool(
             });
 
             if (!aiResponse.ok) {
-                return toolError('Resume analysis failed. Please try again later.');
+                const errorBody = await aiResponse.text().catch(() => '');
+                const errorDetail = aiResponse.status === 500
+                    ? 'The AI analysis service encountered an error'
+                    : `Unexpected response (${aiResponse.status})`;
+                return toolError(`Resume analysis failed: ${errorDetail}. Please try again later.`);
             }
 
             const aiResult = (await aiResponse.json()) as { data: any };
