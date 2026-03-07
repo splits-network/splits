@@ -49,6 +49,7 @@ export default function InviteRecruiterModal({
     const [permissions, setPermissions] = useState<RecruiterCompanyPermissions>({
         ...DEFAULT_PERMISSIONS,
     });
+    const [relationshipType, setRelationshipType] = useState<"recruiter" | "sourcer">("recruiter");
     const [message, setMessage] = useState("");
     const [agreeTerms, setAgreeTerms] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,6 +79,7 @@ export default function InviteRecruiterModal({
             await client.post("/recruiter-companies/invite", {
                 company_id: selectedCompanyId,
                 recruiter_id: recruiter.id,
+                relationship_type: relationshipType,
                 permissions,
                 message: message.trim() || undefined,
             });
@@ -151,9 +153,19 @@ export default function InviteRecruiterModal({
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-base font-black">
-                                {displayName}
-                            </h3>
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-base font-black">
+                                    {displayName}
+                                </h3>
+                                <a
+                                    href={`/portal/recruiters?recruiterId=${recruiter.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="link link-primary text-sm"
+                                >
+                                    View Profile
+                                </a>
+                            </div>
                             <p className="text-sm text-base-content/60">
                                 <span
                                     className={
@@ -285,6 +297,57 @@ export default function InviteRecruiterModal({
                         )}
                     </fieldset>
 
+                    {/* Relationship Type */}
+                    <fieldset className="fieldset mb-6">
+                        <legend className="fieldset-legend font-bold uppercase text-sm tracking-wider">
+                            Relationship Type
+                        </legend>
+                        <div className="flex gap-3">
+                            <label
+                                className={`flex-1 flex items-center gap-3 p-3 border cursor-pointer transition-all ${
+                                    relationshipType === "recruiter"
+                                        ? "border-primary bg-primary/5"
+                                        : "border-base-300 bg-base-200"
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="relationship_type"
+                                    className="radio radio-primary radio-sm"
+                                    checked={relationshipType === "recruiter"}
+                                    onChange={() => setRelationshipType("recruiter")}
+                                />
+                                <div>
+                                    <p className="text-sm font-bold">Recruiter</p>
+                                    <p className="text-sm text-base-content/50">
+                                        Full recruiting partner
+                                    </p>
+                                </div>
+                            </label>
+                            <label
+                                className={`flex-1 flex items-center gap-3 p-3 border cursor-pointer transition-all ${
+                                    relationshipType === "sourcer"
+                                        ? "border-primary bg-primary/5"
+                                        : "border-base-300 bg-base-200"
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="relationship_type"
+                                    className="radio radio-primary radio-sm"
+                                    checked={relationshipType === "sourcer"}
+                                    onChange={() => setRelationshipType("sourcer")}
+                                />
+                                <div>
+                                    <p className="text-sm font-bold">Sourcer</p>
+                                    <p className="text-sm text-base-content/50">
+                                        Candidate sourcing only
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+                    </fieldset>
+
                     {/* Permissions */}
                     <PermissionConfigurator
                         permissions={permissions}
@@ -334,6 +397,10 @@ export default function InviteRecruiterModal({
                         <div className="flex items-center gap-2 text-sm">
                             <i className="fa-duotone fa-regular fa-building w-5 text-center text-base-content/40" />
                             <span>{selectedCompanyName}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <i className="fa-duotone fa-regular fa-handshake w-5 text-center text-base-content/40" />
+                            <span className="capitalize">{relationshipType}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <i className="fa-duotone fa-regular fa-shield-check w-5 text-center text-base-content/40" />

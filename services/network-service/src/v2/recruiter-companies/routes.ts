@@ -57,6 +57,7 @@ const inviteSchema = {
         properties: {
             company_id: { type: 'string', format: 'uuid' },
             recruiter_id: { type: 'string', format: 'uuid' },
+            relationship_type: { type: 'string', enum: ['sourcer', 'recruiter'], default: 'recruiter' },
             permissions: permissionsSchema,
             message: { type: 'string', maxLength: 500 }
         }

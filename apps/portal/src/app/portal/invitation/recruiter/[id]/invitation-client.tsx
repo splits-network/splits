@@ -10,6 +10,7 @@ import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
 import { WizardShell } from "../../shared/wizard-shell";
 import { RecruiterCompanyAgreement } from "../../shared/agreement-clauses";
+import { PermissionConfigurator } from "../../shared/permission-configurator";
 import type { InvitationRelationship, WizardStep } from "../../shared/types";
 
 const STEPS: WizardStep[] = [
@@ -177,6 +178,7 @@ export default function InvitationRecruiterClient({
                     companyInitials={companyInitials}
                     industry={relationship.company.industry}
                     location={relationship.company.headquarters_location}
+                    website={relationship.company.website}
                     invitedByUserId={relationship.invited_by}
                     currentStep={currentStep}
                 />
@@ -211,6 +213,41 @@ export default function InvitationRecruiterClient({
                                 </span>
                             </p>
                         </div>
+                    </div>
+
+                    {/* Company Description */}
+                    <div className="bg-base-200 p-4 mb-8">
+                        <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-2">
+                            About {companyName}
+                        </p>
+                        <p className={`text-sm leading-relaxed ${
+                            relationship.company.description
+                                ? "text-base-content/70"
+                                : "text-base-content/30 italic"
+                        }`}>
+                            {relationship.company.description || "No company description provided."}
+                        </p>
+                    </div>
+
+                    {/* Personal Message from Company */}
+                    {relationship.request_message && (
+                        <div className="bg-base-200 p-4 border-l-4 border-info mb-8">
+                            <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-2">
+                                Message from {companyName}
+                            </p>
+                            <p className="text-sm text-base-content/70 leading-relaxed">
+                                {relationship.request_message}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Granted Permissions */}
+                    <div className="mb-8">
+                        <PermissionConfigurator
+                            permissions={relationship.permissions}
+                            recruiterName={recruiterName}
+                            readonly
+                        />
                     </div>
 
                     {/* What this means */}
@@ -293,9 +330,9 @@ export default function InvitationRecruiterClient({
                             <div className="bg-info/10 border border-info/20 p-4">
                                 <p className="text-sm text-base-content/70">
                                     <i className="fa-duotone fa-regular fa-info-circle text-info mr-2" />
-                                    <strong>Note:</strong> The company will configure your
-                                    permissions after you accept. You will be able to see
-                                    your granted permissions on your network dashboard.
+                                    <strong>Note:</strong> The company has pre-configured your
+                                    permissions (shown in Step 1). You can view and manage
+                                    them on your network dashboard after accepting.
                                 </p>
                             </div>
 
@@ -434,6 +471,7 @@ function RecruiterSidebar({
     companyInitials,
     industry,
     location,
+    website,
     invitedByUserId,
     currentStep,
 }: {
@@ -441,6 +479,7 @@ function RecruiterSidebar({
     companyInitials: string;
     industry?: string;
     location?: string;
+    website?: string;
     invitedByUserId?: string;
     currentStep: number;
 }) {
@@ -508,6 +547,19 @@ function RecruiterSidebar({
                             View Company Profile
                         </Link>
                     </div>
+                    {website && (
+                        <div className="flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-globe w-4 text-center text-base-content/40" />
+                            <a
+                                href={website.startsWith("http") ? website : `https://${website}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="link link-primary text-sm"
+                            >
+                                Company Website
+                            </a>
+                        </div>
+                    )}
                 </div>
 
                 {/* Actions */}

@@ -112,9 +112,10 @@ export class RecruiterCompanyServiceV2 {
         const relationship = await this.repository.create({
             recruiter_id: request.recruiter_id,
             company_id: request.company_id,
-            relationship_type: 'recruiter',
+            relationship_type: request.relationship_type || 'recruiter',
             permissions,
-            invited_by: userContext.identityUserId || undefined
+            invited_by: userContext.identityUserId || undefined,
+            request_message: request.message || undefined,
         }, clerkUserId);
 
         // Publish invitation event for notification service
@@ -122,6 +123,7 @@ export class RecruiterCompanyServiceV2 {
             relationshipId: relationship.id,
             recruiterId: request.recruiter_id,
             companyId: request.company_id,
+            relationshipType: request.relationship_type || 'recruiter',
             permissions,
             invitedBy: userContext.identityUserId,
             message: request.message

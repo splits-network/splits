@@ -12,59 +12,76 @@ export interface RecruiterCompanyInvitationData {
     companyName: string;
     inviterName: string;
     personalMessage?: string;
+    relationshipType?: 'recruiter' | 'sourcer';
+    permissions?: {
+        can_view_jobs?: boolean;
+        can_create_jobs?: boolean;
+        can_edit_jobs?: boolean;
+        can_submit_candidates?: boolean;
+        can_view_applications?: boolean;
+        can_advance_candidates?: boolean;
+    };
     invitationsLink: string;
     source?: EmailSource;
 }
 
 export function recruiterCompanyInvitationEmail(data: RecruiterCompanyInvitationData): string {
-    const personalMessageSection = data.personalMessage
-        ? `
-${divider()}
-
-${heading({ level: 3, text: 'Message from ' + data.inviterName })}
-
-${paragraph(`"${data.personalMessage}"`)}
-        `.trim()
-        : '';
+    const roleLabel = data.relationshipType === 'sourcer' ? 'Sourcer' : 'Recruiter';
 
     const content = `
-${heading({ level: 1, text: 'Company invitation' })}
+${heading({ level: 1, text: 'Company partnership invitation' })}
 
-${paragraph(`<strong>${data.inviterName}</strong> from <strong>${data.companyName}</strong> has invited you to join their recruiting network on Splits Network.`)}
+${paragraph(`<strong>${data.inviterName}</strong> from <strong>${data.companyName}</strong> has invited you to represent their company as a <strong>${roleLabel.toLowerCase()}</strong> on Splits Network.`)}
 
-${personalMessageSection}
+${alert({
+        type: 'info',
+        title: 'What does this mean?',
+        message: 'This is a formal business relationship — not a casual connection. If you accept, you will officially represent this company as a recruiting partner. You can submit candidates to their open roles, and when your candidates get hired, you earn placement fees per their billing terms. The company has pre-configured your permissions, and you\'ll review the full agreement before accepting.',
+    })}
 
-${divider()}
+${data.personalMessage ? alert({
+        type: 'info',
+        title: 'Message from ' + data.inviterName,
+        message: data.personalMessage,
+    }) : ''}
 
 ${infoCard({
         title: 'Invitation Details',
         items: [
             { label: 'Company', value: data.companyName, highlight: true },
             { label: 'Invited by', value: data.inviterName },
+            { label: 'Role', value: roleLabel },
+            ...(data.permissions ? [{ label: 'Permissions', value: formatPermissionSummary(data.permissions) }] : []),
+            { label: 'Status', value: 'Awaiting your review', highlight: true },
         ],
     })}
 
-${paragraph('Review and respond to this invitation from your portal:')}
+${paragraph(`<strong>What happens if you accept:</strong><br/>• You officially represent ${data.companyName} and can submit candidates to their open roles<br/>• When a candidate you submit gets hired, you receive placement attribution and fees<br/>• Your permissions are set by the company — they control what you can view and do<br/>• Either party can end the relationship at any time from the network dashboard`)}
 
 ${button({
         href: data.invitationsLink,
-        text: 'Review Invitation →',
+        text: 'Review & Respond →',
         variant: 'primary',
     })}
 
 ${divider()}
 
-${alert({
-        type: 'info',
-        message: 'If you don\'t recognize the sender or weren\'t expecting this invitation, you can safely ignore this email.',
-    })}
+${paragraph('You will walk through a 3-step review: learn about the company, read the agreement, then accept or decline.')}
+
+${paragraph(`<em style="color: #71717a; font-size: 13px;">If you don't recognize the sender or weren't expecting this invitation, you can safely ignore this email.</em>`)}
     `.trim();
 
     return baseEmailTemplate({
-        preheader: `${data.companyName} invited you to join their recruiting network`,
+        preheader: `${data.companyName} invited you to represent them as a ${roleLabel.toLowerCase()} on Splits Network`,
         content,
         source: data.source || 'portal',
     });
+}
+
+function formatPermissionSummary(permissions: Record<string, boolean | undefined>): string {
+    const enabled = Object.values(permissions).filter(Boolean).length;
+    const total = Object.keys(permissions).length;
+    return `${enabled} of ${total} enabled`;
 }
 
 // ─── Accepted Email (sent to inviter) ────────────────────────────────────────

@@ -26,8 +26,10 @@ export class RecruiterCompanyInvitationsConsumer {
             relationshipId,
             recruiterId,
             companyId,
+            relationshipType,
             invitedBy,
-            message
+            message,
+            permissions
         } = event.payload;
 
         this.logger.info(
@@ -64,7 +66,9 @@ export class RecruiterCompanyInvitationsConsumer {
                 companyName: company.name,
                 inviterName,
                 personalMessage: message,
+                relationshipType,
                 invitationsLink,
+                permissions,
             });
 
             this.logger.info(

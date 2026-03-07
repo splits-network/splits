@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import { useChatSidebar } from "@splits-network/chat-ui";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { WizardShell } from "../../shared/wizard-shell";
 import { RecruiterCompanyAgreement } from "../../shared/agreement-clauses";
@@ -182,12 +185,10 @@ export default function InvitationCompanyClient({
                 <Sidebar
                     recruiterName={recruiterName}
                     recruiterEmail={relationship.recruiter.user.email}
+                    recruiterUserId={relationship.recruiter.user_id}
                     companyName={companyName}
                     initials={initials}
                     currentStep={currentStep}
-                    onNext={handleNext}
-                    onBack={handleBack}
-                    error={error}
                 />
             }
         >
@@ -218,7 +219,7 @@ export default function InvitationCompanyClient({
                     {/* Recruiter's personal message */}
                     {relationship.request_message && (
                         <div className="bg-base-200 p-4 border-l-4 border-info mb-8">
-                            <p className="text-xs font-bold uppercase tracking-wider text-base-content/40 mb-2">
+                            <p className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-2">
                                 Message from {recruiterName}
                             </p>
                             <p className="text-sm text-base-content/70 leading-relaxed">
@@ -363,22 +364,6 @@ export default function InvitationCompanyClient({
                                 </button>
                             </div>
 
-                            {/* Message option */}
-                            <div className="bg-base-200 p-4 border-l-4 border-info">
-                                <p className="text-sm text-base-content/70">
-                                    <i className="fa-duotone fa-regular fa-comments text-info mr-2" />
-                                    <strong>Want to discuss first?</strong> You can
-                                    message {recruiterName} before making a decision.
-                                    Go to{" "}
-                                    <a
-                                        href="/portal/messages"
-                                        className="link link-primary"
-                                    >
-                                        Messages
-                                    </a>{" "}
-                                    to start a conversation.
-                                </p>
-                            </div>
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -441,40 +426,91 @@ export default function InvitationCompanyClient({
 function Sidebar({
     recruiterName,
     recruiterEmail,
+    recruiterUserId,
     companyName,
     initials,
     currentStep,
-    onNext,
-    onBack,
-    error,
 }: {
     recruiterName: string;
     recruiterEmail: string;
+    recruiterUserId: string;
     companyName: string;
     initials: string;
     currentStep: number;
-    onNext: () => void;
-    onBack: () => void;
-    error: string | null;
 }) {
+    const { getToken } = useAuth();
+    const chatSidebar = useChatSidebar();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
+
+    const handleMessage = async () => {
+        try {
+            setStartingChat(true);
+            const conversationId = await startChatConversation(
+                getToken,
+                recruiterUserId,
+                {},
+            );
+            chatSidebar.openToThread(conversationId, {
+                otherUserName: recruiterName,
+            });
+        } catch (err: any) {
+            console.error("Failed to start chat:", err);
+            toast.error(err?.message || "Failed to start chat");
+        } finally {
+            setStartingChat(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Recruiter Summary Card */}
-            <div className="bg-base-200 p-5">
-                <div className="flex items-center gap-3 mb-3">
+            <div className="bg-base-200 border-t-4 border-primary p-6">
+                <h3 className="text-sm font-black uppercase tracking-wider mb-4">
+                    The Recruiter
+                </h3>
+                <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center flex-shrink-0">
                         <span className="text-sm font-black">{initials}</span>
                     </div>
                     <div>
                         <p className="text-sm font-bold">{recruiterName}</p>
-                        <p className="text-xs text-base-content/50">{recruiterEmail}</p>
+                        <p className="text-sm text-base-content/50">{recruiterEmail}</p>
                     </div>
                 </div>
-                <div className="text-xs text-base-content/50 space-y-1">
-                    <p>
-                        <i className="fa-duotone fa-regular fa-building w-4 text-center mr-1" />
-                        Requesting to represent {companyName}
-                    </p>
+
+                {/* Contact Details */}
+                <div className="text-sm space-y-2 border-t border-base-300 pt-3 mb-4">
+                    <div className="flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-envelope w-4 text-center text-base-content/40" />
+                        <span className="text-base-content/70">{recruiterEmail}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-building w-4 text-center text-base-content/40" />
+                        <span className="text-base-content/50">
+                            Requesting to represent {companyName}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-2 border-t border-base-300 pt-3 mb-4">
+                    <button
+                        onClick={handleMessage}
+                        disabled={startingChat}
+                        className="btn btn-secondary btn-md w-full gap-2"
+                    >
+                        {startingChat ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-comment" />
+                        )}
+                        Message {recruiterName.split(" ")[0]}
+                    </button>
+                </div>
+
+                {/* Invitation Info */}
+                <div className="text-sm text-base-content/50 space-y-1 border-t border-base-300 pt-3">
                     <p>
                         <i className="fa-duotone fa-regular fa-handshake w-4 text-center mr-1" />
                         Relationship type: Recruiter
@@ -482,25 +518,49 @@ function Sidebar({
                 </div>
             </div>
 
-            {/* Navigation */}
-            <div className="flex gap-2">
-                {currentStep > 0 && (
-                    <button onClick={onBack} className="btn btn-ghost btn-sm gap-2 flex-1">
-                        <i className="fa-duotone fa-regular fa-arrow-left" />
-                        Back
-                    </button>
-                )}
-                {currentStep < 2 && (
-                    <button onClick={onNext} className="btn btn-primary btn-sm gap-2 flex-1">
-                        Continue
-                        <i className="fa-duotone fa-regular fa-arrow-right" />
-                    </button>
-                )}
+            {/* Progress */}
+            <div className="bg-base-200 border-t-4 border-secondary p-6">
+                <h3 className="text-sm font-black uppercase tracking-wider mb-4">
+                    Your Progress
+                </h3>
+                <div className="space-y-3">
+                    {STEPS.map((step, i) => (
+                        <div
+                            key={step.num}
+                            className="flex items-center gap-3"
+                        >
+                            <div
+                                className={`w-6 h-6 flex items-center justify-center text-sm font-bold ${
+                                    i < currentStep
+                                        ? "bg-success text-success-content"
+                                        : i === currentStep
+                                          ? "bg-primary text-primary-content"
+                                          : "bg-base-300 text-base-content/30"
+                                }`}
+                            >
+                                {i < currentStep ? (
+                                    <i className="fa-solid fa-check" />
+                                ) : (
+                                    step.num
+                                )}
+                            </div>
+                            <span
+                                className={`text-sm ${
+                                    i <= currentStep
+                                        ? "font-semibold text-base-content"
+                                        : "text-base-content/40"
+                                }`}
+                            >
+                                {step.label}
+                            </span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Help */}
             <div className="bg-base-200 p-4">
-                <p className="text-xs text-base-content/50 leading-relaxed">
+                <p className="text-sm text-base-content/50 leading-relaxed">
                     <i className="fa-duotone fa-regular fa-circle-info text-info mr-1" />
                     Not sure? You can decline now and the recruiter can send a new
                     request later. Or message them first to discuss.

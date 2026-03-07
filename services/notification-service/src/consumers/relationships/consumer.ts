@@ -16,7 +16,7 @@ export class RelationshipsEventConsumer {
 
     async handleConnectionRequested(event: DomainEvent): Promise<void> {
         try {
-            const { relationshipId, recruiterId, companyId, requestedBy, message } = event.payload;
+            const { relationshipId, recruiterId, companyId, relationshipType, requestedBy, message } = event.payload;
 
             this.logger.info({ relationshipId, recruiterId, companyId }, 'Handling connection requested notification');
 
@@ -45,6 +45,7 @@ export class RelationshipsEventConsumer {
                     companyName: company.name,
                     recruiterName: recruiterContact.name,
                     recruiterEmail: recruiterContact.email,
+                    relationshipType,
                     message,
                     connectionUrl: `${this.portalUrl}/portal/invitation/company/${relationshipId}`,
                     userId: admin.user_id || undefined,
