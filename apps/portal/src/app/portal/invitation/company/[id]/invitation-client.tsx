@@ -417,6 +417,27 @@ export default function InvitationCompanyClient({
                     )}
                 </div>
             )}
+
+            {/* Bottom Navigation */}
+            <div className="flex items-center justify-between mt-10 pt-6 border-t border-base-300">
+                <button
+                    onClick={handleBack}
+                    disabled={currentStep === 0}
+                    className="btn btn-ghost btn-sm disabled:opacity-30"
+                >
+                    <i className="fa-duotone fa-regular fa-arrow-left" />{" "}
+                    Back
+                </button>
+                {currentStep < 2 && (
+                    <button
+                        onClick={handleNext}
+                        className="btn btn-primary btn-sm"
+                    >
+                        Continue{" "}
+                        <i className="fa-duotone fa-regular fa-arrow-right" />
+                    </button>
+                )}
+            </div>
         </WizardShell>
     );
 }
