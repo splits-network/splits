@@ -59,7 +59,7 @@ export class RecruiterCompanyInvitationsConsumer {
                 }
             }
 
-            const invitationsLink = `${this.portalUrl}/portal/company-invitations?invitationId=${relationshipId}`;
+            const invitationsLink = `${this.portalUrl}/portal/invitation/recruiter/${relationshipId}`;
 
             await this.notificationService.recruiterCompanyInvitations.sendInvitation({
                 email: recruiterContact.email,
