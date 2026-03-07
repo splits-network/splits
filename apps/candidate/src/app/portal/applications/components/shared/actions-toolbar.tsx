@@ -73,6 +73,10 @@ export default function ActionsToolbar({
     const canSubmit = SUBMITTABLE_STAGES.includes(item.stage);
     const canWithdraw = WITHDRAWABLE_STAGES.includes(item.stage);
     const isProposal = item.stage === "recruiter_proposed";
+    const isOffer =
+        item.stage === "offer" && !item.accepted_by_candidate;
+    const hasAcceptedOffer =
+        item.stage === "offer" && !!item.accepted_by_candidate;
     const isJobClosed = ["closed", "filled", "cancelled"].includes(
         item.job?.status || "",
     );
@@ -161,6 +165,11 @@ export default function ActionsToolbar({
     // Withdraw handler
     const handleWithdraw = async () => {
         await actions.withdraw(item.id);
+    };
+
+    // Accept offer handler
+    const handleAcceptOffer = async () => {
+        await actions.acceptOffer(item.id);
     };
 
     // Decline proposal handler
@@ -317,11 +326,47 @@ export default function ActionsToolbar({
                         </button>
                     )}
 
+                    {/* Accept Offer */}
+                    {isOffer && (
+                        <button
+                            className={`btn btn-success ${getSizeClass()} gap-2`}
+                            style={{ borderRadius: 0 }}
+                            disabled={isLoading}
+                            onClick={() =>
+                                handleConfirmClick(
+                                    "accept-offer",
+                                    handleAcceptOffer,
+                                )
+                            }
+                            title="Accept this offer"
+                        >
+                            {actions.loading === "accept-offer" ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-check" />
+                            )}
+                            <span className="hidden md:inline">
+                                {confirmAction === "accept-offer"
+                                    ? "Confirm?"
+                                    : "Accept Offer"}
+                            </span>
+                        </button>
+                    )}
+
+                    {/* Already accepted indicator */}
+                    {hasAcceptedOffer && (
+                        <span className={`btn btn-success btn-outline ${getSizeClass()} gap-2 no-animation pointer-events-none`}>
+                            <i className="fa-duotone fa-regular fa-check-double" />
+                            <span className="hidden md:inline">Offer Accepted</span>
+                        </span>
+                    )}
+
                     {/* Divider */}
                     {(canEdit ||
                         canBackToDraft ||
                         canSubmit ||
-                        canWithdraw) && (
+                        canWithdraw ||
+                        isOffer) && (
                         <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
                     )}
 
@@ -457,6 +502,26 @@ export default function ActionsToolbar({
             disabled: isLoading,
             keepOpen: confirmAction !== "withdraw",
             onClick: () => handleConfirmClick("withdraw", handleWithdraw),
+        });
+    }
+
+    if (isOffer) {
+        speedDialActions.push({
+            key: "accept-offer",
+            icon:
+                confirmAction === "accept-offer"
+                    ? "fa-duotone fa-regular fa-check-double"
+                    : "fa-duotone fa-regular fa-check",
+            label:
+                confirmAction === "accept-offer"
+                    ? "Confirm?"
+                    : "Accept Offer",
+            variant: "btn-success",
+            loading: actions.loading === "accept-offer",
+            disabled: isLoading,
+            keepOpen: confirmAction !== "accept-offer",
+            onClick: () =>
+                handleConfirmClick("accept-offer", handleAcceptOffer),
         });
     }
 

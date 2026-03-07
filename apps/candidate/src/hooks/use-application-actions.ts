@@ -15,6 +15,7 @@ interface UseApplicationActionsReturn {
     returnToDraft: (id: string) => Promise<void>;
     backToDraft: (id: string) => Promise<void>;
     withdraw: (id: string) => Promise<void>;
+    acceptOffer: (id: string) => Promise<void>;
     declineProposal: (id: string, reason: string, details?: string) => Promise<void>;
     loading: string | null;
     error: string | null;
@@ -143,6 +144,24 @@ export function useApplicationActions(
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const acceptOffer = useCallback(async (id: string) => {
+        setLoading("accept-offer");
+        setError(null);
+        try {
+            const client = await getClient();
+            await client.post(`/applications/${id}/accept-offer`, {});
+            toast.success("Offer accepted!");
+            options?.onSuccess?.();
+        } catch (err: any) {
+            const msg = err?.message || "Failed to accept offer";
+            setError(msg);
+            toast.error(msg);
+        } finally {
+            setLoading(null);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const declineProposal = useCallback(async (id: string, reason: string, details?: string) => {
         setLoading("decline");
         setError(null);
@@ -186,6 +205,7 @@ export function useApplicationActions(
         returnToDraft,
         backToDraft,
         withdraw,
+        acceptOffer,
         declineProposal,
         loading,
         error,

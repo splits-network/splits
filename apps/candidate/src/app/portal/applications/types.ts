@@ -37,6 +37,7 @@ export interface Application {
     id: string;
     stage: string;
     accepted_by_company: boolean;
+    accepted_by_candidate?: boolean;
     created_at: string;
     updated_at: string;
     submitted_at?: string | null;
