@@ -1407,6 +1407,9 @@ export class ApplicationsEmailService {
             companyName: string;
             applicationId: string;
             userId?: string;
+            salary?: number;
+            feePercentage?: number;
+            estimatedFee?: number;
         }
     ): Promise<void> {
         const subject = `Offer Extended: ${data.candidateName} for ${data.jobTitle}`;
@@ -1418,6 +1421,9 @@ export class ApplicationsEmailService {
             jobTitle: data.jobTitle,
             companyName: data.companyName,
             applicationUrl,
+            salary: data.salary,
+            feePercentage: data.feePercentage,
+            estimatedFee: data.estimatedFee,
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
@@ -1440,6 +1446,12 @@ export class ApplicationsEmailService {
             companyName: string;
             applicationId: string;
             userId?: string;
+            salary?: number;
+            placementFee?: number;
+            feePercentage?: number;
+            guaranteeDays?: number;
+            guaranteeExpiresAt?: string;
+            startDate?: string;
         }
     ): Promise<void> {
         const subject = `Placement Made: ${data.candidateName} hired as ${data.jobTitle}`;
@@ -1451,6 +1463,12 @@ export class ApplicationsEmailService {
             jobTitle: data.jobTitle,
             companyName: data.companyName,
             applicationUrl,
+            salary: data.salary,
+            placementFee: data.placementFee,
+            feePercentage: data.feePercentage,
+            guaranteeDays: data.guaranteeDays,
+            guaranteeExpiresAt: data.guaranteeExpiresAt,
+            startDate: data.startDate,
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {

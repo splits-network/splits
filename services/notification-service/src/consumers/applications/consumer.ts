@@ -461,6 +461,10 @@ export class ApplicationsEventConsumer {
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
+                            const salary = event.payload.salary;
+                            const feePercentage = event.payload.fee_percentage;
+                            const estimatedFee = salary && feePercentage ? Math.round((salary * feePercentage) / 100) : undefined;
+
                             await this.emailService.sendRecruiterOfferExtended(recruiterContact.email, {
                                 recruiterName: recruiterContact.name,
                                 candidateName: candidate.full_name,
@@ -468,6 +472,9 @@ export class ApplicationsEventConsumer {
                                 companyName: job.company?.name || 'Unknown Company',
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
+                                salary,
+                                feePercentage,
+                                estimatedFee,
                             });
                         }
                     }
@@ -490,6 +497,13 @@ export class ApplicationsEventConsumer {
 
                 case 'hired':
 
+                    const salary = event.payload.salary;
+                    const startDate = event.payload.start_date;
+                    const feePercentage = event.payload.fee_percentage;
+                    const placementFee = event.payload.placement_fee;
+                    const guaranteeDays = event.payload.guarantee_days;
+                    const guaranteeExpiresAt = event.payload.guarantee_expires_at;
+
                     if (candidateEmail) {
                         let recruiterName = undefined;
                         if (effectiveRecruiterId) {
@@ -506,6 +520,7 @@ export class ApplicationsEventConsumer {
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
+                            startDate,
                         });
                     }
 
@@ -519,6 +534,12 @@ export class ApplicationsEventConsumer {
                                 companyName: job.company?.name || 'Unknown Company',
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
+                                salary,
+                                placementFee,
+                                feePercentage,
+                                guaranteeDays,
+                                guaranteeExpiresAt,
+                                startDate,
                             });
                         }
                     }

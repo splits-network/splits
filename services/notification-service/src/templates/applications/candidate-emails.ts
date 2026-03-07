@@ -41,7 +41,7 @@ ${alert({
 
 ${button({
         href: data.applicationUrl,
-        text: 'Track Application Status →',
+        text: 'Track Application Status \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -91,7 +91,7 @@ ${infoCard({
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Application →',
+        text: 'View Application \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -155,7 +155,7 @@ ${infoCard({
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Application Details →',
+        text: 'View Application Details \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -183,52 +183,54 @@ export interface CandidateOfferReceivedData {
 
 export function candidateOfferReceivedEmail(data: CandidateOfferReceivedData): string {
     const content = `
-${heading({ level: 1, text: 'Job offer received' })}
+${heading({ level: 1, text: 'You received a formal job offer' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
 ${alert({
         type: 'success',
-        title: 'Congratulations',
-        message: `${data.companyName} has extended an offer for the ${data.jobTitle} position.`,
+        title: 'Congratulations!',
+        message: `<strong>${data.companyName}</strong> has extended a formal offer for the <strong>${data.jobTitle}</strong> position. This is a significant achievement in your career journey.`,
     })}
 
-${paragraph('The company has reviewed your qualifications and would like you to join their team.')}
+${alert({
+        type: 'info',
+        title: 'What this means',
+        message: 'The company has formally offered you this position. This is a significant step in the hiring process \u2014 they reviewed your qualifications, interviewed you, and decided you are the right fit for their team.',
+    })}
+
+${infoCard({
+        title: 'Offer Details',
+        items: [
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName, highlight: true },
+        ],
+        theme: defaultTheme,
+    })}
 
 ${data.hasRecruiter && data.recruiterName ? `
-${infoCard({
-        title: 'Next steps with your recruiter',
-        items: [
-            { label: 'Offer Review', value: `${data.recruiterName} will help you review the offer details` },
-            { label: 'Negotiation Support', value: 'Your recruiter can assist with any negotiations' },
-            { label: 'Decision Timeline', value: 'Take time to consider - your recruiter will guide you' },
-        ],
-        theme: defaultTheme,
-    })}
+${paragraph(`<strong>What happens next:</strong><br/>\u2022 Your recruiter <strong>${data.recruiterName}</strong> will walk you through the offer details and terms<br/>\u2022 They can help you evaluate compensation, benefits, and other terms<br/>\u2022 If you have questions or want to negotiate, ${data.recruiterName} will advocate on your behalf<br/>\u2022 Take your time to make a thoughtful decision \u2014 your recruiter is here to support you`)}
 ` : `
-${infoCard({
-        title: 'Next steps',
-        items: [
-            { label: 'Review Carefully', value: 'Take time to review all offer details' },
-            { label: 'Ask Questions', value: 'Clarify anything you\'re unsure about' },
-            { label: 'Decision Timeline', value: 'Most offers require a response within 3-5 days' },
-        ],
-        theme: defaultTheme,
-    })}
+${paragraph('<strong>What happens next:</strong><br/>\u2022 Review the offer details carefully, including compensation and benefits<br/>\u2022 Ask any questions you have about the role, team, or company culture<br/>\u2022 Most offers have a response timeline \u2014 check the details and respond accordingly<br/>\u2022 Take your time to make a thoughtful, informed decision')}
 `}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Offer Details →',
+        text: 'View Your Application \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
 
-${paragraph('Review the offer details and respond within the specified timeline.')}
+${divider()}
+
+${data.hasRecruiter && data.recruiterName
+        ? paragraph(`Your recruiter <strong>${data.recruiterName}</strong> is available to answer any questions and guide you through the decision process.`)
+        : paragraph('Review the offer details and respond within the specified timeline. If you have questions, don\'t hesitate to reach out to the hiring team.')
+    }
     `.trim();
 
     return baseEmailTemplate({
-        preheader: `Job offer from ${data.companyName} for ${data.jobTitle}`,
+        preheader: `Congratulations! ${data.companyName} has extended a formal offer for ${data.jobTitle}`,
         content,
         source: 'candidate',
         theme: defaultTheme,
@@ -246,6 +248,15 @@ export interface CandidateHiredData {
 }
 
 export function candidateHiredEmail(data: CandidateHiredData): string {
+    const positionItems: Array<{ label: string; value: string; highlight?: boolean }> = [
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Company', value: data.companyName, highlight: true },
+    ];
+
+    if (data.startDate) {
+        positionItems.push({ label: 'Start Date', value: data.startDate });
+    }
+
     const content = `
 ${heading({ level: 1, text: 'Welcome to your new role' })}
 
@@ -253,40 +264,38 @@ ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
 ${alert({
         type: 'success',
-        title: 'Congratulations',
-        message: `You've officially been hired as ${data.jobTitle} at ${data.companyName}.`,
+        title: 'Congratulations!',
+        message: `You've officially been hired as <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong>. This is a major milestone \u2014 well done!`,
     })}
 
-${paragraph('Your placement is confirmed. No further action is needed on the platform.')}
-
-${data.startDate ? `
 ${infoCard({
-        title: 'Your new role details',
-        items: [
-            { label: 'Position', value: data.jobTitle },
-            { label: 'Company', value: data.companyName },
-            { label: 'Start Date', value: data.startDate },
-        ],
+        title: 'Your New Position',
+        items: positionItems,
         theme: defaultTheme,
     })}
-` : ''}
+
+${paragraph(`<strong>What's next:</strong><br/>\u2022 Prepare for your first day${data.startDate ? ` on <strong>${data.startDate}</strong>` : ''}<br/>\u2022 The company will send you onboarding details and any paperwork to complete<br/>\u2022 No further action is needed on the Applicant Network platform`)}
 
 ${data.hasRecruiter && data.recruiterName ? `
-${paragraph(`Special thanks to your recruiter <strong>${data.recruiterName}</strong> for their support throughout this process.`)}
+${divider()}
+
+${paragraph(`A special thanks to your recruiter <strong>${data.recruiterName}</strong> for their support throughout this process. Their guidance and advocacy helped make this placement possible.`)}
 ` : ''}
 
-${paragraph('We wish you success in your new role.')}
+${divider()}
+
+${paragraph('We wish you every success in your new role. Your profile will remain active on the platform for any future career needs.')}
     `.trim();
 
     return baseEmailTemplate({
-        preheader: `Congratulations on your new role at ${data.companyName}!`,
+        preheader: `Congratulations on your new role as ${data.jobTitle} at ${data.companyName}!`,
         content,
         source: 'candidate',
         theme: defaultTheme,
     });
 }
 
-// When candidate application is rejected  
+// When candidate application is rejected
 export interface CandidateApplicationRejectedData {
     candidateName: string;
     jobTitle: string;
@@ -386,7 +395,7 @@ ${paragraph(data.jobDescription)}
 
 ${button({
         href: data.proposalUrl,
-        text: 'Review Job Details & Respond →',
+        text: 'Review Job Details & Respond \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -444,7 +453,7 @@ ${paragraph(`<strong>What happens next:</strong> ${nextSteps}`)}
 
 ${button({
         href: data.applicationUrl,
-        text: 'Track AI Review Status →',
+        text: 'Track AI Review Status \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -497,7 +506,7 @@ ${paragraph('Your application is now in the hands of the hiring team. Your recru
 
 ${button({
         href: data.applicationUrl,
-        text: 'Track Application Status →',
+        text: 'Track Application Status \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -560,7 +569,7 @@ ${paragraph(`<strong>What to expect next:</strong> ${nextStepsMessage}`)}
 
 ${button({
         href: data.applicationUrl,
-        text: 'Track Application Status →',
+        text: 'Track Application Status \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -626,7 +635,7 @@ ${paragraph(`<strong>What happens next:</strong> ${nextStepsMessage}`)}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Application Status →',
+        text: 'View Application Status \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -680,7 +689,7 @@ ${paragraph(`Your recruiter will now work to get your application in front of th
 
 ${button({
         href: data.applicationUrl,
-        text: 'Track Proposal Status →',
+        text: 'Track Proposal Status \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -741,7 +750,7 @@ ${paragraph(`<strong>What happens next:</strong> ${nextStepsMessage}`)}
 
 ${button({
         href: data.applicationUrl,
-        text: 'Review Analysis & Continue →',
+        text: 'Review Analysis & Continue \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -798,7 +807,7 @@ ${paragraph(`This review process ensures your application will make the stronges
 
 ${button({
         href: data.applicationUrl,
-        text: 'Track Review Progress →',
+        text: 'Track Review Progress \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -844,7 +853,7 @@ ${paragraph('<strong>Action required:</strong> Review the job details and accept
 
 ${button({
         href: data.applicationUrl,
-        text: 'Review & Respond →',
+        text: 'Review & Respond \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -852,7 +861,7 @@ ${button({
 ${divider()}
 
 ${heading({ level: 3, text: 'Next steps' })}
-${paragraph('1. Review the job description and requirements<br>2. Accept or decline the proposal<br>3. If accepted, complete your application — your recruiter will guide you')}
+${paragraph('1. Review the job description and requirements<br>2. Accept or decline the proposal<br>3. If accepted, complete your application \u2014 your recruiter will guide you')}
 
 ${paragraph('Questions? Reply to this email or contact your recruiter directly.')}
     `.trim();
@@ -893,7 +902,7 @@ ${paragraph('Please review your application and make the requested updates so yo
 
 ${button({
         href: data.applicationUrl,
-        text: 'Update My Application →',
+        text: 'Update My Application \u2192',
         variant: 'primary',
         theme: defaultTheme,
     })}
@@ -941,7 +950,7 @@ function getCandidateExpiredContent(data: CandidateApplicationExpiredData): {
             alertType: 'warning',
             alertTitle: 'Proposal Expired',
             message: `You didn't respond to ${data.recruiterName || 'your recruiter'}'s proposal for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> in time.`,
-            ctaText: 'Contact Your Recruiter →',
+            ctaText: 'Contact Your Recruiter \u2192',
             ctaVariant: 'primary',
         };
     }
@@ -952,7 +961,7 @@ function getCandidateExpiredContent(data: CandidateApplicationExpiredData): {
             alertType: 'warning',
             alertTitle: 'Information Request Expired',
             message: `You didn't provide the information ${data.recruiterName || 'your recruiter'} requested for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong>.`,
-            ctaText: 'Reach Out to Your Recruiter →',
+            ctaText: 'Reach Out to Your Recruiter \u2192',
             ctaVariant: 'primary',
         };
     }
@@ -963,7 +972,7 @@ function getCandidateExpiredContent(data: CandidateApplicationExpiredData): {
             alertType: 'info',
             alertTitle: 'Application Timed Out',
             message: `<strong>${data.companyName}</strong> didn't move forward with your application for <strong>${data.jobTitle}</strong> within the required timeframe.`,
-            ctaText: 'Browse Similar Jobs →',
+            ctaText: 'Browse Similar Jobs \u2192',
             ctaVariant: 'primary',
         };
     }
@@ -974,7 +983,7 @@ function getCandidateExpiredContent(data: CandidateApplicationExpiredData): {
             alertType: 'info',
             alertTitle: 'Application Expired',
             message: `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> wasn't advanced during the screening phase.`,
-            ctaText: 'View Your Applications →',
+            ctaText: 'View Your Applications \u2192',
             ctaVariant: 'secondary',
         };
     }
@@ -985,7 +994,7 @@ function getCandidateExpiredContent(data: CandidateApplicationExpiredData): {
         alertType: 'warning',
         alertTitle: 'Application Timeout',
         message: `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has expired due to inactivity.`,
-        ctaText: 'View Application History →',
+        ctaText: 'View Application History \u2192',
         ctaVariant: 'secondary',
     };
 }
@@ -1051,13 +1060,13 @@ ${alert({ type: 'warning', title: 'Action required', message })}
 ${isActionRequired
             ? button({
                 href: data.applicationUrl,
-                text: 'Respond Now →',
+                text: 'Respond Now \u2192',
                 variant: 'primary',
                 theme: defaultTheme,
             })
             : button({
                 href: data.applicationUrl,
-                text: 'View Application →',
+                text: 'View Application \u2192',
                 variant: 'primary',
                 theme: defaultTheme,
             })

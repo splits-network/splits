@@ -376,7 +376,7 @@ export class ApplicationServiceV2 {
             try {
                 // Stage changed event - other services listen and react to stages they care about
                 if (updates.stage) {
-                    await this.eventPublisher.publish('application.stage_changed', {
+                    const stageChangedPayload: Record<string, any> = {
                         application_id: id,
                         job_id: updatedApplication.job_id,
                         candidate_id: updatedApplication.candidate_id,
@@ -384,7 +384,17 @@ export class ApplicationServiceV2 {
                         old_stage: currentApplication.stage,
                         new_stage: updates.stage,
                         changed_by: userContext.identityUserId,
-                    });
+                    };
+
+                    // Enrich with financial data for offer stage transitions
+                    if (updates.stage === 'offer') {
+                        const job = currentApplication.job;
+                        stageChangedPayload.salary = updatedApplication.salary || null;
+                        stageChangedPayload.fee_percentage = job?.fee_percentage || null;
+                        stageChangedPayload.guarantee_days = job?.guarantee_days ?? 90;
+                    }
+
+                    await this.eventPublisher.publish('application.stage_changed', stageChangedPayload);
                 }
 
                 // Generic update event
@@ -1077,8 +1087,22 @@ export class ApplicationServiceV2 {
             },
         });
 
-        // Publish stage changed event
+        // Publish stage changed event enriched with financial data
         if (this.eventPublisher) {
+            // Look up job for fee_percentage and guarantee_days
+            const job = await this.repository.getJobById(application.job_id);
+            const feePercentage = job?.fee_percentage || null;
+            const guaranteeDays = job?.guarantee_days ?? 90;
+            const startDate = body.start_date || new Date().toISOString().split('T')[0];
+
+            // Compute guarantee expiration from start_date + guarantee_days
+            let guaranteeExpiresAt: string | null = null;
+            if (guaranteeDays > 0) {
+                const expirationDate = new Date(startDate);
+                expirationDate.setDate(expirationDate.getDate() + guaranteeDays);
+                guaranteeExpiresAt = expirationDate.toISOString().split('T')[0];
+            }
+
             await this.eventPublisher.publish('application.stage_changed', {
                 application_id: applicationId,
                 job_id: application.job_id,
@@ -1087,6 +1111,12 @@ export class ApplicationServiceV2 {
                 old_stage: application.stage,
                 new_stage: 'hired',
                 changed_by: userContext.identityUserId,
+                salary: body.salary,
+                start_date: startDate,
+                fee_percentage: feePercentage,
+                placement_fee: feePercentage ? Math.round((body.salary * feePercentage) / 100) : null,
+                guarantee_days: guaranteeDays,
+                guarantee_expires_at: guaranteeExpiresAt,
             });
         }
 

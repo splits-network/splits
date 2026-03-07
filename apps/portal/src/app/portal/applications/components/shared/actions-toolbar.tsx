@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
@@ -18,7 +19,6 @@ import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import BaselAddNoteModal from "@/components/basel/applications/add-note-modal";
 import RequestChangesModal from "../modals/request-changes-modal";
-import HireModal from "../modals/hire-modal";
 import PreScreenRequestModal from "../modals/pre-screen-request-modal";
 import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
 import {
@@ -71,6 +71,7 @@ export default function ActionsToolbar({
     onRefresh,
     className = "",
 }: ActionsToolbarProps) {
+    const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isAdmin, isRecruiter, isCompanyUser, hasPermissionForCompany } =
@@ -94,7 +95,6 @@ export default function ActionsToolbar({
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [showNoteModal, setShowNoteModal] = useState(false);
-    const [showHireModal, setShowHireModal] = useState(false);
     const [showPreScreenModal, setShowPreScreenModal] = useState(false);
     const [showRequestChangesModal, setShowRequestChangesModal] =
         useState(false);
@@ -196,10 +196,22 @@ export default function ActionsToolbar({
     const isOfferStage = application.stage === "offer";
 
     const handleApprove = (toOffer: boolean = false) => {
+        // At offer stage, hire via wizard page
         if (isOfferStage) {
-            setShowHireModal(true);
+            router.push(`/portal/applications/${application.id}/hire`);
             return;
         }
+        // Check if this transition leads to offer stage
+        const nextStage = getNextStageOnApprove(
+            application.stage as ApplicationStage,
+            application.candidate_recruiter_id,
+            toOffer,
+        );
+        if (nextStage === "offer") {
+            router.push(`/portal/applications/${application.id}/offer`);
+            return;
+        }
+        // Regular stage transitions stay as modal
         setMoveToOffer(toOffer);
         setShowApproveModal(true);
     };
@@ -424,17 +436,6 @@ export default function ActionsToolbar({
                     onClose={() => setShowNoteModal(false)}
                     onSave={handleSaveNote}
                     loading={actionLoading}
-                />
-            )}
-            {showHireModal && (
-                <HireModal
-                    application={application}
-                    onClose={() => setShowHireModal(false)}
-                    onSuccess={() => {
-                        setShowHireModal(false);
-                        toast.success("Candidate hired successfully!");
-                        refresh();
-                    }}
                 />
             )}
             {showPreScreenModal &&

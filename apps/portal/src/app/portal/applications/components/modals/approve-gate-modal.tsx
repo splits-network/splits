@@ -9,11 +9,6 @@ import {
     BaselModalFooter,
     BaselAlertBox,
 } from "@splits-network/basel-ui";
-import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
-import CompanyDocumentUpload, {
-    StagedDocument,
-} from "@/components/documents/company-document-upload";
 
 interface ApproveGateModalProps {
     isOpen: boolean;
@@ -33,19 +28,11 @@ export default function ApproveGateModal({
     candidateName,
     jobTitle,
     gateName,
-    applicationId,
     currentStage,
 }: ApproveGateModalProps) {
     const [notes, setNotes] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [showDocumentUpload, setShowDocumentUpload] = useState(false);
-    const [stagedDocuments, setStagedDocuments] = useState<StagedDocument[]>([]);
-    const [uploadingDocuments, setUploadingDocuments] = useState(false);
-
-    const { getToken } = useAuth();
-
-    const isOfferTransition = currentStage === "interview";
 
     const getTitleText = () => {
         switch (currentStage) {
@@ -61,37 +48,8 @@ export default function ApproveGateModal({
                 return "Approve Proposal for Company Review";
             case "company_feedback":
                 return "Approve & Continue";
-            case "interview":
-                return "Extend Offer";
             default:
                 return "Approve";
-        }
-    };
-
-    const uploadStagedDocuments = async (): Promise<void> => {
-        if (stagedDocuments.length === 0) return;
-
-        setUploadingDocuments(true);
-        const token = await getToken();
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-
-        const client = createAuthenticatedClient(token);
-        const uploadPromises = stagedDocuments.map(async (doc) => {
-            const formData = new FormData();
-            formData.append("file", doc.file);
-            formData.append("entity_type", "application");
-            formData.append("entity_id", applicationId!);
-            formData.append("document_type", doc.document_type);
-
-            return client.post<{ data: any }>("/documents", formData);
-        });
-
-        try {
-            await Promise.all(uploadPromises);
-        } finally {
-            setUploadingDocuments(false);
         }
     };
 
@@ -101,14 +59,9 @@ export default function ApproveGateModal({
         setSubmitting(true);
 
         try {
-            if (isOfferTransition && stagedDocuments.length > 0) {
-                await uploadStagedDocuments();
-            }
-
             await onApprove(notes.trim() || undefined);
 
             setNotes("");
-            setStagedDocuments([]);
             onClose();
         } catch (err) {
             console.error("Failed to approve gate:", err);
@@ -126,8 +79,6 @@ export default function ApproveGateModal({
         if (!submitting) {
             setNotes("");
             setError(null);
-            setShowDocumentUpload(false);
-            setStagedDocuments([]);
             onClose();
         }
     };
@@ -169,67 +120,6 @@ export default function ApproveGateModal({
                             <BaselAlertBox variant="error">{error}</BaselAlertBox>
                         )}
 
-                        {/* Document Upload Section for Offer Transitions */}
-                        {isOfferTransition && applicationId && (
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <i className="fa-duotone fa-regular fa-file-contract text-primary"></i>
-                                    <span className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/50">
-                                        Offer Documents (Optional)
-                                    </span>
-                                    <button
-                                        type="button"
-                                        className="btn btn-ghost btn-xs"
-                                        style={{ borderRadius: 0 }}
-                                        onClick={() =>
-                                            setShowDocumentUpload(
-                                                !showDocumentUpload,
-                                            )
-                                        }
-                                    >
-                                        {showDocumentUpload ? (
-                                            <>
-                                                <i className="fa-duotone fa-regular fa-chevron-up"></i>
-                                                Hide
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="fa-duotone fa-regular fa-chevron-down"></i>
-                                                Add Documents
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-
-                                <p className="text-sm text-base-content/40 mb-3">
-                                    Upload offer letters, contracts, or other
-                                    documents to include with your offer.
-                                </p>
-
-                                {showDocumentUpload && (
-                                    <div className="bg-base-100 border border-base-300 p-4">
-                                        <CompanyDocumentUpload
-                                            entityType="application"
-                                            entityId={applicationId}
-                                            staged={true}
-                                            onFilesStaged={(files) =>
-                                                setStagedDocuments(files)
-                                            }
-                                            onError={(error) => {
-                                                console.error(
-                                                    "Document staging failed:",
-                                                    error,
-                                                );
-                                                setError(error);
-                                            }}
-                                            compact={true}
-                                            maxSizeKB={5120}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
                         <MarkdownEditor
                             label="Approval Notes (Optional)"
                             value={notes}
@@ -256,22 +146,17 @@ export default function ApproveGateModal({
                         type="submit"
                         className="btn btn-success"
                         style={{ borderRadius: 0 }}
-                        disabled={submitting || uploadingDocuments}
+                        disabled={submitting}
                     >
                         {submitting ? (
                             <>
                                 <span className="loading loading-spinner loading-sm"></span>
-                                {uploadingDocuments
-                                    ? "Uploading Documents..."
-                                    : "Approving..."}
+                                Approving...
                             </>
                         ) : (
                             <>
                                 <i className="fa-duotone fa-regular fa-check"></i>
-                                {isOfferTransition &&
-                                stagedDocuments.length > 0
-                                    ? `Extend Offer (${stagedDocuments.length} document${stagedDocuments.length !== 1 ? "s" : ""})`
-                                    : "Approve Application"}
+                                Approve Application
                             </>
                         )}
                     </button>
