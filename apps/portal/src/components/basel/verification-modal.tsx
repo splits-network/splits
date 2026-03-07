@@ -154,7 +154,7 @@ export default function VerificationModal({
                                 <span className="text-error">*</span>
                             </label>
                             <select
-                                className="select select-bordered w-full bg-base-100 border-base-300 font-medium focus:border-primary focus:outline-none"
+                                className="select w-full bg-base-100 border-base-300 font-medium focus:border-primary focus:outline-none"
                                 style={{ borderRadius: 0, appearance: "auto" }}
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}

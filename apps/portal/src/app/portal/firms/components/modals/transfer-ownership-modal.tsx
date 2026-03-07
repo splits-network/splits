@@ -119,7 +119,7 @@ export default function TransferOwnershipModal({
                                             setSelectedRecruiterId(e.target.value);
                                             setConfirmed(false);
                                         }}
-                                        className="select select-bordered w-full bg-base-200 border-base-300"
+                                        className="select w-full"
                                         style={{ borderRadius: 0 }}
                                         disabled={loading}
                                     >

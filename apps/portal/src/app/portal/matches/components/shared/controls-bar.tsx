@@ -57,7 +57,7 @@ export function ControlsBar({
                                 (e.target.value || undefined) as MatchFilters["match_tier"],
                             )
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Tiers</option>
                         <option value="standard">Standard</option>
@@ -72,7 +72,7 @@ export function ControlsBar({
                                 (e.target.value || undefined) as MatchFilters["status"],
                             )
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Statuses</option>
                         <option value="active">Active</option>
@@ -88,7 +88,7 @@ export function ControlsBar({
                                 e.target.value ? Number(e.target.value) : undefined,
                             )
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">Any Score</option>
                         <option value="40">40+ Worth Reviewing</option>

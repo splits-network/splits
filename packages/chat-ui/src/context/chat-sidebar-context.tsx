@@ -148,13 +148,11 @@ export function ChatSidebarProvider({
     } | null>(null);
 
     // Restore persisted state after mount (post-hydration) to avoid SSR/client mismatch
-    // On mobile, never restore isOpen — the fullscreen overlay blocks the entire UI
     useEffect(() => {
         const persisted = loadPersistedState();
         if (persisted) {
-            const isMobile = window.innerWidth < 768;
-            setIsOpen(isMobile ? false : persisted.isOpen);
-            setIsMinimized(isMobile ? false : persisted.isMinimized);
+            setIsOpen(persisted.isOpen);
+            setIsMinimized(persisted.isMinimized);
             setView(persisted.view);
             setActiveConversationId(persisted.activeConversationId);
             setActiveConversationMeta(persisted.activeConversationMeta);

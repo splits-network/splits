@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
@@ -34,12 +35,11 @@ export default function ConnectionActionsToolbar({
     onRefresh,
     className = "",
 }: ConnectionActionsToolbarProps) {
+    const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile } = useUserProfile();
+    const { profile, isRecruiter } = useUserProfile();
     const refresh = onRefresh ?? (() => {});
-
-    const [accepting, setAccepting] = useState(false);
     const [declining, setDeclining] = useState(false);
     const [revoking, setRevoking] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
@@ -60,28 +60,13 @@ export default function ConnectionActionsToolbar({
         terminate: showActions.terminate !== false && isActive,
     };
 
-    const handleAccept = useCallback(async () => {
-        setAccepting(true);
-        try {
-            const token = await getToken();
-            if (!token) return;
-            const client = createAuthenticatedClient(token);
-            await client.patch(
-                `/recruiter-companies/${invitation.id}/respond`,
-                { accept: true },
-            );
-            toast.success("Connection accepted!");
-            refresh();
-        } catch (e: any) {
-            toast.error(
-                e?.response?.data?.error?.message ||
-                    "Failed to accept connection",
-            );
-        } finally {
-            setAccepting(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [invitation.id, toast]);
+    const handleAccept = useCallback(() => {
+        // Navigate to the invitation wizard instead of inline accept
+        const route = isRecruiter
+            ? `/portal/invitation/recruiter/${invitation.id}`
+            : `/portal/invitation/company/${invitation.id}`;
+        router.push(route);
+    }, [invitation.id, isRecruiter, router]);
 
     const handleDecline = useCallback(() => {
         setShowDeclineConfirm(true);
@@ -98,12 +83,12 @@ export default function ConnectionActionsToolbar({
                 `/recruiter-companies/${invitation.id}/respond`,
                 { accept: false },
             );
-            toast.success("Connection declined.");
+            toast.success("Request declined.");
             refresh();
         } catch (e: any) {
             toast.error(
                 e?.response?.data?.error?.message ||
-                    "Failed to decline connection",
+                    "Failed to decline request",
             );
         } finally {
             setDeclining(false);
@@ -169,25 +154,23 @@ export default function ConnectionActionsToolbar({
         if (actions.accept) {
             speedDialActions.push({
                 key: "accept",
-                icon: "fa-duotone fa-regular fa-check",
-                label: "Accept Connection",
+                icon: "fa-duotone fa-regular fa-arrow-right",
+                label: "Review & Respond",
                 variant: "btn-success",
                 onClick: handleAccept,
-                disabled: accepting,
-                loading: accepting,
-                title: "Accept Connection",
+                title: "Review & Respond",
             });
         }
         if (actions.decline) {
             speedDialActions.push({
                 key: "decline",
                 icon: "fa-duotone fa-regular fa-xmark",
-                label: "Decline Connection",
+                label: "Decline Request",
                 variant: "btn-ghost",
                 onClick: handleDecline,
                 disabled: declining,
                 loading: declining,
-                title: "Decline Connection",
+                title: "Decline Request",
             });
         }
         if (actions.revoke) {
@@ -225,11 +208,11 @@ export default function ConnectionActionsToolbar({
                     isOpen={showDeclineConfirm}
                     onClose={() => setShowDeclineConfirm(false)}
                     onConfirm={confirmDecline}
-                    title="Decline Connection"
+                    title="Decline Request"
                     icon="fa-ban"
                     confirmColor="btn-error"
                 >
-                    <p>Are you sure you want to decline this connection request?</p>
+                    <p>Are you sure you want to decline this representation request?</p>
                 </BaselConfirmModal>
                 <BaselConfirmModal
                     isOpen={showRevokeConfirm}
@@ -257,14 +240,9 @@ export default function ConnectionActionsToolbar({
                         onClick={handleAccept}
                         className={`btn btn-${size} btn-success gap-2`}
                         style={{ borderRadius: 0 }}
-                        disabled={accepting}
                     >
-                        {accepting ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <i className="fa-duotone fa-regular fa-check" />
-                        )}
-                        Accept
+                        <i className="fa-duotone fa-regular fa-arrow-right" />
+                        Review & Respond
                     </button>
                 )}
                 {actions.decline && (
@@ -313,11 +291,11 @@ export default function ConnectionActionsToolbar({
                 isOpen={showDeclineConfirm}
                 onClose={() => setShowDeclineConfirm(false)}
                 onConfirm={confirmDecline}
-                title="Decline Connection"
+                title="Decline Request"
                 icon="fa-ban"
                 confirmColor="btn-error"
             >
-                <p>Are you sure you want to decline this connection request?</p>
+                <p>Are you sure you want to decline this representation request?</p>
             </BaselConfirmModal>
             <BaselConfirmModal
                 isOpen={showRevokeConfirm}

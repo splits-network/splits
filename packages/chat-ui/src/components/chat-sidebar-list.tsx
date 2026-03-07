@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useState, useMemo } from "react";
 import { useChatSidebar } from "../context/chat-sidebar-context";
 import { ChatSidebarListItem } from "./chat-sidebar-list-item";
 import { getOtherParticipant } from "../types/chat-types";
@@ -22,7 +20,6 @@ export function ChatSidebarList({ currentUserId }: ChatSidebarListProps) {
 
     const [searchInput, setSearchInput] = useState("");
     const [mailbox, setMailbox] = useState<Mailbox>("inbox");
-    const listRef = useRef<HTMLDivElement>(null);
 
     // Filter by mailbox
     const mailboxFiltered = useMemo(() => {
@@ -59,20 +56,6 @@ export function ChatSidebarList({ currentUserId }: ChatSidebarListProps) {
             return new Date(bTime).getTime() - new Date(aTime).getTime();
         });
     }, [filtered]);
-
-    // GSAP stagger animation on list items
-    useGSAP(() => {
-        if (!listRef.current || sorted.length === 0) return;
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-        const items = listRef.current.querySelectorAll("[data-sidebar-item]");
-        if (!items.length) return;
-
-        gsap.fromTo(items,
-            { y: 8, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.25, stagger: 0.03, ease: "power3.out" },
-        );
-    }, { dependencies: [sorted.length, mailbox], scope: listRef });
 
     const requestCount = useMemo(() => {
         return conversations.filter(
@@ -124,7 +107,7 @@ export function ChatSidebarList({ currentUserId }: ChatSidebarListProps) {
             </div>
 
             {/* List */}
-            <div ref={listRef} className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto">
                 {conversationsLoading && sorted.length === 0 ? (
                     <div className="flex items-center justify-center py-12">
                         <span className="loading loading-spinner loading-sm text-primary" />

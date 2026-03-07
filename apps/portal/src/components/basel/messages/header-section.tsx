@@ -28,28 +28,28 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
 
             <div className="relative  container mx-auto px-6 lg:px-12">
                 <div className="max-w-4xl">
-                    <p className="header-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                    <p className="header-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                         Communications Hub
                     </p>
 
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="header-word inline-block opacity-0">
+                        <span className="header-word inline-block scroll-reveal fade-up">
                             Your
                         </span>{" "}
-                        <span className="header-word inline-block opacity-0 text-primary">
+                        <span className="header-word inline-block scroll-reveal fade-up text-primary">
                             messages.
                         </span>{" "}
                         <br className="hidden md:block" />
-                        <span className="header-word inline-block opacity-0">
+                        <span className="header-word inline-block scroll-reveal fade-up">
                             All in
                         </span>{" "}
-                        <span className="header-word inline-block opacity-0">
+                        <span className="header-word inline-block scroll-reveal fade-up">
                             one place.
                         </span>
                     </h1>
 
                     {/* Stat bar */}
-                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 scroll-reveal fade-up">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-envelope text-primary-content" />

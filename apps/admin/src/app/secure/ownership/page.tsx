@@ -25,7 +25,7 @@ export default function OwnershipPage() {
 
             <div className="flex gap-3 mb-4">
                 <select
-                    className="select select-sm select-bordered"
+                    className="select select-sm"
                     value={filters.verification_status}
                     onChange={(e) => setFilter('verification_status', e.target.value)}
                 >

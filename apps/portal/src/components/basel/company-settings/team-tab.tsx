@@ -243,7 +243,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                             <select
                                 value={inviteRole}
                                 onChange={(e) => setInviteRole(e.target.value)}
-                                className="select select-bordered w-full"
+                                className="select w-full"
                                 disabled={inviting}
                             >
                                 {ROLES.map((r) => (
@@ -265,7 +265,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                             <select
                                 value={inviteScope}
                                 onChange={(e) => setInviteScope(e.target.value)}
-                                className="select select-bordered w-full"
+                                className="select w-full"
                                 disabled={inviting}
                             >
                                 {SCOPES.map((s) => (

@@ -11,7 +11,7 @@ export function AboutTab({ firm, recentPlacements }: AboutTabProps) {
     return (
         <div className="space-y-10">
             {/* Description */}
-            <div className="profile-section opacity-0 border-l-4 border-l-primary pl-6">
+            <div className="scroll-reveal fade-up profile-section border-l-4 border-l-primary pl-6">
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
                     About {firm.name}
                 </p>
@@ -28,7 +28,7 @@ export function AboutTab({ firm, recentPlacements }: AboutTabProps) {
 
             {/* Tagline highlight */}
             {firm.tagline && (
-                <div className="profile-section opacity-0 bg-primary/5 border border-primary/10 px-6 py-5">
+                <div className="scroll-reveal fade-up profile-section bg-primary/5 border border-primary/10 px-6 py-5">
                     <i className="fa-duotone fa-regular fa-quote-left text-xl text-primary/30 mb-3 block" />
                     <p className="text-lg font-bold text-base-content/80 italic leading-relaxed">
                         &ldquo;{firm.tagline}&rdquo;
@@ -37,7 +37,7 @@ export function AboutTab({ firm, recentPlacements }: AboutTabProps) {
             )}
 
             {/* Partnership signals */}
-            <div className="profile-section opacity-0">
+            <div className="scroll-reveal fade-up profile-section">
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                     Partnership
                 </p>
@@ -55,7 +55,7 @@ export function AboutTab({ firm, recentPlacements }: AboutTabProps) {
 
             {/* Recent Placements */}
             {recentPlacements.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up profile-section">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Recent Placements
                     </p>

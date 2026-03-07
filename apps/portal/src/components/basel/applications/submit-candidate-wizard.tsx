@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { BaselWizardModal, BaselAlertBox } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -60,11 +58,6 @@ export default function BaselSubmitCandidateWizard({
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Animation refs
-    const containerRef = useRef<HTMLDivElement>(null);
-    const backdropRef = useRef<HTMLDivElement>(null);
-    const stepContentRef = useRef<HTMLDivElement>(null);
-
     // Job selection state
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
     const [jobs, setJobs] = useState<Job[]>([]);
@@ -119,35 +112,6 @@ export default function BaselSubmitCandidateWizard({
     const currentStepId = activeStepIds[currentStep];
     const isLastContentStep =
         currentStepId === activeStepIds[activeStepIds.length - 2];
-
-    /* ── GSAP step transition ─────────────────────────────────────────── */
-
-    useGSAP(() => {
-        if (!isOpen || !stepContentRef.current) return;
-        gsap.fromTo(
-            stepContentRef.current,
-            { opacity: 0, x: 20 },
-            { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", clearProps: "transform" },
-        );
-    }, [currentStep, isOpen]);
-
-    /* ── GSAP entrance ────────────────────────────────────────────────── */
-
-    useGSAP(() => {
-        if (!isOpen) return;
-        const backdrop = backdropRef.current;
-        const box = containerRef.current;
-        if (!backdrop || !box) return;
-
-        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-        tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-        tl.fromTo(
-            box,
-            { opacity: 0, y: 40, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.4, clearProps: "transform" },
-            "-=0.15",
-        );
-    }, [isOpen]);
 
     /* ── Initialize pre-selected values on open ────────────────────────── */
 
@@ -456,23 +420,9 @@ export default function BaselSubmitCandidateWizard({
         return true;
     };
 
-    /* ── Animated close ───────────────────────────────────────────────── */
-
     const handleClose = useCallback(() => {
         if (submitting) return;
-        const backdrop = backdropRef.current;
-        const box = containerRef.current;
-
-        if (backdrop && box) {
-            const tl = gsap.timeline({
-                defaults: { ease: "power2.in", clearProps: "transform" },
-                onComplete: onClose,
-            });
-            tl.to(box, { opacity: 0, y: 30, scale: 0.97, duration: 0.25 });
-            tl.to(backdrop, { opacity: 0, duration: 0.2 }, "-=0.1");
-        } else {
-            onClose();
-        }
+        onClose();
     }, [submitting, onClose]);
 
     /* ── Render ────────────────────────────────────────────────────────── */
@@ -495,9 +445,6 @@ export default function BaselSubmitCandidateWizard({
             submitLabel="Propose Candidate"
             submittingLabel="Submitting Proposal..."
             maxWidth="max-w-4xl"
-            containerRef={containerRef}
-            backdropRef={backdropRef}
-            stepContentRef={stepContentRef}
         >
             {error && (
                 <BaselAlertBox variant="error" title="Error" className="mb-5">

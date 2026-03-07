@@ -1,14 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const benefits = [
     {
@@ -38,116 +31,8 @@ const features = [
 
 export function ForCandidatesSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const benefitsRef = useRef<HTMLDivElement>(null);
-    const featuresRef = useRef<HTMLDivElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading animation - from right
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, x: 40 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 70%",
-                    },
-                },
-            );
-
-            // Benefits list stagger - from right
-            const benefitItems =
-                benefitsRef.current?.querySelectorAll(".benefit-item");
-            if (benefitItems) {
-                gsap.fromTo(
-                    benefitItems,
-                    { opacity: 0, x: 30 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.fast,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                        scrollTrigger: {
-                            trigger: benefitsRef.current,
-                            start: "top 75%",
-                        },
-                    },
-                );
-
-                const icons =
-                    benefitsRef.current?.querySelectorAll(".benefit-icon");
-                if (icons) {
-                    gsap.fromTo(
-                        icons,
-                        { scale: 0 },
-                        {
-                            scale: 1,
-                            duration: duration.fast,
-                            ease: easing.bounce,
-                            stagger: stagger.tight,
-                            delay: 0.1,
-                            scrollTrigger: {
-                                trigger: benefitsRef.current,
-                                start: "top 75%",
-                            },
-                        },
-                    );
-                }
-            }
-
-            // Features badges
-            const featureBadges =
-                featuresRef.current?.querySelectorAll(".feature-badge");
-            if (featureBadges) {
-                gsap.fromTo(
-                    featureBadges,
-                    { opacity: 0, scale: 0.8 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.tight,
-                        scrollTrigger: {
-                            trigger: featuresRef.current,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            }
-
-            // CTA button
-            gsap.fromTo(
-                ctaRef.current,
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: ctaRef.current,
-                        start: "top 85%",
-                    },
-                },
-            );
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     return (
         <section
@@ -245,7 +130,7 @@ export function ForCandidatesSection() {
 
                     {/* Content - on right for candidates */}
                     <div className="order-1 lg:order-2">
-                        <div ref={headingRef} className="opacity-0">
+                        <div className="scroll-reveal slide-from-right">
                             <div className="flex items-center gap-3 mb-4">
                                 <img
                                     src="/applicant.png"
@@ -268,11 +153,11 @@ export function ForCandidatesSection() {
                             </p>
                         </div>
 
-                        <div ref={benefitsRef} className="space-y-4 mb-8">
+                        <div className="space-y-4 mb-8 stagger-children">
                             {benefits.map((benefit, index) => (
                                 <div
                                     key={index}
-                                    className="benefit-item flex items-start gap-4 opacity-0"
+                                    className="scroll-reveal slide-from-right benefit-item flex items-start gap-4"
                                 >
                                     <div className="benefit-icon w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                                         <i
@@ -287,13 +172,12 @@ export function ForCandidatesSection() {
                         </div>
 
                         <div
-                            ref={featuresRef}
-                            className="flex flex-wrap gap-2 mb-8"
+                            className="flex flex-wrap gap-2 mb-8 stagger-children"
                         >
                             {features.map((feature, index) => (
                                 <span
                                     key={index}
-                                    className="feature-badge badge badge-lg bg-white/10 border-white/20 gap-2 opacity-0"
+                                    className="scroll-reveal pop-in feature-badge badge badge-lg bg-white/10 border-white/20 gap-2"
                                 >
                                     <i className={`${feature.icon} text-xs`}></i>
                                     {feature.label}
@@ -301,7 +185,7 @@ export function ForCandidatesSection() {
                             ))}
                         </div>
 
-                        <div ref={ctaRef} className="opacity-0">
+                        <div className="scroll-reveal fade-up">
                             <a
                                 href="https://applicant.network/sign-up"
                                 className="btn btn-lg bg-white text-secondary hover:bg-white/90 border-0 shadow-lg"

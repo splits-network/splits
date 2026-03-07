@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ShortcutDisplayItem {
     label: string;
@@ -20,6 +20,12 @@ export function KeyboardShortcutsModal({
     items,
 }: KeyboardShortcutsModalProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
+    const [isMac, setIsMac] = useState(false);
+
+    // Detect platform after mount to avoid hydration mismatch
+    useEffect(() => {
+        setIsMac(/Mac|iPod|iPhone|iPad/.test(navigator.userAgent));
+    }, []);
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -50,9 +56,6 @@ export function KeyboardShortcutsModal({
 
     const sectionOrder = ["main", "management", "settings"];
 
-    const isMac =
-        typeof navigator !== "undefined" &&
-        /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
     const modifierLabel = isMac ? "Opt" : "Alt";
 
     return (

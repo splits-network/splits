@@ -232,7 +232,7 @@ export default function TerminateModal({
                                                 </p>
                                             </div>
                                             <select
-                                                className="select select-sm select-bordered bg-base-100 text-xs uppercase tracking-wider font-bold"
+                                                className="select select-sm bg-base-100 text-xs uppercase tracking-wider font-bold"
                                                 style={{ borderRadius: 0 }}
                                                 value={
                                                     decisions[job.id] || "keep"

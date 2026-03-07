@@ -123,7 +123,7 @@ export default function MatchesContent() {
             <MatchesAnimator containerRef={containerRef} loading={loading} />
 
             {/* Hero section */}
-            <section className="matches-hero bg-base-200 py-12 opacity-0">
+            <section className="matches-hero bg-base-200 py-12 scroll-reveal fade-up">
                 <div className="container mx-auto px-6 sm:px-8 lg:px-12">
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
                         Matched For You

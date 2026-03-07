@@ -34,8 +34,19 @@ const listSchema = {
             company_id: { type: 'string', format: 'uuid' },
             status: { type: 'string', enum: ['pending', 'active', 'declined', 'terminated'] },
             relationship_type: { type: 'string', enum: ['sourcer', 'recruiter'] },
-            can_manage_company_jobs: { type: 'boolean' }
         }
+    }
+};
+
+const permissionsSchema = {
+    type: 'object',
+    properties: {
+        can_view_jobs: { type: 'boolean' },
+        can_create_jobs: { type: 'boolean' },
+        can_edit_jobs: { type: 'boolean' },
+        can_advance_candidates: { type: 'boolean' },
+        can_view_applications: { type: 'boolean' },
+        can_submit_candidates: { type: 'boolean' },
     }
 };
 
@@ -46,7 +57,7 @@ const inviteSchema = {
         properties: {
             company_id: { type: 'string', format: 'uuid' },
             recruiter_id: { type: 'string', format: 'uuid' },
-            can_manage_company_jobs: { type: 'boolean', default: false },
+            permissions: permissionsSchema,
             message: { type: 'string', maxLength: 500 }
         }
     }
@@ -57,7 +68,8 @@ const respondSchema = {
         type: 'object',
         required: ['accept'],
         properties: {
-            accept: { type: 'boolean' }
+            accept: { type: 'boolean' },
+            permissions: permissionsSchema
         }
     }
 };
@@ -75,7 +87,7 @@ const updateSchema = {
     body: {
         type: 'object',
         properties: {
-            can_manage_company_jobs: { type: 'boolean' },
+            permissions: permissionsSchema,
             status: { type: 'string', enum: ['active', 'terminated'] }
         }
     }
@@ -209,10 +221,10 @@ export async function recruiterCompanyRoutes(
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { id } = request.params as { id: string };
-        const { accept } = request.body as AcceptInvitationRequest;
+        const { accept, permissions } = request.body as AcceptInvitationRequest;
 
         try {
-            const relationship = await service.respondToInvitation(id, accept, clerkUserId);
+            const relationship = await service.respondToInvitation(id, accept, clerkUserId, permissions);
             return reply.send({ data: relationship });
         } catch (error: any) {
             // Log the full error for debugging
@@ -334,12 +346,11 @@ export async function recruiterCompanyRoutes(
         }
     });
 
-    // GET companies recruiter can manage
-    app.get('/api/v2/recruiter-companies/manageable-companies', {
+    // GET all permissions for the current recruiter across all active companies
+    app.get('/api/v2/recruiter-companies/my-permissions', {
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
 
-        // Get current user's recruiter ID
         const { data: user } = await supabase
             .from('users')
             .select('id')
@@ -347,9 +358,7 @@ export async function recruiterCompanyRoutes(
             .single();
 
         if (!user) {
-            return reply.code(404).send({
-                error: { code: 'USER_NOT_FOUND', message: 'User not found' }
-            });
+            return reply.send({ data: [] });
         }
 
         const { data: recruiter } = await supabase
@@ -359,47 +368,15 @@ export async function recruiterCompanyRoutes(
             .single();
 
         if (!recruiter) {
-            return reply.send({ data: [] }); // Not a recruiter
+            return reply.send({ data: [] });
         }
 
-        const companyIds = await service.getManageableCompanies(recruiter.id);
-        return reply.send({ data: companyIds });
+        const permissions = await service.getAllPermissionsForRecruiter(recruiter.id);
+        return reply.send({ data: permissions });
     });
 
-    // GET companies recruiter can manage with details (id, name)
-    app.get('/api/v2/recruiter-companies/manageable-companies-with-details', {
-    }, async (request, reply) => {
-        const { clerkUserId } = requireUserContext(request);
-
-        // Get current user's recruiter ID
-        const { data: user } = await supabase
-            .from('users')
-            .select('id')
-            .eq('clerk_user_id', clerkUserId)
-            .single();
-
-        if (!user) {
-            return reply.code(404).send({
-                error: { code: 'USER_NOT_FOUND', message: 'User not found' }
-            });
-        }
-
-        const { data: recruiter } = await supabase
-            .from('recruiters')
-            .select('id')
-            .eq('user_id', user.id)
-            .single();
-
-        if (!recruiter) {
-            return reply.send({ data: [] }); // Not a recruiter
-        }
-
-        const companies = await service.getManageableCompaniesWithDetails(recruiter.id);
-        return reply.send({ data: companies });
-    });
-
-    // GET check if recruiter can manage company jobs
-    app.get('/api/v2/recruiter-companies/can-manage/:companyId', {
+    // GET permissions for the current recruiter for a specific company
+    app.get('/api/v2/recruiter-companies/my-permissions/:companyId', {
         schema: {
             params: {
                 type: 'object',
@@ -410,31 +387,29 @@ export async function recruiterCompanyRoutes(
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { companyId } = request.params as { companyId: string };
-        
-        // Get current user's recruiter ID
+
         const { data: user } = await supabase
             .from('users')
             .select('id')
             .eq('clerk_user_id', clerkUserId)
             .single();
-            
+
         if (!user) {
-            return reply.code(404).send({ 
-                error: { code: 'USER_NOT_FOUND', message: 'User not found' } 
-            });
+            return reply.send({ data: null });
         }
-        
+
         const { data: recruiter } = await supabase
             .from('recruiters')
             .select('id')
             .eq('user_id', user.id)
             .single();
-            
+
         if (!recruiter) {
-            return reply.send({ data: { can_manage: false } }); // Not a recruiter
+            return reply.send({ data: null });
         }
-        
-        const canManage = await service.canManageCompanyJobs(recruiter.id, companyId);
-        return reply.send({ data: { can_manage: canManage } });
+
+        const permissions = await service.getPermissions(recruiter.id, companyId);
+
+        return reply.send({ data: permissions });
     });
 }

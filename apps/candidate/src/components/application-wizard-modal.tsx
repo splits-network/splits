@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import gsap from "gsap";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import StepDocuments from "@/components/application-wizard/step-documents";
 import StepCoverLetter from "@/components/application-wizard/step-cover-letter";
@@ -73,71 +72,20 @@ export default function ApplicationWizardModal({
 
     const currentStepLabel = stepLabels[currentStep - 1] || "";
 
-    /* ─── GSAP Animations ─────────────────────────────────────────────── */
+    /* ─── CSS Entrance Animation ──────────────────────────────────────── */
+
+    const [visible, setVisible] = useState(false);
+    const [closing, setClosing] = useState(false);
 
     useEffect(() => {
-        if (!backdropRef.current || !boxRef.current) return;
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-            return;
-
-        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-        tl.fromTo(
-            backdropRef.current,
-            { opacity: 0 },
-            { opacity: 1, duration: 0.3 },
-        );
-        tl.fromTo(
-            boxRef.current,
-            { opacity: 0, y: 40, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.4, clearProps: "transform" },
-            "-=0.15",
-        );
+        // Trigger entrance animation on next frame
+        requestAnimationFrame(() => setVisible(true));
     }, []);
 
-    useEffect(() => {
-        if (!stepContentRef.current) return;
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-            return;
-
-        gsap.fromTo(
-            stepContentRef.current,
-            { opacity: 0, x: 20 },
-            { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", clearProps: "transform" },
-        );
-    }, [currentStep, loading]);
-
-    const animateClose = useCallback(
-        (onComplete: () => void) => {
-            if (
-                !backdropRef.current ||
-                !boxRef.current ||
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ) {
-                onComplete();
-                return;
-            }
-            const tl = gsap.timeline({
-                defaults: { ease: "power2.in", clearProps: "transform" },
-                onComplete,
-            });
-            tl.to(boxRef.current, {
-                opacity: 0,
-                y: 30,
-                scale: 0.97,
-                duration: 0.25,
-            });
-            tl.to(
-                backdropRef.current,
-                { opacity: 0, duration: 0.2 },
-                "-=0.1",
-            );
-        },
-        [],
-    );
-
     const handleClose = useCallback(() => {
-        animateClose(onClose);
-    }, [animateClose, onClose]);
+        setClosing(true);
+        setTimeout(onClose, 300);
+    }, [onClose]);
 
     /* ─── Data Loading ────────────────────────────────────────────────── */
 
@@ -472,13 +420,18 @@ export default function ApplicationWizardModal({
             {/* Backdrop */}
             <div
                 ref={backdropRef}
-                className="modal-backdrop bg-neutral/60"
+                className="modal-backdrop bg-neutral/60 transition-opacity duration-300"
+                style={{ opacity: visible && !closing ? 1 : 0 }}
             />
 
             {/* Modal Box */}
             <div
                 ref={boxRef}
-                className="modal-box max-w-3xl bg-base-100 p-0 overflow-hidden max-h-[90vh] flex flex-col"
+                className="modal-box max-w-3xl bg-base-100 p-0 overflow-hidden max-h-[90vh] flex flex-col transition-all duration-300 ease-out"
+                style={{
+                    opacity: visible && !closing ? 1 : 0,
+                    transform: visible && !closing ? "translateY(0) scale(1)" : "translateY(40px) scale(0.96)",
+                }}
             >
                 {/* ── Header ──────────────────────────────────── */}
                 <div className="bg-neutral text-neutral-content px-8 py-6 flex-shrink-0">

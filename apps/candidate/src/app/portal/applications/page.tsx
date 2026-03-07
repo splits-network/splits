@@ -154,7 +154,7 @@ export default function ApplicationsBaselPage() {
             />
 
             {/* Content Area */}
-            <section className="content-area opacity-0">
+            <section className="content-area scroll-reveal fade-in">
                 <div ref={contentRef}>
                     {loading && applications.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">

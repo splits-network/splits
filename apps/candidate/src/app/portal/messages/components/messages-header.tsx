@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 interface MessagesHeaderProps {
     conversationCount: number;
@@ -14,55 +13,7 @@ export function MessagesHeader({
     unreadCount,
 }: MessagesHeaderProps) {
     const headerRef = useRef<HTMLElement>(null);
-
-    useGSAP(
-        () => {
-            if (!headerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                headerRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
-                return;
-            }
-
-            const $ = (s: string) => headerRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => headerRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            tl.fromTo(
-                $1(".msg-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" },
-            )
-                .fromTo(
-                    $(".msg-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                        clearProps: "transform",
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".msg-stat-bar"),
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.5,
-                        clearProps: "transform",
-                    },
-                    "-=0.4",
-                );
-        },
-        { scope: headerRef },
-    );
+    useScrollReveal(headerRef);
 
     return (
         <section
@@ -77,19 +28,19 @@ export function MessagesHeader({
             />
             <div className="relative container mx-auto px-6 lg:px-12">
                 <div className="max-w-4xl">
-                    <p className="msg-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                    <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                         Communications Hub
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="msg-title-word inline-block opacity-0">
+                        <span className="scroll-reveal fade-up inline-block">
                             Your
                         </span>{" "}
-                        <span className="msg-title-word inline-block opacity-0 text-primary">
+                        <span className="scroll-reveal fade-up inline-block text-primary">
                             messages.
                         </span>
                     </h1>
 
-                    <div className="msg-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                    <div className="scroll-reveal fade-up flex flex-wrap gap-8 mt-8">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-envelope text-primary-content" />

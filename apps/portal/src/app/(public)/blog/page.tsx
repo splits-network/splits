@@ -153,7 +153,7 @@ export default function BlogPage() {
                 <section className="py-20 bg-base-200 overflow-hidden">
                     <div className="container mx-auto px-4">
                         <div className="max-w-6xl mx-auto">
-                            <h2 className="text-4xl font-bold mb-12 text-center opacity-0">
+                            <h2 className="text-4xl font-bold mb-12 text-center scroll-reveal fade-up">
                                 What We'll Cover
                             </h2>
                             <div
@@ -232,7 +232,7 @@ export default function BlogPage() {
                     <div className="container mx-auto px-4">
                         <div className="max-w-5xl mx-auto text-center">
                             <div>
-                                <h2 className="text-4xl font-bold mb-8 opacity-0">
+                                <h2 className="text-4xl font-bold mb-8 scroll-reveal fade-up">
                                     In the Meantime
                                 </h2>
                                 <p className="text-lg opacity-80 mb-12">

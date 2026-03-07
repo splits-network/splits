@@ -36,7 +36,7 @@ export function HeroStats({ firm }: HeroStatsProps) {
             {stats.map((stat, i) => {
                 const iconStyle = ICON_STYLES[i % ICON_STYLES.length];
                 return (
-                    <div key={stat.label} className="stat-block opacity-0 flex items-center gap-3 px-4 py-4">
+                    <div key={stat.label} className="scroll-reveal fade-up stat-block flex items-center gap-3 px-4 py-4">
                         <div className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}>
                             <i className={`${stat.icon} text-base`} />
                         </div>

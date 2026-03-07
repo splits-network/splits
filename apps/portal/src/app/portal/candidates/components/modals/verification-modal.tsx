@@ -130,7 +130,7 @@ export default function VerificationModal({
                                 <span className="text-error">*</span>
                             </label>
                             <select
-                                className="select select-bordered w-full"
+                                className="select w-full"
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
                                 required

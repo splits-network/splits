@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useRef, useEffect } from "react";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
@@ -100,22 +99,12 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
 
 function ChatTrigger() {
     const sidebar = useChatSidebarOptional();
-    const router = useRouter();
     if (!sidebar) return null;
-
-    const handleClick = () => {
-        // On mobile, navigate to full messages page instead of opening sidebar widget
-        if (window.innerWidth < 768) {
-            router.push("/portal/messages");
-        } else {
-            sidebar.openToList();
-        }
-    };
 
     return (
         <button
             type="button"
-            onClick={handleClick}
+            onClick={sidebar.openToList}
             className="btn btn-ghost btn-sm relative"
             aria-label="Open messages"
         >

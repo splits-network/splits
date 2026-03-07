@@ -40,17 +40,17 @@ export default function PrivacyPolicyBaselPage() {
             <section className="py-28 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="bl-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                        <p className="bl-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
                             <i className="fa-duotone fa-regular fa-shield-check mr-2" />
                             Legal
                         </p>
-                        <h1 className="bl-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-6 opacity-0">
+                        <h1 className="bl-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-6 scroll-reveal fade-up">
                             Privacy <span className="text-primary">Policy</span>
                         </h1>
-                        <p className="bl-hero-subtitle text-lg md:text-xl opacity-70 leading-relaxed mb-6 opacity-0">
+                        <p className="bl-hero-subtitle text-lg md:text-xl opacity-70 leading-relaxed mb-6 scroll-reveal fade-up">
                             How we protect and respect your personal data
                         </p>
-                        <p className="bl-hero-date text-sm font-semibold uppercase tracking-wider opacity-40 opacity-0">
+                        <p className="bl-hero-date text-sm font-semibold uppercase tracking-wider opacity-40 scroll-reveal fade-up">
                             Last updated: {lastUpdated}
                         </p>
                     </div>
@@ -60,7 +60,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ TABLE OF CONTENTS ═══ */}
             <section className="py-12 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-toc border-l-4 border-primary bg-base-100 p-8 shadow-sm opacity-0">
+                    <div className="bl-toc border-l-4 border-primary bg-base-100 p-8 shadow-sm scroll-reveal fade-up">
                         <h2 className="text-xl font-black tracking-tight mb-6">
                             Quick{" "}
                             <span className="text-primary">Navigation</span>
@@ -87,7 +87,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 1 — Overview ═══ */}
             <section id="overview" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 1
@@ -152,7 +152,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 2 — Information Collection ═══ */}
             <section id="information-collection" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 2
@@ -237,7 +237,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 3 — How We Use ═══ */}
             <section id="how-we-use" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-accent text-accent-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 3
@@ -293,7 +293,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 4 — Information Sharing ═══ */}
             <section id="information-sharing" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 4
@@ -356,7 +356,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 5 — Data Security ═══ */}
             <section id="data-security" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 5
@@ -412,7 +412,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 6 — Data Retention ═══ */}
             <section id="data-retention" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-accent text-accent-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 6
@@ -484,7 +484,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 7 — Your Rights ═══ */}
             <section id="your-rights" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 7
@@ -559,7 +559,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 8 — Cookies & Tracking ═══ */}
             <section id="cookies" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 8
@@ -650,7 +650,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 9 — Third-Party Services ═══ */}
             <section id="third-party" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-accent text-accent-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 9
@@ -777,7 +777,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 10 — Google API Services ═══ */}
             <section id="google-api-services" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 10
@@ -868,7 +868,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 11 — AI & Automated Processing ═══ */}
             <section id="ai-processing" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 11
@@ -922,7 +922,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 12 — International Transfers ═══ */}
             <section id="international" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-accent text-accent-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 12
@@ -972,7 +972,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 13 — Children's Privacy ═══ */}
             <section id="children" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 13
@@ -1008,7 +1008,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 14 — California Rights (CCPA/CPRA) ═══ */}
             <section id="california" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 14
@@ -1081,7 +1081,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 15 — GDPR Rights (EU) ═══ */}
             <section id="gdpr" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-accent text-accent-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 15
@@ -1153,7 +1153,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ Section 16 — Changes to This Policy ═══ */}
             <section id="changes" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">
                                 16
@@ -1189,7 +1189,7 @@ export default function PrivacyPolicyBaselPage() {
             {/* ═══ CONTACT ═══ */}
             <section className="py-16 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-contact opacity-0">
+                    <div className="bl-contact scroll-reveal fade-up">
                         <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-8 text-center">
                             Questions About Privacy?
                         </h2>

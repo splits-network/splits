@@ -11,16 +11,27 @@ import { heading, paragraph, button, alert, infoCard, divider } from '../compone
 export interface ConnectionRequestedData {
     companyName: string;
     recruiterName: string;
+    recruiterEmail?: string;
     message?: string;
     connectionUrl: string;
     source?: EmailSource;
 }
 
 export function connectionRequestedEmail(data: ConnectionRequestedData): string {
-    const content = `
-${heading({ level: 1, text: 'New recruiter connection request' })}
+    const recruiterIdentifier = data.recruiterEmail
+        ? `<strong>${data.recruiterName}</strong> (${data.recruiterEmail})`
+        : `<strong>${data.recruiterName}</strong>`;
 
-${paragraph(`<strong>${data.recruiterName}</strong> wants to connect with <strong>${data.companyName}</strong> on Splits Network.`)}
+    const content = `
+${heading({ level: 1, text: 'Recruiter representation request' })}
+
+${paragraph(`${recruiterIdentifier} is requesting to <strong>represent ${data.companyName}</strong> as a recruiting partner on Splits Network.`)}
+
+${alert({
+        type: 'info',
+        title: 'What does this mean?',
+        message: 'This is a formal business relationship request — not a social connection. If you accept, this recruiter will represent your company and may earn placement fees for successful hires. You choose exactly which permissions to grant — viewing jobs, submitting candidates, advancing applications, or managing listings. You control the access level and can change or revoke it at any time.',
+    })}
 
 ${data.message ? alert({
         type: 'info',
@@ -29,27 +40,33 @@ ${data.message ? alert({
     }) : ''}
 
 ${infoCard({
-        title: 'Connection Details',
+        title: 'Request Details',
         items: [
             { label: 'Recruiter', value: data.recruiterName },
-            { label: 'Request Status', value: 'Pending', highlight: true },
+            ...(data.recruiterEmail ? [{ label: 'Email', value: data.recruiterEmail }] : []),
+            { label: 'Requesting', value: 'To represent your company as a recruiting partner' },
+            { label: 'Status', value: 'Awaiting your review', highlight: true },
         ],
     })}
 
+${paragraph(`<strong>What happens if you accept:</strong><br/>• You set the permissions — view jobs, submit candidates, advance applications, create/edit listings<br/>• When the recruiter submits a candidate who gets hired, they receive placement fees per your billing terms<br/>• You can end the relationship anytime from your network dashboard`)}
+
 ${button({
         href: data.connectionUrl,
-        text: 'Review Connection Request \u2192',
+        text: 'Review & Respond \u2192',
         variant: 'primary',
     })}
 
 ${divider()}
 
-${paragraph('You can approve or decline this request from your network dashboard.')}
+${paragraph('You will walk through a 3-step review: learn about the recruiter, read the agreement, then set permissions and accept or decline.')}
+
+${paragraph(`<em style="color: #71717a; font-size: 13px;">This notification was sent to all administrators of ${data.companyName}.</em>`)}
     `.trim();
 
     return baseEmailTemplate({
         content,
-        preheader: `${data.recruiterName} wants to connect with ${data.companyName} on Splits Network.`,
+        preheader: `${data.recruiterName} is requesting to represent ${data.companyName} as a recruiter. Review and respond.`,
         source: data.source || 'portal',
     });
 }

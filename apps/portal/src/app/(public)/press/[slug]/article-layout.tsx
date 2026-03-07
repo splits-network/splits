@@ -2,14 +2,8 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import type { PressArticleMeta } from "@/lib/press";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 interface ArticleLayoutProps {
     article: PressArticleMeta;
@@ -35,69 +29,7 @@ export function ArticleLayout({
 }: ArticleLayoutProps) {
     const mainRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current.querySelectorAll(".opacity-0").forEach((el) => {
-                    (el as HTMLElement).style.opacity = "1";
-                });
-                return;
-            }
-
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-
-            /* ── Hero timeline ─────────────────────────────── */
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            tl.fromTo(
-                $1(".article-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".article-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $(".article-meta"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $(".article-tag"),
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.3, stagger: 0.04 },
-                    "-=0.2",
-                );
-
-            /* ── Content + Sidebar scroll animation ─────────── */
-            $(".article-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        scrollTrigger: { trigger: section, start: "top 85%" },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     /* Split title into words for staggered animation */
     const titleWords = article.title.split(" ");
@@ -115,7 +47,7 @@ export function ArticleLayout({
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         {/* Breadcrumb */}
-                        <div className="article-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6 opacity-0">
+                        <div className="scroll-reveal fade-up flex items-center gap-2 text-sm text-neutral-content/40 mb-6">
                             <Link
                                 href="/press"
                                 className="hover:text-neutral-content transition-colors"
@@ -138,7 +70,7 @@ export function ArticleLayout({
                                     {titleWords.map((word, i) => (
                                         <span
                                             key={i}
-                                            className="article-title-word inline-block opacity-0 mr-3"
+                                            className="scroll-reveal fade-up inline-block mr-3"
                                         >
                                             {word}
                                         </span>
@@ -169,7 +101,7 @@ export function ArticleLayout({
                             ].map((tag) => (
                                 <span
                                     key={tag.text}
-                                    className="article-meta opacity-0 flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
+                                    className="scroll-reveal fade-up flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
                                 >
                                     <i
                                         className={`${tag.icon} text-xs text-secondary`}
@@ -185,7 +117,7 @@ export function ArticleLayout({
                                 {article.tags.map((tag) => (
                                     <span
                                         key={tag}
-                                        className="article-tag opacity-0 px-3 py-1 bg-neutral-content/10 text-xs font-semibold text-neutral-content/60 uppercase tracking-wider"
+                                        className="scroll-reveal fade-up px-3 py-1 bg-neutral-content/10 text-xs font-semibold text-neutral-content/60 uppercase tracking-wider"
                                     >
                                         {tag}
                                     </span>
@@ -200,14 +132,14 @@ export function ArticleLayout({
             <section className="container mx-auto px-6 lg:px-12 py-10 lg:py-14">
                 <div className="grid lg:grid-cols-5 gap-10 lg:gap-16">
                     {/* Main Content */}
-                    <div className="lg:col-span-3 article-section opacity-0">
+                    <div className="lg:col-span-3 scroll-reveal fade-up">
                         <div className="prose-portal">{children}</div>
                     </div>
 
                     {/* Sidebar */}
                     <div className="lg:col-span-2">
                         {/* Article Info */}
-                        <div className="article-section opacity-0 bg-primary text-primary-content p-6 mb-6">
+                        <div className="scroll-reveal fade-up bg-primary text-primary-content p-6 mb-6">
                             <h3 className="text-lg font-black mb-3">
                                 Article Info
                             </h3>
@@ -244,7 +176,7 @@ export function ArticleLayout({
                         </div>
 
                         {/* Navigation */}
-                        <div className="article-section opacity-0 bg-base-200 border-t-4 border-secondary p-6 mb-6">
+                        <div className="scroll-reveal fade-up bg-base-200 border-t-4 border-secondary p-6 mb-6">
                             <h3 className="text-sm font-black uppercase tracking-wider mb-4">
                                 Navigation
                             </h3>
@@ -294,7 +226,7 @@ export function ArticleLayout({
                         </div>
 
                         {/* Share */}
-                        <div className="article-section opacity-0 bg-base-200 p-6 sticky top-24">
+                        <div className="scroll-reveal fade-up bg-base-200 p-6 sticky top-24">
                             <h3 className="text-sm font-black uppercase tracking-wider mb-4">
                                 Share
                             </h3>

@@ -2,9 +2,8 @@
 
 import { useSignUp, useAuth, useClerk } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState, useEffect, useRef } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import Link from "next/link";
-import gsap from "gsap";
 import { ensureUserInDatabase } from "@/lib/user-registration";
 import {
     createAuthenticatedClient,
@@ -43,8 +42,6 @@ export default function SignUpPage() {
         profile_image_url?: string | null;
     } | null>(null);
     const [referralError, setReferralError] = useState("");
-
-    const stepRef = useRef<HTMLDivElement>(null);
 
     // Validate referral code with debounce
     useEffect(() => {
@@ -228,20 +225,6 @@ export default function SignUpPage() {
         });
     };
 
-    // Animate step transitions
-    useEffect(() => {
-        if (
-            !stepRef.current ||
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        )
-            return;
-        gsap.fromTo(
-            stepRef.current,
-            { opacity: 0, x: 20 },
-            { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" },
-        );
-    }, [pendingVerification]);
-
     // Already signed in state
     if (isLoaded && isSignedIn) {
         return (
@@ -301,7 +284,7 @@ export default function SignUpPage() {
     // Verification step
     if (pendingVerification) {
         return (
-            <div ref={stepRef}>
+            <div>
                 <div className="mb-8">
                     <h1 className="text-3xl font-black tracking-tight mb-2">
                         Verify your email
@@ -374,7 +357,7 @@ export default function SignUpPage() {
 
     // Registration form
     return (
-        <div ref={stepRef}>
+        <div>
             {/* Heading */}
             <div className="mb-8">
                 <h1 className="text-3xl font-black tracking-tight mb-2">

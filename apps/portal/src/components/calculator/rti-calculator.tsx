@@ -1,19 +1,12 @@
 'use client';
 
 import { useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-import { duration, easing } from '@splits-network/basel-ui';
+import { useScrollReveal } from '@splits-network/basel-ui';
 import { useCalculator } from './use-calculator';
 import { useSplitsRates } from './use-splits-rates';
 import { FeeInput } from './fee-input';
 import { RoleSelector } from './role-selector';
 import { TierComparison } from './tier-comparison';
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 interface RTICalculatorProps {
   /** Optional: Enable scroll-triggered entrance animation */
@@ -24,7 +17,6 @@ interface RTICalculatorProps {
 
 export function RTICalculator({ animate = false, className = '' }: RTICalculatorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const { rates, platformTake, tierInfo, loading, error } = useSplitsRates();
 
@@ -38,31 +30,7 @@ export function RTICalculator({ animate = false, className = '' }: RTICalculator
     toggleRole,
   } = useCalculator({ rates, platformTake, tierInfo });
 
-  // Scroll-triggered entrance animation
-  useGSAP(
-    () => {
-      if (!animate || !containerRef.current || !contentRef.current) return;
-
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReducedMotion) return;
-
-      gsap.fromTo(
-        contentRef.current,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: duration.normal,
-          ease: easing.smooth,
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'top 75%',
-          },
-        }
-      );
-    },
-    { scope: containerRef, dependencies: [animate] }
-  );
+  useScrollReveal(containerRef);
 
   if (loading) {
     return (
@@ -87,7 +55,7 @@ export function RTICalculator({ animate = false, className = '' }: RTICalculator
 
   return (
     <div ref={containerRef} className={className}>
-      <div ref={contentRef} className={animate ? 'opacity-0' : ''}>
+      <div className={animate ? 'scroll-reveal fade-up' : ''}>
         {/* Mobile: Stack vertically, Desktop: Side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Input Section - Left side on desktop */}

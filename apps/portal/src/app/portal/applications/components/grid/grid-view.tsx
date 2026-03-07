@@ -19,36 +19,44 @@ export function GridView({
         applications.find((a) => a.id === selectedId) ?? null;
 
     return (
-        <div className="relative">
-            {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                {applications.map((application) => (
-                    <GridCard
-                        key={application.id}
-                        application={application}
-                        isSelected={selectedId === application.id}
-                        onSelect={() => onSelect(application)}
-                        onRefresh={onRefresh}
-                    />
-                ))}
+        <div className="drawer drawer-end">
+            <input
+                type="checkbox"
+                className="drawer-toggle"
+                checked={!!selectedApplication}
+                readOnly
+            />
+            <div className="drawer-content">
+                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                    {applications.map((application) => (
+                        <GridCard
+                            key={application.id}
+                            application={application}
+                            isSelected={selectedId === application.id}
+                            onSelect={() => onSelect(application)}
+                            onRefresh={onRefresh}
+                        />
+                    ))}
+                </div>
             </div>
-
-            {/* Detail Drawer */}
-            {selectedApplication && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/30 transition-opacity"
-                        onClick={() => onSelect(selectedApplication)}
-                    />
-                    <div className="fixed top-0 right-0 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+            <div className="drawer-side">
+                <div
+                    className="drawer-overlay"
+                    onClick={() =>
+                        selectedApplication && onSelect(selectedApplication)
+                    }
+                    aria-label="close drawer"
+                />
+                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
+                    {selectedApplication && (
                         <DetailLoader
                             applicationId={selectedApplication.id}
                             onClose={() => onSelect(selectedApplication)}
                             onRefresh={onRefresh}
                         />
-                    </div>
-                </>
-            )}
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

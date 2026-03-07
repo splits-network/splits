@@ -1,16 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import {
-    duration,
-    easing,
-    stagger,
-} from "@splits-network/basel-ui";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const whyJoin = [
     {
@@ -53,292 +44,15 @@ const values = [
 ];
 
 export function CareersContent() {
-    const heroRef = useRef<HTMLDivElement>(null);
-    const comingSoonRef = useRef<HTMLDivElement>(null);
-    const whyRef = useRef<HTMLDivElement>(null);
-    const areasRef = useRef<HTMLDivElement>(null);
-    const valuesRef = useRef<HTMLDivElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    // Hero animation - no scroll trigger (visible on load)
-    useGSAP(
-        () => {
-            if (!heroRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const content = heroRef.current.querySelector(".hero-content");
-            if (content) {
-                gsap.fromTo(
-                    content,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.hero,
-                        ease: easing.smooth,
-                    }
-                );
-            }
-        },
-        { scope: heroRef }
-    );
-
-    // Coming Soon animation
-    useGSAP(
-        () => {
-            if (!comingSoonRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const icon = comingSoonRef.current.querySelector(".coming-soon-icon");
-            const content = comingSoonRef.current.querySelector(".coming-soon-content");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: comingSoonRef.current,
-                    start: "top 85%",
-                },
-            });
-
-            if (icon) {
-                tl.fromTo(
-                    icon,
-                    { scale: 0, y: 20 },
-                    {
-                        scale: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                    }
-                );
-            }
-
-            if (content) {
-                tl.fromTo(
-                    content,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.3"
-                );
-            }
-        },
-        { scope: comingSoonRef }
-    );
-
-    // Why Join animation
-    useGSAP(
-        () => {
-            if (!whyRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const heading = whyRef.current.querySelector(".section-heading");
-            const cards = whyRef.current.querySelectorAll(".why-card");
-            const icons = whyRef.current.querySelectorAll(".card-icon");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: whyRef.current,
-                    start: "top 80%",
-                },
-            });
-
-            if (heading) {
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    }
-                );
-            }
-
-            if (cards.length > 0) {
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, y: 40, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.normal,
-                    },
-                    "-=0.3"
-                );
-            }
-
-            if (icons.length > 0) {
-                tl.fromTo(
-                    icons,
-                    { scale: 0 },
-                    {
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.5"
-                );
-            }
-        },
-        { scope: whyRef }
-    );
-
-    // Hiring Areas animation
-    useGSAP(
-        () => {
-            if (!areasRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const heading = areasRef.current.querySelector(".section-heading");
-            const cards = areasRef.current.querySelectorAll(".area-card");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: areasRef.current,
-                    start: "top 80%",
-                },
-            });
-
-            if (heading) {
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    }
-                );
-            }
-
-            if (cards.length > 0) {
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, x: -30 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.3"
-                );
-            }
-        },
-        { scope: areasRef }
-    );
-
-    // Values animation
-    useGSAP(
-        () => {
-            if (!valuesRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const heading = valuesRef.current.querySelector(".section-heading");
-            const cards = valuesRef.current.querySelectorAll(".value-card");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: valuesRef.current,
-                    start: "top 80%",
-                },
-            });
-
-            if (heading) {
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    }
-                );
-            }
-
-            if (cards.length > 0) {
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.normal,
-                    },
-                    "-=0.3"
-                );
-            }
-        },
-        { scope: valuesRef }
-    );
-
-    // CTA animation
-    useGSAP(
-        () => {
-            if (!ctaRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const content = ctaRef.current.querySelector(".cta-content");
-
-            gsap.fromTo(
-                content,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: ctaRef.current,
-                        start: "top 85%",
-                    },
-                }
-            );
-        },
-        { scope: ctaRef }
-    );
+    useScrollReveal(containerRef);
 
     return (
-        <>
+        <div ref={containerRef}>
             {/* Hero Section */}
-            <section ref={heroRef} className="hero bg-gradient-to-r from-success to-info text-success-content py-20 overflow-hidden">
-                <div className="hero-content text-center max-w-5xl">
+            <section className="hero bg-gradient-to-r from-success to-info text-success-content py-20 overflow-hidden">
+                <div className="scroll-reveal fade-up hero-content text-center max-w-5xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
                             Careers at Splits Network
@@ -351,13 +65,13 @@ export function CareersContent() {
             </section>
 
             {/* Coming Soon Message */}
-            <section ref={comingSoonRef} className="py-20 bg-base-100 overflow-hidden">
+            <section className="py-20 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="mb-12">
-                            <i className="coming-soon-icon fa-duotone fa-regular fa-rocket text-8xl text-primary opacity-20"></i>
+                            <i className="scroll-reveal scale-in fa-duotone fa-regular fa-rocket text-8xl text-primary opacity-20"></i>
                         </div>
-                        <div className="coming-soon-content">
+                        <div className="scroll-reveal fade-up">
                             <h2 className="text-4xl font-bold mb-6">Careers Page Coming Soon</h2>
                             <p className="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
                                 We're building something special at Splits Network, and we'll be looking for talented
@@ -376,15 +90,15 @@ export function CareersContent() {
             </section>
 
             {/* Why Work With Us */}
-            <section ref={whyRef} className="py-20 bg-base-200 overflow-hidden">
+            <section className="py-20 bg-base-200 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold mb-12 text-center">Why Splits Network?</h2>
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <h2 className="scroll-reveal fade-up text-4xl font-bold mb-12 text-center">Why Splits Network?</h2>
+                        <div className="grid md:grid-cols-3 gap-8 stagger-children">
                             {whyJoin.map((item, index) => (
-                                <div key={index} className="why-card card bg-base-100 shadow">
+                                <div key={index} className="scroll-reveal scale-in card bg-base-100 shadow">
                                     <div className="card-body text-center">
-                                        <div className={`card-icon w-16 h-16 rounded-full ${item.bgColor} flex items-center justify-center mx-auto mb-4`}>
+                                        <div className={`w-16 h-16 rounded-full ${item.bgColor} flex items-center justify-center mx-auto mb-4`}>
                                             <i className={`fa-duotone fa-regular ${item.icon} ${item.iconColor} text-2xl`}></i>
                                         </div>
                                         <h3 className="card-title justify-center text-xl mb-3">{item.title}</h3>
@@ -400,13 +114,13 @@ export function CareersContent() {
             </section>
 
             {/* Areas We're Building */}
-            <section ref={areasRef} className="py-20 bg-base-100 overflow-hidden">
+            <section className="py-20 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold mb-12 text-center">Areas We'll Be Hiring</h2>
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <h2 className="scroll-reveal fade-up text-4xl font-bold mb-12 text-center">Areas We'll Be Hiring</h2>
+                        <div className="grid md:grid-cols-2 gap-6 stagger-children">
                             {hiringAreas.map((area, index) => (
-                                <div key={index} className="area-card card bg-base-200 shadow">
+                                <div key={index} className="scroll-reveal slide-from-left card bg-base-200 shadow">
                                     <div className="card-body">
                                         <h3 className="card-title">
                                             <i className={`fa-duotone fa-regular ${area.icon} ${area.iconColor}`}></i>
@@ -424,13 +138,13 @@ export function CareersContent() {
             </section>
 
             {/* Values */}
-            <section ref={valuesRef} className="py-20 bg-neutral text-neutral-content overflow-hidden">
+            <section className="py-20 bg-neutral text-neutral-content overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="section-heading text-4xl font-bold mb-12 text-center">What We Value</h2>
-                        <div className="space-y-6">
+                        <h2 className="scroll-reveal fade-up text-4xl font-bold mb-12 text-center">What We Value</h2>
+                        <div className="space-y-6 stagger-children">
                             {values.map((value, index) => (
-                                <div key={index} className="value-card card bg-base-100 text-base-content shadow">
+                                <div key={index} className="scroll-reveal fade-up card bg-base-100 text-base-content shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <i className={`fa-duotone fa-regular ${value.icon} ${value.iconColor} text-2xl mt-1`}></i>
@@ -450,8 +164,8 @@ export function CareersContent() {
             </section>
 
             {/* CTA Section */}
-            <section ref={ctaRef} className="py-20 bg-primary text-primary-content overflow-hidden">
-                <div className="cta-content container mx-auto px-4 text-center">
+            <section className="py-20 bg-primary text-primary-content overflow-hidden">
+                <div className="scroll-reveal fade-up container mx-auto px-4 text-center">
                     <h2 className="text-4xl font-bold mb-6">Interested in Joining?</h2>
                     <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
                         Send your resume and tell us what excites you about Splits
@@ -465,6 +179,6 @@ export function CareersContent() {
                     </p>
                 </div>
             </section>
-        </>
+        </div>
     );
 }

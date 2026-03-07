@@ -646,63 +646,43 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
         }
     );
 
-    // GET manageable companies for current recruiter
+    // GET all permissions for the current recruiter across all active companies
     app.get(
-        '/api/v2/recruiter-companies/manageable-companies',
+        '/api/v2/recruiter-companies/my-permissions',
         routeOptions(),
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    '/api/v2/recruiter-companies/manageable-companies',
+                    '/api/v2/recruiter-companies/my-permissions',
                     undefined,
                     correlationId,
                     buildAuthHeaders(request)
                 );
                 return reply.send(data);
             } catch (error: any) {
-                return handleNetworkError(request, reply, error, 'Failed to fetch manageable companies');
+                return handleNetworkError(request, reply, error, 'Failed to get recruiter permissions');
             }
         }
     );
 
-    // GET manageable companies with details (id, name) for current recruiter
+    // GET permissions for the current recruiter for a specific company
     app.get(
-        '/api/v2/recruiter-companies/manageable-companies-with-details',
-        routeOptions(),
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            try {
-                const correlationId = getCorrelationId(request);
-                const data = await networkService().get(
-                    '/api/v2/recruiter-companies/manageable-companies-with-details',
-                    undefined,
-                    correlationId,
-                    buildAuthHeaders(request)
-                );
-                return reply.send(data);
-            } catch (error: any) {
-                return handleNetworkError(request, reply, error, 'Failed to fetch manageable companies');
-            }
-        }
-    );
-
-    // GET check if recruiter can manage company jobs
-    app.get(
-        '/api/v2/recruiter-companies/can-manage/:companyId',
+        '/api/v2/recruiter-companies/my-permissions/:companyId',
         routeOptions(),
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
                 const { companyId } = request.params as { companyId: string };
                 const correlationId = getCorrelationId(request);
                 const data = await networkService().get(
-                    `/api/v2/recruiter-companies/can-manage/${companyId}`,
+                    `/api/v2/recruiter-companies/my-permissions/${companyId}`,
                     undefined,
                     correlationId,
                     buildAuthHeaders(request)
                 );
                 return reply.send(data);
             } catch (error: any) {
-                return handleNetworkError(request, reply, error, 'Failed to check company management permission');
+                return handleNetworkError(request, reply, error, 'Failed to get recruiter permissions for company');
             }
         }
     );

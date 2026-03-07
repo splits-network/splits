@@ -21,7 +21,7 @@ export function ProviderCard({
     onConnect,
 }: ProviderCardProps) {
     return (
-        <div className="integration-card opacity-0 border border-base-300 bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+        <div className="integration-card scroll-reveal fade-up border border-base-300 bg-base-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-5">
                 {/* Header row */}
                 <div className="flex items-start gap-4 mb-3">

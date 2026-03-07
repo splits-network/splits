@@ -42,7 +42,7 @@ export function ControlsBar({
     requestCount,
 }: ControlsBarProps) {
     return (
-        <div className="controls-bar mb-4 flex flex-wrap items-center gap-2 opacity-0">
+        <div className="controls-bar mb-4 flex flex-wrap items-center gap-2 scroll-reveal fade-up">
             {/* Search — native DaisyUI input with icon */}
             <label className="input input-sm flex-1 min-w-64">
                 <i className="fa-duotone fa-regular fa-magnifying-glass opacity-50" />

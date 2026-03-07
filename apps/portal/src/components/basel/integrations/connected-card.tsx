@@ -33,7 +33,7 @@ export function ConnectedCard({
         : null;
 
     return (
-        <div className="integration-card opacity-0 border-l-4 border-l-primary border border-base-300 bg-base-100 shadow-sm">
+        <div className="integration-card scroll-reveal fade-up border-l-4 border-l-primary border border-base-300 bg-base-100 shadow-sm">
             <div className="p-5">
                 <div className="flex items-start gap-4">
                     {/* Provider icon */}

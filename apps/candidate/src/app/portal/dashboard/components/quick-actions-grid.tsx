@@ -159,7 +159,7 @@ export default function QuickActionsGrid({
                     <Link
                         key={action.href}
                         href={action.href}
-                        className={`action-card relative p-4 flex flex-col items-start gap-1.5 transition-all duration-200 hover:-translate-y-0.5 opacity-0 ${
+                        className={`action-card relative p-4 flex flex-col items-start gap-1.5 transition-all duration-200 hover:-translate-y-0.5 scroll-reveal fade-up ${
                             highlighted
                                 ? `${colors.bg} border-l-4 ${colors.border}`
                                 : "bg-base-100 border-l-4 border-transparent hover:border-base-content/10"

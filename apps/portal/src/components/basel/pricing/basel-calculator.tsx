@@ -1,9 +1,7 @@
 "use client";
 
 import { useRef, useId } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { useCalculator } from "@/components/calculator/use-calculator";
 import { useSplitsRates } from "@/components/calculator/use-splits-rates";
 import { AnimatedPayout } from "@/components/calculator/animated-payout";
@@ -16,10 +14,6 @@ const ROLE_META: RoleMeta[] = [
     { id: 'candidate_sourcer', label: 'Candidate Sourcer', description: 'Initially sourced the candidate' },
     { id: 'company_sourcer', label: 'Company Sourcer', description: 'Initially sourced the company' },
 ];
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -84,31 +78,7 @@ export function BaselCalculator({
     const paidPayout = payouts.find((p) => p.tier === "paid");
     const premiumPayout = payouts.find((p) => p.tier === "premium");
 
-    useGSAP(
-        () => {
-            if (!shouldAnimate || !containerRef.current || !contentRef.current)
-                return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(contentRef.current, { opacity: 1 });
-                return;
-            }
-            gsap.fromTo(
-                contentRef.current,
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: containerRef.current,
-                        start: "top 80%",
-                    },
-                },
-            );
-        },
-        { scope: containerRef, dependencies: [shouldAnimate] },
-    );
+    useScrollReveal(containerRef);
 
     /* ── Shared sub-sections ──────────────────────────────────────────────── */
 
@@ -468,7 +438,7 @@ export function BaselCalculator({
 
     return (
         <div ref={containerRef} className={className}>
-            <div ref={contentRef} className={shouldAnimate ? "opacity-0" : ""}>
+            <div className={shouldAnimate ? "scroll-reveal fade-up" : ""}>
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
                     {/* Input panel — 2 of 5 cols */}
                     <div className="lg:col-span-2 space-y-6">

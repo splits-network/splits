@@ -198,22 +198,22 @@ export default function StatusClient({
             <section className="bs-hero py-28 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <div className="bs-hero-badge mb-6 opacity-0">
+                        <div className="bs-hero-badge mb-6 scroll-reveal fade-up">
                             <span className={`${heroState.badgeClass} gap-2`}>
                                 <i className="fa-duotone fa-regular fa-signal-bars" />
                                 System Status
                             </span>
                         </div>
 
-                        <h1 className="bs-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-6 opacity-0">
+                        <h1 className="bs-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-6 scroll-reveal fade-up">
                             {heroState.headline}
                         </h1>
 
-                        <p className="bs-hero-body text-lg md:text-xl opacity-70 leading-relaxed mb-8 opacity-0">
+                        <p className="bs-hero-body text-lg md:text-xl opacity-70 leading-relaxed mb-8 scroll-reveal fade-up">
                             {heroState.subtext}
                         </p>
 
-                        <div className="bs-hero-timestamp inline-flex items-center gap-3 border-l-4 border-secondary bg-neutral-content/5 px-6 py-3 opacity-0">
+                        <div className="bs-hero-timestamp inline-flex items-center gap-3 border-l-4 border-secondary bg-neutral-content/5 px-6 py-3 scroll-reveal fade-up">
                             <i className="fa-duotone fa-regular fa-clock text-secondary" />
                             <span
                                 className="text-sm font-semibold opacity-70"
@@ -248,7 +248,7 @@ export default function StatusClient({
                             },
                             { value: "30s", label: "Refresh Interval" },
                         ].map((m, i) => (
-                            <div key={i} className="bs-metric-item opacity-0">
+                            <div key={i} className="bs-metric-item scroll-reveal fade-up">
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {m.value}
                                 </div>
@@ -271,7 +271,7 @@ export default function StatusClient({
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-7xl mx-auto">
                         {/* Section kicker + heading spans full width */}
-                        <div className="bs-editorial-heading mb-12 opacity-0">
+                        <div className="bs-editorial-heading mb-12 scroll-reveal fade-up">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 Infrastructure
                             </p>
@@ -289,7 +289,7 @@ export default function StatusClient({
                             {/* LEFT — Service breakdown (2/3) */}
                             <div className="lg:col-span-2">
                                 <div className="bs-services">
-                                    <h3 className="bs-services-heading text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-5 border-b border-base-300 pb-3 opacity-0">
+                                    <h3 className="bs-services-heading text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-5 border-b border-base-300 pb-3 scroll-reveal fade-up">
                                         Service health
                                     </h3>
 
@@ -313,7 +313,7 @@ export default function StatusClient({
                                             return (
                                                 <div
                                                     key={service.name}
-                                                    className={`bs-service-card border-l-4 ${borderColor} bg-base-200 p-5 shadow-sm opacity-0`}
+                                                    className={`bs-service-card border-l-4 ${borderColor} bg-base-200 p-5 shadow-sm scroll-reveal fade-up`}
                                                 >
                                                     <div className="flex items-start justify-between gap-3 mb-3">
                                                         <h4 className="font-bold text-sm">
@@ -377,7 +377,7 @@ export default function StatusClient({
 
                             {/* RIGHT — Active incidents (1/3) */}
                             <div className="bs-incidents">
-                                <h3 className="bs-incidents-heading text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-5 border-b border-base-300 pb-3 opacity-0">
+                                <h3 className="bs-incidents-heading text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-5 border-b border-base-300 pb-3 scroll-reveal fade-up">
                                     Active incidents
                                 </h3>
 
@@ -386,7 +386,7 @@ export default function StatusClient({
                                         {unhealthyServices.map((service) => (
                                             <div
                                                 key={service.name}
-                                                className="bs-incident-card border-l-4 border-error bg-base-200 p-5 shadow-sm opacity-0"
+                                                className="bs-incident-card border-l-4 border-error bg-base-200 p-5 shadow-sm scroll-reveal fade-up"
                                             >
                                                 <div className="flex items-start gap-3">
                                                     <div className="w-10 h-10 flex items-center justify-center flex-shrink-0 bg-error/10">
@@ -411,7 +411,7 @@ export default function StatusClient({
                                 )}
 
                                 {unhealthyServices.length === 0 && (
-                                    <div className="bs-no-incidents border-l-4 border-success bg-base-200 p-6 shadow-sm opacity-0">
+                                    <div className="bs-no-incidents border-l-4 border-success bg-base-200 p-6 shadow-sm scroll-reveal fade-up">
                                         <div className="flex items-center gap-4 mb-3">
                                             <i className="fa-duotone fa-regular fa-circle-check text-2xl text-success" />
                                             <p className="font-bold text-base">
@@ -428,7 +428,7 @@ export default function StatusClient({
 
                                 {/* Sidebar info cards */}
                                 <div className="mt-6 space-y-4">
-                                    <div className="bs-sidebar-card border-l-4 border-secondary bg-base-200 p-5 shadow-sm opacity-0">
+                                    <div className="bs-sidebar-card border-l-4 border-secondary bg-base-200 p-5 shadow-sm scroll-reveal fade-up">
                                         <h4 className="font-bold text-sm mb-2">
                                             <i className="fa-duotone fa-regular fa-clock text-secondary mr-2" />
                                             Support hours
@@ -442,7 +442,7 @@ export default function StatusClient({
                                         </ul>
                                     </div>
 
-                                    <div className="bs-sidebar-card border-l-4 border-accent bg-base-200 p-5 shadow-sm opacity-0">
+                                    <div className="bs-sidebar-card border-l-4 border-accent bg-base-200 p-5 shadow-sm scroll-reveal fade-up">
                                         <h4 className="font-bold text-sm mb-2">
                                             <i className="fa-duotone fa-regular fa-circle-info text-accent mr-2" />
                                             Quick links
@@ -481,7 +481,7 @@ export default function StatusClient({
             <section id="contact" className="bs-contact py-20 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
-                        <div className="mb-10 opacity-0 bs-contact-heading">
+                        <div className="mb-10 scroll-reveal fade-up bs-contact-heading">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 Report an Issue
                             </p>
@@ -494,7 +494,7 @@ export default function StatusClient({
                             </p>
                         </div>
 
-                        <div className="bs-contact-form border-l-4 border-primary bg-base-100 p-8 shadow-md opacity-0">
+                        <div className="bs-contact-form border-l-4 border-primary bg-base-100 p-8 shadow-md scroll-reveal fade-up">
                             {formFeedback && (
                                 <div
                                     className={`alert mb-6 ${
@@ -651,7 +651,7 @@ export default function StatusClient({
                ══════════════════════════════════════════════════════════ */}
             <section className="bs-cta py-24 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="bs-cta-content text-center max-w-3xl mx-auto opacity-0">
+                    <div className="bs-cta-content text-center max-w-3xl mx-auto scroll-reveal fade-up">
                         <h2 className="text-4xl md:text-5xl font-black leading-[0.95] tracking-tight mb-6">
                             Something not right?
                         </h2>
@@ -688,7 +688,7 @@ export default function StatusClient({
                     <div className="container mx-auto px-6 lg:px-12">
                         <div className="max-w-4xl mx-auto">
                             <details className="group">
-                                <summary className="bs-past-incidents-toggle font-bold text-xl cursor-pointer list-none flex items-center gap-2 select-none opacity-0">
+                                <summary className="bs-past-incidents-toggle font-bold text-xl cursor-pointer list-none flex items-center gap-2 select-none scroll-reveal fade-up">
                                     <i className="fa-duotone fa-regular fa-chevron-right text-sm text-secondary transition-transform duration-200 group-open:rotate-90" />
                                     <i className="fa-duotone fa-regular fa-clock-rotate-left mr-1 text-secondary" />
                                     Incident History

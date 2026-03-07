@@ -1,14 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal, useAnimatedCounter } from "@splits-network/basel-ui";
 
 const metrics = [
     {
@@ -45,114 +38,40 @@ const metrics = [
     },
 ];
 
+function MetricCard({ metric }: { metric: typeof metrics[number] }) {
+    const counterRef = useAnimatedCounter(metric.value, { suffix: metric.suffix });
+
+    return (
+        <div
+            className="scroll-reveal fade-up metric-card bg-base-100/5 border border-base-100/10 rounded-2xl p-8 text-center"
+        >
+            <div
+                className={`scroll-reveal scale-in metric-icon w-16 h-16 rounded-full bg-${metric.color}/20 flex items-center justify-center mx-auto mb-6`}
+            >
+                <i
+                    className={`${metric.icon} text-2xl text-${metric.color}`}
+                ></i>
+            </div>
+            <span
+                ref={counterRef}
+                className={`metric-value block text-4xl md:text-5xl font-bold text-${metric.color} mb-2`}
+            >
+                0{metric.suffix}
+            </span>
+            <div className="font-semibold text-lg mb-1">
+                {metric.label}
+            </div>
+            <div className="text-sm opacity-60">
+                {metric.description}
+            </div>
+        </div>
+    );
+}
+
 export function MetricsSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const metricsRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading animation
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // Metric cards stagger in
-            const cards = metricsRef.current?.querySelectorAll(".metric-card");
-            if (cards) {
-                gsap.fromTo(
-                    cards,
-                    { opacity: 0, y: 40, scale: 0.9 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                        stagger: stagger.normal,
-                        scrollTrigger: {
-                            trigger: metricsRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // Counter animations
-            const valueElements =
-                metricsRef.current?.querySelectorAll(".metric-value");
-            if (valueElements) {
-                valueElements.forEach((el, index) => {
-                    const target = metrics[index].value;
-                    const suffix = metrics[index].suffix;
-
-                    gsap.fromTo(
-                        { value: 0 },
-                        { value: target },
-                        {
-                            duration: duration.counter,
-                            ease: easing.smooth,
-                            delay: 0.3 + index * stagger.normal,
-                            scrollTrigger: {
-                                trigger: metricsRef.current,
-                                start: "top 80%",
-                            },
-                            onUpdate: function () {
-                                const current = Math.floor(
-                                    this.targets()[0].value,
-                                );
-                                if (target >= 1000) {
-                                    el.textContent =
-                                        current.toLocaleString() + suffix;
-                                } else {
-                                    el.textContent = current + suffix;
-                                }
-                            },
-                        },
-                    );
-                });
-            }
-
-            // Icons pop
-            const icons = metricsRef.current?.querySelectorAll(".metric-icon");
-            if (icons) {
-                gsap.fromTo(
-                    icons,
-                    { scale: 0 },
-                    {
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.normal,
-                        delay: 0.2,
-                        scrollTrigger: {
-                            trigger: metricsRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     return (
         <section
@@ -161,8 +80,7 @@ export function MetricsSection() {
         >
             <div className="container mx-auto px-4">
                 <div
-                    ref={headingRef}
-                    className="text-center mb-16 opacity-0 max-w-3xl mx-auto"
+                    className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto"
                 >
                     <p className="text-sm uppercase tracking-wider opacity-60 mb-3">
                         By The Numbers
@@ -177,33 +95,10 @@ export function MetricsSection() {
                 </div>
 
                 <div
-                    ref={metricsRef}
-                    className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto"
+                    className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto stagger-children"
                 >
                     {metrics.map((metric, index) => (
-                        <div
-                            key={index}
-                            className="metric-card bg-base-100/5 border border-base-100/10 rounded-2xl p-8 text-center opacity-0"
-                        >
-                            <div
-                                className={`metric-icon w-16 h-16 rounded-full bg-${metric.color}/20 flex items-center justify-center mx-auto mb-6`}
-                            >
-                                <i
-                                    className={`${metric.icon} text-2xl text-${metric.color}`}
-                                ></i>
-                            </div>
-                            <div
-                                className={`metric-value text-4xl md:text-5xl font-bold text-${metric.color} mb-2`}
-                            >
-                                0{metric.suffix}
-                            </div>
-                            <div className="font-semibold text-lg mb-1">
-                                {metric.label}
-                            </div>
-                            <div className="text-sm opacity-60">
-                                {metric.description}
-                            </div>
-                        </div>
+                        <MetricCard key={index} metric={metric} />
                     ))}
                 </div>
             </div>

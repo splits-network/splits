@@ -25,7 +25,7 @@ export default function ReputationPage() {
 
             <div className="flex gap-3 mb-4">
                 <select
-                    className="select select-sm select-bordered"
+                    className="select select-sm"
                     value={filters.tier}
                     onChange={(e) => setFilter('tier', e.target.value)}
                 >
@@ -38,7 +38,7 @@ export default function ReputationPage() {
                     ))}
                 </select>
                 <select
-                    className="select select-sm select-bordered"
+                    className="select select-sm"
                     value={filters.entity_type}
                     onChange={(e) => setFilter('entity_type', e.target.value)}
                 >

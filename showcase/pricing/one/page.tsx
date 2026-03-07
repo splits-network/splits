@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* --- Data ----------------------------------------------------------------- */
 
@@ -145,66 +139,7 @@ export default function PricingOne() {
     const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
     const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-            tl.fromTo(
-                $1(".pricing-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".pricing-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".pricing-desc"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                )
-                .fromTo(
-                    $1(".pricing-toggle"),
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4 },
-                    "-=0.2",
-                )
-                .fromTo(
-                    $(".pricing-card"),
-                    { opacity: 0, y: 40 },
-                    { opacity: 1, y: 0, duration: 0.6, stagger: 0.12 },
-                    "-=0.2",
-                );
-
-            $(".pricing-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        scrollTrigger: { trigger: section, start: "top 85%" },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -217,27 +152,27 @@ export default function PricingOne() {
                     }}
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12 text-center">
-                    <p className="pricing-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                    <p className="pricing-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                         Pricing
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                        <span className="pricing-title-word inline-block opacity-0">
+                        <span className="pricing-title-word inline-block scroll-reveal hero-word">
                             Simple,
                         </span>{" "}
-                        <span className="pricing-title-word inline-block opacity-0 text-primary">
+                        <span className="pricing-title-word inline-block scroll-reveal hero-word text-primary">
                             transparent
                         </span>{" "}
-                        <span className="pricing-title-word inline-block opacity-0">
+                        <span className="pricing-title-word inline-block scroll-reveal hero-word">
                             pricing.
                         </span>
                     </h1>
-                    <p className="pricing-desc text-base text-neutral-content/50 max-w-xl mx-auto opacity-0">
+                    <p className="pricing-desc text-base text-neutral-content/50 max-w-xl mx-auto scroll-reveal fade-up">
                         Start free. Upgrade when you are ready. No hidden fees,
                         no surprises.
                     </p>
 
                     {/* Billing Toggle */}
-                    <div className="pricing-toggle opacity-0 flex items-center justify-center gap-4 mt-8">
+                    <div className="pricing-toggle scroll-reveal fade-up flex items-center justify-center gap-4 mt-8">
                         <span
                             className={`text-sm font-semibold ${billing === "monthly" ? "text-neutral-content" : "text-neutral-content/40"}`}
                         >
@@ -275,7 +210,7 @@ export default function PricingOne() {
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
-                            className={`pricing-card opacity-0 bg-base-100 border border-base-300 p-8 lg:p-10 relative ${plan.popular ? "border-coral border-2 lg:-mt-4 lg:mb-0 lg:pb-14 " : ""}`}
+                            className={`pricing-card scroll-reveal fade-up bg-base-100 border border-base-300 p-8 lg:p-10 relative ${plan.popular ? "border-coral border-2 lg:-mt-4 lg:mb-0 lg:pb-14 " : ""}`}
                         >
                             {plan.popular && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-content text-sm font-bold uppercase tracking-wider">
@@ -330,7 +265,7 @@ export default function PricingOne() {
             </section>
 
             {/* Comparison Table */}
-            <section className="pricing-section opacity-0 container mx-auto px-6 lg:px-12 py-16 lg:py-24">
+            <section className="pricing-section scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-16 lg:py-24">
                 <h2 className="text-2xl md:text-3xl font-black tracking-tight text-center mb-10">
                     Compare plans
                 </h2>
@@ -378,7 +313,7 @@ export default function PricingOne() {
             </section>
 
             {/* FAQ */}
-            <section className="pricing-section opacity-0 bg-base-200 py-16 lg:py-24">
+            <section className="pricing-section scroll-reveal fade-up bg-base-200 py-16 lg:py-24">
                 <div className="container mx-auto px-6 lg:px-12 max-w-3xl">
                     <h2 className="text-2xl md:text-3xl font-black tracking-tight text-center mb-10">
                         Frequently Asked Questions
@@ -411,7 +346,7 @@ export default function PricingOne() {
             </section>
 
             {/* CTA */}
-            <section className="pricing-section opacity-0 bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="pricing-section scroll-reveal fade-up bg-neutral text-neutral-content py-16 lg:py-20">
                 <div className="container mx-auto px-6 lg:px-12 text-center">
                     <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">
                         Ready to grow your pipeline?

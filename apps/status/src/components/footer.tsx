@@ -1,15 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import Image from "next/image";
-import { BaselFooter } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal, BaselFooter } from "@splits-network/basel-ui";
 
 const PLATFORM_LINKS = [
     { label: "Splits Network", href: "https://splits.network" },
@@ -53,76 +46,7 @@ const BOTTOM_LEGAL = [
 export function Footer() {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                containerRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => {
-                        gsap.set(el, { opacity: 1 });
-                    });
-                return;
-            }
-
-            const $ = (sel: string) =>
-                containerRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) =>
-                containerRef.current!.querySelector(sel);
-
-            const ctaBand = $1(".footer-cta-band");
-            if (ctaBand) {
-                gsap.fromTo(
-                    ctaBand,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: ctaBand,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            }
-
-            gsap.fromTo(
-                $(".footer-col"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    stagger: 0.08,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".footer-columns"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            const bottom = $1(".footer-bottom");
-            if (bottom) {
-                gsap.fromTo(
-                    bottom,
-                    { opacity: 0 },
-                    {
-                        opacity: 1,
-                        duration: 0.6,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: bottom,
-                            start: "top 95%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: containerRef },
-    );
+    useScrollReveal(containerRef);
 
     return (
         <BaselFooter
@@ -173,7 +97,7 @@ export function Footer() {
             }
             columns={
                 <>
-                    <div className="footer-col opacity-0">
+                    <div className="footer-col scroll-reveal fade-up">
                         <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
                             <span className="w-4 h-0.5 bg-primary" />
                             Platform
@@ -194,7 +118,7 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    <div className="footer-col opacity-0">
+                    <div className="footer-col scroll-reveal fade-up">
                         <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
                             <span className="w-4 h-0.5 bg-primary" />
                             Legal
@@ -215,12 +139,12 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    <div className="footer-col opacity-0" />
-                    <div className="footer-col opacity-0" />
+                    <div className="footer-col scroll-reveal fade-up" />
+                    <div className="footer-col scroll-reveal fade-up" />
                 </>
             }
             bottomBar={
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 opacity-0">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 scroll-reveal fade-in">
                     <div className="flex items-center gap-1 text-sm opacity-30">
                         <i className="fa-duotone fa-regular fa-copyright" />
                         <span>

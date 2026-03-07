@@ -14,6 +14,8 @@ import {
     RecruiterCompanyCreate,
     RecruiterCompanyUpdate,
     RecruiterCompanyFilters,
+    RecruiterCompanyPermissions,
+    DEFAULT_PERMISSIONS,
     InviteRecruiterRequest,
     AcceptInvitationRequest,
     TerminateRelationshipRequest,
@@ -105,12 +107,13 @@ export class RecruiterCompanyServiceV2 {
             throw new Error('Recruiter is already actively working with this company');
         }
 
-        // Create pending relationship
+        // Create pending relationship with permissions
+        const permissions = request.permissions || DEFAULT_PERMISSIONS;
         const relationship = await this.repository.create({
             recruiter_id: request.recruiter_id,
             company_id: request.company_id,
             relationship_type: 'recruiter',
-            can_manage_company_jobs: request.can_manage_company_jobs || false,
+            permissions,
             invited_by: userContext.identityUserId || undefined
         }, clerkUserId);
 
@@ -119,7 +122,7 @@ export class RecruiterCompanyServiceV2 {
             relationshipId: relationship.id,
             recruiterId: request.recruiter_id,
             companyId: request.company_id,
-            canManageJobs: request.can_manage_company_jobs || false,
+            permissions,
             invitedBy: userContext.identityUserId,
             message: request.message
         });
@@ -161,12 +164,15 @@ export class RecruiterCompanyServiceV2 {
             throw new Error('An active or pending relationship already exists with this company');
         }
 
-        // Create pending relationship via recruiter-specific method
+        // Create pending relationship with terms acknowledgment
         const relationship = await this.repository.createConnectionRequest({
             recruiter_id: userContext.recruiterId,
             company_id: request.company_id,
             relationship_type: request.relationship_type || 'recruiter',
-            invited_by: userContext.identityUserId || undefined
+            invited_by: userContext.identityUserId || undefined,
+            request_message: request.message || undefined,
+            terms_acknowledged_at: new Date().toISOString(),
+            terms_acknowledged_by: userContext.identityUserId || undefined,
         });
 
         // Publish event
@@ -184,11 +190,13 @@ export class RecruiterCompanyServiceV2 {
 
     /**
      * Accept or decline invitation
+     * When accepting, the accepting party can set granular permissions
      */
     async respondToInvitation(
         relationshipId: string,
         accept: boolean,
-        clerkUserId: string
+        clerkUserId: string,
+        permissions?: RecruiterCompanyPermissions
     ): Promise<RecruiterCompany> {
         const startTime = Date.now();
         console.log(`[RESPOND] Start - relationshipId: ${relationshipId}, accept: ${accept}`);
@@ -231,6 +239,11 @@ export class RecruiterCompanyServiceV2 {
         const newStatus = accept ? 'active' : 'declined';
         const updates: RecruiterCompanyUpdate = { status: newStatus };
 
+        // When accepting, apply permissions (use defaults if none provided)
+        if (accept) {
+            updates.permissions = permissions || DEFAULT_PERMISSIONS;
+        }
+
         const updatedRelationship = await this.repository.update(relationshipId, updates, clerkUserId);
         console.log(`[RESPOND] Update completed in ${Date.now() - startTime}ms`);
 
@@ -240,7 +253,8 @@ export class RecruiterCompanyServiceV2 {
             relationshipId: relationship.id,
             recruiterId: relationship.recruiter_id,
             companyId: relationship.company_id,
-            respondedBy: userContext.identityUserId
+            respondedBy: userContext.identityUserId,
+            permissions: accept ? updatedRelationship.permissions : undefined
         });
         console.log(`[RESPOND] Event published, total time: ${Date.now() - startTime}ms`);
 
@@ -270,7 +284,7 @@ export class RecruiterCompanyServiceV2 {
         const relationship = await this.repository.update(id, updates, clerkUserId);
 
         // Publish event if significant changes
-        if (updates.status || updates.can_manage_company_jobs !== undefined) {
+        if (updates.status || updates.permissions) {
             await this.eventPublisher?.publish('recruiter_company.updated', {
                 relationshipId: id,
                 changes: Object.keys(updates),
@@ -332,31 +346,32 @@ export class RecruiterCompanyServiceV2 {
     }
 
     /**
-     * Get all companies a recruiter can manage jobs for
+     * Get all permissions for a recruiter-company relationship
      */
-    async getManageableCompanies(recruiterId: string): Promise<string[]> {
-        return await this.repository.getManageableCompanyIds(recruiterId);
+    async getPermissions(
+        recruiterId: string,
+        companyId: string
+    ): Promise<RecruiterCompanyPermissions | null> {
+        return this.repository.getPermissions(recruiterId, companyId);
     }
 
     /**
-     * Check if recruiter can manage jobs for specific company
+     * Check if recruiter has a specific permission for a company
      */
-    async canManageCompanyJobs(recruiterId: string, companyId: string): Promise<boolean> {
-        const { data } = await this.repository.list('system', {
-            recruiter_id: recruiterId,
-            company_id: companyId,
-            status: 'active',
-            can_manage_company_jobs: true,
-            limit: 1
-        });
-
-        return data.length > 0;
+    async hasPermission(
+        recruiterId: string,
+        companyId: string,
+        permission: keyof RecruiterCompanyPermissions
+    ): Promise<boolean> {
+        return this.repository.hasPermission(recruiterId, companyId, permission);
     }
 
     /**
-     * Get all companies a recruiter can manage jobs for, with details
+     * Get all permissions across all active company relationships for a recruiter
      */
-    async getManageableCompaniesWithDetails(recruiterId: string): Promise<{ id: string; name: string }[]> {
-        return await this.repository.getManageableCompaniesWithDetails(recruiterId);
+    async getAllPermissionsForRecruiter(
+        recruiterId: string
+    ): Promise<{ company_id: string; company_name: string; permissions: RecruiterCompanyPermissions }[]> {
+        return this.repository.getAllPermissionsForRecruiter(recruiterId);
     }
 }

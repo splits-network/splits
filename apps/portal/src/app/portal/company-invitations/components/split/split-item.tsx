@@ -72,16 +72,6 @@ export function SplitItem({
                 </span>
             </div>
 
-            {/* Row 4: permissions */}
-            {invitation.can_manage_company_jobs && (
-                <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold text-success">
-                        <i className="fa-duotone fa-regular fa-briefcase mr-1" />
-                        Can Manage Jobs
-                    </span>
-                </div>
-            )}
-
             {/* Actions */}
             <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
                 <ConnectionActionsToolbar

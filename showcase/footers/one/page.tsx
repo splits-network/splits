@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Footer Data ────────────────────────────────────────────────────────── */
 
@@ -91,165 +85,7 @@ export default function FootersOne() {
     };
 
     /* ── GSAP Animations ──────────────────────────────────────── */
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            /* Hero entrance */
-            const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
-            });
-
-            heroTl
-                .fromTo(
-                    $1(".showcase-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                )
-                .fromTo(
-                    $(".showcase-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".showcase-desc"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                );
-
-            /* Content sections */
-            $(".content-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: section,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            });
-
-            /* Footer: CTA band */
-            gsap.fromTo(
-                $1(".footer-cta-band"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.8,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".footer-cta-band"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            /* Footer: newsletter */
-            gsap.fromTo(
-                $1(".footer-newsletter"),
-                { opacity: 0, x: -40 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".footer-newsletter"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            /* Footer: columns stagger */
-            gsap.fromTo(
-                $(".footer-col"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    stagger: 0.08,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".footer-columns"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            /* Footer: stats bar */
-            gsap.fromTo(
-                $(".footer-stat"),
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.4,
-                    stagger: 0.08,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".footer-stats-bar"),
-                        start: "top 90%",
-                    },
-                },
-            );
-
-            /* Footer: bottom bar */
-            gsap.fromTo(
-                $1(".footer-bottom"),
-                { opacity: 0 },
-                {
-                    opacity: 1,
-                    duration: 0.6,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".footer-bottom"),
-                        start: "top 95%",
-                    },
-                },
-            );
-
-            /* Footer: social icons */
-            gsap.fromTo(
-                $(".social-icon"),
-                { opacity: 0, scale: 0.8 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 0.3,
-                    stagger: 0.06,
-                    ease: "back.out(1.7)",
-                    scrollTrigger: {
-                        trigger: $1(".social-row"),
-                        start: "top 90%",
-                    },
-                },
-            );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -270,24 +106,24 @@ export default function FootersOne() {
 
                 <div className="relative  container mx-auto px-6 lg:px-12 py-20">
                     <div className="max-w-3xl">
-                        <p className="showcase-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-5 opacity-0">
+                        <p className="showcase-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-5 scroll-reveal fade-up">
                             Footer Component
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="showcase-word inline-block opacity-0">
+                            <span className="showcase-word inline-block scroll-reveal hero-word">
                                 Split-Screen
                             </span>{" "}
-                            <span className="showcase-word inline-block opacity-0 text-primary">
+                            <span className="showcase-word inline-block scroll-reveal hero-word text-primary">
                                 Editorial
                             </span>{" "}
                             <br className="hidden md:block" />
-                            <span className="showcase-word inline-block opacity-0">
+                            <span className="showcase-word inline-block scroll-reveal hero-word">
                                 Footer.
                             </span>
                         </h1>
 
-                        <p className="showcase-desc text-lg text-neutral-content/60 leading-relaxed max-w-xl opacity-0">
+                        <p className="showcase-desc text-lg text-neutral-content/60 leading-relaxed max-w-xl scroll-reveal fade-up">
                             A comprehensive footer system built on the editorial
                             grid. Features a bold CTA band, newsletter signup
                             with split-screen layout, organized navigation
@@ -323,7 +159,7 @@ export default function FootersOne() {
             {/* ═══════════════════════════════════════════════════════
                 SAMPLE CONTENT — Gives context above footer
                ═══════════════════════════════════════════════════════ */}
-            <section className="content-section py-24 bg-base-100 opacity-0">
+            <section className="content-section py-24 bg-base-100 scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         <div className="lg:col-span-3">
@@ -448,7 +284,7 @@ export default function FootersOne() {
             </section>
 
             {/* Transition section */}
-            <section className="content-section py-16 bg-base-200 opacity-0">
+            <section className="content-section py-16 bg-base-200 scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12 text-center">
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                         Scroll Down
@@ -471,7 +307,7 @@ export default function FootersOne() {
                ═══════════════════════════════════════════════════════ */}
 
             {/* ── 1. CTA Band ─────────────────────────────────────── */}
-            <section className="footer-cta-band bg-primary text-primary-content py-16 opacity-0">
+            <section className="footer-cta-band bg-primary text-primary-content py-16 scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-8 items-center">
                         <div className="lg:col-span-3">
@@ -506,7 +342,7 @@ export default function FootersOne() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-0 py-16 border-b border-neutral-content/10">
                         {/* Left: Newsletter */}
-                        <div className="footer-newsletter lg:col-span-3 lg:pr-16 lg:border-r lg:border-neutral-content/10 mb-10 lg:mb-0 opacity-0">
+                        <div className="footer-newsletter lg:col-span-3 lg:pr-16 lg:border-r lg:border-neutral-content/10 mb-10 lg:mb-0 scroll-reveal slide-from-left">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 bg-primary flex items-center justify-center">
                                     <i className="fa-duotone fa-regular fa-envelope text-primary-content" />
@@ -595,7 +431,7 @@ export default function FootersOne() {
                                         key={social.label}
                                         href={social.href}
                                         title={social.label}
-                                        className="social-icon w-9 h-9 bg-neutral-content/5 hover:bg-primary hover:text-primary-content flex items-center justify-center transition-all opacity-0"
+                                        className="social-icon w-9 h-9 bg-neutral-content/5 hover:bg-primary hover:text-primary-content flex items-center justify-center transition-all scroll-reveal scale-in"
                                     >
                                         <i
                                             className={`${social.icon} text-sm`}
@@ -613,7 +449,7 @@ export default function FootersOne() {
                         {footerSections.map((section) => (
                             <div
                                 key={section.title}
-                                className="footer-col opacity-0"
+                                className="footer-col scroll-reveal fade-up"
                             >
                                 <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4">
                                     {section.title}
@@ -641,7 +477,7 @@ export default function FootersOne() {
                         {trustStats.map((stat) => (
                             <div
                                 key={stat.label}
-                                className="footer-stat text-center opacity-0"
+                                className="footer-stat text-center scroll-reveal fade-up"
                             >
                                 <div className="text-2xl font-black text-primary">
                                     {stat.value}
@@ -656,7 +492,7 @@ export default function FootersOne() {
 
                 {/* ── 5. Bottom Bar (legal + copyright) ───────────── */}
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="footer-bottom py-6 flex flex-col md:flex-row items-center justify-between gap-4 opacity-0">
+                    <div className="footer-bottom py-6 flex flex-col md:flex-row items-center justify-between gap-4 scroll-reveal fade-in">
                         <div className="flex items-center gap-1 text-sm opacity-30">
                             <i className="fa-duotone fa-regular fa-copyright" />
                             <span>

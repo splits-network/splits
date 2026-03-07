@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* --- Data ----------------------------------------------------------------- */
 
@@ -81,34 +80,7 @@ export default function OnboardingOne() {
         return true;
     };
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-            tl.fromTo(
-                $1(".onboard-logo"),
-                { opacity: 0, scale: 0.9 },
-                { opacity: 1, scale: 1, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".onboard-step-indicator"),
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".onboard-panel"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main
@@ -124,7 +96,7 @@ export default function OnboardingOne() {
                     }}
                 />
                 <div className="relative ">
-                    <div className="onboard-logo opacity-0 mb-16">
+                    <div className="onboard-logo scroll-reveal scale-in mb-16">
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             S
                         </div>
@@ -148,7 +120,7 @@ export default function OnboardingOne() {
                     {steps.map((step) => (
                         <div
                             key={step.id}
-                            className={`onboard-step-indicator opacity-0 flex items-center gap-3 px-4 py-3 transition-all ${currentStep === step.id ? "bg-neutral-content/10" : currentStep > step.id ? "opacity-60" : "opacity-30"}`}
+                            className={`onboard-step-indicator scroll-reveal fade-up flex items-center gap-3 px-4 py-3 transition-all ${currentStep === step.id ? "bg-neutral-content/10" : currentStep > step.id ? "opacity-60" : "opacity-30"}`}
                         >
                             <div
                                 className={`w-8 h-8 flex items-center justify-center text-xs font-bold flex-shrink-0 ${currentStep > step.id ? "bg-success text-success-content" : currentStep === step.id ? "bg-primary text-primary-content" : "bg-neutral-content/10"}`}
@@ -172,7 +144,7 @@ export default function OnboardingOne() {
 
             {/* Right Panel - Content */}
             <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-base-100 text-base-content">
-                <div className="onboard-panel opacity-0 w-full max-w-lg">
+                <div className="onboard-panel scroll-reveal fade-up w-full max-w-lg">
                     {/* Mobile step indicator */}
                     <div className="lg:hidden flex items-center gap-2 mb-8">
                         {steps.map((step) => (

@@ -33,7 +33,7 @@ export default function SavedJobCard({
     const companyName = company?.name || "Company not listed";
 
     return (
-        <div className="saved-job-card flex flex-col bg-base-100 border-2 border-base-200 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30 opacity-0 relative group">
+        <div className="saved-job-card flex flex-col bg-base-100 border-2 border-base-200 p-6 transition-all shadow-sm hover:shadow-md hover:border-primary/30 scroll-reveal fade-up relative group">
             {/* Remove button */}
             <button
                 className="btn btn-circle btn-ghost btn-sm absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"

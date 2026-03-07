@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import {
@@ -9,7 +9,6 @@ import {
     BaselModalBody,
     BaselModalFooter,
 } from "@splits-network/basel-ui";
-import gsap from "gsap";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
@@ -51,35 +50,6 @@ export default function BaselUploadDocumentModal({
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    /* ─── GSAP entrance animation ────────────────────────────────────────── */
-
-    useEffect(() => {
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
-
-        if (prefersReducedMotion) {
-            if (containerRef.current) containerRef.current.style.opacity = "1";
-            if (backdropRef.current) backdropRef.current.style.opacity = "1";
-            return;
-        }
-
-        if (containerRef.current) {
-            gsap.fromTo(
-                containerRef.current,
-                { opacity: 0, y: 40, scale: 0.96 },
-                { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out", clearProps: "transform" },
-            );
-        }
-
-        if (backdropRef.current) {
-            gsap.fromTo(
-                backdropRef.current,
-                { opacity: 0 },
-                { opacity: 1, duration: 0.3 },
-            );
-        }
-    }, []);
 
     /* ─── File handling ──────────────────────────────────────────────────── */
 

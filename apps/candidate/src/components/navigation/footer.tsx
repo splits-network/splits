@@ -155,7 +155,7 @@ export default function Footer({
                 </div>
             }
             newsletter={
-                <>
+                <div>
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 bg-primary flex items-center justify-center">
                             <i className="fa-duotone fa-regular fa-envelope text-primary-content" />
@@ -164,7 +164,7 @@ export default function Footer({
                             <h3 className="text-lg font-black">
                                 Stay in the loop
                             </h3>
-                            <p className="text-xs opacity-50">
+                            <p className="text-sm opacity-50">
                                 Weekly career tips, new job alerts, and platform
                                 updates.
                             </p>
@@ -175,27 +175,30 @@ export default function Footer({
                         <div className="flex items-center gap-3 p-4 bg-success/10 border border-success/20">
                             <i className="fa-duotone fa-regular fa-circle-check text-success text-xl" />
                             <div>
-                                <p className="text-sm font-bold text-success">
+                                <p className="text-md font-bold text-success">
                                     You are subscribed!
                                 </p>
-                                <p className="text-xs opacity-50">
+                                <p className="text-sm opacity-50">
                                     Check your inbox for a confirmation email.
                                 </p>
                             </div>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubscribe} className="flex gap-2">
+                        <form
+                            onSubmit={handleSubscribe}
+                            className="flex flex-col sm:flex-row gap-2 max-w-md"
+                        >
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@company.com"
                                 required
-                                className="input input-sm flex-1 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-primary focus:outline-none"
+                                className="input input-sm flex-1 min-w-0 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-primary focus:outline-none"
                             />
                             <button
                                 type="submit"
-                                className="btn btn-primary btn-sm"
+                                className="btn btn-primary btn-sm shrink-0"
                             >
                                 <i className="fa-duotone fa-regular fa-paper-plane" />
                                 Subscribe
@@ -203,10 +206,10 @@ export default function Footer({
                         </form>
                     )}
 
-                    <p className="text-[10px] opacity-30 mt-3">
+                    <p className="text-sm opacity-30 mt-3">
                         No spam. Unsubscribe anytime. We respect your privacy.
                     </p>
-                </>
+                </div>
             }
             brand={
                 <>

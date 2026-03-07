@@ -285,7 +285,7 @@ export default function PipelineModal({
                                                 <td className="px-4 py-3">
                                                     {isAdmin ? (
                                                         <select
-                                                            className="select select-xs text-sm uppercase tracking-[0.15em] font-bold bg-base-200 border-0"
+                                                            className="select select-xs uppercase tracking-[0.15em] font-bold border-0"
                                                             style={{
                                                                 borderRadius: 0,
                                                             }}

@@ -1,14 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const steps = [
     {
@@ -47,96 +40,8 @@ const steps = [
 
 export function HowItWorksSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const timelineRef = useRef<HTMLDivElement>(null);
-    const lineRef = useRef<SVGPathElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading animation
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // Timeline line draws itself
-            if (lineRef.current) {
-                const lineLength = lineRef.current.getTotalLength();
-                gsap.set(lineRef.current, {
-                    strokeDasharray: lineLength,
-                    strokeDashoffset: lineLength,
-                });
-                gsap.to(lineRef.current, {
-                    strokeDashoffset: 0,
-                    duration: duration.counter,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: timelineRef.current,
-                        start: "top 70%",
-                    },
-                });
-            }
-
-            // Step cards stagger in
-            const stepCards =
-                timelineRef.current?.querySelectorAll(".step-card");
-            if (stepCards) {
-                gsap.fromTo(
-                    stepCards,
-                    { opacity: 0, x: -40 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.loose,
-                        scrollTrigger: {
-                            trigger: timelineRef.current,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-
-            // Number badges pop in
-            const badges = timelineRef.current?.querySelectorAll(".step-badge");
-            if (badges) {
-                gsap.fromTo(
-                    badges,
-                    { scale: 0 },
-                    {
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.loose,
-                        delay: 0.2,
-                        scrollTrigger: {
-                            trigger: timelineRef.current,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     return (
         <section
@@ -145,10 +50,7 @@ export function HowItWorksSection() {
             className="py-24 bg-base-200 overflow-hidden"
         >
             <div className="container mx-auto px-4">
-                <div
-                    ref={headingRef}
-                    className="text-center mb-16 opacity-0 max-w-3xl mx-auto"
-                >
+                <div className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto">
                     <p className="text-sm uppercase tracking-wider text-primary mb-3">
                         How It Works
                     </p>
@@ -161,7 +63,7 @@ export function HowItWorksSection() {
                     </p>
                 </div>
 
-                <div ref={timelineRef} className="relative max-w-4xl mx-auto">
+                <div className="relative max-w-4xl mx-auto">
                     {/* SVG Timeline Line (desktop only) */}
                     <svg
                         className="absolute left-8 top-0 h-full hidden md:block"
@@ -171,7 +73,6 @@ export function HowItWorksSection() {
                         style={{ overflow: "visible" }}
                     >
                         <path
-                            ref={lineRef}
                             d="M2,0 L2,100"
                             stroke="url(#timelineGradient)"
                             strokeWidth="4"
@@ -194,15 +95,15 @@ export function HowItWorksSection() {
                     </svg>
 
                     {/* Steps */}
-                    <div className="space-y-8 md:space-y-12">
+                    <div className="stagger-children space-y-8 md:space-y-12">
                         {steps.map((step, index) => (
                             <div
                                 key={index}
-                                className="step-card relative flex items-start gap-6 md:gap-8 opacity-0"
+                                className="scroll-reveal slide-from-left relative flex items-start gap-6 md:gap-8"
                             >
                                 {/* Step Badge */}
                                 <div
-                                    className={`step-badge relative  w-16 h-16 rounded-full bg-${step.color} text-${step.color}-content flex items-center justify-center flex-shrink-0 shadow-lg`}
+                                    className={`scroll-reveal pop-in relative  w-16 h-16 rounded-full bg-${step.color} text-${step.color}-content flex items-center justify-center flex-shrink-0 shadow-lg`}
                                 >
                                     <span className="text-2xl font-bold">
                                         {step.number}

@@ -18,36 +18,34 @@ export function GridView({
     const selectedFirm = firms.find((t) => t.id === selectedId) ?? null;
 
     return (
-        <div className="relative">
-            {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4">
-                {firms.map((firm) => (
-                    <GridCard
-                        key={firm.id}
-                        firm={firm}
-                        isSelected={selectedId === firm.id}
-                        onSelect={() => onSelectAction(firm)}
-                        onRefresh={onRefreshAction}
-                    />
-                ))}
+        <div className="drawer drawer-end">
+            <input type="checkbox" className="drawer-toggle" checked={!!selectedFirm} readOnly />
+            <div className="drawer-content">
+                {/* Grid */}
+                <div className="grid gap-4 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4">
+                    {firms.map((firm) => (
+                        <GridCard
+                            key={firm.id}
+                            firm={firm}
+                            isSelected={selectedId === firm.id}
+                            onSelect={() => onSelectAction(firm)}
+                            onRefresh={onRefreshAction}
+                        />
+                    ))}
+                </div>
             </div>
-
-            {/* Detail Drawer */}
-            {selectedFirm && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/30 transition-opacity"
-                        onClick={() => onSelectAction(selectedFirm)}
-                    />
-                    <div className="fixed top-0 right-0 h-full w-full md:w-1/2 bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+            <div className="drawer-side z-50">
+                <div className="drawer-overlay" onClick={() => selectedFirm && onSelectAction(selectedFirm)} aria-label="close drawer" />
+                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
+                    {selectedFirm && (
                         <FirmDetailLoader
                             firmId={selectedFirm.id}
                             onClose={() => onSelectAction(selectedFirm)}
                             onRefresh={onRefreshAction}
                         />
-                    </div>
-                </>
-            )}
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

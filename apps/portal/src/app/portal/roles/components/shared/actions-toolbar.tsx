@@ -58,7 +58,7 @@ export default function RoleActionsToolbar({
 }: RoleActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isRecruiter, manageableCompanyIds } =
+    const { profile, isAdmin, isRecruiter, hasPermissionForCompany } =
         useUserProfile();
     const refresh = onRefresh ?? (() => {});
 
@@ -80,16 +80,18 @@ export default function RoleActionsToolbar({
         if (
             isRecruiter &&
             job.company_id &&
-            manageableCompanyIds.includes(job.company_id)
+            hasPermissionForCompany(job.company_id, "can_edit_jobs")
         )
             return true;
         return false;
-    }, [isAdmin, profile, isRecruiter, job.company_id, manageableCompanyIds]);
+    }, [isAdmin, profile, isRecruiter, job.company_id, hasPermissionForCompany]);
 
-    const canSubmitCandidate = useMemo(
-        () => isRecruiter || isAdmin,
-        [isRecruiter, isAdmin],
-    );
+    const canSubmitCandidate = useMemo(() => {
+        if (isAdmin) return true;
+        if (!isRecruiter) return false;
+        if (!job.company_id) return true; // Firm job — recruiter has full access
+        return hasPermissionForCompany(job.company_id, "can_submit_candidates");
+    }, [isRecruiter, isAdmin, job.company_id, hasPermissionForCompany]);
 
     /* ── Status Change ── */
 

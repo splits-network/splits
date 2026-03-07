@@ -1,13 +1,10 @@
 "use client";
 
 import { useRef, useState, useEffect, useMemo } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { useAuth } from "@clerk/nextjs";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import { BadgeGrid, LevelBadge, MiniLeaderboard } from "@splits-network/shared-gamification";
-import { BaselTabBar } from "@splits-network/basel-ui";
+import { BaselTabBar, useScrollReveal } from "@splits-network/basel-ui";
 import type { BadgeAward, EntityLevelInfo } from "@splits-network/shared-gamification";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ApiClient } from "@/lib/api-client";
@@ -16,10 +13,6 @@ import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
 import ConnectModal, { type ConnectModalHandle } from "./connect-modal";
 import SimilarRecruiters from "./similar-recruiters";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 /* ─── Types ───────────────────────────────────────────────────────────── */
 
@@ -269,116 +262,9 @@ export default function RecruiterProfileClient({
     const email = recruiter.users?.email || recruiter.email || null;
     const stats = buildStats(recruiter);
 
-    /* ─── GSAP ────────────────────────────────────────────────────────── */
+    /* ─── Scroll-reveal animations ──────────────────────────────────── */
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll(".opacity-0")
-                    .forEach((el) => {
-                        (el as HTMLElement).style.opacity = "1";
-                    });
-                return;
-            }
-
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            const avatar = $1(".profile-avatar");
-            if (avatar)
-                tl.fromTo(
-                    avatar,
-                    { opacity: 0, scale: 0.9 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 0.5,
-                        clearProps: "transform",
-                    },
-                );
-
-            const nameEl = $1(".profile-name");
-            if (nameEl)
-                tl.fromTo(
-                    nameEl,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        clearProps: "transform",
-                    },
-                    "-=0.3",
-                );
-
-            const metas = $(".profile-meta");
-            if (metas.length)
-                tl.fromTo(
-                    metas,
-                    { opacity: 0, y: 15 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.4,
-                        stagger: 0.05,
-                        clearProps: "transform",
-                    },
-                    "-=0.3",
-                );
-
-            const statEls = $(".profile-stat");
-            if (statEls.length)
-                tl.fromTo(
-                    statEls,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.4,
-                        stagger: 0.06,
-                        clearProps: "transform",
-                    },
-                    "-=0.2",
-                );
-
-            const actions = $(".profile-action");
-            if (actions.length)
-                tl.fromTo(
-                    actions,
-                    { opacity: 0, y: 10 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.3,
-                        stagger: 0.06,
-                        clearProps: "transform",
-                    },
-                    "-=0.2",
-                );
-
-            $(".profile-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        clearProps: "transform",
-                        scrollTrigger: {
-                            trigger: section,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            });
-        },
-        { scope: mainRef, dependencies: [activeTab], revertOnUpdate: true },
-    );
+    useScrollReveal(mainRef);
 
     /* ─── Render ──────────────────────────────────────────────────────── */
 
@@ -394,7 +280,7 @@ export default function RecruiterProfileClient({
                 />
                 <div className="relative px-8 pt-10 pb-0">
                     {/* Kicker row */}
-                    <div className="profile-meta opacity-0 flex items-center justify-between mb-8">
+                    <div className="profile-meta scroll-reveal fade-up flex items-center justify-between mb-8">
                         <div>
                             {recruiter.firm_name && (
                                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40">
@@ -420,7 +306,7 @@ export default function RecruiterProfileClient({
                     {/* Avatar + Identity */}
                     <div className="flex flex-col lg:flex-row lg:items-end gap-8">
                         <div className="flex items-end gap-5 flex-1">
-                            <div className="profile-avatar opacity-0 shrink-0">
+                            <div className="profile-avatar scroll-reveal pop-in shrink-0">
                                 {recruiter.users?.profile_image_url ? (
                                     <img
                                         src={recruiter.users.profile_image_url}
@@ -434,7 +320,7 @@ export default function RecruiterProfileClient({
                                 )}
                             </div>
 
-                            <div className="profile-name opacity-0 min-w-0 pb-1">
+                            <div className="profile-name scroll-reveal fade-up min-w-0 pb-1">
                                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1">
                                     {recruiter.tagline ||
                                         recruiter.specialization ||
@@ -475,14 +361,14 @@ export default function RecruiterProfileClient({
                             {connected ? (
                                 <a
                                     href="/chat"
-                                    className="profile-action opacity-0 btn btn-primary btn-sm font-bold uppercase tracking-wider"
+                                    className="profile-action scroll-reveal fade-up btn btn-primary btn-sm font-bold uppercase tracking-wider"
                                 >
                                     <i className="fa-duotone fa-regular fa-comments" />{" "}
                                     Message
                                 </a>
                             ) : (
                                 <button
-                                    className="profile-action opacity-0 btn btn-primary btn-sm font-bold uppercase tracking-wider"
+                                    className="profile-action scroll-reveal fade-up btn btn-primary btn-sm font-bold uppercase tracking-wider"
                                     onClick={() =>
                                         connectModalRef.current?.open()
                                     }
@@ -492,7 +378,7 @@ export default function RecruiterProfileClient({
                                 </button>
                             )}
                             <button
-                                className="profile-action opacity-0 btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider"
+                                className="profile-action scroll-reveal fade-up btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider"
                                 onClick={() => {
                                     if (navigator.share) {
                                         navigator.share({
@@ -518,7 +404,7 @@ export default function RecruiterProfileClient({
                             {stats.map((stat, i) => (
                                 <div
                                     key={stat.label}
-                                    className="profile-stat opacity-0 flex items-center gap-3 px-4 py-4"
+                                    className="profile-stat scroll-reveal fade-up flex items-center gap-3 px-4 py-4"
                                 >
                                     <div
                                         className={`w-10 h-10 flex items-center justify-center shrink-0 ${STAT_ICON_STYLES[i % STAT_ICON_STYLES.length]}`}
@@ -559,7 +445,7 @@ export default function RecruiterProfileClient({
                             <div className="space-y-10">
                                 {/* Bio */}
                                 {recruiter.bio && (
-                                    <div className="profile-section opacity-0 border-l-4 border-l-primary pl-6">
+                                    <div className="profile-section scroll-reveal fade-up border-l-4 border-l-primary pl-6">
                                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
                                             About
                                         </p>
@@ -574,7 +460,7 @@ export default function RecruiterProfileClient({
                                 {((recruiter.specialties || []).length > 0 ||
                                     (recruiter.industries || []).length >
                                         0) && (
-                                    <div className="profile-section opacity-0">
+                                    <div className="profile-section scroll-reveal fade-up">
                                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                                             Specializations
                                         </p>
@@ -617,7 +503,7 @@ export default function RecruiterProfileClient({
                                 )}
 
                                 {/* Partnership signals */}
-                                <div className="profile-section opacity-0">
+                                <div className="profile-section scroll-reveal fade-up">
                                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                                         Partnership
                                     </p>
@@ -646,7 +532,7 @@ export default function RecruiterProfileClient({
                                 </div>
 
                                 {/* Recent Activity */}
-                                <div className="profile-section opacity-0">
+                                <div className="profile-section scroll-reveal fade-up">
                                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                                         Recent Activity
                                     </p>
@@ -698,7 +584,7 @@ export default function RecruiterProfileClient({
                         )}
 
                         {activeTab === "experience" && (
-                            <div className="profile-section opacity-0">
+                            <div className="profile-section scroll-reveal fade-up">
                                 <div className="bg-base-200 border border-base-300 p-10 lg:p-16">
                                     <div className="max-w-lg mx-auto text-center">
                                         <div className="w-20 h-20 bg-primary/10 flex items-center justify-center mx-auto mb-6">
@@ -721,7 +607,7 @@ export default function RecruiterProfileClient({
                         )}
 
                         {activeTab === "reviews" && (
-                            <div className="profile-section opacity-0">
+                            <div className="profile-section scroll-reveal fade-up">
                                 <div className="bg-base-200 border border-base-300 p-10 lg:p-16">
                                     <div className="max-w-lg mx-auto text-center">
                                         <div className="w-20 h-20 bg-secondary/10 flex items-center justify-center mx-auto mb-6">

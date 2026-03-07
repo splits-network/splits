@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Data ───────────────────────────────────────────────────────────────── */
 
@@ -237,54 +231,7 @@ export default function CardsOne() {
     const mainRef = useRef<HTMLElement>(null);
     const [filter, setFilter] = useState<CardCategory>("all");
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-            tl.fromTo(
-                $1(".cards-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".cards-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".cards-desc"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                );
-
-            $(".cards-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power3.out",
-                        scrollTrigger: { trigger: section, start: "top 85%" },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     const urgencyColors: Record<string, string> = {
         low: "text-base-content/40",
@@ -305,18 +252,18 @@ export default function CardsOne() {
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="cards-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="cards-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                             Marketplace
                         </p>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                            <span className="cards-title-word inline-block opacity-0">
+                            <span className="cards-title-word inline-block scroll-reveal hero-word">
                                 Browse the
                             </span>{" "}
-                            <span className="cards-title-word inline-block opacity-0 text-primary">
+                            <span className="cards-title-word inline-block scroll-reveal hero-word text-primary">
                                 network.
                             </span>
                         </h1>
-                        <p className="cards-desc text-base text-neutral-content/50 max-w-xl opacity-0">
+                        <p className="cards-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
                             Jobs, recruiters, companies, and candidates in one
                             connected ecosystem.
                         </p>
@@ -349,7 +296,7 @@ export default function CardsOne() {
             <section className="container mx-auto px-6 lg:px-12 py-10 lg:py-14">
                 {/* Featured Jobs */}
                 {(filter === "all" || filter === "jobs") && (
-                    <div className="cards-section opacity-0 mb-14">
+                    <div className="cards-section scroll-reveal fade-up mb-14">
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-1">
@@ -485,7 +432,7 @@ export default function CardsOne() {
 
                 {/* Recruiters */}
                 {(filter === "all" || filter === "recruiters") && (
-                    <div className="cards-section opacity-0 mb-14">
+                    <div className="cards-section scroll-reveal fade-up mb-14">
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-1">
@@ -550,7 +497,7 @@ export default function CardsOne() {
 
                 {/* Companies */}
                 {(filter === "all" || filter === "companies") && (
-                    <div className="cards-section opacity-0 mb-14">
+                    <div className="cards-section scroll-reveal fade-up mb-14">
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-1">
@@ -618,7 +565,7 @@ export default function CardsOne() {
 
                 {/* Candidates */}
                 {(filter === "all" || filter === "candidates") && (
-                    <div className="cards-section opacity-0">
+                    <div className="cards-section scroll-reveal fade-up">
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent mb-1">

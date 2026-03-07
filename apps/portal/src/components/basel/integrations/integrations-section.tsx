@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { BaselStatusPill } from "@splits-network/basel-ui";
 import type {
@@ -16,7 +14,6 @@ import { ConnectedCard } from "./connected-card";
 
 export function IntegrationsSection() {
     const { getToken } = useAuth();
-    const containerRef = useRef<HTMLDivElement>(null);
 
     const [providers, setProviders] = useState<IntegrationProvider[]>([]);
     const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
@@ -54,37 +51,6 @@ export function IntegrationsSection() {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
-
-    /* ── GSAP stagger animation ──────────────────────────────────────── */
-
-    useGSAP(
-        () => {
-            if (loading || !containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                containerRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => gsap.set(el, { opacity: 1 }));
-                return;
-            }
-
-            const cards =
-                containerRef.current.querySelectorAll(".integration-card");
-            if (cards.length) {
-                gsap.fromTo(
-                    cards,
-                    { opacity: 0, y: 24 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.5,
-                        stagger: 0.08,
-                        ease: "power3.out",
-                    },
-                );
-            }
-        },
-        { scope: containerRef, dependencies: [loading] },
-    );
 
     /* ── Connect handler ─────────────────────────────────────────────── */
 
@@ -198,7 +164,7 @@ export function IntegrationsSection() {
     /* ── Render ───────────────────────────────────────────────────────── */
 
     return (
-        <div ref={containerRef}>
+        <div>
             {/* Section header */}
             <div className="mb-8">
                 <div className="flex items-center gap-3 mb-2">

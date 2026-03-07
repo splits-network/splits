@@ -5,7 +5,6 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import gsap from "gsap";
 import { createAuthenticatedClient, ApiClient } from "@/lib/api-client";
 import { getRecCodeFromCookie } from "@/hooks/use-rec-code";
 
@@ -236,24 +235,23 @@ export default function SignUpPage() {
         });
     };
 
-    // Animate step transitions
+    // Animate step transitions with CSS
     useEffect(() => {
-        if (
-            !stepRef.current ||
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        )
-            return;
-        gsap.fromTo(
-            stepRef.current,
-            { opacity: 0, x: 20 },
-            { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" },
-        );
+        if (!stepRef.current) return;
+        const el = stepRef.current;
+        el.style.opacity = "0";
+        el.style.transform = "translateX(20px)";
+        requestAnimationFrame(() => {
+            el.style.transition = "opacity 0.3s cubic-bezier(0.33,1,0.68,1), transform 0.3s cubic-bezier(0.33,1,0.68,1)";
+            el.style.opacity = "1";
+            el.style.transform = "translateX(0)";
+        });
     }, [pendingVerification]);
 
     // Verification step
     if (pendingVerification) {
         return (
-            <div ref={stepRef}>
+            <div>
                 <div className="mb-8">
                     <h1 className="text-3xl font-black tracking-tight mb-2">
                         Verify your email
@@ -326,7 +324,7 @@ export default function SignUpPage() {
 
     // Registration form
     return (
-        <div ref={stepRef}>
+        <div>
             {/* Heading */}
             <div className="mb-8">
                 <h1 className="text-3xl font-black tracking-tight mb-2">

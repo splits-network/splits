@@ -1,8 +1,5 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { BaselStatusPill } from "@splits-network/basel-ui";
 import type {
     IntegrationProvider,
@@ -16,6 +13,8 @@ interface InstalledIntegrationsProps {
     disconnecting: string | null;
     onDisconnect: (connectionId: string) => void;
 }
+
+/* ── Status config ──────────────────────────────────────────────────── */
 
 const STATUS_CONFIG: Record<
     OAuthConnectionStatus,
@@ -34,43 +33,10 @@ export function InstalledIntegrations({
     disconnecting,
     onDisconnect,
 }: InstalledIntegrationsProps) {
-    const listRef = useRef<HTMLDivElement>(null);
-
     const activeConnections = connections.filter((c) => c.status !== "revoked");
 
     const getProvider = (slug: string) =>
         providers.find((p) => p.slug === slug);
-
-    /* ── GSAP stagger ────────────────────────────────────────────────── */
-
-    useGSAP(
-        () => {
-            if (!listRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                listRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => gsap.set(el, { opacity: 1 }));
-                return;
-            }
-
-            const rows = listRef.current.querySelectorAll(".installed-row");
-            if (rows.length) {
-                gsap.fromTo(
-                    rows,
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.4,
-                        stagger: 0.06,
-                        ease: "power3.out",
-                        clearProps: "transform",
-                    },
-                );
-            }
-        },
-        { scope: listRef },
-    );
 
     /* ── Empty state ─────────────────────────────────────────────────── */
 
@@ -94,7 +60,7 @@ export function InstalledIntegrations({
     /* ── Render ───────────────────────────────────────────────────────── */
 
     return (
-        <div ref={listRef}>
+        <div>
             {/* Header row */}
             <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-4 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-base-content/30 border-b border-base-300">
                 <div className="col-span-5">Integration</div>
@@ -113,7 +79,7 @@ export function InstalledIntegrations({
                     return (
                         <div
                             key={conn.id}
-                            className="installed-row opacity-0 grid sm:grid-cols-12 gap-4 items-center px-4 py-4 hover:bg-base-200/50 transition-colors"
+                            className="installed-row grid sm:grid-cols-12 gap-4 items-center px-4 py-4 hover:bg-base-200/50 transition-colors"
                         >
                             {/* Provider info */}
                             <div className="sm:col-span-5 flex items-center gap-3">

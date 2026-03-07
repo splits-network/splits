@@ -6,7 +6,6 @@ export interface RecruiterCompanyRelationship {
     company_id: string;
     relationship_type: "sourcer" | "recruiter";
     status: ConnectionStatus;
-    can_manage_company_jobs: boolean;
     relationship_start_date?: string;
     relationship_end_date?: string;
     termination_reason?: string;

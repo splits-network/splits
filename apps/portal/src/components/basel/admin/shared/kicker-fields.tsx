@@ -34,7 +34,7 @@ export function KickerFields({
             </BaselFormField>
             <BaselFormField label="Kicker Color">
                 <select
-                    className="select select-bordered w-full"
+                    className="select w-full"
                     value={kickerColor || "primary"}
                     onChange={(e) => onKickerColorChange(e.target.value)}
                 >

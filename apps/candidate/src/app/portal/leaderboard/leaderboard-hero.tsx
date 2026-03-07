@@ -8,23 +8,23 @@ export function LeaderboardHero({ title, subtitle }: LeaderboardHeroProps) {
         <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
             <div className="container mx-auto px-6 lg:px-12">
                 <div className="max-w-4xl">
-                    <p className="lb-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                    <p className="lb-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
                         <i className="fa-duotone fa-regular fa-ranking-star mr-2" />
                         Rankings
                     </p>
 
                     <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="lb-title-word inline-block opacity-0">{title}</span>{" "}
-                        <span className="lb-title-word inline-block opacity-0 text-primary">
+                        <span className="lb-title-word inline-block scroll-reveal fade-up">{title}</span>{" "}
+                        <span className="lb-title-word inline-block scroll-reveal fade-up text-primary">
                             Leaderboard.
                         </span>
                     </h1>
 
-                    <p className="lb-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 opacity-0">
+                    <p className="lb-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                         {subtitle}
                     </p>
 
-                    <div className="lb-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                    <div className="lb-stat-bar flex flex-wrap gap-8 mt-8 scroll-reveal fade-up">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-users text-primary-content" />

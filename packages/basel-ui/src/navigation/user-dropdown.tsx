@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface UserDropdownMenuItem {
@@ -51,10 +49,8 @@ export interface UserDropdownProps {
 /**
  * Basel Design System — User Dropdown
  *
- * Editorial-style user menu following the Split-Screen Editorial header pattern.
- * Uses DaisyUI semantic tokens only. Sharp corners, subtle shadows, clean typography.
- *
- * @see showcase/headers/one for the reference design
+ * Uses DaisyUI `dropdown` for auto click-outside handling.
+ * Editorial-style user menu with sharp corners, subtle shadows, clean typography.
  */
 export function UserDropdown({
     userName,
@@ -68,38 +64,11 @@ export function UserDropdown({
     avatarClassName = "bg-primary text-primary-content",
     badgeClassName = "bg-primary/10 text-primary",
 }: UserDropdownProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node)
-            ) {
-                setIsOpen(false);
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isOpen]);
-
-    const handleSignOut = async () => {
-        setIsOpen(false);
-        await onSignOut();
+    const closeDropdown = () => {
+        const el = document.activeElement as HTMLElement | null;
+        el?.blur();
     };
 
-    const handleItemClick = () => {
-        setIsOpen(false);
-    };
-
-    // Link renderer — uses Next.js Link if provided, falls back to <a>
     const LinkComponent = ({
         href,
         onClick,
@@ -122,10 +91,11 @@ export function UserDropdown({
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="dropdown dropdown-end">
             {/* ── Trigger ──────────────────────────────────────── */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
+            <div
+                tabIndex={0}
+                role="button"
                 className="flex items-center gap-2 px-2 py-1 hover:bg-base-200 transition-colors cursor-pointer"
             >
                 <div
@@ -151,95 +121,94 @@ export function UserDropdown({
                         </div>
                     )}
                 </div>
-                <i
-                    className={`fa-solid fa-chevron-down text-[8px] text-base-content/40 hidden md:block transition-transform ${isOpen ? "rotate-180" : ""}`}
-                />
-            </button>
+                <i className="fa-solid fa-chevron-down text-[8px] text-base-content/40 hidden md:block" />
+            </div>
 
             {/* ── Dropdown Panel ────────────────────────────────── */}
-            {isOpen && (
-                <div className="absolute top-full right-0 mt-1 w-64 bg-base-100 border border-base-300 shadow-lg py-2">
-                    {/* User header */}
-                    <div className="px-4 py-3 border-b border-base-300">
-                        <div className="flex items-center gap-3">
-                            <div
-                                className={`w-10 h-10 ${avatarClassName} flex items-center justify-center font-bold text-sm flex-shrink-0 overflow-hidden`}
-                            >
-                                {userImageUrl ? (
-                                    <img
-                                        src={userImageUrl}
-                                        alt={userName}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    userInitials
-                                )}
+            <div tabIndex={0} className="dropdown-content mt-1 w-64 bg-base-100 border border-base-300 shadow-lg py-2">
+                {/* User header */}
+                <div className="px-4 py-3 border-b border-base-300">
+                    <div className="flex items-center gap-3">
+                        <div
+                            className={`w-10 h-10 ${avatarClassName} flex items-center justify-center font-bold text-sm flex-shrink-0 overflow-hidden`}
+                        >
+                            {userImageUrl ? (
+                                <img
+                                    src={userImageUrl}
+                                    alt={userName}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                userInitials
+                            )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <div className="text-sm font-bold truncate">
+                                {userName}
                             </div>
-                            <div className="min-w-0 flex-1">
-                                <div className="text-sm font-bold truncate">
-                                    {userName}
+                            {userEmail && (
+                                <div className="text-sm text-base-content/50 truncate mt-0.5">
+                                    {userEmail}
                                 </div>
-                                {userEmail && (
-                                    <div className="text-sm text-base-content/50 truncate mt-0.5">
-                                        {userEmail}
-                                    </div>
-                                )}
-                                {role && (
-                                    <span
-                                        className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-sm font-semibold uppercase tracking-wider ${badgeClassName}`}
-                                    >
-                                        {role.icon && (
-                                            <i
-                                                className={`fa-duotone fa-regular ${role.icon} text-sm`}
-                                            />
-                                        )}
-                                        {role.label}
-                                    </span>
-                                )}
-                            </div>
+                            )}
+                            {role && (
+                                <span
+                                    className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-sm font-semibold uppercase tracking-wider ${badgeClassName}`}
+                                >
+                                    {role.icon && (
+                                        <i
+                                            className={`fa-duotone fa-regular ${role.icon} text-sm`}
+                                        />
+                                    )}
+                                    {role.label}
+                                </span>
+                            )}
                         </div>
                     </div>
-
-                    {/* Menu items */}
-                    <div className="py-1">
-                        {menuItems.map((item) => (
-                            <LinkComponent
-                                key={item.href}
-                                href={item.href}
-                                onClick={handleItemClick}
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
-                            >
-                                <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
-                                    <i
-                                        className={`${item.icon} text-primary text-sm`}
-                                    />
-                                </div>
-                                <div>
-                                    <div className="text-sm font-semibold">
-                                        {item.label}
-                                    </div>
-                                    {item.description && (
-                                        <div className="text-sm text-base-content/50">
-                                            {item.description}
-                                        </div>
-                                    )}
-                                </div>
-                            </LinkComponent>
-                        ))}
-                    </div>
-
-                    {/* Sign out */}
-                    <div className="border-t border-base-300 pt-1">
-                        <button
-                            onClick={handleSignOut}
-                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-error/70 hover:bg-error/10 hover:text-error transition-colors cursor-pointer"
-                        >
-                            <i className="fa-duotone fa-regular fa-arrow-right-from-bracket text-sm w-4 text-center" />
-                            Sign Out
-                        </button>
-                    </div>
                 </div>
-            )}
+
+                {/* Menu items */}
+                <div className="py-1">
+                    {menuItems.map((item) => (
+                        <LinkComponent
+                            key={item.href}
+                            href={item.href}
+                            onClick={closeDropdown}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors"
+                        >
+                            <div className="w-8 h-8 bg-base-200 flex items-center justify-center flex-shrink-0">
+                                <i
+                                    className={`${item.icon} text-primary text-sm`}
+                                />
+                            </div>
+                            <div>
+                                <div className="text-sm font-semibold">
+                                    {item.label}
+                                </div>
+                                {item.description && (
+                                    <div className="text-sm text-base-content/50">
+                                        {item.description}
+                                    </div>
+                                )}
+                            </div>
+                        </LinkComponent>
+                    ))}
+                </div>
+
+                {/* Sign out */}
+                <div className="border-t border-base-300 pt-1">
+                    <button
+                        onClick={() => {
+                            closeDropdown();
+                            onSignOut();
+                        }}
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-error/70 hover:bg-error/10 hover:text-error transition-colors cursor-pointer"
+                    >
+                        <i className="fa-duotone fa-regular fa-arrow-right-from-bracket text-sm w-4 text-center" />
+                        Sign Out
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

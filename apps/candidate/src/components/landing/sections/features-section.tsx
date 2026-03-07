@@ -1,14 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const features = [
     {
@@ -57,115 +50,8 @@ const features = [
 
 export function FeaturesSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const cardsRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading animation
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // Feature cards stagger in
-            const cards = cardsRef.current?.querySelectorAll(".feature-card");
-            if (cards) {
-                gsap.fromTo(
-                    cards,
-                    { opacity: 0, y: 40, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                        scrollTrigger: {
-                            trigger: cardsRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-
-                // Icons pop in after cards
-                const icons = cardsRef.current?.querySelectorAll(".feature-icon");
-                if (icons) {
-                    gsap.fromTo(
-                        icons,
-                        { scale: 0, rotation: -15 },
-                        {
-                            scale: 1,
-                            rotation: 0,
-                            duration: duration.fast,
-                            ease: easing.bounce,
-                            stagger: stagger.tight,
-                            delay: 0.15,
-                            scrollTrigger: {
-                                trigger: cardsRef.current,
-                                start: "top 80%",
-                            },
-                        },
-                    );
-                }
-            }
-        },
-        { scope: sectionRef },
-    );
-
-    // Hover animations
-    const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-        gsap.to(e.currentTarget, {
-            y: -8,
-            boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
-            duration: duration.fast,
-            ease: easing.smooth,
-        });
-        const icon = e.currentTarget.querySelector(".feature-icon");
-        if (icon) {
-            gsap.to(icon, {
-                scale: 1.1,
-                rotation: 5,
-                duration: duration.fast,
-                ease: easing.bounce,
-            });
-        }
-    };
-
-    const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-        gsap.to(e.currentTarget, {
-            y: 0,
-            boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
-            duration: duration.fast,
-            ease: easing.smooth,
-        });
-        const icon = e.currentTarget.querySelector(".feature-icon");
-        if (icon) {
-            gsap.to(icon, {
-                scale: 1,
-                rotation: 0,
-                duration: duration.fast,
-                ease: easing.smooth,
-            });
-        }
-    };
+    useScrollReveal(sectionRef);
 
     return (
         <section
@@ -173,10 +59,7 @@ export function FeaturesSection() {
             className="py-24 bg-base-100 overflow-hidden"
         >
             <div className="container mx-auto px-4">
-                <div
-                    ref={headingRef}
-                    className="text-center mb-16 opacity-0 max-w-3xl mx-auto"
-                >
+                <div className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto">
                     <p className="text-sm uppercase tracking-wider text-primary mb-3">
                         Platform Features
                     </p>
@@ -189,20 +72,15 @@ export function FeaturesSection() {
                     </p>
                 </div>
 
-                <div
-                    ref={cardsRef}
-                    className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto"
-                >
+                <div className="stagger-children grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="feature-card bg-base-200 rounded-2xl p-6 opacity-0 cursor-pointer transition-colors hover:bg-base-300"
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
+                            className="scroll-reveal fade-up bg-base-200 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:bg-base-300 hover:-translate-y-2 hover:shadow-lg"
                         >
                             <div className="flex items-start gap-4">
                                 <div
-                                    className={`feature-icon w-14 h-14 rounded-xl bg-${feature.color}/10 flex items-center justify-center flex-shrink-0`}
+                                    className={`w-14 h-14 rounded-xl bg-${feature.color}/10 flex items-center justify-center flex-shrink-0 transition-transform duration-300 hover:scale-110`}
                                 >
                                     <i
                                         className={`${feature.icon} text-2xl text-${feature.color}`}

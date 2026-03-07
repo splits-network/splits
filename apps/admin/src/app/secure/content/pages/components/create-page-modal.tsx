@@ -133,7 +133,7 @@ export function CreatePageModal({ isOpen, onClose, onCreated }: CreatePageModalP
 
                     <BaselFormField label="App" required>
                         <select
-                            className="select select-bordered w-full"
+                            className="select w-full"
                             value={formData.app}
                             onChange={(e) => setFormData({ ...formData, app: e.target.value })}
                         >

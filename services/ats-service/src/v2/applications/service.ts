@@ -145,6 +145,30 @@ export class ApplicationServiceV2 {
             throw new Error('Candidate ID & Identity User ID is required and could not be resolved from user context');
         }
 
+        // Enforce can_submit_candidates permission for company jobs
+        if (recruiterId) {
+            const { data: job } = await this.repository.getSupabase()
+                .from('jobs')
+                .select('company_id, source_firm_id')
+                .eq('id', data.job_id)
+                .single();
+
+            if (job?.company_id && !job?.source_firm_id) {
+                // Company job: check recruiter has can_submit_candidates permission
+                const { data: relationship } = await this.repository.getSupabase()
+                    .from('recruiter_companies')
+                    .select('permissions')
+                    .eq('recruiter_id', recruiterId)
+                    .eq('company_id', job.company_id)
+                    .eq('status', 'active')
+                    .maybeSingle();
+
+                if (!relationship?.permissions?.can_submit_candidates) {
+                    throw new Error('Forbidden: You do not have permission to submit candidates for this company');
+                }
+            }
+        }
+
         // Extract document-related fields that shouldn't be persisted to applications table
         const { document_ids, ...applicationData } = data;
 
@@ -270,6 +294,23 @@ export class ApplicationServiceV2 {
                 updates.stage,
                 currentApplication
             );
+
+            // Enforce can_advance_candidates permission for company jobs
+            const job = currentApplication.job;
+            const isFirmJob = !job?.company_id && !!job?.source_firm_id;
+            if (!isFirmJob && userContext.recruiterId && job?.company_id) {
+                const { data: relationship } = await this.repository.getSupabase()
+                    .from('recruiter_companies')
+                    .select('permissions')
+                    .eq('recruiter_id', userContext.recruiterId)
+                    .eq('company_id', job.company_id)
+                    .eq('status', 'active')
+                    .maybeSingle();
+
+                if (!relationship?.permissions?.can_advance_candidates) {
+                    throw new Error('Forbidden: You do not have permission to advance candidates for this company');
+                }
+            }
 
             // Enforce role-based stage authorization (company vs firm job rules)
             this.authorizeStageTransition(updates.stage, userContext, currentApplication);

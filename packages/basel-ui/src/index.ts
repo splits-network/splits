@@ -153,35 +153,12 @@ export {
     type BaselArticleAnimatedProps,
     BaselArticleAnimationWrapper,
     type BaselArticleAnimationWrapperProps,
-    useArticleAnimations,
 } from './content';
 
-// Animation presets, hooks, and utilities
+// CSS animation hooks
 export {
-    easing,
-    duration,
-    stagger,
-    scrollTrigger,
-    fadeUp,
-    fadeIn,
-    scaleIn,
-    slideFromLeft,
-    slideFromRight,
-    popIn,
-    hoverLift,
-    hoverScale,
-    iconWiggle,
-    prefersReducedMotion,
-    getAnimationDuration,
-    createStagger,
-    useScrollFadeUp,
-    useScrollStagger,
-    useScrollScaleIn,
-    useParallax,
-    useScrollTimeline,
+    useScrollReveal,
     useAnimatedCounter,
-    initGsapDefaults,
-    GsapInit,
 } from './animations';
 
 // Consent components

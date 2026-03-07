@@ -69,8 +69,12 @@ export default function RolesPage() {
     }, [selectedJobId, viewMode, pathname, router]);
 
     /* ── User profile ── */
-    const { isAdmin, isRecruiter, isCompanyUser, manageableCompanyIds } =
-        useUserProfile();
+    const {
+        isAdmin,
+        isRecruiter,
+        isCompanyUser,
+        getCompanyIdsWithPermission,
+    } = useUserProfile();
     const { getToken } = useAuth();
     const [isFirmMember, setIsFirmMember] = useState(false);
 
@@ -94,7 +98,8 @@ export default function RolesPage() {
     const canCreateRole =
         isAdmin ||
         isCompanyUser ||
-        (isRecruiter && manageableCompanyIds.length > 0) ||
+        (isRecruiter &&
+            getCompanyIdsWithPermission("can_create_jobs").length > 0) ||
         (isRecruiter && isFirmMember);
 
     /* ── Data ── */
@@ -165,7 +170,7 @@ export default function RolesPage() {
 
     return (
         <>
-            <RolesAnimator contentRef={contentRef}>
+            <RolesAnimator>
                 <HeaderSection stats={stats} />
 
                 <ControlsBar
@@ -184,7 +189,7 @@ export default function RolesPage() {
                 />
 
                 {/* Content Area */}
-                <section className="content-area opacity-0 p-4">
+                <section className="content-area scroll-reveal fade-in p-4">
                     <div ref={contentRef}>
                         {loading && jobs.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">

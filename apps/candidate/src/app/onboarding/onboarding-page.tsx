@@ -13,8 +13,7 @@
 
 import { useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { useOnboarding } from "./use-onboarding";
 import { SplashLoading } from "@splits-network/shared-ui";
 
@@ -63,68 +62,8 @@ export function OnboardingPage() {
         (s) => s.id === state.currentStep,
     );
 
-    // ── GSAP entrance animation ──
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current.querySelectorAll(".ob-anim").forEach((el) => {
-                    (el as HTMLElement).style.opacity = "1";
-                });
-                return;
-            }
-
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            const logo = $1(".ob-logo");
-            if (logo)
-                tl.fromTo(
-                    logo,
-                    { opacity: 0, scale: 0.9 },
-                    { opacity: 1, scale: 1, duration: 0.5 },
-                );
-
-            const heading = $1(".ob-heading");
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.3",
-                );
-
-            const stepItems = $(".ob-step-item");
-            if (stepItems.length)
-                tl.fromTo(
-                    stepItems,
-                    { opacity: 0, y: 10 },
-                    { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 },
-                    "-=0.2",
-                );
-
-            const panel = $1(".ob-panel");
-            if (panel)
-                tl.fromTo(
-                    panel,
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.3",
-                );
-
-            const testimonial = $1(".ob-testimonial");
-            if (testimonial)
-                tl.fromTo(
-                    testimonial,
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.4 },
-                    "-=0.1",
-                );
-        },
-        { scope: mainRef, dependencies: [initStatus] },
-    );
+    // ── Entrance animation via scroll-reveal ──
+    useScrollReveal(mainRef);
 
     // ── Loading state ──
     if (initStatus === "loading" || initStatus === "creating_account") {
@@ -204,7 +143,7 @@ export function OnboardingPage() {
                 </div>
 
                 {/* Step content */}
-                <div className="ob-panel ob-anim opacity-0 flex-1 flex items-start justify-center p-6 lg:p-12">
+                <div className="ob-panel scroll-reveal fade-up flex-1 flex items-start justify-center p-6 lg:p-12">
                     <div className="w-full max-w-lg">
                         {/* Persisting indicator */}
                         {persisting && (
@@ -277,7 +216,7 @@ export function OnboardingPage() {
 
                 {/* Top: Logo + Heading */}
                 <div className="relative ">
-                    <div className="ob-logo ob-anim opacity-0 mb-16">
+                    <div className="ob-logo scroll-reveal pop-in mb-16">
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             A
                         </div>
@@ -285,7 +224,7 @@ export function OnboardingPage() {
                             Applicant Network
                         </p>
                     </div>
-                    <div className="ob-heading ob-anim opacity-0">
+                    <div className="ob-heading scroll-reveal fade-up">
                         <h2 className="text-3xl font-black leading-tight tracking-tight mb-4">
                             Your career, represented
                             <br />
@@ -311,7 +250,7 @@ export function OnboardingPage() {
                         return (
                             <div
                                 key={step.id}
-                                className={`ob-step-item ob-anim opacity-0 flex items-center gap-3 px-4 py-3 transition-all ${
+                                className={`ob-step-item scroll-reveal fade-up flex items-center gap-3 px-4 py-3 transition-all ${
                                     isActive
                                         ? "bg-neutral-content/10"
                                         : isCompleted
@@ -346,7 +285,7 @@ export function OnboardingPage() {
                 </div>
 
                 {/* Bottom: Testimonial */}
-                <div className="ob-testimonial ob-anim opacity-0 relative ">
+                <div className="ob-testimonial scroll-reveal fade-up relative ">
                     <div className="border-l-4 border-primary pl-4">
                         <p className="text-sm text-neutral-content/60 italic mb-3">
                             &ldquo;I had three recruiters presenting me to

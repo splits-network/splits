@@ -22,27 +22,24 @@ export function GridView({
     const selectedMatch = matches.find((m) => m.id === selectedId) ?? null;
 
     return (
-        <div className="relative">
-            {/* Grid */}
-            <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                {matches.map((match) => (
-                    <GridCard
-                        key={match.id}
-                        match={match}
-                        isSelected={selectedId === match.id}
-                        onSelect={() => onSelect(match)}
-                    />
-                ))}
+        <div className="drawer drawer-end">
+            <input type="checkbox" className="drawer-toggle" checked={!!selectedMatch} readOnly />
+            <div className="drawer-content">
+                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                    {matches.map((match) => (
+                        <GridCard
+                            key={match.id}
+                            match={match}
+                            isSelected={selectedId === match.id}
+                            onSelect={() => onSelect(match)}
+                        />
+                    ))}
+                </div>
             </div>
-
-            {/* Detail Drawer */}
-            {selectedMatch && (
-                <>
-                    <div
-                        className="fixed inset-0 bg-black/30 transition-opacity"
-                        onClick={() => onSelect(selectedMatch)}
-                    />
-                    <div className="fixed top-0 right-0 h-full w-full md:w-[480px] lg:w-[540px] bg-base-100 shadow-2xl border-l border-base-300 overflow-y-auto animate-slide-in-right">
+            <div className="drawer-side z-50">
+                <div className="drawer-overlay" onClick={() => selectedMatch && onSelect(selectedMatch)} aria-label="close drawer" />
+                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
+                    {selectedMatch && (
                         <MatchDetailLoader
                             matchId={selectedMatch.id}
                             isPartner={isPartner}
@@ -50,9 +47,9 @@ export function GridView({
                             onDismiss={onDismiss}
                             dismissing={dismissing}
                         />
-                    </div>
-                </>
-            )}
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

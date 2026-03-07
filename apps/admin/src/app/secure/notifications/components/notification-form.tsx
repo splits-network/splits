@@ -127,13 +127,13 @@ export function NotificationForm({ isOpen, onClose, onSuccess, initial }: Notifi
                     <fieldset className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="label label-text text-sm">Type</label>
-                            <select className="select select-sm select-bordered w-full" value={form.type} onChange={(e) => set('type', e.target.value as NotificationType)}>
+                            <select className="select select-sm w-full" value={form.type} onChange={(e) => set('type', e.target.value as NotificationType)}>
                                 {TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
                         </div>
                         <div>
                             <label className="label label-text text-sm">Severity</label>
-                            <select className="select select-sm select-bordered w-full" value={form.severity} onChange={(e) => set('severity', e.target.value as NotificationSeverity)}>
+                            <select className="select select-sm w-full" value={form.severity} onChange={(e) => set('severity', e.target.value as NotificationSeverity)}>
                                 {SEVERITY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
                         </div>

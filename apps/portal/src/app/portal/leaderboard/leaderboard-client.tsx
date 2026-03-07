@@ -11,8 +11,7 @@ import {
     LeaderboardNextMilestone,
     useGamification,
 } from "@splits-network/shared-gamification";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { LeaderboardHero } from "./leaderboard-hero";
 import { LeaderboardList } from "./leaderboard-list";
 import { LeaderboardFilterBar, HERO_COPY, type EntityType, type Period, type Metric } from "./leaderboard-filters";
@@ -102,45 +101,13 @@ export default function LeaderboardClient() {
     const myLevel = myEntityId ? getLevel(myEntityId) : undefined;
     const heroCopy = HERO_COPY[entityType];
 
-    /* ── Mount animation ─────────────────────────────────────────────── */
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                mainRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => ((el as HTMLElement).style.opacity = "1"));
-                return;
-            }
-
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            tl.fromTo($1(".lb-kicker"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" })
-                .fromTo(
-                    mainRef.current!.querySelectorAll(".lb-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    { opacity: 1, y: 0, rotateX: 0, duration: 0.8, stagger: 0.1, clearProps: "transform" },
-                    "-=0.3",
-                )
-                .fromTo($1(".lb-subtitle"), { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" }, "-=0.4")
-                .fromTo($1(".lb-stat-bar"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, clearProps: "transform" }, "-=0.2")
-                .fromTo($1(".lb-body"), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, clearProps: "transform" }, "-=0.2")
-                .fromTo(
-                    mainRef.current!.querySelectorAll(".lb-sidebar-card"),
-                    { opacity: 0, x: 30 },
-                    { opacity: 1, x: 0, stagger: 0.12, duration: 0.5, clearProps: "transform" },
-                    "-=0.3",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             <LeaderboardHero title={heroCopy.title} subtitle={heroCopy.subtitle} />
 
-            <section className="lb-body opacity-0 container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+            <section className="scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-10 lg:py-14">
                 <LeaderboardFilterBar
                     entityType={entityType}
                     period={period}
@@ -158,10 +125,10 @@ export default function LeaderboardClient() {
                     </div>
 
                     <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-                        <div className="lb-sidebar-card opacity-0">
+                        <div className="scroll-reveal slide-from-right">
                             <LeaderboardYourStats myRank={myRank} level={myLevel} entityType={entityType} period={period} metric={metric} />
                         </div>
-                        <div className="lb-sidebar-card opacity-0">
+                        <div className="scroll-reveal slide-from-right">
                             <LeaderboardNextMilestone myRank={myRank} entries={entries} />
                         </div>
                     </div>

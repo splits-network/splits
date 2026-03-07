@@ -57,7 +57,7 @@ export function ButtonListEditor({ buttons, onChange }: ButtonListEditorProps) {
                             placeholder="fa-icon (optional)"
                         />
                         <select
-                            className="select select-bordered select-sm"
+                            className="select select-sm"
                             value={btn.variant}
                             onChange={(e) =>
                                 update({ variant: e.target.value as ContentButton["variant"] })

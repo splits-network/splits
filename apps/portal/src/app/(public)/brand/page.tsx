@@ -3,13 +3,7 @@
 import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 // ── Basel color palette data ─────────────────────────────────────────────────
 
@@ -149,283 +143,7 @@ const keyFacts = [
 
 export default function BrandBaselPage() {
     const mainRef = useRef<HTMLElement>(null);
-
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) {
-                mainRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => gsap.set(el, { opacity: 1 }));
-                return;
-            }
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            // ── Hero entrance ─────────────────────────────────────
-            const heroTl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            heroTl
-                .fromTo(
-                    $1(".hero-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                )
-                .fromTo(
-                    $(".hero-headline-word"),
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 1,
-                        stagger: 0.12,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".hero-subtitle"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
-                    "-=0.5",
-                )
-                .fromTo(
-                    $(".hero-cta"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 },
-                    "-=0.3",
-                );
-
-            // Hero image
-            const heroImg = $1(".hero-img-wrap");
-            if (heroImg) {
-                gsap.fromTo(
-                    heroImg,
-                    { opacity: 0, scale: 1.08 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 1.4,
-                        ease: "power2.out",
-                        delay: 0.2,
-                    },
-                );
-            }
-
-            // ── Company overview ──────────────────────────────────
-            const overviewSection = $1(".overview-section");
-            if (overviewSection) {
-                gsap.fromTo(
-                    $1(".overview-heading"),
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: overviewSection,
-                            start: "top 75%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $(".overview-card"),
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        stagger: 0.1,
-                        scrollTrigger: {
-                            trigger: overviewSection,
-                            start: "top 70%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $(".fact-card"),
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.5,
-                        stagger: 0.08,
-                        scrollTrigger: {
-                            trigger: $1(".facts-grid"),
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // ── Logo section ──────────────────────────────────────
-            const logoSection = $1(".logo-section");
-            if (logoSection) {
-                gsap.fromTo(
-                    $1(".logo-heading"),
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        scrollTrigger: {
-                            trigger: logoSection,
-                            start: "top 75%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $(".logo-card"),
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        stagger: 0.12,
-                        scrollTrigger: {
-                            trigger: logoSection,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-
-            // ── Typography section ────────────────────────────────
-            const typoSection = $1(".typo-section");
-            if (typoSection) {
-                gsap.fromTo(
-                    $1(".typo-heading"),
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        scrollTrigger: {
-                            trigger: typoSection,
-                            start: "top 75%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $(".typo-card"),
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        stagger: 0.1,
-                        scrollTrigger: {
-                            trigger: typoSection,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-
-            // ── Color palette section ─────────────────────────────
-            const colorSection = $1(".color-section");
-            if (colorSection) {
-                gsap.fromTo(
-                    $1(".color-heading"),
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        scrollTrigger: {
-                            trigger: colorSection,
-                            start: "top 75%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $(".color-swatch"),
-                    { opacity: 0, y: 20, scale: 0.96 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: 0.5,
-                        stagger: 0.06,
-                        scrollTrigger: {
-                            trigger: $1(".color-grid"),
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // ── Screenshots section ───────────────────────────────
-            const screenshotSection = $1(".screenshot-section");
-            if (screenshotSection) {
-                gsap.fromTo(
-                    $1(".screenshot-heading"),
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        scrollTrigger: {
-                            trigger: screenshotSection,
-                            start: "top 75%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $(".screenshot-card"),
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        stagger: 0.15,
-                        scrollTrigger: {
-                            trigger: screenshotSection,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-
-            // ── Contact section ───────────────────────────────────
-            const contactSection = $1(".contact-section");
-            if (contactSection) {
-                gsap.fromTo(
-                    $1(".contact-heading"),
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        scrollTrigger: {
-                            trigger: contactSection,
-                            start: "top 75%",
-                        },
-                    },
-                );
-                gsap.fromTo(
-                    $(".contact-card"),
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        stagger: 0.12,
-                        scrollTrigger: {
-                            trigger: contactSection,
-                            start: "top 70%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="overflow-hidden">
@@ -435,7 +153,7 @@ export default function BrandBaselPage() {
             <section className="hero-section relative min-h-[70vh] flex items-center bg-base-100">
                 {/* Right image panel — abstract brand texture */}
                 <div
-                    className="hero-img-wrap absolute inset-0 lg:left-[55%] opacity-0"
+                    className="scroll-reveal scale-in absolute inset-0 lg:left-[55%]"
                     style={{
                         clipPath: "polygon(10% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
@@ -454,21 +172,21 @@ export default function BrandBaselPage() {
 
                 <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                        <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
                             <i className="fa-duotone fa-regular fa-palette mr-2"></i>
                             Press Kit
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content">
+                            <span className="scroll-reveal fade-up inline-block text-base-content">
                                 Brand
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="scroll-reveal fade-up inline-block text-primary">
                                 Guidelines
                             </span>
                         </h1>
 
-                        <p className="hero-subtitle text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
+                        <p className="scroll-reveal fade-up text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10">
                             Logos, color specifications, typography standards,
                             and company information for press, partners, and
                             editorial use.
@@ -478,7 +196,7 @@ export default function BrandBaselPage() {
                             <a
                                 href="/logo.svg"
                                 download="splits-network-logo.svg"
-                                className="hero-cta btn btn-primary btn-lg shadow-md opacity-0"
+                                className="scroll-reveal fade-up btn btn-primary btn-lg shadow-md"
                                 style={{ borderRadius: 0 }}
                             >
                                 <i className="fa-duotone fa-regular fa-download"></i>
@@ -486,7 +204,7 @@ export default function BrandBaselPage() {
                             </a>
                             <a
                                 href="mailto:press@splits.network"
-                                className="hero-cta btn btn-ghost btn-lg opacity-0"
+                                className="scroll-reveal fade-up btn btn-ghost btn-lg"
                                 style={{ borderRadius: 0 }}
                             >
                                 <i className="fa-duotone fa-regular fa-envelope"></i>
@@ -502,7 +220,7 @@ export default function BrandBaselPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <section className="overview-section py-24 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="overview-heading max-w-3xl mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mb-16 ">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             The Company
                         </p>
@@ -514,7 +232,7 @@ export default function BrandBaselPage() {
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
                         {/* About + Boilerplate — 3/5 */}
                         <div className="lg:col-span-3 space-y-10">
-                            <div className="overview-card border-l-4 border-primary pl-6 opacity-0">
+                            <div className="scroll-reveal fade-up border-l-4 border-primary pl-6 ">
                                 <h3 className="text-xl font-bold text-base-content mb-4">
                                     What We Do
                                 </h3>
@@ -531,7 +249,7 @@ export default function BrandBaselPage() {
                                 </p>
                             </div>
 
-                            <div className="overview-card border-l-4 border-secondary pl-6 opacity-0">
+                            <div className="scroll-reveal fade-up border-l-4 border-secondary pl-6 ">
                                 <h3 className="text-xl font-bold text-base-content mb-4">
                                     Press Boilerplate
                                 </h3>
@@ -563,7 +281,7 @@ export default function BrandBaselPage() {
                                 {keyFacts.map((fact, i) => (
                                     <div
                                         key={i}
-                                        className={`fact-card border-l-4 ${fact.border} bg-base-100 p-5 shadow-sm opacity-0`}
+                                        className={`scroll-reveal slide-from-left border-l-4 ${fact.border} bg-base-100 p-5 shadow-sm `}
                                     >
                                         <div
                                             className={`text-2xl font-black ${fact.text} mb-1`}
@@ -586,7 +304,7 @@ export default function BrandBaselPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <section className="logo-section py-24 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="logo-heading max-w-3xl mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mb-16 ">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                             Identity
                         </p>
@@ -600,7 +318,7 @@ export default function BrandBaselPage() {
 
                     {/* Primary logos — light vs dark */}
                     <div className="grid md:grid-cols-2 gap-8 mb-16">
-                        <div className="logo-card bg-base-200/10 border border-neutral-content/10 p-8 shadow-md opacity-0">
+                        <div className="scroll-reveal fade-up bg-base-200/10 border border-neutral-content/10 p-8 shadow-md ">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-2 h-6 bg-primary" />
                                 <h3 className="text-lg font-bold">
@@ -621,7 +339,7 @@ export default function BrandBaselPage() {
                             </p>
                         </div>
 
-                        <div className="logo-card bg-base-200/10 border border-neutral-content/10 p-8 shadow-md opacity-0">
+                        <div className="scroll-reveal fade-up bg-base-200/10 border border-neutral-content/10 p-8 shadow-md ">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-2 h-6 bg-secondary" />
                                 <h3 className="text-lg font-bold">
@@ -644,7 +362,7 @@ export default function BrandBaselPage() {
                     </div>
 
                     {/* Usage guidelines */}
-                    <div className="logo-card bg-base-200/10 border border-neutral-content/10 p-8 shadow-md mb-12 opacity-0">
+                    <div className="scroll-reveal fade-up bg-base-200/10 border border-neutral-content/10 p-8 shadow-md mb-12 ">
                         <h3 className="text-lg font-bold mb-6">
                             Usage Guidelines
                         </h3>
@@ -680,7 +398,7 @@ export default function BrandBaselPage() {
                     </div>
 
                     {/* SVG download */}
-                    <div className="logo-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-base-200/10 border border-neutral-content/10 p-6 shadow-sm opacity-0">
+                    <div className="scroll-reveal fade-up flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-base-200/10 border border-neutral-content/10 p-6 shadow-sm ">
                         <div>
                             <h4 className="text-base font-bold mb-1">
                                 Vector Logo
@@ -708,7 +426,7 @@ export default function BrandBaselPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <section className="typo-section py-24 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="typo-heading max-w-3xl mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mb-16 ">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             Typography
                         </p>
@@ -719,7 +437,7 @@ export default function BrandBaselPage() {
 
                     {/* Font families */}
                     <div className="grid md:grid-cols-3 gap-8 mb-12">
-                        <div className="typo-card border-l-4 border-primary bg-base-200 p-8 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up border-l-4 border-primary bg-base-200 p-8 shadow-sm ">
                             <div className="flex items-center gap-3 mb-4">
                                 <i className="fa-duotone fa-regular fa-font text-primary"></i>
                                 <h3 className="text-lg font-bold">
@@ -748,7 +466,7 @@ export default function BrandBaselPage() {
                             </div>
                         </div>
 
-                        <div className="typo-card border-l-4 border-secondary bg-base-200 p-8 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up border-l-4 border-secondary bg-base-200 p-8 shadow-sm ">
                             <div className="flex items-center gap-3 mb-4">
                                 <i className="fa-duotone fa-regular fa-code text-secondary"></i>
                                 <h3 className="text-lg font-bold">Monospace</h3>
@@ -775,7 +493,7 @@ export default function BrandBaselPage() {
                             </div>
                         </div>
 
-                        <div className="typo-card border-l-4 border-accent bg-base-200 p-8 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up border-l-4 border-accent bg-base-200 p-8 shadow-sm ">
                             <div className="flex items-center gap-3 mb-4">
                                 <i className="fa-duotone fa-regular fa-wand-magic-sparkles text-accent"></i>
                                 <h3 className="text-lg font-bold">
@@ -808,7 +526,7 @@ export default function BrandBaselPage() {
                     </div>
 
                     {/* Type scale */}
-                    <div className="typo-card bg-base-200 p-8 shadow-sm mb-12 opacity-0">
+                    <div className="scroll-reveal fade-up bg-base-200 p-8 shadow-sm mb-12 ">
                         <h3 className="text-xl font-bold mb-8 border-l-4 border-primary pl-4">
                             Heading Scale
                         </h3>
@@ -874,7 +592,7 @@ export default function BrandBaselPage() {
 
                     {/* Body text + treatments */}
                     <div className="grid md:grid-cols-2 gap-8">
-                        <div className="typo-card bg-base-200 p-8 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up bg-base-200 p-8 shadow-sm ">
                             <h3 className="text-xl font-bold mb-6 border-l-4 border-secondary pl-4">
                                 Body Text
                             </h3>
@@ -911,7 +629,7 @@ export default function BrandBaselPage() {
                             </div>
                         </div>
 
-                        <div className="typo-card bg-base-200 p-8 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up bg-base-200 p-8 shadow-sm ">
                             <h3 className="text-xl font-bold mb-6 border-l-4 border-accent pl-4">
                                 Text Treatments
                             </h3>
@@ -969,7 +687,7 @@ export default function BrandBaselPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <section className="color-section py-24 bg-base-200">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="color-heading max-w-3xl mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mb-16 ">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             Color System
                         </p>
@@ -990,7 +708,7 @@ export default function BrandBaselPage() {
                         {baselColors.map((color) => (
                             <div
                                 key={color.name}
-                                className="color-swatch bg-base-100 shadow-sm overflow-hidden opacity-0"
+                                className="scroll-reveal fade-up bg-base-100 shadow-sm overflow-hidden "
                             >
                                 <div
                                     className={`${color.swatch} h-24 flex items-center justify-center`}
@@ -1026,7 +744,7 @@ export default function BrandBaselPage() {
                         {baseSurfaces.map((color) => (
                             <div
                                 key={color.name}
-                                className="color-swatch bg-base-100 shadow-sm overflow-hidden opacity-0"
+                                className="scroll-reveal fade-up bg-base-100 shadow-sm overflow-hidden "
                             >
                                 <div
                                     className={`${color.swatch} h-24 flex items-center justify-center border border-base-300`}
@@ -1062,7 +780,7 @@ export default function BrandBaselPage() {
                         {semanticColors.map((color) => (
                             <div
                                 key={color.name}
-                                className="color-swatch bg-base-100 shadow-sm overflow-hidden opacity-0"
+                                className="scroll-reveal fade-up bg-base-100 shadow-sm overflow-hidden "
                             >
                                 <div
                                     className={`${color.swatch} h-24 flex items-center justify-center`}
@@ -1123,7 +841,7 @@ export default function BrandBaselPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <section className="screenshot-section py-24 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="screenshot-heading max-w-3xl mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mb-16 ">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                             Product
                         </p>
@@ -1137,7 +855,7 @@ export default function BrandBaselPage() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-8">
-                        <div className="screenshot-card bg-base-200/10 border border-neutral-content/10 p-6 shadow-md opacity-0">
+                        <div className="scroll-reveal fade-up bg-base-200/10 border border-neutral-content/10 p-6 shadow-md ">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-2 h-6 bg-primary" />
                                 <h3 className="text-base font-bold">
@@ -1154,7 +872,7 @@ export default function BrandBaselPage() {
                                 />
                             </div>
                         </div>
-                        <div className="screenshot-card bg-base-200/10 border border-neutral-content/10 p-6 shadow-md opacity-0">
+                        <div className="scroll-reveal fade-up bg-base-200/10 border border-neutral-content/10 p-6 shadow-md ">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-2 h-6 bg-secondary" />
                                 <h3 className="text-base font-bold">
@@ -1190,7 +908,7 @@ export default function BrandBaselPage() {
             ═══════════════════════════════════════════════════════════════ */}
             <section className="contact-section py-24 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="contact-heading max-w-3xl mx-auto text-center mb-16 opacity-0">
+                    <div className="scroll-reveal fade-up max-w-3xl mx-auto text-center mb-16 ">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             Contact
                         </p>
@@ -1201,7 +919,7 @@ export default function BrandBaselPage() {
 
                     <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
                         {/* Press */}
-                        <div className="contact-card border-l-4 border-primary bg-base-200 p-8 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up border-l-4 border-primary bg-base-200 p-8 shadow-sm ">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-10 h-10 bg-primary/10 flex items-center justify-center">
                                     <i className="fa-duotone fa-regular fa-newspaper text-primary"></i>
@@ -1230,7 +948,7 @@ export default function BrandBaselPage() {
                         </div>
 
                         {/* Partnerships */}
-                        <div className="contact-card border-l-4 border-secondary bg-base-200 p-8 shadow-sm opacity-0">
+                        <div className="scroll-reveal fade-up border-l-4 border-secondary bg-base-200 p-8 shadow-sm ">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-10 h-10 bg-secondary/10 flex items-center justify-center">
                                     <i className="fa-duotone fa-regular fa-handshake text-secondary"></i>

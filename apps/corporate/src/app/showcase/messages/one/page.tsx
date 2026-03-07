@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Role Colours & Badges ──────────────────────────────────────────────── */
 
@@ -522,89 +521,7 @@ export default function MessagesOne() {
     };
 
     /* ── GSAP Animations ──────────────────────────────────────── */
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            /* Header entrance */
-            const headerTl = gsap.timeline({
-                defaults: { ease: "power3.out", clearProps: "transform" },
-            });
-
-            headerTl
-                .fromTo(
-                    $1(".msg-header-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                )
-                .fromTo(
-                    $(".msg-header-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".msg-header-stat-bar"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                );
-
-            /* Inbox panel slide */
-            gsap.fromTo(
-                $1(".inbox-panel"),
-                { opacity: 0, x: -40 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    delay: 0.3,
-                },
-            );
-
-            /* Thread panel slide */
-            gsap.fromTo(
-                $1(".thread-panel"),
-                { opacity: 0, x: 40 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    delay: 0.4,
-                },
-            );
-
-            /* Conversation items stagger */
-            gsap.fromTo(
-                $(".conv-item"),
-                { opacity: 0, x: -20 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.4,
-                    stagger: 0.05,
-                    ease: "power2.out",
-                    delay: 0.5,
-                },
-            );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     /* ── Animate new messages on thread change ────────────────── */
     useEffect(() => {
@@ -615,18 +532,16 @@ export default function MessagesOne() {
         if (prefersReducedMotion) return;
 
         const bubbles = threadRef.current.querySelectorAll(".msg-bubble");
-        gsap.fromTo(
-            bubbles,
-            { opacity: 0, y: 20, scale: 0.97 },
-            {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 0.3,
-                stagger: 0.04,
-                ease: "power2.out",
-            },
-        );
+        bubbles.forEach((bubble, i) => {
+            const el = bubble as HTMLElement;
+            el.style.opacity = "0";
+            el.style.transform = "translateY(20px) scale(0.97)";
+            requestAnimationFrame(() => {
+                el.style.transition = `opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1) ${i * 40}ms, transform 0.3s cubic-bezier(0.33, 1, 0.68, 1) ${i * 40}ms`;
+                el.style.opacity = "1";
+                el.style.transform = "translateY(0) scale(1)";
+            });
+        });
     }, [selectedId]);
 
     /* ── Total unread count ───────────────────────────────────── */
@@ -657,28 +572,28 @@ export default function MessagesOne() {
 
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
-                        <p className="msg-header-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                        <p className="msg-header-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                             Communications Hub
                         </p>
 
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-6">
-                            <span className="msg-header-word inline-block opacity-0">
+                            <span className="msg-header-word inline-block scroll-reveal hero-word">
                                 Your
                             </span>{" "}
-                            <span className="msg-header-word inline-block opacity-0 text-primary">
+                            <span className="msg-header-word inline-block scroll-reveal hero-word text-primary">
                                 messages.
                             </span>{" "}
                             <br className="hidden md:block" />
-                            <span className="msg-header-word inline-block opacity-0">
+                            <span className="msg-header-word inline-block scroll-reveal hero-word">
                                 All in
                             </span>{" "}
-                            <span className="msg-header-word inline-block opacity-0">
+                            <span className="msg-header-word inline-block scroll-reveal hero-word">
                                 one place.
                             </span>
                         </h1>
 
                         {/* Stat bar */}
-                        <div className="msg-header-stat-bar flex flex-wrap gap-8 mt-8 opacity-0">
+                        <div className="msg-header-stat-bar flex flex-wrap gap-8 mt-8 scroll-reveal fade-up">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-primary flex items-center justify-center">
                                     <i className="fa-duotone fa-regular fa-envelope text-primary-content" />
@@ -734,7 +649,7 @@ export default function MessagesOne() {
                 <div className="flex gap-0 lg:gap-6 h-[calc(100vh-20rem)] min-h-[500px]">
                     {/* ── INBOX PANEL (left 40%) ─────────────────────── */}
                     <div
-                        className={`inbox-panel opacity-0 flex flex-col w-full lg:w-[38%] bg-base-200 border border-base-300 overflow-hidden ${
+                        className={`inbox-panel scroll-reveal fade-up flex flex-col w-full lg:w-[38%] bg-base-200 border border-base-300 overflow-hidden ${
                             mobileShowThread ? "hidden lg:flex" : "flex"
                         }`}
                     >
@@ -815,7 +730,7 @@ export default function MessagesOne() {
                                         onClick={() =>
                                             selectConversation(conv.id)
                                         }
-                                        className={`conv-item opacity-0 w-full text-left p-4 border-b border-base-300 transition-all hover:bg-base-300/50 ${
+                                        className={`conv-item scroll-reveal fade-up w-full text-left p-4 border-b border-base-300 transition-all hover:bg-base-300/50 ${
                                             isActive
                                                 ? "bg-base-100 border-l-4 border-l-primary"
                                                 : "border-l-4 border-l-transparent"
@@ -901,7 +816,7 @@ export default function MessagesOne() {
 
                     {/* ── THREAD PANEL (right 60%) ────────────────────── */}
                     <div
-                        className={`thread-panel opacity-0 flex flex-col flex-1 bg-base-100 border border-base-300 overflow-hidden ${
+                        className={`thread-panel scroll-reveal fade-up flex flex-col flex-1 bg-base-100 border border-base-300 overflow-hidden ${
                             mobileShowThread ? "flex" : "hidden lg:flex"
                         }`}
                     >

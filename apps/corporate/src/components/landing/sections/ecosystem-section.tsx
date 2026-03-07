@@ -1,110 +1,12 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 export function EcosystemSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const diagramRef = useRef<HTMLDivElement>(null);
-    const arrowsRef = useRef<SVGSVGElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading animation
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // Platform cards
-            const platforms = diagramRef.current?.querySelectorAll(".platform-card");
-            if (platforms) {
-                gsap.fromTo(
-                    platforms,
-                    { opacity: 0, scale: 0.8 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                        stagger: 0.2,
-                        scrollTrigger: {
-                            trigger: diagramRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // Center hub
-            const hub = diagramRef.current?.querySelector(".center-hub");
-            if (hub) {
-                gsap.fromTo(
-                    hub,
-                    { opacity: 0, scale: 0 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                        delay: 0.3,
-                        scrollTrigger: {
-                            trigger: diagramRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // Connecting lines draw
-            const paths = arrowsRef.current?.querySelectorAll("path");
-            if (paths) {
-                paths.forEach((path) => {
-                    const length = path.getTotalLength();
-                    gsap.set(path, {
-                        strokeDasharray: length,
-                        strokeDashoffset: length,
-                    });
-                    gsap.to(path, {
-                        strokeDashoffset: 0,
-                        duration: duration.hero,
-                        ease: easing.smooth,
-                        delay: 0.5,
-                        scrollTrigger: {
-                            trigger: diagramRef.current,
-                            start: "top 80%",
-                        },
-                    });
-                });
-            }
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     return (
         <section
@@ -113,8 +15,7 @@ export function EcosystemSection() {
         >
             <div className="container mx-auto px-4">
                 <div
-                    ref={headingRef}
-                    className="text-center mb-16 opacity-0 max-w-3xl mx-auto"
+                    className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto"
                 >
                     <p className="text-sm uppercase tracking-wider text-primary mb-3">
                         Connected Platforms
@@ -132,12 +33,10 @@ export function EcosystemSection() {
                 </div>
 
                 <div
-                    ref={diagramRef}
                     className="relative max-w-4xl mx-auto"
                 >
                     {/* SVG connecting lines */}
                     <svg
-                        ref={arrowsRef}
                         className="absolute inset-0 w-full h-full pointer-events-none hidden md:block"
                         viewBox="0 0 800 400"
                         preserveAspectRatio="xMidYMid meet"
@@ -189,9 +88,9 @@ export function EcosystemSection() {
                     </svg>
 
                     {/* Grid layout for the diagram */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 items-center min-h-[400px]">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 items-center min-h-[400px] stagger-children">
                         {/* Left column - Recruiters */}
-                        <div className="platform-card bg-primary text-primary-content rounded-2xl p-6 shadow-xl opacity-0">
+                        <div className="scroll-reveal slide-from-left platform-card bg-primary text-primary-content rounded-2xl p-6 shadow-xl">
                             <div className="flex items-center gap-3 mb-4">
                                 <i className="fa-duotone fa-regular fa-user-tie text-2xl"></i>
                                 <div>
@@ -220,7 +119,7 @@ export function EcosystemSection() {
                         {/* Center column - Hub + Companies */}
                         <div className="flex flex-col items-center gap-8">
                             {/* Companies card - top */}
-                            <div className="platform-card bg-base-200 rounded-2xl p-6 shadow-xl opacity-0 w-full">
+                            <div className="scroll-reveal fade-up platform-card bg-base-200 rounded-2xl p-6 shadow-xl w-full">
                                 <div className="flex items-center gap-3 mb-4">
                                     <i className="fa-duotone fa-regular fa-building text-2xl text-accent"></i>
                                     <div>
@@ -247,7 +146,7 @@ export function EcosystemSection() {
                             </div>
 
                             {/* Center hub */}
-                            <div className="center-hub w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-xl opacity-0">
+                            <div className="scroll-reveal scale-in center-hub w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-xl">
                                 <i className="fa-duotone fa-regular fa-arrows-to-circle text-3xl text-white"></i>
                             </div>
 
@@ -260,7 +159,7 @@ export function EcosystemSection() {
                         </div>
 
                         {/* Right column - Candidates */}
-                        <div className="platform-card bg-secondary text-secondary-content rounded-2xl p-6 shadow-xl opacity-0">
+                        <div className="scroll-reveal slide-from-right platform-card bg-secondary text-secondary-content rounded-2xl p-6 shadow-xl">
                             <div className="flex items-center gap-3 mb-4">
                                 <i className="fa-duotone fa-regular fa-user text-2xl"></i>
                                 <div>

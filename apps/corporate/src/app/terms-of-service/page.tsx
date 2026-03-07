@@ -48,17 +48,17 @@ export default function TermsOfServiceBaselPage() {
             <section className="py-28 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="bl-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                        <p className="bl-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
                             <i className="fa-duotone fa-regular fa-gavel mr-2" />
                             Legal
                         </p>
-                        <h1 className="bl-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-6 opacity-0">
+                        <h1 className="bl-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-6 scroll-reveal fade-up">
                             Terms of <span className="text-primary">Service</span>
                         </h1>
-                        <p className="bl-hero-subtitle text-lg md:text-xl opacity-70 leading-relaxed mb-6 opacity-0">
+                        <p className="bl-hero-subtitle text-lg md:text-xl opacity-70 leading-relaxed mb-6 scroll-reveal fade-up">
                             The rules, guidelines, and mutual commitments that govern your use of Employment Networks platforms
                         </p>
-                        <p className="bl-hero-date text-sm font-semibold uppercase tracking-wider opacity-40 opacity-0">
+                        <p className="bl-hero-date text-sm font-semibold uppercase tracking-wider opacity-40 scroll-reveal fade-up">
                             Last updated: {lastUpdated}
                         </p>
                     </div>
@@ -68,7 +68,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ TABLE OF CONTENTS ═══ */}
             <section className="py-12 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-toc border-l-4 border-primary bg-base-100 p-8 shadow-sm opacity-0">
+                    <div className="bl-toc border-l-4 border-primary bg-base-100 p-8 shadow-sm scroll-reveal fade-up">
                         <h2 className="text-xl font-black tracking-tight mb-6">
                             Quick <span className="text-primary">Navigation</span>
                         </h2>
@@ -94,7 +94,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 1 — Acceptance ═══ */}
             <section id="acceptance" className={`py-16 ${sectionBg(0)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(0)} text-${badgeColor(0)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>1</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Acceptance of Terms</h2>
@@ -121,7 +121,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 2 — Service Description ═══ */}
             <section id="description" className={`py-16 ${sectionBg(1)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(1)} text-${badgeColor(1)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>2</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Service Description</h2>
@@ -164,7 +164,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 3 — Eligibility ═══ */}
             <section id="eligibility" className={`py-16 ${sectionBg(2)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(2)} text-${badgeColor(2)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>3</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Eligibility</h2>
@@ -197,7 +197,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 4 — Accounts & Registration ═══ */}
             <section id="accounts" className={`py-16 ${sectionBg(3)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(3)} text-${badgeColor(3)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>4</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Accounts &amp; Registration</h2>
@@ -227,7 +227,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 5 — User Conduct ═══ */}
             <section id="conduct" className={`py-16 ${sectionBg(4)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(4)} text-${badgeColor(4)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>5</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">User Conduct</h2>
@@ -265,7 +265,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 6 — Platform Rules ═══ */}
             <section id="platform-rules" className={`py-16 ${sectionBg(5)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(5)} text-${badgeColor(5)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>6</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Platform Rules</h2>
@@ -307,7 +307,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 7 — Fees & Payments ═══ */}
             <section id="fees" className={`py-16 ${sectionBg(6)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(6)} text-${badgeColor(6)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>7</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Fees &amp; Payments</h2>
@@ -334,7 +334,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 8 — Intellectual Property ═══ */}
             <section id="ip" className={`py-16 ${sectionBg(7)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(7)} text-${badgeColor(7)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>8</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Intellectual Property</h2>
@@ -360,7 +360,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 9 — AI-Powered Features ═══ */}
             <section id="ai-features" className={`py-16 ${sectionBg(8)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(8)} text-${badgeColor(8)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>9</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">AI-Powered Features</h2>
@@ -390,7 +390,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 10 — Privacy & Data ═══ */}
             <section id="privacy" className={`py-16 ${sectionBg(9)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(9)} text-${badgeColor(9)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>10</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Privacy &amp; Data</h2>
@@ -431,7 +431,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 11 — Disclaimers ═══ */}
             <section id="disclaimers" className={`py-16 ${sectionBg(10)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(10)} text-${badgeColor(10)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>11</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Disclaimers</h2>
@@ -463,7 +463,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 12 — Limitation of Liability ═══ */}
             <section id="liability" className={`py-16 ${sectionBg(11)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(11)} text-${badgeColor(11)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>12</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Limitation of Liability</h2>
@@ -487,7 +487,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 13 — Indemnification ═══ */}
             <section id="indemnification" className={`py-16 ${sectionBg(12)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(12)} text-${badgeColor(12)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>13</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Indemnification</h2>
@@ -523,7 +523,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 14 — Termination ═══ */}
             <section id="termination" className={`py-16 ${sectionBg(13)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(13)} text-${badgeColor(13)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>14</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Termination</h2>
@@ -553,7 +553,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 15 — Dispute Resolution ═══ */}
             <section id="disputes" className={`py-16 ${sectionBg(14)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(14)} text-${badgeColor(14)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>15</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Dispute Resolution</h2>
@@ -597,7 +597,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 16 — Governing Law ═══ */}
             <section id="governing-law" className={`py-16 ${sectionBg(15)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(15)} text-${badgeColor(15)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>16</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Governing Law</h2>
@@ -620,7 +620,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ Section 17 — Changes to Terms ═══ */}
             <section id="changes" className={`py-16 ${sectionBg(16)}`}>
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className={`w-10 h-10 bg-${badgeColor(16)} text-${badgeColor(16)}-content flex items-center justify-center font-black text-lg flex-shrink-0`}>17</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Changes to Terms</h2>
@@ -646,7 +646,7 @@ export default function TermsOfServiceBaselPage() {
             {/* ═══ CONTACT ═══ */}
             <section id="contact" className="py-16 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-contact opacity-0">
+                    <div className="bl-contact scroll-reveal fade-up">
                         <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-8 text-center">
                             Questions About These Terms?
                         </h2>

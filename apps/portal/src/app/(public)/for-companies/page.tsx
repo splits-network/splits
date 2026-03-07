@@ -232,7 +232,7 @@ export default function ForCompaniesPage() {
                             data-animate-stagger
                         >
                             {companyBenefits.map((benefit) => (
-                                <div key={benefit.title} className="opacity-0">
+                                <div key={benefit.title} className="scroll-reveal fade-up">
                                     <div className="card bg-base-100 shadow-lg h-full hover:-translate-y-1 hover:shadow-lg transition-all">
                                         <div className="card-body text-center">
                                             <div className="text-secondary text-5xl mb-4">
@@ -278,7 +278,7 @@ export default function ForCompaniesPage() {
                             data-animate-stagger
                         >
                             {industries.map((industry) => (
-                                <div key={industry.name} className="opacity-0">
+                                <div key={industry.name} className="scroll-reveal fade-up">
                                     <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
                                         <div className="card-body text-center p-6">
                                             <div className="text-accent text-4xl mb-3">
@@ -320,7 +320,7 @@ export default function ForCompaniesPage() {
                             {hiringProcess.map((step, index) => (
                                 <div
                                     key={step.step}
-                                    className={`opacity-0 relative flex items-center mb-16 ${
+                                    className={`scroll-reveal fade-up relative flex items-center mb-16 ${
                                         index % 2 === 0
                                             ? "md:flex-row-reverse"
                                             : ""
@@ -610,7 +610,7 @@ export default function ForCompaniesPage() {
                         <div className="grid lg:grid-cols-2 gap-16 items-center">
                             <div>
                                 <div className="space-y-8" data-animate-stagger>
-                                    <div className="opacity-0 bg-base-100 p-6 rounded-xl shadow-lg">
+                                    <div className="scroll-reveal fade-up bg-base-100 p-6 rounded-xl shadow-lg">
                                         <div className="flex items-start gap-4">
                                             <div className="bg-secondary/20 p-3 rounded-lg">
                                                 <i className="fa-duotone fa-regular fa-users-gear text-secondary text-2xl"></i>
@@ -639,7 +639,7 @@ export default function ForCompaniesPage() {
                                         </div>
                                     </div>
 
-                                    <div className="opacity-0 bg-base-100 p-6 rounded-xl shadow-lg">
+                                    <div className="scroll-reveal fade-up bg-base-100 p-6 rounded-xl shadow-lg">
                                         <div className="flex items-start gap-4">
                                             <div className="bg-primary/20 p-3 rounded-lg">
                                                 <i className="fa-duotone fa-regular fa-chart-line-up text-primary text-2xl"></i>
@@ -671,7 +671,7 @@ export default function ForCompaniesPage() {
 
                             <div>
                                 <div className="space-y-8" data-animate-stagger>
-                                    <div className="opacity-0 bg-base-100 p-6 rounded-xl shadow-lg">
+                                    <div className="scroll-reveal fade-up bg-base-100 p-6 rounded-xl shadow-lg">
                                         <div className="flex items-start gap-4">
                                             <div className="bg-accent/20 p-3 rounded-lg">
                                                 <i className="fa-duotone fa-regular fa-scale-balanced text-accent text-2xl"></i>
@@ -699,7 +699,7 @@ export default function ForCompaniesPage() {
                                         </div>
                                     </div>
 
-                                    <div className="opacity-0 bg-base-100 p-6 rounded-xl shadow-lg">
+                                    <div className="scroll-reveal fade-up bg-base-100 p-6 rounded-xl shadow-lg">
                                         <div className="flex items-start gap-4">
                                             <div className="bg-info/20 p-3 rounded-lg">
                                                 <i className="fa-duotone fa-regular fa-shield-check text-info text-2xl"></i>
@@ -805,7 +805,7 @@ export default function ForCompaniesPage() {
                                 className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto"
                                 data-animate-stagger
                             >
-                                <div className="stat opacity-0">
+                                <div className="stat scroll-reveal fade-up">
                                     <div className="stat-title">Setup Time</div>
                                     <div className="stat-value text-secondary">
                                         1 day
@@ -814,7 +814,7 @@ export default function ForCompaniesPage() {
                                         From signup to first posting
                                     </div>
                                 </div>
-                                <div className="stat opacity-0">
+                                <div className="stat scroll-reveal fade-up">
                                     <div className="stat-title">Risk Free</div>
                                     <div className="stat-value text-accent">
                                         100%
@@ -823,7 +823,7 @@ export default function ForCompaniesPage() {
                                         Money-back guarantee
                                     </div>
                                 </div>
-                                <div className="stat opacity-0">
+                                <div className="stat scroll-reveal fade-up">
                                     <div className="stat-title">Support</div>
                                     <div className="stat-value text-primary">
                                         24/7

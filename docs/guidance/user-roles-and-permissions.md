@@ -825,6 +825,35 @@ This rule must be enforced at:
 - The function needs access to `source_firm_id` and `company_id` from the job to make this determination
 - For firm jobs, treat the recruiter role as having the same stage management powers as a company user
 
+### 6.5 Recruiter-Company Granular Permissions
+
+The `recruiter_companies` table has a `permissions` JSONB column that controls what a connected recruiter can do for a specific company. Company admins configure these permissions when accepting a connection request via the invitation wizard at `/portal/invitation/company/[id]`.
+
+#### Permission Flags
+
+| Permission | Default | Description |
+|---|---|---|
+| `can_view_jobs` | `true` | View the company's open job listings |
+| `can_submit_candidates` | `true` | Submit candidates to the company's positions |
+| `can_view_applications` | `true` | View status and details of applications |
+| `can_advance_candidates` | `true` | Advance candidates through pre-offer stages (screen, interview). Cannot advance to offer or hired — section 6.2 still applies |
+| `can_create_jobs` | `false` | Create new job listings on behalf of the company |
+| `can_edit_jobs` | `false` | Edit existing job listings |
+
+#### Key Rules
+
+- Permissions are set by the **company admin** when accepting a recruiter's connection request
+- The legacy `can_manage_company_jobs` boolean is kept in sync: `true` when `can_create_jobs` or `can_edit_jobs` is granted
+- Company admins can modify permissions at any time from the network dashboard
+- The `can_advance_candidates` permission does NOT override the stage gate in section 6.2 — recruiters still cannot advance to `offer` or beyond on company jobs, even with this permission
+- New relationships default to view/submit/advance/view-applications enabled, create/edit jobs disabled
+
+#### Enforcement Points
+
+1. **Frontend**: Permission checks in `permission-utils.ts` and the invitation wizard's `PermissionConfigurator` component
+2. **Backend (network-service)**: `RecruiterCompanyRepository.hasPermission()` and `getPermissions()` methods
+3. **Backend (ats-service)**: Job CRUD and application stage advancement check the permissions JSONB
+
 ---
 
 ## 7. Role Assignment & Management

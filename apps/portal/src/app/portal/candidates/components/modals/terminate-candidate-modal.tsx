@@ -289,7 +289,7 @@ export default function TerminateCandidateModal({
                                                     </p>
                                                 </div>
                                                 <select
-                                                    className="select select-bordered select-sm"
+                                                    className="select select-sm"
                                                     style={{ borderRadius: 0 }}
                                                     value={
                                                         decisions[app.id] ||

@@ -147,7 +147,7 @@ export function CreatePageModal({
 
                     <BaselFormField label="App" required>
                         <select
-                            className="select select-bordered w-full"
+                            className="select w-full"
                             value={formData.app}
                             onChange={(e) =>
                                 setFormData({

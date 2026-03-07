@@ -152,32 +152,18 @@ export default function NotificationBell() {
     const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
-    const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
     const previousUnreadCount = useRef<number | null>(null);
 
     // Browser tab indicator
     useNotificationTabIndicator(unreadCount);
 
-    // Click outside to close
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node)
-            ) {
-                setIsOpen(false);
-            }
-        };
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
-    }, [isOpen]);
+    const closeDropdown = () => {
+        const el = document.activeElement as HTMLElement | null;
+        el?.blur();
+    };
 
     // Fetch unread count every 15 seconds
     const loadUnreadCount = useCallback(async () => {
@@ -240,10 +226,10 @@ export default function NotificationBell() {
         return () => clearInterval(interval);
     }, [loadUnreadCount]);
 
-    // Load notifications when dropdown opens
-    useEffect(() => {
-        if (isOpen) loadNotifications();
-    }, [isOpen, loadNotifications]);
+    // Load notifications when dropdown opens (via focus on trigger)
+    const handleDropdownOpen = () => {
+        loadNotifications();
+    };
 
     const handleNotificationClick = async (notification: InAppNotification) => {
         if (!notification.read) {
@@ -269,7 +255,7 @@ export default function NotificationBell() {
             }
         }
         if (notification.action_url) {
-            setIsOpen(false);
+            closeDropdown();
             router.push(notification.action_url);
         }
     };
@@ -329,12 +315,13 @@ export default function NotificationBell() {
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="dropdown dropdown-end">
             {/* Bell Button */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
+            <div
+                tabIndex={0}
+                role="button"
                 className="btn btn-ghost btn-square relative"
-                style={{ borderRadius: 0 }}
+                onFocus={handleDropdownOpen}
                 aria-label="Notifications"
                 title="Notifications"
             >
@@ -344,114 +331,107 @@ export default function NotificationBell() {
                         {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
-            </button>
+            </div>
 
             {/* Dropdown Panel */}
-            {isOpen && (
-                <div
-                    className="fixed inset-x-2 top-[var(--header-h,3.5rem)] sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-96 bg-base-100 border border-base-300 shadow-lg"
-                    style={{ borderRadius: 0 }}
-                >
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-base-300">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1 h-5 bg-primary" />
-                            <span className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content">
-                                Notifications
+            <div
+                tabIndex={0}
+                className="dropdown-content mt-2 w-[calc(100vw-1rem)] sm:w-96 bg-base-100 border border-base-300 shadow-lg"
+            >
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-base-300">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1 h-5 bg-primary" />
+                        <span className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content">
+                            Notifications
+                        </span>
+                        {unreadCount > 0 && (
+                            <span className="text-xs font-bold px-2 py-0.5 bg-primary/10 text-primary">
+                                {unreadCount}
                             </span>
-                            {unreadCount > 0 && (
-                                <span
-                                    className="text-xs font-bold px-2 py-0.5 bg-primary/10 text-primary"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    {unreadCount}
-                                </span>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-3">
-                            {unreadCount > 0 && (
-                                <button
-                                    type="button"
-                                    onClick={handleMarkAllRead}
-                                    className="text-sm font-semibold uppercase tracking-wider text-secondary hover:text-base-content transition-colors cursor-pointer"
-                                >
-                                    Mark all read
-                                </button>
-                            )}
-                            <Link
-                                href="/portal/notifications"
-                                onClick={() => setIsOpen(false)}
-                                className="text-sm font-semibold uppercase tracking-wider text-base-content/40 hover:text-base-content transition-colors"
-                            >
-                                View all
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Notification List */}
-                    <div className="max-h-[400px] overflow-y-auto">
-                        {loading ? (
-                            <div className="flex flex-col items-center justify-center py-10 gap-2">
-                                <i className="fa-duotone fa-regular fa-spinner-third fa-spin text-xl text-primary" />
-                                <span className="text-md font-semibold uppercase tracking-wider text-base-content/30">
-                                    Loading...
-                                </span>
-                            </div>
-                        ) : notifications.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-10 gap-3">
-                                <div
-                                    className="w-14 h-14 flex items-center justify-center bg-base-200"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    <i className="fa-duotone fa-regular fa-inbox text-2xl text-base-content/20" />
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-sm font-semibold uppercase tracking-wider text-base-content/40">
-                                        All Clear
-                                    </div>
-                                    <div className="text-xs text-base-content/20 mt-1">
-                                        No notifications yet
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="p-2 space-y-1">
-                                {notifications.map((notification) => (
-                                    <NotificationItemBasel
-                                        key={notification.id}
-                                        notification={notification}
-                                        onClick={() =>
-                                            handleNotificationClick(
-                                                notification,
-                                            )
-                                        }
-                                        onToggleRead={() =>
-                                            handleToggleRead(notification)
-                                        }
-                                        onDelete={() =>
-                                            handleDismiss(notification.id)
-                                        }
-                                    />
-                                ))}
-                            </div>
                         )}
                     </div>
-
-                    {/* Footer */}
-                    {notifications.length > 0 && (
-                        <div className="border-t border-base-300">
-                            <Link
-                                href="/portal/notifications"
-                                onClick={() => setIsOpen(false)}
-                                className="flex items-center justify-center gap-2 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40 hover:text-primary transition-colors"
+                    <div className="flex items-center gap-3">
+                        {unreadCount > 0 && (
+                            <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={handleMarkAllRead}
+                                className="text-sm font-semibold uppercase tracking-wider text-secondary hover:text-base-content transition-colors cursor-pointer"
                             >
-                                <i className="fa-duotone fa-regular fa-arrow-right text-sm" />
-                                View all notifications
-                            </Link>
+                                Mark all read
+                            </button>
+                        )}
+                        <Link
+                            href="/portal/notifications"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={closeDropdown}
+                            className="text-sm font-semibold uppercase tracking-wider text-base-content/40 hover:text-base-content transition-colors"
+                        >
+                            View all
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Notification List */}
+                <div className="max-h-[400px] overflow-y-auto">
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-10 gap-2">
+                            <i className="fa-duotone fa-regular fa-spinner-third fa-spin text-xl text-primary" />
+                            <span className="text-md font-semibold uppercase tracking-wider text-base-content/30">
+                                Loading...
+                            </span>
+                        </div>
+                    ) : notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 gap-3">
+                            <div className="w-14 h-14 flex items-center justify-center bg-base-200">
+                                <i className="fa-duotone fa-regular fa-inbox text-2xl text-base-content/20" />
+                            </div>
+                            <div className="text-center">
+                                <div className="text-sm font-semibold uppercase tracking-wider text-base-content/40">
+                                    All Clear
+                                </div>
+                                <div className="text-xs text-base-content/20 mt-1">
+                                    No notifications yet
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="p-2 space-y-1">
+                            {notifications.map((notification) => (
+                                <NotificationItemBasel
+                                    key={notification.id}
+                                    notification={notification}
+                                    onClick={() =>
+                                        handleNotificationClick(notification)
+                                    }
+                                    onToggleRead={() =>
+                                        handleToggleRead(notification)
+                                    }
+                                    onDelete={() =>
+                                        handleDismiss(notification.id)
+                                    }
+                                />
+                            ))}
                         </div>
                     )}
                 </div>
-            )}
+
+                {/* Footer */}
+                {notifications.length > 0 && (
+                    <div className="border-t border-base-300">
+                        <Link
+                            href="/portal/notifications"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={closeDropdown}
+                            className="flex items-center justify-center gap-2 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40 hover:text-primary transition-colors"
+                        >
+                            <i className="fa-duotone fa-regular fa-arrow-right text-sm" />
+                            View all notifications
+                        </Link>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

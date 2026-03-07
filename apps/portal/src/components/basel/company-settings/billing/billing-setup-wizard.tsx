@@ -259,7 +259,7 @@ export function BaselBillingSetupWizard({
 
                     <BaselFormField label="Payment Terms" required>
                         <select
-                            className="select select-bordered w-full"
+                            className="select w-full"
                             value={billingTerms}
                             onChange={(e) => setBillingTerms(e.target.value)}
                             required

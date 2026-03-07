@@ -4,7 +4,6 @@ import { useSignIn, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import gsap from "gsap";
 
 export default function ForgotPasswordPage() {
     const { isLoaded, signIn, setActive } = useSignIn();
@@ -83,24 +82,23 @@ export default function ForgotPasswordPage() {
         }
     };
 
-    // Animate step transitions
+    // Animate step transitions with CSS
     useEffect(() => {
-        if (
-            !stepRef.current ||
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        )
-            return;
-        gsap.fromTo(
-            stepRef.current,
-            { opacity: 0, x: 20 },
-            { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" },
-        );
+        if (!stepRef.current) return;
+        const el = stepRef.current;
+        el.style.opacity = "0";
+        el.style.transform = "translateX(20px)";
+        requestAnimationFrame(() => {
+            el.style.transition = "opacity 0.3s cubic-bezier(0.33,1,0.68,1), transform 0.3s cubic-bezier(0.33,1,0.68,1)";
+            el.style.opacity = "1";
+            el.style.transform = "translateX(0)";
+        });
     }, [successfulCreation, complete]);
 
     // Success state
     if (complete) {
         return (
-            <div ref={stepRef} className="py-8 text-center">
+            <div className="py-8 text-center">
                 <div className="w-16 h-16 mx-auto mb-6 bg-success/10 flex items-center justify-center">
                     <i className="fa-duotone fa-regular fa-circle-check text-success text-3xl" />
                 </div>
@@ -119,7 +117,7 @@ export default function ForgotPasswordPage() {
     // Reset code entry + new password step
     if (successfulCreation) {
         return (
-            <div ref={stepRef}>
+            <div>
                 <div className="mb-8">
                     <h1 className="text-3xl font-black tracking-tight mb-2">
                         Check your inbox
@@ -220,7 +218,7 @@ export default function ForgotPasswordPage() {
 
     // Initial email entry step
     return (
-        <div ref={stepRef}>
+        <div>
             <div className="mb-8">
                 <h1 className="text-3xl font-black tracking-tight mb-2">
                     Reset your password

@@ -1,14 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 type Status = "good" | "partial" | "poor";
 
@@ -74,82 +67,14 @@ function StatusIcon({ status }: { status: Status }) {
 
 export function ComparisonSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const tableRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade in
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // Table rows stagger in
-            const rows = tableRef.current?.querySelectorAll(".comparison-row");
-            if (rows) {
-                gsap.fromTo(
-                    rows,
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.fast,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                        scrollTrigger: {
-                            trigger: tableRef.current,
-                            start: "top 75%",
-                        },
-                    },
-                );
-            }
-
-            // Highlight column pulse
-            const splitsColumn =
-                tableRef.current?.querySelectorAll(".splits-cell");
-            if (splitsColumn) {
-                gsap.fromTo(
-                    splitsColumn,
-                    { backgroundColor: "rgba(15, 157, 138, 0)" },
-                    {
-                        backgroundColor: "rgba(15, 157, 138, 0.1)",
-                        duration: 0.5,
-                        delay: 0.6,
-                        ease: easing.smooth,
-                        scrollTrigger: {
-                            trigger: tableRef.current,
-                            start: "top 75%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     return (
         <section ref={sectionRef} className="py-24 bg-base-200">
             <div className="container mx-auto px-4">
                 {/* Heading */}
-                <div ref={headingRef} className="text-center mb-12 opacity-0">
+                <div className="scroll-reveal fade-up text-center mb-12">
                     <h2 className="text-4xl font-bold mb-4">How we compare</h2>
                     <p className="text-lg text-base-content/70 max-w-2xl mx-auto">
                         Splits Network is built for split placements from the
@@ -158,14 +83,11 @@ export function ComparisonSection() {
                 </div>
 
                 {/* Comparison Table */}
-                <div
-                    ref={tableRef}
-                    className="max-w-5xl mx-auto overflow-x-auto"
-                >
+                <div className="scroll-reveal fade-up max-w-5xl mx-auto overflow-x-auto">
                     <table className="table w-full rounded-xl border border-base-300">
                         {/* Header */}
                         <thead>
-                            <tr className="comparison-row opacity-0">
+                            <tr>
                                 <th className="bg-base-100 text-base-content font-medium w-1/4"></th>
                                 <th className="bg-base-100 text-center text-base-content/70 font-medium">
                                     <div className="flex flex-col items-center gap-1">
@@ -179,7 +101,7 @@ export function ComparisonSection() {
                                         <span>Other ATS</span>
                                     </div>
                                 </th>
-                                <th className="bg-secondary/10 text-center font-bold text-secondary splits-cell">
+                                <th className="bg-secondary/10 text-center font-bold text-secondary">
                                     <div className="flex flex-col items-center gap-1">
                                         <i className="fa-duotone fa-regular fa-handshake text-2xl"></i>
                                         <span>Splits Network</span>
@@ -191,7 +113,7 @@ export function ComparisonSection() {
                             {comparisonData.map((row, index) => (
                                 <tr
                                     key={index}
-                                    className="comparison-row opacity-0 hover:bg-base-100"
+                                    className="hover:bg-base-100"
                                 >
                                     <td className="font-medium">
                                         {row.feature}
@@ -216,7 +138,7 @@ export function ComparisonSection() {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="text-center splits-cell">
+                                    <td className="text-center bg-secondary/5">
                                         <div className="flex flex-col items-center gap-1">
                                             <StatusIcon
                                                 status={row.splits.status}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
@@ -14,10 +14,15 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 export default function NotificationBell() {
     const router = useRouter();
     const { getToken } = useAuth();
-    const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const previousUnreadCount = useRef<number | null>(null);
+
+    const closeDropdown = () => {
+        const el = document.activeElement as HTMLElement | null;
+        el?.blur();
+    };
 
     // Fetch unread count every 30 seconds
     const loadUnreadCount = useCallback(async () => {
@@ -29,11 +34,14 @@ export default function NotificationBell() {
             const response = await client.get<{ data: { count: number } }>(
                 "/notifications/unread-count",
             );
-            setUnreadCount(response.data.count);
+            const count = response.data.count;
+            previousUnreadCount.current = count;
+            setUnreadCount(count);
         } catch (error) {
             // Fail silently - notification bell should continue working
         }
-    }, [getToken]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Fetch recent notifications when dropdown opens
     const loadNotifications = useCallback(async () => {
@@ -58,7 +66,8 @@ export default function NotificationBell() {
         } finally {
             setLoading(false);
         }
-    }, [getToken]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Initial load and polling
     useEffect(() => {
@@ -67,12 +76,10 @@ export default function NotificationBell() {
         return () => clearInterval(interval);
     }, [loadUnreadCount]);
 
-    // Load notifications when dropdown opens
-    useEffect(() => {
-        if (isOpen) {
-            loadNotifications();
-        }
-    }, [isOpen, loadNotifications]);
+    // Load notifications when dropdown opens (via focus on trigger)
+    const handleDropdownOpen = () => {
+        loadNotifications();
+    };
 
     const handleNotificationClick = async (notification: InAppNotification) => {
         // Mark as read if unread
@@ -98,7 +105,7 @@ export default function NotificationBell() {
 
         // Navigate to action URL if present
         if (notification.action_url) {
-            setIsOpen(false);
+            closeDropdown();
             router.push(notification.action_url);
         }
     };
@@ -142,27 +149,25 @@ export default function NotificationBell() {
 
     return (
         <div className="dropdown dropdown-end">
-            <button
-                type="button"
+            <div
                 tabIndex={0}
                 role="button"
                 className="btn btn-ghost btn-square relative"
-                onFocus={() => setIsOpen(true)}
-                onBlur={() => setIsOpen(false)}
+                onFocus={handleDropdownOpen}
                 aria-label="Notifications"
                 title="Notifications"
             >
-                <i className="fa-duotone fa-regular fa-bell text-lg"></i>
+                <i className="fa-duotone fa-regular fa-bell text-lg" />
                 {unreadCount > 0 && (
                     <span className="badge badge-accent badge-sm absolute -top-1 -right-1 rounded-full">
                         {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
-            </button>
+            </div>
 
             <div
-                tabIndex={-1}
-                className="dropdown-content mt-3 w-96 shadow bg-base-100 rounded-box border border-base-300"
+                tabIndex={0}
+                className="dropdown-content mt-2 w-[calc(100vw-1rem)] sm:w-96 bg-base-100 border border-base-300 shadow-lg"
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-base-300">

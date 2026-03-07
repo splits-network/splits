@@ -23,7 +23,7 @@ function AboutTab({ firm, recentPlacements }: { firm: PublicFirm; recentPlacemen
     return (
         <div className="space-y-10">
             {/* Description */}
-            <div className="profile-section opacity-0 border-l-4 border-l-primary pl-6">
+            <div className="scroll-reveal fade-up border-l-4 border-l-primary pl-6">
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
                     About {firm.name}
                 </p>
@@ -40,7 +40,7 @@ function AboutTab({ firm, recentPlacements }: { firm: PublicFirm; recentPlacemen
 
             {/* Tagline highlight */}
             {firm.tagline && (
-                <div className="profile-section opacity-0 bg-primary/5 border border-primary/10 px-6 py-5">
+                <div className="scroll-reveal fade-up bg-primary/5 border border-primary/10 px-6 py-5">
                     <i className="fa-duotone fa-regular fa-quote-left text-xl text-primary/30 mb-3 block" />
                     <p className="text-lg font-bold text-base-content/80 italic leading-relaxed">
                         &ldquo;{firm.tagline}&rdquo;
@@ -49,7 +49,7 @@ function AboutTab({ firm, recentPlacements }: { firm: PublicFirm; recentPlacemen
             )}
 
             {/* Partnership signals */}
-            <div className="profile-section opacity-0">
+            <div className="scroll-reveal fade-up">
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                     Partnership
                 </p>
@@ -67,7 +67,7 @@ function AboutTab({ firm, recentPlacements }: { firm: PublicFirm; recentPlacemen
 
             {/* Recent Placements */}
             {recentPlacements && recentPlacements.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Recent Placements
                     </p>
@@ -102,7 +102,7 @@ function SpecialtiesTab({ firm }: { firm: PublicFirm }) {
 
     if (!hasData) {
         return (
-            <div className="profile-section opacity-0 text-center py-12">
+            <div className="scroll-reveal fade-up text-center py-12">
                 <i className="fa-duotone fa-regular fa-bullseye text-3xl text-base-content/15 mb-3 block" />
                 <p className="text-sm text-base-content/50">
                     No specialization data available yet.
@@ -114,7 +114,7 @@ function SpecialtiesTab({ firm }: { firm: PublicFirm }) {
     return (
         <div className="space-y-10">
             {firm.industries.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Industries
                     </p>
@@ -129,7 +129,7 @@ function SpecialtiesTab({ firm }: { firm: PublicFirm }) {
             )}
 
             {firm.specialties.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Specialties
                     </p>
@@ -144,7 +144,7 @@ function SpecialtiesTab({ firm }: { firm: PublicFirm }) {
             )}
 
             {firm.placement_types.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Placement Types
                     </p>
@@ -163,7 +163,7 @@ function SpecialtiesTab({ firm }: { firm: PublicFirm }) {
             )}
 
             {firm.geo_focus.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Geographic Focus
                     </p>
@@ -186,7 +186,7 @@ function SpecialtiesTab({ firm }: { firm: PublicFirm }) {
 
 function ReviewsTab() {
     return (
-        <div className="profile-section opacity-0 text-center py-16">
+        <div className="scroll-reveal fade-up text-center py-16">
             <div className="bg-base-200 border border-base-300 border-l-4 border-l-primary px-8 py-12 max-w-md mx-auto">
                 <i className="fa-duotone fa-regular fa-star text-4xl text-primary/30 mb-4 block" />
                 <h3 className="text-xl font-black tracking-tight text-base-content mb-2">

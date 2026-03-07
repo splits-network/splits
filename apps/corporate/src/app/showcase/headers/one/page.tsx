@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Navigation Data ────────────────────────────────────────────────────── */
 
@@ -87,131 +81,10 @@ export default function HeadersOne() {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 
     /* ── Scroll detection ─────────────────────────────────────── */
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-
-            ScrollTrigger.create({
-                trigger: mainRef.current,
-                start: "top top",
-                end: "80px top",
-                onLeave: () => setScrolled(true),
-                onEnterBack: () => setScrolled(false),
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     /* ── GSAP entrance animations ─────────────────────────────── */
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            /* Header bar entrance */
-            gsap.fromTo(
-                $1(".header-bar"),
-                { opacity: 0, y: -30 },
-                { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
-            );
-
-            /* Logo */
-            gsap.fromTo(
-                $1(".header-logo"),
-                { opacity: 0, x: -20 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.5,
-                    ease: "power2.out",
-                    delay: 0.2,
-                },
-            );
-
-            /* Nav links stagger */
-            gsap.fromTo(
-                $(".nav-link-item"),
-                { opacity: 0, y: -10 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.4,
-                    stagger: 0.06,
-                    ease: "power2.out",
-                    delay: 0.3,
-                },
-            );
-
-            /* Right side items */
-            gsap.fromTo(
-                $(".header-right-item"),
-                { opacity: 0, x: 20 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.4,
-                    stagger: 0.08,
-                    ease: "power2.out",
-                    delay: 0.4,
-                },
-            );
-
-            /* Showcase hero */
-            const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out", clearProps: "transform" },
-            });
-
-            heroTl
-                .fromTo(
-                    $1(".showcase-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, delay: 0.6 },
-                )
-                .fromTo(
-                    $(".showcase-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".showcase-desc"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                );
-
-            /* Sample content sections */
-            $(".content-section").forEach((section) => {
-                gsap.fromTo(
-                    section,
-                    { opacity: 0, y: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.7,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: section,
-                            start: "top 85%",
-                        },
-                    },
-                );
-            });
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -219,7 +92,7 @@ export default function HeadersOne() {
                 HEADER — Split-Screen Editorial Navigation
                ═══════════════════════════════════════════════════════ */}
             <header
-                className={`header-bar fixed top-0 left-0 right-0 transition-all duration-300 opacity-0 ${
+                className={`header-bar scroll-reveal fade-up fixed top-0 left-0 right-0 transition-all duration-300 ${
                     scrolled
                         ? "bg-base-100/95 backdrop-blur-md shadow-sm border-b border-base-300"
                         : "bg-transparent"
@@ -235,7 +108,7 @@ export default function HeadersOne() {
                             {/* Logo */}
                             <a
                                 href="#"
-                                className="header-logo flex items-center gap-3 opacity-0"
+                                className="header-logo flex items-center gap-3 scroll-reveal scale-in"
                             >
                                 <div className="w-9 h-9 bg-primary flex items-center justify-center">
                                     <i className="fa-duotone fa-regular fa-split text-primary-content text-lg" />
@@ -265,7 +138,7 @@ export default function HeadersOne() {
                                                                 : link.label,
                                                         )
                                                     }
-                                                    className="nav-link-item opacity-0 flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                                                    className="nav-link-item scroll-reveal fade-up flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
                                                 >
                                                     {link.label}
                                                     <i
@@ -315,7 +188,7 @@ export default function HeadersOne() {
                                         ) : (
                                             <a
                                                 href={link.href}
-                                                className="nav-link-item opacity-0 px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
+                                                className="nav-link-item scroll-reveal fade-up px-3 py-2 text-sm font-semibold text-base-content/70 hover:text-base-content transition-colors"
                                             >
                                                 {link.label}
                                             </a>
@@ -328,7 +201,7 @@ export default function HeadersOne() {
                         {/* ── Right: Search, Notifications, User, CTA ─── */}
                         <div className="flex items-center gap-2">
                             {/* Search */}
-                            <div className="header-right-item opacity-0 relative">
+                            <div className="header-right-item scroll-reveal fade-up relative">
                                 <button
                                     onClick={() => setSearchOpen(!searchOpen)}
                                     className="btn btn-ghost btn-sm btn-square"
@@ -382,7 +255,7 @@ export default function HeadersOne() {
                             </div>
 
                             {/* Notifications */}
-                            <div className="header-right-item opacity-0 relative hidden sm:block">
+                            <div className="header-right-item scroll-reveal fade-up relative hidden sm:block">
                                 <button className="btn btn-ghost btn-sm btn-square">
                                     <i className="fa-duotone fa-regular fa-bell text-base-content/60" />
                                 </button>
@@ -394,7 +267,7 @@ export default function HeadersOne() {
                             </div>
 
                             {/* User menu */}
-                            <div className="header-right-item opacity-0 relative hidden sm:block">
+                            <div className="header-right-item scroll-reveal fade-up relative hidden sm:block">
                                 <button
                                     onClick={() =>
                                         setUserMenuOpen(!userMenuOpen)
@@ -470,7 +343,7 @@ export default function HeadersOne() {
                             {/* CTA button */}
                             <a
                                 href="#"
-                                className="header-right-item opacity-0 btn btn-primary btn-sm hidden md:flex"
+                                className="header-right-item scroll-reveal fade-up btn btn-primary btn-sm hidden md:flex"
                             >
                                 <i className="fa-duotone fa-regular fa-plus" />
                                 Post a Job
@@ -479,7 +352,7 @@ export default function HeadersOne() {
                             {/* Mobile hamburger */}
                             <button
                                 onClick={() => setMobileOpen(!mobileOpen)}
-                                className="header-right-item opacity-0 btn btn-ghost btn-sm btn-square lg:hidden"
+                                className="header-right-item scroll-reveal fade-up btn btn-ghost btn-sm btn-square lg:hidden"
                             >
                                 <i
                                     className={`fa-duotone fa-regular ${
@@ -617,24 +490,24 @@ export default function HeadersOne() {
 
                 <div className="relative  container mx-auto px-6 lg:px-12 py-20">
                     <div className="max-w-3xl">
-                        <p className="showcase-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-5 opacity-0">
+                        <p className="showcase-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-5 scroll-reveal fade-up">
                             Header Component
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="showcase-word inline-block opacity-0">
+                            <span className="showcase-word inline-block scroll-reveal hero-word">
                                 Split-Screen
                             </span>{" "}
-                            <span className="showcase-word inline-block opacity-0 text-primary">
+                            <span className="showcase-word inline-block scroll-reveal hero-word text-primary">
                                 Editorial
                             </span>{" "}
                             <br className="hidden md:block" />
-                            <span className="showcase-word inline-block opacity-0">
+                            <span className="showcase-word inline-block scroll-reveal hero-word">
                                 Navigation.
                             </span>
                         </h1>
 
-                        <p className="showcase-desc text-lg text-neutral-content/60 leading-relaxed max-w-xl opacity-0">
+                        <p className="showcase-desc text-lg text-neutral-content/60 leading-relaxed max-w-xl scroll-reveal fade-up">
                             A bold, editorial-inspired navigation system. Clean
                             lines, sharp typography, and deliberate negative
                             space create a professional hierarchy. Features
@@ -670,7 +543,7 @@ export default function HeadersOne() {
             {/* ═══════════════════════════════════════════════════════
                 SAMPLE CONTENT — Demonstrates header in context
                ═══════════════════════════════════════════════════════ */}
-            <section className="content-section py-24 bg-base-100 opacity-0">
+            <section className="content-section py-24 bg-base-100 scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-start">
                         <div className="lg:col-span-3">
@@ -804,7 +677,7 @@ export default function HeadersOne() {
             </section>
 
             {/* ── Stats section ────────────────────────────────── */}
-            <section className="content-section py-24 bg-base-200 opacity-0">
+            <section className="content-section py-24 bg-base-200 scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl mx-auto text-center">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
@@ -863,7 +736,7 @@ export default function HeadersOne() {
             </section>
 
             {/* ── Scroll behavior section ─────────────────────── */}
-            <section className="content-section py-24 bg-neutral text-neutral-content opacity-0">
+            <section className="content-section py-24 bg-neutral text-neutral-content scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <div>
@@ -920,7 +793,7 @@ export default function HeadersOne() {
             </section>
 
             {/* ── Design notes section ────────────────────────── */}
-            <section className="content-section py-24 bg-base-100 opacity-0">
+            <section className="content-section py-24 bg-base-100 scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">

@@ -73,7 +73,8 @@ export default function ActionsToolbar({
 }: ActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
+    const { profile, isAdmin, isRecruiter, isCompanyUser, hasPermissionForCompany } =
+        useUserProfile();
     const chatSidebar = useChatSidebar();
     const filterContext = useFilterOptional();
     const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
@@ -117,7 +118,7 @@ export default function ActionsToolbar({
     const isFirmJob = !application.job?.company_id && !!application.job?.source_firm_id;
 
     const permissions = useMemo(() => {
-        return canTakeActionOnApplication(
+        const base = canTakeActionOnApplication(
             application.stage as ApplicationStage,
             isRecruiter || false,
             isCompanyUser || false,
@@ -126,14 +127,33 @@ export default function ActionsToolbar({
             (application as any).expired_at,
             isFirmJob,
         );
+
+        // Gate recruiter stage advancement by can_advance_candidates permission
+        if (
+            isRecruiter &&
+            !isAdmin &&
+            !isFirmJob &&
+            application.job?.company_id &&
+            !hasPermissionForCompany(
+                application.job.company_id,
+                "can_advance_candidates",
+            )
+        ) {
+            base.canApprove = false;
+            base.canReject = false;
+        }
+
+        return base;
     }, [
         application.stage,
         application.candidate_recruiter_id,
         (application as any).expired_at,
+        application.job?.company_id,
         isRecruiter,
         isCompanyUser,
         isAdmin,
         isFirmJob,
+        hasPermissionForCompany,
     ]);
 
     const handleStartChat = async () => {

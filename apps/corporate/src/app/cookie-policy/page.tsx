@@ -29,17 +29,17 @@ export default function CookiePolicyBaselPage() {
             <section className="py-28 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="bl-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 opacity-0">
+                        <p className="bl-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
                             <i className="fa-duotone fa-regular fa-cookie mr-2" />
                             Legal
                         </p>
-                        <h1 className="bl-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-6 opacity-0">
+                        <h1 className="bl-hero-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[0.92] tracking-tight mb-6 scroll-reveal fade-up">
                             Cookie <span className="text-primary">Policy</span>
                         </h1>
-                        <p className="bl-hero-subtitle text-lg md:text-xl opacity-70 leading-relaxed mb-6 opacity-0">
+                        <p className="bl-hero-subtitle text-lg md:text-xl opacity-70 leading-relaxed mb-6 scroll-reveal fade-up">
                             How we use cookies and similar technologies
                         </p>
-                        <p className="bl-hero-date text-sm font-semibold uppercase tracking-wider opacity-40 opacity-0">
+                        <p className="bl-hero-date text-sm font-semibold uppercase tracking-wider opacity-40 scroll-reveal fade-up">
                             Last updated: {lastUpdated}
                         </p>
                     </div>
@@ -49,7 +49,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ TABLE OF CONTENTS ═══ */}
             <section className="py-12 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-toc border-l-4 border-primary bg-base-100 p-8 shadow-sm opacity-0">
+                    <div className="bl-toc border-l-4 border-primary bg-base-100 p-8 shadow-sm scroll-reveal fade-up">
                         <h2 className="text-xl font-black tracking-tight mb-6">
                             Quick <span className="text-primary">Navigation</span>
                         </h2>
@@ -75,7 +75,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ Section 1 — What Are Cookies ═══ */}
             <section id="what-are-cookies" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">1</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">What Are Cookies?</h2>
@@ -103,7 +103,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ Section 2 — How We Use Cookies ═══ */}
             <section id="how-we-use" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg flex-shrink-0">2</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">How We Use Cookies</h2>
@@ -134,7 +134,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ Section 3 — Types of Cookies ═══ */}
             <section id="types" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-accent text-accent-content flex items-center justify-center font-black text-lg flex-shrink-0">3</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Types of Cookies</h2>
@@ -205,7 +205,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ Section 4 — Third-Party Cookies ═══ */}
             <section id="third-party" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">4</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Third-Party Cookies</h2>
@@ -236,7 +236,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ Section 5 — Management ═══ */}
             <section id="management" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg flex-shrink-0">5</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">How to Manage Cookies</h2>
@@ -268,7 +268,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ Section 6 — Consent ═══ */}
             <section id="consent" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-accent text-accent-content flex items-center justify-center font-black text-lg flex-shrink-0">6</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Consent &amp; Cookie Banner</h2>
@@ -284,7 +284,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ Section 7 — Do Not Track ═══ */}
             <section id="dnt" className="py-16 bg-base-100">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center font-black text-lg flex-shrink-0">7</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Do Not Track (DNT)</h2>
@@ -299,7 +299,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ Section 8 — Updates ═══ */}
             <section id="updates" className="py-16 bg-base-200">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-section opacity-0">
+                    <div className="bl-section scroll-reveal fade-up">
                         <div className="flex items-center gap-3 mb-6">
                             <span className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center font-black text-lg flex-shrink-0">8</span>
                             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Updates to This Policy</h2>
@@ -328,7 +328,7 @@ export default function CookiePolicyBaselPage() {
             {/* ═══ CONTACT ═══ */}
             <section className="py-16 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="bl-contact opacity-0">
+                    <div className="bl-contact scroll-reveal fade-up">
                         <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-8 text-center">
                             Questions About Cookies?
                         </h2>

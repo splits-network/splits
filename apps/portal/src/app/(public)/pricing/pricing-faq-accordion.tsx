@@ -14,7 +14,7 @@ export function PricingFaqAccordion({ faqs }: PricingFaqAccordionProps) {
             {faqs.map((faq, index) => (
                 <div
                     key={index}
-                    className="faq-card border border-base-content/10 bg-base-100/5 overflow-hidden opacity-0"
+                    className="faq-card border border-base-content/10 bg-base-100/5 overflow-hidden scroll-reveal fade-up"
                 >
                     <button
                         onClick={() =>

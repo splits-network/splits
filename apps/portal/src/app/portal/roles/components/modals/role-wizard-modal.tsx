@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { useToast } from "@/lib/toast-context";
@@ -95,28 +93,6 @@ export default function RoleWizardModal({
     const isOffPlatform = isRecruiter && hasFirms && roleSource === "firm";
     const showCompanySelect = isAdmin || (isRecruiterWithCompanyAccess && companies.length > 1);
 
-    // GSAP refs
-    const containerRef = useRef<HTMLDivElement>(null);
-    const backdropRef = useRef<HTMLDivElement>(null);
-    const stepContentRef = useRef<HTMLDivElement>(null);
-
-    // ── GSAP Animations ──
-
-    useGSAP(() => {
-        if (!isOpen) return;
-        const backdrop = backdropRef.current;
-        const box = containerRef.current;
-        if (!backdrop || !box) return;
-        const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-        tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-        tl.fromTo(box, { opacity: 0, y: 40, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, clearProps: "transform" }, "-=0.15");
-    }, [isOpen]);
-
-    useGSAP(() => {
-        if (!isOpen || !stepContentRef.current) return;
-        gsap.fromTo(stepContentRef.current, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", clearProps: "transform" });
-    }, [currentStep, isOpen]);
-
     // ── Load existing job data (edit mode) ──
 
     useEffect(() => {
@@ -188,16 +164,24 @@ export default function RoleWizardModal({
                 } else if (isRecruiter) {
                     let hasCompanyAccess = false;
                     try {
-                        const response = await client.get<{ data: Company[] }>("/recruiter-companies/manageable-companies-with-details");
-                        const manageableCompanies = response.data || [];
-                        setCompanies(manageableCompanies);
-                        hasCompanyAccess = manageableCompanies.length > 0;
+                        const response = await client.get<{
+                            data: Array<{
+                                company_id: string;
+                                company_name: string;
+                                permissions: { can_create_jobs: boolean };
+                            }>;
+                        }>("/recruiter-companies/my-permissions");
+                        const creatableCompanies = (response.data || [])
+                            .filter((p) => p.permissions?.can_create_jobs)
+                            .map((p) => ({ id: p.company_id, name: p.company_name } as Company));
+                        setCompanies(creatableCompanies);
+                        hasCompanyAccess = creatableCompanies.length > 0;
                         setIsRecruiterWithCompanyAccess(hasCompanyAccess);
-                        if (manageableCompanies.length === 1) {
-                            setFormData((prev) => ({ ...prev, company_id: manageableCompanies[0].id }));
+                        if (creatableCompanies.length === 1) {
+                            setFormData((prev) => ({ ...prev, company_id: creatableCompanies[0].id }));
                         }
                     } catch (err: any) {
-                        console.error("Failed to load manageable companies:", err);
+                        console.error("Failed to load company permissions:", err);
                         setCompanies([]);
                     }
                     try {
@@ -258,15 +242,7 @@ export default function RoleWizardModal({
 
     const handleClose = useCallback(() => {
         if (submitting) return;
-        const backdrop = backdropRef.current;
-        const box = containerRef.current;
-        if (backdrop && box) {
-            const tl = gsap.timeline({ defaults: { ease: "power2.in", clearProps: "transform" }, onComplete: onClose });
-            tl.to(box, { opacity: 0, y: 30, scale: 0.97, duration: 0.25 });
-            tl.to(backdrop, { opacity: 0, duration: 0.2 }, "-=0.1");
-        } else {
-            onClose();
-        }
+        onClose();
     }, [submitting, onClose]);
 
     const handleNext = useCallback(() => {
@@ -417,9 +393,6 @@ export default function RoleWizardModal({
             submitLabel={mode === "edit" ? "Update Role" : "Create Role"}
             submittingLabel={mode === "edit" ? "Updating..." : "Creating..."}
             maxWidth="max-w-3xl"
-            containerRef={containerRef}
-            backdropRef={backdropRef}
-            stepContentRef={stepContentRef}
         >
             {error && (
                 <BaselAlertBox variant="error" className="mb-5">

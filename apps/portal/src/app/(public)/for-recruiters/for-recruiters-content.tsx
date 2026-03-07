@@ -2,22 +2,8 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { AuthenticatedCTAWrapper } from "@/components/auth/authenticated-cta-wrapper";
-import {
-    duration,
-    easing,
-    stagger,
-    fadeUp,
-    scaleIn,
-    popIn,
-} from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 const recruiterBenefits = [
     {
@@ -126,73 +112,7 @@ const processSteps = [
 
 export function ForRecruitersContent() {
     const containerRef = useRef<HTMLDivElement>(null);
-
-    useGSAP(
-        () => {
-            const sections = gsap.utils.toArray(
-                ".animate-section",
-            ) as Element[];
-            sections.forEach((section) => {
-                gsap.fromTo(
-                    section as gsap.TweenTarget,
-                    { opacity: 0, y: 50 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        scrollTrigger: {
-                            trigger: section,
-                            start: "top 85%",
-                            toggleActions: "play none none none",
-                        },
-                    },
-                );
-            });
-
-            const cards = gsap.utils.toArray(".animate-card") as Element[];
-            cards.forEach((card, index) => {
-                gsap.fromTo(
-                    card as gsap.TweenTarget,
-                    { opacity: 0, y: 30, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        delay: index * 0.1,
-                        scrollTrigger: {
-                            trigger: card,
-                            start: "top 85%",
-                            toggleActions: "play none none none",
-                        },
-                    },
-                );
-            });
-
-            const stats = gsap.utils.toArray(".animate-stat") as Element[];
-            stats.forEach((stat, index) => {
-                gsap.fromTo(
-                    stat as gsap.TweenTarget,
-                    { opacity: 0, scale: 0.8 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        delay: index * 0.2,
-                        scrollTrigger: {
-                            trigger: stat,
-                            start: "top 85%",
-                            toggleActions: "play none none none",
-                        },
-                    },
-                );
-            });
-        },
-        { scope: containerRef },
-    );
+    useScrollReveal(containerRef);
 
     return (
         <div ref={containerRef} className="min-h-screen bg-base-100">
@@ -200,7 +120,7 @@ export function ForRecruitersContent() {
             <section className="relative bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 py-24 px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="badge badge-primary badge-lg mb-6">
                                 <i className="fa-duotone fa-regular fa-users mr-2"></i>
                                 For Recruiters
@@ -236,7 +156,7 @@ export function ForRecruitersContent() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4 text-center">
-                                <div className="animate-stat">
+                                <div className="scroll-reveal pop-in">
                                     <div className="text-2xl font-bold text-primary">
                                         2,500+
                                     </div>
@@ -244,7 +164,7 @@ export function ForRecruitersContent() {
                                         Active Recruiters
                                     </div>
                                 </div>
-                                <div className="animate-stat">
+                                <div className="scroll-reveal pop-in">
                                     <div className="text-2xl font-bold text-secondary">
                                         $85M+
                                     </div>
@@ -252,7 +172,7 @@ export function ForRecruitersContent() {
                                         Fees Distributed
                                     </div>
                                 </div>
-                                <div className="animate-stat">
+                                <div className="scroll-reveal pop-in">
                                     <div className="text-2xl font-bold text-accent">
                                         12k+
                                     </div>
@@ -263,7 +183,7 @@ export function ForRecruitersContent() {
                             </div>
                         </div>
 
-                        <div className="animate-section lg:order-first">
+                        <div className="scroll-reveal fade-up lg:order-first">
                             <div className="relative">
                                 <img
                                     src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2088&q=80"
@@ -287,7 +207,7 @@ export function ForRecruitersContent() {
             {/* Benefits Section */}
             <section className="py-24 px-4 bg-base-200/50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Why Choose Splits Network
                         </h2>
@@ -299,7 +219,7 @@ export function ForRecruitersContent() {
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {recruiterBenefits.map((benefit, index) => (
-                            <div key={benefit.title} className="animate-card">
+                            <div key={benefit.title} className="scroll-reveal fade-up">
                                 <div className="card bg-base-100 shadow-lg h-full">
                                     <div className="card-body text-center">
                                         <div className="text-5xl mb-4">
@@ -329,7 +249,7 @@ export function ForRecruitersContent() {
             {/* Platform Benefits Section */}
             <section className="py-24 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Transform Your Recruiting Business
                         </h2>
@@ -341,7 +261,7 @@ export function ForRecruitersContent() {
                     </div>
 
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="space-y-8">
                                 <div className="flex gap-4">
                                     <div className="flex-shrink-0">
@@ -414,7 +334,7 @@ export function ForRecruitersContent() {
                             </div>
                         </div>
 
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="relative">
                                 <div className="card bg-gradient-to-br from-primary/5 to-secondary/5 shadow-xl">
                                     <div className="card-body p-8">
@@ -481,7 +401,7 @@ export function ForRecruitersContent() {
             {/* How It Works Section */}
             <section className="py-24 px-4 bg-base-200/50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Your Path to Success
                         </h2>
@@ -497,7 +417,7 @@ export function ForRecruitersContent() {
                         {processSteps.map((step, index) => (
                             <div
                                 key={step.step}
-                                className={`animate-card relative flex items-center mb-16 ${
+                                className={`scroll-reveal fade-up relative flex items-center mb-16 ${
                                     index % 2 === 0 ? "md:flex-row-reverse" : ""
                                 }`}
                             >
@@ -547,7 +467,7 @@ export function ForRecruitersContent() {
             Success Stories Section 
             <section className="py-24 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Recruiter Success Stories
                         </h2>
@@ -559,7 +479,7 @@ export function ForRecruitersContent() {
 
                     <div className="grid lg:grid-cols-3 gap-8">
                         {successStories.map((story, index) => (
-                            <div key={story.name} className="animate-card">
+                            <div key={story.name} className="scroll-reveal fade-up">
                                 <div className="card bg-base-100 shadow-lg h-full">
                                     <div className="card-body">
                                         <div className="flex items-center gap-4 mb-6">
@@ -615,7 +535,7 @@ export function ForRecruitersContent() {
             <section className="py-24 px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-8">
                                 Your Office is{" "}
                                 <span className="text-primary">Everywhere</span>
@@ -680,7 +600,7 @@ export function ForRecruitersContent() {
                             </div>
                         </div>
 
-                        <div className="animate-section lg:order-first">
+                        <div className="scroll-reveal fade-up lg:order-first">
                             <div className="relative">
                                 <img
                                     src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80"
@@ -704,7 +624,7 @@ export function ForRecruitersContent() {
             {/* CTA Section */}
             <section className="py-24 px-4 bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10">
                 <div className="max-w-7xl mx-auto text-center">
-                    <div className="animate-section">
+                    <div className="scroll-reveal fade-up">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Ready to Transform Your Recruiting Business?
                         </h2>

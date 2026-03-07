@@ -1,17 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import {
-    duration,
-    easing,
-    stagger,
-    prefersReducedMotion,
-} from "@splits-network/basel-ui";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const tips = [
     {
@@ -89,264 +79,22 @@ const starMethod = [
 ];
 
 export function InterviewPrepContent() {
-    const heroRef = useRef<HTMLDivElement>(null);
-    const tipsRef = useRef<HTMLDivElement>(null);
-    const questionsRef = useRef<HTMLDivElement>(null);
-    const starRef = useRef<HTMLDivElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
-
-    // Hero animation
-    useGSAP(
-        () => {
-            if (!heroRef.current || prefersReducedMotion()) return;
-            const icon = heroRef.current.querySelector(".hero-icon");
-            const heading = heroRef.current.querySelector("h1");
-            const description =
-                heroRef.current.querySelector(".hero-description");
-
-            const tl = gsap.timeline({ defaults: { clearProps: "transform" } });
-            if (icon)
-                tl.fromTo(
-                    icon,
-                    { opacity: 0, scale: 0 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                    },
-                );
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, x: -30 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.4",
-                );
-            if (description)
-                tl.fromTo(
-                    description,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: heroRef },
-    );
-
-    // Tips animation
-    useGSAP(
-        () => {
-            if (!tipsRef.current || prefersReducedMotion()) return;
-            const heading = tipsRef.current.querySelector(".section-heading");
-            const cards = tipsRef.current.querySelectorAll(".tip-card");
-            const icons = tipsRef.current.querySelectorAll(".tip-icon");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: { trigger: tipsRef.current, start: "top 80%" },
-            });
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (cards.length > 0)
-                tl.fromTo(
-                    cards,
-                    { opacity: 0, y: 40, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        stagger: stagger.normal,
-                    },
-                    "-=0.3",
-                );
-            if (icons.length > 0)
-                tl.fromTo(
-                    icons,
-                    { scale: 0 },
-                    {
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.6",
-                );
-        },
-        { scope: tipsRef },
-    );
-
-    // Questions animation
-    useGSAP(
-        () => {
-            if (!questionsRef.current || prefersReducedMotion()) return;
-            const heading =
-                questionsRef.current.querySelector(".section-heading");
-            const card = questionsRef.current.querySelector(".questions-card");
-            const items =
-                questionsRef.current.querySelectorAll(".question-item");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: {
-                    trigger: questionsRef.current,
-                    start: "top 80%",
-                },
-            });
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (card)
-                tl.fromTo(
-                    card,
-                    { opacity: 0, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.3",
-                );
-            if (items.length > 0)
-                tl.fromTo(
-                    items,
-                    { opacity: 0, x: -20 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        duration: duration.fast,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: questionsRef },
-    );
-
-    // STAR Method animation
-    useGSAP(
-        () => {
-            if (!starRef.current || prefersReducedMotion()) return;
-            const heading = starRef.current.querySelector(".section-heading");
-            const card = starRef.current.querySelector(".star-card");
-            const items = starRef.current.querySelectorAll(".star-item");
-
-            const tl = gsap.timeline({
-                defaults: { clearProps: "transform" },
-                scrollTrigger: { trigger: starRef.current, start: "top 80%" },
-            });
-            if (heading)
-                tl.fromTo(
-                    heading,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                );
-            if (card)
-                tl.fromTo(
-                    card,
-                    { opacity: 0, y: 30, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                    },
-                    "-=0.3",
-                );
-            if (items.length > 0)
-                tl.fromTo(
-                    items,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                        stagger: stagger.normal,
-                    },
-                    "-=0.3",
-                );
-        },
-        { scope: starRef },
-    );
-
-    // CTA animation
-    useGSAP(
-        () => {
-            if (!ctaRef.current || prefersReducedMotion()) return;
-            const card = ctaRef.current.querySelector(".cta-card");
-            gsap.fromTo(
-                card,
-                { opacity: 0, y: 30, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: ctaRef.current,
-                        start: "top 85%",
-                    },
-                },
-            );
-        },
-        { scope: ctaRef },
-    );
+    const containerRef = useRef<HTMLDivElement>(null);
+    useScrollReveal(containerRef);
 
     return (
-        <div className="min-h-screen bg-base-200">
+        <div ref={containerRef} className="min-h-screen bg-base-200">
             {/* Header */}
-            <div
-                ref={heroRef}
-                className="bg-gradient-to-br from-secondary to-accent text-white py-16 overflow-hidden"
-            >
+            <div className="bg-gradient-to-br from-secondary to-accent text-white py-16 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
-                        <div className="flex items-center gap-2 mb-4">
-                            <i className="hero-icon fa-duotone fa-regular fa-user-tie text-3xl"></i>
+                        <div className="scroll-reveal fade-in flex items-center gap-2 mb-4">
+                            <i className="fa-duotone fa-regular fa-user-tie text-3xl"></i>
                             <h1 className="text-4xl font-bold">
                                 Interview Preparation
                             </h1>
                         </div>
-                        <p className="hero-description text-xl opacity-90">
+                        <p className="scroll-reveal fade-up text-xl opacity-90">
                             Everything you need to ace your next interview and
                             land your dream job.
                         </p>
@@ -357,19 +105,19 @@ export function InterviewPrepContent() {
             {/* Content */}
             <div className="container mx-auto px-4 py-12">
                 {/* Essential Tips */}
-                <div ref={tipsRef} className="mb-16 overflow-hidden">
-                    <h2 className="section-heading text-3xl font-bold mb-8">
+                <div className="mb-16 overflow-hidden">
+                    <h2 className="scroll-reveal fade-up text-3xl font-bold mb-8">
                         Essential Interview Tips
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
                         {tips.map((tip, index) => (
                             <div
                                 key={index}
-                                className="tip-card card bg-base-100 shadow hover:shadow-lg transition-shadow"
+                                className="scroll-reveal fade-up card bg-base-100 shadow hover:shadow-lg transition-shadow"
                             >
                                 <div className="card-body">
                                     <div
-                                        className={`tip-icon w-14 h-14 rounded-full bg-${tip.color}/20 flex items-center justify-center mb-4`}
+                                        className={`w-14 h-14 rounded-full bg-${tip.color}/20 flex items-center justify-center mb-4`}
                                     >
                                         <i
                                             className={`fa-duotone fa-regular fa-${tip.icon} text-${tip.color} text-2xl`}
@@ -388,11 +136,11 @@ export function InterviewPrepContent() {
                 </div>
 
                 {/* Common Questions */}
-                <div ref={questionsRef} className="mb-16 overflow-hidden">
-                    <h2 className="section-heading text-3xl font-bold mb-8">
+                <div className="mb-16 overflow-hidden">
+                    <h2 className="scroll-reveal fade-up text-3xl font-bold mb-8">
                         Common Interview Questions
                     </h2>
-                    <div className="questions-card card bg-base-100 shadow">
+                    <div className="scroll-reveal scale-in card bg-base-100 shadow">
                         <div className="card-body">
                             <p className="mb-4 text-base-content/70">
                                 Practice answering these frequently asked
@@ -402,7 +150,7 @@ export function InterviewPrepContent() {
                                 {commonQuestions.map((question, index) => (
                                     <li
                                         key={index}
-                                        className="question-item flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg transition-colors"
+                                        className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg transition-colors"
                                     >
                                         <i className="fa-duotone fa-regular fa-circle-check text-success text-lg mt-0.5"></i>
                                         <span className="font-medium">
@@ -416,21 +164,21 @@ export function InterviewPrepContent() {
                 </div>
 
                 {/* STAR Method */}
-                <div ref={starRef} className="mb-16 overflow-hidden">
-                    <h2 className="section-heading text-3xl font-bold mb-8">
+                <div className="mb-16 overflow-hidden">
+                    <h2 className="scroll-reveal fade-up text-3xl font-bold mb-8">
                         The STAR Method
                     </h2>
-                    <div className="star-card card bg-gradient-to-br from-primary to-secondary text-primary-content shadow">
+                    <div className="scroll-reveal fade-up card bg-gradient-to-br from-primary to-secondary text-primary-content shadow">
                         <div className="card-body">
                             <p className="text-lg mb-6">
                                 Use the STAR method to structure your answers to
                                 behavioral questions:
                             </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-children">
                                 {starMethod.map((item, index) => (
                                     <div
                                         key={index}
-                                        className="star-item bg-base-100/10 p-4 rounded-lg"
+                                        className="scroll-reveal pop-in bg-base-100/10 p-4 rounded-lg"
                                     >
                                         <div className="flex items-center gap-2 mb-2">
                                             <i
@@ -449,8 +197,8 @@ export function InterviewPrepContent() {
                 </div>
 
                 {/* CTA */}
-                <div ref={ctaRef} className="text-center overflow-hidden">
-                    <div className="cta-card card bg-base-100 shadow max-w-2xl mx-auto">
+                <div className="text-center overflow-hidden">
+                    <div className="scroll-reveal fade-up card bg-base-100 shadow max-w-2xl mx-auto">
                         <div className="card-body">
                             <h2 className="card-title text-2xl justify-center mb-2">
                                 Ready to put your skills to work?

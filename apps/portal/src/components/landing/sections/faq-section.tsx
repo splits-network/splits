@@ -1,15 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
+import { useRef, useState, useEffect } from "react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { portalFaqs } from "./faq-data";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 const faqs = portalFaqs;
 
@@ -18,55 +11,20 @@ interface FAQItemProps {
     answer: string;
     isOpen: boolean;
     onClick: () => void;
-    index: number;
 }
 
-function FAQItem({ question, answer, isOpen, onClick, index }: FAQItemProps) {
+function FAQItem({ question, answer, isOpen, onClick }: FAQItemProps) {
     const contentRef = useRef<HTMLDivElement>(null);
-    const answerRef = useRef<HTMLDivElement>(null);
+    const [height, setHeight] = useState(0);
 
-    useGSAP(() => {
-        if (!contentRef.current || !answerRef.current) return;
-
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
-
-        if (isOpen) {
-            // Measure the content height
-            const height = answerRef.current.scrollHeight;
-
-            gsap.to(contentRef.current, {
-                height: height,
-                duration: prefersReducedMotion ? 0 : 0.3,
-                ease: "power2.out",
-            });
-
-            gsap.to(answerRef.current, {
-                opacity: 1,
-                y: 0,
-                duration: prefersReducedMotion ? 0 : 0.3,
-                ease: "power2.out",
-                delay: 0.1,
-            });
-        } else {
-            gsap.to(contentRef.current, {
-                height: 0,
-                duration: prefersReducedMotion ? 0 : 0.25,
-                ease: "power2.in",
-            });
-
-            gsap.to(answerRef.current, {
-                opacity: 0,
-                y: -10,
-                duration: prefersReducedMotion ? 0 : 0.15,
-                ease: "power2.in",
-            });
+    useEffect(() => {
+        if (contentRef.current) {
+            setHeight(isOpen ? contentRef.current.scrollHeight : 0);
         }
     }, [isOpen]);
 
     return (
-        <div className="faq-item card bg-base-100 shadow opacity-0 overflow-hidden">
+        <div className="scroll-reveal fade-up card bg-base-100 shadow overflow-hidden">
             <button
                 onClick={onClick}
                 className="w-full text-left p-6 flex items-center justify-between gap-4 hover:bg-base-200/50 transition-colors"
@@ -81,13 +39,14 @@ function FAQItem({ question, answer, isOpen, onClick, index }: FAQItemProps) {
                 </span>
             </button>
             <div
-                ref={contentRef}
-                className="overflow-hidden"
-                style={{ height: 0 }}
+                className="overflow-hidden transition-[height] duration-300 ease-out"
+                style={{ height }}
             >
                 <div
-                    ref={answerRef}
-                    className="px-6 pb-6 opacity-0 -translate-y-2"
+                    ref={contentRef}
+                    className={`px-6 pb-6 transition-all duration-300 ease-out ${
+                        isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+                    }`}
                 >
                     <p className="text-base-content/70 leading-relaxed">
                         {answer}
@@ -100,58 +59,9 @@ function FAQItem({ question, answer, isOpen, onClick, index }: FAQItemProps) {
 
 export function FAQSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const faqContainerRef = useRef<HTMLDivElement>(null);
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading fade in
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // FAQ items stagger in
-            const faqItems =
-                faqContainerRef.current?.querySelectorAll(".faq-item");
-            if (faqItems) {
-                gsap.fromTo(
-                    faqItems,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.fast,
-                        ease: easing.smooth,
-                        stagger: stagger.tight,
-                        scrollTrigger: {
-                            trigger: faqContainerRef.current,
-                            start: "top 75%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     const handleToggle = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
@@ -161,7 +71,7 @@ export function FAQSection() {
         <section ref={sectionRef} className="py-24 bg-base-200">
             <div className="container mx-auto px-4">
                 {/* Heading */}
-                <div ref={headingRef} className="text-center mb-12 opacity-0">
+                <div className="scroll-reveal fade-up text-center mb-12">
                     <h2 className="text-4xl md:text-5xl font-bold mb-4">
                         Questions? We've got answers.
                     </h2>
@@ -171,10 +81,7 @@ export function FAQSection() {
                 </div>
 
                 {/* FAQ Items */}
-                <div
-                    ref={faqContainerRef}
-                    className="max-w-3xl mx-auto space-y-4"
-                >
+                <div className="max-w-3xl mx-auto space-y-4 stagger-children">
                     {faqs.map((faq, index) => (
                         <FAQItem
                             key={index}
@@ -182,7 +89,6 @@ export function FAQSection() {
                             answer={faq.answer}
                             isOpen={openIndex === index}
                             onClick={() => handleToggle(index)}
-                            index={index}
                         />
                     ))}
                 </div>

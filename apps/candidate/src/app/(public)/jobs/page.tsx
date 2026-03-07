@@ -187,7 +187,7 @@ function JobsPageInner() {
             />
 
             {/* Content */}
-            <section className="content-area opacity-0">
+            <section className="content-area scroll-reveal fade-in">
                 <div className="container mx-auto px-6 lg:px-12 py-8">
                     {loading ? (
                         <LoadingState />

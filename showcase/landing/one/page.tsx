@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Unsplash images (recruiting / professional themes) ─────────────────── */
 const img = {
@@ -123,298 +117,7 @@ const testimonials = [
 export default function LandingOne() {
     const mainRef = useRef<HTMLElement>(null);
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-
-            // ── Hero ────────────────────────────────────────────
-            const heroTl = gsap.timeline({
-                defaults: { ease: "power3.out" },
-            });
-
-            heroTl
-                .fromTo(
-                    $1(".hero-kicker"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                )
-                .fromTo(
-                    $(".hero-headline-word"),
-                    { opacity: 0, y: 80, rotateX: 40 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 1,
-                        stagger: 0.12,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".hero-body"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.7 },
-                    "-=0.5",
-                )
-                .fromTo(
-                    $(".hero-cta"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 },
-                    "-=0.3",
-                );
-
-            // Hero image parallax
-            gsap.fromTo(
-                $1(".hero-img-wrap"),
-                { opacity: 0, scale: 1.08 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 1.4,
-                    ease: "power2.out",
-                    delay: 0.2,
-                },
-            );
-
-            gsap.to($1(".hero-img-wrap img"), {
-                yPercent: 12,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: $1(".hero-section"),
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: true,
-                },
-            });
-
-            // ── Stats bar ───────────────────────────────────────
-            gsap.fromTo(
-                $(".stat-item"),
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    stagger: 0.1,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".stats-bar"),
-                        start: "top 85%",
-                    },
-                },
-            );
-
-            // ── Problem split-screen ────────────────────────────
-            gsap.fromTo(
-                $1(".problem-text"),
-                { opacity: 0, x: -60 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.8,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".problem-section"),
-                        start: "top 70%",
-                    },
-                },
-            );
-            gsap.fromTo(
-                $1(".problem-img"),
-                { opacity: 0, x: 60 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.8,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".problem-section"),
-                        start: "top 70%",
-                    },
-                },
-            );
-            gsap.fromTo(
-                $(".problem-pain"),
-                { opacity: 0, x: -20 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.4,
-                    stagger: 0.08,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".problem-section"),
-                        start: "top 60%",
-                    },
-                },
-            );
-
-            // ── How-it-works steps ──────────────────────────────
-            gsap.fromTo(
-                $1(".hiw-heading"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".hiw-section"),
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            $(".hiw-step").forEach((step, i) => {
-                gsap.fromTo(
-                    step,
-                    { opacity: 0, y: 50, scale: 0.96 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: 0.7,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: step,
-                            start: "top 80%",
-                        },
-                        delay: i * 0.05,
-                    },
-                );
-            });
-
-            // ── Platforms split ──────────────────────────────────
-            gsap.fromTo(
-                $1(".platforms-heading"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".platforms-section"),
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            gsap.fromTo(
-                $(".platform-card"),
-                { opacity: 0, y: 50 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    stagger: 0.15,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".platforms-grid"),
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // ── Testimonials ────────────────────────────────────
-            gsap.fromTo(
-                $1(".testimonials-heading"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".testimonials-section"),
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            gsap.fromTo(
-                $(".testimonial-card"),
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    stagger: 0.12,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".testimonials-grid"),
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // ── Editorial split (ecosystem) ─────────────────────
-            gsap.fromTo(
-                $1(".editorial-img"),
-                { opacity: 0, scale: 1.05 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 1,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: $1(".editorial-section"),
-                        start: "top 70%",
-                    },
-                },
-            );
-            gsap.fromTo(
-                $1(".editorial-text"),
-                { opacity: 0, x: 60 },
-                {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.8,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".editorial-section"),
-                        start: "top 65%",
-                    },
-                },
-            );
-
-            // Parallax on editorial image
-            gsap.to($1(".editorial-img img"), {
-                yPercent: 10,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: $1(".editorial-section"),
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: true,
-                },
-            });
-
-            // ── CTA ─────────────────────────────────────────────
-            gsap.fromTo(
-                $1(".final-cta-content"),
-                { opacity: 0, y: 50 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: $1(".final-cta"),
-                        start: "top 80%",
-                    },
-                },
-            );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="overflow-hidden">
@@ -424,7 +127,7 @@ export default function LandingOne() {
             <section className="hero-section relative min-h-[92vh] flex items-center bg-base-100">
                 {/* Right image panel — sits behind on mobile, 40% on desktop */}
                 <div
-                    className="hero-img-wrap absolute inset-0 lg:left-[58%] opacity-0"
+                    className="hero-img-wrap absolute inset-0 lg:left-[58%] scroll-reveal scale-in"
                     style={{
                         clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0% 100%)",
                     }}
@@ -441,26 +144,26 @@ export default function LandingOne() {
                 {/* Content panel — 60% on desktop */}
                 <div className="relative  container mx-auto px-6 lg:px-12 py-28">
                     <div className="max-w-2xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 scroll-reveal fade-up">
                             Employment Networks
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word text-base-content lg:text-base-content">
                                 Recruiting
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word text-primary">
                                 rebuilt
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word text-base-content lg:text-base-content">
                                 for
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content lg:text-base-content">
+                            <span className="hero-headline-word inline-block scroll-reveal hero-word text-base-content lg:text-base-content">
                                 everyone.
                             </span>
                         </h1>
 
-                        <p className="hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
+                        <p className="hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                             Two platforms. One connected ecosystem. Splits
                             Network for recruiters and companies. Applicant
                             Network for candidates. Transparent, modern, and
@@ -470,21 +173,21 @@ export default function LandingOne() {
                         <div className="flex flex-wrap gap-4">
                             <a
                                 href="https://splits.network/sign-up"
-                                className="hero-cta btn btn-primary btn-lg shadow-lg opacity-0"
+                                className="hero-cta btn btn-primary btn-lg shadow-lg scroll-reveal fade-up"
                             >
                                 <i className="fa-duotone fa-regular fa-rocket"></i>
                                 Join as Recruiter
                             </a>
                             <a
                                 href="https://applicant.network/sign-up"
-                                className="hero-cta btn btn-secondary btn-lg shadow-lg opacity-0"
+                                className="hero-cta btn btn-secondary btn-lg shadow-lg scroll-reveal fade-up"
                             >
                                 <i className="fa-duotone fa-regular fa-user-plus"></i>
                                 Find a Job
                             </a>
                             <a
                                 href="#how-it-works"
-                                className="hero-cta btn btn-ghost btn-lg opacity-0"
+                                className="hero-cta btn btn-ghost btn-lg scroll-reveal fade-up"
                             >
                                 Learn More
                                 <i className="fa-duotone fa-regular fa-arrow-down"></i>
@@ -501,7 +204,7 @@ export default function LandingOne() {
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                         {stats.map((stat, i) => (
-                            <div key={i} className="stat-item opacity-0">
+                            <div key={i} className="stat-item scroll-reveal fade-up">
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {stat.value}
                                 </div>
@@ -521,7 +224,7 @@ export default function LandingOne() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                         {/* Text — 3 of 5 columns (60%) */}
-                        <div className="problem-text lg:col-span-3 opacity-0">
+                        <div className="problem-text lg:col-span-3 scroll-reveal slide-from-left">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
                                 The Industry Problem
                             </p>
@@ -553,7 +256,7 @@ export default function LandingOne() {
                                 ].map((pain, i) => (
                                     <div
                                         key={i}
-                                        className="problem-pain flex items-start gap-4 opacity-0"
+                                        className="problem-pain flex items-start gap-4 scroll-reveal fade-up"
                                     >
                                         <div className="w-10 h-10 flex-shrink-0 bg-error/10 flex items-center justify-center">
                                             <i
@@ -569,7 +272,7 @@ export default function LandingOne() {
                         </div>
 
                         {/* Image — 2 of 5 columns (40%) */}
-                        <div className="problem-img lg:col-span-2 opacity-0">
+                        <div className="problem-img lg:col-span-2 scroll-reveal slide-from-right">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -597,7 +300,7 @@ export default function LandingOne() {
                 className="hiw-section py-28 bg-neutral text-neutral-content"
             >
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="hiw-heading max-w-3xl mb-20 opacity-0">
+                    <div className="hiw-heading max-w-3xl mb-20 scroll-reveal fade-up">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                             How It Works
                         </p>
@@ -612,7 +315,7 @@ export default function LandingOne() {
                         {splitSteps.map((step, i) => (
                             <div
                                 key={i}
-                                className="hiw-step flex gap-6 opacity-0"
+                                className="hiw-step flex gap-6 scroll-reveal fade-up"
                             >
                                 <div className="flex-shrink-0">
                                     <span className="text-6xl font-black text-secondary/30 leading-none">
@@ -643,7 +346,7 @@ export default function LandingOne() {
                ═══════════════════════════════════════════════════════ */}
             <section className="platforms-section py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="platforms-heading max-w-3xl mx-auto text-center mb-20 opacity-0">
+                    <div className="platforms-heading max-w-3xl mx-auto text-center mb-20 scroll-reveal fade-up">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             Our Platforms
                         </p>
@@ -662,7 +365,7 @@ export default function LandingOne() {
                                     p.color === "primary"
                                         ? "border-coral"
                                         : "border-secondary"
-                                } bg-base-200 p-10 opacity-0`}
+                                } bg-base-200 p-10 scroll-reveal fade-up`}
                             >
                                 <div className="flex items-center gap-4 mb-6">
                                     <div
@@ -726,7 +429,7 @@ export default function LandingOne() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
                         {/* Image — 2 of 5 columns (40%) */}
-                        <div className="editorial-img lg:col-span-2 opacity-0">
+                        <div className="editorial-img lg:col-span-2 scroll-reveal scale-in">
                             <div
                                 className="relative overflow-hidden"
                                 style={{
@@ -743,7 +446,7 @@ export default function LandingOne() {
                         </div>
 
                         {/* Text — 3 of 5 columns (60%) */}
-                        <div className="editorial-text lg:col-span-3 opacity-0">
+                        <div className="editorial-text lg:col-span-3 scroll-reveal slide-from-right">
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                                 The Ecosystem
                             </p>
@@ -800,7 +503,7 @@ export default function LandingOne() {
                ═══════════════════════════════════════════════════════ */}
             <section className="testimonials-section py-28 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="testimonials-heading max-w-3xl mb-16 opacity-0">
+                    <div className="testimonials-heading max-w-3xl mb-16 scroll-reveal fade-up">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                             What People Say
                         </p>
@@ -815,7 +518,7 @@ export default function LandingOne() {
                         {testimonials.map((t, i) => (
                             <div
                                 key={i}
-                                className="testimonial-card border-l-4 border-coral bg-base-200 p-8 opacity-0"
+                                className="testimonial-card border-l-4 border-coral bg-base-200 p-8 scroll-reveal fade-up"
                             >
                                 <i className="fa-duotone fa-regular fa-quote-left text-3xl text-primary/20 mb-4 block"></i>
                                 <p className="text-base-content/80 leading-relaxed mb-6 italic">
@@ -863,7 +566,7 @@ export default function LandingOne() {
                ═══════════════════════════════════════════════════════ */}
             <section className="final-cta py-28 bg-primary text-primary-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="final-cta-content max-w-4xl mx-auto text-center opacity-0">
+                    <div className="final-cta-content max-w-4xl mx-auto text-center scroll-reveal fade-up">
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-8">
                             Ready to transform
                             <br />

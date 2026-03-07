@@ -141,7 +141,7 @@ export function CompanyInfoStep({ state, actions }: CompanyInfoStepProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <BaselFormField label="Industry" required>
                         <select
-                            className="select select-bordered w-full"
+                            className="select w-full"
                             value={formData.industry}
                             onChange={(e) =>
                                 handleChange("industry", e.target.value)
@@ -159,7 +159,7 @@ export function CompanyInfoStep({ state, actions }: CompanyInfoStepProps) {
 
                     <BaselFormField label="Company Size" required>
                         <select
-                            className="select select-bordered w-full"
+                            className="select w-full"
                             value={formData.size}
                             onChange={(e) =>
                                 handleChange("size", e.target.value)
@@ -182,7 +182,7 @@ export function CompanyInfoStep({ state, actions }: CompanyInfoStepProps) {
                     hint="Used for invoice timing after guarantee completion."
                 >
                     <select
-                        className="select select-bordered w-full"
+                        className="select w-full"
                         value={formData.billing_terms}
                         onChange={(e) =>
                             handleChange("billing_terms", e.target.value)

@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import type {
@@ -69,66 +68,7 @@ export default function IntegrationsMarketplacePage() {
         if (!profileLoading) fetchData();
     }, [profileLoading, fetchData]);
 
-    /* ── GSAP page entrance ──────────────────────────────────────────── */
-
-    useGSAP(
-        () => {
-            if (loading || !containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                containerRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => gsap.set(el, { opacity: 1 }));
-                return;
-            }
-
-            const $ = (s: string) => containerRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => containerRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-
-            const kicker = $1(".mkt-kicker");
-            if (kicker)
-                tl.fromTo(
-                    kicker,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                );
-
-            const titleWords = $(".mkt-title-word");
-            if (titleWords.length) {
-                tl.fromTo(
-                    titleWords,
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                );
-            }
-
-            const desc = $1(".mkt-desc");
-            if (desc)
-                tl.fromTo(
-                    desc,
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                );
-
-            const content = $1(".mkt-content");
-            if (content)
-                tl.fromTo(
-                    content,
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.2",
-                );
-        },
-        { scope: containerRef, dependencies: [loading] },
-    );
+    useScrollReveal(containerRef);
 
     /* ── Connect handler ─────────────────────────────────────────────── */
 
@@ -262,7 +202,7 @@ export default function IntegrationsMarketplacePage() {
             <MarketplaceHero activeCount={activeConnections.length} />
 
             {/* ── Content ─────────────────────────────────────────────── */}
-            <section className="mkt-content opacity-0 p-4">
+            <section className="scroll-reveal fade-up p-4">
                 {/* Error banner */}
                 {error && (
                     <div className="bg-error/5 border-l-4 border-error px-4 py-3 mb-6">

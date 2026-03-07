@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* ─── Data ───────────────────────────────────────────────────────────────── */
 
@@ -182,46 +181,7 @@ export default function SearchOne() {
             setLocations((p) => p.filter((x) => x !== value));
     };
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-            tl.fromTo(
-                $1(".search-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".search-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".search-bar-main"),
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".search-content"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -234,19 +194,19 @@ export default function SearchOne() {
                     }}
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
-                    <p className="search-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                    <p className="search-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                         Advanced Search
                     </p>
                     <h1 className="text-4xl md:text-5xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="search-title-word inline-block opacity-0">
+                        <span className="search-title-word inline-block scroll-reveal hero-word">
                             Find your
                         </span>{" "}
-                        <span className="search-title-word inline-block opacity-0 text-primary">
+                        <span className="search-title-word inline-block scroll-reveal hero-word text-primary">
                             next placement.
                         </span>
                     </h1>
                     {/* Search bar */}
-                    <div className="search-bar-main opacity-0 max-w-2xl">
+                    <div className="search-bar-main scroll-reveal fade-up max-w-2xl">
                         <div className="relative">
                             <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-content/40" />
                             <input
@@ -303,7 +263,7 @@ export default function SearchOne() {
             )}
 
             {/* Content */}
-            <section className="search-content opacity-0 container mx-auto px-6 lg:px-12 py-8 lg:py-12">
+            <section className="search-content scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-8 lg:py-12">
                 <div className="grid lg:grid-cols-5 gap-8">
                     {/* Sidebar Filters */}
                     <div className="lg:col-span-1">
@@ -448,7 +408,7 @@ export default function SearchOne() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="select select-sm bg-base-200 border-base-300 text-sm"
+                                    className="select select-sm"
                                 >
                                     {sortOptions.map((o) => (
                                         <option key={o}>{o}</option>

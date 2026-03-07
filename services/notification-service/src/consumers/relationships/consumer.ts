@@ -44,8 +44,9 @@ export class RelationshipsEventConsumer {
                 await this.emailService.sendConnectionRequested(admin.email, {
                     companyName: company.name,
                     recruiterName: recruiterContact.name,
+                    recruiterEmail: recruiterContact.email,
                     message,
-                    connectionUrl: `${this.portalUrl}/portal/network`,
+                    connectionUrl: `${this.portalUrl}/portal/invitation/company/${relationshipId}`,
                     userId: admin.user_id || undefined,
                     companyId,
                 });

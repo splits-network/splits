@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState, Suspense } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { BaselEmptyState } from "@splits-network/basel-ui";
 import {
     useFullSearch,
@@ -51,11 +50,6 @@ const ENTITY_FILTERS: {
     },
 ];
 
-/* ─── Animation constants ────────────────────────────────────────────────── */
-
-const D = { fast: 0.4, normal: 0.6, slow: 0.9 };
-const E = { editorial: "power3.out" };
-
 /* ─── Inner page ─────────────────────────────────────────────────────────── */
 
 function SearchPageInner() {
@@ -96,82 +90,7 @@ function SearchPageInner() {
         executeSearch,
     } = useFullSearch();
 
-    /* ─── GSAP ─────────────────────────────────────────────────────── */
-
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(
-                    mainRef.current.querySelectorAll("[class*='opacity-0']"),
-                    { opacity: 1 },
-                );
-                return;
-            }
-
-            const $ = (sel: string) => mainRef.current!.querySelectorAll(sel);
-            const $1 = (sel: string) => mainRef.current!.querySelector(sel);
-            const tl = gsap.timeline({ defaults: { ease: E.editorial, clearProps: "transform" } });
-
-            const kicker = $1(".search-kicker");
-            if (kicker)
-                tl.fromTo(
-                    kicker,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.fast,
-                        clearProps: "transform",
-                    },
-                );
-
-            const words = $(".search-title-word");
-            if (words.length)
-                tl.fromTo(
-                    words,
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: D.slow,
-                        stagger: 0.1,
-                        clearProps: "transform",
-                    },
-                    "-=0.2",
-                );
-
-            const searchBar = $1(".search-bar-main");
-            if (searchBar)
-                tl.fromTo(
-                    searchBar,
-                    { opacity: 0, y: 20 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.fast,
-                        clearProps: "transform",
-                    },
-                    "-=0.3",
-                );
-
-            const content = $1(".search-content");
-            if (content)
-                tl.fromTo(
-                    content,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: D.normal,
-                        clearProps: "transform",
-                    },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     /* ─── Handlers ─────────────────────────────────────────────────── */
 
@@ -244,20 +163,20 @@ function SearchPageInner() {
                     }}
                 />
                 <div className="relative  container mx-auto px-6 lg:px-12">
-                    <p className="search-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                    <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                         Advanced Search
                     </p>
                     <h1 className="text-4xl md:text-5xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="search-title-word inline-block opacity-0">
+                        <span className="scroll-reveal fade-up inline-block">
                             Find your
                         </span>{" "}
-                        <span className="search-title-word inline-block opacity-0 text-primary">
+                        <span className="scroll-reveal fade-up inline-block text-primary">
                             next placement.
                         </span>
                     </h1>
 
                     {/* Search bar */}
-                    <div className="search-bar-main opacity-0 max-w-2xl">
+                    <div className="scroll-reveal fade-up max-w-2xl">
                         <div className="relative">
                             <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-content/40" />
                             <input
@@ -323,7 +242,7 @@ function SearchPageInner() {
             {/* ══════════════════════════════════════════════════════════
                 CONTENT
                ══════════════════════════════════════════════════════════ */}
-            <section className="search-content opacity-0 container mx-auto px-6 lg:px-12 py-8 lg:py-12">
+            <section className="scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-8 lg:py-12">
                 <div className="grid lg:grid-cols-5 gap-8">
                     {/* ──────────────────────────────────────────────────
                         SIDEBAR
@@ -376,7 +295,7 @@ function SearchPageInner() {
                                     onChange={(e) =>
                                         setSortBy(e.target.value as SortOption)
                                     }
-                                    className="select select-sm w-full bg-base-200 border-base-300 text-sm"
+                                    className="select select-sm w-full"
                                 >
                                     {SORT_OPTIONS.map((o) => (
                                         <option key={o.value} value={o.value}>
@@ -646,7 +565,7 @@ function SearchPageInner() {
                                                 e.target.value as SortOption,
                                             )
                                         }
-                                        className="select select-sm bg-base-200 border-base-300 text-sm"
+                                        className="select select-sm"
                                     >
                                         {SORT_OPTIONS.map((o) => (
                                             <option

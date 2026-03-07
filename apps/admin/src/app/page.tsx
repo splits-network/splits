@@ -64,23 +64,23 @@ export default function HomePage() {
             />
 
             {/* ── Hero ────────────────────────────────────────────── */}
-            <section className="hero-section flex-1 flex items-center py-28 lg:py-36">
+            <section className="hero-section hero-entrance flex-1 flex items-center py-28 lg:py-36">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
-                        <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6 opacity-0">
+                        <p className="hero-kicker scroll-reveal text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-6">
                             Internal Platform
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="hero-headline-word inline-block opacity-0 text-base-content">
+                            <span className="hero-headline-word scroll-reveal inline-block text-base-content">
                                 Employment Networks
                             </span>{" "}
-                            <span className="hero-headline-word inline-block opacity-0 text-primary">
+                            <span className="hero-headline-word scroll-reveal inline-block text-primary">
                                 Administration
                             </span>
                         </h1>
 
-                        <p className="hero-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 opacity-0">
+                        <p className="hero-body scroll-reveal text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10">
                             This is the internal administration portal for Employment Networks.
                             Looking for our platforms? Visit Splits Network for recruiters and
                             companies, or Applicant Network for job seekers.
@@ -89,21 +89,21 @@ export default function HomePage() {
                         <div className="flex flex-wrap gap-4">
                             <a
                                 href="https://splits.network"
-                                className="hero-cta btn btn-primary btn-lg shadow-lg opacity-0"
+                                className="hero-cta scroll-reveal btn btn-primary btn-lg shadow-lg"
                             >
                                 <i className="fa-duotone fa-regular fa-network-wired" />
                                 Splits Network
                             </a>
                             <a
                                 href="https://applicant.network"
-                                className="hero-cta btn btn-secondary btn-lg shadow-lg opacity-0"
+                                className="hero-cta scroll-reveal btn btn-secondary btn-lg shadow-lg"
                             >
                                 <i className="fa-duotone fa-regular fa-user" />
                                 Applicant Network
                             </a>
                             <Link
                                 href="/sign-in"
-                                className="hero-cta btn btn-ghost btn-lg opacity-0"
+                                className="hero-cta scroll-reveal btn btn-ghost btn-lg"
                             >
                                 <i className="fa-duotone fa-regular fa-lock" />
                                 Admin Sign In
@@ -124,7 +124,7 @@ export default function HomePage() {
                                     p.color === "primary"
                                         ? "border-primary"
                                         : "border-secondary"
-                                } bg-base-100 p-8 lg:p-10 opacity-0`}
+                                } bg-base-100 p-8 lg:p-10 scroll-reveal fade-up`}
                             >
                                 <div className="flex items-center gap-4 mb-4">
                                     <div
@@ -181,7 +181,7 @@ export default function HomePage() {
             {/* ── Footer ──────────────────────────────────────────── */}
             <footer className="py-16 bg-neutral text-neutral-content">
                 <div className="container mx-auto px-6 lg:px-12">
-                    <div className="footer-content max-w-3xl mx-auto text-center opacity-0">
+                    <div className="footer-content scroll-reveal fade-up max-w-3xl mx-auto text-center">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
                             Authorized Personnel Only
                         </p>

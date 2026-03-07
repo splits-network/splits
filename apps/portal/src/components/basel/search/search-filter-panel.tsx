@@ -256,7 +256,7 @@ function FilterSelect({
         <select
             value={value ?? ""}
             onChange={(e) => onChange(e.target.value || undefined)}
-            className="select select-sm w-full bg-base-200 border-base-300 text-sm"
+            className="select select-sm w-full"
         >
             <option value="">{placeholder}</option>
             {options.map((opt) => (

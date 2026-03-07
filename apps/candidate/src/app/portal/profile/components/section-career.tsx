@@ -65,7 +65,7 @@ export function SectionCareer({ settings, onUpdate }: SectionCareerProps) {
                         Desired Job Type
                     </label>
                     <select
-                        className="select select-bordered w-full"
+                        className="select w-full"
                         value={settings.desired_job_type || ""}
                         onChange={(e) =>
                             onUpdate({
@@ -89,7 +89,7 @@ export function SectionCareer({ settings, onUpdate }: SectionCareerProps) {
                         Availability
                     </label>
                     <select
-                        className="select select-bordered w-full"
+                        className="select w-full"
                         value={settings.availability || ""}
                         onChange={(e) =>
                             onUpdate({

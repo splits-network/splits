@@ -160,7 +160,7 @@ export default function ApplicationsBaselPage() {
             </div>
 
             {/* Content area */}
-            <section className="content-area opacity-0 p-4">
+            <section className="content-area scroll-reveal fade-in p-4">
                 <div className="mx-auto">
                     {loading && applications.length === 0 ? (
                         <LoadingState message="Loading pipeline..." />

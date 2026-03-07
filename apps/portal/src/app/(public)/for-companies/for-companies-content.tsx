@@ -2,22 +2,8 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useScrollReveal } from "@splits-network/basel-ui";
 import { AuthenticatedCTAWrapper } from "@/components/auth/authenticated-cta-wrapper";
-import {
-    duration,
-    easing,
-    stagger,
-    fadeUp,
-    scaleIn,
-    popIn,
-} from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 const companyBenefits = [
     {
@@ -222,73 +208,7 @@ const industries = [
 
 export function ForCompaniesContent() {
     const containerRef = useRef<HTMLDivElement>(null);
-
-    useGSAP(
-        () => {
-            const sections = gsap.utils.toArray(
-                ".animate-section",
-            ) as Element[];
-            sections.forEach((section) => {
-                gsap.fromTo(
-                    section as gsap.TweenTarget,
-                    { opacity: 0, y: 50 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        scrollTrigger: {
-                            trigger: section,
-                            start: "top 80%",
-                            toggleActions: "play none none none",
-                        },
-                    },
-                );
-            });
-
-            const cards = gsap.utils.toArray(".animate-card") as Element[];
-            cards.forEach((card, index) => {
-                gsap.fromTo(
-                    card as gsap.TweenTarget,
-                    { opacity: 0, y: 30, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.smooth,
-                        delay: index * 0.1,
-                        scrollTrigger: {
-                            trigger: card,
-                            start: "top 80%",
-                            toggleActions: "play none none reverse",
-                        },
-                    },
-                );
-            });
-
-            const stats = gsap.utils.toArray(".animate-stat") as Element[];
-            stats.forEach((stat, index) => {
-                gsap.fromTo(
-                    stat as gsap.TweenTarget,
-                    { opacity: 0, scale: 0.8 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        delay: index * 0.2,
-                        scrollTrigger: {
-                            trigger: stat,
-                            start: "top 80%",
-                            toggleActions: "play none none reverse",
-                        },
-                    },
-                );
-            });
-        },
-        { scope: containerRef },
-    );
+    useScrollReveal(containerRef);
 
     return (
         <div ref={containerRef} className="min-h-screen bg-base-100">
@@ -296,7 +216,7 @@ export function ForCompaniesContent() {
             <section className="relative bg-gradient-to-br from-secondary/10 via-base-100 to-accent/10 py-24 px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="badge badge-secondary badge-lg mb-6">
                                 <i className="fa-duotone fa-regular fa-building mr-2"></i>
                                 For Companies
@@ -333,7 +253,7 @@ export function ForCompaniesContent() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4 text-center">
-                                <div className="animate-stat">
+                                <div className="scroll-reveal pop-in">
                                     <div className="text-2xl font-bold text-secondary">
                                         1,200+
                                     </div>
@@ -341,7 +261,7 @@ export function ForCompaniesContent() {
                                         Companies Trust Us
                                     </div>
                                 </div>
-                                <div className="animate-stat">
+                                <div className="scroll-reveal pop-in">
                                     <div className="text-2xl font-bold text-accent">
                                         14 days
                                     </div>
@@ -349,7 +269,7 @@ export function ForCompaniesContent() {
                                         Avg Time to Hire
                                     </div>
                                 </div>
-                                <div className="animate-stat">
+                                <div className="scroll-reveal pop-in">
                                     <div className="text-2xl font-bold text-primary">
                                         95%
                                     </div>
@@ -360,7 +280,7 @@ export function ForCompaniesContent() {
                             </div>
                         </div>
 
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="relative">
                                 <img
                                     src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80"
@@ -384,7 +304,7 @@ export function ForCompaniesContent() {
             {/* Benefits Section */}
             <section className="py-24 px-4 bg-base-200/50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Why Companies Choose Us
                         </h2>
@@ -397,7 +317,7 @@ export function ForCompaniesContent() {
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {companyBenefits.map((benefit, index) => (
-                            <div key={benefit.title} className="animate-card">
+                            <div key={benefit.title} className="scroll-reveal fade-up">
                                 <div className="card bg-base-100 shadow-lg h-full">
                                     <div className="card-body text-center">
                                         <div className="text-secondary text-5xl mb-4">
@@ -427,7 +347,7 @@ export function ForCompaniesContent() {
             {/* Industries Section */}
             <section className="py-24 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Trusted Across Industries
                         </h2>
@@ -440,7 +360,7 @@ export function ForCompaniesContent() {
 
                     <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6">
                         {industries.map((industry, index) => (
-                            <div key={industry.name} className="animate-card">
+                            <div key={industry.name} className="scroll-reveal fade-up">
                                 <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
                                     <div className="card-body text-center p-6">
                                         <div className="text-accent text-4xl mb-3">
@@ -465,7 +385,7 @@ export function ForCompaniesContent() {
             {/* How It Works Section */}
             <section className="py-24 px-4 bg-base-200/50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Your Hiring Process, Simplified
                         </h2>
@@ -482,7 +402,7 @@ export function ForCompaniesContent() {
                         {hiringProcess.map((step, index) => (
                             <div
                                 key={step.step}
-                                className={`animate-card relative flex items-center mb-16 ${
+                                className={`scroll-reveal fade-up relative flex items-center mb-16 ${
                                     index % 2 === 0 ? "md:flex-row-reverse" : ""
                                 }`}
                             >
@@ -530,7 +450,7 @@ export function ForCompaniesContent() {
             {/* Real Company Gains Section */}
             <section className="py-24 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             What Your Company Actually Gets
                         </h2>
@@ -542,7 +462,7 @@ export function ForCompaniesContent() {
                     </div>
 
                     <div className="grid lg:grid-cols-2 gap-12">
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="space-y-8">
                                 <div className="bg-primary/5 p-6 rounded-xl border-l-4 border-coral">
                                     <div className="flex items-start gap-4">
@@ -630,7 +550,7 @@ export function ForCompaniesContent() {
                             </div>
                         </div>
 
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="space-y-8">
                                 <div className="bg-info/5 p-6 rounded-xl border-l-4 border-info">
                                     <div className="flex items-start gap-4">
@@ -715,7 +635,7 @@ export function ForCompaniesContent() {
                         </div>
                     </div>
 
-                    <div className="mt-16 text-center animate-section">
+                    <div className="mt-16 text-center scroll-reveal fade-up">
                         <AuthenticatedCTAWrapper>
                             <div className="bg-gradient-to-r from-base-100 to-base-200 p-8 rounded-2xl shadow-lg">
                                 <h3 className="text-2xl font-bold text-base-content mb-4">
@@ -744,7 +664,7 @@ export function ForCompaniesContent() {
             {/* Why Choose Splits Network Section */}
             <section id="benefits" className="py-24 px-4 bg-base-200/50">
                 <div className="max-w-7xl mx-auto">
-                    <div className="animate-section text-center mb-16">
+                    <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                             Why Choose{" "}
                             <span className="text-secondary">
@@ -760,7 +680,7 @@ export function ForCompaniesContent() {
                     </div>
 
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="space-y-8">
                                 <div className="bg-base-100 p-6 rounded-xl shadow-lg">
                                     <div className="flex items-start gap-4">
@@ -819,7 +739,7 @@ export function ForCompaniesContent() {
                             </div>
                         </div>
 
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <div className="space-y-8">
                                 <div className="bg-base-100 p-6 rounded-xl shadow-lg">
                                     <div className="flex items-start gap-4">
@@ -878,7 +798,7 @@ export function ForCompaniesContent() {
                         </div>
                     </div>
 
-                    <div className="mt-16 text-center animate-section">
+                    <div className="mt-16 text-center scroll-reveal fade-up">
                         <div className="bg-gradient-to-r from-secondary/10 to-primary/10 p-8 rounded-2xl">
                             <h3 className="text-2xl font-bold text-base-content mb-4">
                                 The Bottom Line: Better Hiring Outcomes
@@ -921,7 +841,7 @@ export function ForCompaniesContent() {
             <section className="py-24 px-4 bg-gradient-to-br from-secondary/10 via-base-100 to-accent/10">
                 <AuthenticatedCTAWrapper>
                     <div className="max-w-7xl mx-auto text-center">
-                        <div className="animate-section">
+                        <div className="scroll-reveal fade-up">
                             <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
                                 Ready to Transform Your Hiring?
                             </h2>

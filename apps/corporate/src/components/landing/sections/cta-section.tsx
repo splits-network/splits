@@ -1,103 +1,12 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 export function CTASection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const contentRef = useRef<HTMLDivElement>(null);
-    const cardsRef = useRef<HTMLDivElement>(null);
-    const footerRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Content slide up
-            gsap.fromTo(
-                contentRef.current,
-                { opacity: 0, y: 40 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.hero,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 80%",
-                    },
-                },
-            );
-
-            // Cards pop in with stagger
-            const cards = cardsRef.current?.querySelectorAll(".cta-card");
-            if (cards) {
-                gsap.fromTo(
-                    cards,
-                    { opacity: 0, scale: 0.9, y: 20 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                        stagger: stagger.loose,
-                        delay: 0.3,
-                        scrollTrigger: {
-                            trigger: sectionRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // Footer text fade in
-            gsap.fromTo(
-                footerRef.current,
-                { opacity: 0 },
-                {
-                    opacity: 1,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    delay: 0.6,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 80%",
-                    },
-                },
-            );
-        },
-        { scope: sectionRef },
-    );
-
-    // Button hover animations
-    const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        gsap.to(e.currentTarget, {
-            scale: 1.05,
-            duration: 0.2,
-            ease: "power2.out",
-        });
-    };
-
-    const handleMouseLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        gsap.to(e.currentTarget, {
-            scale: 1,
-            duration: 0.2,
-            ease: "power2.out",
-        });
-    };
+    useScrollReveal(sectionRef);
 
     return (
         <section
@@ -113,8 +22,7 @@ export function CTASection() {
 
             <div className="container mx-auto px-4 relative ">
                 <div
-                    ref={contentRef}
-                    className="text-center mb-12 opacity-0 max-w-3xl mx-auto"
+                    className="scroll-reveal fade-up text-center mb-12 max-w-3xl mx-auto"
                 >
                     <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
                         Ready to transform how you recruit?
@@ -126,11 +34,10 @@ export function CTASection() {
                 </div>
 
                 <div
-                    ref={cardsRef}
-                    className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12"
+                    className="scroll-reveal fade-up grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12 stagger-children"
                 >
                     {/* Recruiters Card */}
-                    <div className="cta-card bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 opacity-0">
+                    <div className="cta-card bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-user-tie text-xl"></i>
@@ -148,9 +55,7 @@ export function CTASection() {
                         </p>
                         <a
                             href="https://splits.network/sign-up"
-                            className="btn btn-sm bg-white text-primary hover:bg-white/90 border-0 w-full"
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
+                            className="btn btn-sm bg-white text-primary hover:bg-white/90 border-0 w-full transition-transform hover:scale-105"
                         >
                             Join Network
                             <i className="fa-duotone fa-regular fa-arrow-right"></i>
@@ -158,7 +63,7 @@ export function CTASection() {
                     </div>
 
                     {/* Companies Card */}
-                    <div className="cta-card bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 opacity-0">
+                    <div className="cta-card bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-building text-xl"></i>
@@ -176,9 +81,7 @@ export function CTASection() {
                         </p>
                         <a
                             href="https://splits.network/sign-up"
-                            className="btn btn-sm bg-white text-primary hover:bg-white/90 border-0 w-full"
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
+                            className="btn btn-sm bg-white text-primary hover:bg-white/90 border-0 w-full transition-transform hover:scale-105"
                         >
                             Post a Role
                             <i className="fa-duotone fa-regular fa-arrow-right"></i>
@@ -186,7 +89,7 @@ export function CTASection() {
                     </div>
 
                     {/* Candidates Card */}
-                    <div className="cta-card bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 opacity-0">
+                    <div className="cta-card bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-user text-xl"></i>
@@ -204,9 +107,7 @@ export function CTASection() {
                         </p>
                         <a
                             href="https://applicant.network/sign-up"
-                            className="btn btn-sm bg-white text-secondary hover:bg-white/90 border-0 w-full"
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
+                            className="btn btn-sm bg-white text-secondary hover:bg-white/90 border-0 w-full transition-transform hover:scale-105"
                         >
                             Create Profile
                             <i className="fa-duotone fa-regular fa-arrow-right"></i>
@@ -214,7 +115,7 @@ export function CTASection() {
                     </div>
                 </div>
 
-                <div ref={footerRef} className="text-center opacity-0">
+                <div className="scroll-reveal fade-in text-center">
                     <p className="text-sm opacity-70 mb-4">
                         Questions? Reach out to us directly.
                     </p>

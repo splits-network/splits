@@ -21,7 +21,7 @@ export interface BaselHeaderProps {
     frosted?: boolean;
     /** Additional className on the outer wrapper */
     className?: string;
-    /** Ref forwarded to the outermost container div (for GSAP, ResizeObserver, etc.) */
+    /** Ref forwarded to the outermost container div (for ResizeObserver, etc.) */
     containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -34,8 +34,6 @@ export interface BaselHeaderProps {
  * Mobile menu uses DaisyUI `dropdown` for auto click-outside handling.
  * Content is injected via composition slots — logo, nav, actions, mobileMenu.
  *
- * CSS class hooks for GSAP targeting:
- *   .header-bar — the <header> element (for entrance animations)
  */
 export function BaselHeader({
     logo,

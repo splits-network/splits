@@ -1,14 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 const pillars = [
     {
@@ -30,77 +23,8 @@ const pillars = [
 
 export function SolutionSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headingRef = useRef<HTMLDivElement>(null);
-    const pillarsRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            // Heading animation
-            gsap.fromTo(
-                headingRef.current,
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration.normal,
-                    ease: easing.smooth,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                    },
-                },
-            );
-
-            // Pillars stagger in
-            const cards = pillarsRef.current?.querySelectorAll(".pillar-card");
-            if (cards) {
-                gsap.fromTo(
-                    cards,
-                    { opacity: 0, y: 40, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        ease: easing.bounce,
-                        stagger: stagger.loose,
-                        scrollTrigger: {
-                            trigger: pillarsRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-
-            // Icons pop in
-            const icons = pillarsRef.current?.querySelectorAll(".pillar-icon");
-            if (icons) {
-                gsap.fromTo(
-                    icons,
-                    { scale: 0 },
-                    {
-                        scale: 1,
-                        duration: duration.fast,
-                        ease: easing.bounce,
-                        stagger: stagger.loose,
-                        delay: 0.2,
-                        scrollTrigger: {
-                            trigger: pillarsRef.current,
-                            start: "top 80%",
-                        },
-                    },
-                );
-            }
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     return (
         <section
@@ -109,8 +33,7 @@ export function SolutionSection() {
         >
             <div className="container mx-auto px-4">
                 <div
-                    ref={headingRef}
-                    className="text-center mb-16 opacity-0 max-w-3xl mx-auto"
+                    className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto"
                 >
                     <p className="text-sm uppercase tracking-wider text-primary mb-3">
                         Our Approach
@@ -129,15 +52,14 @@ export function SolutionSection() {
                 </div>
 
                 <div
-                    ref={pillarsRef}
-                    className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+                    className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto stagger-children"
                 >
                     {pillars.map((pillar, index) => (
                         <div
                             key={index}
-                            className="pillar-card text-center p-8 bg-base-200 rounded-2xl opacity-0"
+                            className="scroll-reveal fade-up pillar-card text-center p-8 bg-base-200 rounded-2xl"
                         >
-                            <div className="pillar-icon w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-6">
+                            <div className="scroll-reveal scale-in pillar-icon w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-6">
                                 <i
                                     className={`${pillar.icon} text-3xl text-primary`}
                                 ></i>

@@ -210,7 +210,7 @@ export default function ReferralCodesBaselPage() {
 
     return (
         <>
-            <ReferralCodesAnimator contentRef={contentRef}>
+            <ReferralCodesAnimator>
                 <HeaderSection stats={stats} />
 
                 <ControlsBar
@@ -226,7 +226,7 @@ export default function ReferralCodesBaselPage() {
                 />
 
                 {/* Content Area */}
-                <section className="content-area opacity-0 p-4">
+                <section className="content-area scroll-reveal fade-in p-4">
                     <div ref={contentRef} className="mx-auto">
                         {loading && codes.length === 0 ? (
                             <div className="py-28 text-center">

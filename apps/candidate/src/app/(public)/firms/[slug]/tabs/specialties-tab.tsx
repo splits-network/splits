@@ -23,7 +23,7 @@ export function SpecialtiesTab({ firm }: SpecialtiesTabProps) {
 
     if (!hasData) {
         return (
-            <div className="profile-section opacity-0 text-center py-12">
+            <div className="scroll-reveal fade-up profile-section text-center py-12">
                 <i className="fa-duotone fa-regular fa-bullseye text-3xl text-base-content/15 mb-3 block" />
                 <p className="text-sm text-base-content/50">
                     No specialization data available yet.
@@ -36,7 +36,7 @@ export function SpecialtiesTab({ firm }: SpecialtiesTabProps) {
         <div className="space-y-10">
             {/* Industries */}
             {firm.industries.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up profile-section">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Industries
                     </p>
@@ -52,7 +52,7 @@ export function SpecialtiesTab({ firm }: SpecialtiesTabProps) {
 
             {/* Specialties */}
             {firm.specialties.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up profile-section">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Specialties
                     </p>
@@ -68,7 +68,7 @@ export function SpecialtiesTab({ firm }: SpecialtiesTabProps) {
 
             {/* Placement Types */}
             {firm.placement_types.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up profile-section">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Placement Types
                     </p>
@@ -88,7 +88,7 @@ export function SpecialtiesTab({ firm }: SpecialtiesTabProps) {
 
             {/* Geographic Focus */}
             {firm.geo_focus.length > 0 && (
-                <div className="profile-section opacity-0">
+                <div className="scroll-reveal fade-up profile-section">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                         Geographic Focus
                     </p>

@@ -1,87 +1,12 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { duration, easing, stagger } from "@splits-network/basel-ui";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 export function HeroSection() {
     const sectionRef = useRef<HTMLElement>(null);
-    const headlineRef = useRef<HTMLHeadingElement>(null);
-    const subtextRef = useRef<HTMLParagraphElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
-    const platformsRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(
-        () => {
-            if (!sectionRef.current) return;
-
-            const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            ).matches;
-            if (prefersReducedMotion) return;
-
-            const tl = gsap.timeline({ defaults: { ease: easing.smooth, clearProps: "transform" } });
-
-            // Headline reveal
-            tl.fromTo(
-                headlineRef.current,
-                { opacity: 0, y: 60 },
-                { opacity: 1, y: 0, duration: duration.hero },
-            );
-
-            // Subtext fade up
-            tl.fromTo(
-                subtextRef.current,
-                { opacity: 0, y: 30 },
-                { opacity: 1, y: 0, duration: duration.normal },
-                "-=0.6",
-            );
-
-            // Platform badges stagger in
-            const platforms =
-                platformsRef.current?.querySelectorAll(".platform-badge");
-            if (platforms) {
-                tl.fromTo(
-                    platforms,
-                    { opacity: 0, scale: 0.8, y: 20 },
-                    {
-                        opacity: 1,
-                        scale: 1,
-                        y: 0,
-                        duration: duration.normal,
-                        stagger: stagger.normal,
-                        ease: easing.bounce,
-                    },
-                    "-=0.4",
-                );
-            }
-
-            // CTA buttons pop in
-            const buttons = ctaRef.current?.querySelectorAll("a");
-            if (buttons) {
-                tl.fromTo(
-                    buttons,
-                    { opacity: 0, y: 20, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: duration.normal,
-                        stagger: stagger.normal,
-                        ease: easing.bounce,
-                    },
-                    "-=0.3",
-                );
-            }
-        },
-        { scope: sectionRef },
-    );
+    useScrollReveal(sectionRef);
 
     const handleSmoothScroll = (
         e: React.MouseEvent<HTMLAnchorElement>,
@@ -111,8 +36,7 @@ export function HeroSection() {
             <div className="container mx-auto px-4 relative  py-20">
                 <div className="max-w-5xl mx-auto text-center">
                     <h1
-                        ref={headlineRef}
-                        className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-8 opacity-0"
+                        className="scroll-reveal fade-up text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-8"
                     >
                         The Future of{" "}
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
@@ -121,8 +45,7 @@ export function HeroSection() {
                     </h1>
 
                     <p
-                        ref={subtextRef}
-                        className="text-xl md:text-2xl text-base-content/70 mb-10 max-w-3xl mx-auto leading-relaxed opacity-0"
+                        className="scroll-reveal fade-up text-xl md:text-2xl text-base-content/70 mb-10 max-w-3xl mx-auto leading-relaxed"
                     >
                         Employment Networks powers modern recruiting through two
                         innovative platforms—connecting recruiters, companies,
@@ -130,10 +53,9 @@ export function HeroSection() {
                     </p>
 
                     <div
-                        ref={platformsRef}
-                        className="flex flex-col sm:flex-row gap-6 justify-center mb-12"
+                        className="scroll-reveal fade-up flex flex-col sm:flex-row gap-6 justify-center mb-12 stagger-children"
                     >
-                        <div className="platform-badge flex items-center gap-3 bg-base-200 rounded-2xl px-6 py-4 opacity-0">
+                        <div className="platform-badge flex items-center gap-3 bg-base-200 rounded-2xl px-6 py-4">
                             <img
                                 src="/splits.png"
                                 alt="Splits Network"
@@ -148,7 +70,7 @@ export function HeroSection() {
                                 </div>
                             </div>
                         </div>
-                        <div className="platform-badge flex items-center gap-3 bg-base-200 rounded-2xl px-6 py-4 opacity-0">
+                        <div className="platform-badge flex items-center gap-3 bg-base-200 rounded-2xl px-6 py-4">
                             <img
                                 src="/applicant.png"
                                 alt="Applicant Network"
@@ -166,15 +88,14 @@ export function HeroSection() {
                     </div>
 
                     <div
-                        ref={ctaRef}
-                        className="flex flex-col sm:flex-row gap-4 justify-center"
+                        className="scroll-reveal fade-up flex flex-col sm:flex-row gap-4 justify-center stagger-children"
                     >
                         <a
                             href="#for-recruiters"
                             onClick={(e) =>
                                 handleSmoothScroll(e, "#for-recruiters")
                             }
-                            className="btn btn-primary btn-lg gap-2 shadow-lg opacity-0"
+                            className="btn btn-primary btn-lg gap-2 shadow-lg"
                         >
                             <i className="fa-duotone fa-regular fa-user-tie"></i>
                             I&apos;m a Recruiter
@@ -184,7 +105,7 @@ export function HeroSection() {
                             onClick={(e) =>
                                 handleSmoothScroll(e, "#for-candidates")
                             }
-                            className="btn btn-secondary btn-lg gap-2 shadow-lg opacity-0"
+                            className="btn btn-secondary btn-lg gap-2 shadow-lg"
                         >
                             <i className="fa-duotone fa-regular fa-user"></i>
                             I&apos;m Looking for a Job
@@ -194,7 +115,7 @@ export function HeroSection() {
                             onClick={(e) =>
                                 handleSmoothScroll(e, "#for-companies")
                             }
-                            className="btn btn-outline btn-lg gap-2 opacity-0"
+                            className="btn btn-outline btn-lg gap-2"
                         >
                             <i className="fa-duotone fa-regular fa-building"></i>
                             I&apos;m Hiring

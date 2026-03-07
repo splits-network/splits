@@ -1,8 +1,6 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import gsap from 'gsap';
-import { duration, easing } from '@splits-network/basel-ui';
 
 interface AnimatedPayoutProps {
   value: number;
@@ -20,47 +18,51 @@ export function AnimatedPayout({
   const [displayValue, setDisplayValue] = useState(value);
   const [isAnimating, setIsAnimating] = useState(false);
   const previousValue = useRef(value);
-  const animationRef = useRef<gsap.core.Tween | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Check for reduced motion preference
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Kill any existing animation
-    if (animationRef.current) {
-      animationRef.current.kill();
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
     }
 
     if (prefersReducedMotion) {
-      // Skip animation, set value immediately
       setDisplayValue(value);
       previousValue.current = value;
       return;
     }
 
-    // Animate from previous value to new value
     const startValue = previousValue.current;
+    const diff = value - startValue;
+    if (diff === 0) return;
+
+    const animDuration = 600; // ms
+    const startTime = performance.now();
     setIsAnimating(true);
 
-    const obj = { val: startValue };
-    animationRef.current = gsap.to(obj, {
-      val: value,
-      duration: duration.counter,
-      ease: easing.smooth,
-      onUpdate: () => {
-        setDisplayValue(Math.round(obj.val));
-      },
-      onComplete: () => {
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / animDuration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(startValue + diff * eased));
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
         setIsAnimating(false);
         previousValue.current = value;
-      },
-    });
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(step);
 
     return () => {
-      if (animationRef.current) {
-        animationRef.current.kill();
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
       }
     };
   }, [value]);

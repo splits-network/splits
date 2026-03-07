@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type {
     OAuthConnectionPublic,
@@ -50,35 +48,6 @@ export default function EmailThreadPanel({
     const [loadingMessage, setLoadingMessage] = useState(false);
     const [error, setError] = useState("");
     const [nextPageToken, setNextPageToken] = useState<string | undefined>();
-
-    /* ── GSAP entrance ── */
-    useGSAP(
-        () => {
-            if (loading || !containerRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                containerRef.current
-                    .querySelectorAll("[class*='opacity-0']")
-                    .forEach((el) => gsap.set(el, { opacity: 1 }));
-                return;
-            }
-            const items = containerRef.current.querySelectorAll(".email-item");
-            if (items.length) {
-                gsap.fromTo(
-                    items,
-                    { opacity: 0, y: 10 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.3,
-                        stagger: 0.05,
-                        ease: "power3.out",
-                        clearProps: "transform",
-                    },
-                );
-            }
-        },
-        { scope: containerRef, dependencies: [loading, messages] },
-    );
 
     /* ── Fetch email connections ── */
     const fetchConnections = useCallback(async () => {
@@ -307,7 +276,7 @@ export default function EmailThreadPanel({
                         <button
                             key={msg.id}
                             onClick={() => handleViewMessage(msg)}
-                            className="email-item w-full text-left px-4 py-3 border-b border-base-200 hover:bg-base-200/50 transition-colors"
+                            className="email-item w-full text-left px-4 py-3 border-b border-base-200 hover:bg-base-200/50 transition-colors animate-[fadeIn_0.3s_ease-out]"
                         >
                             <div className="flex items-center gap-2">
                                 <i className="fa-duotone fa-regular fa-envelope text-base-content/30 text-xs" />

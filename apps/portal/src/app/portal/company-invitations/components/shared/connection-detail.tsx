@@ -181,31 +181,6 @@ export function ConnectionDetail({
                     )}
                 </div>
 
-                {/* Permissions */}
-                <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
-                        Permissions
-                    </h3>
-                    <div className="flex items-center gap-3 text-sm">
-                        <i
-                            className={`fa-duotone fa-regular ${invitation.can_manage_company_jobs ? "fa-check-circle text-success" : "fa-times-circle text-base-content/30"}`}
-                        />
-                        <span className="text-base-content/75">
-                            Can manage company jobs
-                        </span>
-                    </div>
-                    {invitation.can_manage_company_jobs && (
-                        <div className="p-3 border-2 border-success/20 mt-3">
-                            <div className="text-sm text-base-content/70">
-                                <i className="fa-duotone fa-regular fa-info-circle mr-1 text-success" />
-                                {isCompanyUser
-                                    ? "This recruiter can create and edit job postings for your company."
-                                    : "You can create and edit job postings for this company."}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
                 {/* Termination Reason */}
                 {invitation.status === "terminated" &&
                     invitation.termination_reason && (

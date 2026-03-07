@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-}
+import { useScrollReveal } from "@splits-network/basel-ui";
 
 /* --- Data ----------------------------------------------------------------- */
 
@@ -197,46 +191,7 @@ export default function NotificationsOne() {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
     };
 
-    useGSAP(
-        () => {
-            if (!mainRef.current) return;
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-                return;
-            const $ = (s: string) => mainRef.current!.querySelectorAll(s);
-            const $1 = (s: string) => mainRef.current!.querySelector(s);
-            const tl = gsap.timeline({ defaults: { ease: "power3.out", clearProps: "transform" } });
-            tl.fromTo(
-                $1(".notif-kicker"),
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5 },
-            )
-                .fromTo(
-                    $(".notif-title-word"),
-                    { opacity: 0, y: 60, rotateX: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                    },
-                    "-=0.3",
-                )
-                .fromTo(
-                    $1(".notif-desc"),
-                    { opacity: 0, y: 15 },
-                    { opacity: 1, y: 0, duration: 0.5 },
-                    "-=0.4",
-                )
-                .fromTo(
-                    $1(".notif-content"),
-                    { opacity: 0, y: 30 },
-                    { opacity: 1, y: 0, duration: 0.6 },
-                    "-=0.2",
-                );
-        },
-        { scope: mainRef },
-    );
+    useScrollReveal(mainRef);
 
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
@@ -251,18 +206,18 @@ export default function NotificationsOne() {
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                         <div className="max-w-3xl">
-                            <p className="notif-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 opacity-0">
+                            <p className="notif-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 scroll-reveal fade-up">
                                 Activity
                             </p>
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.92] tracking-tight mb-4">
-                                <span className="notif-title-word inline-block opacity-0">
+                                <span className="notif-title-word inline-block scroll-reveal hero-word">
                                     Your
                                 </span>{" "}
-                                <span className="notif-title-word inline-block opacity-0 text-primary">
+                                <span className="notif-title-word inline-block scroll-reveal hero-word text-primary">
                                     notifications.
                                 </span>
                             </h1>
-                            <p className="notif-desc text-base text-neutral-content/50 max-w-xl opacity-0">
+                            <p className="notif-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
                                 Stay on top of placements, messages, and
                                 marketplace activity.
                             </p>
@@ -316,7 +271,7 @@ export default function NotificationsOne() {
             </section>
 
             {/* Notifications List */}
-            <section className="notif-content opacity-0 container mx-auto px-6 lg:px-12 py-10 lg:py-14">
+            <section className="notif-content scroll-reveal fade-up container mx-auto px-6 lg:px-12 py-10 lg:py-14">
                 <div className="max-w-3xl mx-auto">
                     {filtered.length === 0 ? (
                         <div className="text-center py-16">
