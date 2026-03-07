@@ -1,225 +1,199 @@
 # Project Research Summary
 
-**Project:** Splits Network v5.0 -- Custom GPT (Applicant.Network)
-**Domain:** Custom GPT with Actions backend for a recruiting marketplace (candidate-facing)
-**Researched:** 2026-02-13
-**Confidence:** MEDIUM-HIGH
+**Project:** Splits Network v9.0 -- Video Interviewing with LiveKit
+**Domain:** Real-time video interviewing for split-fee recruiting marketplace
+**Researched:** 2026-03-07
+**Confidence:** HIGH (stack verified via npm; architecture verified against codebase; features well-understood domain)
 
 ## Executive Summary
 
-The v5.0 Custom GPT milestone requires building a `gpt-service` microservice that serves two purposes: (1) acting as an OAuth2 authorization server so OpenAI's ChatGPT can authenticate Applicant.Network candidates, and (2) providing GPT-optimized API endpoints for job search, application management, and resume analysis. The critical insight is that this service is a **translation layer**, not new domain logic. All underlying capabilities (job search with full-text search, AI fit analysis, application management, RBAC) already exist in ats-service and ai-service. The work is bridging OpenAI's GPT Actions protocol with these existing services while maintaining security and usability.
+Video interviewing is a well-understood domain in recruiting technology, and the recommended approach is to self-host LiveKit (an open-source WebRTC SFU) on the existing AKS Kubernetes cluster. This gives full data control, zero per-minute API costs, and leverages existing infrastructure (Redis, RabbitMQ, NGINX ingress, cert-manager). A new `video-service` microservice (port 3019) handles interview scheduling, LiveKit token issuance, and recording orchestration, while LiveKit handles all media routing, TURN/STUN negotiation, and recording via its Egress service. The frontend uses LiveKit's official React component library, which is compatible with React 19.
 
-The recommended approach is hand-rolled OAuth2 routes (not a library) since there is exactly one client (OpenAI) and one grant type (authorization code). The service follows existing V2 patterns: Fastify, direct Supabase queries, `shared-access-context` for RBAC, and RabbitMQ events for observability. Only one genuinely new dependency is needed: `@fastify/formbody` for parsing the OAuth token endpoint's `application/x-www-form-urlencoded` body. Everything else already exists in the monorepo. GPT access tokens should be opaque strings (not JWTs), validated via hashed database lookup, because instant revocation matters more than stateless verification at GPT request volumes.
+The core competitive advantage is integration depth: unlike Greenhouse and Lever (which rely on external Zoom/Teams links), Splits Network will offer native in-app video with server-side recording, AI transcription via the existing ai-service, and automatic posting of interview summaries as application notes. The user never leaves the platform. Most enterprise ATS competitors do not have this. BreezyHR is the closest competitor with native video but lacks AI-powered transcription and summarization.
 
-The primary risks are: (1) the OAuth2 token exchange failing silently because the project's `{ data: ... }` response envelope breaks the OAuth2 spec (token endpoint must return bare `{ access_token, token_type, ... }`), (2) the OpenAPI schema being rejected by GPT Actions' strict parser due to missing response schemas or unsupported features, and (3) cross-user data leakage if `resolveAccessContext` is not enforced on every endpoint. All three risks have clear mitigations. The secondary risk is that OpenAI-specific behaviors (timeout limits, PKCE requirement, callback URL format) could not be verified against current documentation and must be validated by creating a minimal GPT in GPT Builder before writing production code.
+The primary risks are infrastructure-related: (1) UDP port exposure on AKS for WebRTC media requires careful LoadBalancer or hostNetwork configuration, (2) LiveKit Egress is resource-intensive (headless Chrome) and can silently drop recordings if under-resourced, and (3) corporate firewalls block UDP, so TURN on TCP 443 must be enabled from day one. These are all solvable with proper K8s configuration but represent the highest-complexity work in the project. The magic link token system for candidate access is the primary security design concern -- it must use a two-step exchange pattern (DB token to LiveKit JWT) rather than embedding LiveKit tokens directly in URLs.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The gpt-service requires almost no new infrastructure. It plugs into the existing Fastify + Supabase + Clerk ecosystem with minimal additions.
+The stack is additive -- no changes to the existing platform. Two new npm packages for the backend (`livekit-server-sdk@2.15.0`, `@azure/storage-blob@12.31.0`) and three for the frontend (`@livekit/components-react@2.9.20`, `livekit-client@2.17.2`, `@livekit/components-styles@1.2.0`). Two new K8s deployments (LiveKit Server, LiveKit Egress). All other capabilities (transcription, summarization, email, calendar) use existing services.
 
-**New dependency (genuinely new):**
-- `@fastify/formbody` ^8.0.2: Parse `application/x-www-form-urlencoded` bodies -- OAuth2 token endpoint requires this content type per RFC 6749
+**Core technologies:**
+- **LiveKit Server (self-hosted on AKS):** WebRTC SFU for video/audio routing -- zero per-minute costs, full data sovereignty, built-in TURN server
+- **LiveKit Egress (self-hosted):** Server-side recording via headless Chrome compositing to Azure Blob Storage -- independent of client state, reliable MP4 output
+- **livekit-server-sdk@2.15.0:** Node.js SDK for room management and JWT token generation -- the video-service's interface to LiveKit
+- **@livekit/components-react@2.9.20:** Pre-built React video UI components (VideoConference, ControlBar, ParticipantTile) -- compatible with React 19, style with Tailwind/DaisyUI
+- **Azure Blob Storage:** Recording storage with SAS token access, lifecycle management for cost control -- native to AKS infrastructure
+- **OpenAI Whisper (via existing ai-service):** Batch transcription of recordings -- no new dependency, reuses existing openai SDK
 
-**Reused from monorepo (already in other services):**
-- `jsonwebtoken` ^9.0.3: Available for token signing if needed; already in api-gateway
-- `uuid`: Generate authorization codes and token IDs; already in identity-service
-- `@clerk/backend`: Validate Clerk sessions during OAuth callback; already in identity-service
-- All shared packages (`shared-config`, `shared-fastify`, `shared-logging`, `shared-types`, `shared-access-context`)
-
-**What NOT to add:**
-- `@fastify/oauth2`: Wrong tool -- this is an OAuth2 CLIENT library, not a provider. Already unused in api-gateway (listed but never imported).
-- `@jmondi/oauth2-server` or `@node-oauth/oauth2-server`: Over-engineered for single-client use case. Library interfaces assume multiple clients with varying grants and scopes.
-- Redis for token storage: Tokens need durable storage with revocation tracking, not ephemeral cache. Consistent with "single Supabase Postgres database" rule.
-- `passport.js` or `@fastify/passport`: Session-based middleware, wrong paradigm for stateless token auth.
-- `openai` npm package: gpt-service RECEIVES calls from GPT, it does not CALL OpenAI API. That package belongs in ai-service.
-- YAML parsing library: Defer unless JSON schema conversion is actually needed. Serve schema as raw text.
-- RSA/JWKS signing infrastructure: HS256 or opaque tokens are sufficient when issuer and verifier are the same system.
+**Critical version notes:** livekit-client@2.17.2 is a strict peer dependency of @livekit/components-react@2.9.20. Node 22 (current Docker base) is compatible with all packages.
 
 ### Expected Features
 
-**Must have (table stakes -- GPT is non-functional without these):**
-- TS-1: OpenAPI 3.0.1 Action Schema -- the contract with OpenAI, must include operationIds and full response schemas
-- TS-2: OAuth2 Authorization Code Provider -- enables all authenticated features (3 endpoints: authorize, callback, token)
-- TS-3: Job Search via structured parameters -- primary use case, works without auth for public jobs
-- TS-4: Application Status Lookup -- core personalized feature with human-readable stage labels
-- TS-5: Application Submission with two-phase confirmation -- core write action, defense-in-depth safety
-- TS-6: GPT Instructions Document -- behavioral configuration defining personality, capabilities, and constraints
-- TS-7: GPT-Friendly Error Responses -- standard error codes with human-readable messages (not stack traces)
-- TS-8: Per-User Data Isolation -- security fundamental via resolveAccessContext, candidate-only scope enforcement
-- TS-9: GPT-Specific Rate Limiting -- per-user throttle tiers, per-endpoint limits for expensive operations
+**Must have (table stakes -- P1 for launch):**
+- 1:1 video calls with basic controls (mute, camera, leave, device selection)
+- Interview scheduling with Google Calendar sync (enhance existing `schedule-interview-modal.tsx`)
+- Magic link join for candidates (no account required)
+- In-app join for authenticated recruiters/hiring managers
+- Server-side recording with playback
+- Waiting room / lobby
+- Interview status tracking (scheduled, in_progress, completed, cancelled, no_show)
+- Email notifications (confirmation, 24h reminder, cancellation)
+- Stage-triggered scheduling (moving to "interview" stage prompts scheduling)
+- Interview section on application detail page
 
-**Should have (differentiators -- high value, low-medium complexity):**
-- DIFF-1: Resume Analysis and Job Fit Scoring -- "killer feature" using existing ai-service pipeline, returns fit score + matched/missing skills
-- DIFF-2: Job Detail Deep Dive -- very low complexity wrapper around existing `findJob()` with include params
-- DIFF-6: Pre-Screen Question Answering -- free if DIFF-2 and TS-5 are built (answers submitted with application)
+**Should have (differentiators -- P2 post-launch):**
+- AI transcription of recordings (via Whisper)
+- AI interview summary auto-posted as application note
+- Panel interviews (3+ participants)
+- Screen sharing
+- Pre-call device check
+- Cancel/reschedule flow with calendar updates
+- Interviewer notes during call
+- Dedicated interviews tab on application detail
 
-**Defer to post-MVP:**
-- DIFF-3: Smart Job Recommendations -- high complexity, needs embedding/matching design work
-- DIFF-4: Conversational Application Builder -- primarily GPT Instructions optimization, not backend work
-- DIFF-5: Application Progress Notifications -- requires "last interaction" tracking, nice but not critical
+**Defer (v2+):**
+- Interview scorecards / structured evaluation
+- Live captions (real-time STT)
+- Self-service scheduling links (Calendly-style)
+- Interview analytics dashboard
+- Candidate interview prep page
 
-**Anti-features (explicitly do NOT build):**
-- Server-side NLP/intent parsing -- the GPT IS the NLP layer; adding a second creates double-interpretation errors
-- Raw internal API response passthrough -- create GPT-specific DTOs with human-readable values
-- Recruiter/admin features -- candidate-only scope for v5.0, recruiter GPT is a separate future milestone
-- File upload through GPT Actions -- unreliable; use candidate's already-uploaded resumes
-- Autonomous multi-step workflows -- violates confirmation safety pattern
-- GPT response caching -- stale data is worse than slight latency at this scale
-- Custom chat history/memory -- redundant with ChatGPT's built-in memory, creates privacy concerns
+**Explicitly do NOT build (anti-features):**
+- One-way/async video interviews (candidates hate them, 30-50% drop-off increase)
+- Custom WebRTC infrastructure (multi-year undertaking)
+- Real-time AI coaching during interviews (ethically questionable, legally risky)
+- Built-in whiteboard/code editor (separate product category)
 
 ### Architecture Approach
 
-The gpt-service is a new Fastify microservice that sits behind the api-gateway with a separate auth path. GPT requests flow: ChatGPT -> NGINX -> api-gateway (skips Clerk auth for `/api/v1/gpt/*`) -> gpt-service (validates its own opaque tokens via hashed DB lookup). The gpt-service queries Supabase directly (no HTTP calls between services, per architecture rules) and uses `resolveAccessContext` for RBAC, but forces candidate-only scope regardless of the user's actual roles. Two auth systems coexist but never overlap: Clerk JWTs for portal/candidate app, GPT opaque tokens for ChatGPT.
+The architecture follows the established Splits Network pattern: frontend calls api-gateway, which proxies to video-service, which manages interview sessions in Supabase and issues LiveKit access tokens. The critical architectural insight is that LiveKit is a standalone media server that frontends connect to directly (like Clerk for auth) -- media never flows through api-gateway or video-service. video-service is a session orchestrator, not a media proxy. Recording happens via LiveKit Egress (a separate K8s deployment) which outputs to Azure Blob Storage, triggering RabbitMQ events that ai-service consumes for transcription and summarization.
 
 **Major components:**
+1. **video-service** (new Fastify microservice, port 3019) -- interview CRUD, LiveKit token generation, recording orchestration, webhook receiver
+2. **LiveKit Server** (K8s deployment, hostNetwork) -- WebRTC SFU, media routing, TURN/STUN, room management
+3. **LiveKit Egress** (K8s deployment, dedicated resources) -- server-side recording via headless Chrome, outputs MP4 to Azure Blob Storage
+4. **video-ui package** (`packages/video-ui/`) -- shared React components for video room (pre-join, in-call, controls)
+5. **Database tables** -- `interviews`, `interview_participants`, `interview_recordings`, `interview_transcripts`, `interview_analyses`
 
-1. **OAuth2 routes** (`/oauth/authorize`, `/oauth/callback`, `/oauth/token`) -- Account linking flow that bridges Clerk identity with GPT tokens. Authorize redirects to Clerk login, callback issues authorization code, token endpoint exchanges code for access/refresh tokens.
-2. **GPT auth middleware** -- Validates opaque bearer tokens via SHA-256 hashed DB lookup, resolves access context, enforces candidate-only scope. Every request goes through this.
-3. **GPT API routes** (`/api/v1/gpt/jobs`, `/api/v1/gpt/applications`, `/api/v1/gpt/resume/analyze`) -- GPT-optimized endpoints returning human-readable DTOs. Flat structures, no UUIDs in display fields, relative dates, enum-to-label translation.
-4. **OpenAPI schema server** -- Static YAML served at `/api/v1/gpt/openapi.yaml`, hand-crafted for GPT Actions requirements with detailed descriptions, operationIds, and `x-openai-isConsequential` annotations.
-5. **API gateway modifications** -- Auth bypass for GPT routes, proxy registration to gpt-service, GPT-specific rate limit tier keyed on userId (not token suffix).
-
-**Key architectural decisions:**
-- **Opaque tokens over JWTs** -- instant revocation, no signing key infrastructure, DB lookup is fast enough at GPT scale
-- **`/api/v1/gpt/*` namespace** -- separate from `/api/v2/` for independent versioning, clean auth boundary, isolated OpenAPI schema
-- **Direct DB access** -- follows "no HTTP between services" rule; gpt-service has its own repository layer reading existing tables
-- **Static OpenAPI schema** -- hand-crafted, not auto-generated, because it is a contract with OpenAI requiring specific descriptions and annotations
-
-**New database tables (5):**
-- `gpt_authorization_codes` -- short-lived (10 min), single-use, plaintext acceptable
-- `gpt_refresh_tokens` -- long-lived (30 days), SHA-256 hashed, rotation on use
-- `gpt_sessions` -- OAuth flow state management (15 min TTL)
-- `gpt_oauth_events` -- audit log for all OAuth and action events
-- `oauth_clients` -- registered OAuth clients (just the one GPT, but extensible)
+**Modified existing components:**
+- api-gateway: add `video` ServiceName, register proxy routes, skip auth for magic link + webhook routes
+- shared-types: add interview event types and status enums
+- portal app: add interview UI pages
+- candidate app: add magic link join page
+- K8s ingress: add LiveKit subdomain (`livekit.splits.network`)
 
 ### Critical Pitfalls
 
-1. **OAuth2 response envelope conflict** -- The project wraps ALL responses in `{ data: ... }` but OAuth2 requires bare `{ access_token, token_type, expires_in, refresh_token }`. **Prevention:** Explicitly exclude OAuth endpoints from the gateway's response wrapper. The gpt-service OAuth routes must send raw RFC 6749 responses. Test token exchange with a mock OAuth client before connecting to ChatGPT.
+1. **WebRTC media blocked by corporate firewalls** -- Enable TURN on TCP 443 from day one with a dedicated subdomain (`turn.splits.network`). Test from a restrictive network before launch. Without this, calls "connect" (signaling works) but show black screen (media fails silently).
 
-2. **OpenAPI schema rejected by GPT Actions parser** -- GPT Actions has a stricter parser than standard validators. Missing `operationId`, empty response schemas, deep `$ref` chains, or OpenAPI 3.1 features cause silent failures. **Prevention:** Use 3.0.1 only, add descriptions on every operation and parameter, inline schemas (max 2-level `$ref`), test in GPT Builder before writing backend code. The existing starter schema has empty response schemas -- these MUST be expanded.
+2. **LiveKit Egress silently drops recordings** -- Run Egress on dedicated node pool with guaranteed resources (2 CPU, 4GB RAM per pod). Set `EGRESS_LIMIT` env var. Subscribe to Egress webhooks and build recording verification (check file size > 0). Without this, corrupted/missing recordings are discovered days later.
 
-3. **Cross-user data leakage** -- If `resolveAccessContext` is skipped or GPT tokens grant broader permissions than intended, User A sees User B's data. **Prevention:** Every endpoint calls `resolveAccessContext`, every query filters by `candidateId`, GPT tokens force candidate-only scope regardless of user's actual roles. Add explicit tenant isolation tests (User A cannot access User B's resources via any endpoint).
+3. **Magic link tokens create security holes** -- Use two-step flow: DB access token in magic link, exchanged for LiveKit JWT at join time. Never embed LiveKit tokens in URLs. Bind tokens to participant identity, set short expiry (interview duration + 30 min buffer), make single-use.
 
-4. **Write-action confirmation bypass** -- The GPT may auto-populate `confirmed: true` without showing users a summary. The GPT Instructions are soft guidance, not hard enforcement. **Prevention:** Two-call pattern enforced server-side: first call always returns CONFIRMATION_REQUIRED with rich summary data (job title, company, resume used), second call with `confirmed: true` executes. Monitor the CONFIRMATION_REQUIRED-to-submission ratio. Consider a `confirmation_token` nonce.
+4. **LiveKit Server advertises wrong IP on AKS** -- Use `hostNetwork: true` with `rtc.use_external_ip: true`. Verify ICE candidates contain public IP, not pod IP (10.x.x.x). Without this, signaling works but media fails.
 
-5. **Clerk/GPT token lifecycle mismatch** -- GPT tokens remain valid after Clerk sessions expire or users are deactivated. **Prevention:** Short-lived access tokens (1 hour), user-exists check on every request, Clerk webhook integration (`user.deleted`, `user.updated`) to revoke all GPT tokens for affected users. Extend existing identity-service webhook handler.
+5. **Recording storage costs spiral without lifecycle management** -- Define 90-day retention policy before building recording. Configure Azure Blob lifecycle rules (Hot -> Cool after 30 days, Archive after 90 days, delete after retention period). A 60-minute 720p recording is 500MB-1GB.
 
 ## Implications for Roadmap
 
-Based on dependency analysis, architecture patterns, and risk ordering, the suggested structure is 6 phases:
+Based on research, suggested phase structure:
 
-### Phase 1: Service Scaffold and Database Schema
-**Rationale:** Everything depends on the gpt-service existing and having database tables. This is zero-risk foundational work that unblocks all subsequent phases.
-**Delivers:** New `gpt-service` Fastify microservice (scaffold, health check, build pipeline, K8s manifest). Database migration for all 5 new tables. Shared types for GPT domain in `shared-types`. Service registration in api-gateway.
-**Addresses:** Service foundation, DB schema
-**Complexity:** Low
+### Phase 1: Infrastructure and Core Service
+**Rationale:** LiveKit deployment and video-service are prerequisites for everything else. Infrastructure is the highest-risk work and must be validated first. Firewall traversal (Pitfall 1) and IP advertisement (Pitfall 4) can only be verified with a running LiveKit instance.
+**Delivers:** LiveKit Server running on AKS with TURN on TCP 443, video-service scaffolded with interview CRUD, database migrations for all 5 tables, api-gateway integration, magic link token system designed and implemented
+**Addresses:** Interview status tracking, database schema, service skeleton, LiveKit K8s deployment
+**Avoids:** Pitfall 1 (TURN on TCP 443 from day one), Pitfall 4 (correct IP advertisement), Pitfall 3 (two-step token exchange)
+**Key decision:** hostNetwork vs Azure UDP LoadBalancer for LiveKit (recommend hostNetwork for Phase 1 simplicity)
 
-### Phase 2: OAuth2 Provider and API Gateway Integration
-**Rationale:** Authentication is the critical path -- every authenticated feature depends on OAuth working. This is the highest-risk phase and should be validated early. If OAuth fails with OpenAI, all subsequent phases are blocked.
-**Delivers:** Three OAuth endpoints (/authorize, /callback, /token), Clerk redirect-based authentication, token issuance with hashed storage, token refresh with rotation, api-gateway auth bypass for `/api/v1/gpt/*`, CORS configuration for ChatGPT origins, GPT-specific rate limit tier.
-**Addresses:** TS-2 (OAuth), TS-8 (Data Isolation foundation), TS-9 (Rate Limiting foundation)
-**Avoids:** Pitfall #1 (response envelope -- bare OAuth responses), Pitfall #5 (redirect URI mismatch), Pitfall #13 (CORS), Pitfall #14 (auth middleware rejection)
-**Complexity:** HIGH -- This is the hardest phase. Must resolve the Clerk redirect mechanism and validate against real GPT Builder.
+### Phase 2: Video Call Experience
+**Rationale:** With infrastructure validated, build the user-facing video experience. This is the core feature that makes the product usable. Pre-join device check (Pitfall 6) prevents support issues from day one.
+**Delivers:** Working 1:1 video calls, magic link join for candidates, in-app join for recruiters, waiting room/lobby, basic controls (mute, camera, leave, device selection), pre-join device check, video-ui shared package
+**Addresses:** Video room (P1), magic link join (P1), in-app join (P1), waiting room (P1), basic controls (P1)
+**Avoids:** Pitfall 6 (pre-join device check built early), Pitfall 9 (room lifecycle tied to interview lifecycle with empty_timeout and max_duration)
 
-### Phase 3: Read Endpoints
-**Rationale:** Read endpoints are safer, simpler, and deliver immediate user value. Building these before write endpoints lets the GPT be functional (even if read-only) while write safety patterns are perfected.
-**Delivers:** `GET /api/v1/gpt/jobs` (search with structured parameters), `GET /api/v1/gpt/jobs/:id` (details with requirements and pre-screen questions), `GET /api/v1/gpt/applications` (status with human-readable stage labels), `GET /api/v1/gpt/resumes` (list candidate resumes). GPT-friendly response DTOs.
-**Addresses:** TS-3 (Job Search), TS-4 (Application Status), TS-7 (Error Responses), DIFF-2 (Job Details)
-**Avoids:** Pitfall #3 (data leakage -- resolveAccessContext on every request), Pitfall #6 (NL mapping -- granular schema parameters with enum descriptions), Pitfall #10 (response format -- flat DTOs with human-readable values)
-**Complexity:** Low-Medium
+### Phase 3: Scheduling and Notifications
+**Rationale:** Scheduling builds on the existing `schedule-interview-modal.tsx` and Google Calendar integration. This phase connects the video infrastructure to the ATS workflow. Calendar event orphans (Pitfall 7) are the primary concern.
+**Delivers:** Enhanced scheduling modal creating interview DB records, calendar event creation with join links (store calendar_event_id), email notifications (confirmation + 24h reminder + cancellation), stage-triggered scheduling prompt, interview section on application detail page
+**Addresses:** Interview scheduling + calendar (P1), email notifications (P1), stage-triggered scheduling (P1), interview section on application detail (P1)
+**Avoids:** Pitfall 7 (store calendar_event_id, single mutation path, idempotent calendar operations)
 
-### Phase 4: Write Endpoints and AI Integration
-**Rationale:** Write actions require the confirmation safety pattern and build on read endpoints (need job details for confirmation summaries). Resume analysis depends on auth being solid.
-**Delivers:** `POST /api/v1/gpt/applications` (two-phase confirmation with rich summary), `POST /api/v1/gpt/resume/analyze` (AI fit scoring via existing pipeline), pre-screen question collection in application flow, duplicate application prevention.
-**Addresses:** TS-5 (Application Submission), DIFF-1 (Resume Analysis), DIFF-6 (Pre-Screen Q&A)
-**Avoids:** Pitfall #4 (confirmation bypass -- server-side two-call enforcement with dedup), Pitfall #5 (timeout -- async pattern or time budget for resume analysis)
-**Complexity:** Medium
+### Phase 4: Recording and Playback
+**Rationale:** Recording depends on stable video calls (Phase 2). Egress resource management (Pitfall 2) and storage costs (Pitfall 5) are the main concerns. Recording consent is a legal requirement that must be addressed before launch.
+**Delivers:** LiveKit Egress deployment with dedicated resources, server-side recording with consent mechanism, Azure Blob Storage with lifecycle policies, recording playback component, recording verification pipeline (file size > 0, duration check)
+**Addresses:** Recording (P1), recording playback (P1)
+**Avoids:** Pitfall 2 (dedicated node pool, resource limits, verification pipeline), Pitfall 5 (lifecycle rules from day one, 90-day retention policy)
 
-### Phase 5: OpenAPI Schema and GPT Configuration
-**Rationale:** The schema documents what was built in Phases 3-4. GPT Instructions require understanding all endpoints and flows. These cannot be finalized until endpoints are stable and tested.
-**Delivers:** Complete OpenAPI 3.0.1 YAML schema with all operations, parameters, response schemas, auth config, and `x-openai-isConsequential` annotations. Comprehensive GPT Instructions document. Schema serving endpoint. Custom GPT configuration in OpenAI platform.
-**Addresses:** TS-1 (OpenAPI Schema), TS-6 (GPT Instructions)
-**Avoids:** Pitfall #1 (schema rejected -- test every operationId in GPT Builder), Pitfall #11 (vague instructions -- comprehensive coverage of all scenarios), Pitfall #15 (schema drift -- validate schema against actual routes)
-**Complexity:** Medium
+### Phase 5: AI Transcription and Summarization
+**Rationale:** Transcription depends on recordings (Phase 4). This is the key differentiator vs competitors -- no major ATS has built-in AI transcription with auto-posted summaries. The async pipeline design (Pitfall 8) is critical.
+**Delivers:** Async transcription pipeline via ai-service consuming `recording.completed` RabbitMQ events, AI interview summary generation via GPT-4o-mini, auto-posting summaries as application notes (new `interview_summary` note type requiring migration), dead-letter queue for failed jobs
+**Addresses:** AI transcription (P2), AI summary + app note (P2)
+**Avoids:** Pitfall 8 (async job pipeline with dead-letter queue, progress tracking, retry with exponential backoff)
 
-### Phase 6: Production Hardening
-**Rationale:** Hardening should happen after core features work. Rate limit tuning requires real traffic patterns. Token lifecycle management needs end-to-end testing.
-**Delivers:** Tuned per-endpoint rate limits based on real usage, Clerk webhook integration for token revocation (user.deleted, user.updated), token cleanup cron job (expire old tokens/codes), audit log review, monitoring and alerting dashboards, privacy policy and terms of service pages.
-**Addresses:** TS-9 (Rate Limiting tuning), Pitfall #7 (token lifecycle), Pitfall #8 (rate limit conflicts), Pitfall #12 (legal URLs for GPT Store)
-**Complexity:** Medium
+### Phase 6: Panel Interviews and Polish
+**Rationale:** Multi-party calls are a distinct scaling concern (Pitfall 10). Build after 1:1 calls are stable and adopted. Screen sharing and cancel/reschedule flows round out the feature set.
+**Delivers:** Panel interview support (3-6 participants), screen sharing, cancel/reschedule flow with calendar event updates, interviewer notes during call, dedicated interviews tab on application detail
+**Addresses:** Panel interviews (P2), screen sharing (P2), cancel/reschedule (P2), interviewer notes (P2), dedicated interviews tab (P2)
+**Avoids:** Pitfall 10 (consistent participant identity, reconnection handling, late joiner support, max_participants with buffer)
 
 ### Phase Ordering Rationale
 
-- **Phase 1 before 2:** OAuth routes need database tables and service scaffold to exist.
-- **Phase 2 before 3:** Every authenticated endpoint depends on token validation working. Validate OAuth with real GPT Builder before investing in endpoint development.
-- **Phase 3 before 4:** Write endpoints need read data for confirmation summaries (job details for "Apply to Senior Engineer at Acme Corp?"). Read endpoints are also simpler to validate.
-- **Phase 5 after 3-4:** The OpenAPI schema must document actual, tested endpoints. Writing the schema before endpoints exist causes drift.
-- **Phase 6 last:** Hardening and tuning require the system to be functionally complete. Rate limits need real usage data.
+- **Infrastructure first** because every other phase depends on a working LiveKit deployment and video-service. This is also the highest-risk work (K8s networking, UDP exposure, firewall traversal). Fail fast on infrastructure.
+- **Video calls before scheduling** because you need to test the call experience before building the workflow around it. Scheduling without working calls is useless.
+- **Scheduling before recording** because scheduling creates the interview lifecycle that recording attaches to. Recording needs interview records to exist.
+- **Recording before AI** because transcription requires recordings as input. This is a hard sequential dependency.
+- **Panel interviews last** because they are a scaling concern on top of working 1:1 calls. The core 1:1 use case covers the majority of recruiting interviews.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 2 (OAuth):** HIGH priority. Must resolve: (a) Clerk redirect mechanism for OAuth callback -- how to redirect user to Clerk login and get proof of authentication back, (b) OpenAI's exact callback URL format, (c) whether PKCE is required, (d) `token_exchange_method` (basic vs post). **Recommend:** Create minimal GPT in GPT Builder with a single test endpoint to validate the full OAuth flow before writing production code.
-- **Phase 5 (OpenAPI Schema):** MEDIUM priority. Must verify: (a) `x-openai-isConsequential` flag behavior, (b) OpenAPI 3.0 vs 3.1 support, (c) action count limits, (d) response size limits.
+- **Phase 1:** LiveKit K8s deployment specifics -- UDP port exposure on AKS, hostNetwork vs LoadBalancer tradeoffs, LiveKit config file format, webhook setup. Verify against current LiveKit docs at https://docs.livekit.io.
+- **Phase 4:** LiveKit Egress Azure Blob Storage configuration -- whether S3-compat API works or needs native Azure config. Whisper API 25MB file size limit for long recordings (may need FFmpeg audio extraction). Recording consent legal requirements per jurisdiction.
+- **Phase 5:** Speaker diarization in Whisper output -- verify transcript attributes words to specific speakers, not just a wall of text. May need to use track-based audio export instead of composite recording audio.
 
-Phases with standard patterns (skip phase research):
-- **Phase 1 (Scaffold):** Standard Fastify service creation, follows existing service patterns exactly (copy ai-service structure).
-- **Phase 3 (Read Endpoints):** Thin wrappers around existing repository methods. V2 patterns well-documented in codebase.
-- **Phase 4 (Write Endpoints):** Confirmation pattern is well-designed in research. AI integration reuses existing pipeline.
-- **Phase 6 (Hardening):** Standard rate limiting, webhook handling, and deployment patterns.
+Phases with standard patterns (skip research-phase):
+- **Phase 2:** LiveKit React components are well-documented with examples. Standard WebRTC UI patterns. @livekit/components-react provides most of the UI out of the box.
+- **Phase 3:** Scheduling and notifications follow existing codebase patterns exactly (RabbitMQ events, Resend templates, Google Calendar integration via combo provider). Enhancement of existing `schedule-interview-modal.tsx`.
+- **Phase 6:** Panel support is a room capacity configuration, not a fundamentally different architecture. Screen sharing is a standard LiveKit feature.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Only 1 new dependency. Everything else reused from monorepo. Hand-rolled OAuth justified by single-client scope. |
-| Features | MEDIUM-HIGH | Table stakes and differentiators clearly mapped to existing infrastructure. OpenAI-specific constraints (action limits, file upload, timeout) from training data, not live-verified. |
-| Architecture | HIGH | Direct codebase analysis of api-gateway auth, routing, CORS, and rate limiting. All integration points verified against actual code. Service patterns well-established. |
-| Pitfalls | MEDIUM-HIGH | Codebase-specific pitfalls (response envelope, auth middleware, CORS, rate limiter key) are HIGH confidence from code inspection. OpenAI-specific pitfalls (timeout limits, parser behavior, PKCE) are MEDIUM from training data. |
+| Stack | HIGH | npm versions verified via registry. Peer dependencies confirmed compatible with React 19 and Node 22. All integration points verified against existing codebase. |
+| Features | HIGH | Video interviewing is a well-understood recruiting domain with clear industry precedent. Feature priorities validated against competitor analysis (Greenhouse, Lever, BreezyHR, Spark Hire). |
+| Architecture | HIGH/MEDIUM | Service architecture HIGH (follows existing V2 patterns exactly, verified against codebase). LiveKit K8s deployment specifics MEDIUM (based on training data, verify against current docs). |
+| Pitfalls | MEDIUM | WebRTC networking pitfalls are well-documented (HIGH). LiveKit-specific config details based on training data through May 2025 (MEDIUM). Verify LiveKit webhook format, Egress config, and TURN setup against current docs before implementation. |
 
-**Overall confidence:** MEDIUM-HIGH
+**Overall confidence:** HIGH -- the domain is well-understood, the stack additions are minimal and verified, and the architecture follows established codebase patterns. The main uncertainty is LiveKit K8s deployment specifics which should be validated during Phase 1.
 
 ### Gaps to Address
 
-1. **Clerk redirect-based authentication for OAuth callback**: The exact mechanism for redirecting users to Clerk, authenticating them, and getting proof back to the OAuth callback needs investigation. Options include Clerk hosted sign-in page with redirect, Clerk session cookies, or a lightweight candidate app page. **Resolution:** Investigate during Phase 2 planning; consult Clerk docs at https://clerk.com/docs.
-
-2. **OpenAI GPT Actions current documentation**: `x-openai-isConsequential` behavior, exact OAuth callback URL format, PKCE requirement, supported OpenAPI versions, action timeout limits, and token refresh behavior were not verified (WebSearch unavailable). **Resolution:** Consult https://platform.openai.com/docs/actions before Phase 2 begins. Create minimal GPT in Builder to test empirically.
-
-3. **Token format disagreement (JWT vs opaque)**: STACK.md recommends JWT access tokens for stateless gateway verification. ARCHITECTURE.md recommends opaque tokens for instant revocation. **Resolution:** Use opaque tokens. At GPT request volumes (tens per user per session), DB lookup is not a bottleneck. Instant revocation is more valuable. If scale demands it later, add Redis token cache with 30s TTL.
-
-4. **OpenAI token refresh behavior**: How frequently OpenAI refreshes tokens, whether it handles refresh token rotation, and error recovery on failed refreshes are unknown. **Resolution:** Test empirically during Phase 2 implementation.
-
-5. **ChatGPT CORS origins**: Exact domains (`chat.openai.com`, `chatgpt.com`, others) need confirmation. Most GPT Action calls may be server-to-server, making CORS only relevant for OAuth redirect flow. **Resolution:** Verify during Phase 2; start permissive, tighten after testing.
+- **LiveKit Helm chart vs raw YAML:** Project uses raw K8s YAML, not Helm. Decide whether to adopt Helm for LiveKit only or translate chart values into raw YAML. Raw YAML is more consistent with existing patterns but Helm simplifies LiveKit-specific config. **Resolution:** Investigate during Phase 1 planning.
+- **UDP port exposure on Azure AKS:** Exact method for exposing UDP through Azure LoadBalancer needs AKS-specific investigation. **Resolution:** Test hostNetwork first during Phase 1; migrate to UDP LoadBalancer if scaling demands.
+- **LiveKit Egress to Azure Blob Storage:** Whether Egress can write via S3-compat API or needs native Azure handler. **Resolution:** Verify against current Egress docs during Phase 4 planning.
+- **Whisper API 25MB file limit:** Long interviews (60+ min) may produce recordings exceeding this. **Resolution:** Plan for FFmpeg audio extraction as fallback in Phase 5. Whisper accepts video files directly for shorter recordings.
+- **Recording consent legal requirements:** Two-party consent laws vary by jurisdiction. **Resolution:** Legal review needed before Phase 4 recording feature launches. Build consent mechanism regardless.
+- **LiveKit webhook payload format:** Exact event names and payload structures should be verified against current LiveKit docs. **Resolution:** Validate during Phase 1 implementation when LiveKit Server is running.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `services/api-gateway/src/index.ts` -- Auth hook patterns (lines 283-377), rate limiter config (lines 178-200), CORS config (lines 38-43), service registry
-- `services/api-gateway/src/auth.ts` -- Clerk JWT verification, multi-client auth loop
-- `packages/shared-access-context/src/index.ts` -- resolveAccessContext, role extraction, candidateId resolution (line 142)
-- `services/ats-service/src/v2/` -- V2 service pattern (jobs, applications, candidates repositories with search, pagination, role-based filtering)
-- `services/ai-service/src/v2/reviews/` -- AI review pipeline (fit analysis, resume text extraction)
-- `docs/gpt/01_PRD_Custom_GPT.md` through `05_GPT_Instructions_Template.md` -- Existing GPT documentation
-- `.planning/PROJECT.md` -- v5.0 milestone context and constraints
-- npm registry (verified) -- @fastify/formbody 8.0.2, @jmondi/oauth2-server 4.2.2, @node-oauth/oauth2-server 5.2.1, @fastify/oauth2 8.2.0, jsonwebtoken 9.0.3
+- npm registry: livekit-server-sdk@2.15.0 (published 2025-12-10), livekit-client@2.17.2 (2026-02-19), @livekit/components-react@2.9.20 (2026-02-19), @azure/storage-blob@12.31.0 -- versions, peer deps, publication dates verified
+- Existing codebase: service patterns (V2 architecture), K8s manifests (deployment patterns, port allocations), api-gateway structure (ServiceName union, auth hooks, proxy registration), shared-types enums, ai-service architecture (openai SDK, RabbitMQ consumers), schedule-interview-modal.tsx, integration-service Google Calendar combo provider, notification-service Resend templates
 
 ### Secondary (MEDIUM confidence)
-- OpenAI GPT Actions OAuth2 specification -- training data through May 2025
-- OpenAPI 3.0 specification requirements for GPT Actions
-- GPT parameter mapping and response interpretation behavior
-- RFC 6749 (OAuth 2.0 Authorization Code Grant)
-- RFC 7636 (PKCE -- may be required by GPT Actions)
+- LiveKit architecture (SFU model, Egress behavior, TURN embedding, Redis requirement, webhook system) -- training data through May 2025, verify against https://docs.livekit.io
+- Competitor feature sets (Greenhouse, Lever, BreezyHR, Spark Hire) -- training data, not verified against current product pages
+- WebRTC networking fundamentals (STUN/TURN/ICE) -- well-established protocol knowledge
 
-### Tertiary (LOW confidence -- needs validation before implementation)
-- GPT Actions HTTP timeout (~45 seconds, unverified)
-- OpenAPI 3.0 vs 3.1 requirement (recommend 3.0 to be safe)
-- Maximum ~30 operations per GPT (anecdotal)
-- Exact ChatGPT CORS origins (may have additional domains)
-- GPT Store review criteria (may have changed since May 2025)
-- `x-openai-isConsequential` exact behavior and enforcement
+### Tertiary (LOW confidence)
+- LiveKit Helm chart configuration specifics -- inferred, needs verification
+- Azure Blob Storage lifecycle rule syntax for Egress output -- general knowledge, verify Azure docs
+- Recording consent legal requirements by jurisdiction -- general knowledge, requires legal counsel
+- LiveKit Egress resource requirements (headless Chrome) -- based on training data, validate during staging deployment
 
 ---
-*Research completed: 2026-02-13*
+*Research completed: 2026-03-07*
 *Ready for roadmap: yes*
