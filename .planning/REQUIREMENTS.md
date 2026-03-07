@@ -98,13 +98,45 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| INFRA-01 | Phase 33 | Pending |
+| INFRA-02 | Phase 33 | Pending |
+| INFRA-03 | Phase 33 | Pending |
+| INFRA-04 | Phase 33 | Pending |
+| INFRA-05 | Phase 33 | Pending |
+| INFRA-06 | Phase 33 | Pending |
+| ROOM-01 | Phase 34 | Pending |
+| ROOM-02 | Phase 34 | Pending |
+| ROOM-03 | Phase 38 | Pending |
+| ROOM-04 | Phase 38 | Pending |
+| ROOM-05 | Phase 34 | Pending |
+| ROOM-06 | Phase 34 | Pending |
+| SCHED-01 | Phase 35 | Pending |
+| SCHED-02 | Phase 35 | Pending |
+| SCHED-03 | Phase 35 | Pending |
+| SCHED-04 | Phase 35 | Pending |
+| JOIN-01 | Phase 34 | Pending |
+| JOIN-02 | Phase 34 | Pending |
+| JOIN-03 | Phase 34 | Pending |
+| REC-01 | Phase 36 | Pending |
+| REC-02 | Phase 36 | Pending |
+| REC-03 | Phase 36 | Pending |
+| AI-01 | Phase 37 | Pending |
+| AI-02 | Phase 37 | Pending |
+| AI-03 | Phase 37 | Pending |
+| NOTIF-01 | Phase 35 | Pending |
+| NOTIF-02 | Phase 35 | Pending |
+| NOTIF-03 | Phase 35 | Pending |
+| NOTIF-04 | Phase 35 | Pending |
+| INT-01 | Phase 38 | Pending |
+| INT-02 | Phase 38 | Pending |
+| INT-03 | Phase 36 | Pending |
+| INT-04 | Phase 38 | Pending |
 
 **Coverage:**
-- v9.0 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30
+- v9.0 requirements: 33 total
+- Mapped to phases: 33
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-07*
-*Last updated: 2026-03-07 after initial definition*
+*Last updated: 2026-03-07 after roadmap creation (all 33 requirements mapped)*
