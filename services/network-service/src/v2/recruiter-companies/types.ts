@@ -46,6 +46,7 @@ export interface RecruiterCompanyCreate {
     relationship_type: 'sourcer' | 'recruiter';
     permissions?: RecruiterCompanyPermissions;
     invited_by?: string;
+    request_message?: string;
 }
 
 export interface RecruiterCompanyUpdate {
@@ -69,6 +70,7 @@ export interface RecruiterCompanyFilters {
 }
 
 export interface InviteRecruiterRequest {
+    relationship_type?: 'sourcer' | 'recruiter';
     recruiter_id: string;
     company_id: string;
     permissions?: RecruiterCompanyPermissions;

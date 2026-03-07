@@ -31,9 +31,13 @@ export interface InvitationRelationship {
     request_message?: string;
     terms_acknowledged_at?: string;
     created_at: string;
+    invitation_message?: string;
     recruiter: {
         id: string;
         user_id: string;
+        bio?: string;
+        tagline?: string;
+        phone?: string;
         user: {
             name: string;
             email: string;
@@ -44,6 +48,8 @@ export interface InvitationRelationship {
         name: string;
         industry?: string;
         headquarters_location?: string;
+        description?: string;
+        website?: string;
     };
 }
 

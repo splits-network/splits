@@ -12,6 +12,7 @@ export interface ConnectionRequestedData {
     companyName: string;
     recruiterName: string;
     recruiterEmail?: string;
+    relationshipType?: 'recruiter' | 'sourcer';
     message?: string;
     connectionUrl: string;
     source?: EmailSource;
@@ -22,10 +23,12 @@ export function connectionRequestedEmail(data: ConnectionRequestedData): string 
         ? `<strong>${data.recruiterName}</strong> (${data.recruiterEmail})`
         : `<strong>${data.recruiterName}</strong>`;
 
+    const roleLabel = data.relationshipType === 'sourcer' ? 'sourcer' : 'recruiting partner';
+
     const content = `
 ${heading({ level: 1, text: 'Recruiter representation request' })}
 
-${paragraph(`${recruiterIdentifier} is requesting to <strong>represent ${data.companyName}</strong> as a recruiting partner on Splits Network.`)}
+${paragraph(`${recruiterIdentifier} is requesting to <strong>represent ${data.companyName}</strong> as a ${roleLabel} on Splits Network.`)}
 
 ${alert({
         type: 'info',
@@ -44,7 +47,8 @@ ${infoCard({
         items: [
             { label: 'Recruiter', value: data.recruiterName },
             ...(data.recruiterEmail ? [{ label: 'Email', value: data.recruiterEmail }] : []),
-            { label: 'Requesting', value: 'To represent your company as a recruiting partner' },
+            { label: 'Role', value: data.relationshipType === 'sourcer' ? 'Sourcer' : 'Recruiter' },
+            { label: 'Requesting', value: `To represent your company as a ${roleLabel}` },
             { label: 'Status', value: 'Awaiting your review', highlight: true },
         ],
     })}
@@ -53,7 +57,7 @@ ${paragraph(`<strong>What happens if you accept:</strong><br/>• You set the pe
 
 ${button({
         href: data.connectionUrl,
-        text: 'Review & Respond \u2192',
+        text: 'Review & Respond →',
         variant: 'primary',
     })}
 
@@ -66,7 +70,7 @@ ${paragraph(`<em style="color: #71717a; font-size: 13px;">This notification was 
 
     return baseEmailTemplate({
         content,
-        preheader: `${data.recruiterName} is requesting to represent ${data.companyName} as a recruiter. Review and respond.`,
+        preheader: `${data.recruiterName} is requesting to represent ${data.companyName} as a ${roleLabel}. Review and respond.`,
         source: data.source || 'portal',
     });
 }

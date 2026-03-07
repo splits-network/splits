@@ -56,9 +56,10 @@ const PERMISSION_OPTIONS: PermissionOption[] = [
 
 interface PermissionConfiguratorProps {
     permissions: RecruiterCompanyPermissions;
-    onChange: (permissions: RecruiterCompanyPermissions) => void;
+    onChange?: (permissions: RecruiterCompanyPermissions) => void;
     recruiterName: string;
     disabled?: boolean;
+    readonly?: boolean;
 }
 
 export function PermissionConfigurator({
@@ -66,9 +67,10 @@ export function PermissionConfigurator({
     onChange,
     recruiterName,
     disabled = false,
+    readonly = false,
 }: PermissionConfiguratorProps) {
     const togglePermission = (key: keyof RecruiterCompanyPermissions) => {
-        onChange({ ...permissions, [key]: !permissions[key] });
+        onChange?.({ ...permissions, [key]: !permissions[key] });
     };
 
     const enabledCount = Object.values(permissions).filter(Boolean).length;
@@ -80,15 +82,54 @@ export function PermissionConfigurator({
                     <h3 className="text-sm font-black uppercase tracking-wider text-base-content/50">
                         Permissions for {recruiterName}
                     </h3>
-                    <p className="text-xs text-base-content/40 mt-1">
+                    <p className="text-sm text-base-content/40 mt-1">
                         {enabledCount} of {PERMISSION_OPTIONS.length} permissions
-                        enabled. You can change these at any time.
+                        enabled.{!readonly && " You can change these at any time."}
                     </p>
                 </div>
             </div>
             <div className="space-y-2">
                 {PERMISSION_OPTIONS.map((option) => {
                     const isEnabled = permissions[option.key];
+
+                    if (readonly) {
+                        return (
+                            <div
+                                key={option.key}
+                                className={`flex items-start gap-4 p-4 border ${
+                                    isEnabled
+                                        ? "border-primary/30 bg-primary/5"
+                                        : "border-base-300 bg-base-200"
+                                }`}
+                            >
+                                <i
+                                    className={`text-sm mt-1 ${
+                                        isEnabled
+                                            ? "fa-duotone fa-regular fa-circle-check text-success"
+                                            : "fa-duotone fa-regular fa-circle-xmark text-base-content/30"
+                                    }`}
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <i
+                                            className={`${option.icon} text-sm ${
+                                                isEnabled
+                                                    ? "text-primary"
+                                                    : "text-base-content/30"
+                                            }`}
+                                        />
+                                        <span className="text-sm font-bold">
+                                            {option.label}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-base-content/50 mt-1 leading-relaxed">
+                                        {option.description}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    }
+
                     return (
                         <label
                             key={option.key}
@@ -118,7 +159,7 @@ export function PermissionConfigurator({
                                         {option.label}
                                     </span>
                                 </div>
-                                <p className="text-xs text-base-content/50 mt-1 leading-relaxed">
+                                <p className="text-sm text-base-content/50 mt-1 leading-relaxed">
                                     {option.description}
                                 </p>
                             </div>

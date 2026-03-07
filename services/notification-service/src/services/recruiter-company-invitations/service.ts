@@ -82,18 +82,30 @@ export class RecruiterCompanyInvitationsEmailService {
         companyName: string;
         inviterName: string;
         personalMessage?: string;
+        relationshipType?: 'recruiter' | 'sourcer';
         invitationsLink: string;
+        permissions?: {
+            can_view_jobs?: boolean;
+            can_create_jobs?: boolean;
+            can_edit_jobs?: boolean;
+            can_submit_candidates?: boolean;
+            can_view_applications?: boolean;
+            can_advance_candidates?: boolean;
+        };
     }): Promise<void> {
         this.logger.info(
             { email: payload.email, companyName: payload.companyName },
             'Sending recruiter-company invitation email'
         );
 
-        const subject = `${payload.companyName} invited you to join their recruiting network`;
+        const roleLabel = payload.relationshipType === 'sourcer' ? 'sourcer' : 'recruiter';
+        const subject = `${payload.companyName} invited you to represent them as a ${roleLabel}`;
         const html = recruiterCompanyInvitationEmail({
             companyName: payload.companyName,
             inviterName: payload.inviterName,
             personalMessage: payload.personalMessage,
+            relationshipType: payload.relationshipType,
+            permissions: payload.permissions,
             invitationsLink: payload.invitationsLink,
         });
 
@@ -102,6 +114,7 @@ export class RecruiterCompanyInvitationsEmailService {
             payload: {
                 company_name: payload.companyName,
                 inviter_name: payload.inviterName,
+                relationship_type: payload.relationshipType || 'recruiter',
             },
         });
     }

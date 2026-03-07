@@ -536,6 +536,15 @@ const recruiterCompanyInvitationData = {
     companyName: 'TechCorp Inc',
     inviterName: 'Alex Director',
     personalMessage: 'We would love to have you as a preferred recruiter on our platform.',
+    relationshipType: 'recruiter' as const,
+    permissions: {
+        can_view_jobs: true,
+        can_create_jobs: false,
+        can_edit_jobs: false,
+        can_submit_candidates: true,
+        can_view_applications: true,
+        can_advance_candidates: false,
+    },
     invitationsLink: 'https://splits.network/portal/invitations',
 };
 
@@ -597,6 +606,8 @@ const jobExpiredData = {
 const connectionRequestedData = {
     companyName: 'TechCorp Inc',
     recruiterName: 'Jane Smith',
+    recruiterEmail: 'jane@recruiter.com',
+    relationshipType: 'recruiter' as const,
     message: 'I specialize in backend engineering placements and would love to work with your team.',
     connectionUrl: 'https://splits.network/portal/network',
 };

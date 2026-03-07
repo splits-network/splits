@@ -10,15 +10,21 @@ import { MiniLeaderboard, AchievementsSection } from "@splits-network/shared-gam
 import { useAuth } from "@clerk/nextjs";
 import { createUnauthenticatedClient, createAuthenticatedClient } from "@/lib/api-client";
 import { CompanyTab } from "./company-tab";
+import { CultureTab } from "./culture-tab";
 import { BillingTab } from "./billing-tab";
 import { TeamTab } from "./team-tab";
 import type { SettingsTab, Company } from "@/app/portal/company/settings/types";
 
 const NAV_ITEMS = [
     {
-        value: "company",
-        label: "Company",
+        value: "profile",
+        label: "Profile",
         icon: "fa-duotone fa-regular fa-building",
+    },
+    {
+        value: "culture",
+        label: "Culture",
+        icon: "fa-duotone fa-regular fa-sparkles",
     },
     {
         value: "billing",
@@ -37,7 +43,7 @@ const NAV_ITEMS = [
     },
 ];
 
-const VALID_TABS = new Set<string>(["company", "billing", "team", "achievements"]);
+const VALID_TABS = new Set<string>(["profile", "culture", "billing", "team", "achievements"]);
 
 interface SettingsContentProps {
     company: Company | null;
@@ -61,7 +67,7 @@ export default function BaselSettingsContent({
 
     const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
         const tab = searchParams.get("tab");
-        return tab && VALID_TABS.has(tab) ? (tab as SettingsTab) : "company";
+        return tab && VALID_TABS.has(tab) ? (tab as SettingsTab) : "profile";
     });
 
     // Sync tab to URL
@@ -71,7 +77,7 @@ export default function BaselSettingsContent({
     useEffect(() => {
         const params = new URLSearchParams(searchParamsRef.current.toString());
 
-        if (activeTab !== "company") {
+        if (activeTab !== "profile") {
             params.set("tab", activeTab);
         } else {
             params.delete("tab");
@@ -153,25 +159,25 @@ export default function BaselSettingsContent({
 
                     {/* Main Panel */}
                     <div className="lg:col-span-4">
-                        {activeTab === "company" && (
-                            <>
-                                <CompanyTab
-                                    company={company}
-                                    organizationId={resolvedOrgId}
-                                />
-                                {companyId && (
-                                    <div className="mt-8">
-                                        <MiniLeaderboard
-                                            entityType="company"
-                                            entityId={companyId}
-                                            client={publicClient}
-                                            showToggle={false}
-                                            title="Company Rankings"
-                                            fullLeaderboardHref="/portal/leaderboard"
-                                        />
-                                    </div>
-                                )}
-                            </>
+                        {activeTab === "profile" && (
+                            <CompanyTab
+                                company={company}
+                                organizationId={resolvedOrgId}
+                            />
+                        )}
+
+                        {activeTab === "culture" && companyId && (
+                            <CultureTab companyId={companyId} />
+                        )}
+
+                        {activeTab === "culture" && !companyId && (
+                            <div className="bg-warning/5 border border-warning/20 p-6">
+                                <p className="text-sm font-semibold text-base-content flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-circle-info text-warning" />
+                                    Save your company profile first to manage
+                                    culture and tech stack.
+                                </p>
+                            </div>
                         )}
 
                         {activeTab === "billing" && (
@@ -196,12 +202,24 @@ export default function BaselSettingsContent({
                         )}
 
                         {activeTab === "achievements" && companyId && (
-                            <AchievementsSection
-                                entityId={companyId}
-                                entityType="company"
-                                getToken={getToken}
-                                createClient={createAuthenticatedClient}
-                            />
+                            <>
+                                <div className="mb-8">
+                                    <MiniLeaderboard
+                                        entityType="company"
+                                        entityId={companyId}
+                                        client={publicClient}
+                                        showToggle={false}
+                                        title="Company Rankings"
+                                        fullLeaderboardHref="/portal/leaderboard"
+                                    />
+                                </div>
+                                <AchievementsSection
+                                    entityId={companyId}
+                                    entityType="company"
+                                    getToken={getToken}
+                                    createClient={createAuthenticatedClient}
+                                />
+                            </>
                         )}
 
                         {activeTab === "achievements" && !companyId && (

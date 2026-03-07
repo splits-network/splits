@@ -35,7 +35,9 @@ export class RecruiterCompanyRepository {
                     id,
                     name,
                     industry,
-                    headquarters_location
+                    headquarters_location,
+                    description,
+                    website
                 )
             `, { count: 'exact' });
 
@@ -131,7 +133,9 @@ export class RecruiterCompanyRepository {
                     id,
                     name,
                     industry,
-                    headquarters_location
+                    headquarters_location,
+                    description,
+                    website
                 )
             `)
             .eq('id', id);
@@ -209,7 +213,9 @@ export class RecruiterCompanyRepository {
                     id,
                     name,
                     industry,
-                    headquarters_location
+                    headquarters_location,
+                    description,
+                    website
                 )
             `)
             .single();
@@ -256,7 +262,9 @@ export class RecruiterCompanyRepository {
                     id,
                     name,
                     industry,
-                    headquarters_location
+                    headquarters_location,
+                    description,
+                    website
                 )
             `)
             .single();
@@ -341,7 +349,9 @@ export class RecruiterCompanyRepository {
                     id,
                     name,
                     industry,
-                    headquarters_location
+                    headquarters_location,
+                    description,
+                    website
                 )
             `)
             .single();
