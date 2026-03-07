@@ -1171,6 +1171,32 @@ function registerApplicationProposalRoutes(app: FastifyInstance, services: Servi
         }
     );
 
+    // POST /api/v2/applications/:id/accept-offer - Candidate accepts offer
+    app.post(
+        '/api/v2/applications/:id/accept-offer',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${id}/accept-offer`,
+                    request.body || {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to accept offer');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to accept offer' });
+            }
+        }
+    );
+
     // POST /api/v2/applications/:id/decline-proposal - Candidate declines proposal
     app.post(
         '/api/v2/applications/:id/decline-proposal',

@@ -623,6 +623,7 @@ export interface Application {
 
     // Legacy fields (maintained for compatibility)
     accepted_by_company: boolean;
+    accepted_by_candidate?: boolean;
     accepted_at?: Date;
     ai_reviewed: boolean;  // Whether AI review has been completed
 

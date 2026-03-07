@@ -20,6 +20,7 @@ export interface ApplicationUpdate {
     hired_at?: Date | string;
     placement_id?: string;
     accepted_by_company?: boolean;
+    accepted_by_candidate?: boolean;
     accepted_at?: Date | string;
     document_ids?: string[];
     pre_screen_answers?: Array<{ question: string; question_type: string; is_required: boolean; options?: string[]; disclaimer?: string; answer: any }>;

@@ -974,6 +974,57 @@ export class ApplicationServiceV2 {
     }
 
     /**
+     * Candidate accepts a job offer.
+     * Sets accepted_by_candidate = true on the application and creates an audit log.
+     * The application stays in 'offer' stage — the company finalizes the hire separately.
+     */
+    async acceptOffer(applicationId: string, clerkUserId: string): Promise<any> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        if (application.stage !== 'offer') {
+            throw new Error(`Cannot accept offer from stage: ${application.stage}. Application must be in offer stage.`);
+        }
+
+        // Verify candidate owns this application
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        if (!userContext.candidateId || userContext.candidateId !== application.candidate_id) {
+            throw new Error('Only the candidate can accept this offer');
+        }
+
+        if (application.accepted_by_candidate) {
+            throw new Error('Offer has already been accepted');
+        }
+
+        const updated = await this.repository.updateApplication(applicationId, {
+            accepted_by_candidate: true,
+        });
+
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'offer_accepted',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: 'candidate',
+            old_value: { accepted_by_candidate: false },
+            new_value: { accepted_by_candidate: true },
+        });
+
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('application.offer_accepted', {
+                application_id: applicationId,
+                candidate_id: application.candidate_id,
+                job_id: application.job_id,
+                accepted_by: userContext.identityUserId,
+            });
+        }
+
+        return updated;
+    }
+
+    /**
      * Hire a candidate — transitions application to 'hired' stage and creates a placement record.
      *
      * This is the single entry point for hiring. It:

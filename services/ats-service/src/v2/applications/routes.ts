@@ -226,6 +226,25 @@ export function registerApplicationRoutes(
     });
 
     /**
+     * POST /api/v2/applications/:id/accept-offer
+     * Candidate accepts a job offer
+     */
+    app.post('/api/v2/applications/:id/accept-offer', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+
+            request.log.info({ applicationId: id, clerkUserId }, 'Candidate accepting offer');
+
+            const application = await config.applicationService.acceptOffer(id, clerkUserId);
+            return reply.send({ data: application });
+        } catch (error: any) {
+            request.log.error({ error: error.message, applicationId: request.params }, 'Failed to accept offer');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
      * POST /api/v2/applications/:id/request-prescreen
      * Company requests a recruiter pre-screen for a candidate's application
      */
