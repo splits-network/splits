@@ -46,7 +46,7 @@ export function ControlsBar({
         <BaselControlsBarShell
             filters={
                 <>
-                    <div className="flex bg-base-200 p-1 rounded-none">
+                    <div className="join">
                         {(
                             [
                                 { value: "all", label: "All Applications" },
@@ -56,10 +56,10 @@ export function ControlsBar({
                             <button
                                 key={value}
                                 onClick={() => onFilterChange("scope", value)}
-                                className={`px-3 py-1.5 text-sm font-bold uppercase tracking-wider transition-colors rounded-none ${
+                                className={`join-item btn btn-sm rounded-none ${
                                     (filters.scope || "all") === value
-                                        ? "bg-primary text-primary-content"
-                                        : "text-base-content/50 hover:text-base-content"
+                                        ? "btn-active"
+                                        : ""
                                 }`}
                             >
                                 {label}
@@ -79,7 +79,7 @@ export function ControlsBar({
                         onChange={(e) =>
                             onFilterChange("stage", e.target.value || undefined)
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Stages</option>
                         <option value="draft">Draft</option>
@@ -98,7 +98,7 @@ export function ControlsBar({
                         onChange={(e) =>
                             onFilterChange("ai_score_filter", e.target.value || undefined)
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All AI Scores</option>
                         <option value="high">High Match</option>

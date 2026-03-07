@@ -182,7 +182,7 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
                             name="industry"
                             value={formData.industry}
                             onChange={handleChange}
-                            className="select select-bordered w-full"
+                            className="select w-full"
                         >
                             <option value="">Select industry...</option>
                             {INDUSTRIES.map((i) => (
@@ -198,7 +198,7 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
                             name="company_size"
                             value={formData.company_size}
                             onChange={handleChange}
-                            className="select select-bordered w-full"
+                            className="select w-full"
                         >
                             <option value="">Select size...</option>
                             {COMPANY_SIZES.map((s) => (

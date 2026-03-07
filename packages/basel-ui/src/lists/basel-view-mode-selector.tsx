@@ -18,18 +18,16 @@ export function BaselViewModeSelector({
     modes = DEFAULT_MODES,
 }: BaselViewModeSelectorProps) {
     return (
-        <div className="flex bg-base-200 p-1 rounded-none">
+        <div className="join">
             {modes.map(({ mode, icon, label }) => (
                 <button
                     key={mode}
                     onClick={() => onViewModeChange(mode)}
-                    className={`px-3 py-1.5 text-sm font-bold uppercase tracking-wider transition-colors rounded-none ${
-                        viewMode === mode
-                            ? 'bg-primary text-primary-content'
-                            : 'text-base-content/50 hover:text-base-content'
+                    className={`join-item btn btn-sm rounded-none ${
+                        viewMode === mode ? 'btn-active' : ''
                     }`}
                 >
-                    <i className={`fa-duotone fa-regular ${icon} mr-1`} />
+                    <i className={`fa-duotone fa-regular ${icon}`} />
                     <span className="hidden sm:inline">{label}</span>
                 </button>
             ))}

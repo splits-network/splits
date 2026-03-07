@@ -25,7 +25,7 @@ export default function DecisionLogPage() {
 
             <div className="flex gap-3 mb-4">
                 <select
-                    className="select select-sm select-bordered"
+                    className="select select-sm"
                     value={filters.decision_type}
                     onChange={(e) => setFilter('decision_type', e.target.value)}
                 >

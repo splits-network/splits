@@ -55,7 +55,7 @@ export function ControlsBar({
                         onChange={(e) =>
                             onFilterChange("stage", e.target.value || undefined)
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Stages</option>
                         {APPLICATION_STAGES.map((s) => (

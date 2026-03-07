@@ -48,7 +48,7 @@ export function ControlsBar({
         <BaselControlsBarShell
             filters={
                 <>
-                    <div className="flex bg-base-200 p-1 rounded-none">
+                    <div className="join">
                         {(
                             [
                                 { value: "mine", label: "My Candidates" },
@@ -58,10 +58,8 @@ export function ControlsBar({
                             <button
                                 key={value}
                                 onClick={() => onScopeChange(value)}
-                                className={`px-3 py-1.5 text-sm font-bold uppercase tracking-wider transition-colors rounded-none ${
-                                    scope === value
-                                        ? "bg-primary text-primary-content"
-                                        : "text-base-content/50 hover:text-base-content"
+                                className={`join-item btn btn-sm rounded-none ${
+                                    scope === value ? "btn-active" : ""
                                 }`}
                             >
                                 {label}
@@ -84,7 +82,7 @@ export function ControlsBar({
                                 e.target.value || undefined,
                             )
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Status</option>
                         <option value="verified">Verified</option>
@@ -101,7 +99,7 @@ export function ControlsBar({
                                 e.target.value || undefined,
                             )
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Types</option>
                         <option value="full_time">Full Time</option>

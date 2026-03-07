@@ -122,13 +122,13 @@ const DEFAULT_STAGE = {
 
 export default function RecruiterView() {
     const { userId, getToken } = useAuth();
-    const { profile, manageableCompanyIds } = useUserProfile();
+    const { profile, getCompanyIdsWithPermission } = useUserProfile();
     const [trendPeriod, setTrendPeriod] = useState(6);
     const [showAddRoleModal, setShowAddRoleModal] = useState(false);
     const [canCreateRole, setCanCreateRole] = useState(false);
 
     useEffect(() => {
-        if (manageableCompanyIds.length > 0) {
+        if (getCompanyIdsWithPermission("can_create_jobs").length > 0) {
             setCanCreateRole(true);
             return;
         }
@@ -151,7 +151,7 @@ export default function RecruiterView() {
             cancelled = true;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [manageableCompanyIds.length]);
+    }, [getCompanyIdsWithPermission]);
 
     /* Data hooks */
     const {

@@ -164,16 +164,24 @@ export default function RoleWizardModal({
                 } else if (isRecruiter) {
                     let hasCompanyAccess = false;
                     try {
-                        const response = await client.get<{ data: Company[] }>("/recruiter-companies/manageable-companies-with-details");
-                        const manageableCompanies = response.data || [];
-                        setCompanies(manageableCompanies);
-                        hasCompanyAccess = manageableCompanies.length > 0;
+                        const response = await client.get<{
+                            data: Array<{
+                                company_id: string;
+                                company_name: string;
+                                permissions: { can_create_jobs: boolean };
+                            }>;
+                        }>("/recruiter-companies/my-permissions");
+                        const creatableCompanies = (response.data || [])
+                            .filter((p) => p.permissions?.can_create_jobs)
+                            .map((p) => ({ id: p.company_id, name: p.company_name } as Company));
+                        setCompanies(creatableCompanies);
+                        hasCompanyAccess = creatableCompanies.length > 0;
                         setIsRecruiterWithCompanyAccess(hasCompanyAccess);
-                        if (manageableCompanies.length === 1) {
-                            setFormData((prev) => ({ ...prev, company_id: manageableCompanies[0].id }));
+                        if (creatableCompanies.length === 1) {
+                            setFormData((prev) => ({ ...prev, company_id: creatableCompanies[0].id }));
                         }
                     } catch (err: any) {
-                        console.error("Failed to load manageable companies:", err);
+                        console.error("Failed to load company permissions:", err);
                         setCompanies([]);
                     }
                     try {

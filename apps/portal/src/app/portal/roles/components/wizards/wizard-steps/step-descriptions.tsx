@@ -21,7 +21,7 @@ export function StepDescriptions({ formData, onChange }: StepDescriptionsProps) 
 
             <fieldset>
                 <label className="block font-bold text-sm uppercase tracking-wider mb-2">
-                    Recruiter-Facing Description
+                    Recruiter Brief
                 </label>
                 <MarkdownEditor
                     value={formData.recruiter_description}

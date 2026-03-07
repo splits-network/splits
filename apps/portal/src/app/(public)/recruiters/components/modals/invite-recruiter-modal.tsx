@@ -32,7 +32,6 @@ export default function InviteRecruiterModal({
     const [selectedCompanyId, setSelectedCompanyId] = useState(
         companies.length === 1 ? companies[0].id : "",
     );
-    const [canManageJobs, setCanManageJobs] = useState(false);
     const [message, setMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,7 +56,6 @@ export default function InviteRecruiterModal({
             await client.post("/recruiter-companies/invite", {
                 company_id: selectedCompanyId,
                 recruiter_id: recruiter.id,
-                can_manage_company_jobs: canManageJobs,
                 message: message.trim() || undefined,
             });
 
@@ -144,27 +142,6 @@ export default function InviteRecruiterModal({
                                 ))}
                             </select>
                         )}
-                    </fieldset>
-
-                    {/* Permissions */}
-                    <fieldset className="fieldset mb-4">
-                        <label className="label cursor-pointer justify-start gap-3">
-                            <input
-                                type="checkbox"
-                                className="checkbox checkbox-primary"
-                                checked={canManageJobs}
-                                onChange={(e) =>
-                                    setCanManageJobs(e.target.checked)
-                                }
-                            />
-                            <span className="label-text font-bold">
-                                Allow recruiter to manage company jobs
-                            </span>
-                        </label>
-                        <p className="text-sm text-base-content/50 ml-9">
-                            If enabled, the recruiter can create and edit job
-                            postings for your company.
-                        </p>
                     </fieldset>
 
                     {/* Optional Message */}

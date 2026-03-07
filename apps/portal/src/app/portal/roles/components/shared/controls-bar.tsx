@@ -47,7 +47,7 @@ export function ControlsBar({
             filters={
                 <>
                     {/* My Roles / All Roles toggle */}
-                    <div className="flex bg-base-200 p-1 rounded-none">
+                    <div className="join">
                         {(
                             [
                                 { value: "assigned", label: "My Roles" },
@@ -59,10 +59,10 @@ export function ControlsBar({
                                 onClick={() =>
                                     onFilterChange("job_owner_filter", value)
                                 }
-                                className={`px-3 py-1.5 text-sm font-bold uppercase tracking-wider transition-colors rounded-none ${
+                                className={`join-item btn btn-sm rounded-none ${
                                     filters.job_owner_filter === value
-                                        ? "bg-primary text-primary-content"
-                                        : "text-base-content/50 hover:text-base-content"
+                                        ? "btn-active"
+                                        : ""
                                 }`}
                             >
                                 {label}
@@ -82,7 +82,7 @@ export function ControlsBar({
                         onChange={(e) =>
                             onFilterChange("status", e.target.value || undefined)
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Status</option>
                         <option value="draft">Draft</option>
@@ -100,7 +100,7 @@ export function ControlsBar({
                         onChange={(e) =>
                             onFilterChange("employment_type", e.target.value || undefined)
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Types</option>
                         <option value="full_time">Full Time</option>

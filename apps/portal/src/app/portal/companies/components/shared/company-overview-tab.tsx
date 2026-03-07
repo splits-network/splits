@@ -182,13 +182,31 @@ export function CompanyOverviewTab({
                                 <p className="font-bold text-sm">{formatDate(relationship.relationship_start_date)}</p>
                             </div>
                         )}
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Can Manage Jobs</p>
-                            <p className={`font-bold text-sm ${relationship.can_manage_company_jobs ? "text-success" : "text-base-content/50"}`}>
-                                {relationship.can_manage_company_jobs ? "Yes" : "No"}
-                            </p>
-                        </div>
                     </div>
+
+                    {/* Granular Permissions */}
+                    {relationship.permissions && (
+                        <div className="mt-4">
+                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-3">Permissions</p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                {([
+                                    { key: "can_view_jobs" as const, label: "View Jobs" },
+                                    { key: "can_create_jobs" as const, label: "Create Jobs" },
+                                    { key: "can_edit_jobs" as const, label: "Edit Jobs" },
+                                    { key: "can_submit_candidates" as const, label: "Submit Candidates" },
+                                    { key: "can_view_applications" as const, label: "View Applications" },
+                                    { key: "can_advance_candidates" as const, label: "Advance Candidates" },
+                                ]).map(({ key, label }) => (
+                                    <div key={key} className="flex items-center gap-2">
+                                        <i className={`fa-solid ${relationship.permissions![key] ? "fa-check text-success" : "fa-xmark text-base-content/30"} text-sm`} />
+                                        <span className={`text-sm ${relationship.permissions![key] ? "text-base-content" : "text-base-content/40"}`}>
+                                            {label}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

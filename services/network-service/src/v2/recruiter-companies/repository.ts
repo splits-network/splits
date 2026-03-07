@@ -26,6 +26,9 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
+                    phone,
+                    bio,
+                    tagline,
                     user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
@@ -74,10 +77,6 @@ export class RecruiterCompanyRepository {
         if (params.status) {
             query = query.eq('status', params.status);
         }
-        if (params.can_manage_company_jobs !== undefined) {
-            query = query.eq('can_manage_company_jobs', params.can_manage_company_jobs);
-        }
-        
         // Search across recruiter and company names
         if (params.search) {
             query = query.or(`
@@ -123,6 +122,9 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
+                    phone,
+                    bio,
+                    tagline,
                     user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
@@ -186,7 +188,7 @@ export class RecruiterCompanyRepository {
             ...data,
             status: 'pending' as const,
             invited_by: accessContext.identityUserId,
-            can_manage_company_jobs: data.can_manage_company_jobs || false
+            ...(data.permissions ? { permissions: data.permissions } : {}),
         };
 
         const { data: result, error } = await this.supabase
@@ -198,6 +200,9 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
+                    phone,
+                    bio,
+                    tagline,
                     user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
@@ -242,6 +247,9 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
+                    phone,
+                    bio,
+                    tagline,
                     user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
@@ -314,7 +322,6 @@ export class RecruiterCompanyRepository {
         const relationshipData = {
             ...data,
             status: 'pending' as const,
-            can_manage_company_jobs: data.can_manage_company_jobs || false,
         };
 
         const { data: result, error } = await this.supabase
@@ -325,6 +332,9 @@ export class RecruiterCompanyRepository {
                 recruiter:recruiters!inner(
                     id,
                     user_id,
+                    phone,
+                    bio,
+                    tagline,
                     user:users!recruiters_user_id_fkey!inner(name, email)
                 ),
                 company:companies!inner(
@@ -338,48 +348,6 @@ export class RecruiterCompanyRepository {
 
         if (error) throw error;
         return result;
-    }
-
-    /**
-     * Get company IDs a recruiter can manage jobs for
-     * Uses both legacy can_manage_company_jobs and new permissions.can_create_jobs
-     */
-    async getManageableCompanyIds(recruiterId: string): Promise<string[]> {
-        const { data, error } = await this.supabase
-            .from('recruiter_companies')
-            .select('company_id, permissions')
-            .eq('recruiter_id', recruiterId)
-            .eq('status', 'active');
-
-        if (error) throw error;
-
-        return (data || [])
-            .filter(row => row.permissions?.can_create_jobs || row.permissions?.can_edit_jobs)
-            .map(row => row.company_id);
-    }
-
-    /**
-     * Get companies a recruiter can manage jobs for, with details
-     */
-    async getManageableCompaniesWithDetails(recruiterId: string): Promise<{ id: string; name: string }[]> {
-        const { data, error } = await this.supabase
-            .from('recruiter_companies')
-            .select(`
-                company_id,
-                permissions,
-                company:companies!inner(id, name)
-            `)
-            .eq('recruiter_id', recruiterId)
-            .eq('status', 'active');
-
-        if (error) throw error;
-
-        return (data || [])
-            .filter(row => row.permissions?.can_create_jobs || row.permissions?.can_edit_jobs)
-            .map(row => ({
-                id: (row.company as any).id,
-                name: (row.company as any).name
-            }));
     }
 
     /**
@@ -421,5 +389,30 @@ export class RecruiterCompanyRepository {
 
         if (error) throw error;
         return data?.permissions || null;
+    }
+
+    /**
+     * Get all permissions across all active company relationships for a recruiter
+     */
+    async getAllPermissionsForRecruiter(
+        recruiterId: string
+    ): Promise<{ company_id: string; company_name: string; permissions: RecruiterCompanyPermissions }[]> {
+        const { data, error } = await this.supabase
+            .from('recruiter_companies')
+            .select(`
+                company_id,
+                permissions,
+                company:companies!inner(name)
+            `)
+            .eq('recruiter_id', recruiterId)
+            .eq('status', 'active');
+
+        if (error) throw error;
+
+        return (data || []).map(row => ({
+            company_id: row.company_id,
+            company_name: (row.company as any)?.name || '',
+            permissions: row.permissions,
+        }));
     }
 }

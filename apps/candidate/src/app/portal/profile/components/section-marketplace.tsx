@@ -56,7 +56,7 @@ export function SectionMarketplace({
                         Visibility
                     </label>
                     <select
-                        className="select select-bordered w-full"
+                        className="select w-full"
                         value={settings.marketplace_visibility || "public"}
                         onChange={(e) =>
                             onUpdate({

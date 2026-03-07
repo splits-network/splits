@@ -431,7 +431,7 @@ export default function ScheduleInterviewModal({
                                 onChange={(e) =>
                                     setDuration(Number(e.target.value))
                                 }
-                                className="select select-bordered w-full rounded-none"
+                                className="select w-full rounded-none"
                             >
                                 <option value={15}>15 minutes</option>
                                 <option value={30}>30 minutes</option>

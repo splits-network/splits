@@ -95,7 +95,7 @@ export function InviteMemberModal({
 
                         <BaselFormField label="Role" required>
                             <select
-                                className="select select-bordered w-full bg-base-200 border-base-300"
+                                className="select w-full"
                                 style={{ borderRadius: 0 }}
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}

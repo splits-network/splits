@@ -740,7 +740,7 @@ export default function SettingsOne() {
                                                             e.target.value,
                                                         )
                                                     }
-                                                    className="select select-bordered w-full"
+                                                    className="select w-full"
                                                 >
                                                     <option value="America/Los_Angeles">
                                                         Pacific Time (PT)
@@ -760,7 +760,7 @@ export default function SettingsOne() {
                                                 <label className="text-xs font-semibold text-base-content/50 mb-2 block">
                                                     Date Format
                                                 </label>
-                                                <select className="select select-bordered w-full">
+                                                <select className="select w-full">
                                                     <option>MM/DD/YYYY</option>
                                                     <option>DD/MM/YYYY</option>
                                                     <option>YYYY-MM-DD</option>

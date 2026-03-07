@@ -50,7 +50,7 @@ export function CompanyDetailsSection({
                     name="stage"
                     value={stage}
                     onChange={onChange}
-                    className="select select-bordered w-full"
+                    className="select w-full"
                 >
                     <option value="">Select stage...</option>
                     {COMPANY_STAGES.map((s) => (

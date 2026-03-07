@@ -95,7 +95,7 @@ export default function NotificationsPage() {
                     </button>
                 </div>
                 <select
-                    className="select select-sm select-bordered"
+                    className="select select-sm"
                     value={filters.severity}
                     onChange={(e) => setFilter('severity', e.target.value)}
                 >

@@ -25,7 +25,7 @@ export default function FraudPage() {
 
             <div className="flex gap-3 mb-4">
                 <select
-                    className="select select-sm select-bordered"
+                    className="select select-sm"
                     value={filters.severity}
                     onChange={(e) => setFilter('severity', e.target.value)}
                 >
@@ -36,7 +36,7 @@ export default function FraudPage() {
                     ))}
                 </select>
                 <select
-                    className="select select-sm select-bordered"
+                    className="select select-sm"
                     value={filters.resolved}
                     onChange={(e) => setFilter('resolved', e.target.value)}
                 >

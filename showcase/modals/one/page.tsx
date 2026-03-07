@@ -518,7 +518,7 @@ export default function ModalsOne() {
                                             </span>
                                         </label>
                                         <select
-                                            className="select select-bordered w-full"
+                                            className="select w-full"
                                             value={standardForm.type}
                                             onChange={(e) =>
                                                 setStandardForm((f) => ({
@@ -805,7 +805,7 @@ export default function ModalsOne() {
                                                         </span>
                                                     </label>
                                                     <select
-                                                        className="select select-bordered w-full"
+                                                        className="select w-full"
                                                         value={wizardData.type}
                                                         onChange={(e) =>
                                                             setWizardData(
@@ -842,7 +842,7 @@ export default function ModalsOne() {
                                                     </span>
                                                 </label>
                                                 <select
-                                                    className="select select-bordered w-full"
+                                                    className="select w-full"
                                                     value={
                                                         wizardData.experienceLevel
                                                     }

@@ -60,20 +60,18 @@ export function StepBasicInfo({
                     <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
                         Role Type *
                     </legend>
-                    <div className="flex bg-base-200 p-1">
+                    <div className="join w-full">
                         <button
                             type="button"
                             onClick={() => {
                                 onRoleSourceChange("company");
                                 onChange({ source_firm_id: undefined });
                             }}
-                            className={`flex-1 px-3 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
-                                roleSource === "company"
-                                    ? "bg-primary text-primary-content"
-                                    : "text-base-content/50 hover:text-base-content"
+                            className={`join-item btn btn-sm flex-1 rounded-none ${
+                                roleSource === "company" ? "btn-active" : ""
                             }`}
                         >
-                            <i className="fa-duotone fa-regular fa-building mr-2" />
+                            <i className="fa-duotone fa-regular fa-building" />
                             Managed Company
                         </button>
                         <button
@@ -82,13 +80,11 @@ export function StepBasicInfo({
                                 onRoleSourceChange("firm");
                                 onChange({ company_id: "", source_firm_id: userFirms[0]?.id });
                             }}
-                            className={`flex-1 px-3 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
-                                roleSource === "firm"
-                                    ? "bg-primary text-primary-content"
-                                    : "text-base-content/50 hover:text-base-content"
+                            className={`join-item btn btn-sm flex-1 rounded-none ${
+                                roleSource === "firm" ? "btn-active" : ""
                             }`}
                         >
-                            <i className="fa-duotone fa-regular fa-users-rectangle mr-2" />
+                            <i className="fa-duotone fa-regular fa-users-rectangle" />
                             Agency Client
                         </button>
                     </div>
@@ -185,7 +181,10 @@ export function StepBasicInfo({
                         value={formData.status}
                         onChange={(e) => onChange({ status: e.target.value as FormData["status"] })}
                     >
-                        {STATUS_OPTIONS.map((opt) => (
+                        {(isRecruiter && roleSource === "company"
+                            ? STATUS_OPTIONS.filter((opt) => opt.value === "draft" || opt.value === "pending")
+                            : STATUS_OPTIONS
+                        ).map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>

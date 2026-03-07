@@ -214,7 +214,7 @@ export default function ComposeEmailModal({
                                                 e.target.value,
                                             )
                                         }
-                                        className="select select-bordered w-full"
+                                        className="select w-full"
                                         style={{ borderRadius: 0 }}
                                     >
                                         <option value="">

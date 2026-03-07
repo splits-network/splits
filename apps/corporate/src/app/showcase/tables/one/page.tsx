@@ -279,7 +279,7 @@ export default function TablesOne() {
                         <select
                             value={stageFilter}
                             onChange={(e) => setStageFilter(e.target.value)}
-                            className="select select-bordered select-sm"
+                            className="select select-sm"
                         >
                             <option>All</option>
                             <option>Submitted</option>

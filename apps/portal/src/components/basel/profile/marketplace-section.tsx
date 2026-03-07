@@ -218,7 +218,7 @@ export function MarketplaceSection() {
                                         | "hidden",
                                 })
                             }
-                            className="select select-bordered w-full max-w-sm"
+                            className="select w-full max-w-sm"
                         >
                             <option value="public">Public</option>
                             <option value="limited">Verified Only</option>

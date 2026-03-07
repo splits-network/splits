@@ -69,8 +69,12 @@ export default function RolesPage() {
     }, [selectedJobId, viewMode, pathname, router]);
 
     /* ── User profile ── */
-    const { isAdmin, isRecruiter, isCompanyUser, manageableCompanyIds } =
-        useUserProfile();
+    const {
+        isAdmin,
+        isRecruiter,
+        isCompanyUser,
+        getCompanyIdsWithPermission,
+    } = useUserProfile();
     const { getToken } = useAuth();
     const [isFirmMember, setIsFirmMember] = useState(false);
 
@@ -94,7 +98,8 @@ export default function RolesPage() {
     const canCreateRole =
         isAdmin ||
         isCompanyUser ||
-        (isRecruiter && manageableCompanyIds.length > 0) ||
+        (isRecruiter &&
+            getCompanyIdsWithPermission("can_create_jobs").length > 0) ||
         (isRecruiter && isFirmMember);
 
     /* ── Data ── */

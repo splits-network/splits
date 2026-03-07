@@ -279,7 +279,7 @@ function SearchPageInner() {
                                     onChange={(e) =>
                                         setSortBy(e.target.value as SortOption)
                                     }
-                                    className="select select-sm w-full bg-base-200 border-base-300 text-sm"
+                                    className="select select-sm w-full"
                                 >
                                     {SORT_OPTIONS.map((o) => (
                                         <option key={o.value} value={o.value}>
@@ -549,7 +549,7 @@ function SearchPageInner() {
                                                 e.target.value as SortOption,
                                             )
                                         }
-                                        className="select select-sm bg-base-200 border-base-300 text-sm"
+                                        className="select select-sm"
                                     >
                                         {SORT_OPTIONS.map((o) => (
                                             <option

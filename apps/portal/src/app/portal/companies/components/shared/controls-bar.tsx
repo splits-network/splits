@@ -56,27 +56,23 @@ export function ControlsBar({
                     />
 
                     {/* Tab Toggle */}
-                    <div className="flex bg-base-200 p-1 rounded-none">
+                    <div className="join">
                         <button
                             onClick={() => onTabChange("marketplace")}
-                            className={`px-3 py-1.5 text-sm font-bold uppercase tracking-wider transition-colors rounded-none ${
-                                activeTab === "marketplace"
-                                    ? "bg-primary text-primary-content"
-                                    : "text-base-content/50 hover:text-base-content"
+                            className={`join-item btn btn-sm rounded-none ${
+                                activeTab === "marketplace" ? "btn-active" : ""
                             }`}
                         >
-                            <i className="fa-duotone fa-regular fa-store mr-1" />
+                            <i className="fa-duotone fa-regular fa-store" />
                             <span className="hidden sm:inline">Marketplace</span>
                         </button>
                         <button
                             onClick={() => onTabChange("my-companies")}
-                            className={`px-3 py-1.5 text-sm font-bold uppercase tracking-wider transition-colors rounded-none ${
-                                activeTab === "my-companies"
-                                    ? "bg-primary text-primary-content"
-                                    : "text-base-content/50 hover:text-base-content"
+                            className={`join-item btn btn-sm rounded-none ${
+                                activeTab === "my-companies" ? "btn-active" : ""
                             }`}
                         >
-                            <i className="fa-duotone fa-regular fa-handshake mr-1" />
+                            <i className="fa-duotone fa-regular fa-handshake" />
                             <span className="hidden sm:inline">My Companies</span>
                         </button>
                     </div>
@@ -86,7 +82,7 @@ export function ControlsBar({
                         onChange={(e) =>
                             onFilterChange("industry", e.target.value || undefined)
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Industries</option>
                         <option value="Technology">Technology</option>
@@ -104,7 +100,7 @@ export function ControlsBar({
                             onChange={(e) =>
                                 onFilterChange("status", e.target.value || undefined)
                             }
-                            className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                            className="select uppercase rounded-none"
                         >
                             <option value="">All Status</option>
                             <option value="active">Active</option>

@@ -210,7 +210,14 @@ export async function autoAssignRecruiter(
             company_id: companyId,
             relationship_type: 'recruiter',
             status: 'active',
-            can_manage_company_jobs: false,
+            permissions: {
+                can_view_jobs: true,
+                can_create_jobs: false,
+                can_edit_jobs: false,
+                can_submit_candidates: true,
+                can_view_applications: true,
+                can_advance_candidates: false,
+            },
             relationship_start_date: new Date().toISOString(),
         });
 

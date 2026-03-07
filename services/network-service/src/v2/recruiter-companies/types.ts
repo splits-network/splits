@@ -27,7 +27,6 @@ export interface RecruiterCompany {
     company_id: string;
     relationship_type: 'sourcer' | 'recruiter';
     status: 'pending' | 'active' | 'declined' | 'terminated';
-    can_manage_company_jobs: boolean;
     permissions: RecruiterCompanyPermissions;
     relationship_start_date: string;
     relationship_end_date?: string;
@@ -45,13 +44,12 @@ export interface RecruiterCompanyCreate {
     recruiter_id: string;
     company_id: string;
     relationship_type: 'sourcer' | 'recruiter';
-    can_manage_company_jobs?: boolean;
+    permissions?: RecruiterCompanyPermissions;
     invited_by?: string;
 }
 
 export interface RecruiterCompanyUpdate {
     status?: 'pending' | 'active' | 'declined' | 'terminated';
-    can_manage_company_jobs?: boolean;
     permissions?: RecruiterCompanyPermissions;
     relationship_end_date?: string;
     termination_reason?: string;
@@ -63,7 +61,6 @@ export interface RecruiterCompanyFilters {
     company_id?: string;
     relationship_type?: 'sourcer' | 'recruiter';
     status?: 'pending' | 'active' | 'declined' | 'terminated';
-    can_manage_company_jobs?: boolean;
     search?: string; // Search recruiter or company names
     page?: number;
     limit?: number;
@@ -74,7 +71,6 @@ export interface RecruiterCompanyFilters {
 export interface InviteRecruiterRequest {
     recruiter_id: string;
     company_id: string;
-    can_manage_company_jobs?: boolean;
     permissions?: RecruiterCompanyPermissions;
     message?: string; // Optional invitation message
 }

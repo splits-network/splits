@@ -88,15 +88,6 @@ export function TableRow({
                     </span>
                 </td>
 
-                {/* Jobs */}
-                <td className="px-4 py-3 text-sm text-base-content">
-                    {invitation.can_manage_company_jobs ? (
-                        <i className="fa-duotone fa-regular fa-check text-success" />
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-xmark text-base-content/20" />
-                    )}
-                </td>
-
                 {/* Received */}
                 <td className="px-4 py-3 text-sm text-base-content/50">
                     {postedAgo(invitation)}

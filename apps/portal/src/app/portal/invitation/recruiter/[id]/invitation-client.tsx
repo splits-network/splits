@@ -2,8 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { useChatSidebar } from "@splits-network/chat-ui";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
 import { WizardShell } from "../../shared/wizard-shell";
 import { RecruiterCompanyAgreement } from "../../shared/agreement-clauses";
 import type { InvitationRelationship, WizardStep } from "../../shared/types";
@@ -173,9 +177,8 @@ export default function InvitationRecruiterClient({
                     companyInitials={companyInitials}
                     industry={relationship.company.industry}
                     location={relationship.company.headquarters_location}
+                    invitedByUserId={relationship.invited_by}
                     currentStep={currentStep}
-                    onNext={handleNext}
-                    onBack={handleBack}
                 />
             }
         >
@@ -198,17 +201,15 @@ export default function InvitationRecruiterClient({
                         </div>
                         <div className="flex-1 min-w-0">
                             <h3 className="text-lg font-black">{companyName}</h3>
-                            {relationship.company.industry && (
-                                <p className="text-sm text-base-content/60">
-                                    {relationship.company.industry}
-                                </p>
-                            )}
-                            {relationship.company.headquarters_location && (
-                                <p className="text-sm text-base-content/50">
-                                    <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                                    {relationship.company.headquarters_location}
-                                </p>
-                            )}
+                            <p className="text-sm text-base-content/60">
+                                {relationship.company.industry || "Industry not provided"}
+                            </p>
+                            <p className="text-sm text-base-content/50">
+                                <i className="fa-duotone fa-regular fa-location-dot mr-1" />
+                                <span className={!relationship.company.headquarters_location ? "italic text-base-content/30" : ""}>
+                                    {relationship.company.headquarters_location || "Location not provided"}
+                                </span>
+                            </p>
                         </div>
                     </div>
 
@@ -349,22 +350,6 @@ export default function InvitationRecruiterClient({
                                     Decline
                                 </button>
                             </div>
-
-                            {/* Message option */}
-                            <div className="bg-base-200 p-4 border-l-4 border-info">
-                                <p className="text-sm text-base-content/70">
-                                    <i className="fa-duotone fa-regular fa-comments text-info mr-2" />
-                                    <strong>Want to discuss first?</strong> You can
-                                    message the company before deciding. Go to{" "}
-                                    <a
-                                        href="/portal/messages"
-                                        className="link link-primary"
-                                    >
-                                        Messages
-                                    </a>{" "}
-                                    to start a conversation.
-                                </p>
-                            </div>
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -417,6 +402,27 @@ export default function InvitationRecruiterClient({
                     )}
                 </div>
             )}
+
+            {/* Bottom Navigation */}
+            <div className="flex items-center justify-between mt-10 pt-6 border-t border-base-300">
+                <button
+                    onClick={handleBack}
+                    disabled={currentStep === 0}
+                    className="btn btn-ghost btn-sm disabled:opacity-30"
+                >
+                    <i className="fa-duotone fa-regular fa-arrow-left" />{" "}
+                    Back
+                </button>
+                {currentStep < 2 && (
+                    <button
+                        onClick={handleNext}
+                        className="btn btn-primary btn-sm"
+                    >
+                        Continue{" "}
+                        <i className="fa-duotone fa-regular fa-arrow-right" />
+                    </button>
+                )}
+            </div>
         </WizardShell>
     );
 }
@@ -428,60 +434,154 @@ function RecruiterSidebar({
     companyInitials,
     industry,
     location,
+    invitedByUserId,
     currentStep,
-    onNext,
-    onBack,
 }: {
     companyName: string;
     companyInitials: string;
     industry?: string;
     location?: string;
+    invitedByUserId?: string;
     currentStep: number;
-    onNext: () => void;
-    onBack: () => void;
 }) {
+    const { getToken } = useAuth();
+    const chatSidebar = useChatSidebar();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
+
+    const handleMessage = async () => {
+        if (!invitedByUserId) {
+            toast.error("Unable to determine who to message");
+            return;
+        }
+        try {
+            setStartingChat(true);
+            const conversationId = await startChatConversation(
+                getToken,
+                invitedByUserId,
+                {},
+            );
+            chatSidebar.openToThread(conversationId, {
+                otherUserName: companyName,
+            });
+        } catch (err: any) {
+            console.error("Failed to start chat:", err);
+            toast.error(err?.message || "Failed to start chat");
+        } finally {
+            setStartingChat(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Company Summary Card */}
-            <div className="bg-base-200 p-5">
-                <div className="flex items-center gap-3 mb-3">
+            <div className="bg-base-200 border-t-4 border-secondary p-6">
+                <h3 className="text-sm font-black uppercase tracking-wider mb-4">
+                    The Company
+                </h3>
+                <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center flex-shrink-0">
                         <span className="text-sm font-black">{companyInitials}</span>
                     </div>
                     <div>
                         <p className="text-sm font-bold">{companyName}</p>
-                        {industry && (
-                            <p className="text-xs text-base-content/50">{industry}</p>
-                        )}
+                        <p className="text-sm text-base-content/50">
+                            {industry || "Industry not provided"}
+                        </p>
                     </div>
                 </div>
-                {location && (
-                    <p className="text-xs text-base-content/50">
-                        <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                        {location}
+
+                {/* Contact Details */}
+                <div className="text-sm space-y-2 border-t border-base-300 pt-3 mb-4">
+                    <div className="flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-location-dot w-4 text-center text-base-content/40" />
+                        <span className={location ? "text-base-content/70" : "text-base-content/30 italic"}>
+                            {location || "Not provided"}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-building w-4 text-center text-base-content/40" />
+                        <Link
+                            href={`/portal/companies?companyName=${encodeURIComponent(companyName)}`}
+                            className="link link-primary text-sm"
+                        >
+                            View Company Profile
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-2 border-t border-base-300 pt-3 mb-4">
+                    <button
+                        onClick={handleMessage}
+                        disabled={startingChat || !invitedByUserId}
+                        className="btn btn-secondary btn-md w-full gap-2"
+                    >
+                        {startingChat ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-comment" />
+                        )}
+                        Message {companyName.split(" ")[0]}
+                    </button>
+                </div>
+
+                {/* Invitation Info */}
+                <div className="text-sm text-base-content/50 space-y-1 border-t border-base-300 pt-3">
+                    <p>
+                        <i className="fa-duotone fa-regular fa-paper-plane w-4 text-center mr-1" />
+                        Invited to represent {companyName}
                     </p>
-                )}
+                    <p>
+                        <i className="fa-duotone fa-regular fa-handshake w-4 text-center mr-1" />
+                        Relationship type: Recruiter
+                    </p>
+                </div>
             </div>
 
-            {/* Navigation */}
-            <div className="flex gap-2">
-                {currentStep > 0 && (
-                    <button onClick={onBack} className="btn btn-ghost btn-sm gap-2 flex-1">
-                        <i className="fa-duotone fa-regular fa-arrow-left" />
-                        Back
-                    </button>
-                )}
-                {currentStep < 2 && (
-                    <button onClick={onNext} className="btn btn-primary btn-sm gap-2 flex-1">
-                        Continue
-                        <i className="fa-duotone fa-regular fa-arrow-right" />
-                    </button>
-                )}
+            {/* Progress */}
+            <div className="bg-base-200 border-t-4 border-primary p-6">
+                <h3 className="text-sm font-black uppercase tracking-wider mb-4">
+                    Your Progress
+                </h3>
+                <div className="space-y-3">
+                    {STEPS.map((step, i) => (
+                        <div
+                            key={step.num}
+                            className="flex items-center gap-3"
+                        >
+                            <div
+                                className={`w-6 h-6 flex items-center justify-center text-sm font-bold ${
+                                    i < currentStep
+                                        ? "bg-success text-success-content"
+                                        : i === currentStep
+                                          ? "bg-primary text-primary-content"
+                                          : "bg-base-300 text-base-content/30"
+                                }`}
+                            >
+                                {i < currentStep ? (
+                                    <i className="fa-solid fa-check" />
+                                ) : (
+                                    step.num
+                                )}
+                            </div>
+                            <span
+                                className={`text-sm ${
+                                    i <= currentStep
+                                        ? "font-semibold text-base-content"
+                                        : "text-base-content/40"
+                                }`}
+                            >
+                                {step.label}
+                            </span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Help */}
             <div className="bg-base-200 p-4">
-                <p className="text-xs text-base-content/50 leading-relaxed">
+                <p className="text-sm text-base-content/50 leading-relaxed">
                     <i className="fa-duotone fa-regular fa-circle-info text-info mr-1" />
                     Not sure? You can decline now and ask the company to re-invite
                     you later. Or message them first to discuss.

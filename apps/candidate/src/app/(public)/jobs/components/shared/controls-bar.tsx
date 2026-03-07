@@ -55,7 +55,7 @@ export function ControlsBar({
                                 e.target.value || undefined,
                             )
                         }
-                        className="select select-bordered bg-base-200 border-base-300 text-sm uppercase tracking-wider font-bold rounded-none"
+                        className="select uppercase rounded-none"
                     >
                         <option value="">All Types</option>
                         {EMPLOYMENT_TYPES.map((t) => (

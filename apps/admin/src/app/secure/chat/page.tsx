@@ -25,7 +25,7 @@ export default function ChatModerationPage() {
 
             <div className="flex gap-3 mb-4">
                 <select
-                    className="select select-sm select-bordered"
+                    className="select select-sm"
                     value={filters.status}
                     onChange={(e) => setFilter('status', e.target.value)}
                 >

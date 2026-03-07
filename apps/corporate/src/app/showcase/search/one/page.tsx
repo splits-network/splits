@@ -408,7 +408,7 @@ export default function SearchOne() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="select select-sm bg-base-200 border-base-300 text-sm"
+                                    className="select select-sm"
                                 >
                                     {sortOptions.map((o) => (
                                         <option key={o}>{o}</option>

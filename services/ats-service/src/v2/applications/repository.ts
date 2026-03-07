@@ -61,21 +61,40 @@ export class ApplicationRepository {
             query = query.eq('candidate_id', accessContext.candidateId);
         } else if (accessContext.recruiterId) {
             // Recruiters can access applications where they are:
-            // 1. candidate_recruiter_id on the application
-            // 2. company_recruiter_id on the related job (assigned via pre-screen)
-            // 3. job_owner_recruiter_id on the related job
+            // 1. candidate_recruiter_id on the application (always — their own submissions)
+            // 2. company_recruiter_id or job_owner_recruiter_id on the related job
+            //    BUT only for companies where they have can_view_applications permission
             const { data: recruiterJobs } = await this.supabase
                 .from('jobs')
-                .select('id')
+                .select('id, company_id')
                 .or(`company_recruiter_id.eq.${accessContext.recruiterId},job_owner_recruiter_id.eq.${accessContext.recruiterId}`);
 
-            const recruiterJobIds = recruiterJobs?.map(j => j.id) || [];
+            // Filter assigned jobs to only those where recruiter has can_view_applications
+            let viewableJobIds: string[] = [];
+            if (recruiterJobs && recruiterJobs.length > 0) {
+                // Get companies where recruiter has can_view_applications permission
+                const { data: permittedRelationships } = await this.supabase
+                    .from('recruiter_companies')
+                    .select('company_id, permissions')
+                    .eq('recruiter_id', accessContext.recruiterId)
+                    .eq('status', 'active');
 
-            if (recruiterJobIds.length > 0) {
+                const viewableCompanyIds = (permittedRelationships || [])
+                    .filter(r => r.permissions?.can_view_applications === true)
+                    .map(r => r.company_id);
+
+                // Include firm jobs (no company_id) + company jobs where permission granted
+                viewableJobIds = recruiterJobs
+                    .filter(j => !j.company_id || viewableCompanyIds.includes(j.company_id))
+                    .map(j => j.id);
+            }
+
+            if (viewableJobIds.length > 0) {
                 query = query.or(
-                    `candidate_recruiter_id.eq.${accessContext.recruiterId},job_id.in.(${recruiterJobIds.join(',')})`
+                    `candidate_recruiter_id.eq.${accessContext.recruiterId},job_id.in.(${viewableJobIds.join(',')})`
                 );
             } else {
+                // Only show their own submissions
                 query = query.eq('candidate_recruiter_id', accessContext.recruiterId);
             }
         } else if (!accessContext.isPlatformAdmin) {

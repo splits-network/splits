@@ -601,7 +601,7 @@ export default function FormsOne() {
                                             onChange={(e) =>
                                                 setExperience(e.target.value)
                                             }
-                                            className="select w-full bg-base-200 border-base-300 focus:border-coral focus:outline-none"
+                                            className="select w-full focus:border-coral focus:outline-none"
                                         >
                                             {experienceLevels.map((el) => (
                                                 <option

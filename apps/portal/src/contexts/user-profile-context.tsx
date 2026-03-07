@@ -23,7 +23,11 @@ import {
     getCurrentUserProfile,
     getCachedSubscription,
 } from "@/lib/current-user-profile";
-import { createAuthenticatedClient } from "@/lib/api-client";
+import {
+    useRecruiterPermissions,
+    type CompanyPermissionEntry,
+} from "@/hooks/use-recruiter-permissions";
+import type { RecruiterCompanyPermissions } from "@/app/portal/invitation/shared/types";
 
 /**
  * Plan tier types
@@ -143,8 +147,21 @@ interface UserProfileContextValue {
     isSubscriptionLoading: boolean;
     /** Refresh the subscription data */
     refreshSubscription: () => Promise<void>;
-    /** Company IDs the recruiter can manage (can_manage_company_jobs=true) */
-    manageableCompanyIds: string[];
+    /** All company permissions for the recruiter */
+    companyPermissions: CompanyPermissionEntry[];
+    /** Whether permissions are loading */
+    isPermissionsLoading: boolean;
+    /** Check if recruiter has a specific permission for a company */
+    hasPermissionForCompany: (
+        companyId: string,
+        permission: keyof RecruiterCompanyPermissions,
+    ) => boolean;
+    /** Get company IDs where recruiter has a specific permission */
+    getCompanyIdsWithPermission: (
+        permission: keyof RecruiterCompanyPermissions,
+    ) => string[];
+    /** Refresh permissions */
+    refreshPermissions: () => Promise<void>;
 }
 
 const UserProfileContext = createContext<UserProfileContextValue | null>(null);
@@ -168,9 +185,7 @@ export function UserProfileProvider({
     const [error, setError] = useState<string | null>(null);
     const [subscription, setSubscription] = useState<Subscription | null>(null);
     const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
-    const [manageableCompanyIds, setManageableCompanyIds] = useState<string[]>(
-        [],
-    );
+    // Granular recruiter permissions (replaces legacy manageableCompanyIds)
 
     const fetchProfile = useCallback(
         async (opts?: { silent?: boolean }) => {
@@ -252,34 +267,14 @@ export function UserProfileProvider({
         }
     }, [profile, fetchSubscription]);
 
-    const fetchManageableCompanies = useCallback(async () => {
-        if (!profile?.recruiter_id) {
-            setManageableCompanyIds([]);
-            return;
-        }
+    const {
+        permissions: companyPermissions,
+        isLoading: isPermissionsLoading,
+        hasPermission: hasPermissionForCompany,
+        getCompanyIdsWithPermission,
+        refresh: refreshPermissions,
+    } = useRecruiterPermissions(profile?.recruiter_id ?? null);
 
-        try {
-            const token = await getToken();
-            if (!token) return;
-
-            const client = createAuthenticatedClient(token);
-            const response = await client.get<{ data: string[] }>(
-                "/recruiter-companies/manageable-companies",
-            );
-            setManageableCompanyIds(response.data || []);
-        } catch (err) {
-            console.error("Failed to fetch manageable companies:", err);
-            setManageableCompanyIds([]);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [profile?.recruiter_id]);
-
-    // Load manageable companies when profile loads (recruiters only)
-    useEffect(() => {
-        if (profile) {
-            fetchManageableCompanies();
-        }
-    }, [profile, fetchManageableCompanies]);
 
     // Derived role checks
     const roles = profile?.roles || [];
@@ -358,7 +353,11 @@ export function UserProfileProvider({
         isSubscriptionActive,
         isSubscriptionLoading,
         refreshSubscription: () => fetchSubscription(),
-        manageableCompanyIds,
+        companyPermissions,
+        isPermissionsLoading,
+        hasPermissionForCompany,
+        getCompanyIdsWithPermission,
+        refreshPermissions,
     };
 
     return (

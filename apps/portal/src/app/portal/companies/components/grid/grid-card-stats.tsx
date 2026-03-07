@@ -93,13 +93,6 @@ export function RelationshipStats({
                 : "---",
             icon: "fa-duotone fa-regular fa-user-tie",
         },
-        {
-            label: "Access",
-            value: relationship.can_manage_company_jobs
-                ? "Manage"
-                : "View Only",
-            icon: "fa-duotone fa-regular fa-shield-check",
-        },
     ];
 
     return (

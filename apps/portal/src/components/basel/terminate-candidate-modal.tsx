@@ -284,7 +284,7 @@ export default function TerminateCandidateModal({
                                                     </p>
                                                 </div>
                                                 <select
-                                                    className="select select-bordered select-sm font-medium bg-base-100 border-base-300 focus:border-primary focus:outline-none"
+                                                    className="select select-sm font-medium bg-base-100 border-base-300 focus:border-primary focus:outline-none"
                                                     style={{
                                                         borderRadius: 0,
                                                         appearance: "auto",

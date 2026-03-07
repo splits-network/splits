@@ -80,12 +80,6 @@ export function GridCard({
                     <i className="fa-duotone fa-regular fa-tag mr-1" />
                     {invitation.relationship_type}
                 </span>
-                {invitation.can_manage_company_jobs && (
-                    <span className="text-sm font-bold text-success">
-                        <i className="fa-duotone fa-regular fa-briefcase mr-1" />
-                        Jobs
-                    </span>
-                )}
             </div>
 
             {/* Footer: logo/initials left, actions right */}

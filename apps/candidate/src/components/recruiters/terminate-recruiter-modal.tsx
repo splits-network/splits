@@ -188,7 +188,7 @@ export default function TerminateRecruiterModal({
                                         <p className="text-xs text-base-content/60">{app.company_name} &middot; {app.stage}</p>
                                     </div>
                                     <select
-                                        className="select select-sm select-bordered"
+                                        className="select select-sm"
                                         value={decisions[app.id] || 'keep'}
                                         onChange={(e) =>
                                             setDecisions((prev) => ({

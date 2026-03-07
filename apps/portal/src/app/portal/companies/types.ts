@@ -25,13 +25,22 @@ export interface Company {
     avg_salary?: number | null;
 }
 
+export interface CompanyRelationshipPermissions {
+    can_view_jobs: boolean;
+    can_create_jobs: boolean;
+    can_edit_jobs: boolean;
+    can_submit_candidates: boolean;
+    can_view_applications: boolean;
+    can_advance_candidates: boolean;
+}
+
 export interface CompanyRelationship {
     id: string;
     recruiter_id: string;
     company_id: string;
     relationship_type: RelationshipType;
     status: RelationshipStatus;
-    can_manage_company_jobs: boolean;
+    permissions?: CompanyRelationshipPermissions;
     relationship_start_date: string;
     relationship_end_date?: string;
     termination_reason?: string;

@@ -4,12 +4,20 @@ import React, { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { ButtonLoading } from "@splits-network/shared-ui";
+import { BaselWizardModal } from "@splits-network/basel-ui";
 import { PermissionConfigurator } from "@/app/portal/invitation/shared/permission-configurator";
+import { RecruiterCompanyAgreement } from "@/app/portal/invitation/shared/agreement-clauses";
 import { DEFAULT_PERMISSIONS } from "@/app/portal/invitation/shared/types";
 import type { RecruiterCompanyPermissions } from "@/app/portal/invitation/shared/types";
 import type { RecruiterWithUser, Company } from "../../types";
-import { getDisplayName } from "../../types";
+import { getDisplayName, getInitials } from "../../types";
+
+const WIZARD_STEPS = [
+    { label: "The Recruiter" },
+    { label: "Permissions" },
+    { label: "Agreement" },
+    { label: "Confirm & Send" },
+];
 
 interface InviteRecruiterModalProps {
     isOpen: boolean;
@@ -31,25 +39,35 @@ export default function InviteRecruiterModal({
 
     const displayName = getDisplayName(recruiter);
     const displayEmail = recruiter.users?.email || recruiter.email;
+    const displayPhone = recruiter.phone;
+    const initials = getInitials(displayName);
 
+    const [currentStep, setCurrentStep] = useState(0);
     const [selectedCompanyId, setSelectedCompanyId] = useState(
         companies.length === 1 ? companies[0].id : "",
     );
-    const [permissions, setPermissions] = useState<RecruiterCompanyPermissions>({ ...DEFAULT_PERMISSIONS });
+    const [permissions, setPermissions] = useState<RecruiterCompanyPermissions>({
+        ...DEFAULT_PERMISSIONS,
+    });
     const [message, setMessage] = useState("");
+    const [agreeTerms, setAgreeTerms] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const selectedCompanyName =
+        companies.find((c) => c.id === selectedCompanyId)?.name || "your company";
 
+    const handleSubmit = async () => {
         if (!selectedCompanyId) {
             toast.error("Please select a company");
+            return;
+        }
+        if (!agreeTerms) {
+            toast.error("Please acknowledge the agreement");
             return;
         }
 
         try {
             setIsSubmitting(true);
-
             const token = await getToken();
             if (!token) {
                 toast.error("Not authenticated");
@@ -60,7 +78,6 @@ export default function InviteRecruiterModal({
             await client.post("/recruiter-companies/invite", {
                 company_id: selectedCompanyId,
                 recruiter_id: recruiter.id,
-                can_manage_company_jobs: permissions.can_create_jobs || permissions.can_edit_jobs,
                 permissions,
                 message: message.trim() || undefined,
             });
@@ -79,46 +96,162 @@ export default function InviteRecruiterModal({
         }
     };
 
-    if (!isOpen) return null;
+    const handleNext = () => {
+        if (currentStep === 1 && !selectedCompanyId) {
+            toast.error("Please select a company before continuing");
+            return;
+        }
+        setCurrentStep((s) => Math.min(s + 1, 3));
+    };
+    const handleBack = () => setCurrentStep((s) => Math.max(s - 1, 0));
+
+    const handleClose = () => {
+        setCurrentStep(0);
+        setAgreeTerms(false);
+        setMessage("");
+        onClose();
+    };
+
+    const isLastStep = currentStep === 3;
+    const nextDisabled =
+        isLastStep ? !agreeTerms || !selectedCompanyId : false;
 
     return (
-        <dialog className="modal modal-open">
-            <div className="modal-box max-w-lg bg-base-100 border-2 border-base-300 shadow-md" style={{ borderRadius: 0 }}>
-                <form method="dialog">
-                    <button
-                        type="button"
-                        className="btn btn-sm btn-square btn-ghost absolute right-2 top-2"
-                        onClick={onClose}
-                        disabled={isSubmitting}
-                    >
-                        <i className="fa-duotone fa-regular fa-xmark" />
-                    </button>
-                </form>
+        <BaselWizardModal
+            isOpen={isOpen}
+            onClose={handleClose}
+            title="Invite Recruiter"
+            icon="fa-duotone fa-regular fa-paper-plane"
+            steps={WIZARD_STEPS}
+            currentStep={currentStep}
+            onNext={handleNext}
+            onBack={handleBack}
+            onSubmit={handleSubmit}
+            submitting={isSubmitting}
+            nextDisabled={nextDisabled}
+            submitLabel="Send Invitation"
+            submittingLabel="Sending..."
+        >
+            {/* Step 1: Review the Recruiter */}
+            {currentStep === 0 && (
+                <div>
+                    <h4 className="text-lg font-black tracking-tight mb-1">
+                        About the Recruiter
+                    </h4>
+                    <p className="text-sm text-base-content/50 mb-6">
+                        Review this recruiter&apos;s profile before inviting
+                        them to represent {selectedCompanyName}.
+                    </p>
 
-                <h3 className="font-black text-xl uppercase tracking-tight mb-6">
-                    <i className="fa-duotone fa-regular fa-paper-plane mr-2 text-primary" />
-                    Invite Recruiter
-                </h3>
-
-                <form onSubmit={handleSubmit}>
-                    {/* Recruiter Info */}
-                    <div className="p-4 border-l-4 border-primary bg-primary/5 mb-4">
-                        <div className="flex items-center gap-3">
-                            <i className="fa-duotone fa-regular fa-user text-primary" />
-                            <div>
-                                <div className="font-bold">
-                                    {displayName}
-                                </div>
-                                <div className="text-sm text-base-content/60">
+                    {/* Recruiter Card */}
+                    <div className="flex items-start gap-5 bg-base-200 p-5 mb-6">
+                        <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-black">
+                                {initials}
+                            </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-black">
+                                {displayName}
+                            </h3>
+                            <p className="text-sm text-base-content/60">
+                                <span
+                                    className={
+                                        !recruiter.tagline
+                                            ? "italic text-base-content/30"
+                                            : ""
+                                    }
+                                >
+                                    {recruiter.tagline || "No tagline provided"}
+                                </span>
+                            </p>
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-base-content/50">
+                                <span>
+                                    <i className="fa-duotone fa-regular fa-envelope mr-1" />
                                     {displayEmail}
-                                </div>
+                                </span>
+                                <span>
+                                    <i className="fa-duotone fa-regular fa-phone mr-1" />
+                                    <span
+                                        className={
+                                            !displayPhone
+                                                ? "italic text-base-content/30"
+                                                : ""
+                                        }
+                                    >
+                                        {displayPhone || "Not provided"}
+                                    </span>
+                                </span>
                             </div>
+                            <p className="mt-3 text-sm text-base-content/70 leading-relaxed italic">
+                                {recruiter.bio ||
+                                    "This recruiter has not provided a bio."}
+                            </p>
                         </div>
                     </div>
 
+                    {/* What does inviting mean? */}
+                    <h4 className="text-sm font-black uppercase tracking-wider text-base-content/50 mb-4">
+                        What does inviting a recruiter mean?
+                    </h4>
+                    <div className="space-y-3">
+                        {[
+                            {
+                                icon: "fa-duotone fa-regular fa-handshake",
+                                title: "Formal Representation",
+                                text: "This recruiter will officially represent your company as a recruiting partner on Splits Network.",
+                            },
+                            {
+                                icon: "fa-duotone fa-regular fa-user-plus",
+                                title: "Candidate Submissions",
+                                text: "They can submit candidates to your open positions, creating tracked applications with full attribution.",
+                            },
+                            {
+                                icon: "fa-duotone fa-regular fa-coins",
+                                title: "Placement Fees",
+                                text: "When a candidate they submit gets hired, they receive placement attribution and fees per your billing terms.",
+                            },
+                            {
+                                icon: "fa-duotone fa-regular fa-shield-check",
+                                title: "You Control Permissions",
+                                text: "You decide their access level — which jobs they see, whether they can advance candidates, and if they can manage listings.",
+                            },
+                        ].map((item) => (
+                            <div
+                                key={item.title}
+                                className="flex items-start gap-3 border-l-4 border-base-300 pl-4 py-1"
+                            >
+                                <i
+                                    className={`${item.icon} text-primary mt-0.5`}
+                                />
+                                <div>
+                                    <p className="text-sm font-bold">
+                                        {item.title}
+                                    </p>
+                                    <p className="text-sm text-base-content/60 leading-relaxed">
+                                        {item.text}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Step 2: Configure Permissions */}
+            {currentStep === 1 && (
+                <div>
+                    <h4 className="text-lg font-black tracking-tight mb-1">
+                        Configure Relationship
+                    </h4>
+                    <p className="text-sm text-base-content/50 mb-6">
+                        Select the company and configure what{" "}
+                        {displayName} will be able to do.
+                    </p>
+
                     {/* Company Selection */}
-                    <fieldset className="fieldset mb-4">
-                        <legend className="fieldset-legend font-bold uppercase text-xs tracking-wider">
+                    <fieldset className="fieldset mb-6">
+                        <legend className="fieldset-legend font-bold uppercase text-sm tracking-wider">
                             Company
                         </legend>
                         {companies.length === 1 ? (
@@ -127,7 +260,6 @@ export default function InviteRecruiterModal({
                                 className="input w-full"
                                 value={companies[0].name}
                                 disabled
-                                style={{ borderRadius: 0 }}
                             />
                         ) : (
                             <select
@@ -137,9 +269,10 @@ export default function InviteRecruiterModal({
                                     setSelectedCompanyId(e.target.value)
                                 }
                                 required
-                                style={{ borderRadius: 0 }}
                             >
-                                <option value="">Select a company...</option>
+                                <option value="">
+                                    Select a company...
+                                </option>
                                 {companies.map((company) => (
                                     <option
                                         key={company.id}
@@ -153,18 +286,72 @@ export default function InviteRecruiterModal({
                     </fieldset>
 
                     {/* Permissions */}
-                    <div className="mb-4">
-                        <PermissionConfigurator
-                            permissions={permissions}
-                            onChange={setPermissions}
-                            recruiterName={displayName}
-                        />
+                    <PermissionConfigurator
+                        permissions={permissions}
+                        onChange={setPermissions}
+                        recruiterName={displayName}
+                    />
+                </div>
+            )}
+
+            {/* Step 3: Review Agreement */}
+            {currentStep === 2 && (
+                <div>
+                    <h4 className="text-lg font-black tracking-tight mb-1">
+                        Recruiter Relationship Agreement
+                    </h4>
+                    <p className="text-sm text-base-content/50 mb-6">
+                        Read the agreement below carefully. It defines how{" "}
+                        {displayName} will work with{" "}
+                        {selectedCompanyName} and what both parties are
+                        responsible for.
+                    </p>
+                    <RecruiterCompanyAgreement
+                        recruiterName={displayName}
+                        companyName={selectedCompanyName}
+                        direction="company-to-recruiter"
+                    />
+                </div>
+            )}
+
+            {/* Step 4: Confirm & Send */}
+            {currentStep === 3 && (
+                <div>
+                    <h4 className="text-lg font-black tracking-tight mb-1">
+                        Confirm & Send Invitation
+                    </h4>
+                    <p className="text-sm text-base-content/50 mb-6">
+                        Review the summary below, add an optional message, and
+                        send the invitation.
+                    </p>
+
+                    {/* Summary */}
+                    <div className="bg-base-200 p-4 mb-6 space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                            <i className="fa-duotone fa-regular fa-user w-5 text-center text-base-content/40" />
+                            <span className="font-bold">{displayName}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <i className="fa-duotone fa-regular fa-building w-5 text-center text-base-content/40" />
+                            <span>{selectedCompanyName}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <i className="fa-duotone fa-regular fa-shield-check w-5 text-center text-base-content/40" />
+                            <span>
+                                {
+                                    Object.values(permissions).filter(
+                                        Boolean,
+                                    ).length
+                                }{" "}
+                                of 6 permissions enabled
+                            </span>
+                        </div>
                     </div>
 
                     {/* Optional Message */}
                     <fieldset className="fieldset mb-6">
-                        <legend className="fieldset-legend font-bold uppercase text-xs tracking-wider">
-                            Message (optional)
+                        <legend className="fieldset-legend font-bold uppercase text-sm tracking-wider">
+                            Personal Message (optional)
                         </legend>
                         <textarea
                             className="textarea w-full"
@@ -173,7 +360,6 @@ export default function InviteRecruiterModal({
                             onChange={(e) => setMessage(e.target.value)}
                             rows={3}
                             maxLength={500}
-                            style={{ borderRadius: 0 }}
                         />
                         <label className="label">
                             <span className="text-sm text-base-content/40">
@@ -182,37 +368,32 @@ export default function InviteRecruiterModal({
                         </label>
                     </fieldset>
 
-                    {/* Actions */}
-                    <div className="flex justify-end gap-2">
-                        <button
-                            type="button"
-                            className="btn btn-ghost font-bold"
-                            onClick={onClose}
-                            disabled={isSubmitting}
-                            style={{ borderRadius: 0 }}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-primary font-bold"
-                            disabled={isSubmitting || !selectedCompanyId}
-                            style={{ borderRadius: 0 }}
-                        >
-                            <ButtonLoading
-                                loading={isSubmitting}
-                                text="Send Invitation"
-                                loadingText="Sending..."
-                            />
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <form method="dialog" className="modal-backdrop">
-                <button onClick={onClose} disabled={isSubmitting}>
-                    close
-                </button>
-            </form>
-        </dialog>
+                    {/* Agreement Checkbox */}
+                    <label
+                        className={`flex items-start gap-3 p-4 border cursor-pointer transition-all ${
+                            agreeTerms
+                                ? "border-primary bg-primary/5"
+                                : "border-base-300 bg-base-200"
+                        }`}
+                    >
+                        <input
+                            type="checkbox"
+                            className="checkbox checkbox-primary mt-0.5"
+                            checked={agreeTerms}
+                            onChange={(e) =>
+                                setAgreeTerms(e.target.checked)
+                            }
+                        />
+                        <span className="text-sm text-base-content/80">
+                            I have reviewed the recruiter relationship
+                            agreement and I authorize{" "}
+                            <strong>{displayName}</strong> to represent{" "}
+                            <strong>{selectedCompanyName}</strong> with the
+                            permissions configured above.
+                        </span>
+                    </label>
+                </div>
+            )}
+        </BaselWizardModal>
     );
 }

@@ -323,17 +323,16 @@ export class JobRepository {
                         throw new Error('Forbidden: You must be an active member of the firm to create off-platform jobs');
                     }
                 } else {
-                    // Platform job: check recruiter_companies for company access
-                    const { data: relationships } = await this.supabase
+                    // Platform job: check recruiter_companies for can_create_jobs permission
+                    const { data: relationship } = await this.supabase
                         .from('recruiter_companies')
-                        .select('company_id')
+                        .select('permissions')
                         .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('company_id', job.company_id)
                         .eq('status', 'active')
-                        .eq('can_manage_company_jobs', true);
+                        .maybeSingle();
 
-                    const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
-
-                    if (!allowedCompanyIds.includes(job.company_id)) {
+                    if (!relationship?.permissions?.can_create_jobs) {
                         throw new Error('Forbidden: No active relationship with permission to create jobs for this company');
                     }
                 }
@@ -401,7 +400,11 @@ export class JobRepository {
                     .eq('id', id)
                     .single();
 
-                if (existingJob?.source_firm_id && !existingJob?.company_id) {
+                if (!existingJob) {
+                    throw new Error('Job not found');
+                }
+
+                if (existingJob.source_firm_id && !existingJob.company_id) {
                     // Off-platform job: verify firm membership
                     const { data: firmMember } = await this.supabase
                         .from('firm_members')
@@ -415,21 +418,18 @@ export class JobRepository {
                         throw new Error('Forbidden: You must be an active firm member to edit this off-platform job');
                     }
                 } else {
-                    // Platform job: check recruiter_companies
-                    const { data: relationships } = await this.supabase
+                    // Platform job: check recruiter_companies for can_edit_jobs permission
+                    const { data: relationship } = await this.supabase
                         .from('recruiter_companies')
-                        .select('company_id')
+                        .select('permissions')
                         .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('company_id', existingJob.company_id)
                         .eq('status', 'active')
-                        .eq('can_manage_company_jobs', true);
+                        .maybeSingle();
 
-                    const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
-
-                    if (allowedCompanyIds.length === 0) {
-                        throw new Error('Forbidden: No active company relationships with job management permissions');
+                    if (!relationship?.permissions?.can_edit_jobs) {
+                        throw new Error('Forbidden: No active relationship with permission to edit jobs for this company');
                     }
-
-                    query = query.in('company_id', allowedCompanyIds);
                 }
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users can edit their organization's jobs (not off-platform)
@@ -474,7 +474,11 @@ export class JobRepository {
                     .eq('id', id)
                     .single();
 
-                if (existingJob?.source_firm_id && !existingJob?.company_id) {
+                if (!existingJob) {
+                    throw new Error('Job not found');
+                }
+
+                if (existingJob.source_firm_id && !existingJob.company_id) {
                     // Off-platform job: verify firm membership
                     const { data: firmMember } = await this.supabase
                         .from('firm_members')
@@ -488,21 +492,20 @@ export class JobRepository {
                         throw new Error('Forbidden: You must be an active firm member to delete this off-platform job');
                     }
                 } else {
-                    // Platform job: check recruiter_companies
-                    const { data: relationships } = await this.supabase
+                    // Platform job: check recruiter_companies for can_edit_jobs permission (delete = edit)
+                    const { data: relationship } = await this.supabase
                         .from('recruiter_companies')
-                        .select('company_id')
+                        .select('permissions')
                         .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('company_id', existingJob.company_id)
                         .eq('status', 'active')
-                        .eq('can_manage_company_jobs', true);
+                        .maybeSingle();
 
-                    const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
-
-                    if (allowedCompanyIds.length === 0) {
-                        throw new Error('Forbidden: No active company relationships with job management permissions');
+                    if (!relationship?.permissions?.can_edit_jobs) {
+                        throw new Error('Forbidden: No active relationship with permission to manage jobs for this company');
                     }
 
-                    query = query.in('company_id', allowedCompanyIds);
+                    query = query.eq('company_id', existingJob.company_id);
                 }
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users can delete their organization's jobs

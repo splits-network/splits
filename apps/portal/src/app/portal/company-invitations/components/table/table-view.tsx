@@ -9,7 +9,6 @@ const COLUMNS = [
     "Details",
     "Type",
     "Status",
-    "Jobs",
     "Received",
     "", // actions
 ] as const;

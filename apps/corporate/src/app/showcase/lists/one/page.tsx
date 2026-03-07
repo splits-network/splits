@@ -476,7 +476,7 @@ export default function ListsOnePage() {
                             <select
                                 value={filterType}
                                 onChange={(e) => setFilterType(e.target.value)}
-                                className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
+                                className="select select-sm text-xs uppercase tracking-wider font-bold"
                             >
                                 <option value="all">All Types</option>
                                 <option value="full-time">Full-Time</option>
@@ -491,7 +491,7 @@ export default function ListsOnePage() {
                                 onChange={(e) =>
                                     setFilterStatus(e.target.value)
                                 }
-                                className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
+                                className="select select-sm text-xs uppercase tracking-wider font-bold"
                             >
                                 <option value="all">All Status</option>
                                 <option value="open">Open</option>
@@ -504,7 +504,7 @@ export default function ListsOnePage() {
                             <select
                                 value={filterLevel}
                                 onChange={(e) => setFilterLevel(e.target.value)}
-                                className="select select-bordered select-sm bg-base-200 border-base-300 text-xs uppercase tracking-wider font-bold"
+                                className="select select-sm text-xs uppercase tracking-wider font-bold"
                             >
                                 <option value="all">All Levels</option>
                                 <option value="entry">Entry</option>

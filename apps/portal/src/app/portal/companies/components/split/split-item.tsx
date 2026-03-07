@@ -98,11 +98,6 @@ export function SplitItem({
                     <span className="text-sm font-bold text-base-content/70 capitalize">
                         {relationship.relationship_type}
                     </span>
-                    {relationship.can_manage_company_jobs && (
-                        <span className="text-sm font-bold text-secondary">
-                            Can manage jobs
-                        </span>
-                    )}
                 </div>
             )}
 
