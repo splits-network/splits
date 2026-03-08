@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 36 of 38 (Recording & Playback)
-Plan: 2 of 6
+Plan: 3 of 6
 Status: In progress
-Last activity: 2026-03-08 — Completed 36-02-PLAN.md (egress Azure Blob config)
+Last activity: 2026-03-08 — Completed 36-03-PLAN.md (recording API routes)
 
 Progress: ██████████████████████░░ 96%
 
@@ -23,7 +23,7 @@ Progress: ██████████████████████░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 26
+- Plans completed: 27
 - Phases completed: 3 (Phases 33-35)
 
 ## Accumulated Context
@@ -86,6 +86,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | H264_720P_30 preset for egress encoding | 36-01 | 1280x720, 30fps, H264/OPUS -- matches LiveKit built-in preset |
 | Protobuf constructors for LiveKit egress types | 36-01 | livekit-server-sdk v2.9 uses proto3 Message classes |
 | 90-day recording retention with 30-day tier transition | 36-02 | Hot→Cool at 30 days, delete at 90 per CONTEXT.md |
+| Interviewer-only recording start/stop | 36-03 | Only interviewer participant role can control recording |
+| Dual auth on consent endpoint | 36-03 | Magic link token OR Clerk header for candidate/authenticated user consent |
+| Participant-gated blob URL | 36-03 | Only interview participants see recording blob URL |
 
 ### Pending Todos
 
@@ -100,10 +103,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 36-02-PLAN.md (egress Azure Blob config)
+Stopped at: Completed 36-03-PLAN.md (recording API routes)
 Resume file: None
-Next: 36-03-PLAN.md
+Next: 36-04-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 36-02 complete)*
+*Last updated: 2026-03-08 (Plan 36-03 complete)*
