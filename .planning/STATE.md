@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 33 of 38 (Infrastructure)
-Plan: 01 of 03
+Plan: 02 of 03
 Status: In progress
-Last activity: 2026-03-08 — Completed 33-01-PLAN.md (LiveKit K8s + interviews schema)
+Last activity: 2026-03-08 — Completed 33-02-PLAN.md (video-service scaffold + interview CRUD)
 
-Progress: █░░░░░░░░░░░░░░░░░░░ 5%
+Progress: ██░░░░░░░░░░░░░░░░░░ 10%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: █░░░░░░░░░░░░░░░░░░░ 5%
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 1
+- Plans completed: 2
 - Phases completed: 0
 
 ## Accumulated Context
@@ -40,6 +40,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Official Docker Hub images for LiveKit | 33-01 | Open source, no need for ACR |
 | Egress on dedicated node pool | 33-01 | Isolate CPU-heavy encoding from general workloads |
 | Extended interview_type enum (panel, debrief) | 33-01 | Supports multi-interviewer and post-interview workflows |
+| video-service on port 3019 | 33-02 | Next available port after gamification-service (3018) |
+| Room name format: interview-{uuid} | 33-02 | Unique, predictable, no PII exposure |
 
 ### Pending Todos
 
@@ -54,10 +56,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 33-01-PLAN.md (LiveKit K8s manifests + interviews schema)
+Stopped at: Completed 33-02-PLAN.md (video-service scaffold + interview CRUD)
 Resume file: None
-Next: Execute 33-02-PLAN.md (video-service scaffold)
+Next: Execute 33-03-PLAN.md (token system + gateway routing)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (33-01 complete)*
+*Last updated: 2026-03-08 (33-02 complete)*
