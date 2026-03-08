@@ -20,7 +20,7 @@ export function VideoControls({
     canStopRecording,
 }: VideoControlsProps = {}) {
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-base-300/90 backdrop-blur-md z-20">
+        <div className="bg-base-300/90 backdrop-blur-md z-20">
             <div className="flex items-center justify-center gap-4 py-4">
                 {/* Recording indicator — left side */}
                 <RecordingIndicator
@@ -46,6 +46,15 @@ export function VideoControls({
                 >
                     <i className="fa-duotone fa-regular fa-video data-[lk-muted=true]:hidden" />
                     <i className="fa-duotone fa-regular fa-video-slash hidden data-[lk-muted=true]:inline" />
+                </TrackToggle>
+
+                {/* Screen share toggle */}
+                <TrackToggle
+                    source={Track.Source.ScreenShare}
+                    className="btn btn-circle btn-sm lg:btn-md data-[lk-enabled=true]:btn-success"
+                    showIcon={false}
+                >
+                    <i className="fa-duotone fa-regular fa-screen-share" />
                 </TrackToggle>
 
                 {/* Device settings dropdown */}
