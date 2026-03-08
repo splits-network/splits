@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 35 of 38 (Scheduling & Notifications)
-Plan: 05 of 10
+Plan: 06 of 10
 Status: In progress
-Last activity: 2026-03-08 — Completed 35-05-PLAN.md (calendar interview integration)
+Last activity: 2026-03-08 — Completed 35-06-PLAN.md (calendar preferences & stage toast)
 
-Progress: █████████████████████░░░ 88%
+Progress: █████████████████████░░░ 89%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: █████████████████████░░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 20
+- Plans completed: 21
 - Phases completed: 2 (Phases 33-34), Phase 35 in progress
 
 ## Accumulated Context
@@ -70,6 +70,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Accent color for interview events | 35-05 | Visual distinction from regular calendar events |
 | Join button 10-min pre-start window | 35-05 | Consistent with lobby gate timing from 34-05 |
 | Stage promotion dialog on non-interview apps | 35-05 | User confirmation before changing application stage |
+| Clerk-to-UUID resolution for calendar prefs | 35-06 | user_calendar_preferences FK requires internal UUID, not clerk ID |
+| PUT method in gateway video proxy | 35-06 | Gateway switch only had GET/POST/PATCH/DELETE |
+| Toast ref timer with cleanup | 35-06 | Prevent memory leaks on unmount for auto-dismiss |
 
 ### Pending Todos
 
@@ -84,10 +87,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 35-05-PLAN.md (calendar interview integration)
+Stopped at: Completed 35-06-PLAN.md (calendar preferences & stage toast)
 Resume file: None
-Next: 35-06-PLAN.md
+Next: 35-07-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 35-05 complete)*
+*Last updated: 2026-03-08 (Plan 35-06 complete)*
