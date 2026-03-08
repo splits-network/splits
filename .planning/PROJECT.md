@@ -10,22 +10,19 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 ## Current State
 
-v7.0 Company Profile Enhancement shipped. v8.0 Company Experience Enhancement shelved (requirements defined but not executed — see REQUIREMENTS-v8.md if resuming).
+v9.0 Video Interviewing shipped. v8.0 Company Experience Enhancement shelved (requirements defined but not executed — see REQUIREMENTS-v8.md if resuming).
 
-## Current Milestone: v9.0 Video Interviewing
+## Current Milestone: v10.0 Video Platform & Recruiting Calls
 
-**Goal:** Add in-app video interviewing powered by self-hosted LiveKit — schedule, conduct, record, transcribe, and AI-summarize interviews directly within the recruiting workflow.
+**Goal:** Generalize video from interview-only to platform-wide recruiting conversations, with dedicated full-screen video apps on branded subdomains.
 
 **Target features:**
-- LiveKit self-hosted on K8s with new `video-service` microservice for room management
-- 1:1 and panel interviews (multi-party support)
-- Candidate join via magic link (no account needed) or through candidate app (logged-in)
-- Scheduling: stage-triggered prompts, standalone "Schedule Interview" action, Google Calendar sync via combo provider
-- Interview recording with LiveKit Egress, stored in object storage
-- AI transcription and summary generation via existing ai-service pipeline
-- AI summary auto-posted as application note AND available in dedicated interviews tab
-- Video call UI: lobby, in-call controls, screen share
-- Interview scheduling modal with calendar availability
+- Dedicated video app (`apps/video/`) — full-screen call experience replacing in-portal video pages
+- Two branded subdomains: `video.splits.network` (recruiters/companies) and `video.applicant.network` (candidates)
+- Recruiter ↔ Company calls — discuss candidates, roles, split terms with AI summaries linked to entities
+- Generalized call types beyond interviews: `interview`, `client_meeting`
+- Migration of existing interview video flows to the new video app
+- AI summaries for all call types — context-aware linking to applications, jobs, or companies
 
 ## Requirements
 
@@ -93,7 +90,7 @@ v7.0 Company Profile Enhancement shipped. v8.0 Company Experience Enhancement sh
 - Computed open roles count and average salary from jobs table — v7.0
 - Search index enriched with new company profile data — v7.0
 
-### Active
+<!-- v9.0 -->
 
 - LiveKit self-hosted infrastructure on K8s with video-service microservice — v9.0
 - Interview scheduling with stage triggers, standalone action, and Google Calendar sync — v9.0
@@ -103,6 +100,14 @@ v7.0 Company Profile Enhancement shipped. v8.0 Company Experience Enhancement sh
 - AI transcription and summary generation via ai-service — v9.0
 - Dedicated interviews tab on applications/roles with recording playback — v9.0
 - AI summary auto-posted as application note — v9.0
+
+### Active
+
+- Dedicated video app with full-screen call experience on branded subdomains — v10.0
+- Recruiter ↔ Company video calls with entity-linked AI summaries — v10.0
+- Generalized call types (`interview`, `client_meeting`) with polymorphic entity linking — v10.0
+- Migration of existing interview video flows from portal/candidate to video app — v10.0
+- Two branded video subdomains: video.splits.network and video.applicant.network — v10.0
 
 ### Out of Scope
 
@@ -178,7 +183,9 @@ v7.0 Company Profile Enhancement shipped. v8.0 Company Experience Enhancement sh
 | Admin routes under /admin/* in domain services | Clean separation from user-scoped /api/v2/* routes. Gateway rewritePrefix strips service prefix. | ✓ Good |
 | useStandardList clientFactory option | Admin wrapper injects createAdminClient. No Clerk coupling in shared-hooks. | ✓ Good |
 
-| LiveKit over Daily/Twilio/100ms | Self-hostable on existing K8s, open-source, full control over data and costs. Already running K8s so infra overhead is minimal. | — Pending |
+| LiveKit over Daily/Twilio/100ms | Self-hostable on existing K8s, open-source, full control over data and costs. Already running K8s so infra overhead is minimal. | ✓ Good |
+| Separate video app per brand | Candidates shouldn't see Splits Network branding — avoids feeling like a commodity in a financial transaction. Same codebase, different brand shell. | — Pending |
+| Generalize calls over interview-only video | Recruiter-company calls are a natural workflow extension. AI summaries linked to entities is unique value vs Zoom. | — Pending |
 | Tech stack reuses skills table | Tech stack items are the same domain as skills. Reusing avoids duplication and enables cross-entity matching (candidate skills vs company tech stack). | ✓ Good |
 | Perks as new lookup table | Perks are a distinct domain from skills. Slug-deduplication pattern with BaselSkillPicker UI. | ✓ Good |
 | Culture tags as new lookup table | Culture is open-ended enough to warrant a lookup. Remote-first, async-friendly, etc. | ✓ Good |
@@ -186,4 +193,4 @@ v7.0 Company Profile Enhancement shipped. v8.0 Company Experience Enhancement sh
 | Computed open roles and avg salary | Derived from jobs table at query time, not stored. Always accurate. | ✓ Good |
 
 ---
-*Last updated: 2026-03-07 after v9.0 milestone started (v8.0 shelved)*
+*Last updated: 2026-03-08 after v10.0 milestone started (v9.0 shipped)*
