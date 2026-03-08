@@ -9,9 +9,9 @@ Requirements for generalizing video from interview-only to platform-wide recruit
 
 ### Data Model
 
-- [ ] **DATA-01**: New `calls` table as universal video session entity with `call_type` enum (`interview`, `client_meeting`), polymorphic entity linking (`entity_type` + `entity_id`), and room/scheduling fields
-- [ ] **DATA-02**: Existing `interviews` table references `calls` via `call_id` FK — interviews become a specialized call type with `application_id` context
-- [ ] **DATA-03**: All call artifacts (recordings, transcripts, AI summaries, in-call notes) are owned by the call record, not posted to entity note tables
+- [x] **DATA-01**: New `calls` table as universal video session entity with `call_type` enum (`interview`, `client_meeting`), polymorphic entity linking (`entity_type` + `entity_id`), and room/scheduling fields
+- [x] **DATA-02**: Existing `interviews` table references `calls` via `call_id` FK — interviews become a specialized call type with `application_id` context
+- [x] **DATA-03**: All call artifacts (recordings, transcripts, AI summaries, in-call notes) are owned by the call record, not posted to entity note tables
 
 ### Video App
 
