@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 35 in progress
+**Current focus:** v9.0 Video Interviewing — Phase 35 complete
 
 ## Current Position
 
 Phase: 35 of 38 (Scheduling & Notifications)
-Plan: 09 of 10
-Status: In progress
-Last activity: 2026-03-08 — Completed 35-09-PLAN.md (interview reminders)
+Plan: 10 of 10
+Status: Phase complete
+Last activity: 2026-03-08 — Completed 35-10-PLAN.md (candidate reschedule & countdown)
 
-Progress: █████████████████████░░░ 92%
+Progress: ██████████████████████░░ 96%
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: █████████████████████░░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 24
-- Phases completed: 2 (Phases 33-34), Phase 35 in progress
+- Plans completed: 25
+- Phases completed: 3 (Phases 33-35)
 
 ## Accumulated Context
 
@@ -79,6 +79,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | All interview notifications use 'both' channel | 35-08 | High-priority events need email + in-app visibility |
 | croner for in-process cron over K8s CronJob | 35-09 | 5-minute interval too frequent for K8s CronJob overhead |
 | Reminder deduplication via notification_log | 35-09 | Prevents duplicate reminders on overlapping job runs |
+| Available slots uses working hours, no busy slots | 35-10 | Simple approach for candidate-initiated reschedule |
+| 60-second setInterval for countdown polling | 35-10 | Per CONTEXT.md guidance, no WebSocket needed |
 
 ### Pending Todos
 
@@ -93,10 +95,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 35-09-PLAN.md (interview reminders)
+Stopped at: Completed 35-10-PLAN.md (candidate reschedule & countdown) — Phase 35 complete
 Resume file: None
-Next: 35-10-PLAN.md
+Next: Phase 36 planning
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 35-09 complete)*
+*Last updated: 2026-03-08 (Plan 35-10 complete — Phase 35 done)*
