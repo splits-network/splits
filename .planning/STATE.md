@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 36 of 38 (Recording & Playback)
-Plan: 4 of 6
+Plan: 5 of 6
 Status: In progress
-Last activity: 2026-03-08 — Completed 36-04-PLAN.md (recording consent UX)
+Last activity: 2026-03-08 — Completed 36-05-PLAN.md (recording playback)
 
 Progress: ██████████████████████░░ 96%
 
@@ -23,7 +23,7 @@ Progress: ██████████████████████░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 28
+- Plans completed: 29
 - Phases completed: 3 (Phases 33-35)
 
 ## Accumulated Context
@@ -91,6 +91,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Participant-gated blob URL | 36-03 | Only interview participants see recording blob URL |
 | Warning-themed consent card | 36-04 | Draws attention without being alarming (bg-warning/5) |
 | Recording opt-in per interview | 36-04 | Default unchecked; auto-record means auto-start IF enabled |
+| SAS URL helper as reusable module | 36-05 | Avoids duplication between playback and download endpoints |
+| Company admin auth via app->job->company chain | 36-05 | Sequential queries, consistent with existing token endpoint pattern |
+| 1-hour SAS token expiry | 36-05 | Balances security with reasonable viewing session length |
 
 ### Pending Todos
 
@@ -105,10 +108,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 36-04-PLAN.md (recording consent UX)
+Stopped at: Completed 36-05-PLAN.md (recording playback)
 Resume file: None
-Next: 36-05-PLAN.md
+Next: 36-06-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 36-04 complete)*
+*Last updated: 2026-03-08 (Plan 36-05 complete)*
