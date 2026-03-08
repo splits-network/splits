@@ -1,0 +1,40 @@
+{
+    "rules": [
+        {
+            "enabled": true,
+            "name": "move-recordings-to-cool",
+            "type": "Lifecycle",
+            "definition": {
+                "actions": {
+                    "baseBlob": {
+                        "tierToCool": {
+                            "daysAfterModificationGreaterThan": 30
+                        }
+                    }
+                },
+                "filters": {
+                    "blobTypes": ["blockBlob"],
+                    "prefixMatch": ["recordings/"]
+                }
+            }
+        },
+        {
+            "enabled": true,
+            "name": "delete-old-recordings",
+            "type": "Lifecycle",
+            "definition": {
+                "actions": {
+                    "baseBlob": {
+                        "delete": {
+                            "daysAfterModificationGreaterThan": 90
+                        }
+                    }
+                },
+                "filters": {
+                    "blobTypes": ["blockBlob"],
+                    "prefixMatch": ["recordings/"]
+                }
+            }
+        }
+    ]
+}
