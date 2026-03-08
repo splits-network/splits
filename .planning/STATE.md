@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 38 of 38 (Panel, Notes & Polish)
-Plan: 1 of 4
+Plan: 2 of 4
 Status: In progress
-Last activity: 2026-03-08 — Completed 38-01-PLAN.md (Backend migration and API)
+Last activity: 2026-03-08 — Completed 38-02-PLAN.md (Panel layout and screen sharing)
 
 Progress: ████████████████████████ 99%
 
@@ -23,7 +23,7 @@ Progress: ███████████████████████�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 34
+- Plans completed: 35
 - Phases completed: 5 (Phases 33-37), Phase 38 in progress
 
 ## Accumulated Context
@@ -103,6 +103,10 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Upsert note design (one per participant per interview) | 38-01 | Auto-save friendly, no duplicate rows |
 | Cross-table posting for interview notes | 38-01 | video-service directly inserts into application_notes |
 | Round numbering by chronological position | 38-01 | 1-based from scheduled_at order |
+| Grid layout over active speaker for panels | 38-02 | All participants visible simultaneously in interview context |
+| Flex-based controls bar instead of fixed | 38-02 | Works within new layout hierarchy with sidebar |
+| TrackToggle for screen share | 38-02 | LiveKit built-in handles browser permission prompts |
+| useRef identity tracking for join/leave | 38-02 | Compare previous vs current participant set each render |
 
 ### Pending Todos
 
@@ -117,10 +121,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 38-01-PLAN.md
+Stopped at: Completed 38-02-PLAN.md
 Resume file: None
-Next: 38-02-PLAN.md
+Next: 38-03-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Phase 38 Plan 01 complete)*
+*Last updated: 2026-03-08 (Phase 38 Plan 02 complete)*
