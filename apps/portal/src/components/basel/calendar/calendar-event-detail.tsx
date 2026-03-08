@@ -14,6 +14,9 @@ import {
     isInterviewEvent,
     parseInterviewSummary,
 } from "./calendar-context";
+import RescheduleInterviewModal from "@/components/basel/scheduling/reschedule-interview-modal";
+import CancelInterviewDialog from "@/components/basel/scheduling/cancel-interview-dialog";
+import type { ScheduledInterview } from "@/app/portal/applications/hooks/use-scheduled-interview";
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 
@@ -107,16 +110,23 @@ function isJoinWindowActive(startDT?: string, endDT?: string): boolean {
 
 function InterviewDetailSection({
     eventId,
+    candidateName,
+    jobTitle,
     joinable,
 }: {
     eventId: string;
+    candidateName: string;
+    jobTitle: string;
     joinable: boolean;
 }) {
     const { getToken } = useAuth();
+    const { selectedConnection, refresh } = useCalendar();
     const getTokenRef = useRef(getToken);
     getTokenRef.current = getToken;
-    const [interviewId, setInterviewId] = useState<string | null>(null);
+    const [interviewData, setInterviewData] = useState<ScheduledInterview | null>(null);
     const [loading, setLoading] = useState(true);
+    const [showReschedule, setShowReschedule] = useState(false);
+    const [showCancel, setShowCancel] = useState(false);
 
     const fetchInterview = useCallback(async () => {
         try {
@@ -128,10 +138,10 @@ function InterviewDetailSection({
             })) as { data: any[] };
             const interviews = res.data ?? [];
             if (interviews.length > 0) {
-                setInterviewId(interviews[0].id);
+                setInterviewData(interviews[0]);
             }
         } catch {
-            // Interview lookup failed — non-critical
+            // Interview lookup failed -- non-critical
         } finally {
             setLoading(false);
         }
@@ -142,9 +152,14 @@ function InterviewDetailSection({
     }, [fetchInterview]);
 
     const handleJoin = () => {
-        if (interviewId) {
-            window.open(`/portal/interviews/${interviewId}`, "_blank");
+        if (interviewData?.id) {
+            window.open(`/portal/interviews/${interviewData.id}`, "_blank");
         }
+    };
+
+    const handleSuccess = () => {
+        fetchInterview();
+        refresh();
     };
 
     if (loading) {
@@ -158,9 +173,11 @@ function InterviewDetailSection({
         );
     }
 
+    if (!interviewData) return null;
+
     return (
         <div className="space-y-3">
-            {interviewId && joinable && (
+            {joinable && (
                 <button
                     onClick={handleJoin}
                     className="btn btn-accent w-full"
@@ -172,24 +189,46 @@ function InterviewDetailSection({
 
             <div className="flex gap-2">
                 <button
-                    onClick={() =>
-                        console.log("TODO: implement in plan 07")
-                    }
+                    onClick={() => setShowReschedule(true)}
                     className="btn btn-outline btn-sm flex-1"
                 >
                     <i className="fa-duotone fa-regular fa-calendar-pen" />
                     Reschedule
                 </button>
                 <button
-                    onClick={() =>
-                        console.log("TODO: implement in plan 07")
-                    }
+                    onClick={() => setShowCancel(true)}
                     className="btn btn-outline btn-error btn-sm flex-1"
                 >
                     <i className="fa-duotone fa-regular fa-xmark" />
                     Cancel
                 </button>
             </div>
+
+            {showReschedule && (
+                <RescheduleInterviewModal
+                    interviewId={interviewData.id}
+                    currentScheduledAt={interviewData.scheduled_at}
+                    currentDuration={interviewData.scheduled_duration_minutes || 30}
+                    candidateName={candidateName}
+                    jobTitle={jobTitle}
+                    calendarEventId={eventId}
+                    calendarConnectionId={selectedConnection?.id}
+                    onClose={() => setShowReschedule(false)}
+                    onSuccess={handleSuccess}
+                />
+            )}
+
+            {showCancel && (
+                <CancelInterviewDialog
+                    interviewId={interviewData.id}
+                    candidateName={candidateName}
+                    scheduledAt={interviewData.scheduled_at}
+                    calendarEventId={eventId}
+                    calendarConnectionId={selectedConnection?.id}
+                    onClose={() => setShowCancel(false)}
+                    onSuccess={handleSuccess}
+                />
+            )}
         </div>
     );
 }
@@ -315,9 +354,11 @@ export default function CalendarEventDetail() {
                 )}
 
                 {/* Interview action buttons (join, reschedule, cancel) */}
-                {interview && (
+                {interview && interviewInfo && (
                     <InterviewDetailSection
                         eventId={selectedEvent.id}
+                        candidateName={interviewInfo.candidateName}
+                        jobTitle={interviewInfo.jobTitle}
                         joinable={joinable}
                     />
                 )}

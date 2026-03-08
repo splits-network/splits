@@ -1,13 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
-interface ScheduledInterview {
+export interface ScheduledInterview {
     id: string;
     scheduled_at: string;
+    scheduled_duration_minutes: number;
     status: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show";
+    calendar_event_id?: string;
+    calendar_connection_id?: string;
+    title?: string;
+    application_id?: string;
 }
 
 const JOINABLE_STAGES = new Set([
@@ -29,7 +34,12 @@ export function useScheduledInterview(
     stage: string | null | undefined,
 ) {
     const [interview, setInterview] = useState<ScheduledInterview | null>(null);
+    const [refreshKey, setRefreshKey] = useState(0);
     const { getToken } = useAuth();
+
+    const refetch = useCallback(() => {
+        setRefreshKey((k) => k + 1);
+    }, []);
 
     useEffect(() => {
         if (!stage || !JOINABLE_STAGES.has(stage)) return;
@@ -48,8 +58,8 @@ export function useScheduledInterview(
                     (i: ScheduledInterview) =>
                         i.status === "scheduled" || i.status === "in_progress",
                 );
-                if (!cancelled && joinable) {
-                    setInterview(joinable);
+                if (!cancelled) {
+                    setInterview(joinable || null);
                 }
             } catch (err) {
                 console.warn("[useScheduledInterview] Failed to fetch interviews for", applicationId, err);
@@ -59,7 +69,7 @@ export function useScheduledInterview(
             cancelled = true;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [applicationId, stage]);
+    }, [applicationId, stage, refreshKey]);
 
-    return interview;
+    return { interview, refetch };
 }
