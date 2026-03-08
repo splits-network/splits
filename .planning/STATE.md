@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 34 of 38 (Video Call Experience)
-Plan: 01 of 04
+Plan: 02 of 06
 Status: In progress
-Last activity: 2026-03-08 — Completed 34-01-PLAN.md (shared-video package + token enrichment)
+Last activity: 2026-03-08 — Completed 34-02-PLAN.md (pre-join lobby components)
 
-Progress: ████░░░░░░░░░░░░░░░░ 20%
+Progress: █████░░░░░░░░░░░░░░░ 25%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: ████░░░░░░░░░░░░░░░░ 20%
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 4
+- Plans completed: 5
 - Phases completed: 1 (Phase 33)
 
 ## Accumulated Context
@@ -46,6 +46,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Lazy room name assignment | 33-03 | Room name set on first token generation if not already present |
 | Sequential queries for context enrichment | 34-01 | Simpler than complex joins, negligible overhead for once-per-session token endpoint |
 | User names from DB not Clerk API | 34-01 | Self-contained backend, no external API during token generation |
+| Manual device enumeration in lobby | 34-02 | LiveKit MediaDeviceSelect requires room context, lobby has none |
+| Web Audio API for lobby audio meter | 34-02 | LiveKit BarVisualizer requires room context, lobby uses raw tracks |
 
 ### Pending Todos
 
@@ -60,10 +62,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 34-01-PLAN.md (shared-video package + token enrichment)
+Stopped at: Completed 34-02-PLAN.md (pre-join lobby components)
 Resume file: None
-Next: 34-02-PLAN.md
+Next: 34-03-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (34-01 complete)*
+*Last updated: 2026-03-08 (34-02 complete)*
