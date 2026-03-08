@@ -9,7 +9,7 @@
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
-- [ ] **v9.0 Video Interviewing** - Phases 33-41
+- [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
 
 ## Phases
 
@@ -45,7 +45,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 
 </details>
 
-### v9.0 Video Interviewing (Active)
+### v9.0 Video Interviewing (Complete)
 
 **Milestone Goal:** Add in-app video interviewing powered by self-hosted LiveKit -- schedule, conduct, record, transcribe, and AI-summarize interviews directly within the recruiting workflow.
 
@@ -57,7 +57,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
 - [x] **Phase 39: Integration Wiring & Auth Fixes** - Gateway auth bypasses, LiveKit webhook config, candidate notes dual-auth
 - [x] **Phase 40: Candidate Magic-Link Bug Fixes** - Recording consent token location, notes load-on-mount array mismatch
-- [ ] **Phase 41: Schedule & Recording Bug Fixes** - Empty participants array on schedule, recording status field mismatch
+- [x] **Phase 41: Schedule & Recording Bug Fixes** - Empty participants array on schedule, recording status field mismatch
 
 ## Phase Details
 
@@ -204,8 +204,8 @@ Plans:
   2. Recording status polling reads the correct field, so observers and page refreshes show accurate recording state
 **Plans:** 2 plans
 Plans:
-- [ ] 41-01-PLAN.md — Fix schedule modal empty participants array (BUG-03)
-- [ ] 41-02-PLAN.md — Fix recording status polling field mismatch (BUG-04)
+- [x] 41-01-PLAN.md — Fix schedule modal empty participants array (BUG-03)
+- [x] 41-02-PLAN.md — Fix recording status polling field mismatch (BUG-04)
 
 ## Progress
 
@@ -235,4 +235,4 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 38. Panel, Notes & Polish | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 39. Integration Wiring & Auth Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 40. Candidate Magic-Link Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
-| 41. Schedule & Recording Bug Fixes | v9.0 | 0/2 | Not Started | — |
+| 41. Schedule & Recording Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
