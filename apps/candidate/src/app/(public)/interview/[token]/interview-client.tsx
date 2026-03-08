@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { LiveKitRoom } from '@livekit/components-react';
 import {
     useInterviewToken,
+    useRecordingState,
     getLiveKitUrl,
     defaultRoomOptions,
     VideoLobby,
@@ -35,8 +36,19 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
 
     const callStartRef = useRef<number>(0);
     const tokenDataRef = useRef<TokenResult | null>(null);
+    const interviewIdRef = useRef<string>('');
 
     const { exchangeMagicLink, loading } = useInterviewToken(API_BASE);
+
+    // Candidate uses magic link token for auth, not Clerk
+    const getTokenForRecording = useCallback(async () => magicToken, [magicToken]);
+    const recordingEnabled = interviewContext?.recording_enabled ?? false;
+    const recordingState = useRecordingState(
+        interviewIdRef.current || 'pending',
+        API_BASE,
+        getTokenForRecording,
+        false, // candidates are never interviewers
+    );
 
     // Exchange magic link token on mount
     useEffect(() => {
@@ -53,6 +65,7 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
             }
 
             tokenDataRef.current = result;
+            interviewIdRef.current = result.interview.id;
             setInterviewContext(result.interview);
         }
 
@@ -149,6 +162,8 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
                         name: candidateName,
                         avatarUrl: candidateAvatar,
                     }}
+                    recordingEnabled={recordingEnabled}
+                    onRecordingConsent={() => recordingState.submitConsent(magicToken)}
                 />
             );
 
@@ -175,6 +190,8 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
                         localName={candidateName}
                         localAvatarUrl={candidateAvatar}
                         onDisconnect={handleDisconnected}
+                        isRecording={recordingState.isRecording}
+                        canStopRecording={false}
                     />
                 </LiveKitRoom>
             ) : null;

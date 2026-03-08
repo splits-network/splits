@@ -10,6 +10,7 @@ import {
     type TokenResult,
     useInterviewToken,
     useCallDuration,
+    useRecordingState,
     getLiveKitUrl,
     defaultRoomOptions,
     VideoLobby,
@@ -33,8 +34,13 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const tokenFetchedRef = useRef(false);
+    const participantRoleRef = useRef<string | null>(null);
     const { fetchAuthenticatedToken, loading, error } = useInterviewToken(API_BASE, getToken);
     const callDuration = useCallDuration();
+
+    const isInterviewer = participantRoleRef.current === 'interviewer';
+    const recordingEnabled = interviewContext?.recording_enabled ?? false;
+    const recordingState = useRecordingState(interviewId, API_BASE, getToken, isInterviewer);
 
     // Fetch interview context on mount (but NOT the LiveKit JWT yet)
     useEffect(() => {
@@ -44,6 +50,7 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
         fetchAuthenticatedToken(interviewId).then((result) => {
             if (result) {
                 setInterviewContext(result.interview);
+                participantRoleRef.current = result.participant.role;
             }
         });
     }, [interviewId, fetchAuthenticatedToken]);
@@ -68,7 +75,14 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
     const handleConnected = useCallback(() => {
         setCallState('in-call');
         callDuration.start();
-    }, [callDuration]);
+
+        // Auto-start recording when enabled and user is the interviewer
+        if (recordingEnabled && isInterviewer) {
+            recordingState.startRecording().catch(() => {
+                // Recording start failure is non-blocking — interview continues
+            });
+        }
+    }, [callDuration, recordingEnabled, isInterviewer, recordingState]);
 
     const handleDisconnected = useCallback(() => {
         callDuration.stop();
@@ -108,6 +122,8 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
                             name: localName,
                             avatarUrl: localAvatarUrl,
                         }}
+                        recordingEnabled={recordingEnabled}
+                        onRecordingConsent={() => recordingState.submitConsent()}
                     />
                     {errorMessage && (
                         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 alert alert-error shadow-lg max-w-md z-50">
@@ -145,6 +161,9 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
                         localName={localName}
                         localAvatarUrl={localAvatarUrl}
                         onDisconnect={handleDisconnected}
+                        isRecording={recordingState.isRecording}
+                        onStopRecording={recordingState.stopRecording}
+                        canStopRecording={isInterviewer}
                     />
                 </LiveKitRoom>
             );

@@ -16,12 +16,18 @@ interface VideoRoomProps {
     localName: string;
     localAvatarUrl?: string;
     onDisconnect: () => void;
+    isRecording?: boolean;
+    onStopRecording?: () => void;
+    canStopRecording?: boolean;
 }
 
 export function VideoRoom({
     interviewContext,
     localName,
     localAvatarUrl,
+    isRecording,
+    onStopRecording,
+    canStopRecording,
 }: VideoRoomProps) {
     const remoteParticipants = useRemoteParticipants();
     const remoteParticipant = remoteParticipants[0] ?? null;
@@ -65,7 +71,11 @@ export function VideoRoom({
             <SelfViewPip name={localName} avatarUrl={localAvatarUrl} />
 
             {/* Controls bar */}
-            <VideoControls />
+            <VideoControls
+                isRecording={isRecording}
+                onStopRecording={onStopRecording}
+                canStopRecording={canStopRecording}
+            />
 
             {/* Remote audio rendering -- CRITICAL for hearing remote participant */}
             <RoomAudioRenderer />

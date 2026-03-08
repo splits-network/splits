@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { InterviewRecordingCard } from './interview-recording-card';
 
 type InterviewStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
 
@@ -8,6 +9,10 @@ interface JoinInterviewButtonProps {
     interviewId: string;
     scheduledAt: string;
     status: InterviewStatus;
+    recordingStatus?: string;
+    recordingStartedAt?: string;
+    recordingDurationSeconds?: number;
+    participantNames?: string[];
 }
 
 function formatScheduledTime(isoString: string): string {
@@ -25,6 +30,10 @@ export function JoinInterviewButton({
     interviewId,
     scheduledAt,
     status,
+    recordingStatus,
+    recordingStartedAt,
+    recordingDurationSeconds,
+    participantNames,
 }: JoinInterviewButtonProps) {
     const isJoinable = status === 'scheduled' || status === 'in_progress';
 
@@ -38,6 +47,25 @@ export function JoinInterviewButton({
             'noopener',
         );
     }, [interviewId]);
+
+    // Show recording card for completed interviews with recording data
+    if (
+        status === 'completed' &&
+        recordingStatus &&
+        (recordingStatus === 'ready' || recordingStatus === 'processing') &&
+        recordingStartedAt
+    ) {
+        return (
+            <InterviewRecordingCard
+                interviewId={interviewId}
+                scheduledAt={scheduledAt}
+                recordingStartedAt={recordingStartedAt}
+                durationSeconds={recordingDurationSeconds ?? null}
+                participantNames={participantNames ?? []}
+                recordingStatus={recordingStatus}
+            />
+        );
+    }
 
     if (!isJoinable) return null;
 
