@@ -1,0 +1,35 @@
+{
+    "name": "@splits-network/video",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev --webpack --port 3102",
+        "build": "next build --webpack",
+        "start": "next start --port 3102",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@livekit/components-react": "^2.9.20",
+        "@livekit/components-styles": "^1.2.0",
+        "@sentry/nextjs": "^10.32.1",
+        "@splits-network/basel-ui": "workspace:*",
+        "@splits-network/shared-types": "workspace:*",
+        "@splits-network/shared-ui": "workspace:*",
+        "@splits-network/shared-video": "workspace:*",
+        "livekit-client": "^2.17.2",
+        "next": "^16.1.0",
+        "react": "^19.2.1",
+        "react-dom": "^19.2.1"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.17",
+        "@types/node": "^24.10.1",
+        "@types/react": "^19.0.1",
+        "@types/react-dom": "^19.0.2",
+        "autoprefixer": "^10.4.20",
+        "daisyui": "^5.5.14",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^4.1.17",
+        "typescript": "^5.9.3"
+    }
+}

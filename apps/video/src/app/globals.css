@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@import "./themes/splits-light.css";
+@import "./themes/applicant-light.css";
+@import "../../../../packages/basel-ui/src/animations/animations.css";

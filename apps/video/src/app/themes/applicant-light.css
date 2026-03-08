@@ -1,0 +1,54 @@
+/* Applicant Network – DaisyUI Light Theme (video app) */
+
+@plugin "daisyui/theme" {
+    name: "applicant-light";
+    color-scheme: light;
+    default: false;
+    prefersdark: false;
+
+    /* Brand — warmer palette to distinguish from Splits Network */
+    --color-primary: #7c3aed;
+    /* violet-600 */
+    --color-primary-content: #f9fafb;
+
+    --color-secondary: #0f9d8a;
+    /* teal (shared brand color) */
+    --color-secondary-content: #f9fafb;
+
+    --color-accent: #f59e0b;
+    /* amber-500 */
+    --color-accent-content: #18181b;
+
+    --color-neutral: #18181b;
+    /* zinc-900 */
+    --color-neutral-content: #fafafa;
+
+    /* Base surfaces */
+    --color-base-100: #ffffff;
+    --color-base-200: #f4f4f5;
+    --color-base-300: #e4e4e7;
+    --color-base-content: #18181b;
+
+    /* Semantic */
+    --color-info: #0ea5e9;
+    --color-info-content: #f9fafb;
+
+    --color-success: #16a34a;
+    --color-success-content: #f9fafb;
+
+    --color-warning: #d97706;
+    --color-warning-content: #f9fafb;
+
+    --color-error: #ef4444;
+    --color-error-content: #f9fafb;
+
+    /* Radii / sizing tokens used by DaisyUI */
+    --radius-selector: 0rem;
+    --radius-field: 0rem;
+    --radius-box: 0rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+}
