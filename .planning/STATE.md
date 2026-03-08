@@ -23,7 +23,7 @@ Progress: █████████████████████░░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 21
+- Plans completed: 22
 - Phases completed: 2 (Phases 33-34), Phase 35 in progress
 
 ## Accumulated Context
@@ -73,6 +73,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Clerk-to-UUID resolution for calendar prefs | 35-06 | user_calendar_preferences FK requires internal UUID, not clerk ID |
 | PUT method in gateway video proxy | 35-06 | Gateway switch only had GET/POST/PATCH/DELETE |
 | Toast ref timer with cleanup | 35-06 | Prevent memory leaks on unmount for auto-dismiss |
+| BaselWizardModal for reschedule, plain modal for cancel | 35-07 | Multi-step flow needs wizard; single-step cancel doesn't |
+| Best-effort calendar event deletion on cancel | 35-07 | Don't block interview cancellation if calendar API fails |
 
 ### Pending Todos
 

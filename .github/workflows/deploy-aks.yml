@@ -69,10 +69,7 @@ jobs:
                           name: gamification-service,
                           path: services/gamification-service,
                       }
-                    - {
-                          name: video-service,
-                          path: services/video-service,
-                      }
+                    - { name: video-service, path: services/video-service }
                     - { name: portal, path: apps/portal }
                     - { name: candidate, path: apps/candidate }
                     - { name: corporate, path: apps/corporate }
