@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 39 of 39 (Integration Wiring & Auth Fixes)
-Plan: 0 of 2
-Status: Not started
-Last activity: 2026-03-08 — Gap closure phase created from milestone audit
+Plan: 1 of 2
+Status: In progress
+Last activity: 2026-03-08 — Completed 39-01-PLAN.md
 
-Progress: ████████████████████████░ 97%
+Progress: ████████████████████████░ 98%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: ███████████████████████�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 37
+- Plans completed: 38
 - Phases completed: 6 (Phases 33-38)
 
 ## Accumulated Context
@@ -98,6 +98,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Transcript segments as JSONB | 37-01 | Flexible schema for speaker diarization without separate table overhead |
 | Six-state pipeline status | 37-01 | Granular step display per CONTEXT.md locked decision (incl posting) |
 | Gap-based speaker alternation heuristic | 37-02 | Whisper-1 lacks diarization; gap > 1s triggers speaker switch |
+| Auth bypass for 4 magic-link/webhook routes | 39-01 | Self-authenticating routes skip gateway Clerk check |
+| LiveKit webhook URL in K8s config | 39-01 | Egress completion events POST to video-service |
 | Interview creator as AI note author | 37-02 | Valid FK required; platform_admin type + interview_summary note_type distinguishes AI |
 | FFmpeg 64kbps/16kHz for large recordings | 37-02 | Keeps under Whisper 25MB while preserving speech quality |
 | Upsert note design (one per participant per interview) | 38-01 | Auto-save friendly, no duplicate rows |
@@ -125,10 +127,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 38-04-PLAN.md (Phase 38 complete)
+Stopped at: Completed 39-01-PLAN.md
 Resume file: None
-Next: Plan Phase 39 (`/basel:plan-phase 39`)
+Next: Execute 39-02-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Phase 38 complete — v9.0 milestone done)*
+*Last updated: 2026-03-08 (39-01 complete — gateway auth bypasses & LiveKit webhook)*
