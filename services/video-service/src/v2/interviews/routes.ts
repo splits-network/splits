@@ -469,37 +469,53 @@ export async function registerInterviewRoutes(
 
     // ── Interview Notes ─────────────────────────────────────────────────
 
-    // PUT /api/v2/interviews/:id/notes - Upsert in-call note for current participant
+    // PUT /api/v2/interviews/:id/notes - Upsert in-call note (dual-auth: magic link OR Clerk)
     app.put('/api/v2/interviews/:id/notes', async (request, reply) => {
         try {
-            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            const body = request.body as { content?: string };
+            const body = request.body as { content?: string; token?: string };
 
             if (body?.content === undefined) {
                 return reply.code(400).send({ error: 'content is required' });
             }
 
-            // Resolve clerk user to internal user ID
-            const userId = await repository.resolveUserId(clerkUserId);
+            let userId: string;
+            let participantId: string;
 
-            // Find participant record for this user in this interview
-            const { data: participant, error: pError } = await repository
-                .getSupabase()
-                .from('interview_participants')
-                .select('id')
-                .eq('interview_id', id)
-                .eq('user_id', userId)
-                .maybeSingle();
+            if (body?.token) {
+                // Magic link auth path (candidates)
+                const tokenResult = await tokenService.validateMagicLinkToken(body.token);
+                if (!tokenResult) {
+                    return reply.code(401).send({ error: 'Invalid or expired token' });
+                }
+                if (tokenResult.interview.id !== id) {
+                    return reply.code(403).send({ error: 'Token does not match this interview' });
+                }
+                userId = tokenResult.participant.user_id;
+                participantId = tokenResult.participant.id;
+            } else {
+                // Clerk auth path (authenticated users)
+                const { clerkUserId } = requireUserContext(request);
+                userId = await repository.resolveUserId(clerkUserId);
 
-            if (pError) throw pError;
-            if (!participant) {
-                return reply.code(403).send({ error: 'You are not a participant in this interview' });
+                const { data: participant, error: pError } = await repository
+                    .getSupabase()
+                    .from('interview_participants')
+                    .select('id')
+                    .eq('interview_id', id)
+                    .eq('user_id', userId)
+                    .maybeSingle();
+
+                if (pError) throw pError;
+                if (!participant) {
+                    return reply.code(403).send({ error: 'You are not a participant in this interview' });
+                }
+                participantId = participant.id;
             }
 
             const note = await repository.saveInterviewNote(
                 id,
-                participant.id,
+                participantId,
                 userId,
                 body.content,
             );
