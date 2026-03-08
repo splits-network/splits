@@ -9,12 +9,12 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: LiveKit server deployed on K8s with TURN/STUN support and UDP port exposure
-- [ ] **INFRA-02**: LiveKit Egress service deployed on K8s for server-side recording (dedicated node pool)
-- [ ] **INFRA-03**: New `video-service` Fastify microservice following V2 patterns (repository, service, routes)
-- [ ] **INFRA-04**: `interviews` database table with status enum (`scheduled`, `in_progress`, `completed`, `cancelled`, `no_show`), linked to `applications` via `application_id`
-- [ ] **INFRA-05**: Interview access token system for magic link join (separate from Clerk auth)
-- [ ] **INFRA-06**: Gateway routes for video-service endpoints through api-gateway
+- [x] **INFRA-01**: LiveKit server deployed on K8s with TURN/STUN support and UDP port exposure
+- [x] **INFRA-02**: LiveKit Egress service deployed on K8s for server-side recording (dedicated node pool)
+- [x] **INFRA-03**: New `video-service` Fastify microservice following V2 patterns (repository, service, routes)
+- [x] **INFRA-04**: `interviews` database table with status enum (`scheduled`, `in_progress`, `completed`, `cancelled`, `no_show`), linked to `applications` via `application_id`
+- [x] **INFRA-05**: Interview access token system for magic link join (separate from Clerk auth)
+- [x] **INFRA-06**: Gateway routes for video-service endpoints through api-gateway
 
 ### Video Room
 
@@ -98,12 +98,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 33 | Pending |
-| INFRA-02 | Phase 33 | Pending |
-| INFRA-03 | Phase 33 | Pending |
-| INFRA-04 | Phase 33 | Pending |
-| INFRA-05 | Phase 33 | Pending |
-| INFRA-06 | Phase 33 | Pending |
+| INFRA-01 | Phase 33 | Complete |
+| INFRA-02 | Phase 33 | Complete |
+| INFRA-03 | Phase 33 | Complete |
+| INFRA-04 | Phase 33 | Complete |
+| INFRA-05 | Phase 33 | Complete |
+| INFRA-06 | Phase 33 | Complete |
 | ROOM-01 | Phase 34 | Pending |
 | ROOM-02 | Phase 34 | Pending |
 | ROOM-03 | Phase 38 | Pending |

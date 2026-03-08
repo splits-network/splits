@@ -49,7 +49,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 
 **Milestone Goal:** Add in-app video interviewing powered by self-hosted LiveKit -- schedule, conduct, record, transcribe, and AI-summarize interviews directly within the recruiting workflow.
 
-- [ ] **Phase 33: Infrastructure** - LiveKit K8s deployment, video-service scaffold, database schema, token system, gateway routes
+- [x] **Phase 33: Infrastructure** - LiveKit K8s deployment, video-service scaffold, database schema, token system, gateway routes
 - [ ] **Phase 34: Video Call Experience** - 1:1 calls, lobby, controls, magic link join, in-app join, candidate prep page
 - [ ] **Phase 35: Scheduling & Notifications** - Calendar integration, stage triggers, cancel/reschedule, email and in-app notifications
 - [ ] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
@@ -70,9 +70,9 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
   5. All video-service endpoints are accessible through api-gateway
 **Plans:** 3 plans
 Plans:
-- [ ] 33-01-PLAN.md — LiveKit K8s manifests + interviews database schema
-- [ ] 33-02-PLAN.md — video-service scaffold with interview CRUD
-- [ ] 33-03-PLAN.md — Token system (magic links + LiveKit JWT) + gateway routing
+- [x] 33-01-PLAN.md — LiveKit K8s manifests + interviews database schema
+- [x] 33-02-PLAN.md — video-service scaffold with interview CRUD
+- [x] 33-03-PLAN.md — Token system (magic links + LiveKit JWT) + gateway routing
 
 ### Phase 34: Video Call Experience
 **Goal**: Users can conduct 1:1 video interviews within the app with a professional pre-join and in-call experience
@@ -149,7 +149,7 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | ~~30. Notifications~~ | ~~v8.0~~ | — | Shelved | — |
 | ~~31. Portal UI~~ | ~~v8.0~~ | — | Shelved | — |
 | ~~32. Candidate UI~~ | ~~v8.0~~ | — | Shelved | — |
-| 33. Infrastructure | v9.0 | 0/3 | Planned | — |
+| 33. Infrastructure | v9.0 | 3/3 | Complete | 2026-03-08 |
 | 34. Video Call Experience | v9.0 | 0/TBD | Pending | — |
 | 35. Scheduling & Notifications | v9.0 | 0/TBD | Pending | — |
 | 36. Recording & Playback | v9.0 | 0/TBD | Pending | — |
