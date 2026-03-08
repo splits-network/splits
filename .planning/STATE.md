@@ -83,6 +83,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | 60-second setInterval for countdown polling | 35-10 | Per CONTEXT.md guidance, no WebSocket needed |
 | Azure credentials on both egress and video-service | 36-02 | Video-service orchestrates egress requests, needs credentials to pass per-request |
 | emptyDir 10Gi for egress temp storage | 36-02 | Ephemeral encoding files, no need for PVC |
+| H264_720P_30 preset for egress encoding | 36-01 | 1280x720, 30fps, H264/OPUS -- matches LiveKit built-in preset |
+| Protobuf constructors for LiveKit egress types | 36-01 | livekit-server-sdk v2.9 uses proto3 Message classes |
 | 90-day recording retention with 30-day tier transition | 36-02 | Hot→Cool at 30 days, delete at 90 per CONTEXT.md |
 
 ### Pending Todos
