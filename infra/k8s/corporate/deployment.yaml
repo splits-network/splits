@@ -1,94 +1,94 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: corporate
-  namespace: splits-network
+    name: corporate
+    namespace: splits-network
 spec:
-  replicas: ${REPLICAS:-2}
-  selector:
-    matchLabels:
-      app: corporate
-  template:
-    metadata:
-      labels:
-        app: corporate
-    spec:
-        nodeSelector:
-            agentpool: userpool
-        tolerations:
-            - key: "kubernetes.azure.com/scalesetpriority"
-              operator: "Equal"
-              value: "spot"
-              effect: "NoSchedule"
-      containers:
-        - name: corporate
-          image: ${ACR_SERVER}/corporate:${IMAGE_TAG}
-          ports:
-            - containerPort: 3102
-              name: http
-          env:
-            - name: NODE_ENV
-              value: "production"
-            - name: PORT
-              value: "3102"
-            - name: SENTRY_DSN
-              value: "https://bb5cb39c4d6d136de7f548e1f779f9fc@o4510570789732352.ingest.us.sentry.io/4510570904748032"
-            - name: NEXT_PUBLIC_SENTRY_DSN
-              value: "https://bb5cb39c4d6d136de7f548e1f779f9fc@o4510570789732352.ingest.us.sentry.io/4510570904748032"
-            - name: NEXT_PUBLIC_APP_URL
-              value: "https://employment-networks.com"
-            - name: NEXT_PUBLIC_API_URL
-              value: "https://api.splits.network/api"
-            - name: NEXT_PUBLIC_API_GATEWAY_URL
-              value: "https://api.splits.network"
-            - name: IDENTITY_SERVICE_URL
-              value: "http://identity-service.splits-network.svc.cluster.local:3001"
-            - name: ATS_SERVICE_URL
-              value: "http://ats-service.splits-network.svc.cluster.local:3002"
-            - name: NETWORK_SERVICE_URL
-              value: "http://network-service.splits-network.svc.cluster.local:3003"
-            - name: BILLING_SERVICE_URL
-              value: "http://billing-service.splits-network.svc.cluster.local:3004"
-            - name: NOTIFICATION_SERVICE_URL
-              value: "http://notification-service.splits-network.svc.cluster.local:3005"
-            - name: AUTOMATION_SERVICE_URL
-              value: "http://automation-service.splits-network.svc.cluster.local:3007"
-            - name: DOCUMENT_SERVICE_URL
-              value: "http://document-service.splits-network.svc.cluster.local:3006"
-            - name: DOCUMENT_PROCESSING_SERVICE_URL
-              value: "http://document-processing-service.splits-network.svc.cluster.local:3008"
-            - name: AI_SERVICE_URL
-              value: "http://ai-service.splits-network.svc.cluster.local:3009"
-          resources:
-            requests:
-              cpu: 200m
-              memory: 256Mi
-            limits:
-              cpu: 1000m
-              memory: 1Gi
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 3102
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 3102
-            initialDelaySeconds: 10
-            periodSeconds: 5
+    replicas: ${REPLICAS:-2}
+    selector:
+        matchLabels:
+            app: corporate
+    template:
+        metadata:
+            labels:
+                app: corporate
+        spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
+            containers:
+                - name: corporate
+                  image: ${ACR_SERVER}/corporate:${IMAGE_TAG}
+                  ports:
+                      - containerPort: 3102
+                        name: http
+                  env:
+                      - name: NODE_ENV
+                        value: "production"
+                      - name: PORT
+                        value: "3102"
+                      - name: SENTRY_DSN
+                        value: "https://bb5cb39c4d6d136de7f548e1f779f9fc@o4510570789732352.ingest.us.sentry.io/4510570904748032"
+                      - name: NEXT_PUBLIC_SENTRY_DSN
+                        value: "https://bb5cb39c4d6d136de7f548e1f779f9fc@o4510570789732352.ingest.us.sentry.io/4510570904748032"
+                      - name: NEXT_PUBLIC_APP_URL
+                        value: "https://employment-networks.com"
+                      - name: NEXT_PUBLIC_API_URL
+                        value: "https://api.splits.network/api"
+                      - name: NEXT_PUBLIC_API_GATEWAY_URL
+                        value: "https://api.splits.network"
+                      - name: IDENTITY_SERVICE_URL
+                        value: "http://identity-service.splits-network.svc.cluster.local:3001"
+                      - name: ATS_SERVICE_URL
+                        value: "http://ats-service.splits-network.svc.cluster.local:3002"
+                      - name: NETWORK_SERVICE_URL
+                        value: "http://network-service.splits-network.svc.cluster.local:3003"
+                      - name: BILLING_SERVICE_URL
+                        value: "http://billing-service.splits-network.svc.cluster.local:3004"
+                      - name: NOTIFICATION_SERVICE_URL
+                        value: "http://notification-service.splits-network.svc.cluster.local:3005"
+                      - name: AUTOMATION_SERVICE_URL
+                        value: "http://automation-service.splits-network.svc.cluster.local:3007"
+                      - name: DOCUMENT_SERVICE_URL
+                        value: "http://document-service.splits-network.svc.cluster.local:3006"
+                      - name: DOCUMENT_PROCESSING_SERVICE_URL
+                        value: "http://document-processing-service.splits-network.svc.cluster.local:3008"
+                      - name: AI_SERVICE_URL
+                        value: "http://ai-service.splits-network.svc.cluster.local:3009"
+                  resources:
+                      requests:
+                          cpu: 200m
+                          memory: 256Mi
+                      limits:
+                          cpu: 1000m
+                          memory: 1Gi
+                  livenessProbe:
+                      httpGet:
+                          path: /
+                          port: 3102
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /
+                          port: 3102
+                      initialDelaySeconds: 10
+                      periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: corporate
-  namespace: splits-network
+    name: corporate
+    namespace: splits-network
 spec:
-  type: ClusterIP
-  ports:
-    - port: 80
-      targetPort: 3102
-      name: http
-  selector:
-    app: corporate
+    type: ClusterIP
+    ports:
+        - port: 80
+          targetPort: 3102
+          name: http
+    selector:
+        app: corporate
