@@ -15,6 +15,7 @@ import {
     SpeedMenu,
     type SpeedDialAction,
 } from "@splits-network/basel-ui";
+import { useScheduledInterview } from "../../hooks/use-scheduled-interview";
 import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import BaselAddNoteModal from "@/components/basel/applications/add-note-modal";
@@ -116,6 +117,8 @@ export default function ActionsToolbar({
     const presenceStatus = candidateUserId
         ? presence[candidateUserId]?.status
         : undefined;
+
+    const scheduledInterview = useScheduledInterview(application.id, application.stage);
 
     const isFirmJob = !application.job?.company_id && !!application.job?.source_firm_id;
 
@@ -404,6 +407,7 @@ export default function ActionsToolbar({
                 application.stage ?? "",
             ),
         sendEmail: isRecruiter || isCompanyUser || isAdmin,
+        joinInterview: !!scheduledInterview,
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -516,6 +520,20 @@ export default function ActionsToolbar({
                 variant: "btn-warning",
                 disabled: actionLoading,
                 onClick: () => setShowPreScreenModal(true),
+            });
+        }
+        if (actions.joinInterview && scheduledInterview) {
+            speedDialActions.push({
+                key: "join-interview",
+                icon: "fa-duotone fa-regular fa-video",
+                label: "Join Interview",
+                variant: "btn-primary",
+                onClick: () =>
+                    window.open(
+                        `/portal/interview/${scheduledInterview.id}`,
+                        `interview-${scheduledInterview.id}`,
+                        "noopener",
+                    ),
             });
         }
         if (actions.scheduleInterview) {
@@ -666,6 +684,20 @@ export default function ActionsToolbar({
                 onClick: () => setShowNoteModal(true),
             });
         }
+        if (actions.joinInterview && scheduledInterview) {
+            speedDialActions.push({
+                key: "join-interview",
+                icon: "fa-duotone fa-regular fa-video",
+                label: "Join Interview",
+                variant: "btn-primary",
+                onClick: () =>
+                    window.open(
+                        `/portal/interview/${scheduledInterview.id}`,
+                        `interview-${scheduledInterview.id}`,
+                        "noopener",
+                    ),
+            });
+        }
         if (actions.scheduleInterview) {
             speedDialActions.push({
                 key: "schedule-interview",
@@ -748,6 +780,22 @@ export default function ActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-user-check" />
                         Request Pre-Screen
+                    </button>
+                )}
+                {actions.joinInterview && scheduledInterview && (
+                    <button
+                        onClick={() =>
+                            window.open(
+                                `/portal/interview/${scheduledInterview.id}`,
+                                `interview-${scheduledInterview.id}`,
+                                "noopener",
+                            )
+                        }
+                        className={`btn ${sizeClass} btn-primary gap-2`}
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-video" />
+                        Join Interview
                     </button>
                 )}
                 {actions.scheduleInterview && (
