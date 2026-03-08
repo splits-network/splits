@@ -66,6 +66,7 @@ export class InterviewService {
             scheduled_duration_minutes: input.scheduled_duration_minutes ?? 60,
             max_duration_seconds: 14400, // 4 hours
             grace_period_seconds: 300, // 5 minutes
+            recording_enabled: input.recording_enabled ?? false,
             metadata: null,
             created_by: createdByUserId,
             calendar_event_id: input.calendar_event_id ?? null,

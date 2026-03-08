@@ -67,6 +67,7 @@ export class TokenService {
                       scheduled_at: context.scheduled_at,
                       scheduled_duration_minutes: context.scheduled_duration_minutes,
                       reschedule_count: context.reschedule_count,
+                      recording_enabled: context.recording_enabled,
                       job: context.job,
                       participants: context.participants,
                   }
@@ -78,6 +79,7 @@ export class TokenService {
                       scheduled_at: interview.scheduled_at,
                       scheduled_duration_minutes: interview.scheduled_duration_minutes,
                       reschedule_count: interview.reschedule_count ?? 0,
+                      recording_enabled: interview.recording_enabled ?? false,
                       job: { id: '', title: 'Interview', company_name: '' },
                       participants: [],
                   },
@@ -167,6 +169,7 @@ export class TokenService {
                 scheduled_at: interview.scheduled_at,
                 scheduled_duration_minutes: interview.scheduled_duration_minutes,
                 reschedule_count: interview.reschedule_count,
+                recording_enabled: interview.recording_enabled,
                 job: interview.job,
                 participants: interview.participants,
             },

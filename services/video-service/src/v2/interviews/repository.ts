@@ -41,6 +41,7 @@ export class InterviewRepository {
         calendar_connection_id?: string | null;
         meeting_platform?: string;
         meeting_link?: string | null;
+        recording_enabled?: boolean;
     }): Promise<Interview> {
         const { data, error } = await this.supabase
             .from('interviews')

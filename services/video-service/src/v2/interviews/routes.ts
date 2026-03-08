@@ -47,6 +47,7 @@ export async function registerInterviewRoutes(
                     calendar_connection_id: body.calendar_connection_id,
                     meeting_platform: body.meeting_platform,
                     meeting_link: body.meeting_link,
+                    recording_enabled: body.recording_enabled,
                     participants: body.participants || [],
                 },
                 clerkUserId,
@@ -443,6 +444,7 @@ export async function registerInterviewRoutes(
                 'meeting_link',
                 'title',
                 'metadata',
+                'recording_enabled',
             ];
 
             const updates: Record<string, any> = {};
