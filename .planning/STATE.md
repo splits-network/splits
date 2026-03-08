@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 34 of 38 (Video Call Experience)
-Plan: 02 of 06
+Plan: 03 of 06
 Status: In progress
-Last activity: 2026-03-08 — Completed 34-02-PLAN.md (pre-join lobby components)
+Last activity: 2026-03-08 — Completed 34-03-PLAN.md (in-call room components)
 
-Progress: █████░░░░░░░░░░░░░░░ 25%
+Progress: ██████░░░░░░░░░░░░░░ 30%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: █████░░░░░░░░░░░░░░░ 25%
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 5
+- Plans completed: 6
 - Phases completed: 1 (Phase 33)
 
 ## Accumulated Context
@@ -48,6 +48,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | User names from DB not Clerk API | 34-01 | Self-contained backend, no external API during token generation |
 | Manual device enumeration in lobby | 34-02 | LiveKit MediaDeviceSelect requires room context, lobby has none |
 | Web Audio API for lobby audio meter | 34-02 | LiveKit BarVisualizer requires room context, lobby uses raw tracks |
+| isTrackReference guard for VideoTrack | 34-03 | useTracks returns placeholder union type; narrow before passing to VideoTrack |
+| Always-visible controls bar | 34-03 | Professional interview context needs instant mute access |
 
 ### Pending Todos
 
@@ -62,10 +64,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 34-02-PLAN.md (pre-join lobby components)
+Stopped at: Completed 34-03-PLAN.md (in-call room components)
 Resume file: None
-Next: 34-03-PLAN.md
+Next: 34-04-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (34-02 complete)*
+*Last updated: 2026-03-08 (34-03 complete)*
