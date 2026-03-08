@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 34 complete, Phase 35 next
+**Current focus:** v9.0 Video Interviewing — Phase 35 in progress
 
 ## Current Position
 
-Phase: 34 of 38 (Video Call Experience)
-Plan: 06 of 06
-Status: Complete
-Last activity: 2026-03-07 — Completed 34-06-PLAN.md (integration verification)
+Phase: 35 of 38 (Scheduling & Notifications)
+Plan: 01 of 10
+Status: In progress
+Last activity: 2026-03-08 — Completed 35-01-PLAN.md (schema foundation)
 
-Progress: ████████████████████ 100%
+Progress: ████████████████████░░░░ 85%
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ████████████████████ 100%
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 15
-- Phases completed: 2 (Phases 33-34)
+- Plans completed: 16
+- Phases completed: 2 (Phases 33-34), Phase 35 in progress
 
 ## Accumulated Context
 
@@ -56,6 +56,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Splits Network branding on candidate prep page | 34-05 | Not company-branded per CONTEXT.md deferred items |
 | Lobby gate at 10 minutes before start | 34-05 | Prevents early access while allowing reasonable arrival |
 | No auto-redirect for candidate post-call | 34-05 | Candidates close tab themselves; no redirect destination |
+| meeting_platform as TEXT not enum | 35-01 | Easier to extend than PostgreSQL enum |
+| Reschedule requests in separate table | 35-01 | Preserves audit trail of multiple reschedule attempts |
+| working_days as ISO day numbers | 35-01 | International compatibility (1=Monday, 7=Sunday) |
 
 ### Pending Todos
 
@@ -69,11 +72,11 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07
-Stopped at: Completed Phase 34 (Video Call Experience)
+Last session: 2026-03-08
+Stopped at: Completed 35-01-PLAN.md (schema foundation)
 Resume file: None
-Next: Phase 35 (Scheduling & Notifications)
+Next: 35-02-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-07 (Phase 34 complete)*
+*Last updated: 2026-03-08 (Plan 35-01 complete)*
