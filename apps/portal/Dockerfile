@@ -17,6 +17,7 @@ COPY packages/basel-ui/package.json ./packages/basel-ui/
 COPY packages/chat-ui/package.json ./packages/chat-ui/
 COPY packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY packages/shared-gamification/package.json ./packages/shared-gamification/
+COPY packages/shared-video/package.json ./packages/shared-video/
 COPY apps/portal/package.json ./apps/portal/
 RUN pnpm install --frozen-lockfile
 
@@ -64,6 +65,7 @@ COPY packages/basel-ui ./packages/basel-ui
 COPY packages/chat-ui ./packages/chat-ui
 COPY packages/memphis-ui ./packages/memphis-ui
 COPY packages/shared-gamification ./packages/shared-gamification
+COPY packages/shared-video ./packages/shared-video
 COPY apps/portal ./apps/portal
 # Copy press content (MDX articles read at runtime by server components)
 COPY content ./content
@@ -77,6 +79,7 @@ RUN pnpm --filter @splits-network/basel-ui build
 RUN pnpm --filter @splits-network/chat-ui build
 RUN pnpm --filter @splits-network/memphis-ui build
 RUN pnpm --filter @splits-network/shared-gamification build
+RUN pnpm --filter @splits-network/shared-video build
 # Then build portal (will transpile packages from source)
 RUN pnpm --filter @splits-network/portal build
 # Prune to production dependencies (uses local store, no network)
@@ -113,6 +116,8 @@ COPY --from=build /app/packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY --from=build /app/packages/memphis-ui/dist ./packages/memphis-ui/dist
 COPY --from=build /app/packages/shared-gamification/package.json ./packages/shared-gamification/
 COPY --from=build /app/packages/shared-gamification/dist ./packages/shared-gamification/dist
+COPY --from=build /app/packages/shared-video/package.json ./packages/shared-video/
+COPY --from=build /app/packages/shared-video/dist ./packages/shared-video/dist
 
 # App package.json for pnpm filter
 COPY --from=build /app/apps/portal/package.json ./apps/portal/
