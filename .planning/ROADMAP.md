@@ -52,7 +52,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 33: Infrastructure** - LiveKit K8s deployment, video-service scaffold, database schema, token system, gateway routes
 - [x] **Phase 34: Video Call Experience** - 1:1 calls, lobby, controls, magic link join, in-app join, candidate prep page
 - [x] **Phase 35: Scheduling & Notifications** - Calendar integration, stage triggers, cancel/reschedule, email and in-app notifications
-- [ ] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
+- [x] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
 - [ ] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
 - [ ] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
 
@@ -127,12 +127,12 @@ Plans:
   4. An `interview.recording_ready` RabbitMQ event is published when a recording completes, enabling downstream processing
 **Plans:** 6 plans
 Plans:
-- [ ] 36-01-PLAN.md — Database migration + RecordingService (LiveKit Egress API)
-- [ ] 36-02-PLAN.md — Egress K8s config + Azure Blob lifecycle rules
-- [ ] 36-03-PLAN.md — Recording API endpoints (start/stop/webhook/consent)
-- [ ] 36-04-PLAN.md — Consent UX, recording indicator, schedule modal checkbox
-- [ ] 36-05-PLAN.md — Playback UI + SAS URL endpoint + download
-- [ ] 36-06-PLAN.md — Interview client integration + auto-start + API updates
+- [x] 36-01-PLAN.md — Database migration + RecordingService (LiveKit Egress API)
+- [x] 36-02-PLAN.md — Egress K8s config + Azure Blob lifecycle rules
+- [x] 36-03-PLAN.md — Recording API endpoints (start/stop/webhook/consent)
+- [x] 36-04-PLAN.md — Consent UX, recording indicator, schedule modal checkbox
+- [x] 36-05-PLAN.md — Playback UI + SAS URL endpoint + download
+- [x] 36-06-PLAN.md — Interview client integration + auto-start + API updates
 
 ### Phase 37: AI Pipeline
 **Goal**: Completed interview recordings are automatically transcribed and summarized, with summaries posted as application notes
@@ -178,6 +178,6 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 33. Infrastructure | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 34. Video Call Experience | v9.0 | 6/6 | Complete | 2026-03-07 |
 | 35. Scheduling & Notifications | v9.0 | 10/10 | Complete | 2026-03-08 |
-| 36. Recording & Playback | v9.0 | 0/6 | Pending | — |
+| 36. Recording & Playback | v9.0 | 6/6 | Complete | 2026-03-08 |
 | 37. AI Pipeline | v9.0 | 0/TBD | Pending | — |
 | 38. Panel, Notes & Polish | v9.0 | 0/TBD | Pending | — |

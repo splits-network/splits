@@ -40,9 +40,9 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 ### Recording & Playback
 
-- [ ] **REC-01**: Interviews are recorded server-side via LiveKit Egress with recording consent indicator
-- [ ] **REC-02**: Recordings are stored in Azure Blob Storage with configurable retention policy (90-day default)
-- [ ] **REC-03**: User can play back interview recordings from the interviews tab
+- [x] **REC-01**: Interviews are recorded server-side via LiveKit Egress with recording consent indicator
+- [x] **REC-02**: Recordings are stored in Azure Blob Storage with configurable retention policy (90-day default)
+- [x] **REC-03**: User can play back interview recordings from the interviews tab
 
 ### AI Pipeline
 
@@ -61,7 +61,7 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 - [ ] **INT-01**: Application detail page has a dedicated interviews tab showing all interviews with status, recordings, transcripts, and summaries
 - [ ] **INT-02**: Interviewer can take notes in a side panel during the call, auto-saved and posted to application notes on call end
-- [ ] **INT-03**: `interview.recording_ready` RabbitMQ event triggers the AI transcription + summary pipeline
+- [x] **INT-03**: `interview.recording_ready` RabbitMQ event triggers the AI transcription + summary pipeline
 - [ ] **INT-04**: Multiple interviews per application are tracked chronologically (multi-round support)
 
 ## Future Requirements
@@ -117,9 +117,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | JOIN-01 | Phase 34 | Complete |
 | JOIN-02 | Phase 34 | Complete |
 | JOIN-03 | Phase 34 | Complete |
-| REC-01 | Phase 36 | Pending |
-| REC-02 | Phase 36 | Pending |
-| REC-03 | Phase 36 | Pending |
+| REC-01 | Phase 36 | Complete |
+| REC-02 | Phase 36 | Complete |
+| REC-03 | Phase 36 | Complete |
 | AI-01 | Phase 37 | Pending |
 | AI-02 | Phase 37 | Pending |
 | AI-03 | Phase 37 | Pending |
@@ -129,7 +129,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTIF-04 | Phase 35 | Complete |
 | INT-01 | Phase 38 | Pending |
 | INT-02 | Phase 38 | Pending |
-| INT-03 | Phase 36 | Pending |
+| INT-03 | Phase 36 | Complete |
 | INT-04 | Phase 38 | Pending |
 
 **Coverage:**
