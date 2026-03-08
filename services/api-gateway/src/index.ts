@@ -479,6 +479,37 @@ async function main() {
             return;
         }
 
+        // Skip auth for video interview magic-link and webhook routes
+        // These routes handle their own authentication:
+        // - reschedule-request: validates magic link token in body
+        // - available-slots: validates magic link token as query param
+        // - recording/consent: dual-auth (magic link OR Clerk)
+        // - recording/webhook: LiveKit signature verification
+
+        // Skip auth for candidate reschedule request (magic link token in body)
+        // POST /api/v2/interviews/:id/reschedule-request
+        if (request.method === 'POST' && /^\/api\/v2\/interviews\/[^/]+\/reschedule-request/.test(request.url)) {
+            return;
+        }
+
+        // Skip auth for candidate available-slots fetch (magic link token as query param)
+        // GET /api/v2/interviews/:id/available-slots
+        if (request.method === 'GET' && /^\/api\/v2\/interviews\/[^/]+\/available-slots/.test(request.url)) {
+            return;
+        }
+
+        // Skip auth for recording consent (dual-auth: magic link token OR Clerk, handled by video-service)
+        // POST /api/v2/interviews/:id/recording/consent
+        if (request.method === 'POST' && /^\/api\/v2\/interviews\/[^/]+\/recording\/consent/.test(request.url)) {
+            return;
+        }
+
+        // Skip auth for LiveKit Egress recording webhook (signature verified by video-service)
+        // POST /api/v2/interviews/recording/webhook
+        if (request.method === 'POST' && request.url.startsWith('/api/v2/interviews/recording/webhook')) {
+            return;
+        }
+
         // Skip auth for public gamification endpoints (badges, XP, leaderboards)
         // These use optionalAuth() at the route level — try auth if present, don't fail if missing
         if (request.method === 'GET' && (
