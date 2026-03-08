@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 
 ## Current Position
 
-Phase: 39 of 39 (Integration Wiring & Auth Fixes)
-Plan: 2 of 2
-Status: Phase complete -- v9.0 complete
-Last activity: 2026-03-08 — Completed 39-02-PLAN.md
+Phase: 40 of 40 (Candidate Magic-Link Bug Fixes)
+Plan: 1 of 2
+Status: In progress
+Last activity: 2026-03-08 — Completed 40-01-PLAN.md
 
-Progress: █████████████████████████ 100%
+Progress: █████████████████████████ 50% (plan 1/2 in phase 40)
 
 ## Performance Metrics
 
@@ -115,6 +115,7 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Highlighted upcoming interview | 38-04 | Most recent upcoming/in-progress interview gets primary left border accent |
 | Dual-auth on notes PUT/GET endpoints | 39-02 | Magic link token OR Clerk auth for candidate note access |
 | Gateway bypass for notes with regex anchor | 39-02 | (\?|$) anchor prevents matching /notes/post-to-application |
+| Branch on magicToken for consent body vs header | 40-01 | Magic link sends token in body; Clerk auth uses Bearer header |
 
 ### Pending Todos
 
@@ -129,10 +130,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 39-02-PLAN.md
+Stopped at: Completed 40-01-PLAN.md
 Resume file: None
-Next: v9.0 complete
+Next: 40-02-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (39-02 complete — candidate notes dual-auth)*
+*Last updated: 2026-03-08 (40-01 complete — recording consent magic-link body fix)*
