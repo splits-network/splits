@@ -24,6 +24,13 @@ export type MeetingPlatform =
     | 'google_meet'
     | 'microsoft_teams';
 
+export type RecordingStatus =
+    | 'pending'
+    | 'recording'
+    | 'processing'
+    | 'ready'
+    | 'failed';
+
 export type RescheduleRequestStatus =
     | 'pending'
     | 'accepted'
@@ -53,6 +60,15 @@ export interface Interview {
     reschedule_requested_by: string | null;
     reschedule_requested_at: string | null;
     reschedule_notes: string | null;
+    recording_enabled: boolean;
+    recording_status: RecordingStatus | null;
+    recording_egress_id: string | null;
+    recording_blob_url: string | null;
+    recording_duration_seconds: number | null;
+    recording_file_size_bytes: number | null;
+    recording_started_at: string | null;
+    recording_ended_at: string | null;
+    recording_consent_given_at: string | null;
     created_by: string;
     created_at: string;
     updated_at: string;
@@ -147,8 +163,16 @@ export interface CreateInterviewInput {
     calendar_connection_id?: string;
     meeting_platform?: MeetingPlatform;
     meeting_link?: string;
+    recording_enabled?: boolean;
     participants: Array<{
         user_id: string;
         role: ParticipantRole;
     }>;
+}
+
+export interface RecordingConsent {
+    id: string;
+    interview_id: string;
+    participant_id: string;
+    consented_at: string;
 }

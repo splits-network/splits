@@ -8,6 +8,8 @@ import {
     InterviewParticipantWithUser,
     InterviewStatus,
     InterviewRescheduleRequest,
+    RecordingConsent,
+    RecordingStatus,
     RescheduleRequestStatus,
     UserCalendarPreferences,
 } from './types';
@@ -595,5 +597,74 @@ export class InterviewRepository {
             throw error;
         }
         return data as UserCalendarPreferences;
+    }
+
+    // ── Recording ─────────────────────────────────────────────────────────
+
+    async updateRecordingStatus(
+        id: string,
+        updates: {
+            recording_status: RecordingStatus;
+            recording_egress_id?: string;
+            recording_blob_url?: string;
+            recording_duration_seconds?: number;
+            recording_file_size_bytes?: number;
+            recording_started_at?: string;
+            recording_ended_at?: string;
+        },
+    ): Promise<Interview> {
+        const { data, error } = await this.supabase
+            .from('interviews')
+            .update({ ...updates, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+        return data as Interview;
+    }
+
+    async findByEgressId(egressId: string): Promise<Interview | null> {
+        const { data, error } = await this.supabase
+            .from('interviews')
+            .select('*')
+            .eq('recording_egress_id', egressId)
+            .maybeSingle();
+
+        if (error) {
+            throw error;
+        }
+        return data as Interview | null;
+    }
+
+    async addRecordingConsent(
+        interviewId: string,
+        participantId: string,
+    ): Promise<RecordingConsent> {
+        const { data, error } = await this.supabase
+            .from('interview_recording_consents')
+            .insert({ interview_id: interviewId, participant_id: participantId })
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+        return data as RecordingConsent;
+    }
+
+    async findRecordingConsents(interviewId: string): Promise<RecordingConsent[]> {
+        const { data, error } = await this.supabase
+            .from('interview_recording_consents')
+            .select('*')
+            .eq('interview_id', interviewId)
+            .order('consented_at', { ascending: true });
+
+        if (error) {
+            throw error;
+        }
+        return (data || []) as RecordingConsent[];
     }
 }
