@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 
 Phase: 40 of 40 (Candidate Magic-Link Bug Fixes)
 Plan: 2 of 2
-Status: Phase complete
+Status: Phase complete -- v9.0 milestone complete (all 8 phases done)
 Last activity: 2026-03-08 — Completed 40-02-PLAN.md
 
 Progress: █████████████████████████ 100% (plan 2/2 in phase 40)
@@ -23,8 +23,8 @@ Progress: ███████████████████████�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 40
-- Phases completed: 7 (Phases 33-39)
+- Plans completed: 42
+- Phases completed: 8 (Phases 33-40)
 
 ## Accumulated Context
 
@@ -134,7 +134,7 @@ None.
 Last session: 2026-03-08
 Stopped at: Completed 40-02-PLAN.md
 Resume file: None
-Next: Phase 40 complete
+Next: v9.0 milestone complete — run /basel:audit-milestone
 
 ---
 *Created: 2026-02-12*
