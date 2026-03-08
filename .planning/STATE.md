@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 35 of 38 (Scheduling & Notifications)
-Plan: 02 of 10
+Plan: 03 of 10
 Status: In progress
-Last activity: 2026-03-08 — Completed 35-02-PLAN.md (calendar event lifecycle and webhooks)
+Last activity: 2026-03-08 — Completed 35-03-PLAN.md (scheduling backend APIs)
 
-Progress: ████████████████████░░░░ 85%
+Progress: ████████████████████░░░░ 86%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: ████████████████████░░░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 17
+- Plans completed: 18
 - Phases completed: 2 (Phases 33-34), Phase 35 in progress
 
 ## Accumulated Context
@@ -61,6 +61,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | working_days as ISO day numbers | 35-01 | International compatibility (1=Monday, 7=Sunday) |
 | Channel token connectionId:calendarId for webhooks | 35-02 | Simple routing without DB lookup |
 | Webhook receivers always return success | 35-02 | Prevent provider retry storms on processing errors |
+| Gateway wildcard sufficient for scheduling routes | 35-03 | Existing app.all('/api/v2/interviews/*') catches all new endpoints |
+| validateMagicLinkToken separate method | 35-03 | Reschedule requests need token validation without LiveKit JWT |
+| Busy slots as input parameter | 35-03 | Frontend orchestrates calendar API; scheduling service receives pre-fetched busy data |
 
 ### Pending Todos
 
@@ -75,10 +78,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 35-02-PLAN.md (calendar event lifecycle and webhooks)
+Stopped at: Completed 35-03-PLAN.md (scheduling backend APIs)
 Resume file: None
-Next: 35-03-PLAN.md
+Next: 35-04-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 35-02 complete)*
+*Last updated: 2026-03-08 (Plan 35-03 complete)*
