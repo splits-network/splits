@@ -1,72 +1,62 @@
-# Requirements: Splits Network v9.0 — Video Interviewing
+# Requirements: Splits Network v10.0 — Video Platform & Recruiting Calls
 
-**Defined:** 2026-03-07
+**Defined:** 2026-03-08
 **Core Value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
 
-## v9.0 Requirements
+## v10.0 Requirements
 
-Requirements for in-app video interviewing powered by self-hosted LiveKit. Each maps to roadmap phases.
+Requirements for generalizing video from interview-only to platform-wide recruiting conversations, with dedicated full-screen video apps on branded subdomains. Each maps to roadmap phases.
 
-### Infrastructure
+### Data Model
 
-- [x] **INFRA-01**: LiveKit server deployed on K8s with TURN/STUN support and UDP port exposure
-- [x] **INFRA-02**: LiveKit Egress service deployed on K8s for server-side recording (dedicated node pool)
-- [x] **INFRA-03**: New `video-service` Fastify microservice following V2 patterns (repository, service, routes)
-- [x] **INFRA-04**: `interviews` database table with status enum (`scheduled`, `in_progress`, `completed`, `cancelled`, `no_show`), linked to `applications` via `application_id`
-- [x] **INFRA-05**: Interview access token system for magic link join (separate from Clerk auth)
-- [x] **INFRA-06**: Gateway routes for video-service endpoints through api-gateway
+- [ ] **DATA-01**: New `calls` table as universal video session entity with `call_type` enum (`interview`, `client_meeting`), polymorphic entity linking (`entity_type` + `entity_id`), and room/scheduling fields
+- [ ] **DATA-02**: Existing `interviews` table references `calls` via `call_id` FK — interviews become a specialized call type with `application_id` context
+- [ ] **DATA-03**: All call artifacts (recordings, transcripts, AI summaries, in-call notes) are owned by the call record, not posted to entity note tables
 
-### Video Room
+### Video App
 
-- [x] **ROOM-01**: User can conduct a 1:1 video call within the app using LiveKit React components
-- [x] **ROOM-02**: User sees a pre-join lobby with device check (camera, mic, speaker test) and waiting room before entering
-- [x] **ROOM-03**: User can share their screen during a video call
-- [x] **ROOM-04**: User can conduct panel interviews with 3-6+ simultaneous participants
-- [x] **ROOM-05**: User can mute/unmute mic, toggle camera, select devices, and leave the call
-- [x] **ROOM-06**: User sees a connection quality indicator during the call
+- [ ] **APP-01**: Dedicated `apps/video/` Next.js app with full-screen video experience (no portal navigation chrome)
+- [ ] **APP-02**: Single app serves both `video.splits.network` and `video.applicant.network` — brand detection via Host header switches logo, colors, and copy per domain
+- [ ] **APP-03**: Magic-link-only auth for all participants in the video app (Clerk-authenticated users receive a magic link token before redirect)
+- [ ] **APP-04**: K8s deployment with ingress rules for both `video.splits.network` and `video.applicant.network` subdomains with TLS
 
-### Scheduling
+### Recruiter-Company Calls
 
-- [x] **SCHED-01**: User can schedule an interview from the application detail page, creating both a Google Calendar event and an `interviews` DB record
-- [x] **SCHED-02**: Moving an application to `interview` stage prompts the user to schedule an interview
-- [x] **SCHED-03**: User can cancel or reschedule an interview, triggering calendar event updates and notification cascade
-- [x] **SCHED-04**: Scheduling UI shows interviewer free/busy slots from Google Calendar to prevent double-booking
+- [ ] **CALL-01**: Recruiter can initiate a video call with a company contact, linked to a job, company, or general relationship
+- [ ] **CALL-02**: Both participants are authenticated portal users with equal peer-to-peer roles (no host/candidate hierarchy)
+- [ ] **CALL-03**: User can schedule a recruiter-company call with Google Calendar integration, selecting entity to link
+- [ ] **CALL-04**: Participants receive email confirmation, reminders (24h, 1h), and cancellation/reschedule notifications for recruiting calls
 
-### Participant Access
+### Call History
 
-- [x] **JOIN-01**: Candidate can join an interview via magic link (no account required) — token-based URL in calendar invite and email
-- [x] **JOIN-02**: Authenticated user can join an interview via "Join Interview" button on application detail page
-- [x] **JOIN-03**: Candidate sees an interview prep landing page with job details, interviewer info, and join button
-
-### Recording & Playback
-
-- [x] **REC-01**: Interviews are recorded server-side via LiveKit Egress with recording consent indicator
-- [x] **REC-02**: Recordings are stored in Azure Blob Storage with configurable retention policy (90-day default)
-- [x] **REC-03**: User can play back interview recordings from the interviews tab
+- [ ] **HIST-01**: Portal has a "Calls" section listing all calls (interviews and recruiting calls) with filtering by type, date, entity
+- [ ] **HIST-02**: Call detail view shows recording, transcript, AI summary, and in-call notes — all from the call record
 
 ### AI Pipeline
 
-- [x] **AI-01**: Completed interview recordings are transcribed asynchronously via ai-service (Whisper)
-- [x] **AI-02**: Transcripts are summarized into structured format (key points, strengths, concerns, overall impression) via ai-service
-- [x] **AI-03**: AI summary is auto-posted as an `interview_summary` note type to `application_notes`
+- [ ] **AI-04**: AI summaries are stored on the call record and linked to the associated entity — not posted to entity note tables
+- [ ] **AI-05**: Per-call-type summarizer prompts: interview summaries focus on candidate assessment, recruiting call summaries focus on business outcomes and action items
+- [ ] **AI-06**: AI summary includes entity context (job title, company name, candidate names) in the prompt for better output
 
-### Notifications
+### In-Call Experience
 
-- [x] **NOTIF-01**: Participants receive email confirmation when an interview is scheduled (with join link)
-- [x] **NOTIF-02**: Participants receive automated reminder emails (24h and 1h before interview)
-- [x] **NOTIF-03**: Participants are notified when an interview is cancelled or rescheduled
-- [x] **NOTIF-04**: In-app notifications for interview lifecycle events (scheduled, reminder, completed, recording ready)
+- [ ] **EXP-01**: In-call context panel shows entity data alongside notes (job details, candidate profiles, company info) based on what the call is linked to
 
-### Application Integration
+### Migration
 
-- [x] **INT-01**: Application detail page has a dedicated interviews tab showing all interviews with status, recordings, transcripts, and summaries
-- [x] **INT-02**: Interviewer can take notes in a side panel during the call, auto-saved and posted to application notes on call end
-- [x] **INT-03**: `interview.recording_ready` RabbitMQ event triggers the AI transcription + summary pipeline
-- [x] **INT-04**: Multiple interviews per application are tracked chronologically (multi-round support)
+- [ ] **MIG-01**: Existing interview video flows redirect from portal/candidate apps to `video.splits.network` / `video.applicant.network`
+- [ ] **MIG-02**: Existing magic link URLs continue to work (redirect to new video app domain)
+- [ ] **MIG-03**: Existing v9.0 interview data (recordings, transcripts, summaries) migrated to call-owned artifact pattern
 
 ## Future Requirements
 
 Deferred to future milestone. Tracked but not in current roadmap.
+
+### Real-Time & Intelligence
+
+- **QUICK-01**: Quick/instant unscheduled calls — "Start Call" button creates instant room with push notification
+- **SMART-01**: AI-suggested entity linking — transcript analysis suggests related jobs, candidates, companies
+- **CLIP-01**: Recording highlights and clips — AI-generated timestamp markers for key moments
 
 ### Interview Experience v2
 
@@ -78,19 +68,21 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 - **A11Y-01**: Live captions during calls (real-time speech-to-text, opt-in)
 - **SELF-01**: Self-service scheduling links (Calendly-style candidate self-booking)
-- **LABEL-01**: Named interview rounds (Phone Screen, Technical, Cultural Fit) with formal round labels
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
+| Quick/instant unscheduled calls | Requires real-time push notification infrastructure not yet built |
+| AI-suggested entity linking | High complexity, defer to post-v10.0 |
+| Recording highlights and clips | High complexity AI pipeline extension, defer |
+| Custom branding per company | Two brand modes only (Splits Network + Applicant Network) — avoids massive UI/testing complexity |
+| Video voicemail / async messages | Anti-feature in recruiting context — candidates dislike async video |
+| Separate services per call type | Single video-service with call_type enum — avoid fragmenting infrastructure |
+| Video analytics dashboard | Need usage data before building dashboards — defer to post-v10.0 |
+| Built-in virtual backgrounds | Let OS/browser handle this — building well requires specialized ML engineering |
+| Real-time collaborative document editing | Own product category (CRDT/OT infrastructure) — screen share + notes panel sufficient |
 | One-way / async video interviews | Universally disliked by candidates, increases drop-off 30-50%. Anti-feature. |
-| Custom-built WebRTC infrastructure | LiveKit handles all media. Don't build SFU/TURN from scratch. |
-| Real-time AI coaching during interview | Ethically questionable, legally risky, undermines human interaction |
-| 4K video streaming | Diminishing returns past 720p for interviews. Let LiveKit handle adaptive bitrate. |
-| Built-in whiteboard / code editor | Massive scope. Screen sharing covers technical discussions. Use external tools. |
-| Unlimited recording storage | Unbounded cost and GDPR/CCPA exposure. 90-day retention with cold storage archival. |
-| Live transcription for all participants | Real-time STT is 85-90% accuracy vs 95-98% async. Higher cost, worse experience. Defer as accessibility opt-in. |
 
 ## Traceability
 
@@ -98,45 +90,32 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 33 | Complete |
-| INFRA-02 | Phase 33 | Complete |
-| INFRA-03 | Phase 33 | Complete |
-| INFRA-04 | Phase 33 | Complete |
-| INFRA-05 | Phase 33 | Complete |
-| INFRA-06 | Phase 33 | Complete |
-| ROOM-01 | Phase 34 | Complete |
-| ROOM-02 | Phase 34 | Complete |
-| ROOM-03 | Phase 38 | Complete |
-| ROOM-04 | Phase 38 | Complete |
-| ROOM-05 | Phase 34 | Complete |
-| ROOM-06 | Phase 34 | Complete |
-| SCHED-01 | Phase 35 | Complete |
-| SCHED-02 | Phase 35 | Complete |
-| SCHED-03 | Phase 35 | Complete |
-| SCHED-04 | Phase 35 | Complete |
-| JOIN-01 | Phase 34 | Complete |
-| JOIN-02 | Phase 34 | Complete |
-| JOIN-03 | Phase 34 | Complete |
-| REC-01 | Phase 36 | Complete |
-| REC-02 | Phase 36 | Complete |
-| REC-03 | Phase 36 | Complete |
-| AI-01 | Phase 37 | Complete |
-| AI-02 | Phase 37 | Complete |
-| AI-03 | Phase 37 | Complete |
-| NOTIF-01 | Phase 35 | Complete |
-| NOTIF-02 | Phase 35 | Complete |
-| NOTIF-03 | Phase 35 | Complete |
-| NOTIF-04 | Phase 35 | Complete |
-| INT-01 | Phase 38 | Complete |
-| INT-02 | Phase 38 | Complete |
-| INT-03 | Phase 36 | Complete |
-| INT-04 | Phase 38 | Complete |
+| DATA-01 | — | Pending |
+| DATA-02 | — | Pending |
+| DATA-03 | — | Pending |
+| APP-01 | — | Pending |
+| APP-02 | — | Pending |
+| APP-03 | — | Pending |
+| APP-04 | — | Pending |
+| CALL-01 | — | Pending |
+| CALL-02 | — | Pending |
+| CALL-03 | — | Pending |
+| CALL-04 | — | Pending |
+| HIST-01 | — | Pending |
+| HIST-02 | — | Pending |
+| AI-04 | — | Pending |
+| AI-05 | — | Pending |
+| AI-06 | — | Pending |
+| EXP-01 | — | Pending |
+| MIG-01 | — | Pending |
+| MIG-02 | — | Pending |
+| MIG-03 | — | Pending |
 
 **Coverage:**
-- v9.0 requirements: 33 total
-- Mapped to phases: 33
-- Unmapped: 0
+- v10.0 requirements: 20 total
+- Mapped to phases: 0
+- Unmapped: 20
 
 ---
-*Requirements defined: 2026-03-07*
-*Last updated: 2026-03-07 after roadmap creation (all 33 requirements mapped)*
+*Requirements defined: 2026-03-08*
+*Last updated: 2026-03-08 after initial definition*
