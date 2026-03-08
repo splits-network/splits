@@ -1,1027 +1,584 @@
-# Architecture Patterns: Video Interviewing with LiveKit
+# Architecture Patterns: Video Platform & Recruiting Calls
 
-**Domain:** Video interviewing infrastructure for recruiting marketplace
-**Researched:** 2026-03-07
-**Confidence:** HIGH (codebase analysis) / MEDIUM (LiveKit architecture from training data, not live-verified)
+**Domain:** Generalized video calling platform for Splits Network
+**Researched:** 2026-03-08
+**Confidence:** HIGH (based on direct codebase analysis)
 
 ## Executive Summary
 
-Video interviewing adds a self-hosted LiveKit media server to the existing Kubernetes cluster, a new `video-service` microservice following V2 patterns, and frontend video components shared via a new `video-ui` package. The architecture follows the established pattern: frontend calls api-gateway, which proxies to video-service, which manages interview sessions in Supabase and issues LiveKit access tokens. LiveKit handles all WebRTC media routing (SFU model), TURN/STUN negotiation, and recording via its Egress service. Recordings land in Azure Blob Storage and trigger RabbitMQ events for ai-service to transcribe and analyze.
+The current video architecture is tightly coupled to interviews: the `interviews` table has a mandatory `application_id` FK, all routes live under `/api/v2/interviews`, and the shared-video package types reference `InterviewContext` throughout. Generalizing to support recruiter-company calls requires a new data layer, a new Next.js app, and careful refactoring of shared components -- but the video infrastructure (LiveKit, recording, token generation) is reusable as-is.
 
-**Critical architectural insight:** LiveKit is NOT a service you call through the api-gateway. It is a standalone media server that frontends connect to directly via WebSocket/WebRTC. The video-service's role is session orchestration -- creating rooms, issuing tokens, managing lifecycle -- while LiveKit handles all media. This is analogous to how Clerk handles authentication: the backend configures it, the frontend connects directly.
+The recommended approach is: **new `calls` table + new video app + refactored shared-video types**, keeping the existing interview flow working throughout migration.
 
-## Recommended Architecture
+---
 
-### High-Level System View
+## Current Architecture (As-Is)
 
-```
-Browser (portal / candidate app)
-    |                              |
-    | (1) REST API calls           | (2) WebRTC media connection
-    |                              |
-    v                              v
-NGINX Ingress                 LiveKit Server (K8s)
-    |                              |
-    v                              | (media routing, TURN/STUN)
-API Gateway                        |
-    |                              v
-    v                         LiveKit Egress (K8s)
-video-service (Fastify)            |
-    |                              | (recording output)
-    | (DB queries)                 v
-    v                         Azure Blob Storage
-Supabase Postgres                  |
-    |                              | (RabbitMQ event)
-    v                              v
-RabbitMQ  <--------------------  video-service (consumer)
-    |                              |
-    v                              v
-ai-service                    notification-service
-(transcription + analysis)    (recording ready email)
-```
-
-### Interview Scheduling Flow
+### Component Map
 
 ```
-(1) Recruiter clicks "Schedule Interview" on application
-         |
-         v
-(2) Frontend calls POST /api/v2/video/interviews
-    Body: { application_id, scheduled_at, duration_minutes, participant_emails[], type }
-         |
-         v
-(3) api-gateway proxies to video-service
-         |
-         v
-(4) video-service:
-    a. Validates application exists, user has permission
-    b. Creates interview record in DB (status: 'scheduled')
-    c. Generates magic_link_token for each external participant
-    d. Publishes 'interview.scheduled' RabbitMQ event
-         |
-         v
-(5) notification-service consumes event:
-    a. Sends calendar invite emails with join links
-    b. Links include magic_link_token for non-authenticated users
-         |
-         v
-(6) integration-service (optional):
-    a. If recruiter has Google/Microsoft calendar connected
-    b. Creates calendar event via CalendarService
-    c. Adds video link to calendar event description
+Portal App (splits.network)
+  /portal/interview/[id]           -- full-screen layout, Clerk auth
+  JoinInterviewButton              -- window.open to /portal/interview/[id]
+  InterviewClient                  -- useAuth() + fetchAuthenticatedToken()
+
+Candidate App (applicant.network)
+  /interview/[token]               -- magic link auth, no Clerk
+  InterviewClient                  -- exchangeMagicLink(token)
+  PrepPage                         -- candidate prep before lobby
+
+packages/shared-video
+  Components: VideoLobby, VideoRoom, VideoControls, NotesPanel, etc.
+  Hooks: useInterviewToken, useCallDuration, useRecordingState, useInterviewNotes
+  Types: CallState, InterviewContext, TokenResult, LocalUserChoices
+  Config: getLiveKitUrl, defaultRoomOptions
+
+services/video-service (port 3019)
+  /api/v2/interviews                -- CRUD, list by application
+  /api/v2/interviews/:id/token      -- Clerk-authenticated LiveKit JWT
+  /api/v2/interviews/join           -- magic link token exchange
+  /api/v2/interviews/:id/recording  -- start/stop/consent/playback
+  /api/v2/interviews/recording/webhook -- LiveKit Egress callback
+  /api/v2/interviews/:id/notes      -- in-call notes (dual-auth)
+
+services/api-gateway
+  /api/v2/interviews/*              -- proxies all to video-service
+  Auth: passes x-clerk-user-id header, empty for public routes
+
+Infrastructure (K8s)
+  livekit/                          -- LiveKit server
+  livekit-egress/                   -- Egress service for recording
+  video-service/                    -- Backend deployment
 ```
 
-### Interview Join Flow (Authenticated User -- Recruiter/Business)
+### Data Model (Current)
 
 ```
-(1) User clicks "Join Interview" in portal app
-         |
-         v
-(2) Frontend calls POST /api/v2/video/interviews/:id/join
-    Headers: Authorization: Bearer <Clerk JWT>
-         |
-         v
-(3) api-gateway authenticates via Clerk, proxies to video-service
-         |
-         v
-(4) video-service:
-    a. Validates user is a participant on this interview
-    b. Creates LiveKit room if not exists (via LiveKit Server API)
-    c. Generates LiveKit access token with participant identity + grants
-    d. Updates participant status to 'joined'
-    e. Returns { livekit_url, token, room_name }
-         |
-         v
-(5) Frontend receives token, connects to LiveKit server directly
-    - @livekit/components-react handles WebRTC negotiation
-    - Media flows peer <-> LiveKit SFU <-> peer
-    - No media touches video-service or api-gateway
+interviews
+  id UUID PK
+  application_id UUID NOT NULL FK -> applications(id)  <-- HARD COUPLED
+  room_name TEXT UNIQUE
+  status interview_status ENUM
+  interview_type interview_type ENUM
+  title TEXT
+  scheduled_at TIMESTAMPTZ
+  scheduled_duration_minutes INT
+  recording_enabled BOOLEAN
+  recording_status TEXT
+  recording_egress_id TEXT
+  recording_blob_url TEXT
+  ... (15+ more columns)
+  created_by UUID FK -> users(id)
+
+interview_participants
+  id UUID PK
+  interview_id UUID FK -> interviews(id)
+  user_id UUID FK -> users(id)
+  role interview_participant_role ENUM ('interviewer', 'candidate', 'observer')
+
+interview_access_tokens
+  id UUID PK
+  interview_id UUID FK -> interviews(id)
+  participant_id UUID FK -> interview_participants(id)
+  token TEXT UNIQUE
+
+interview_notes, interview_transcripts, interview_recording_consents,
+interview_reschedule_requests, user_calendar_preferences
 ```
 
-### Interview Join Flow (Candidate via Magic Link)
+### Authentication Flow
+
+1. **Portal users (Clerk):** Clerk JWT -> api-gateway extracts `x-clerk-user-id` -> video-service resolves to internal `user_id` via `users.clerk_user_id` -> verifies participant membership -> generates LiveKit JWT.
+
+2. **Candidate users (magic link):** Magic token string -> video-service looks up `interview_access_tokens.token` -> returns interview + participant + LiveKit JWT. No Clerk involved.
+
+3. **API Gateway:** Passes `x-clerk-user-id` header when present, empty headers for public routes. The `/api/v2/interviews/join` endpoint is public (no auth required).
+
+### Key Coupling Points
+
+| Component | Coupled To | How |
+|-----------|-----------|-----|
+| `interviews` table | `applications` | `application_id NOT NULL FK` |
+| `InterviewContext` type | Interview domain | `interview_type`, `job`, `company_name` fields |
+| `interview_participants.role` | Interview roles | ENUM: `interviewer`, `candidate`, `observer` |
+| Token service | Interview IDs | `interview_access_tokens.interview_id` |
+| Recording service | Interview IDs | `interviews.recording_*` columns |
+| Portal interview page | Portal app | Lives under `/portal/interview/[id]` |
+| Candidate interview page | Candidate app | Lives under `/interview/[token]` |
+| `useInterviewToken` hook | `/interviews/` endpoints | Hardcoded API paths |
+| `PostCallSummary` | `isCandidate` boolean | Interview-specific post-call behavior |
+
+---
+
+## Target Architecture (To-Be)
+
+### New Component: `apps/video/`
+
+A dedicated Next.js app serving two subdomains:
 
 ```
-(1) Candidate clicks magic link in email:
-    https://applicant.network/interview/join?token=<magic_link_token>
-         |
-         v
-(2) Candidate app validates token via:
-    POST /api/v2/video/interviews/join-by-token
-    Body: { token: <magic_link_token>, display_name: "John Doe" }
-    Note: NO Clerk auth required -- api-gateway skips auth for this route
-         |
-         v
-(3) video-service:
-    a. Looks up magic_link_token in interview_participants table
-    b. Validates: not expired, not already consumed, interview is joinable
-    c. Creates LiveKit room if not exists
-    d. Generates LiveKit access token with candidate identity
-    e. Marks token as consumed
-    f. Returns { livekit_url, token, room_name }
-         |
-         v
-(4) Candidate app connects to LiveKit directly (same as authenticated flow)
+video.splits.network     -- Portal user video (Splits Network branding)
+video.applicant.network  -- Candidate video (Applicant Network branding)
 ```
 
-### Recording Flow
+**Why a separate app instead of routes in portal/candidate:**
+1. Video calls need full-screen, chrome-free layout -- existing apps have nav, sidebars, etc.
+2. Different authentication model -- video app supports both Clerk AND magic link in one app.
+3. Shared codebase between branded experiences -- one app, two themes.
+4. The video app already opens in a new window -- no user flow disruption.
+5. Future call types (recruiter-company) don't belong in the candidate or portal navigation.
+
+**Architecture of `apps/video/`:**
 
 ```
-(1) Host clicks "Start Recording" (or auto-record is configured)
-         |
-         v
-(2) Frontend calls POST /api/v2/video/interviews/:id/recording/start
-         |
-         v
-(3) video-service:
-    a. Calls LiveKit Egress API: start room composite egress
-    b. Configures output: MP4 to Azure Blob Storage
-    c. Stores egress_id in interview_recordings table
-    d. Returns { recording_id }
-         |
-         v
-(4) LiveKit Egress worker:
-    a. Joins the LiveKit room as a hidden participant
-    b. Composites all video/audio tracks
-    c. Encodes to MP4 in real-time
-    d. Uploads segments to Azure Blob Storage
-         |
-         v
-(5) When recording stops (manual or room closes):
-    a. LiveKit sends webhook to video-service: egress.ended
-    b. video-service updates recording status to 'completed'
-    c. video-service publishes 'recording.completed' RabbitMQ event
-         |
-         v
-(6) ai-service consumes 'recording.completed':
-    a. Downloads recording from Azure Blob Storage
-    b. Transcribes audio (via Whisper API or Azure Speech)
-    c. Runs AI analysis on transcript (fit scoring, sentiment, key topics)
-    d. Stores results in interview_transcripts / interview_analyses tables
-    e. Publishes 'interview.analysis_completed' event
-         |
-         v
-(7) notification-service:
-    a. Sends "Interview analysis ready" notification to recruiter
+apps/video/
+  src/
+    app/
+      [call-id]/               -- Authenticated call page (Clerk users)
+        page.tsx               -- Server component, renders CallClient
+        call-client.tsx        -- Client component, uses shared-video
+      join/
+        [token]/               -- Magic link page (candidates, external)
+          page.tsx
+          call-client.tsx
+      layout.tsx               -- Full-screen, no nav, brand-aware
+    lib/
+      brand.ts                 -- Detect subdomain, return brand config
+    middleware.ts              -- Optional: subdomain detection
 ```
 
-## Component Boundaries
+**Authentication approach -- NO new Clerk instance needed:**
 
-### New Components
+The video app does NOT need its own Clerk instance. Here is why:
 
-| Component | Type | Location | Responsibility |
-|-----------|------|----------|----------------|
-| **video-service** | Fastify microservice | `services/video-service/` | Interview CRUD, LiveKit token generation, recording orchestration, webhook receiver |
-| **LiveKit Server** | Third-party container | `infra/k8s/livekit/` | WebRTC SFU, media routing, TURN/STUN, room management |
-| **LiveKit Egress** | Third-party container | `infra/k8s/livekit-egress/` | Recording, compositing video tracks to MP4 |
-| **video-ui** | Shared package | `packages/video-ui/` | React components for video room (pre-join, in-call, controls) |
-| **DB tables** | Schema additions | Supabase migration | interviews, interview_participants, interview_recordings, interview_transcripts |
+- **Portal users (Clerk path):** When a portal user clicks "Join Call", the portal opens `video.splits.network/[call-id]`. The video app uses the SAME Clerk instance as the portal (same `CLERK_PUBLISHABLE_KEY`). Clerk cookies are domain-scoped; since both are on `*.splits.network`, session sharing works IF the Clerk instance is configured for the parent domain. If not, the portal can pass a short-lived session token in the URL query param that the video app exchanges for a LiveKit JWT.
 
-### Modified Components
+- **Candidate users (magic link path):** No Clerk at all. The candidate clicks a magic link that opens `video.applicant.network/join/[token]`. The video app exchanges the token for a LiveKit JWT, same as today.
 
-| Component | Modification | Why |
-|-----------|-------------|-----|
-| **api-gateway** | Add `video` to ServiceName union, register video-service, add proxy routes, skip auth for magic link route | Route video API requests |
-| **api-gateway K8s** | Add VIDEO_SERVICE_URL env var | K8s service discovery |
-| **shared-types** | Add interview event types, interview status enums | Cross-service type safety |
-| **ingress.yaml** | Add LiveKit WebSocket/WebRTC paths OR separate ingress for LiveKit domain | LiveKit needs direct browser access |
-| **portal app** | Add interview UI pages and components | Recruiter/business video experience |
-| **candidate app** | Add magic link join page and video room | Candidate video experience |
+- **Recommended approach:** Use the portal's Clerk instance for `video.splits.network`. For the initial implementation, the simplest approach is to pass an opaque session token (not the Clerk JWT itself) in the URL when opening the video window, which the video app exchanges for a LiveKit JWT via the existing `/api/v2/interviews/:id/token` endpoint. This avoids Clerk configuration complexity entirely.
 
-### Unchanged Components
+### Data Model: New `calls` Table (Recommended Approach)
 
-| Component | Why Unchanged |
-|-----------|--------------|
-| **ats-service** | video-service reads application data from DB directly |
-| **integration-service** | Calendar integration triggered by RabbitMQ event, not HTTP |
-| **chat-service/gateway** | Separate real-time system, no overlap |
-| **identity-service** | User lookup via shared DB |
-| **document-service** | Recordings go to Azure Blob, not Supabase Storage |
-| **billing-service** | Video feature gating via plan checks (DB query) |
+**Decision: New `calls` table, NOT modify `interviews`.**
 
-## LiveKit Server Architecture
-
-### What LiveKit Is
-
-LiveKit is an open-source WebRTC SFU (Selective Forwarding Unit). It handles:
-
-- **Signaling:** WebSocket connection for session negotiation
-- **Media routing:** Receives media from publishers, forwards to subscribers
-- **TURN/STUN:** Built-in TURN server for NAT traversal (port 443/TCP relay, 3478/UDP)
-- **Room management:** Create/close rooms, manage participants
-- **Server API:** HTTP API for room/participant management from backend
-- **Webhooks:** Notifies your backend of room events (participant joined, egress completed, etc.)
-
-### Deployment Topology
-
-```
-K8s Cluster (splits-network namespace)
-+-------------------------------------------------------+
-|                                                       |
-|  +------------------+    +------------------------+   |
-|  | LiveKit Server   |    | LiveKit Egress         |   |
-|  | (Deployment)     |    | (Deployment)           |   |
-|  |                  |    |                        |   |
-|  | Ports:           |    | Connects to:           |   |
-|  |  7880 (HTTP API) |    |  - LiveKit Server      |   |
-|  |  7881 (WebRTC)   |    |  - Azure Blob Storage  |   |
-|  |  7882 (TURN/UDP) |    |  - Redis (for queue)   |   |
-|  |  443  (TURN/TLS) |    |                        |   |
-|  +------------------+    +------------------------+   |
-|           |                                           |
-|  +------------------+    +------------------------+   |
-|  | video-service    |    | Redis                  |   |
-|  | (Deployment)     |    | (existing, shared)     |   |
-|  |                  |    |                        |   |
-|  | Calls LiveKit    |    | Used by Egress for     |   |
-|  |  Server API      |    |  job queuing           |   |
-|  | Port: 3020       |    |                        |   |
-|  +------------------+    +------------------------+   |
-|                                                       |
-+-------------------------------------------------------+
-         |                           |
-   NGINX Ingress              LiveKit Ingress/LB
-   (api.splits.network)       (livekit.splits.network)
-         |                           |
-    video-service API          LiveKit WebRTC+WS
-    (REST, via gateway)        (direct browser access)
-```
-
-### Network Requirements (MEDIUM confidence)
-
-LiveKit needs specific network configuration for WebRTC to work:
-
-| Port | Protocol | Purpose | Exposure |
-|------|----------|---------|----------|
-| 7880 | TCP | HTTP API (server-to-server) | Internal only (ClusterIP) |
-| 7881 | TCP | WebRTC signaling (WebSocket) | External (ingress or LoadBalancer) |
-| 3478 | UDP | STUN/TURN | External (NodePort or LoadBalancer) |
-| 50000-60000 | UDP | WebRTC media (ICE candidates) | External (hostNetwork or UDP LB) |
-| 443 | TCP | TURN over TLS (fallback) | External (ingress) |
-
-**Critical networking decision: UDP media ports.**
-
-WebRTC performs best with direct UDP. In Kubernetes, this requires one of:
-1. **hostNetwork: true** -- Pod uses host's network stack, gets direct UDP access. Simple but limits to 1 LiveKit pod per node.
-2. **NodePort service** -- Expose UDP port range via NodePort. Works but limited port range.
-3. **Azure LoadBalancer with UDP** -- Azure supports UDP load balancers. Most production-appropriate for AKS.
-4. **TURN-only fallback** -- Force all media through TURN on TCP 443. Works through any firewall but higher latency.
-
-**Recommendation: Start with hostNetwork: true for simplicity** (1 LiveKit pod is sufficient for initial scale), then migrate to Azure UDP LoadBalancer when scaling beyond one node. Always enable TURN on TCP 443 as fallback for participants behind restrictive firewalls.
-
-### LiveKit Configuration
-
-```yaml
-# livekit-config.yaml (ConfigMap)
-port: 7880
-rtc:
-  port_range_start: 50000
-  port_range_end: 60000
-  tcp_port: 7881
-  use_external_ip: true
-turn:
-  enabled: true
-  domain: livekit.splits.network
-  tls_port: 443
-  udp_port: 3478
-redis:
-  address: redis:6379
-  # password from secret
-keys:
-  # API key: secret key pair (from K8s secret)
-  # Used by video-service to authenticate API calls
-webhook:
-  urls:
-    - https://api.splits.network/api/v2/video/webhooks/livekit
-  api_key: <from secret>
-```
-
-### LiveKit Egress Architecture (MEDIUM confidence)
-
-LiveKit Egress is a separate service that records rooms:
-
-- **Deployment:** Runs as a separate K8s Deployment alongside LiveKit Server
-- **How it works:** When recording starts, Egress joins the room as a headless Chrome participant, captures all tracks, composites them, encodes to MP4
-- **Dependencies:** Needs Chrome/Chromium (runs headless), Redis (for job queuing), and access to output storage
-- **Resource intensive:** Each active recording consumes ~1-2 CPU cores and ~1-2GB RAM (headless Chrome + encoding)
-- **Storage output:** Supports S3-compatible APIs, Azure Blob Storage, GCS
-
-```yaml
-# Egress configuration
-api_key: <from secret>
-api_secret: <from secret>
-ws_url: ws://livekit-server:7880
-redis:
-  address: redis:6379
-azure:
-  account_name: <from secret>
-  account_key: <from secret>
-  container_name: interview-recordings
-```
-
-## video-service Internal Architecture
-
-Following the V2 service pattern exactly:
-
-```
-services/video-service/
-+-- Dockerfile
-+-- package.json
-+-- tsconfig.json
-+-- src/
-    +-- index.ts                          # Fastify server setup
-    +-- v2/
-    |   +-- shared/
-    |   |   +-- livekit-client.ts         # LiveKit Server SDK wrapper
-    |   |   +-- magic-link.ts             # Token generation/validation
-    |   |   +-- events.ts                 # RabbitMQ event publisher
-    |   +-- interviews/
-    |   |   +-- types.ts                  # Interview, Participant, Recording types
-    |   |   +-- repository.ts             # interviews, interview_participants CRUD
-    |   |   +-- service.ts                # Business logic, LiveKit orchestration
-    |   |   +-- routes.ts                 # REST endpoints
-    |   +-- recordings/
-    |   |   +-- types.ts                  # Recording, Transcript types
-    |   |   +-- repository.ts             # interview_recordings, interview_transcripts CRUD
-    |   |   +-- service.ts                # Recording lifecycle, storage URL generation
-    |   |   +-- routes.ts                 # Recording endpoints
-    |   +-- webhooks/
-    |   |   +-- livekit-webhook.ts        # LiveKit webhook handler (egress.ended, etc.)
-    |   +-- routes.ts                     # Route registry
-    +-- consumers/
-        +-- recording-consumer.ts         # (Optional) Process recording events
-```
-
-### Key Service Responsibilities
-
-**video-service owns:**
-- Interview lifecycle (schedule, start, end, cancel)
-- Participant management (invite, join, leave)
-- Magic link token generation and validation
-- LiveKit room creation and token issuance
-- Recording start/stop orchestration
-- Webhook processing from LiveKit
-- Publishing domain events to RabbitMQ
-
-**video-service does NOT own:**
-- Media routing (LiveKit)
-- Video encoding/recording (LiveKit Egress)
-- Transcription (ai-service)
-- Calendar events (integration-service via RabbitMQ)
-- Email notifications (notification-service via RabbitMQ)
-
-### LiveKit SDK Integration
-
-```typescript
-// services/video-service/src/v2/shared/livekit-client.ts
-import { RoomServiceClient, AccessToken, VideoGrant } from 'livekit-server-sdk';
-
-export class LiveKitClient {
-    private roomService: RoomServiceClient;
-
-    constructor(
-        private livekitHost: string,    // http://livekit-server:7880
-        private apiKey: string,
-        private apiSecret: string,
-    ) {
-        this.roomService = new RoomServiceClient(livekitHost, apiKey, apiSecret);
-    }
-
-    /** Create or get a room for an interview */
-    async ensureRoom(interviewId: string): Promise<string> {
-        const roomName = `interview-${interviewId}`;
-        await this.roomService.createRoom({
-            name: roomName,
-            emptyTimeout: 300,       // Close 5 min after last participant leaves
-            maxParticipants: 10,     // Panel interviews
-        });
-        return roomName;
-    }
-
-    /** Generate an access token for a participant */
-    generateToken(
-        roomName: string,
-        participantIdentity: string,
-        participantName: string,
-        grants: { canPublish: boolean; canSubscribe: boolean; canPublishData: boolean },
-    ): string {
-        const token = new AccessToken(this.apiKey, this.apiSecret, {
-            identity: participantIdentity,
-            name: participantName,
-            ttl: '4h',  // Token valid for 4 hours
-        });
-        token.addGrant({
-            room: roomName,
-            roomJoin: true,
-            canPublish: grants.canPublish,
-            canSubscribe: grants.canSubscribe,
-            canPublishData: grants.canPublishData,
-        } as VideoGrant);
-        return token.toJwt();
-    }
-}
-```
-
-## Database Schema
-
-### New Tables
+Rationale:
+1. The `interviews` table has `application_id NOT NULL` -- making it nullable is a destructive migration that invalidates existing queries and constraints.
+2. Interview-specific columns (round_name, interview_type ENUM, reschedule logic) don't apply to recruiter-company calls.
+3. Cleaner separation of concerns -- interviews remain interview-specific, calls are the generalized concept.
+4. Both interviews and calls are just "types of call" -- the underlying LiveKit room, recording, and participant machinery is the same.
 
 ```sql
--- Interview sessions
-CREATE TABLE interviews (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID REFERENCES applications(id),
-    job_id UUID REFERENCES jobs(id),
-    title TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('screening', 'technical', 'panel', 'final')),
-    status TEXT NOT NULL DEFAULT 'scheduled'
-        CHECK (status IN ('scheduled', 'in_progress', 'completed', 'cancelled', 'no_show')),
-    scheduled_at TIMESTAMPTZ NOT NULL,
-    started_at TIMESTAMPTZ,
-    ended_at TIMESTAMPTZ,
-    duration_minutes INTEGER NOT NULL DEFAULT 60,
-    livekit_room_name TEXT,           -- Set when room is created
-    auto_record BOOLEAN NOT NULL DEFAULT false,
-    created_by TEXT NOT NULL,          -- clerk_user_id of scheduler
-    organization_id UUID,             -- For RBAC scoping
-    notes TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- New enum for generalized call types
+CREATE TYPE call_type AS ENUM (
+    'interview',           -- Linked to an application (migration bridge)
+    'recruiter_company',   -- Recruiter <-> company contact call
+    'recruiter_candidate', -- Direct recruiter <-> candidate (not application-specific)
+    'internal'             -- Internal team calls
 );
 
-CREATE INDEX idx_interviews_application ON interviews(application_id);
-CREATE INDEX idx_interviews_scheduled ON interviews(scheduled_at) WHERE status = 'scheduled';
-CREATE INDEX idx_interviews_status ON interviews(status);
+CREATE TYPE call_status AS ENUM (
+    'scheduled', 'in_progress', 'completed', 'cancelled', 'no_show', 'expired'
+);
 
--- Interview participants (both authenticated and magic-link)
-CREATE TABLE interview_participants (
+CREATE TYPE call_participant_role AS ENUM (
+    'host', 'guest', 'observer'
+);
+
+-- The generalized calls table
+CREATE TABLE calls (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    interview_id UUID NOT NULL REFERENCES interviews(id) ON DELETE CASCADE,
-    role TEXT NOT NULL CHECK (role IN ('host', 'interviewer', 'candidate', 'observer')),
-    -- Authenticated participants (Clerk users)
-    clerk_user_id TEXT,               -- NULL for magic-link participants
-    user_id UUID,                     -- identity-service user ID
-    -- Magic-link participants (candidates without accounts)
-    email TEXT,
-    display_name TEXT,
-    magic_link_token TEXT UNIQUE,     -- Hashed token for joining
-    magic_link_expires_at TIMESTAMPTZ,
-    -- Status
-    status TEXT NOT NULL DEFAULT 'invited'
-        CHECK (status IN ('invited', 'joined', 'left', 'no_show')),
+    call_type call_type NOT NULL,
+    room_name TEXT UNIQUE,
+    status call_status NOT NULL DEFAULT 'scheduled',
+    title TEXT,
+    scheduled_at TIMESTAMPTZ NOT NULL,
+    scheduled_duration_minutes INT NOT NULL DEFAULT 30,
+    actual_start_at TIMESTAMPTZ,
+    actual_end_at TIMESTAMPTZ,
+    cancellation_reason TEXT,
+    max_duration_seconds INT NOT NULL DEFAULT 14400,
+
+    -- Polymorphic entity link
+    entity_type TEXT,     -- 'application', 'company', 'job', 'firm', etc.
+    entity_id UUID,       -- FK to the relevant entity (not enforced at DB level)
+
+    -- Recording (same columns as interviews)
+    recording_enabled BOOLEAN NOT NULL DEFAULT false,
+    recording_status TEXT CHECK (recording_status IN ('pending','recording','processing','ready','failed')),
+    recording_egress_id TEXT,
+    recording_blob_url TEXT,
+    recording_duration_seconds INT,
+    recording_file_size_bytes BIGINT,
+    recording_started_at TIMESTAMPTZ,
+    recording_ended_at TIMESTAMPTZ,
+
+    -- Metadata
+    metadata JSONB DEFAULT '{}',
+    created_by UUID NOT NULL REFERENCES users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_calls_entity ON calls(entity_type, entity_id) WHERE entity_id IS NOT NULL;
+CREATE INDEX idx_calls_status ON calls(status) WHERE status IN ('scheduled', 'in_progress');
+CREATE INDEX idx_calls_scheduled ON calls(scheduled_at) WHERE status = 'scheduled';
+
+CREATE TABLE call_participants (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    call_id UUID NOT NULL REFERENCES calls(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id),
+    role call_participant_role NOT NULL,
     joined_at TIMESTAMPTZ,
     left_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT participant_identity CHECK (
-        clerk_user_id IS NOT NULL OR email IS NOT NULL
-    )
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_call_participant UNIQUE (call_id, user_id)
 );
 
-CREATE INDEX idx_interview_participants_interview ON interview_participants(interview_id);
-CREATE INDEX idx_interview_participants_magic_link ON interview_participants(magic_link_token)
-    WHERE magic_link_token IS NOT NULL;
-CREATE INDEX idx_interview_participants_clerk_user ON interview_participants(clerk_user_id)
-    WHERE clerk_user_id IS NOT NULL;
-
--- Interview recordings
-CREATE TABLE interview_recordings (
+CREATE TABLE call_access_tokens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    interview_id UUID NOT NULL REFERENCES interviews(id) ON DELETE CASCADE,
-    livekit_egress_id TEXT NOT NULL,   -- LiveKit egress ID for tracking
-    status TEXT NOT NULL DEFAULT 'recording'
-        CHECK (status IN ('recording', 'processing', 'completed', 'failed')),
-    storage_path TEXT,                 -- Azure Blob path when completed
-    storage_url TEXT,                  -- Signed URL (generated on demand, not stored permanently)
-    duration_seconds INTEGER,
-    file_size_bytes BIGINT,
-    format TEXT NOT NULL DEFAULT 'mp4',
-    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    completed_at TIMESTAMPTZ,
-    error_message TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    call_id UUID NOT NULL REFERENCES calls(id) ON DELETE CASCADE,
+    participant_id UUID NOT NULL REFERENCES call_participants(id) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_call_access_token UNIQUE (call_id, participant_id)
 );
-
-CREATE INDEX idx_interview_recordings_interview ON interview_recordings(interview_id);
-
--- Interview transcripts (populated by ai-service)
-CREATE TABLE interview_transcripts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    recording_id UUID NOT NULL REFERENCES interview_recordings(id) ON DELETE CASCADE,
-    interview_id UUID NOT NULL REFERENCES interviews(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,             -- Full transcript text
-    segments JSONB,                    -- Timestamped segments with speaker labels
-    language TEXT NOT NULL DEFAULT 'en',
-    status TEXT NOT NULL DEFAULT 'processing'
-        CHECK (status IN ('processing', 'completed', 'failed')),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Interview AI analysis (populated by ai-service)
-CREATE TABLE interview_analyses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    interview_id UUID NOT NULL REFERENCES interviews(id) ON DELETE CASCADE,
-    transcript_id UUID REFERENCES interview_transcripts(id),
-    analysis_type TEXT NOT NULL CHECK (analysis_type IN ('summary', 'scorecard', 'sentiment')),
-    content JSONB NOT NULL,            -- Structured analysis output
-    model_version TEXT,                -- AI model used
-    status TEXT NOT NULL DEFAULT 'processing'
-        CHECK (status IN ('processing', 'completed', 'failed')),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_interview_analyses_interview ON interview_analyses(interview_id);
 ```
 
-## Integration Points with Existing Architecture
+**Polymorphic entity linking:** The `entity_type` + `entity_id` pattern is used instead of multiple nullable FKs. This is the standard approach for polymorphic associations in Postgres when the set of linked entity types will grow over time. No DB-level FK enforcement on `entity_id` -- application-level validation ensures integrity.
 
-### 1. API Gateway Integration
+| call_type | entity_type | entity_id points to |
+|-----------|------------|---------------------|
+| `interview` | `application` | `applications.id` |
+| `recruiter_company` | `company` | `companies.id` |
+| `recruiter_company` | `job` | `jobs.id` |
+| `recruiter_candidate` | `candidate` | `candidates.id` |
+| `internal` | NULL | NULL |
 
-Same pattern as all other services. Add `video` to the ServiceName union and register the service.
+### Migration Bridge: Interviews -> Calls
 
-**api-gateway changes:**
+**Phase strategy: Parallel tables, not immediate migration.**
+
+1. **Phase 1:** Create `calls` table. New call types (recruiter-company) use `calls`. Existing interviews stay on `interviews` table.
+2. **Phase 2:** Video app works with both tables -- `/api/v2/calls` for new types, `/api/v2/interviews` for existing interviews.
+3. **Phase 3 (optional, later):** Migrate interview data to `calls` table with `call_type = 'interview'`, update all references, deprecate `interviews` table.
+
+This avoids a big-bang migration and lets the existing interview flow work unchanged.
+
+### Service Layer Changes
+
+**video-service expansion:**
+
+```
+services/video-service/src/v2/
+  interviews/          -- EXISTING, unchanged
+    routes.ts
+    service.ts
+    repository.ts
+    recording-routes.ts
+    recording-service.ts
+    token-service.ts
+    types.ts
+  calls/               -- NEW, parallel module
+    routes.ts          -- /api/v2/calls CRUD
+    service.ts         -- Call lifecycle
+    repository.ts      -- calls table access
+    token-service.ts   -- Reuses LiveKit JWT generation
+    types.ts           -- Call, CallParticipant, etc.
+  shared/
+    events.ts          -- Existing
+    helpers.ts         -- Existing
+    livekit.ts         -- NEW: Extract LiveKit JWT generation to shared
+    recording.ts       -- NEW: Extract recording start/stop to shared
+```
+
+**Key refactoring:** Extract LiveKit JWT generation and recording logic from `InterviewRepository`/`TokenService` into shared utilities that both `interviews/` and `calls/` modules use. The LiveKit operations (token generation, egress start/stop) are entity-agnostic -- they only need a room name and participant identity.
+
+**api-gateway expansion:**
 
 ```typescript
-// services/api-gateway/src/routes/v2/common.ts
-export type ServiceName =
-    | 'analytics' | 'ats' | 'network' | 'billing'
-    | 'notification' | 'identity' | 'document'
-    | 'automation' | 'search' | 'gpt' | 'content'
-    | 'integration' | 'matching' | 'gamification'
-    | 'video';  // NEW
-
-// services/api-gateway/src/routes/v2/video.ts (new file)
-const VIDEO_RESOURCES: ResourceDefinition[] = [
-    { name: 'interviews', service: 'video', basePath: '/video/interviews', tag: 'video' },
-    { name: 'recordings', service: 'video', basePath: '/video/recordings', tag: 'video' },
-];
-
-// Plus custom routes for:
-// - POST /api/v2/video/interviews/join-by-token (no auth -- magic link)
-// - POST /api/v2/video/webhooks/livekit (no auth -- webhook signature verification)
+// New route registration in api-gateway
+app.all('/api/v2/calls/*', proxyToVideoService);
+app.all('/api/v2/calls', proxyToVideoService);
 ```
 
-**Auth skip for magic link and webhooks:**
-```typescript
-// api-gateway auth hook additions
-if (request.url.startsWith('/api/v2/video/interviews/join-by-token')) return;  // Magic link
-if (request.url.startsWith('/api/v2/video/webhooks/')) return;                 // LiveKit webhooks
-```
+### shared-video Package Refactoring
 
-### 2. RabbitMQ Event Integration
+The shared-video package currently uses interview-specific types. For generalization:
 
-video-service publishes domain events that other services consume:
-
-| Event | Publisher | Consumer(s) | Payload |
-|-------|-----------|-------------|---------|
-| `interview.scheduled` | video-service | notification-service, integration-service | interview_id, participants, scheduled_at |
-| `interview.started` | video-service | notification-service | interview_id |
-| `interview.completed` | video-service | ats-service (update stage?), notification-service | interview_id, duration |
-| `interview.cancelled` | video-service | notification-service, integration-service | interview_id, reason |
-| `recording.completed` | video-service | ai-service | recording_id, interview_id, storage_path |
-| `interview.analysis_completed` | ai-service | notification-service | interview_id, analysis_id |
-| `application.stage_changed` | ats-service | video-service (optional: auto-schedule?) | application_id, new_stage |
-
-### 3. Calendar Integration
-
-When an interview is scheduled, video-service publishes `interview.scheduled`. The integration-service can consume this event and create calendar events for participants who have connected Google/Microsoft calendars.
-
-**Important:** This is an event-driven integration, NOT an HTTP call. video-service does not call integration-service directly. It publishes the event, and integration-service decides whether to act based on whether participants have calendar connections.
-
-### 4. ai-service Integration
-
-ai-service consumes `recording.completed` events to:
-1. Download the MP4 from Azure Blob Storage
-2. Extract audio and transcribe via Whisper API or Azure Cognitive Services Speech
-3. Run analysis prompts on the transcript
-4. Store results in interview_transcripts and interview_analyses tables
-5. Publish `interview.analysis_completed` event
-
-This follows the existing pattern where ai-service processes domain events asynchronously.
-
-### 5. LiveKit Webhook Integration
-
-LiveKit sends webhooks to video-service for room lifecycle events:
+**Step 1: Introduce generalized types alongside interview types:**
 
 ```typescript
-// services/video-service/src/v2/webhooks/livekit-webhook.ts
-// LiveKit signs webhooks with the API key/secret pair
-// Use livekit-server-sdk WebhookReceiver to verify signatures
+// New generalized types
+export interface CallContext {
+    id: string;
+    callType: 'interview' | 'recruiter_company' | 'recruiter_candidate' | 'internal';
+    status: string;
+    title: string | null;
+    scheduled_at: string;
+    scheduled_duration_minutes: number;
+    recording_enabled: boolean;
+    // Context varies by call type
+    context: {
+        entityType?: string;
+        entityName?: string;    // Job title, company name, etc.
+        entitySubName?: string; // Company name for job context
+    };
+    participants: Array<{
+        id: string;
+        role: string;
+        name: string;
+        avatar_url: string | null;
+    }>;
+}
 
-// Events we care about:
-// - room_started: Room was created (update interview status)
-// - room_finished: Last participant left (update interview status)
-// - participant_joined: Track who joined and when
-// - participant_left: Track who left and when
-// - egress_started: Recording began successfully
-// - egress_ended: Recording completed (trigger recording.completed event)
+// InterviewContext becomes an alias or adapter
+export type InterviewContext = CallContext & {
+    callType: 'interview';
+    interview_type: string;
+    reschedule_count: number;
+    job: { id: string; title: string; company_name: string };
+};
 ```
 
-**Webhook route goes through api-gateway** but skips Clerk auth (same pattern as Stripe webhooks). video-service verifies the LiveKit webhook signature itself.
+**Step 2: Update components to accept `CallContext`:**
 
-### 6. LiveKit Direct Browser Access
+Components like `VideoLobby`, `VideoRoom`, `PostCallSummary` receive `callContext` instead of `interviewContext`. The interview-specific fields (job title, company name) move into the `context` bag.
 
-**Critical:** Unlike all other backend services, LiveKit needs direct browser access. Browsers connect to LiveKit via WebSocket for signaling and WebRTC for media. This traffic does NOT go through api-gateway.
+**Step 3: Keep backward compatibility:**
 
-**Options for exposing LiveKit:**
+Export both `InterviewContext` (for existing portal/candidate code) and `CallContext` (for new video app). Adapter function converts between them.
 
-**Option A: Separate subdomain (RECOMMENDED)**
-- `livekit.splits.network` points to LiveKit LoadBalancer/Ingress
-- Separate TLS certificate (add to cert-manager)
-- Clean separation of concerns
-- LiveKit handles its own WebSocket upgrade
-
-**Option B: Path-based routing on existing ingress**
-- `api.splits.network/livekit/` routes to LiveKit
-- Reuses existing TLS cert
-- More complex ingress rules, potential conflicts with WebSocket upgrade handling
-
-**Recommendation: Option A.** LiveKit's network requirements (UDP ports, WebSocket upgrades, TURN) are different enough from standard HTTP services that a separate ingress/LB is cleaner. The existing ingress already handles WebSocket for chat-gateway and analytics-gateway, but LiveKit also needs UDP which NGINX ingress handles poorly.
-
-## Kubernetes Resources
-
-### New K8s Manifests
+### Integration Points
 
 ```
-infra/k8s/
-+-- livekit/
-|   +-- configmap.yaml          # LiveKit server config
-|   +-- deployment.yaml         # LiveKit server pod (hostNetwork: true)
-|   +-- service.yaml            # ClusterIP for internal API access
-|   +-- ingress.yaml            # Or LoadBalancer for external WebRTC access
-+-- livekit-egress/
-|   +-- deployment.yaml         # Egress worker pod
-+-- livekit-secrets/
-|   +-- secrets.yaml            # API key, API secret, Azure credentials
-+-- video-service/
-    +-- deployment.yaml         # Standard Fastify service deployment
+                    Portal App                          Candidate App
+                    (splits.network)                    (applicant.network)
+                         |                                    |
+                    "Join Call"                          Magic Link
+                    window.open()                       email click
+                         |                                    |
+                         v                                    v
+              video.splits.network/[call-id]    video.applicant.network/join/[token]
+                         |                                    |
+                         |        apps/video/                 |
+                         +--------[call-id]--+--join/[token]--+
+                                     |
+                              shared-video pkg
+                         (VideoLobby, VideoRoom, etc.)
+                                     |
+                              API Gateway
+                         (api.splits.network)
+                                     |
+                    +----------------+----------------+
+                    |                                 |
+              /api/v2/interviews              /api/v2/calls
+              (existing interview flow)       (new call types)
+                    |                                 |
+                    +--------video-service------------+
+                                     |
+                              LiveKit Server
+                         (rooms, tokens, egress)
 ```
 
-### LiveKit Server Deployment (MEDIUM confidence)
+### How Recruiter-Company Calls Get Created
+
+**Flow:**
+
+1. Recruiter views a company profile or job in portal.
+2. Clicks "Schedule Call" or "Call Now" button.
+3. Portal frontend POSTs to `/api/v2/calls` with:
+   ```json
+   {
+     "call_type": "recruiter_company",
+     "entity_type": "company",
+     "entity_id": "company-uuid",
+     "title": "Discuss Senior Developer role",
+     "scheduled_at": "2026-03-15T14:00:00Z",
+     "participants": [
+       { "user_id": "recruiter-user-id", "role": "host" },
+       { "user_id": "company-contact-user-id", "role": "guest" }
+     ]
+   }
+   ```
+4. video-service creates the call, generates access tokens, publishes event.
+5. Notification service sends email/push to company contact with magic link.
+6. Both parties join via the video app.
+
+### Subdomain & Infrastructure
+
+**New K8s resources needed:**
+
+```
+infra/k8s/video/
+  deployment.yaml
+  service.yaml
+  hpa.yaml
+```
+
+**Ingress additions:**
 
 ```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: livekit-server
-  namespace: splits-network
-spec:
-  replicas: 1                    # Start with 1, scale later
-  selector:
-    matchLabels:
-      app: livekit-server
-  template:
-    metadata:
-      labels:
-        app: livekit-server
-    spec:
-      hostNetwork: true          # Required for WebRTC UDP ports
-      dnsPolicy: ClusterFirstWithHostNet
-      containers:
-        - name: livekit
-          image: livekit/livekit-server:latest  # Pin to specific version in prod
-          ports:
-            - containerPort: 7880
-              name: http
-            - containerPort: 7881
-              name: rtc-tcp
-            - containerPort: 3478
-              name: turn-udp
-              protocol: UDP
-          args: ["--config", "/etc/livekit/config.yaml"]
-          volumeMounts:
-            - name: config
-              mountPath: /etc/livekit
-          env:
-            - name: LIVEKIT_KEYS
-              valueFrom:
-                secretKeyRef:
-                  name: livekit-secrets
-                  key: livekit-keys
-          resources:
-            requests:
-              cpu: 500m
-              memory: 512Mi
-            limits:
-              cpu: 2000m
-              memory: 2Gi
-      volumes:
-        - name: config
-          configMap:
-            name: livekit-config
+- host: video.splits.network
+  http:
+    paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: video
+            port:
+              number: 80
+- host: video.applicant.network
+  http:
+    paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: video
+            port:
+              number: 80
 ```
 
-### LiveKit Egress Deployment (MEDIUM confidence)
+**TLS:** Add `video.splits.network` and `video.applicant.network` to the cert-manager TLS hosts list.
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: livekit-egress
-  namespace: splits-network
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: livekit-egress
-  template:
-    metadata:
-      labels:
-        app: livekit-egress
-    spec:
-      containers:
-        - name: egress
-          image: livekit/egress:latest   # Pin version in prod
-          env:
-            - name: EGRESS_CONFIG_BODY
-              valueFrom:
-                secretKeyRef:
-                  name: livekit-secrets
-                  key: egress-config
-          resources:
-            requests:
-              cpu: 1000m            # Recording is CPU intensive
-              memory: 2Gi           # Headless Chrome needs RAM
-            limits:
-              cpu: 4000m
-              memory: 4Gi
-```
-
-### video-service Deployment
-
-Standard pattern matching existing services:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: video-service
-  namespace: splits-network
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: video-service
-  template:
-    metadata:
-      labels:
-        app: video-service
-    spec:
-      containers:
-        - name: video-service
-          image: ${ACR_SERVER}/video-service:${IMAGE_TAG}
-          ports:
-            - containerPort: 3020
-              name: http
-          env:
-            - name: PORT
-              value: "3020"
-            - name: LIVEKIT_HOST
-              value: "http://livekit-server:7880"
-            - name: LIVEKIT_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: livekit-secrets
-                  key: api-key
-            - name: LIVEKIT_API_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: livekit-secrets
-                  key: api-secret
-            - name: LIVEKIT_WS_URL
-              value: "wss://livekit.splits.network"
-            # Standard env vars (Supabase, RabbitMQ, etc.)
-            - name: SUPABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-url
-            # ... (same pattern as other services)
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-```
-
-## Frontend Architecture
-
-### video-ui Package
-
-Shared React components used by both portal and candidate apps:
-
-```
-packages/video-ui/
-+-- src/
-|   +-- components/
-|   |   +-- pre-join-screen.tsx      # Camera/mic preview, device selection
-|   |   +-- video-room.tsx           # Main video room with LiveKit provider
-|   |   +-- participant-tile.tsx     # Single participant video/audio
-|   |   +-- controls-bar.tsx         # Mute, camera, screen share, record, leave
-|   |   +-- screen-share-view.tsx    # Screen share layout
-|   |   +-- recording-indicator.tsx  # "Recording" badge
-|   |   +-- chat-panel.tsx           # In-call text chat (LiveKit data channels)
-|   +-- hooks/
-|   |   +-- use-interview.ts         # Fetch interview details, join flow
-|   |   +-- use-recording.ts         # Recording start/stop
-|   |   +-- use-devices.ts           # Camera/mic enumeration and selection
-|   +-- index.ts
-+-- package.json                     # Depends on @livekit/components-react
-```
-
-**Key dependency:** `@livekit/components-react` provides pre-built React components and hooks for LiveKit. The video-ui package wraps these with Splits Network styling (DaisyUI + TailwindCSS) and business logic.
-
-### Portal App Pages
-
-```
-apps/portal/src/app/(authenticated)/interviews/
-+-- page.tsx                         # List interviews (upcoming, past)
-+-- [id]/
-|   +-- page.tsx                     # Interview detail (participants, recording, transcript)
-+-- schedule/
-    +-- page.tsx                     # Schedule new interview (linked from application)
-
-apps/portal/src/app/(authenticated)/applications/[id]/
-+-- (existing page, add "Schedule Interview" button to actions toolbar)
-```
-
-### Candidate App Pages
-
-```
-apps/candidate/src/app/interview/
-+-- join/
-    +-- page.tsx                     # Magic link landing page
-                                     # Validates token, shows pre-join, enters room
-```
-
-## Patterns to Follow
-
-### Pattern 1: LiveKit Token as Authorization Bridge
-
-**What:** video-service generates short-lived LiveKit access tokens that encode participant identity and room permissions. The frontend uses these tokens to connect directly to LiveKit -- no further backend calls needed for media.
-
-**Why:** Separates session orchestration (video-service) from media routing (LiveKit). The token is the authorization bridge between them.
-
-### Pattern 2: Event-Driven Cross-Service Integration
-
-**What:** video-service publishes RabbitMQ events for all interview lifecycle transitions. Other services consume events they care about.
-
-**Why:** No HTTP calls between services (codebase rule). Calendar creation, email notifications, AI analysis, and stage updates all happen via events.
-
-### Pattern 3: Magic Link with Scoped Access
-
-**What:** Magic link tokens grant access to exactly one interview room, nothing else. They encode the interview_id and participant role, expire after the scheduled time, and are single-use.
-
-**Why:** Candidates may not have accounts. Magic links provide frictionless join without compromising security. The token scope is narrower than any authenticated session.
-
-### Pattern 4: Webhook Signature Verification
-
-**What:** LiveKit webhooks are verified using the LiveKit server SDK's WebhookReceiver, which validates the signature using the shared API key/secret.
-
-**Why:** Same pattern as Stripe webhooks in billing-service. Never trust webhook payloads without signature verification.
+---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Routing Media Through api-gateway
+### Anti-Pattern 1: Making `application_id` nullable on `interviews`
 
-**What:** Trying to proxy WebRTC connections through the api-gateway or any backend service.
+**What:** Modifying the existing `interviews` table to support non-interview calls by making `application_id` nullable.
+**Why bad:** Breaks 15+ existing queries that assume `application_id` is present. Requires updating every repository method. Mixes interview-specific logic (round_name, interview_type enum) with general call logic. Creates a "god table" anti-pattern.
+**Instead:** Create a separate `calls` table. The interviews table stays pure.
 
-**Why bad:** WebRTC requires direct peer-to-SFU connections. HTTP proxying adds unacceptable latency for real-time video. WebSocket upgrade through NGINX is possible but fragile for WebRTC signaling.
+### Anti-Pattern 2: Embedding Clerk auth in the video app for candidates
 
-**Instead:** LiveKit gets its own ingress/LoadBalancer. Browsers connect directly. Only the REST API (room management, token generation) goes through api-gateway.
+**What:** Setting up a Clerk instance for the video app and requiring candidates to authenticate via Clerk.
+**Why bad:** Candidates access via magic links specifically because they don't have Clerk accounts. Adding Clerk for them would break the existing UX.
+**Instead:** The video app supports BOTH paths: Clerk-based auth (portal users) and magic-link token exchange (candidates/external users). The route structure (`/[call-id]` vs `/join/[token]`) determines which path.
 
-### Anti-Pattern 2: Storing Recordings in Supabase Storage
+### Anti-Pattern 3: Splitting video-service into two services
 
-**What:** Using Supabase Storage (the existing document-service approach) for video recordings.
+**What:** Creating a separate `call-service` for the new call types.
+**Why bad:** Both call types use the same LiveKit infrastructure, same recording pipeline, same token generation. Two services would duplicate this logic and create synchronization issues.
+**Instead:** Add a `calls/` module within the existing video-service. Extract shared LiveKit/recording utilities.
 
-**Why bad:** Video files are large (100MB-1GB+ per interview). Supabase Storage has upload limits, is expensive for large files, and lacks streaming playback. LiveKit Egress natively supports Azure Blob/S3 output.
+### Anti-Pattern 4: Polymorphic FK columns (multiple nullable FKs)
 
-**Instead:** Use Azure Blob Storage with LiveKit Egress direct upload. Generate signed URLs in video-service for playback.
+**What:** `calls` table with `application_id UUID FK`, `company_id UUID FK`, `job_id UUID FK`, `candidate_id UUID FK` -- all nullable.
+**Why bad:** Adding new entity types requires schema migrations. Sparse columns. Complex validation logic to ensure exactly one is set.
+**Instead:** Use `entity_type TEXT` + `entity_id UUID` polymorphic pattern. Application-level validation. New entity types need zero schema changes.
 
-### Anti-Pattern 3: Building Custom WebRTC Components
+---
 
-**What:** Implementing WebRTC signaling, ICE negotiation, or media rendering from scratch.
+## Patterns to Follow
 
-**Why bad:** WebRTC is extremely complex. Browser compatibility, NAT traversal, codec negotiation, bandwidth adaptation -- all solved problems in LiveKit's SDK.
+### Pattern 1: Dual-Auth Route Design
 
-**Instead:** Use `@livekit/components-react` for all video UI. Customize styling with DaisyUI, not media handling.
+**What:** Routes that support both Clerk-authenticated and magic-link-authenticated users.
+**Already used in:** `PUT /api/v2/interviews/:id/notes`, `POST /api/v2/interviews/:id/recording/consent`
+**How it works:**
+```typescript
+// If request has magic link token in body/query -> validate token, extract participant
+// Else -> require x-clerk-user-id header, resolve to participant via DB
+```
 
-### Anti-Pattern 4: Synchronous Recording Processing
+### Pattern 2: Window.open for Video Calls
 
-**What:** Waiting for transcription/analysis to complete before returning the recording endpoint response.
+**What:** Portal/candidate apps open video in a new window via `window.open()`.
+**Already used in:** `JoinInterviewButton` component.
+**Continue:** The video app opens in its own window. Closing the video window returns user to the portal/candidate app. The portal doesn't need to know anything about the video app's internal state.
 
-**Why bad:** Transcription takes minutes. Blocking the request creates timeouts and poor UX.
+### Pattern 3: Event-Driven Side Effects
 
-**Instead:** Recording completion triggers async RabbitMQ event. ai-service processes in background. Frontend polls or receives WebSocket notification when analysis is ready.
+**What:** Video-service publishes RabbitMQ events (`interview.created`, `interview.recording_ready`). Other services (notification, AI pipeline) consume them.
+**Continue:** New call events follow the same pattern: `call.created`, `call.completed`, `call.recording_ready`. Notification service subscribes to send call invitations.
 
-### Anti-Pattern 5: One Giant LiveKit Pod with Everything
+---
 
-**What:** Running LiveKit Server and Egress in the same pod/deployment.
+## Build Order (Suggested Phase Structure)
 
-**Why bad:** Egress is resource-intensive (headless Chrome). A recording spike could starve the media server of CPU/memory, degrading all active calls.
+### Phase 1: Database & Service Foundation
 
-**Instead:** Separate deployments with independent resource limits. Egress can scale independently.
+1. Create `calls`, `call_participants`, `call_access_tokens` tables via migration.
+2. Add `calls/` module to video-service (repository, service, types, routes).
+3. Extract shared LiveKit JWT generation from interview token-service.
+4. Add `/api/v2/calls` proxy routes to api-gateway.
+
+**Dependencies:** None. Can be built without touching existing code.
+
+### Phase 2: Video App Shell
+
+1. Create `apps/video/` Next.js app with full-screen layout.
+2. Implement brand detection (subdomain -> theme).
+3. Wire up `[call-id]/page.tsx` with Clerk auth path.
+4. Wire up `join/[token]/page.tsx` with magic link path.
+5. Reuse shared-video components (VideoLobby, VideoRoom, etc.).
+6. K8s deployment + ingress for `video.splits.network` and `video.applicant.network`.
+
+**Dependencies:** Phase 1 (needs `/api/v2/calls` endpoints).
+
+### Phase 3: Generalize shared-video Types
+
+1. Introduce `CallContext` type alongside `InterviewContext`.
+2. Update shared-video components to accept `CallContext`.
+3. Keep `InterviewContext` as backward-compatible alias.
+4. Update hooks (`useCallToken` alongside `useInterviewToken`).
+
+**Dependencies:** Phase 2 (needed when video app starts using components for non-interview calls).
+
+### Phase 4: Portal Integration
+
+1. Update `JoinInterviewButton` to open `video.splits.network/[call-id]` instead of `/portal/interview/[id]`.
+2. Add "Schedule Call" button on company/recruiter profiles.
+3. Add call history/upcoming calls to portal dashboard.
+
+**Dependencies:** Phase 2 (video app must be deployed).
+
+### Phase 5: Candidate App Integration
+
+1. Update magic link emails to point to `video.applicant.network/join/[token]`.
+2. Remove interview pages from candidate app (after video app handles them).
+
+**Dependencies:** Phase 2 (video app must be deployed).
+
+### Phase 6: Interview Migration (Optional, Later)
+
+1. Migrate existing interview creation to also create a `calls` row.
+2. Eventually route all interview video through the video app.
+3. Deprecate `/portal/interview/[id]` route.
+4. Consider whether to migrate historical interview data to calls table.
+
+**Dependencies:** Phases 1-5 complete, stable.
+
+---
 
 ## Scalability Considerations
 
-| Concern | At 10 concurrent calls | At 100 concurrent calls | At 1000 concurrent calls |
-|---------|------------------------|-------------------------|--------------------------|
-| **LiveKit Server** | 1 pod (hostNetwork) | 2-3 pods (need Azure UDP LB) | LiveKit Cloud or multi-node with load balancer |
-| **LiveKit Egress** | 1 pod (handles ~3-5 recordings) | 3-5 pods | 10+ pods, consider dedicated node pool |
-| **video-service** | 2 pods (same as other services) | 2 pods (lightweight) | 3-5 pods |
-| **Azure Blob Storage** | Default tier | Default tier | Hot tier, lifecycle policies |
-| **Database** | Minimal rows | Thousands of rows | Partition interviews by date |
-| **Transcription** | Sequential in ai-service | Queue in ai-service | Dedicated transcription workers |
+| Concern | Current (interviews only) | With calls generalized |
+|---------|--------------------------|----------------------|
+| LiveKit rooms | ~100 concurrent | Same infra, no change |
+| Recording storage | Supabase S3 bucket | Same bucket, partitioned by call ID |
+| Database load | Single `interviews` table | Two tables, same query patterns |
+| Token generation | Per-interview | Per-call, same mechanism |
+| WebSocket connections | LiveKit handles | No change, LiveKit scales |
 
-**Initial scale target:** 5-10 concurrent interviews is realistic for early deployment. The architecture supports this with minimal resources (1 LiveKit pod, 1 Egress pod, 2 video-service pods).
+No significant scalability concerns. The generalization adds a parallel table, not additional infrastructure load.
 
-## Suggested Build Order
-
-Based on dependency analysis:
-
-### Phase 1: Infrastructure + Core Service
-
-**Build:**
-1. Database migration (interviews, participants, recordings tables)
-2. video-service scaffold (Fastify, V2 pattern, health check)
-3. LiveKit Server K8s deployment (ConfigMap, Deployment, Service)
-4. LiveKit SDK integration in video-service (room create, token generate)
-5. api-gateway integration (ServiceName, routes, auth skip for webhooks)
-6. DNS + TLS for livekit.splits.network
-
-**Why first:** Everything depends on LiveKit being deployed and video-service being able to create rooms and issue tokens. This is the foundation.
-
-### Phase 2: Join Flow + Video UI
-
-**Build:**
-1. video-ui package scaffold (pre-join screen, video room, controls)
-2. Authenticated join flow (portal app)
-3. Magic link generation and validation
-4. Candidate magic link join flow (candidate app)
-5. Interview scheduling UI (linked from application actions toolbar)
-
-**Why second:** Users need to actually join video calls. This phase produces a working end-to-end interview experience without recording.
-
-### Phase 3: Recording + Storage
-
-**Build:**
-1. LiveKit Egress K8s deployment
-2. Azure Blob Storage container setup
-3. Recording start/stop endpoints
-4. LiveKit webhook handler (egress.ended)
-5. Recording playback (signed URL generation)
-6. Recording UI (indicator, playback page)
-
-**Why third:** Recording is an enhancement to the core video call. Requires Egress infrastructure and storage, which are independent of the basic call flow.
-
-### Phase 4: Transcription + AI Analysis
-
-**Build:**
-1. RabbitMQ event: recording.completed
-2. ai-service consumer for recording.completed
-3. Whisper/Azure Speech transcription integration
-4. Transcript storage and display UI
-5. AI interview analysis (summary, scorecard)
-6. Analysis display UI
-
-**Why fourth:** Depends on recordings (Phase 3) existing. AI analysis is the highest-value differentiator but has the most external dependencies (AI APIs).
-
-### Phase 5: Calendar + Notifications Integration
-
-**Build:**
-1. interview.scheduled event consumer in integration-service
-2. Calendar event creation with video link
-3. Email templates for interview invitations
-4. Reminder notifications (15 min before)
-5. Post-interview follow-up notifications
-
-**Why fifth:** These are polish features that enhance the experience but don't block core functionality. Can be developed in parallel with Phase 3/4.
+---
 
 ## Sources
 
-**HIGH confidence (codebase analysis):**
-- `services/api-gateway/src/clients.ts` -- ServiceRegistry pattern for adding new services
-- `services/api-gateway/src/routes/v2/common.ts` -- ServiceName type, ResourceDefinition pattern
-- `services/api-gateway/src/routes/v2/ats.ts` -- Resource registration pattern for new service
-- `services/chat-gateway/src/index.ts` -- WebSocket gateway pattern, Clerk multi-tenant auth
-- `services/integration-service/src/v2/calendar/service.ts` -- Calendar integration pattern
-- `packages/shared-types/src/events.ts` -- DomainEvent interface for RabbitMQ events
-- `packages/shared-job-queue/src/index.ts` -- RabbitMQ job queue pattern (amqplib)
-- `infra/k8s/ingress.yaml` -- Current ingress routing, WebSocket support annotations
-- `infra/k8s/ats-service/deployment.yaml` -- Standard K8s deployment pattern
-- `infra/k8s/rabbitmq/deployment.yaml` -- Third-party service deployment pattern in K8s
-
-**MEDIUM confidence (training data, not live-verified):**
-- LiveKit Server architecture (SFU model, ports, configuration) -- based on training data through May 2025. Core architecture is stable but specific config options and API details should be verified against current LiveKit docs.
-- LiveKit Egress (headless Chrome recording, S3/Azure output) -- general approach is well-established but exact configuration format and Azure Blob integration details should be verified.
-- `livekit-server-sdk` Node.js API (AccessToken, RoomServiceClient, VideoGrant) -- API shape is stable but method signatures and options may have changed. Verify with Context7 or npm docs during implementation.
-- `@livekit/components-react` -- React component library exists and is actively maintained. Specific component names and props should be verified.
-- LiveKit webhook events and signature format -- verify with current LiveKit docs.
-- Kubernetes hostNetwork for WebRTC UDP -- standard K8s pattern, verified approach for WebRTC workloads.
-
-**LOW confidence (needs validation during implementation):**
-- Exact LiveKit Egress Azure Blob Storage configuration format -- may differ from S3 config.
-- LiveKit resource consumption per room (CPU/memory estimates are approximate).
-- Whether LiveKit's built-in TURN server is sufficient or if a separate TURN server (coturn) is needed for production.
-- Specific `@livekit/components-react` component hierarchy and customization points.
+- Direct codebase analysis (HIGH confidence):
+  - `services/video-service/src/v2/` -- all interview routes, services, repository, types
+  - `packages/shared-video/src/` -- all components, hooks, types
+  - `apps/portal/src/app/portal/interview/` -- portal interview client
+  - `apps/candidate/src/app/(public)/interview/` -- candidate interview client
+  - `services/api-gateway/src/routes/v2/video.ts` -- gateway proxy
+  - `supabase/migrations/20260307000005_create_interviews_schema.sql` -- DB schema
+  - `supabase/migrations/20260308000001_extend_interviews_for_scheduling.sql` -- scheduling extensions
+  - `supabase/migrations/20260309000001_add_recording_columns.sql` -- recording columns
+  - `supabase/migrations/20260310000001_add_interview_transcripts.sql` -- transcript schema
+  - `supabase/migrations/20260311000001_extend_interviews_for_panel_notes.sql` -- notes schema
+  - `infra/k8s/ingress.yaml` -- production ingress/subdomain routing

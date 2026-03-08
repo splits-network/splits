@@ -1,199 +1,201 @@
 # Project Research Summary
 
-**Project:** Splits Network v9.0 -- Video Interviewing with LiveKit
-**Domain:** Real-time video interviewing for split-fee recruiting marketplace
-**Researched:** 2026-03-07
-**Confidence:** HIGH (stack verified via npm; architecture verified against codebase; features well-understood domain)
+**Project:** v10.0 Video Platform & Recruiting Calls
+**Domain:** Generalizing interview-only video infrastructure to a multi-purpose recruiting call platform
+**Researched:** 2026-03-08
+**Confidence:** HIGH
 
 ## Executive Summary
 
-Video interviewing is a well-understood domain in recruiting technology, and the recommended approach is to self-host LiveKit (an open-source WebRTC SFU) on the existing AKS Kubernetes cluster. This gives full data control, zero per-minute API costs, and leverages existing infrastructure (Redis, RabbitMQ, NGINX ingress, cert-manager). A new `video-service` microservice (port 3019) handles interview scheduling, LiveKit token issuance, and recording orchestration, while LiveKit handles all media routing, TURN/STUN negotiation, and recording via its Egress service. The frontend uses LiveKit's official React component library, which is compatible with React 19.
+v10.0 generalizes the stable v9.0 video interview system into a platform that supports multiple call types -- starting with recruiter-to-company calls. The existing infrastructure (LiveKit, recording, transcription, AI summarization, shared-video component library) is production-proven and reusable. No new external libraries are needed. The work is a data model evolution, a new thin Next.js app (`apps/video/`), and careful refactoring of interview-coupled code -- not a technology bet.
 
-The core competitive advantage is integration depth: unlike Greenhouse and Lever (which rely on external Zoom/Teams links), Splits Network will offer native in-app video with server-side recording, AI transcription via the existing ai-service, and automatic posting of interview summaries as application notes. The user never leaves the platform. Most enterprise ATS competitors do not have this. BreezyHR is the closest competitor with native video but lacks AI-powered transcription and summarization.
+The recommended approach is: create a new `calls` table alongside the existing `interviews` table, build a dedicated video app served from two subdomains (`video.splits.network` and `video.applicant.network`), and use magic-link-only authentication in the video app to sidestep all Clerk cross-domain complexity. The existing interview flow continues working unchanged throughout. New call types use the new `calls` table and new `/api/v2/calls/` routes. This parallel-table strategy avoids a risky big-bang migration while delivering the generalized platform.
 
-The primary risks are infrastructure-related: (1) UDP port exposure on AKS for WebRTC media requires careful LoadBalancer or hostNetwork configuration, (2) LiveKit Egress is resource-intensive (headless Chrome) and can silently drop recordings if under-resourced, and (3) corporate firewalls block UDP, so TURN on TCP 443 must be enabled from day one. These are all solvable with proper K8s configuration but represent the highest-complexity work in the project. The magic link token system for candidate access is the primary security design concern -- it must use a two-step exchange pattern (DB token to LiveKit JWT) rather than embedding LiveKit tokens directly in URLs.
+The primary risks are: (1) the deep coupling of `application_id` throughout video-service and ai-service, which means every function that resolves call context must be audited and potentially made polymorphic, (2) cross-subdomain authentication confusion if Clerk cookies do not share across `*.splits.network`, and (3) scope creep once a dedicated video app exists and stakeholders see a blank canvas. All three are manageable with the phased approach outlined below.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The stack is additive -- no changes to the existing platform. Two new npm packages for the backend (`livekit-server-sdk@2.15.0`, `@azure/storage-blob@12.31.0`) and three for the frontend (`@livekit/components-react@2.9.20`, `livekit-client@2.17.2`, `@livekit/components-styles@1.2.0`). Two new K8s deployments (LiveKit Server, LiveKit Egress). All other capabilities (transcription, summarization, email, calendar) use existing services.
+No new libraries are needed. The video app (`apps/video/`) is a standard Next.js 16 app using the same dependency versions as portal and candidate. It imports `shared-video`, `shared-api-client`, `shared-types`, `shared-ui`, and `basel-ui` from the monorepo. The backend changes are entirely within the existing `video-service` (Fastify + LiveKit SDK + Supabase + RabbitMQ) and `ai-service`.
 
-**Core technologies:**
-- **LiveKit Server (self-hosted on AKS):** WebRTC SFU for video/audio routing -- zero per-minute costs, full data sovereignty, built-in TURN server
-- **LiveKit Egress (self-hosted):** Server-side recording via headless Chrome compositing to Azure Blob Storage -- independent of client state, reliable MP4 output
-- **livekit-server-sdk@2.15.0:** Node.js SDK for room management and JWT token generation -- the video-service's interface to LiveKit
-- **@livekit/components-react@2.9.20:** Pre-built React video UI components (VideoConference, ControlBar, ParticipantTile) -- compatible with React 19, style with Tailwind/DaisyUI
-- **Azure Blob Storage:** Recording storage with SAS token access, lifecycle management for cost control -- native to AKS infrastructure
-- **OpenAI Whisper (via existing ai-service):** Batch transcription of recordings -- no new dependency, reuses existing openai SDK
+**Core technologies (all existing):**
+- **Next.js 16 + React 19:** New `apps/video/` app, identical stack to other apps
+- **LiveKit (client + server SDK):** Already handles rooms, tokens, recording, egress -- no changes
+- **shared-video package:** VideoLobby, VideoRoom, VideoControls, NotesPanel -- reused directly
+- **Supabase Postgres:** New `calls` table + supporting tables via migration
+- **RabbitMQ:** New `call.*` events alongside existing `interview.*` events
 
-**Critical version notes:** livekit-client@2.17.2 is a strict peer dependency of @livekit/components-react@2.9.20. Node 22 (current Docker base) is compatible with all packages.
+**What NOT to add:**
+- No Clerk in the video app (magic-link-only auth eliminates cross-domain cookie issues)
+- No separate API gateway (video app calls existing `api.splits.network`)
+- No WebSocket library (LiveKit provides the real-time layer)
+- No `@tanstack/react-query` (video app fetches context once, then is purely real-time)
+
+See: `.planning/research/STACK.md` for full dependency tables and version pinning.
 
 ### Expected Features
 
-**Must have (table stakes -- P1 for launch):**
-- 1:1 video calls with basic controls (mute, camera, leave, device selection)
-- Interview scheduling with Google Calendar sync (enhance existing `schedule-interview-modal.tsx`)
-- Magic link join for candidates (no account required)
-- In-app join for authenticated recruiters/hiring managers
-- Server-side recording with playback
-- Waiting room / lobby
-- Interview status tracking (scheduled, in_progress, completed, cancelled, no_show)
-- Email notifications (confirmation, 24h reminder, cancellation)
-- Stage-triggered scheduling (moving to "interview" stage prompts scheduling)
-- Interview section on application detail page
+**Must have (table stakes -- P0/P1):**
+- **TS-02: Generalized Call Entity** -- New `calls` table with polymorphic entity linking (P0, critical path)
+- **TS-01: Recruiter-to-Company Video Calls** -- New call type for recruiter + company contact discussions
+- **TS-04: Scheduling for Recruiting Calls** -- Extend existing SchedulingService to non-interview calls
+- **TS-07: Call Notifications** -- Email templates for call scheduling, reminders, cancellation
+- **TS-03: Entity-Linked AI Summaries** -- Route summaries to jobs/companies instead of only applications
+- **TS-05: Dedicated Video App** -- Clean `window.open()` experience at `video.splits.network`
+- **TS-06: Call History** -- List/filter all calls (interviews + recruiting calls) in portal
 
-**Should have (differentiators -- P2 post-launch):**
-- AI transcription of recordings (via Whisper)
-- AI interview summary auto-posted as application note
-- Panel interviews (3+ participants)
-- Screen sharing
-- Pre-call device check
-- Cancel/reschedule flow with calendar updates
-- Interviewer notes during call
-- Dedicated interviews tab on application detail
+**Should have (differentiators -- P2):**
+- **DF-01: Multi-Brand Video** -- Candidates join on `video.applicant.network` with neutral branding
+- **DF-02: Contextual AI Summaries** -- Entity-aware prompts that tailor output per call type
+- **DF-04: In-Call Context Panel** -- Show job/company/candidate data alongside notes during calls
 
-**Defer (v2+):**
-- Interview scorecards / structured evaluation
-- Live captions (real-time STT)
-- Self-service scheduling links (Calendly-style)
-- Interview analytics dashboard
-- Candidate interview prep page
+**Defer to post-v10.0 (P3):**
+- **DF-05: Quick Call (instant/unscheduled)** -- Requires real-time notification infrastructure
+- **DF-03: Call-to-Entity Smart Linking** -- AI-suggested entity tagging, high complexity
+- **DF-06: Recording Highlights/Clips** -- Significant AI pipeline extension
 
-**Explicitly do NOT build (anti-features):**
-- One-way/async video interviews (candidates hate them, 30-50% drop-off increase)
-- Custom WebRTC infrastructure (multi-year undertaking)
-- Real-time AI coaching during interviews (ethically questionable, legally risky)
-- Built-in whiteboard/code editor (separate product category)
+**Anti-features (do NOT build):**
+- Separate backend service per call type (fragments video infrastructure)
+- Real-time collaborative document editing in calls (own product category)
+- Video voicemail / async video messages (anti-pattern candidates dislike)
+- Custom branding per company (massive UI/testing complexity for little value)
+- Video analytics dashboard (no data volume yet to make it meaningful)
+- Built-in virtual backgrounds (OS-level solutions are better)
+
+See: `.planning/research/FEATURES-video-platform.md` for full feature analysis and dependency graph.
 
 ### Architecture Approach
 
-The architecture follows the established Splits Network pattern: frontend calls api-gateway, which proxies to video-service, which manages interview sessions in Supabase and issues LiveKit access tokens. The critical architectural insight is that LiveKit is a standalone media server that frontends connect to directly (like Clerk for auth) -- media never flows through api-gateway or video-service. video-service is a session orchestrator, not a media proxy. Recording happens via LiveKit Egress (a separate K8s deployment) which outputs to Azure Blob Storage, triggering RabbitMQ events that ai-service consumes for transcription and summarization.
+The architecture adds a parallel `calls` data layer and a new thin frontend app without disrupting the existing interview system. The `calls` table uses polymorphic entity linking (`entity_type` + `entity_id`) rather than multiple nullable FKs, supporting future entity types without schema changes. The video-service gains a new `calls/` module alongside the existing `interviews/` module, with shared LiveKit and recording utilities extracted into a `shared/` directory. The video app detects brand via HTTP Host header and themes accordingly.
+
+**Data model resolution:** STACK.md initially recommended adding `call_type` to the existing `interviews` table (making `application_id` nullable). ARCHITECTURE.md and FEATURES.md recommend a new `calls` table. **The new table approach is the correct choice** because: (1) making `application_id` nullable would break 15+ existing queries that assume it is present, (2) interview-specific columns (round_name, interview_type enum, reschedule logic) do not apply to other call types, (3) a parallel table lets existing interview code remain completely untouched, and (4) it follows the project's nano-service philosophy of clean separation. The STACK.md recommendation to modify `interviews` is rejected.
 
 **Major components:**
-1. **video-service** (new Fastify microservice, port 3019) -- interview CRUD, LiveKit token generation, recording orchestration, webhook receiver
-2. **LiveKit Server** (K8s deployment, hostNetwork) -- WebRTC SFU, media routing, TURN/STUN, room management
-3. **LiveKit Egress** (K8s deployment, dedicated resources) -- server-side recording via headless Chrome, outputs MP4 to Azure Blob Storage
-4. **video-ui package** (`packages/video-ui/`) -- shared React components for video room (pre-join, in-call, controls)
-5. **Database tables** -- `interviews`, `interview_participants`, `interview_recordings`, `interview_transcripts`, `interview_analyses`
+1. **`calls` + `call_participants` + `call_access_tokens` tables** -- New data layer with polymorphic entity linking (`entity_type` + `entity_id`)
+2. **`apps/video/`** -- Dedicated Next.js 16 app, two subdomains, magic-link-only auth, brand-aware theming via Host header
+3. **`video-service/src/v2/calls/`** -- New module for call CRUD, token generation, lifecycle management
+4. **`video-service/src/v2/shared/`** -- Extracted LiveKit JWT generation and recording logic (entity-agnostic)
+5. **AI pipeline call-type dispatcher** -- Routes to interview vs. meeting summarization strategies with per-type prompts
+6. **Portal integration** -- "Schedule Call" buttons on company/job pages, call history list, `window.open()` to video app
 
-**Modified existing components:**
-- api-gateway: add `video` ServiceName, register proxy routes, skip auth for magic link + webhook routes
-- shared-types: add interview event types and status enums
-- portal app: add interview UI pages
-- candidate app: add magic link join page
-- K8s ingress: add LiveKit subdomain (`livekit.splits.network`)
+See: `.planning/research/ARCHITECTURE.md` for data model SQL, component diagrams, and migration bridge strategy.
 
 ### Critical Pitfalls
 
-1. **WebRTC media blocked by corporate firewalls** -- Enable TURN on TCP 443 from day one with a dedicated subdomain (`turn.splits.network`). Test from a restrictive network before launch. Without this, calls "connect" (signaling works) but show black screen (media fails silently).
+1. **`application_id` hard-coupling (Critical)** -- 20+ references across video-service and ai-service assume `application_id` exists and use it to resolve job/company context. Every function must be audited. Prevention: new `calls` table sidesteps this entirely; build polymorphic `CallContextResolver` that dispatches by call type for shared utilities.
 
-2. **LiveKit Egress silently drops recordings** -- Run Egress on dedicated node pool with guaranteed resources (2 CPU, 4GB RAM per pod). Set `EGRESS_LIMIT` env var. Subscribe to Egress webhooks and build recording verification (check file size > 0). Without this, corrupted/missing recordings are discovered days later.
+2. **Big-bang rename refactoring (Critical)** -- Renaming `interviews` to `calls` across the codebase would touch 20+ files, break sent email links, break API consumers, and destroy git blame. Prevention: keep `interviews` table and routes as-is; add `calls` as a parallel system; redirect old URLs with 301/308.
 
-3. **Magic link tokens create security holes** -- Use two-step flow: DB access token in magic link, exchanged for LiveKit JWT at join time. Never embed LiveKit tokens in URLs. Bind tokens to participant identity, set short expiry (interview duration + 30 min buffer), make single-use.
+3. **Cross-subdomain auth confusion (Critical)** -- Clerk cookies are domain-scoped. Portal user clicks "Join Call" and lands on `video.splits.network` without a session. Prevention: video app uses magic-link-only auth (no Clerk). Portal generates a short-lived token, redirects to video app, video app exchanges token for LiveKit JWT.
 
-4. **LiveKit Server advertises wrong IP on AKS** -- Use `hostNetwork: true` with `rtc.use_external_ip: true`. Verify ICE candidates contain public IP, not pod IP (10.x.x.x). Without this, signaling works but media fails.
+4. **AI pipeline assumes interview data shape (Critical)** -- Transcription prompts reference "candidate" and "interview," summary posts to `application_notes`. Non-interview calls would crash or produce nonsensical output. Prevention: per-call-type summarizer strategies; disable recording on new call types until AI pipeline is updated.
 
-5. **Recording storage costs spiral without lifecycle management** -- Define 90-day retention policy before building recording. Configure Azure Blob lifecycle rules (Hot -> Cool after 30 days, Archive after 90 days, delete after retention period). A 60-minute 720p recording is 500MB-1GB.
+5. **Recording access control breaks (Critical)** -- Access verification traces `application -> job -> company -> membership`. No application means 500 errors or security holes. Prevention: polymorphic `hasRecordingAccess()` dispatcher; default to participants-only for new call types.
+
+6. **Feature creep (Moderate)** -- A dedicated video app invites stakeholders to request virtual backgrounds, breakout rooms, chat, file sharing. Prevention: hard scope boundary -- v10.0 delivers generalized call types and feature parity with v9.0 interviews. One new call type. No new video features. Cap at ~20 plans.
+
+See: `.planning/research/PITFALLS-video-platform.md` for all 13 pitfalls with detection criteria and phase warnings.
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+Based on the dependency graph from FEATURES, the build order from ARCHITECTURE, and the phase warnings from PITFALLS, here is the recommended phase structure.
 
-### Phase 1: Infrastructure and Core Service
-**Rationale:** LiveKit deployment and video-service are prerequisites for everything else. Infrastructure is the highest-risk work and must be validated first. Firewall traversal (Pitfall 1) and IP advertisement (Pitfall 4) can only be verified with a running LiveKit instance.
-**Delivers:** LiveKit Server running on AKS with TURN on TCP 443, video-service scaffolded with interview CRUD, database migrations for all 5 tables, api-gateway integration, magic link token system designed and implemented
-**Addresses:** Interview status tracking, database schema, service skeleton, LiveKit K8s deployment
-**Avoids:** Pitfall 1 (TURN on TCP 443 from day one), Pitfall 4 (correct IP advertisement), Pitfall 3 (two-step token exchange)
-**Key decision:** hostNetwork vs Azure UDP LoadBalancer for LiveKit (recommend hostNetwork for Phase 1 simplicity)
+### Phase 1: Data Model & Service Foundation
+**Rationale:** Everything depends on the generalized call entity (TS-02 is P0 critical path). Must land first.
+**Delivers:** `calls`, `call_participants`, `call_access_tokens` tables via migration. New `calls/` module in video-service with CRUD routes. Shared LiveKit/recording utilities extracted from interview code into `shared/`. `/api/v2/calls` proxy routes in api-gateway with appropriate auth bypass patterns.
+**Addresses:** TS-02 (Generalized Call Entity)
+**Avoids:** Pitfall 1 (application_id coupling -- sidesteps entirely with new table), Pitfall 10 (migration risk -- additive only, no existing table changes), Pitfall 2 (rename everything -- keeps interviews untouched)
 
-### Phase 2: Video Call Experience
-**Rationale:** With infrastructure validated, build the user-facing video experience. This is the core feature that makes the product usable. Pre-join device check (Pitfall 6) prevents support issues from day one.
-**Delivers:** Working 1:1 video calls, magic link join for candidates, in-app join for recruiters, waiting room/lobby, basic controls (mute, camera, leave, device selection), pre-join device check, video-ui shared package
-**Addresses:** Video room (P1), magic link join (P1), in-app join (P1), waiting room (P1), basic controls (P1)
-**Avoids:** Pitfall 6 (pre-join device check built early), Pitfall 9 (room lifecycle tied to interview lifecycle with empty_timeout and max_duration)
+### Phase 2: Video App Shell & Infrastructure
+**Rationale:** The dedicated video app is the delivery vehicle for all call types. Must exist before portal/candidate integration.
+**Delivers:** `apps/video/` scaffolded with brand detection via Host header, full-screen layout, both auth paths (portal token exchange + magic link). K8s deployment, ingress rules for `video.splits.network` and `video.applicant.network`, TLS certificates via cert-manager. Port 3104 in dev.
+**Addresses:** TS-05 (Dedicated Video App), DF-01 (Multi-Brand -- infrastructure only)
+**Avoids:** Pitfall 3 (cross-subdomain auth -- magic-link-only approach eliminates the problem entirely)
 
-### Phase 3: Scheduling and Notifications
-**Rationale:** Scheduling builds on the existing `schedule-interview-modal.tsx` and Google Calendar integration. This phase connects the video infrastructure to the ATS workflow. Calendar event orphans (Pitfall 7) are the primary concern.
-**Delivers:** Enhanced scheduling modal creating interview DB records, calendar event creation with join links (store calendar_event_id), email notifications (confirmation + 24h reminder + cancellation), stage-triggered scheduling prompt, interview section on application detail page
-**Addresses:** Interview scheduling + calendar (P1), email notifications (P1), stage-triggered scheduling (P1), interview section on application detail (P1)
-**Avoids:** Pitfall 7 (store calendar_event_id, single mutation path, idempotent calendar operations)
+### Phase 3: Recruiter-Company Calls
+**Rationale:** The first new call type. Exercises the entire generalized pipeline: creation, scheduling, notifications, video, notes.
+**Delivers:** Recruiter-to-company call creation from portal UI, scheduling with calendar integration via existing SchedulingService, call notification emails (new templates, not modifying interview ones), in-call experience via video app, post-call notes linked to jobs/companies via polymorphic entity linking.
+**Addresses:** TS-01 (Recruiter-Company Calls), TS-04 (Scheduling), TS-07 (Notifications)
+**Avoids:** Pitfall 6 (notification templates -- new templates from scratch), Pitfall 9 (feature creep -- one call type only)
 
-### Phase 4: Recording and Playback
-**Rationale:** Recording depends on stable video calls (Phase 2). Egress resource management (Pitfall 2) and storage costs (Pitfall 5) are the main concerns. Recording consent is a legal requirement that must be addressed before launch.
-**Delivers:** LiveKit Egress deployment with dedicated resources, server-side recording with consent mechanism, Azure Blob Storage with lifecycle policies, recording playback component, recording verification pipeline (file size > 0, duration check)
-**Addresses:** Recording (P1), recording playback (P1)
-**Avoids:** Pitfall 2 (dedicated node pool, resource limits, verification pipeline), Pitfall 5 (lifecycle rules from day one, 90-day retention policy)
+### Phase 4: shared-video Generalization & Portal Integration
+**Rationale:** Now that both call types work, generalize the shared-video types and wire up portal UI for managing all calls.
+**Delivers:** `CallContext` type alongside `InterviewContext` (backward-compatible alias), updated hooks (`useCallToken` alongside `useInterviewToken`), "Schedule Call" buttons on company/job detail pages, call history list view in portal with filtering by type/date/company, `window.open()` flow from portal to video app.
+**Addresses:** TS-06 (Call History), shared-video backward-compatible type evolution
+**Avoids:** Pitfall 7 (interview-centric types -- union types with call_type discriminator, not making everything optional), Pitfall 8 (auth bypass rules -- duplicate patterns for new `/api/v2/calls/` routes)
 
-### Phase 5: AI Transcription and Summarization
-**Rationale:** Transcription depends on recordings (Phase 4). This is the key differentiator vs competitors -- no major ATS has built-in AI transcription with auto-posted summaries. The async pipeline design (Pitfall 8) is critical.
-**Delivers:** Async transcription pipeline via ai-service consuming `recording.completed` RabbitMQ events, AI interview summary generation via GPT-4o-mini, auto-posting summaries as application notes (new `interview_summary` note type requiring migration), dead-letter queue for failed jobs
-**Addresses:** AI transcription (P2), AI summary + app note (P2)
-**Avoids:** Pitfall 8 (async job pipeline with dead-letter queue, progress tracking, retry with exponential backoff)
+### Phase 5: AI Pipeline Generalization
+**Rationale:** Recording and transcription for new call types. Requires per-call-type summarizer strategies. Deferred until basic calls work because recording can be safely disabled for new call types initially.
+**Delivers:** Call-type-aware AI pipeline dispatcher, meeting-focused summarization prompt (distinct from interview prompt), entity-linked summary storage (job notes, company notes -- not just application_notes), polymorphic recording access control for non-interview calls.
+**Addresses:** TS-03 (Entity-Linked AI Summaries), DF-02 (Contextual AI Summaries)
+**Avoids:** Pitfall 4 (interview-shaped AI prompts -- separate strategies per call type), Pitfall 5 (recording access control -- polymorphic hasRecordingAccess())
 
-### Phase 6: Panel Interviews and Polish
-**Rationale:** Multi-party calls are a distinct scaling concern (Pitfall 10). Build after 1:1 calls are stable and adopted. Screen sharing and cancel/reschedule flows round out the feature set.
-**Delivers:** Panel interview support (3-6 participants), screen sharing, cancel/reschedule flow with calendar event updates, interviewer notes during call, dedicated interviews tab on application detail
-**Addresses:** Panel interviews (P2), screen sharing (P2), cancel/reschedule (P2), interviewer notes (P2), dedicated interviews tab (P2)
-**Avoids:** Pitfall 10 (consistent participant identity, reconnection handling, late joiner support, max_participants with buffer)
+### Phase 6: Candidate Migration & Polish
+**Rationale:** Move candidate interview experience to the video app. This is the riskiest change to existing users (redirecting live magic links) and benefits from all prior phases being stable.
+**Delivers:** Magic link emails point to `video.applicant.network` instead of candidate app, candidate app interview routes redirect with 301/308 (token forwarded), DF-04 (In-Call Context Panel) with entity data alongside notes, removal of interview pages from portal/candidate apps.
+**Addresses:** DF-01 (Multi-Brand -- candidate-facing completion), DF-04 (In-Call Context Panel)
+**Avoids:** Pitfall 13 (bookmark/redirect breakage -- permanent redirects with token forwarding, old URLs work indefinitely)
 
 ### Phase Ordering Rationale
 
-- **Infrastructure first** because every other phase depends on a working LiveKit deployment and video-service. This is also the highest-risk work (K8s networking, UDP exposure, firewall traversal). Fail fast on infrastructure.
-- **Video calls before scheduling** because you need to test the call experience before building the workflow around it. Scheduling without working calls is useless.
-- **Scheduling before recording** because scheduling creates the interview lifecycle that recording attaches to. Recording needs interview records to exist.
-- **Recording before AI** because transcription requires recordings as input. This is a hard sequential dependency.
-- **Panel interviews last** because they are a scaling concern on top of working 1:1 calls. The core 1:1 use case covers the majority of recruiting interviews.
+- **Data model first** because every other phase depends on the `calls` table existing. This is the critical path identified in the FEATURES dependency graph.
+- **Video app before recruiter-company calls** because calls need a place to render. The app is the delivery vehicle.
+- **Recruiter-company calls before shared-video generalization** because building the new call type reveals exactly which types and hooks need generalizing. Design follows usage, not speculation.
+- **AI pipeline after basic calls work** because recording can be disabled for new call types initially (safe default per Pitfall 4 prevention), and the pipeline changes are complex enough to warrant their own phase.
+- **Candidate migration last** because it is the riskiest change to existing users (redirecting live magic links) and benefits from all prior phases being stable.
+- **Total estimated scope: ~18-22 plans across 6 phases.** This stays within the Pitfall 9 boundary of ~20 plans.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 1:** LiveKit K8s deployment specifics -- UDP port exposure on AKS, hostNetwork vs LoadBalancer tradeoffs, LiveKit config file format, webhook setup. Verify against current LiveKit docs at https://docs.livekit.io.
-- **Phase 4:** LiveKit Egress Azure Blob Storage configuration -- whether S3-compat API works or needs native Azure config. Whisper API 25MB file size limit for long recordings (may need FFmpeg audio extraction). Recording consent legal requirements per jurisdiction.
-- **Phase 5:** Speaker diarization in Whisper output -- verify transcript attributes words to specific speakers, not just a wall of text. May need to use track-based audio export instead of composite recording audio.
+**Phases likely needing deeper research during planning:**
+- **Phase 1 (Data Model):** The polymorphic entity linking pattern (`entity_type` + `entity_id`) needs validation against query patterns. How will call listing queries efficiently join to entity tables for display names? Index strategy needs attention.
+- **Phase 2 (Video App):** If requirements change to need Clerk auth in the video app (instead of magic-link-only), cross-subdomain Clerk session behavior needs hands-on testing with wildcard cookie domains.
+- **Phase 5 (AI Pipeline):** Per-call-type prompt engineering needs iteration. The "meeting summary" prompt does not exist yet and will require tuning against real call transcripts.
 
-Phases with standard patterns (skip research-phase):
-- **Phase 2:** LiveKit React components are well-documented with examples. Standard WebRTC UI patterns. @livekit/components-react provides most of the UI out of the box.
-- **Phase 3:** Scheduling and notifications follow existing codebase patterns exactly (RabbitMQ events, Resend templates, Google Calendar integration via combo provider). Enhancement of existing `schedule-interview-modal.tsx`.
-- **Phase 6:** Panel support is a room capacity configuration, not a fundamentally different architecture. Screen sharing is a standard LiveKit feature.
+**Phases with standard patterns (skip deep research):**
+- **Phase 3 (Recruiter-Company Calls):** Follows existing interview creation/scheduling patterns exactly. Well-documented in codebase.
+- **Phase 4 (Portal Integration):** Standard list views, buttons, and `window.open()`. Established UI patterns with StandardListParams/StandardListResponse.
+- **Phase 6 (Candidate Migration):** Redirect patterns are straightforward. The risk is operational (already-sent emails), not technical.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | npm versions verified via registry. Peer dependencies confirmed compatible with React 19 and Node 22. All integration points verified against existing codebase. |
-| Features | HIGH | Video interviewing is a well-understood recruiting domain with clear industry precedent. Feature priorities validated against competitor analysis (Greenhouse, Lever, BreezyHR, Spark Hire). |
-| Architecture | HIGH/MEDIUM | Service architecture HIGH (follows existing V2 patterns exactly, verified against codebase). LiveKit K8s deployment specifics MEDIUM (based on training data, verify against current docs). |
-| Pitfalls | MEDIUM | WebRTC networking pitfalls are well-documented (HIGH). LiveKit-specific config details based on training data through May 2025 (MEDIUM). Verify LiveKit webhook format, Egress config, and TURN setup against current docs before implementation. |
+| Stack | HIGH | Zero new libraries. All versions verified against existing package.json files in the monorepo. |
+| Features | HIGH | Built on direct codebase analysis of v9.0 + domain knowledge of recruiting workflows. Feature dependency graph is clear and validated against code coupling points. |
+| Architecture | HIGH | New `calls` table approach validated against all existing schema, routes, and service code. Migration bridge strategy avoids touching existing interview system. |
+| Pitfalls | HIGH | Every pitfall traces to specific code locations with line-level references. The `application_id` coupling audit identified 20+ references exhaustively. |
 
-**Overall confidence:** HIGH -- the domain is well-understood, the stack additions are minimal and verified, and the architecture follows established codebase patterns. The main uncertainty is LiveKit K8s deployment specifics which should be validated during Phase 1.
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **LiveKit Helm chart vs raw YAML:** Project uses raw K8s YAML, not Helm. Decide whether to adopt Helm for LiveKit only or translate chart values into raw YAML. Raw YAML is more consistent with existing patterns but Helm simplifies LiveKit-specific config. **Resolution:** Investigate during Phase 1 planning.
-- **UDP port exposure on Azure AKS:** Exact method for exposing UDP through Azure LoadBalancer needs AKS-specific investigation. **Resolution:** Test hostNetwork first during Phase 1; migrate to UDP LoadBalancer if scaling demands.
-- **LiveKit Egress to Azure Blob Storage:** Whether Egress can write via S3-compat API or needs native Azure handler. **Resolution:** Verify against current Egress docs during Phase 4 planning.
-- **Whisper API 25MB file limit:** Long interviews (60+ min) may produce recordings exceeding this. **Resolution:** Plan for FFmpeg audio extraction as fallback in Phase 5. Whisper accepts video files directly for shorter recordings.
-- **Recording consent legal requirements:** Two-party consent laws vary by jurisdiction. **Resolution:** Legal review needed before Phase 4 recording feature launches. Build consent mechanism regardless.
-- **LiveKit webhook payload format:** Exact event names and payload structures should be verified against current LiveKit docs. **Resolution:** Validate during Phase 1 implementation when LiveKit Server is running.
+- **Polymorphic entity query performance:** The `entity_type` + `entity_id` pattern does not use database-level FK enforcement. Query patterns for "all calls for company X" need an index strategy. The composite index proposed in ARCHITECTURE.md is likely sufficient, but should be validated with realistic data volumes during Phase 1.
+- **Call series / recurring calls:** FEATURES mentions recurring recruiter-company calls (weekly pipeline reviews). The data model does not yet include a recurrence mechanism. Decide during Phase 3 planning whether to defer or include.
+- **Host header behind nginx ingress:** STACK.md flags MEDIUM confidence on whether `headers().get('host')` in Next.js server components returns the correct value behind the K8s nginx ingress controller. Should be verified in staging during Phase 2 before relying on it for brand detection.
+- **Clerk fallback path:** If the magic-link-only approach for the video app is later rejected and Clerk auth is required, the wildcard cookie domain setup (`*.splits.network`) needs testing. Not researched because the strong recommendation is to avoid Clerk in the video app entirely.
+- **Summary storage for non-interview calls:** Where do meeting summaries live? FEATURES suggests a polymorphic `entity_type` + `entity_id` pattern on a new `call_summaries` table. ARCHITECTURE suggests extending the existing notes infrastructure. Needs resolution during Phase 5 planning.
 
 ## Sources
 
-### Primary (HIGH confidence)
-- npm registry: livekit-server-sdk@2.15.0 (published 2025-12-10), livekit-client@2.17.2 (2026-02-19), @livekit/components-react@2.9.20 (2026-02-19), @azure/storage-blob@12.31.0 -- versions, peer deps, publication dates verified
-- Existing codebase: service patterns (V2 architecture), K8s manifests (deployment patterns, port allocations), api-gateway structure (ServiceName union, auth hooks, proxy registration), shared-types enums, ai-service architecture (openai SDK, RabbitMQ consumers), schedule-interview-modal.tsx, integration-service Google Calendar combo provider, notification-service Resend templates
+### Primary (HIGH confidence -- direct codebase analysis)
+- `services/video-service/src/v2/` -- all interview routes, services, repository, types, recording, tokens
+- `services/ai-service/src/v2/transcription/` -- AI pipeline, summarizer, consumer
+- `services/api-gateway/src/index.ts` -- auth bypass patterns (10 regex rules), proxy routes
+- `packages/shared-video/src/` -- components, hooks, types, exports
+- `apps/portal/src/app/portal/interview/` -- portal interview client implementation
+- `apps/candidate/src/app/(public)/interview/` -- candidate magic link interview client
+- `supabase/migrations/` -- 5 interview-related migrations (schema source of truth)
+- `infra/k8s/ingress.yaml` -- production ingress with 8+ domains, TLS cert pattern
+- `.planning/v9.0-MILESTONE-AUDIT.md` -- v9.0 audit results (33 requirements, all satisfied, 4 bugs found and fixed)
 
-### Secondary (MEDIUM confidence)
-- LiveKit architecture (SFU model, Egress behavior, TURN embedding, Redis requirement, webhook system) -- training data through May 2025, verify against https://docs.livekit.io
-- Competitor feature sets (Greenhouse, Lever, BreezyHR, Spark Hire) -- training data, not verified against current product pages
-- WebRTC networking fundamentals (STUN/TURN/ICE) -- well-established protocol knowledge
-
-### Tertiary (LOW confidence)
-- LiveKit Helm chart configuration specifics -- inferred, needs verification
-- Azure Blob Storage lifecycle rule syntax for Egress output -- general knowledge, verify Azure docs
-- Recording consent legal requirements by jurisdiction -- general knowledge, requires legal counsel
-- LiveKit Egress resource requirements (headless Chrome) -- based on training data, validate during staging deployment
+### Secondary (MEDIUM confidence -- domain knowledge)
+- Recruiting platform video patterns (Greenhouse, Lever, BreezyHR integration approaches)
+- Dedicated video app UX patterns (Zoom, Google Meet, Teams window management)
+- Multi-brand/white-label SaaS deployment patterns
+- Business video call workflows in recruiting context (intake calls, pipeline reviews, strategy calls)
 
 ---
-*Research completed: 2026-03-07*
+*Research completed: 2026-03-08*
 *Ready for roadmap: yes*
