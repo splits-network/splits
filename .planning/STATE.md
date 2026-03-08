@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 35 of 38 (Scheduling & Notifications)
-Plan: 08 of 10
+Plan: 09 of 10
 Status: In progress
-Last activity: 2026-03-08 — Completed 35-08-PLAN.md (interview notification pipeline)
+Last activity: 2026-03-08 — Completed 35-09-PLAN.md (interview reminders)
 
-Progress: █████████████████████░░░ 91%
+Progress: █████████████████████░░░ 92%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: █████████████████████░░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 23
+- Plans completed: 24
 - Phases completed: 2 (Phases 33-34), Phase 35 in progress
 
 ## Accumulated Context
@@ -77,6 +77,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Best-effort calendar event deletion on cancel | 35-07 | Don't block interview cancellation if calendar API fails |
 | Company admins as interviewer recipients | 35-08 | Resolved via identity_organization_id, consistent with job notification pattern |
 | All interview notifications use 'both' channel | 35-08 | High-priority events need email + in-app visibility |
+| croner for in-process cron over K8s CronJob | 35-09 | 5-minute interval too frequent for K8s CronJob overhead |
+| Reminder deduplication via notification_log | 35-09 | Prevents duplicate reminders on overlapping job runs |
 
 ### Pending Todos
 
@@ -91,10 +93,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 35-08-PLAN.md (interview notification pipeline)
+Stopped at: Completed 35-09-PLAN.md (interview reminders)
 Resume file: None
-Next: 35-09-PLAN.md
+Next: 35-10-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 35-08 complete)*
+*Last updated: 2026-03-08 (Plan 35-09 complete)*
