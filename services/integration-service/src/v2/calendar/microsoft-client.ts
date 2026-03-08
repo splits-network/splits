@@ -174,6 +174,66 @@ export class MicrosoftCalendarClient {
         return res.json() as Promise<MicrosoftEvent>;
     }
 
+    async updateEvent(
+        accessToken: string,
+        calendarId: string,
+        eventId: string,
+        params: Partial<Omit<MicrosoftCreateEventParams, 'calendarId'>>,
+    ): Promise<MicrosoftEvent> {
+        const body: Record<string, any> = {};
+        if (params.summary !== undefined) body.subject = params.summary;
+        if (params.description !== undefined) {
+            body.body = { contentType: 'text', content: params.description };
+        }
+        if (params.location !== undefined) {
+            body.location = { displayName: params.location };
+        }
+        if (params.startDateTime && params.timeZone) {
+            body.start = { dateTime: params.startDateTime, timeZone: params.timeZone };
+        }
+        if (params.endDateTime && params.timeZone) {
+            body.end = { dateTime: params.endDateTime, timeZone: params.timeZone };
+        }
+        if (params.attendeeEmails) {
+            body.attendees = params.attendeeEmails.map(email => ({
+                emailAddress: { address: email },
+                type: 'required',
+            }));
+        }
+
+        const res = await fetch(`${BASE_URL}/me/calendars/${calendarId}/events/${eventId}`, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Microsoft updateEvent failed (${res.status}): ${text}`);
+        }
+
+        return res.json() as Promise<MicrosoftEvent>;
+    }
+
+    async deleteEvent(
+        accessToken: string,
+        calendarId: string,
+        eventId: string,
+    ): Promise<void> {
+        const res = await fetch(`${BASE_URL}/me/calendars/${calendarId}/events/${eventId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!res.ok && res.status !== 404) {
+            const text = await res.text();
+            throw new Error(`Microsoft deleteEvent failed (${res.status}): ${text}`);
+        }
+    }
+
     /* ── Private ─────────────────────────────────────────────────────── */
 
     private async request(accessToken: string, path: string): Promise<any> {

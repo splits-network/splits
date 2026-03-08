@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { ConnectionRepository } from '../connections/repository';
 import { TokenRefreshService } from './token-refresh';
-import { CalendarService, CreateCalendarEventParams } from './service';
+import { CalendarService, CreateCalendarEventParams, UpdateCalendarEventParams } from './service';
 import { IEventPublisher } from '../shared/events';
 import { requireUserContext } from '../shared/helpers';
 import { Logger } from '@splits-network/shared-logging';
@@ -138,6 +138,69 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
         } catch (err: any) {
             config.logger.error({ err, connectionId }, 'Failed to create event');
             return reply.status(500).send({ error: err.message });
+        }
+    });
+
+    // PATCH /api/v2/integrations/calendar/:connectionId/events/:eventId
+    app.patch('/api/v2/integrations/calendar/:connectionId/events/:eventId', async (request, reply) => {
+        const { clerkUserId } = requireUserContext(request);
+        const { connectionId, eventId } = request.params as { connectionId: string; eventId: string };
+        const body = request.body as {
+            calendar_id: string;
+            summary?: string;
+            description?: string;
+            location?: string;
+            start_date_time?: string;
+            end_date_time?: string;
+            time_zone?: string;
+            attendee_emails?: string[];
+        };
+
+        if (!body.calendar_id) {
+            return reply.status(400).send({ error: 'calendar_id is required' });
+        }
+
+        try {
+            const params: UpdateCalendarEventParams = {
+                calendarId: body.calendar_id,
+                summary: body.summary,
+                description: body.description,
+                location: body.location,
+                startDateTime: body.start_date_time,
+                endDateTime: body.end_date_time,
+                timeZone: body.time_zone,
+                attendeeEmails: body.attendee_emails,
+            };
+            const event = await service.updateEvent(connectionId, clerkUserId, body.calendar_id, eventId, params);
+            return reply.send({ data: event });
+        } catch (err: any) {
+            config.logger.error({ err, connectionId, eventId }, 'Failed to update event');
+            const status = err.message.includes('Unauthorized') ? 403
+                : err.message.includes('not found') ? 404
+                : 500;
+            return reply.status(status).send({ error: err.message });
+        }
+    });
+
+    // DELETE /api/v2/integrations/calendar/:connectionId/events/:eventId
+    app.delete('/api/v2/integrations/calendar/:connectionId/events/:eventId', async (request, reply) => {
+        const { clerkUserId } = requireUserContext(request);
+        const { connectionId, eventId } = request.params as { connectionId: string; eventId: string };
+        const query = request.query as { calendar_id?: string };
+
+        if (!query.calendar_id) {
+            return reply.status(400).send({ error: 'calendar_id query parameter is required' });
+        }
+
+        try {
+            await service.deleteEvent(connectionId, clerkUserId, query.calendar_id, eventId);
+            return reply.status(204).send();
+        } catch (err: any) {
+            config.logger.error({ err, connectionId, eventId }, 'Failed to delete event');
+            const status = err.message.includes('Unauthorized') ? 403
+                : err.message.includes('not found') ? 404
+                : 500;
+            return reply.status(status).send({ error: err.message });
         }
     });
 }
