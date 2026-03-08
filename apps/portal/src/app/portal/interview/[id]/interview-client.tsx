@@ -16,6 +16,8 @@ import {
     VideoLobby,
     VideoRoom,
     PostCallSummary,
+    NotesPanel,
+    useInterviewNotes,
 } from '@splits-network/shared-video';
 
 interface InterviewClientProps {
@@ -32,6 +34,7 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
     const [userChoices, setUserChoices] = useState<LocalUserChoices | null>(null);
     const [interviewContext, setInterviewContext] = useState<InterviewContext | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [notesOpen, setNotesOpen] = useState(false);
 
     const tokenFetchedRef = useRef(false);
     const participantRoleRef = useRef<string | null>(null);
@@ -41,6 +44,7 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
     const isInterviewer = participantRoleRef.current === 'interviewer';
     const recordingEnabled = interviewContext?.recording_enabled ?? false;
     const recordingState = useRecordingState(interviewId, API_BASE, getToken, isInterviewer);
+    const notes = useInterviewNotes(interviewId, API_BASE, getToken);
 
     // Fetch interview context on mount (but NOT the LiveKit JWT yet)
     useEffect(() => {
@@ -87,7 +91,14 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
     const handleDisconnected = useCallback(() => {
         callDuration.stop();
         setCallState('post-call');
-    }, [callDuration]);
+
+        // Auto-post notes to application notes for interviewers
+        if (isInterviewer) {
+            notes.postToApplication().catch(() => {
+                // Best-effort: don't block post-call flow
+            });
+        }
+    }, [callDuration, isInterviewer, notes]);
 
     const handleClose = useCallback(() => {
         window.close();
@@ -164,6 +175,17 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
                         isRecording={recordingState.isRecording}
                         onStopRecording={recordingState.stopRecording}
                         canStopRecording={isInterviewer}
+                        onNotesToggle={() => setNotesOpen((prev) => !prev)}
+                        notesOpen={notesOpen}
+                        notesPanel={
+                            <NotesPanel
+                                isOpen={notesOpen}
+                                onToggle={() => setNotesOpen((prev) => !prev)}
+                                interviewId={interviewId}
+                                apiBase={API_BASE}
+                                getToken={getToken}
+                            />
+                        }
                     />
                 </LiveKitRoom>
             );

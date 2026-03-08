@@ -25,6 +25,9 @@ interface VideoRoomProps {
     isRecording?: boolean;
     onStopRecording?: () => void;
     canStopRecording?: boolean;
+    onNotesToggle?: () => void;
+    notesOpen?: boolean;
+    notesPanel?: React.ReactNode;
 }
 
 /** Determine grid classes based on participant count */
@@ -67,6 +70,9 @@ export function VideoRoom({
     isRecording,
     onStopRecording,
     canStopRecording,
+    onNotesToggle,
+    notesOpen,
+    notesPanel,
 }: VideoRoomProps) {
     const remoteParticipants = useRemoteParticipants();
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -175,8 +181,13 @@ export function VideoRoom({
                     isRecording={isRecording}
                     onStopRecording={onStopRecording}
                     canStopRecording={canStopRecording}
+                    onNotesToggle={onNotesToggle}
+                    notesOpen={notesOpen}
                 />
             </div>
+
+            {/* Notes panel (right side, shrinks video area when open) */}
+            {notesPanel}
 
             {/* Participant sidebar */}
             <ParticipantSidebar

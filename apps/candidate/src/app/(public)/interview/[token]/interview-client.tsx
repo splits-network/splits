@@ -10,6 +10,8 @@ import {
     VideoLobby,
     VideoRoom,
     PostCallSummary,
+    NotesPanel,
+    useInterviewNotes,
 } from '@splits-network/shared-video';
 import type {
     CallState,
@@ -33,6 +35,7 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
     const [userChoices, setUserChoices] = useState<LocalUserChoices | null>(null);
     const [callDuration, setCallDuration] = useState(0);
     const [tokenError, setTokenError] = useState<string | null>(null);
+    const [notesOpen, setNotesOpen] = useState(false);
 
     const callStartRef = useRef<number>(0);
     const tokenDataRef = useRef<TokenResult | null>(null);
@@ -42,6 +45,12 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
 
     // Candidate uses magic link token for auth, not Clerk
     const getTokenForRecording = useCallback(async () => magicToken, [magicToken]);
+    const candidateNotes = useInterviewNotes(
+        interviewIdRef.current || 'pending',
+        API_BASE,
+        getTokenForRecording,
+        { magicLinkToken: magicToken },
+    );
     const recordingEnabled = interviewContext?.recording_enabled ?? false;
     const recordingState = useRecordingState(
         interviewIdRef.current || 'pending',
@@ -97,7 +106,12 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
             : 0;
         setCallDuration(elapsed);
         setCallState('post-call');
-    }, []);
+
+        // Auto-post candidate notes to application notes
+        candidateNotes.postToApplication().catch(() => {
+            // Best-effort: don't block post-call flow
+        });
+    }, [candidateNotes]);
 
     const handleClose = useCallback(() => {
         // For candidates: stay on thank-you screen, no auto-redirect
@@ -192,6 +206,18 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
                         onDisconnect={handleDisconnected}
                         isRecording={recordingState.isRecording}
                         canStopRecording={false}
+                        onNotesToggle={() => setNotesOpen((prev) => !prev)}
+                        notesOpen={notesOpen}
+                        notesPanel={
+                            <NotesPanel
+                                isOpen={notesOpen}
+                                onToggle={() => setNotesOpen((prev) => !prev)}
+                                interviewId={interviewIdRef.current}
+                                apiBase={API_BASE}
+                                getToken={getTokenForRecording}
+                                magicLinkToken={magicToken}
+                            />
+                        }
                     />
                 </LiveKitRoom>
             ) : null;
