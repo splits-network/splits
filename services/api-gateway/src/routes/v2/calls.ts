@@ -6,6 +6,29 @@ import { buildQueryString, getCorrelationId } from './common';
 export function registerCallRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const callService = () => services.get('call');
 
+    // ── POST /api/v2/calls/exchange-token — Public (no auth headers) ──
+    app.post(
+        '/api/v2/calls/exchange-token',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+
+            try {
+                const data = await callService().post(
+                    '/api/v2/calls/exchange-token',
+                    request.body,
+                    correlationId,
+                    {},
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to proxy exchange-token request');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to proxy exchange-token request' });
+            }
+        }
+    );
+
     app.all(
         '/api/v2/calls/*',
         async (request: FastifyRequest, reply: FastifyReply) => {

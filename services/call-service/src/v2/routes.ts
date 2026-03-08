@@ -26,6 +26,19 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         config.livekitApiSecret,
     );
 
+    // ── POST /api/v2/calls/exchange-token — Public token exchange ───────
+    // This route does NOT require authentication — it is the public entry
+    // point for the video app magic-link flow.
+    app.post('/api/v2/calls/exchange-token', async (request, reply) => {
+        try {
+            const { token } = request.body as { token: string };
+            const result = await tokenService.exchangeToken(token);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 400).send({ error: error.message });
+        }
+    });
+
     // ── GET /api/v2/calls — List calls ──────────────────────────────────
     app.get('/api/v2/calls', async (request, reply) => {
         try {

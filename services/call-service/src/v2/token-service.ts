@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { AccessToken } from 'livekit-server-sdk';
 import { CallRepository } from './repository';
-import { Call } from './types';
+import { Call, CallDetail } from './types';
 
 export class TokenService {
     constructor(
@@ -69,7 +69,7 @@ export class TokenService {
 
     async exchangeToken(
         token: string,
-    ): Promise<{ livekit_token: string; call: Call }> {
+    ): Promise<{ livekit_token: string; call: CallDetail }> {
         // Look up access token
         const accessToken = await this.repository.artifacts.getAccessTokenByToken(token);
         if (!accessToken) {
@@ -90,8 +90,8 @@ export class TokenService {
         // Mark as used
         await this.repository.artifacts.markTokenUsed(accessToken.id);
 
-        // Get call
-        const call = await this.repository.getCall(accessToken.call_id);
+        // Get call detail (includes participants with user info and entity_links)
+        const call = await this.repository.getCallDetail(accessToken.call_id);
         if (!call) {
             throw Object.assign(new Error('Call not found'), { statusCode: 404 });
         }

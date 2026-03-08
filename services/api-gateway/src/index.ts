@@ -479,6 +479,12 @@ async function main() {
             return;
         }
 
+        // Skip auth for call magic-link token exchange (video app uses magic links without Clerk auth)
+        // POST /api/v2/calls/exchange-token - token exchange for LiveKit room access
+        if (request.method === 'POST' && request.url.startsWith('/api/v2/calls/exchange-token')) {
+            return;
+        }
+
         // Skip auth for video interview magic-link and webhook routes
         // These routes handle their own authentication:
         // - reschedule-request: validates magic link token in body
