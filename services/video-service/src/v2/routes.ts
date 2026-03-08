@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { createClient } from '@supabase/supabase-js';
 import { IEventPublisher } from './shared/events';
 import { registerInterviewRoutes } from './interviews/routes';
 import { registerRecordingRoutes } from './interviews/recording-routes';
@@ -15,14 +16,17 @@ interface RegisterConfig {
     livekitApiKey: string;
     livekitApiSecret: string;
     livekitWsUrl: string;
-    azureStorageAccountName: string;
-    azureStorageAccountKey: string;
-    azureStorageContainerName: string;
+    supabaseS3Endpoint: string;
+    supabaseS3Region: string;
+    supabaseS3AccessKey: string;
+    supabaseS3SecretKey: string;
+    supabaseS3Bucket: string;
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     const repository = new InterviewRepository(config.supabaseUrl, config.supabaseKey);
     const tokenService = new TokenService(repository, config.livekitApiKey, config.livekitApiSecret);
+    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
 
     await registerInterviewRoutes(app, {
         supabaseUrl: config.supabaseUrl,
@@ -38,9 +42,11 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         config.livekitApiSecret,
         config.livekitWsUrl,
         {
-            accountName: config.azureStorageAccountName,
-            accountKey: config.azureStorageAccountKey,
-            containerName: config.azureStorageContainerName,
+            endpoint: config.supabaseS3Endpoint,
+            region: config.supabaseS3Region,
+            accessKey: config.supabaseS3AccessKey,
+            secretKey: config.supabaseS3SecretKey,
+            bucket: config.supabaseS3Bucket,
         },
     );
 
@@ -48,11 +54,7 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         repository,
         recordingService,
         tokenService,
-        azureConfig: {
-            accountName: config.azureStorageAccountName,
-            accountKey: config.azureStorageAccountKey,
-            containerName: config.azureStorageContainerName,
-        },
+        supabase,
     });
     await registerRecordingWebhook(app, {
         recordingService,

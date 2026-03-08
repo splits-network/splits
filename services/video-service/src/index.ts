@@ -125,12 +125,14 @@ async function main() {
         logger.warn('LIVEKIT_API_KEY or LIVEKIT_API_SECRET not set - token generation will fail');
     }
 
-    const azureStorageAccountName = process.env.AZURE_STORAGE_ACCOUNT_NAME || '';
-    const azureStorageAccountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY || '';
-    const azureStorageContainerName = process.env.AZURE_STORAGE_CONTAINER_NAME || '';
+    const supabaseS3Endpoint = process.env.SUPABASE_S3_ENDPOINT || '';
+    const supabaseS3Region = process.env.SUPABASE_S3_REGION || 'us-east-1';
+    const supabaseS3AccessKey = process.env.SUPABASE_S3_ACCESS_KEY || '';
+    const supabaseS3SecretKey = process.env.SUPABASE_S3_SECRET_KEY || '';
+    const supabaseS3Bucket = process.env.SUPABASE_S3_BUCKET || 'interview-recordings';
 
-    if (!azureStorageAccountName || !azureStorageAccountKey || !azureStorageContainerName) {
-        logger.warn('Azure storage vars not set - recording upload will fail');
+    if (!supabaseS3Endpoint || !supabaseS3AccessKey || !supabaseS3SecretKey) {
+        logger.warn('Supabase S3 storage vars not set - recording upload will fail');
     }
 
     await registerV2Routes(app, {
@@ -141,9 +143,11 @@ async function main() {
         livekitApiKey,
         livekitApiSecret,
         livekitWsUrl,
-        azureStorageAccountName,
-        azureStorageAccountKey,
-        azureStorageContainerName,
+        supabaseS3Endpoint,
+        supabaseS3Region,
+        supabaseS3AccessKey,
+        supabaseS3SecretKey,
+        supabaseS3Bucket,
     });
 
     app.get("/health", async (request, reply) => {

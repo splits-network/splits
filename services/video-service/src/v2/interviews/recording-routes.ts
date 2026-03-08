@@ -1,28 +1,23 @@
 import { FastifyInstance } from 'fastify';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { InterviewRepository } from './repository';
 import { RecordingService } from './recording-service';
 import { TokenService } from './token-service';
 import { requireUserContext } from '../shared/helpers';
-import { generateSasUrl } from './sas-url-helper';
-
-interface AzureConfig {
-    accountName: string;
-    accountKey: string;
-    containerName: string;
-}
+import { generateSignedUrl, extractStoragePath } from './signed-url-helper';
 
 interface RecordingRoutesConfig {
     repository: InterviewRepository;
     recordingService: RecordingService;
     tokenService: TokenService;
-    azureConfig: AzureConfig;
+    supabase: SupabaseClient;
 }
 
 export async function registerRecordingRoutes(
     app: FastifyInstance,
     config: RecordingRoutesConfig,
 ) {
-    const { repository, recordingService, tokenService, azureConfig } = config;
+    const { repository, recordingService, tokenService, supabase } = config;
 
     // POST /api/v2/interviews/:id/recording/start - Start recording (authenticated, interviewer only)
     app.post('/api/v2/interviews/:id/recording/start', async (request, reply) => {
@@ -111,7 +106,7 @@ export async function registerRecordingRoutes(
         }
     });
 
-    // GET /api/v2/interviews/:id/recording/playback-url - Get time-limited SAS URL for playback
+    // GET /api/v2/interviews/:id/recording/playback-url - Get time-limited signed URL for playback
     app.get('/api/v2/interviews/:id/recording/playback-url', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
@@ -128,10 +123,8 @@ export async function registerRecordingRoutes(
 
             await verifyRecordingAccess(repository, interview, clerkUserId);
 
-            const result = generateSasUrl(azureConfig, {
-                blobUrl: interview.recording_blob_url,
-                containerName: azureConfig.containerName,
-            });
+            const storagePath = extractStoragePath(interview.recording_blob_url);
+            const result = await generateSignedUrl(supabase, { storagePath });
 
             return reply.send({ data: result });
         } catch (error: any) {
@@ -139,7 +132,7 @@ export async function registerRecordingRoutes(
         }
     });
 
-    // GET /api/v2/interviews/:id/recording/download-url - Get time-limited SAS URL for download
+    // GET /api/v2/interviews/:id/recording/download-url - Get time-limited signed URL for download
     app.get('/api/v2/interviews/:id/recording/download-url', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
@@ -156,10 +149,10 @@ export async function registerRecordingRoutes(
 
             await verifyRecordingAccess(repository, interview, clerkUserId);
 
-            const result = generateSasUrl(azureConfig, {
-                blobUrl: interview.recording_blob_url,
-                containerName: azureConfig.containerName,
-                contentDisposition: `attachment; filename=interview-recording-${id}.mp4`,
+            const storagePath = extractStoragePath(interview.recording_blob_url);
+            const result = await generateSignedUrl(supabase, {
+                storagePath,
+                download: `interview-recording-${id}.mp4`,
             });
 
             return reply.send({ data: result });

@@ -45,25 +45,6 @@ spec:
                             secretKeyRef:
                                 name: livekit-secrets
                                 key: api-secret
-                      # Azure Blob Storage credentials -- used by video-service
-                      # when making egress API requests. Mounted here for
-                      # reference; the egress container receives Azure config
-                      # per-request, not from environment variables.
-                      - name: AZURE_STORAGE_ACCOUNT_NAME
-                        valueFrom:
-                            secretKeyRef:
-                                name: azure-blob-secrets
-                                key: account-name
-                      - name: AZURE_STORAGE_ACCOUNT_KEY
-                        valueFrom:
-                            secretKeyRef:
-                                name: azure-blob-secrets
-                                key: account-key
-                      - name: AZURE_STORAGE_CONTAINER_NAME
-                        valueFrom:
-                            secretKeyRef:
-                                name: azure-blob-secrets
-                                key: container-name
                   volumeMounts:
                       - name: egress-tmp
                         mountPath: /tmp/egress

@@ -60,22 +60,24 @@ spec:
                                 key: livekit-api-secret
                       - name: LIVEKIT_URL
                         value: "ws://livekit:7880"
-                      # Azure Blob Storage credentials for egress requests
-                      - name: AZURE_STORAGE_ACCOUNT_NAME
+                      # Supabase S3-compatible storage for recording egress
+                      - name: SUPABASE_S3_ENDPOINT
                         valueFrom:
                             secretKeyRef:
-                                name: azure-blob-secrets
-                                key: account-name
-                      - name: AZURE_STORAGE_ACCOUNT_KEY
+                                name: supabase-secrets
+                                key: supabase-s3-endpoint
+                      - name: SUPABASE_S3_ACCESS_KEY
                         valueFrom:
                             secretKeyRef:
-                                name: azure-blob-secrets
-                                key: account-key
-                      - name: AZURE_STORAGE_CONTAINER_NAME
+                                name: supabase-secrets
+                                key: supabase-s3-access-key
+                      - name: SUPABASE_S3_SECRET_KEY
                         valueFrom:
                             secretKeyRef:
-                                name: azure-blob-secrets
-                                key: container-name
+                                name: supabase-secrets
+                                key: supabase-s3-secret-key
+                      - name: SUPABASE_S3_BUCKET
+                        value: "interview-recordings"
                   resources:
                       requests:
                           cpu: 100m

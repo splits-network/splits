@@ -3,30 +3,32 @@ import {
     EncodedFileOutput,
     EncodedFileType,
     EncodingOptionsPreset,
-    AzureBlobUpload,
+    S3Upload,
 } from 'livekit-server-sdk';
 import { InterviewRepository } from './repository';
 
-interface AzureConfig {
-    accountName: string;
-    accountKey: string;
-    containerName: string;
+interface SupabaseS3Config {
+    endpoint: string;
+    region: string;
+    accessKey: string;
+    secretKey: string;
+    bucket: string;
 }
 
 export class RecordingService {
     private egressClient: EgressClient;
     private repository: InterviewRepository;
-    private azureConfig: AzureConfig;
+    private s3Config: SupabaseS3Config;
 
     constructor(
         repository: InterviewRepository,
         livekitApiKey: string,
         livekitApiSecret: string,
         livekitHost: string,
-        azureConfig: AzureConfig,
+        s3Config: SupabaseS3Config,
     ) {
         this.repository = repository;
-        this.azureConfig = azureConfig;
+        this.s3Config = s3Config;
         this.egressClient = new EgressClient(livekitHost, livekitApiKey, livekitApiSecret);
     }
 
@@ -63,11 +65,14 @@ export class RecordingService {
             fileType: EncodedFileType.MP4,
             filepath,
             output: {
-                case: 'azure',
-                value: new AzureBlobUpload({
-                    accountName: this.azureConfig.accountName,
-                    accountKey: this.azureConfig.accountKey,
-                    containerName: this.azureConfig.containerName,
+                case: 's3',
+                value: new S3Upload({
+                    accessKey: this.s3Config.accessKey,
+                    secret: this.s3Config.secretKey,
+                    endpoint: this.s3Config.endpoint,
+                    region: this.s3Config.region,
+                    bucket: this.s3Config.bucket,
+                    forcePathStyle: true,
                 }),
             },
         });
