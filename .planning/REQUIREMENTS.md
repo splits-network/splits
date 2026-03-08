@@ -90,32 +90,32 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| APP-01 | — | Pending |
-| APP-02 | — | Pending |
-| APP-03 | — | Pending |
-| APP-04 | — | Pending |
-| CALL-01 | — | Pending |
-| CALL-02 | — | Pending |
-| CALL-03 | — | Pending |
-| CALL-04 | — | Pending |
-| HIST-01 | — | Pending |
-| HIST-02 | — | Pending |
-| AI-04 | — | Pending |
-| AI-05 | — | Pending |
-| AI-06 | — | Pending |
-| EXP-01 | — | Pending |
-| MIG-01 | — | Pending |
-| MIG-02 | — | Pending |
-| MIG-03 | — | Pending |
+| DATA-01 | Phase 42 | Pending |
+| DATA-02 | Phase 42 | Pending |
+| DATA-03 | Phase 42 | Pending |
+| APP-01 | Phase 43 | Pending |
+| APP-02 | Phase 43 | Pending |
+| APP-03 | Phase 43 | Pending |
+| APP-04 | Phase 43 | Pending |
+| CALL-01 | Phase 44 | Pending |
+| CALL-02 | Phase 44 | Pending |
+| CALL-03 | Phase 44 | Pending |
+| CALL-04 | Phase 44 | Pending |
+| HIST-01 | Phase 44 | Pending |
+| HIST-02 | Phase 44 | Pending |
+| EXP-01 | Phase 44 | Pending |
+| AI-04 | Phase 45 | Pending |
+| AI-05 | Phase 45 | Pending |
+| AI-06 | Phase 45 | Pending |
+| MIG-01 | Phase 46 | Pending |
+| MIG-02 | Phase 46 | Pending |
+| MIG-03 | Phase 46 | Pending |
 
 **Coverage:**
 - v10.0 requirements: 20 total
-- Mapped to phases: 0
-- Unmapped: 20
+- Mapped to phases: 20
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-08*
-*Last updated: 2026-03-08 after initial definition*
+*Last updated: 2026-03-08 after roadmap creation (all 20 requirements mapped to Phases 42-46)*
