@@ -83,7 +83,14 @@ Plans:
   2. Candidate can open a magic link from an email, see job details and interviewer info on a prep page, and join the call without creating an account
   3. Both participants see a pre-join lobby with camera preview, mic test, and device selection before entering the room
   4. During the call, participants can mute/unmute, toggle camera, switch devices, see connection quality, and leave the call
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [ ] 34-01-PLAN.md — Shared video package scaffold, hooks, types + token endpoint enrichment
+- [ ] 34-02-PLAN.md — Lobby components (split layout, device selector, audio meter, waiting indicator)
+- [ ] 34-03-PLAN.md — Room components (active speaker layout, controls bar, connection quality, post-call)
+- [ ] 34-04-PLAN.md — Portal interview page with state machine + Join Interview button
+- [ ] 34-05-PLAN.md — Candidate prep page + magic link interview flow
+- [ ] 34-06-PLAN.md — Integration verification and build validation
 
 ### Phase 35: Scheduling & Notifications
 **Goal**: Users can schedule, reschedule, and cancel interviews with Google Calendar sync and all participants are notified at every step
@@ -150,7 +157,7 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | ~~31. Portal UI~~ | ~~v8.0~~ | — | Shelved | — |
 | ~~32. Candidate UI~~ | ~~v8.0~~ | — | Shelved | — |
 | 33. Infrastructure | v9.0 | 3/3 | Complete | 2026-03-08 |
-| 34. Video Call Experience | v9.0 | 0/TBD | Pending | — |
+| 34. Video Call Experience | v9.0 | 0/6 | Pending | — |
 | 35. Scheduling & Notifications | v9.0 | 0/TBD | Pending | — |
 | 36. Recording & Playback | v9.0 | 0/TBD | Pending | — |
 | 37. AI Pipeline | v9.0 | 0/TBD | Pending | — |
