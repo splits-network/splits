@@ -51,8 +51,8 @@ export function useScheduledInterview(
                 if (!cancelled && joinable) {
                     setInterview(joinable);
                 }
-            } catch {
-                /* silent — interviews may not exist yet */
+            } catch (err) {
+                console.warn("[useScheduledInterview] Failed to fetch interviews for", applicationId, err);
             }
         })();
         return () => {
