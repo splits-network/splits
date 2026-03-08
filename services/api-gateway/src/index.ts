@@ -510,6 +510,14 @@ async function main() {
             return;
         }
 
+        // Skip auth for interview notes (dual-auth: magic link OR Clerk, handled by video-service)
+        // PUT /api/v2/interviews/:id/notes - upsert note (token in body)
+        // GET /api/v2/interviews/:id/notes - get notes (token in query param)
+        // Note: POST /notes/post-to-application is NOT bypassed (interviewer-only, requires Clerk)
+        if ((request.method === 'PUT' || request.method === 'GET') && /^\/api\/v2\/interviews\/[^/]+\/notes(\?|$)/.test(request.url)) {
+            return;
+        }
+
         // Skip auth for public gamification endpoints (badges, XP, leaderboards)
         // These use optionalAuth() at the route level — try auth if present, don't fail if missing
         if (request.method === 'GET' && (

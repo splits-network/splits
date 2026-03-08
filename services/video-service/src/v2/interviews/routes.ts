@@ -528,11 +528,25 @@ export async function registerInterviewRoutes(
         }
     });
 
-    // GET /api/v2/interviews/:id/notes - Get all notes for an interview
+    // GET /api/v2/interviews/:id/notes - Get all notes for an interview (dual-auth: magic link OR Clerk)
     app.get('/api/v2/interviews/:id/notes', async (request, reply) => {
         try {
-            requireUserContext(request);
             const { id } = request.params as { id: string };
+            const query = request.query as { token?: string };
+
+            if (query?.token) {
+                // Magic link auth path (candidates)
+                const tokenResult = await tokenService.validateMagicLinkToken(query.token);
+                if (!tokenResult) {
+                    return reply.code(401).send({ error: 'Invalid or expired token' });
+                }
+                if (tokenResult.interview.id !== id) {
+                    return reply.code(403).send({ error: 'Token does not match this interview' });
+                }
+            } else {
+                // Clerk auth path (authenticated users)
+                requireUserContext(request);
+            }
 
             const notes = await repository.getInterviewNotes(id);
             return reply.send({ data: notes });
