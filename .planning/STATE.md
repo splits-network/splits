@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 37 complete, Phase 38 next
+**Current focus:** v9.0 Video Interviewing — Phase 38 in progress
 
 ## Current Position
 
-Phase: 37 of 38 (Transcription & AI)
-Plan: 3 of 3
-Status: Phase complete
-Last activity: 2026-03-08 — Completed 37-03-PLAN.md (AI pipeline frontend)
+Phase: 38 of 38 (Panel, Notes & Polish)
+Plan: 1 of 4
+Status: In progress
+Last activity: 2026-03-08 — Completed 38-01-PLAN.md (Backend migration and API)
 
-Progress: ███████████████████████░ 98%
+Progress: ████████████████████████ 99%
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ███████████████████████�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 33
-- Phases completed: 5 (Phases 33-37)
+- Plans completed: 34
+- Phases completed: 5 (Phases 33-37), Phase 38 in progress
 
 ## Accumulated Context
 
@@ -100,6 +100,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Gap-based speaker alternation heuristic | 37-02 | Whisper-1 lacks diarization; gap > 1s triggers speaker switch |
 | Interview creator as AI note author | 37-02 | Valid FK required; platform_admin type + interview_summary note_type distinguishes AI |
 | FFmpeg 64kbps/16kHz for large recordings | 37-02 | Keeps under Whisper 25MB while preserving speech quality |
+| Upsert note design (one per participant per interview) | 38-01 | Auto-save friendly, no duplicate rows |
+| Cross-table posting for interview notes | 38-01 | video-service directly inserts into application_notes |
+| Round numbering by chronological position | 38-01 | 1-based from scheduled_at order |
 
 ### Pending Todos
 
@@ -114,10 +117,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Phase 37 complete (all 3 plans executed)
+Stopped at: Completed 38-01-PLAN.md
 Resume file: None
-Next: Phase 38 (Panel, Notes & Polish)
+Next: 38-02-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Phase 37 complete)*
+*Last updated: 2026-03-08 (Phase 38 Plan 01 complete)*
