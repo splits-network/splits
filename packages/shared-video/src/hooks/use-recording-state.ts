@@ -90,8 +90,8 @@ export function useRecordingState(
         const poll = async () => {
             try {
                 const data = await apiCall('/recording', 'GET');
-                if (data?.data?.status) {
-                    setRecordingStatus(data.data.status);
+                if (data?.data?.recording_status) {
+                    setRecordingStatus(data.data.recording_status);
                 }
             } catch {
                 // Silently fail polling — status will update on next poll
