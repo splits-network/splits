@@ -72,7 +72,10 @@ export function useInterviewNotes(
         async function loadNotes() {
             try {
                 const headers = await getHeaders();
-                const response = await fetch(buildUrl('/notes'), {
+                const notesUrl = magicLinkToken
+                    ? `${buildUrl('/notes')}&mine=true`
+                    : `${buildUrl('/notes')}?mine=true`;
+                const response = await fetch(notesUrl, {
                     method: 'GET',
                     headers,
                 });
