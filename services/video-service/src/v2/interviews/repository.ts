@@ -7,6 +7,8 @@ import {
     InterviewWithContext,
     InterviewParticipantWithUser,
     InterviewStatus,
+    InterviewRescheduleRequest,
+    RescheduleRequestStatus,
 } from './types';
 
 export class InterviewRepository {
@@ -383,5 +385,135 @@ export class InterviewRepository {
             throw error;
         }
         return data as InterviewParticipant;
+    }
+
+    async updateInterview(
+        id: string,
+        fields: Partial<Omit<Interview, 'id' | 'created_at' | 'created_by'>>,
+    ): Promise<Interview> {
+        const { data, error } = await this.supabase
+            .from('interviews')
+            .update({ ...fields, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+        return data as Interview;
+    }
+
+    async findUpcoming(options: {
+        userId?: string;
+        status?: InterviewStatus;
+        from?: string;
+        to?: string;
+    }): Promise<Interview[]> {
+        let query = this.supabase
+            .from('interviews')
+            .select('*')
+            .order('scheduled_at', { ascending: true });
+
+        if (options.status) {
+            query = query.eq('status', options.status);
+        }
+        if (options.from) {
+            query = query.gte('scheduled_at', options.from);
+        }
+        if (options.to) {
+            query = query.lte('scheduled_at', options.to);
+        }
+
+        const { data: interviews, error } = await query;
+
+        if (error) {
+            throw error;
+        }
+
+        if (!options.userId) {
+            return (interviews || []) as Interview[];
+        }
+
+        // Filter by participant userId
+        const interviewIds = (interviews || []).map((i: Interview) => i.id);
+        if (interviewIds.length === 0) {
+            return [];
+        }
+
+        const { data: participants, error: pError } = await this.supabase
+            .from('interview_participants')
+            .select('interview_id')
+            .eq('user_id', options.userId)
+            .in('interview_id', interviewIds);
+
+        if (pError) {
+            throw pError;
+        }
+
+        const participantInterviewIds = new Set(
+            (participants || []).map((p: { interview_id: string }) => p.interview_id),
+        );
+
+        return (interviews || [])
+            .filter((i: Interview) => participantInterviewIds.has(i.id)) as Interview[];
+    }
+
+    async findRescheduleRequests(interviewId: string): Promise<InterviewRescheduleRequest[]> {
+        const { data, error } = await this.supabase
+            .from('interview_reschedule_requests')
+            .select('*')
+            .eq('interview_id', interviewId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            throw error;
+        }
+        return (data || []) as InterviewRescheduleRequest[];
+    }
+
+    async createRescheduleRequest(input: {
+        interview_id: string;
+        requested_by: string;
+        requested_by_user_id?: string;
+        proposed_times: Array<{ start: string; end: string }>;
+        notes?: string;
+    }): Promise<InterviewRescheduleRequest> {
+        const { data, error } = await this.supabase
+            .from('interview_reschedule_requests')
+            .insert({
+                interview_id: input.interview_id,
+                requested_by: input.requested_by,
+                requested_by_user_id: input.requested_by_user_id || null,
+                proposed_times: input.proposed_times,
+                notes: input.notes || null,
+            })
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+        return data as InterviewRescheduleRequest;
+    }
+
+    async updateRescheduleRequest(
+        id: string,
+        updates: {
+            status?: RescheduleRequestStatus;
+            accepted_time?: string;
+        },
+    ): Promise<InterviewRescheduleRequest> {
+        const { data, error } = await this.supabase
+            .from('interview_reschedule_requests')
+            .update({ ...updates, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+        return data as InterviewRescheduleRequest;
     }
 }
