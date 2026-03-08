@@ -86,6 +86,32 @@ export class TokenService {
         };
     }
 
+    /**
+     * Validate a magic link token without generating a LiveKit JWT.
+     * Used for non-video operations like reschedule requests.
+     */
+    async validateMagicLinkToken(token: string): Promise<{
+        interview: { id: string; status: InterviewStatus };
+        participant: { id: string; user_id: string; role: string };
+    } | null> {
+        const result = await this.repository.findAccessTokenByToken(token);
+        if (!result) {
+            return null;
+        }
+
+        return {
+            interview: {
+                id: result.interview.id,
+                status: result.interview.status,
+            },
+            participant: {
+                id: result.participant.id,
+                user_id: result.participant.user_id,
+                role: result.participant.role,
+            },
+        };
+    }
+
     async generateAuthenticatedToken(
         interviewId: string,
         userId: string,

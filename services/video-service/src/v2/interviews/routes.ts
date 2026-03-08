@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { InterviewRepository } from './repository';
 import { InterviewService } from './service';
+import { SchedulingService } from './scheduling-service';
 import { TokenService } from './token-service';
 import { requireUserContext } from '../shared/helpers';
 import { IEventPublisher } from '../shared/events';
@@ -22,6 +23,7 @@ export async function registerInterviewRoutes(
         config.supabaseKey,
     );
     const service = new InterviewService(repository, config.eventPublisher);
+    const schedulingService = new SchedulingService(repository, config.eventPublisher);
     const tokenService = new TokenService(
         repository,
         config.livekitApiKey,
@@ -41,6 +43,10 @@ export async function registerInterviewRoutes(
                     title: body.title,
                     scheduled_at: body.scheduled_at,
                     scheduled_duration_minutes: body.scheduled_duration_minutes,
+                    calendar_event_id: body.calendar_event_id,
+                    calendar_connection_id: body.calendar_connection_id,
+                    meeting_platform: body.meeting_platform,
+                    meeting_link: body.meeting_link,
                     participants: body.participants || [],
                 },
                 clerkUserId,
@@ -160,6 +166,166 @@ export async function registerInterviewRoutes(
             );
 
             return reply.send({ data: result });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // PATCH /api/v2/interviews/:id/reschedule - Reschedule interview (authenticated)
+    app.patch('/api/v2/interviews/:id/reschedule', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+            const body = request.body as any;
+
+            if (!body?.scheduled_at) {
+                return reply.code(400).send({ error: 'scheduled_at is required' });
+            }
+
+            const interview = await schedulingService.rescheduleInterview(
+                id,
+                body.scheduled_at,
+                body.scheduled_duration_minutes,
+                body.reason,
+                clerkUserId,
+            );
+
+            return reply.send({ data: interview });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // POST /api/v2/interviews/:id/reschedule-request - Create reschedule request (NO AUTH - magic link)
+    // Candidates use magic link token to request a reschedule
+    app.post('/api/v2/interviews/:id/reschedule-request', async (request, reply) => {
+        try {
+            const { id } = request.params as { id: string };
+            const body = request.body as any;
+
+            if (!body?.token) {
+                return reply.code(400).send({ error: 'token is required' });
+            }
+
+            if (!body?.proposed_times || body.proposed_times.length === 0) {
+                return reply.code(400).send({ error: 'proposed_times is required' });
+            }
+
+            // Validate the magic link token to identify the candidate
+            const tokenResult = await tokenService.validateMagicLinkToken(body.token);
+            if (!tokenResult) {
+                return reply.code(401).send({ error: 'Invalid or expired token' });
+            }
+
+            // Verify the token belongs to this interview
+            if (tokenResult.interview.id !== id) {
+                return reply.code(403).send({ error: 'Token does not match this interview' });
+            }
+
+            const request_ = await schedulingService.createRescheduleRequest(
+                id,
+                'candidate',
+                tokenResult.participant.user_id,
+                body.proposed_times,
+                body.notes,
+            );
+
+            return reply.code(201).send({ data: request_ });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // PATCH /api/v2/interviews/reschedule-requests/:requestId/accept - Accept reschedule request (authenticated)
+    app.patch('/api/v2/interviews/reschedule-requests/:requestId/accept', async (request, reply) => {
+        try {
+            requireUserContext(request);
+            const { requestId } = request.params as { requestId: string };
+            const body = request.body as any;
+
+            if (!body?.accepted_time) {
+                return reply.code(400).send({ error: 'accepted_time is required' });
+            }
+
+            const interview = await schedulingService.acceptRescheduleRequest(
+                requestId,
+                body.accepted_time,
+            );
+
+            return reply.send({ data: interview });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // POST /api/v2/interviews/available-slots - Compute available time slots (authenticated)
+    app.post('/api/v2/interviews/available-slots', async (request, reply) => {
+        try {
+            requireUserContext(request);
+            const body = request.body as any;
+
+            if (!body?.start_date || !body?.end_date) {
+                return reply.code(400).send({ error: 'start_date and end_date are required' });
+            }
+
+            const slots = schedulingService.getAvailableSlots({
+                busySlots: body.busy_slots || [],
+                startDate: body.start_date,
+                endDate: body.end_date,
+                workingHoursStart: body.working_hours_start || '09:00',
+                workingHoursEnd: body.working_hours_end || '17:00',
+                workingDays: body.working_days || [1, 2, 3, 4, 5],
+                timezone: body.timezone || 'UTC',
+                durationMinutes: body.duration_minutes || 60,
+            });
+
+            return reply.send({ data: slots });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // PATCH /api/v2/interviews/:id - Update interview fields (authenticated)
+    // Used for linking calendar events or updating meeting info after creation
+    app.patch('/api/v2/interviews/:id', async (request, reply) => {
+        try {
+            requireUserContext(request);
+            const { id } = request.params as { id: string };
+            const body = request.body as any;
+
+            // Only allow updating specific fields
+            const allowedFields = [
+                'calendar_event_id',
+                'calendar_connection_id',
+                'meeting_platform',
+                'meeting_link',
+                'title',
+                'metadata',
+            ];
+
+            const updates: Record<string, any> = {};
+            for (const field of allowedFields) {
+                if (body[field] !== undefined) {
+                    updates[field] = body[field];
+                }
+            }
+
+            if (Object.keys(updates).length === 0) {
+                return reply.code(400).send({ error: 'No valid fields to update' });
+            }
+
+            const interview = await repository.updateInterview(id, updates);
+            return reply.send({ data: interview });
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 400)
