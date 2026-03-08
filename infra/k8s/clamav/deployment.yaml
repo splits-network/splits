@@ -6,7 +6,7 @@ metadata:
     labels:
         app: clamav
 spec:
-    replicas: 1
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: clamav
@@ -15,6 +15,13 @@ spec:
             labels:
                 app: clamav
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: clamav
                   image: clamav/clamav:latest

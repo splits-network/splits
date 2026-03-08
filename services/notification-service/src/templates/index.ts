@@ -12,3 +12,4 @@ export * from './components';
 // Domain-specific templates
 export * from './applications';
 export * from './placements';
+export * from './interviews';

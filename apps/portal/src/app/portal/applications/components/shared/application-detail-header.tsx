@@ -4,9 +4,16 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import ActionsToolbar from "./actions-toolbar";
+import { JoinInterviewButton } from "../../[id]/components/join-interview-button";
 import { getStageDisplay, getStageDisplayWithExpired } from "./status-color";
 import { formatApplicationDate } from "../../types";
 import type { Application } from "../../types";
+
+interface ScheduledInterview {
+    id: string;
+    scheduled_at: string;
+    status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+}
 
 interface ApplicationDetailHeaderProps {
     application: Application;
@@ -56,6 +63,7 @@ export function ApplicationDetailHeader({
 
     const aiScoreFromApp = application.ai_review?.fit_score;
     const [fetchedAiScore, setFetchedAiScore] = useState<number | null>(null);
+    const [scheduledInterview, setScheduledInterview] = useState<ScheduledInterview | null>(null);
     const { getToken } = useAuth();
 
     // Self-fetch AI score when not included in the application data
@@ -79,6 +87,30 @@ export function ApplicationDetailHeader({
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [application.id, aiScoreFromApp]);
+
+    // Fetch scheduled interview for this application
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get("/interviews", {
+                    params: { application_id: application.id, limit: 1 },
+                });
+                const interviews = Array.isArray(res.data) ? res.data : [];
+                const joinable = interviews.find(
+                    (i: ScheduledInterview) => i.status === 'scheduled' || i.status === 'in_progress',
+                );
+                if (!cancelled && joinable) {
+                    setScheduledInterview(joinable);
+                }
+            } catch { /* silent — interviews may not exist yet */ }
+        })();
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [application.id]);
 
     const aiScore = aiScoreFromApp ?? fetchedAiScore;
     const stageLabel = getStageDisplay(application.stage);
@@ -161,6 +193,17 @@ export function ApplicationDetailHeader({
                         onRefresh={onRefresh}
                     />
                 </div>
+
+                {/* Join Interview button (when a scheduled/in-progress interview exists) */}
+                {scheduledInterview && (
+                    <div className="mt-3">
+                        <JoinInterviewButton
+                            interviewId={scheduledInterview.id}
+                            scheduledAt={scheduledInterview.scheduled_at}
+                            status={scheduledInterview.status}
+                        />
+                    </div>
+                )}
 
                 {/* Stats strip */}
                 <div

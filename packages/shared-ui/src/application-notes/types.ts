@@ -93,6 +93,16 @@ export const NOTE_TYPE_CONFIG: Record<ApplicationNoteType, { label: string; icon
         icon: 'fa-bullhorn',
         color: 'badge-primary',
     },
+    interview_summary: {
+        label: 'AI Summary',
+        icon: 'fa-sparkles',
+        color: 'badge-secondary',
+    },
+    interview_note: {
+        label: 'Interview Note',
+        icon: 'fa-pen-clip',
+        color: 'badge-accent',
+    },
 };
 
 // Creator type display configuration

@@ -55,6 +55,7 @@ export function ApplicationNoteItem({
         VISIBILITY_CONFIG[note.visibility] || VISIBILITY_CONFIG.shared;
 
     const creatorName = note.created_by?.name || "Unknown User";
+    const isAiSummary = note.note_type === "interview_summary";
 
     return (
         <div
@@ -86,6 +87,14 @@ export function ApplicationNoteItem({
                         {noteTypeConfig.label}
                     </span>
 
+                    {/* AI Generated badge */}
+                    {isAiSummary && (
+                        <span className="badge badge-secondary badge-xs gap-1">
+                            <i className="fa-duotone fa-regular fa-sparkles" />
+                            AI Generated
+                        </span>
+                    )}
+
                     {/* Visibility indicator */}
                     {showVisibility && note.visibility !== "shared" && (
                         <span
@@ -106,8 +115,8 @@ export function ApplicationNoteItem({
                         {formatTimeAgo(note.created_at)}
                     </span>
 
-                    {/* Actions dropdown */}
-                    {showActions && (isOwnNote || onReply) && (
+                    {/* Actions dropdown - hidden for AI-generated notes */}
+                    {showActions && !isAiSummary && (isOwnNote || onReply) && (
                         <div className="dropdown dropdown-end">
                             <button
                                 tabIndex={0}

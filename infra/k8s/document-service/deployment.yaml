@@ -1,81 +1,92 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: document-service
-  namespace: splits-network
+    name: document-service
+    namespace: splits-network
 spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: document-service
-  template:
-    metadata:
-      labels:
-        app: document-service
-    spec:
-      containers:
-        - name: document-service
-          image: ${ACR_SERVER}/document-service:${IMAGE_TAG}
-          ports:
-            - containerPort: 3006
-          env:
-            - name: NODE_ENV
-              value: "production"
-            - name: PORT
-              value: "3006"
-            - name: SERVICE_NAME
-              value: "document-service"
-            - name: SUPABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-url
-            - name: SUPABASE_ANON_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-anon-key
-            - name: SUPABASE_SERVICE_ROLE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-service-role-key
-            - name: MAX_FILE_SIZE_MB
-              value: "10"
-            - name: ALLOWED_MIME_TYPES
-              value: "application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/rtf"
-            - name: RABBITMQ_URL
-              value: "amqp://splits:splits_production@rabbitmq:5672"
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 3006
-            initialDelaySeconds: 30
-            periodSeconds: 30
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 3006
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "256Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
+    replicas: ${REPLICAS:-2}
+    selector:
+        matchLabels:
+            app: document-service
+    template:
+        metadata:
+            labels:
+                app: document-service
+        spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
+            containers:
+                - name: document-service
+                  image: ${ACR_SERVER}/document-service:${IMAGE_TAG}
+                  ports:
+                      - containerPort: 3006
+                  env:
+                      - name: NODE_ENV
+                        value: "production"
+                      - name: PORT
+                        value: "3006"
+                      - name: SERVICE_NAME
+                        value: "document-service"
+                      - name: SUPABASE_URL
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-url
+                      - name: SUPABASE_ANON_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-anon-key
+                      - name: SUPABASE_SERVICE_ROLE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-service-role-key
+                      - name: MAX_FILE_SIZE_MB
+                        value: "10"
+                      - name: ALLOWED_MIME_TYPES
+                        value: "application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/rtf"
+                      - name: RABBITMQ_URL
+                        value: "amqp://splits:splits_production@rabbitmq:5672"
+                  livenessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3006
+                      initialDelaySeconds: 60
+                      periodSeconds: 30
+                      timeoutSeconds: 5
+                      failureThreshold: 3
+                  readinessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3006
+                      initialDelaySeconds: 15
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 2
+                  resources:
+                      requests:
+                          cpu: "100m"
+                          memory: "256Mi"
+                      limits:
+                          cpu: "500m"
+                          memory: "512Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: document-service
-  namespace: splits-network
+    name: document-service
+    namespace: splits-network
 spec:
-  selector:
-    app: document-service
-  ports:
-    - protocol: TCP
-      port: 3006
-      targetPort: 3006
-  type: ClusterIP
+    selector:
+        app: document-service
+    ports:
+        - protocol: TCP
+          port: 3006
+          targetPort: 3006
+    type: ClusterIP

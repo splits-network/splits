@@ -122,7 +122,7 @@ export class AIReviewServiceV2 {
                 this.logger.error({ 
                     application_id: input.application_id, 
                     documents_without_text: documentsWithoutText.length,
-                    total_documents: application.length,
+                    total_documents: application.documents?.length ?? 0,
                     details: documentsWithoutText
                 }, '❌ CRITICAL: Documents found but NO extracted_text in metadata - document text extraction is not running!');
             }
@@ -169,14 +169,18 @@ export class AIReviewServiceV2 {
         const startTime = Date.now();
 
         try {
-            // Publish start event
+            // Publish start event (non-critical — don't let it block the review)
             if (this.eventPublisher) {
-                await this.eventPublisher.publish('ai_review.started', {
-                    application_id: input.application_id,
-                    candidate_id: input.candidate_id,
-                    job_id: input.job_id,
-                    timestamp: new Date().toISOString(),
-                });
+                try {
+                    await this.eventPublisher.publish('ai_review.started', {
+                        application_id: input.application_id,
+                        candidate_id: input.candidate_id,
+                        job_id: input.job_id,
+                        timestamp: new Date().toISOString(),
+                    });
+                } catch {
+                    // Event publish failure is non-critical
+                }
             }
 
             // Call OpenAI to analyze fit
@@ -206,30 +210,38 @@ export class AIReviewServiceV2 {
 
             // Publish ai_review.completed event
             // ATS service will listen to this and decide whether to auto-transition stage
+            // Wrapped in try/catch so event publish failures don't crash a successful review
             if (this.eventPublisher) {
-                await this.eventPublisher.publish('ai_review.completed', {
-                    application_id: input.application_id,
-                    candidate_id: input.candidate_id,
-                    job_id: input.job_id,
-                    ai_review_id: review.id,
-                    fit_score: review.fit_score,
-                    recommendation: review.recommendation,
-                    confidence_level: review.confidence_level,
-                    auto_transition: input.auto_transition,
-                    processing_time_ms: processingTimeMs,
-                    timestamp: new Date().toISOString(),
-                });
-
-                this.logger.info(
-                    {
+                try {
+                    await this.eventPublisher.publish('ai_review.completed', {
                         application_id: input.application_id,
+                        candidate_id: input.candidate_id,
+                        job_id: input.job_id,
                         ai_review_id: review.id,
                         fit_score: review.fit_score,
                         recommendation: review.recommendation,
+                        confidence_level: review.confidence_level,
                         auto_transition: input.auto_transition,
-                    },
-                    'Published ai_review.completed event'
-                );
+                        processing_time_ms: processingTimeMs,
+                        timestamp: new Date().toISOString(),
+                    });
+
+                    this.logger.info(
+                        {
+                            application_id: input.application_id,
+                            ai_review_id: review.id,
+                            fit_score: review.fit_score,
+                            recommendation: review.recommendation,
+                            auto_transition: input.auto_transition,
+                        },
+                        'Published ai_review.completed event'
+                    );
+                } catch (eventErr) {
+                    this.logger.error(
+                        { err: eventErr, application_id: input.application_id, ai_review_id: review.id },
+                        'Failed to publish ai_review.completed event (review was saved successfully)'
+                    );
+                }
             }
 
             this.logger.info(
@@ -239,15 +251,19 @@ export class AIReviewServiceV2 {
 
             return review;
         } catch (error) {
-            // Publish failed event
+            // Publish failed event — guarded so a RabbitMQ failure doesn't mask the real error
             if (this.eventPublisher) {
-                await this.eventPublisher.publish('ai_review.failed', {
-                    application_id: input.application_id,
-                    candidate_id: input.candidate_id,
-                    job_id: input.job_id,
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                    timestamp: new Date().toISOString(),
-                });
+                try {
+                    await this.eventPublisher.publish('ai_review.failed', {
+                        application_id: input.application_id,
+                        candidate_id: input.candidate_id,
+                        job_id: input.job_id,
+                        error: error instanceof Error ? error.message : 'Unknown error',
+                        timestamp: new Date().toISOString(),
+                    });
+                } catch {
+                    // Can't publish failure event either — just log
+                }
             }
 
             this.logger.error({ err: error, application_id: input.application_id }, 'AI review failed');
@@ -280,44 +296,85 @@ export class AIReviewServiceV2 {
         }
 
         const prompt = this.buildPrompt(input);
-
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.openaiApiKey}`,
-            },
-            body: JSON.stringify({
-                model: this.modelVersion,
-                messages: [
-                    {
-                        role: 'system',
-                        content:
-                            'You are an expert recruiter assistant analyzing candidate-job fit. Provide detailed, honest assessments in valid JSON format.',
-                    },
-                    {
-                        role: 'user',
-                        content: prompt,
-                    },
-                ],
-                response_format: { type: 'json_object' },
-                temperature: 0.3,
-                max_tokens: 2000,
-            }),
+        const body = JSON.stringify({
+            model: this.modelVersion,
+            messages: [
+                {
+                    role: 'system',
+                    content:
+                        'You are an expert recruiter assistant analyzing candidate-job fit. Provide detailed, honest assessments in valid JSON format.',
+                },
+                {
+                    role: 'user',
+                    content: prompt,
+                },
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.3,
+            max_tokens: 2000,
         });
 
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(`OpenAI API error: ${response.status} ${error}`);
+        // Retry with exponential backoff for transient failures (429, 5xx)
+        const MAX_RETRIES = 2;
+        let lastError: Error | null = null;
+
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            if (attempt > 0) {
+                const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                this.logger.info({ attempt, application_id: input.application_id }, 'Retrying OpenAI request');
+            }
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${this.openaiApiKey}`,
+                },
+                body,
+                signal: AbortSignal.timeout(60_000),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => '');
+                lastError = new Error(`OpenAI API error: ${response.status} ${errorText}`);
+
+                // Retry on 429 (rate limit) or 5xx (server error)
+                if (response.status === 429 || response.status >= 500) {
+                    continue;
+                }
+                // Non-retryable error (400, 401, 403, etc.)
+                throw lastError;
+            }
+
+            // Safe JSON parsing of OpenAI response
+            let data: any;
+            try {
+                data = await response.json();
+            } catch {
+                lastError = new Error('OpenAI returned invalid JSON response');
+                continue;
+            }
+
+            const content = data?.choices?.[0]?.message?.content;
+            if (!content) {
+                lastError = new Error('OpenAI response missing choices[0].message.content');
+                continue;
+            }
+
+            let result: AIReviewResult;
+            try {
+                result = JSON.parse(content) as AIReviewResult;
+            } catch {
+                lastError = new Error('OpenAI returned non-JSON content in message');
+                continue;
+            }
+
+            this.validateResult(result);
+            return result;
         }
 
-        const data = (await response.json()) as any;
-        const content = data.choices[0].message.content;
-        const result = JSON.parse(content) as AIReviewResult;
-
-        this.validateResult(result);
-
-        return result;
+        throw lastError || new Error('OpenAI request failed after retries');
     }
 
     private buildPrompt(input: AIReviewInput): string {
@@ -353,7 +410,7 @@ export class AIReviewServiceV2 {
         
         // Build resume text section with better context
         let resumeSection = '';
-        if (input.resume_text) {
+        if (input.resume_text && typeof input.resume_text === 'string') {
             // Truncate to 4000 chars to stay within token limits
             resumeSection = `- Resume/Profile: ${input.resume_text.substring(0, 4000)}`;
         } else if (input.documents_count && input.documents_count > 0) {

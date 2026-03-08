@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: livekit-server
+    namespace: splits-network
+spec:
+    replicas: ${REPLICAS:-2}
+    selector:
+        matchLabels:
+            app: livekit-server
+    template:
+        metadata:
+            labels:
+                app: livekit-server
+        spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
+            hostNetwork: true
+            dnsPolicy: ClusterFirstWithHostNet
+            containers:
+                - name: livekit-server
+                  image: livekit/livekit-server:v1.8
+                  args:
+                      - --config
+                      - /etc/livekit/livekit.yaml
+                  ports:
+                      - containerPort: 7880
+                        name: http
+                      - containerPort: 7881
+                        name: rtc
+                        protocol: UDP
+                  env:
+                      - name: LIVEKIT_API_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: livekit-secrets
+                                key: api-key
+                      - name: LIVEKIT_API_SECRET
+                        valueFrom:
+                            secretKeyRef:
+                                name: livekit-secrets
+                                key: api-secret
+                  volumeMounts:
+                      - name: livekit-config
+                        mountPath: /etc/livekit
+                        readOnly: true
+                  resources:
+                      requests:
+                          cpu: 200m
+                          memory: 256Mi
+                      limits:
+                          cpu: 2000m
+                          memory: 2Gi
+                  livenessProbe:
+                      httpGet:
+                          path: /
+                          port: 7880
+                      initialDelaySeconds: 10
+                      periodSeconds: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /
+                          port: 7880
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+            volumes:
+                - name: livekit-config
+                  configMap:
+                      name: livekit-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: livekit-server
+    namespace: splits-network
+spec:
+    type: ClusterIP
+    ports:
+        - port: 80
+          targetPort: 7880
+          name: http
+    selector:
+        app: livekit-server

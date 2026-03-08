@@ -4,7 +4,7 @@ metadata:
     name: chat-gateway
     namespace: splits-network
 spec:
-    replicas: 2
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: chat-gateway
@@ -13,6 +13,13 @@ spec:
             labels:
                 app: chat-gateway
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: chat-gateway
                   image: ${ACR_SERVER}/chat-gateway:${IMAGE_TAG}

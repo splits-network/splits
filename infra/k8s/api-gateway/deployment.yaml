@@ -4,7 +4,7 @@ metadata:
     name: api-gateway
     namespace: splits-network
 spec:
-    replicas: 3
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: api-gateway
@@ -13,6 +13,13 @@ spec:
             labels:
                 app: api-gateway
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: api-gateway
                   image: ${ACR_SERVER}/api-gateway:${IMAGE_TAG}
@@ -117,6 +124,8 @@ spec:
                         value: "http://matching-service:3017"
                       - name: GAMIFICATION_SERVICE_URL
                         value: "http://gamification-service:3018"
+                      - name: VIDEO_SERVICE_URL
+                        value: "http://video-service:80"
                   resources:
                       requests:
                           cpu: 200m
@@ -128,14 +137,18 @@ spec:
                       httpGet:
                           path: /health
                           port: 3000
-                      initialDelaySeconds: 30
+                      initialDelaySeconds: 60
                       periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
                   readinessProbe:
                       httpGet:
                           path: /health
                           port: 3000
-                      initialDelaySeconds: 10
+                      initialDelaySeconds: 15
                       periodSeconds: 5
+                      timeoutSeconds: 5
+                      failureThreshold: 2
 ---
 apiVersion: v1
 kind: Service

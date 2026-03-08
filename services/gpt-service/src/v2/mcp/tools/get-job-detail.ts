@@ -10,7 +10,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { GptActionRepository } from '../../actions/repository';
 import { formatJobForGpt } from '../../actions/helpers';
 import { GptJobDetail } from '../../actions/types';
-import { McpAuthContext, toolError } from '../types';
+import { McpAuthContext, toolError, safeTool } from '../types';
 import { requireMcpScope } from '../auth';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -39,7 +39,7 @@ export function registerGetJobDetailTool(
             },
             _meta: { 'ui/resourceUri': 'ui://career-copilot/job-detail.html' },
         },
-        async ({ job_id }) => {
+        safeTool('get_job_detail', async ({ job_id }) => {
             const auth = getAuth();
             requireMcpScope(auth, 'jobs:read');
 
@@ -57,17 +57,21 @@ export function registerGetJobDetailTool(
                 ...formatJobForGpt(job),
                 description: job.description || '',
                 responsibilities: job.responsibilities || [],
-                requirements: (job.requirements || []).map((req: any) => ({
-                    text: req.description,
-                    type: req.requirement_type as 'mandatory' | 'preferred',
-                })),
-                pre_screen_questions: (job.pre_screen_questions || []).map((q: any) => ({
-                    question: q.question,
-                    type: q.question_type,
-                    is_required: q.is_required,
-                    options: q.options,
-                    disclaimer: q.disclaimer,
-                })),
+                requirements: (job.requirements || [])
+                    .filter((req: any) => req.description)
+                    .map((req: any) => ({
+                        text: req.description,
+                        type: req.requirement_type as 'mandatory' | 'preferred',
+                    })),
+                pre_screen_questions: (job.pre_screen_questions || [])
+                    .filter((q: any) => q.question)
+                    .map((q: any) => ({
+                        question: q.question,
+                        type: q.question_type,
+                        is_required: q.is_required,
+                        options: q.options,
+                        disclaimer: q.disclaimer,
+                    })),
                 company: {
                     name: job.company?.name || 'Unknown Company',
                     industry: job.company?.industry || '',
@@ -86,6 +90,6 @@ export function registerGetJobDetailTool(
                     },
                 ],
             };
-        },
+        }),
     );
 }

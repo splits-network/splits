@@ -492,7 +492,9 @@ export type ApplicationNoteType =
     | 'stage_transition'   // Notes during stage changes
     | 'interview_feedback' // Company interview notes
     | 'general'            // Catch-all type
-    | 'pitch';             // Recruiter pitch when submitting candidate
+    | 'pitch'              // Recruiter pitch when submitting candidate
+    | 'interview_summary' // AI-generated interview summary
+    | 'interview_note';   // Auto-posted from in-call interview notes
 
 export type ApplicationNoteCreatorType =
     | 'candidate'
@@ -521,6 +523,28 @@ export interface ApplicationNote {
     // Enriched data from service layer
     created_by?: { id: string; name: string; email: string };
     in_response_to?: ApplicationNote;
+}
+
+// ============================================================================
+// Interview Transcript Types (AI pipeline)
+// ============================================================================
+
+export interface TranscriptSegment {
+    start: number;    // seconds from recording start
+    end: number;      // seconds from recording start
+    text: string;
+    speaker: string;  // participant name or role
+}
+
+export interface InterviewTranscript {
+    id: string;
+    interview_id: string;
+    full_text: string;
+    segments: TranscriptSegment[];
+    language: string;
+    whisper_model?: string;
+    processing_time_ms?: number;
+    created_at: string;
 }
 
 // Legacy aliases for backwards compatibility during migration

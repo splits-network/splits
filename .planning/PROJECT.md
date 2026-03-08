@@ -10,19 +10,22 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 ## Current State
 
-v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, tech stack, perks, culture tags, social links. Company cards redesigned to Basel editorial design. Search index enriched with new data.
+v7.0 Company Profile Enhancement shipped. v8.0 Company Experience Enhancement shelved (requirements defined but not executed — see REQUIREMENTS-v8.md if resuming).
 
-## Current Milestone: v8.0 Company Experience Enhancement
+## Current Milestone: v9.0 Video Interviewing
 
-**Goal:** Make the portal a first-class experience for company users — invite matched candidates to apply (with email + in-app notifications to both candidate and recruiter), tailor role detail tabs per user role, and surface top matches on the company dashboard.
+**Goal:** Add in-app video interviewing powered by self-hosted LiveKit — schedule, conduct, record, transcribe, and AI-summarize interviews directly within the recruiting workflow.
 
 **Target features:**
-- Invite to Apply: company users can invite matched candidates, triggering email + in-app notifications to candidate AND recruiter
-- New match status `invited` with `invited_by`/`invited_at` tracking
-- `match.invited` RabbitMQ event with notification-service consumers
-- Candidate-side "Invited" badge on match cards
-- Role-aware tab experience: company users see tabs tailored to their context (not recruiter-centric)
-- Company dashboard "Top Matches" widget showing highest-scored matches across company roles
+- LiveKit self-hosted on K8s with new `video-service` microservice for room management
+- 1:1 and panel interviews (multi-party support)
+- Candidate join via magic link (no account needed) or through candidate app (logged-in)
+- Scheduling: stage-triggered prompts, standalone "Schedule Interview" action, Google Calendar sync via combo provider
+- Interview recording with LiveKit Egress, stored in object storage
+- AI transcription and summary generation via existing ai-service pipeline
+- AI summary auto-posted as application note AND available in dedicated interviews tab
+- Video call UI: lobby, in-call controls, screen share
+- Interview scheduling modal with calendar availability
 
 ## Requirements
 
@@ -92,11 +95,14 @@ v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, 
 
 ### Active
 
-- Invite to Apply: match action with `invited` status, `invited_by`/`invited_at` columns — v8.0
-- `match.invited` event with email + in-app notification to candidate and recruiter — v8.0
-- Candidate-side "Invited" badge on match cards — v8.0
-- Role-aware role detail tabs (company vs recruiter persona) — v8.0
-- Company dashboard top matches widget — v8.0
+- LiveKit self-hosted infrastructure on K8s with video-service microservice — v9.0
+- Interview scheduling with stage triggers, standalone action, and Google Calendar sync — v9.0
+- Video call UI with lobby, controls, screen share, 1:1 and panel support — v9.0
+- Magic link join for candidates without accounts — v9.0
+- Interview recording via LiveKit Egress with object storage — v9.0
+- AI transcription and summary generation via ai-service — v9.0
+- Dedicated interviews tab on applications/roles with recording playback — v9.0
+- AI summary auto-posted as application note — v9.0
 
 ### Out of Scope
 
@@ -108,6 +114,7 @@ v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, 
 - Payment processing via GPT — too risky for v1
 - Fully autonomous submissions — all writes require explicit confirmation
 - GPT Store publishing — v5.0 builds the backend, store listing is a separate step
+- v8.0 Company Experience Enhancement — shelved (invite to apply, role-aware tabs, top matches widget)
 
 ## Context
 
@@ -171,6 +178,7 @@ v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, 
 | Admin routes under /admin/* in domain services | Clean separation from user-scoped /api/v2/* routes. Gateway rewritePrefix strips service prefix. | ✓ Good |
 | useStandardList clientFactory option | Admin wrapper injects createAdminClient. No Clerk coupling in shared-hooks. | ✓ Good |
 
+| LiveKit over Daily/Twilio/100ms | Self-hostable on existing K8s, open-source, full control over data and costs. Already running K8s so infra overhead is minimal. | — Pending |
 | Tech stack reuses skills table | Tech stack items are the same domain as skills. Reusing avoids duplication and enables cross-entity matching (candidate skills vs company tech stack). | ✓ Good |
 | Perks as new lookup table | Perks are a distinct domain from skills. Slug-deduplication pattern with BaselSkillPicker UI. | ✓ Good |
 | Culture tags as new lookup table | Culture is open-ended enough to warrant a lookup. Remote-first, async-friendly, etc. | ✓ Good |
@@ -178,4 +186,4 @@ v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, 
 | Computed open roles and avg salary | Derived from jobs table at query time, not stored. Always accurate. | ✓ Good |
 
 ---
-*Last updated: 2026-03-04 after v8.0 milestone started*
+*Last updated: 2026-03-07 after v9.0 milestone started (v8.0 shelved)*

@@ -5,6 +5,19 @@ import { GoogleCalendarClient, CreateEventParams as GoogleCreateParams } from '.
 import { MicrosoftCalendarClient, MicrosoftCreateEventParams } from './microsoft-client';
 import type { CalendarInfo, CalendarEvent, CalendarBusySlot } from '@splits-network/shared-types';
 
+/* ── Unified update-event params ─────────────────────────────────────── */
+
+export interface UpdateCalendarEventParams {
+    calendarId: string;
+    summary?: string;
+    description?: string;
+    location?: string;
+    startDateTime?: string;
+    endDateTime?: string;
+    timeZone?: string;
+    attendeeEmails?: string[];
+}
+
 /* ── Unified create-event params ─────────────────────────────────────── */
 
 export interface CreateCalendarEventParams {
@@ -241,7 +254,133 @@ export class CalendarService {
         return event;
     }
 
+    /**
+     * Update a calendar event (reschedule, change details).
+     * Returns a normalized CalendarEvent.
+     */
+    async updateEvent(
+        connectionId: string,
+        clerkUserId: string,
+        calendarId: string,
+        eventId: string,
+        params: UpdateCalendarEventParams,
+    ): Promise<CalendarEvent> {
+        const connection = await this.authorize(connectionId, clerkUserId);
+        const token = await this.tokenRefresh.getValidToken(connectionId);
+
+        let event: CalendarEvent;
+
+        if (connection.provider_slug.startsWith('google_')) {
+            const e = await this.googleClient.updateEvent(token, calendarId, eventId, {
+                summary: params.summary,
+                description: params.description,
+                location: params.location,
+                startDateTime: params.startDateTime,
+                endDateTime: params.endDateTime,
+                timeZone: params.timeZone,
+                attendeeEmails: params.attendeeEmails,
+            });
+            event = this.normalizeGoogleEvent(e);
+        } else if (connection.provider_slug.startsWith('microsoft_')) {
+            const e = await this.microsoftClient.updateEvent(token, calendarId, eventId, {
+                summary: params.summary,
+                description: params.description,
+                location: params.location,
+                startDateTime: params.startDateTime,
+                endDateTime: params.endDateTime,
+                timeZone: params.timeZone,
+                attendeeEmails: params.attendeeEmails,
+            });
+            event = this.normalizeMicrosoftEvent(e);
+        } else {
+            throw new Error(`Unsupported calendar provider: ${connection.provider_slug}`);
+        }
+
+        await this.connectionRepo.update(connectionId, {
+            last_synced_at: new Date().toISOString(),
+        });
+
+        this.logger.info(
+            { connectionId, eventId, calendarId, provider: connection.provider_slug },
+            'Calendar event updated',
+        );
+
+        return event;
+    }
+
+    /**
+     * Delete a calendar event (cancellation).
+     */
+    async deleteEvent(
+        connectionId: string,
+        clerkUserId: string,
+        calendarId: string,
+        eventId: string,
+    ): Promise<void> {
+        const connection = await this.authorize(connectionId, clerkUserId);
+        const token = await this.tokenRefresh.getValidToken(connectionId);
+
+        if (connection.provider_slug.startsWith('google_')) {
+            await this.googleClient.deleteEvent(token, calendarId, eventId);
+        } else if (connection.provider_slug.startsWith('microsoft_')) {
+            await this.microsoftClient.deleteEvent(token, calendarId, eventId);
+        } else {
+            throw new Error(`Unsupported calendar provider: ${connection.provider_slug}`);
+        }
+
+        await this.connectionRepo.update(connectionId, {
+            last_synced_at: new Date().toISOString(),
+        });
+
+        this.logger.info(
+            { connectionId, eventId, calendarId, provider: connection.provider_slug },
+            'Calendar event deleted',
+        );
+    }
+
     /* ── Private ───────────────────────────────────────────────────────── */
+
+    /** Normalize a Google event to CalendarEvent */
+    private normalizeGoogleEvent(e: any): CalendarEvent {
+        return {
+            id: e.id,
+            summary: e.summary,
+            description: e.description,
+            location: e.location,
+            start: e.start,
+            end: e.end,
+            status: e.status,
+            htmlLink: e.htmlLink,
+            attendees: e.attendees?.map((a: any) => ({
+                email: a.email,
+                displayName: a.displayName,
+                responseStatus: a.responseStatus,
+            })),
+            conferenceData: e.conferenceData,
+        };
+    }
+
+    /** Normalize a Microsoft event to CalendarEvent */
+    private normalizeMicrosoftEvent(e: any): CalendarEvent {
+        return {
+            id: e.id,
+            summary: e.subject,
+            description: e.bodyPreview,
+            location: e.location?.displayName,
+            start: { dateTime: e.start.dateTime, timeZone: e.start.timeZone },
+            end: { dateTime: e.end.dateTime, timeZone: e.end.timeZone },
+            status: e.isCancelled ? 'cancelled' : 'confirmed',
+            htmlLink: e.webLink,
+            attendees: e.attendees?.map((a: any) => ({
+                email: a.emailAddress.address,
+                displayName: a.emailAddress.name,
+                responseStatus: this.mapMicrosoftResponse(a.status.response),
+            })),
+            conferenceData: e.onlineMeeting?.joinUrl ? {
+                entryPoints: [{ entryPointType: 'video', uri: e.onlineMeeting.joinUrl }],
+            } : undefined,
+        };
+    }
 
     private async authorize(connectionId: string, clerkUserId: string) {
         const connection = await this.connectionRepo.findById(connectionId);

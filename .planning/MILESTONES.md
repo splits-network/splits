@@ -1,5 +1,19 @@
 # Project Milestones: Splits Network
 
+## v8.0 Company Experience Enhancement (Shelved: 2026-03-07)
+
+**Status:** Shelved — requirements defined but not executed. Replaced by v9.0 Video Interviewing.
+
+**Planned phases:** 28-32 (never executed)
+**Requirements backed up:** `.planning/REQUIREMENTS-v8-shelved.md`
+
+**Planned features:**
+- Invite to Apply: company users invite matched candidates with email + in-app notifications
+- Role-aware tab experience for company users
+- Company dashboard top matches widget
+
+---
+
 ## v6.0 Admin App Extraction (Shipped: 2026-02-27)
 
 **Delivered:** Extracted platform administration from portal into a dedicated admin app and admin gateway — 30+ pages, real-time WebSocket infrastructure, shared component packages, and dashboard with live database-backed charts and KPI tiles.

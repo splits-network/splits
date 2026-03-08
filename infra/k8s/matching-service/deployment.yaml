@@ -4,7 +4,7 @@ metadata:
     name: matching-service
     namespace: splits-network
 spec:
-    replicas: 2
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: matching-service
@@ -13,6 +13,13 @@ spec:
             labels:
                 app: matching-service
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: matching-service
                   image: ${ACR_SERVER}/matching-service:${IMAGE_TAG}

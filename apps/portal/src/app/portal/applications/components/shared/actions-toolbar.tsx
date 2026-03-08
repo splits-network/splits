@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
@@ -14,13 +15,16 @@ import {
     SpeedMenu,
     type SpeedDialAction,
 } from "@splits-network/basel-ui";
+import { useScheduledInterview } from "../../hooks/use-scheduled-interview";
 import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import BaselAddNoteModal from "@/components/basel/applications/add-note-modal";
 import RequestChangesModal from "../modals/request-changes-modal";
-import HireModal from "../modals/hire-modal";
 import PreScreenRequestModal from "../modals/pre-screen-request-modal";
 import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
+import RescheduleInterviewModal from "@/components/basel/scheduling/reschedule-interview-modal";
+import CancelInterviewDialog from "@/components/basel/scheduling/cancel-interview-dialog";
+import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
@@ -71,6 +75,7 @@ export default function ActionsToolbar({
     onRefresh,
     className = "",
 }: ActionsToolbarProps) {
+    const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isAdmin, isRecruiter, isCompanyUser, hasPermissionForCompany } =
@@ -94,11 +99,13 @@ export default function ActionsToolbar({
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [showNoteModal, setShowNoteModal] = useState(false);
-    const [showHireModal, setShowHireModal] = useState(false);
     const [showPreScreenModal, setShowPreScreenModal] = useState(false);
     const [showRequestChangesModal, setShowRequestChangesModal] =
         useState(false);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [showScheduleToast, setShowScheduleToast] = useState(false);
+    const scheduleToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
@@ -114,6 +121,19 @@ export default function ActionsToolbar({
     const presenceStatus = candidateUserId
         ? presence[candidateUserId]?.status
         : undefined;
+
+    const { interview: scheduledInterview, refetch: refetchInterview } = useScheduledInterview(application.id, application.stage);
+    const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+    const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+    // Clean up schedule toast timer on unmount
+    useEffect(() => {
+        return () => {
+            if (scheduleToastTimer.current) {
+                clearTimeout(scheduleToastTimer.current);
+            }
+        };
+    }, []);
 
     const isFirmJob = !application.job?.company_id && !!application.job?.source_firm_id;
 
@@ -196,10 +216,22 @@ export default function ActionsToolbar({
     const isOfferStage = application.stage === "offer";
 
     const handleApprove = (toOffer: boolean = false) => {
+        // At offer stage, hire via wizard page
         if (isOfferStage) {
-            setShowHireModal(true);
+            router.push(`/portal/applications/${application.id}/hire`);
             return;
         }
+        // Check if this transition leads to offer stage
+        const nextStage = getNextStageOnApprove(
+            application.stage as ApplicationStage,
+            application.candidate_recruiter_id,
+            toOffer,
+        );
+        if (nextStage === "offer") {
+            router.push(`/portal/applications/${application.id}/offer`);
+            return;
+        }
+        // Regular stage transitions stay as modal
         setMoveToOffer(toOffer);
         setShowApproveModal(true);
     };
@@ -254,6 +286,17 @@ export default function ActionsToolbar({
                 );
             } else {
                 toast.success("Application moved to next stage successfully");
+            }
+
+            // Show schedule interview toast when moving to interview stage
+            if (targetStage === "interview") {
+                setShowScheduleToast(true);
+                if (scheduleToastTimer.current) {
+                    clearTimeout(scheduleToastTimer.current);
+                }
+                scheduleToastTimer.current = setTimeout(() => {
+                    setShowScheduleToast(false);
+                }, 8000);
             }
 
             setShowApproveModal(false);
@@ -385,10 +428,20 @@ export default function ActionsToolbar({
             showActions.requestChanges !== false &&
             permissions.canRequestChanges,
         scheduleInterview:
-            (isRecruiter || isAdmin) &&
-            ["screen", "company_review", "interview", "offer"].includes(
-                application.stage ?? "",
-            ),
+            (isRecruiter || isCompanyUser || isAdmin) &&
+            [
+                "submitted",
+                "recruiter_review",
+                "screen",
+                "company_review",
+                "company_feedback",
+                "interview",
+                "offer",
+            ].includes(application.stage ?? ""),
+        sendEmail: isRecruiter || isCompanyUser || isAdmin,
+        joinInterview: !!scheduledInterview,
+        rescheduleInterview: !!scheduledInterview,
+        cancelInterview: !!scheduledInterview,
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -426,17 +479,6 @@ export default function ActionsToolbar({
                     loading={actionLoading}
                 />
             )}
-            {showHireModal && (
-                <HireModal
-                    application={application}
-                    onClose={() => setShowHireModal(false)}
-                    onSuccess={() => {
-                        setShowHireModal(false);
-                        toast.success("Candidate hired successfully!");
-                        refresh();
-                    }}
-                />
-            )}
             {showPreScreenModal &&
                 application.job_id &&
                 application.job?.company?.id && (
@@ -466,6 +508,8 @@ export default function ActionsToolbar({
                     }
                     candidateEmail={application.candidate?.email || undefined}
                     jobTitle={application.job?.title || undefined}
+                    applicationId={application.id}
+                    applicationStage={application.stage ?? undefined}
                     onClose={() => setShowScheduleModal(false)}
                     onSuccess={() => {
                         setShowScheduleModal(false);
@@ -473,8 +517,93 @@ export default function ActionsToolbar({
                     }}
                 />
             )}
+            {showEmailModal && (
+                <ComposeEmailModal
+                    toEmail={application.candidate?.email || undefined}
+                    subject={
+                        application.job?.title
+                            ? `Re: ${application.job.title}`
+                            : undefined
+                    }
+                    onClose={() => setShowEmailModal(false)}
+                    onSent={() => {
+                        setShowEmailModal(false);
+                        refresh();
+                    }}
+                />
+            )}
+            {showRescheduleModal && scheduledInterview && (
+                <RescheduleInterviewModal
+                    interviewId={scheduledInterview.id}
+                    currentScheduledAt={scheduledInterview.scheduled_at}
+                    currentDuration={scheduledInterview.scheduled_duration_minutes || 30}
+                    candidateName={application.candidate?.full_name || "Unknown"}
+                    jobTitle={application.job?.title || "Unknown"}
+                    calendarEventId={scheduledInterview.calendar_event_id}
+                    calendarConnectionId={scheduledInterview.calendar_connection_id}
+                    onClose={() => setShowRescheduleModal(false)}
+                    onSuccess={() => {
+                        setShowRescheduleModal(false);
+                        refetchInterview();
+                        refresh();
+                    }}
+                />
+            )}
+            {showCancelDialog && scheduledInterview && (
+                <CancelInterviewDialog
+                    interviewId={scheduledInterview.id}
+                    candidateName={application.candidate?.full_name || "Unknown"}
+                    scheduledAt={scheduledInterview.scheduled_at}
+                    calendarEventId={scheduledInterview.calendar_event_id}
+                    calendarConnectionId={scheduledInterview.calendar_connection_id}
+                    onClose={() => setShowCancelDialog(false)}
+                    onSuccess={() => {
+                        setShowCancelDialog(false);
+                        refetchInterview();
+                        refresh();
+                    }}
+                />
+            )}
         </ModalPortal>
     );
+
+    const scheduleToast = showScheduleToast ? (
+        <div className="toast toast-end z-50">
+            <div className="alert alert-info shadow-lg">
+                <i className="fa-duotone fa-regular fa-calendar-plus" />
+                <div>
+                    <p className="text-sm font-semibold">
+                        Don&apos;t forget to schedule an interview
+                    </p>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => {
+                            setShowScheduleToast(false);
+                            if (scheduleToastTimer.current) {
+                                clearTimeout(scheduleToastTimer.current);
+                            }
+                            setShowScheduleModal(true);
+                        }}
+                    >
+                        Schedule Now
+                    </button>
+                    <button
+                        className="btn btn-sm btn-ghost"
+                        onClick={() => {
+                            setShowScheduleToast(false);
+                            if (scheduleToastTimer.current) {
+                                clearTimeout(scheduleToastTimer.current);
+                            }
+                        }}
+                    >
+                        <i className="fa-duotone fa-regular fa-xmark" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    ) : null;
 
     if (variant === "icon-only") {
         const speedDialActions: SpeedDialAction[] = [];
@@ -499,6 +628,38 @@ export default function ActionsToolbar({
                 onClick: () => setShowPreScreenModal(true),
             });
         }
+        if (actions.joinInterview && scheduledInterview) {
+            speedDialActions.push({
+                key: "join-interview",
+                icon: "fa-duotone fa-regular fa-video",
+                label: "Join Interview",
+                variant: "btn-primary",
+                onClick: () =>
+                    window.open(
+                        `/portal/interview/${scheduledInterview.id}`,
+                        `interview-${scheduledInterview.id}`,
+                        "noopener",
+                    ),
+            });
+        }
+        if (actions.rescheduleInterview && scheduledInterview) {
+            speedDialActions.push({
+                key: "reschedule-interview",
+                icon: "fa-duotone fa-regular fa-calendar-pen",
+                label: "Reschedule",
+                variant: "btn-warning",
+                onClick: () => setShowRescheduleModal(true),
+            });
+        }
+        if (actions.cancelInterview && scheduledInterview) {
+            speedDialActions.push({
+                key: "cancel-interview",
+                icon: "fa-duotone fa-regular fa-calendar-xmark",
+                label: "Cancel Interview",
+                variant: "btn-error",
+                onClick: () => setShowCancelDialog(true),
+            });
+        }
         if (actions.scheduleInterview) {
             speedDialActions.push({
                 key: "schedule-interview",
@@ -506,6 +667,15 @@ export default function ActionsToolbar({
                 label: "Schedule Interview",
                 variant: "btn-info",
                 onClick: () => setShowScheduleModal(true),
+            });
+        }
+        if (actions.sendEmail) {
+            speedDialActions.push({
+                key: "send-email",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Send Email",
+                variant: "btn-secondary",
+                onClick: () => setShowEmailModal(true),
             });
         }
         if (actions.requestChanges) {
@@ -569,6 +739,7 @@ export default function ActionsToolbar({
                     className={className}
                 />
                 {modals}
+                {scheduleToast}
             </>
         );
     }
@@ -638,6 +809,38 @@ export default function ActionsToolbar({
                 onClick: () => setShowNoteModal(true),
             });
         }
+        if (actions.joinInterview && scheduledInterview) {
+            speedDialActions.push({
+                key: "join-interview",
+                icon: "fa-duotone fa-regular fa-video",
+                label: "Join Interview",
+                variant: "btn-primary",
+                onClick: () =>
+                    window.open(
+                        `/portal/interview/${scheduledInterview.id}`,
+                        `interview-${scheduledInterview.id}`,
+                        "noopener",
+                    ),
+            });
+        }
+        if (actions.rescheduleInterview && scheduledInterview) {
+            speedDialActions.push({
+                key: "reschedule-interview",
+                icon: "fa-duotone fa-regular fa-calendar-pen",
+                label: "Reschedule",
+                variant: "btn-warning",
+                onClick: () => setShowRescheduleModal(true),
+            });
+        }
+        if (actions.cancelInterview && scheduledInterview) {
+            speedDialActions.push({
+                key: "cancel-interview",
+                icon: "fa-duotone fa-regular fa-calendar-xmark",
+                label: "Cancel Interview",
+                variant: "btn-error",
+                onClick: () => setShowCancelDialog(true),
+            });
+        }
         if (actions.scheduleInterview) {
             speedDialActions.push({
                 key: "schedule-interview",
@@ -645,6 +848,15 @@ export default function ActionsToolbar({
                 label: "Schedule Interview",
                 variant: "btn-info",
                 onClick: () => setShowScheduleModal(true),
+            });
+        }
+        if (actions.sendEmail) {
+            speedDialActions.push({
+                key: "send-email",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Send Email",
+                variant: "btn-secondary",
+                onClick: () => setShowEmailModal(true),
             });
         }
         if (actions.requestPrescreen) {
@@ -685,6 +897,7 @@ export default function ActionsToolbar({
                     className={className}
                 />
                 {modals}
+                {scheduleToast}
             </>
         );
     }
@@ -713,6 +926,42 @@ export default function ActionsToolbar({
                         Request Pre-Screen
                     </button>
                 )}
+                {actions.joinInterview && scheduledInterview && (
+                    <button
+                        onClick={() =>
+                            window.open(
+                                `/portal/interview/${scheduledInterview.id}`,
+                                `interview-${scheduledInterview.id}`,
+                                "noopener",
+                            )
+                        }
+                        className={`btn ${sizeClass} btn-primary gap-2`}
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-video" />
+                        Join Interview
+                    </button>
+                )}
+                {actions.rescheduleInterview && scheduledInterview && (
+                    <button
+                        onClick={() => setShowRescheduleModal(true)}
+                        className={`btn ${sizeClass} btn-ghost gap-2`}
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-calendar-pen" />
+                        Reschedule
+                    </button>
+                )}
+                {actions.cancelInterview && scheduledInterview && (
+                    <button
+                        onClick={() => setShowCancelDialog(true)}
+                        className={`btn ${sizeClass} btn-ghost text-error gap-2`}
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-calendar-xmark" />
+                        Cancel
+                    </button>
+                )}
                 {actions.scheduleInterview && (
                     <button
                         onClick={() => setShowScheduleModal(true)}
@@ -721,6 +970,16 @@ export default function ActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-calendar-plus" />
                         Schedule
+                    </button>
+                )}
+                {actions.sendEmail && (
+                    <button
+                        onClick={() => setShowEmailModal(true)}
+                        className={`btn ${sizeClass} btn-secondary gap-2`}
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-envelope" />
+                        Email
                     </button>
                 )}
                 {actions.requestChanges && (
@@ -815,6 +1074,7 @@ export default function ActionsToolbar({
                 )}
             </div>
             {modals}
+                {scheduleToast}
         </>
     );
 }

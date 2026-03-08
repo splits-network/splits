@@ -1,397 +1,422 @@
-# Architecture Patterns: Custom GPT Actions Backend
+# Architecture Patterns: Video Interviewing with LiveKit
 
-**Domain:** Custom GPT with OAuth2-authenticated Actions backend for recruiting marketplace
-**Researched:** 2026-02-13
-**Confidence:** HIGH (codebase analysis) / MEDIUM (GPT Actions spec from training data, not live-verified)
+**Domain:** Video interviewing infrastructure for recruiting marketplace
+**Researched:** 2026-03-07
+**Confidence:** HIGH (codebase analysis) / MEDIUM (LiveKit architecture from training data, not live-verified)
 
 ## Executive Summary
 
-The Custom GPT Actions backend requires a new `gpt-service` microservice that serves as an OAuth2 provider and GPT-specific API layer. This service has a fundamentally different auth model from existing services: instead of Clerk JWTs from browser sessions, it receives bearer tokens that the gpt-service itself issues after an OAuth2 authorization code flow. The gpt-service sits *behind* the api-gateway but with a separate auth path -- the gateway routes GPT requests to gpt-service which handles its own token validation, then gpt-service queries the database directly using `shared-access-context` (following the established "no HTTP calls between services" rule).
+Video interviewing adds a self-hosted LiveKit media server to the existing Kubernetes cluster, a new `video-service` microservice following V2 patterns, and frontend video components shared via a new `video-ui` package. The architecture follows the established pattern: frontend calls api-gateway, which proxies to video-service, which manages interview sessions in Supabase and issues LiveKit access tokens. LiveKit handles all WebRTC media routing (SFU model), TURN/STUN negotiation, and recording via its Egress service. Recordings land in Azure Blob Storage and trigger RabbitMQ events for ai-service to transcribe and analyze.
 
-**Critical architectural insight:** The GPT is NOT a frontend app. It is an external OAuth2 client. The backend must act as an OAuth2 Authorization Server, but the identity provider is still Clerk. This creates a two-layer auth model: Clerk authenticates the human, gpt-service issues and validates GPT-scoped tokens.
+**Critical architectural insight:** LiveKit is NOT a service you call through the api-gateway. It is a standalone media server that frontends connect to directly via WebSocket/WebRTC. The video-service's role is session orchestration -- creating rooms, issuing tokens, managing lifecycle -- while LiveKit handles all media. This is analogous to how Clerk handles authentication: the backend configures it, the frontend connects directly.
 
 ## Recommended Architecture
 
-### High-Level Request Flow
+### High-Level System View
 
 ```
-ChatGPT Custom GPT
-    |
-    | (1) HTTP request with Bearer token (GPT access token)
-    v
-NGINX Ingress (api.splits.network)
-    |
-    | (2) Routes /api/v1/gpt/* to api-gateway
-    v
-API Gateway (Fastify)
-    |
-    | (3) Detects /api/v1/gpt/* path prefix
-    | (4) SKIPS Clerk JWT validation for this prefix
-    | (5) Proxies request to gpt-service with raw Bearer token
-    v
-GPT Service (Fastify)
-    |
-    | (6) Validates GPT access token from Bearer header
-    | (7) Resolves clerk_user_id from gpt_tokens table
-    | (8) Uses resolveAccessContext(clerkUserId) for RBAC
-    | (9) Queries Supabase directly for domain data
-    | (10) Returns GPT-formatted response
-    v
-Response flows back through gateway to ChatGPT
+Browser (portal / candidate app)
+    |                              |
+    | (1) REST API calls           | (2) WebRTC media connection
+    |                              |
+    v                              v
+NGINX Ingress                 LiveKit Server (K8s)
+    |                              |
+    v                              | (media routing, TURN/STUN)
+API Gateway                        |
+    |                              v
+    v                         LiveKit Egress (K8s)
+video-service (Fastify)            |
+    |                              | (recording output)
+    | (DB queries)                 v
+    v                         Azure Blob Storage
+Supabase Postgres                  |
+    |                              | (RabbitMQ event)
+    v                              v
+RabbitMQ  <--------------------  video-service (consumer)
+    |                              |
+    v                              v
+ai-service                    notification-service
+(transcription + analysis)    (recording ready email)
 ```
 
-### OAuth2 Authorization Flow (One-Time Account Linking)
+### Interview Scheduling Flow
 
 ```
-User clicks "Sign in" in ChatGPT Custom GPT
-    |
-    v
-(1) ChatGPT redirects to:
-    https://api.splits.network/api/v1/gpt/oauth/authorize
-    ?client_id=<gpt_client_id>
-    &redirect_uri=https://chatgpt.com/aip/<plugin_id>/oauth/callback
-    &response_type=code
-    &state=<random_state>
-    &scope=candidate
-    |
-    v
-(2) gpt-service receives authorize request
-    - Validates client_id against oauth_clients table
-    - Validates redirect_uri matches registered callback
-    - Stores state + client_id + scope in gpt_sessions table
-    - Redirects user to Clerk login page:
-      https://accounts.applicant.network/sign-in
-      ?redirect_url=https://api.splits.network/api/v1/gpt/oauth/callback
-      &state=<session_id>
-    |
-    v
-(3) User authenticates with Clerk (existing Clerk login page)
-    - Email/password, Google, etc.
-    - Clerk issues session
-    |
-    v
-(4) Clerk redirects back to gpt-service callback:
-    https://api.splits.network/api/v1/gpt/oauth/callback
-    ?state=<session_id>
-    - gpt-service extracts Clerk session from cookie/token
-    - Validates user via Clerk Backend SDK
-    - Retrieves clerk_user_id
-    |
-    v
-(5) gpt-service generates authorization code
-    - Stores: auth_code -> {clerk_user_id, client_id, scope, expires_at}
-    - Redirects to ChatGPT callback:
-      https://chatgpt.com/aip/<plugin_id>/oauth/callback
-      ?code=<auth_code>
-      &state=<original_state>
-    |
-    v
-(6) ChatGPT exchanges code for tokens (server-to-server):
-    POST https://api.splits.network/api/v1/gpt/oauth/token
-    Content-Type: application/x-www-form-urlencoded
-
-    grant_type=authorization_code
-    &code=<auth_code>
-    &client_id=<gpt_client_id>
-    &client_secret=<gpt_client_secret>
-    &redirect_uri=https://chatgpt.com/aip/<plugin_id>/oauth/callback
-    |
-    v
-(7) gpt-service validates code, issues tokens:
-    {
-      "access_token": "<jwt_or_opaque_token>",
-      "token_type": "bearer",
-      "expires_in": 3600,
-      "refresh_token": "<refresh_token>"
-    }
-    - Stores token in gpt_tokens table linked to clerk_user_id
-    |
-    v
-(8) ChatGPT stores tokens, uses access_token for all subsequent API calls:
-    GET /api/v1/gpt/jobs?keywords=senior+engineer
-    Authorization: Bearer <access_token>
+(1) Recruiter clicks "Schedule Interview" on application
+         |
+         v
+(2) Frontend calls POST /api/v2/video/interviews
+    Body: { application_id, scheduled_at, duration_minutes, participant_emails[], type }
+         |
+         v
+(3) api-gateway proxies to video-service
+         |
+         v
+(4) video-service:
+    a. Validates application exists, user has permission
+    b. Creates interview record in DB (status: 'scheduled')
+    c. Generates magic_link_token for each external participant
+    d. Publishes 'interview.scheduled' RabbitMQ event
+         |
+         v
+(5) notification-service consumes event:
+    a. Sends calendar invite emails with join links
+    b. Links include magic_link_token for non-authenticated users
+         |
+         v
+(6) integration-service (optional):
+    a. If recruiter has Google/Microsoft calendar connected
+    b. Creates calendar event via CalendarService
+    c. Adds video link to calendar event description
 ```
 
-### Token Refresh Flow
+### Interview Join Flow (Authenticated User -- Recruiter/Business)
 
 ```
-(1) ChatGPT detects 401 response (expired access token)
-    |
-    v
-(2) ChatGPT sends refresh request:
-    POST /api/v1/gpt/oauth/token
-    grant_type=refresh_token
-    &refresh_token=<refresh_token>
-    &client_id=<gpt_client_id>
-    &client_secret=<gpt_client_secret>
-    |
-    v
-(3) gpt-service validates refresh token
-    - Checks gpt_tokens table: not revoked, not expired
-    - Resolves clerk_user_id
-    - Issues new access_token (and optionally new refresh_token)
-    - Invalidates old access_token
-    |
-    v
-(4) Returns new tokens to ChatGPT
+(1) User clicks "Join Interview" in portal app
+         |
+         v
+(2) Frontend calls POST /api/v2/video/interviews/:id/join
+    Headers: Authorization: Bearer <Clerk JWT>
+         |
+         v
+(3) api-gateway authenticates via Clerk, proxies to video-service
+         |
+         v
+(4) video-service:
+    a. Validates user is a participant on this interview
+    b. Creates LiveKit room if not exists (via LiveKit Server API)
+    c. Generates LiveKit access token with participant identity + grants
+    d. Updates participant status to 'joined'
+    e. Returns { livekit_url, token, room_name }
+         |
+         v
+(5) Frontend receives token, connects to LiveKit server directly
+    - @livekit/components-react handles WebRTC negotiation
+    - Media flows peer <-> LiveKit SFU <-> peer
+    - No media touches video-service or api-gateway
+```
+
+### Interview Join Flow (Candidate via Magic Link)
+
+```
+(1) Candidate clicks magic link in email:
+    https://applicant.network/interview/join?token=<magic_link_token>
+         |
+         v
+(2) Candidate app validates token via:
+    POST /api/v2/video/interviews/join-by-token
+    Body: { token: <magic_link_token>, display_name: "John Doe" }
+    Note: NO Clerk auth required -- api-gateway skips auth for this route
+         |
+         v
+(3) video-service:
+    a. Looks up magic_link_token in interview_participants table
+    b. Validates: not expired, not already consumed, interview is joinable
+    c. Creates LiveKit room if not exists
+    d. Generates LiveKit access token with candidate identity
+    e. Marks token as consumed
+    f. Returns { livekit_url, token, room_name }
+         |
+         v
+(4) Candidate app connects to LiveKit directly (same as authenticated flow)
+```
+
+### Recording Flow
+
+```
+(1) Host clicks "Start Recording" (or auto-record is configured)
+         |
+         v
+(2) Frontend calls POST /api/v2/video/interviews/:id/recording/start
+         |
+         v
+(3) video-service:
+    a. Calls LiveKit Egress API: start room composite egress
+    b. Configures output: MP4 to Azure Blob Storage
+    c. Stores egress_id in interview_recordings table
+    d. Returns { recording_id }
+         |
+         v
+(4) LiveKit Egress worker:
+    a. Joins the LiveKit room as a hidden participant
+    b. Composites all video/audio tracks
+    c. Encodes to MP4 in real-time
+    d. Uploads segments to Azure Blob Storage
+         |
+         v
+(5) When recording stops (manual or room closes):
+    a. LiveKit sends webhook to video-service: egress.ended
+    b. video-service updates recording status to 'completed'
+    c. video-service publishes 'recording.completed' RabbitMQ event
+         |
+         v
+(6) ai-service consumes 'recording.completed':
+    a. Downloads recording from Azure Blob Storage
+    b. Transcribes audio (via Whisper API or Azure Speech)
+    c. Runs AI analysis on transcript (fit scoring, sentiment, key topics)
+    d. Stores results in interview_transcripts / interview_analyses tables
+    e. Publishes 'interview.analysis_completed' event
+         |
+         v
+(7) notification-service:
+    a. Sends "Interview analysis ready" notification to recruiter
 ```
 
 ## Component Boundaries
 
 ### New Components
 
-| Component | Type | Responsibility | Location |
-|-----------|------|----------------|----------|
-| **gpt-service** | New microservice | OAuth2 provider + GPT API endpoints | `services/gpt-service/` |
-| **GPT auth middleware** | New module in gpt-service | Validate GPT tokens, resolve user | `services/gpt-service/src/v2/shared/auth.ts` |
-| **OAuth routes** | New routes in gpt-service | /authorize, /callback, /token, /revoke | `services/gpt-service/src/v2/oauth/` |
-| **GPT API routes** | New routes in gpt-service | Jobs search, resume analysis, applications | `services/gpt-service/src/v2/` |
-| **OpenAPI schema** | Static file | Served at /.well-known/openapi.yaml | `services/gpt-service/src/openapi/` |
-| **DB tables** | Schema additions | gpt_tokens, gpt_auth_codes, oauth_clients | Supabase migration |
+| Component | Type | Location | Responsibility |
+|-----------|------|----------|----------------|
+| **video-service** | Fastify microservice | `services/video-service/` | Interview CRUD, LiveKit token generation, recording orchestration, webhook receiver |
+| **LiveKit Server** | Third-party container | `infra/k8s/livekit/` | WebRTC SFU, media routing, TURN/STUN, room management |
+| **LiveKit Egress** | Third-party container | `infra/k8s/livekit-egress/` | Recording, compositing video tracks to MP4 |
+| **video-ui** | Shared package | `packages/video-ui/` | React components for video room (pre-join, in-call, controls) |
+| **DB tables** | Schema additions | Supabase migration | interviews, interview_participants, interview_recordings, interview_transcripts |
 
 ### Modified Components
 
-| Component | Type | Modification | Why |
-|-----------|------|-------------|-----|
-| **api-gateway auth hook** | Existing | Skip Clerk auth for `/api/v1/gpt/*` paths | GPT tokens are NOT Clerk JWTs |
-| **api-gateway routes** | Existing | Add proxy routes for gpt-service | Route GPT requests to gpt-service |
-| **api-gateway index.ts** | Existing | Register gpt-service in ServiceRegistry | Connect to gpt-service URL |
-| **api-gateway deployment.yaml** | Existing | Add GPT_SERVICE_URL env var | K8s routing |
-| **K8s ingress.yaml** | Unchanged | Already routes api.splits.network/* to api-gateway | No change needed |
+| Component | Modification | Why |
+|-----------|-------------|-----|
+| **api-gateway** | Add `video` to ServiceName union, register video-service, add proxy routes, skip auth for magic link route | Route video API requests |
+| **api-gateway K8s** | Add VIDEO_SERVICE_URL env var | K8s service discovery |
+| **shared-types** | Add interview event types, interview status enums | Cross-service type safety |
+| **ingress.yaml** | Add LiveKit WebSocket/WebRTC paths OR separate ingress for LiveKit domain | LiveKit needs direct browser access |
+| **portal app** | Add interview UI pages and components | Recruiter/business video experience |
+| **candidate app** | Add magic link join page and video room | Candidate video experience |
 
 ### Unchanged Components
 
 | Component | Why Unchanged |
 |-----------|--------------|
-| **ats-service** | gpt-service queries DB directly, not via HTTP |
-| **ai-service** | gpt-service queries DB directly OR uses internal-service-key for AI calls |
-| **document-service** | gpt-service can use Supabase Storage SDK directly |
-| **identity-service** | User data accessed via shared DB |
-| **shared-access-context** | gpt-service uses resolveAccessContext() as-is |
-| **Clerk configuration** | Existing Candidate app Clerk instance used for GPT login |
-| **NGINX Ingress** | Already routes all api.splits.network to api-gateway |
+| **ats-service** | video-service reads application data from DB directly |
+| **integration-service** | Calendar integration triggered by RabbitMQ event, not HTTP |
+| **chat-service/gateway** | Separate real-time system, no overlap |
+| **identity-service** | User lookup via shared DB |
+| **document-service** | Recordings go to Azure Blob, not Supabase Storage |
+| **billing-service** | Video feature gating via plan checks (DB query) |
 
-## Integration Points with Existing Architecture
+## LiveKit Server Architecture
 
-### 1. API Gateway Integration
+### What LiveKit Is
 
-The api-gateway already has a pattern for skipping Clerk auth on certain paths (webhooks, public endpoints, internal service calls). GPT routes follow the same pattern.
+LiveKit is an open-source WebRTC SFU (Selective Forwarding Unit). It handles:
 
-**Current auth skip patterns in api-gateway/src/index.ts:**
+- **Signaling:** WebSocket connection for session negotiation
+- **Media routing:** Receives media from publishers, forwards to subscribers
+- **TURN/STUN:** Built-in TURN server for NAT traversal (port 443/TCP relay, 3478/UDP)
+- **Room management:** Create/close rooms, manage participants
+- **Server API:** HTTP API for room/participant management from backend
+- **Webhooks:** Notifies your backend of room events (participant joined, egress completed, etc.)
+
+### Deployment Topology
+
+```
+K8s Cluster (splits-network namespace)
++-------------------------------------------------------+
+|                                                       |
+|  +------------------+    +------------------------+   |
+|  | LiveKit Server   |    | LiveKit Egress         |   |
+|  | (Deployment)     |    | (Deployment)           |   |
+|  |                  |    |                        |   |
+|  | Ports:           |    | Connects to:           |   |
+|  |  7880 (HTTP API) |    |  - LiveKit Server      |   |
+|  |  7881 (WebRTC)   |    |  - Azure Blob Storage  |   |
+|  |  7882 (TURN/UDP) |    |  - Redis (for queue)   |   |
+|  |  443  (TURN/TLS) |    |                        |   |
+|  +------------------+    +------------------------+   |
+|           |                                           |
+|  +------------------+    +------------------------+   |
+|  | video-service    |    | Redis                  |   |
+|  | (Deployment)     |    | (existing, shared)     |   |
+|  |                  |    |                        |   |
+|  | Calls LiveKit    |    | Used by Egress for     |   |
+|  |  Server API      |    |  job queuing           |   |
+|  | Port: 3020       |    |                        |   |
+|  +------------------+    +------------------------+   |
+|                                                       |
++-------------------------------------------------------+
+         |                           |
+   NGINX Ingress              LiveKit Ingress/LB
+   (api.splits.network)       (livekit.splits.network)
+         |                           |
+    video-service API          LiveKit WebRTC+WS
+    (REST, via gateway)        (direct browser access)
+```
+
+### Network Requirements (MEDIUM confidence)
+
+LiveKit needs specific network configuration for WebRTC to work:
+
+| Port | Protocol | Purpose | Exposure |
+|------|----------|---------|----------|
+| 7880 | TCP | HTTP API (server-to-server) | Internal only (ClusterIP) |
+| 7881 | TCP | WebRTC signaling (WebSocket) | External (ingress or LoadBalancer) |
+| 3478 | UDP | STUN/TURN | External (NodePort or LoadBalancer) |
+| 50000-60000 | UDP | WebRTC media (ICE candidates) | External (hostNetwork or UDP LB) |
+| 443 | TCP | TURN over TLS (fallback) | External (ingress) |
+
+**Critical networking decision: UDP media ports.**
+
+WebRTC performs best with direct UDP. In Kubernetes, this requires one of:
+1. **hostNetwork: true** -- Pod uses host's network stack, gets direct UDP access. Simple but limits to 1 LiveKit pod per node.
+2. **NodePort service** -- Expose UDP port range via NodePort. Works but limited port range.
+3. **Azure LoadBalancer with UDP** -- Azure supports UDP load balancers. Most production-appropriate for AKS.
+4. **TURN-only fallback** -- Force all media through TURN on TCP 443. Works through any firewall but higher latency.
+
+**Recommendation: Start with hostNetwork: true for simplicity** (1 LiveKit pod is sufficient for initial scale), then migrate to Azure UDP LoadBalancer when scaling beyond one node. Always enable TURN on TCP 443 as fallback for participants behind restrictive firewalls.
+
+### LiveKit Configuration
+
+```yaml
+# livekit-config.yaml (ConfigMap)
+port: 7880
+rtc:
+  port_range_start: 50000
+  port_range_end: 60000
+  tcp_port: 7881
+  use_external_ip: true
+turn:
+  enabled: true
+  domain: livekit.splits.network
+  tls_port: 443
+  udp_port: 3478
+redis:
+  address: redis:6379
+  # password from secret
+keys:
+  # API key: secret key pair (from K8s secret)
+  # Used by video-service to authenticate API calls
+webhook:
+  urls:
+    - https://api.splits.network/api/v2/video/webhooks/livekit
+  api_key: <from secret>
+```
+
+### LiveKit Egress Architecture (MEDIUM confidence)
+
+LiveKit Egress is a separate service that records rooms:
+
+- **Deployment:** Runs as a separate K8s Deployment alongside LiveKit Server
+- **How it works:** When recording starts, Egress joins the room as a headless Chrome participant, captures all tracks, composites them, encodes to MP4
+- **Dependencies:** Needs Chrome/Chromium (runs headless), Redis (for job queuing), and access to output storage
+- **Resource intensive:** Each active recording consumes ~1-2 CPU cores and ~1-2GB RAM (headless Chrome + encoding)
+- **Storage output:** Supports S3-compatible APIs, Azure Blob Storage, GCS
+
+```yaml
+# Egress configuration
+api_key: <from secret>
+api_secret: <from secret>
+ws_url: ws://livekit-server:7880
+redis:
+  address: redis:6379
+azure:
+  account_name: <from secret>
+  account_key: <from secret>
+  container_name: interview-recordings
+```
+
+## video-service Internal Architecture
+
+Following the V2 service pattern exactly:
+
+```
+services/video-service/
++-- Dockerfile
++-- package.json
++-- tsconfig.json
++-- src/
+    +-- index.ts                          # Fastify server setup
+    +-- v2/
+    |   +-- shared/
+    |   |   +-- livekit-client.ts         # LiveKit Server SDK wrapper
+    |   |   +-- magic-link.ts             # Token generation/validation
+    |   |   +-- events.ts                 # RabbitMQ event publisher
+    |   +-- interviews/
+    |   |   +-- types.ts                  # Interview, Participant, Recording types
+    |   |   +-- repository.ts             # interviews, interview_participants CRUD
+    |   |   +-- service.ts                # Business logic, LiveKit orchestration
+    |   |   +-- routes.ts                 # REST endpoints
+    |   +-- recordings/
+    |   |   +-- types.ts                  # Recording, Transcript types
+    |   |   +-- repository.ts             # interview_recordings, interview_transcripts CRUD
+    |   |   +-- service.ts                # Recording lifecycle, storage URL generation
+    |   |   +-- routes.ts                 # Recording endpoints
+    |   +-- webhooks/
+    |   |   +-- livekit-webhook.ts        # LiveKit webhook handler (egress.ended, etc.)
+    |   +-- routes.ts                     # Route registry
+    +-- consumers/
+        +-- recording-consumer.ts         # (Optional) Process recording events
+```
+
+### Key Service Responsibilities
+
+**video-service owns:**
+- Interview lifecycle (schedule, start, end, cancel)
+- Participant management (invite, join, leave)
+- Magic link token generation and validation
+- LiveKit room creation and token issuance
+- Recording start/stop orchestration
+- Webhook processing from LiveKit
+- Publishing domain events to RabbitMQ
+
+**video-service does NOT own:**
+- Media routing (LiveKit)
+- Video encoding/recording (LiveKit Egress)
+- Transcription (ai-service)
+- Calendar events (integration-service via RabbitMQ)
+- Email notifications (notification-service via RabbitMQ)
+
+### LiveKit SDK Integration
+
 ```typescript
-// Already exists:
-if (request.url.includes('/webhooks/')) return;           // Signature-verified
-if (request.url.startsWith('/api/public/')) return;       // Public
-if (request.url.startsWith('/api/marketplace/')) return;  // Public
+// services/video-service/src/v2/shared/livekit-client.ts
+import { RoomServiceClient, AccessToken, VideoGrant } from 'livekit-server-sdk';
 
-// NEW: Add GPT route skip
-if (request.url.startsWith('/api/v1/gpt/')) return;       // GPT token auth (handled by gpt-service)
-```
+export class LiveKitClient {
+    private roomService: RoomServiceClient;
 
-**Gateway proxy pattern** (same as all other services):
-```typescript
-// services/api-gateway/src/routes/v2/gpt.ts (new file)
-export function registerGptRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    const gptService = () => services.get('gpt');
-
-    // Proxy ALL /api/v1/gpt/* requests to gpt-service
-    // Note: v1 namespace, not v2, because this is a separate API surface
-    app.all('/api/v1/gpt/*', async (request, reply) => {
-        const path = request.url; // Pass full path through
-        const correlationId = getCorrelationId(request);
-
-        // Forward the raw Authorization header (GPT token, NOT Clerk)
-        const headers: Record<string, string> = {};
-        if (request.headers.authorization) {
-            headers['authorization'] = request.headers.authorization as string;
-        }
-        headers['x-correlation-id'] = correlationId;
-
-        // Proxy to gpt-service
-        const response = await gptService().get(path, request.query, correlationId, headers);
-        return reply.send(response);
-    });
-}
-```
-
-**ServiceRegistry addition** (api-gateway/src/index.ts):
-```typescript
-services.register('gpt', process.env.GPT_SERVICE_URL || 'http://localhost:3014');
-```
-
-### 2. Database Integration (Direct Access)
-
-The gpt-service follows the existing pattern: direct Supabase client for database queries, using `shared-access-context` for RBAC. This adheres to the "no HTTP calls between services" rule.
-
-**gpt-service accesses these existing tables (read-only):**
-- `jobs` (with company join) -- for job search
-- `candidates` -- for user's candidate profile
-- `applications` -- for application status
-- `companies` -- for company context
-- `users` -- via resolveAccessContext
-
-**gpt-service owns these new tables (read-write):**
-- `oauth_clients` -- registered OAuth clients (the GPT itself)
-- `gpt_auth_codes` -- short-lived authorization codes
-- `gpt_tokens` -- access and refresh tokens
-- `gpt_sessions` -- OAuth flow state management
-- `gpt_audit_log` -- all GPT-initiated actions
-
-### 3. Auth Integration (Clerk + Custom OAuth)
-
-**Two auth systems coexist, never overlap:**
-
-| System | Used By | Validated By | Token Format |
-|--------|---------|-------------|-------------|
-| Clerk JWT | Portal app, Candidate app | api-gateway AuthMiddleware | JWT signed by Clerk |
-| GPT tokens | ChatGPT Custom GPT | gpt-service auth middleware | Opaque token (DB lookup) |
-
-**Critical rule:** GPT tokens and Clerk JWTs never mix. The api-gateway does NOT validate GPT tokens. The gpt-service does NOT validate Clerk JWTs. The bridge between them is the `clerk_user_id` stored in the `gpt_tokens` table, which was established during the OAuth flow.
-
-### 4. AI Service Integration
-
-For resume analysis and fit scoring, gpt-service needs AI capabilities. Two options:
-
-**Option A: Direct AI calls from gpt-service (RECOMMENDED)**
-- gpt-service calls OpenAI API directly for GPT-specific AI tasks
-- Uses its own `OPENAI_API_KEY` env var
-- Keeps AI logic GPT-specific (prompt formatting, response parsing)
-- No dependency on existing ai-service
-
-**Option B: Internal service call to ai-service**
-- gpt-service calls ai-service via `x-internal-service-key` header
-- Reuses existing AI review infrastructure
-- Creates coupling between services
-
-**Recommendation: Option A.** The GPT AI tasks (resume parsing for GPT responses, natural language query interpretation) are different from existing ai-service tasks (formal fit analysis for ATS). Keeping them separate follows nano-service philosophy and avoids coupling.
-
-### 5. Document Service Integration (Resume Uploads)
-
-For resume analysis, the GPT needs to handle file uploads. ChatGPT sends files as part of the action request.
-
-**Approach:** gpt-service uses Supabase Storage SDK directly (same pattern as document-service).
-- Receives file from ChatGPT action
-- Stores in Supabase Storage bucket (`gpt-uploads/`)
-- Processes/analyzes the resume
-- Returns analysis to GPT
-
-This avoids HTTP calls to document-service while reusing the same storage backend.
-
-## gpt-service Internal Architecture
-
-Following the V2 service pattern established in the codebase:
-
-```
-services/gpt-service/
-├── Dockerfile
-├── package.json
-├── tsconfig.json
-└── src/
-    ├── index.ts                          # Entry point, Fastify server setup
-    ├── v2/
-    │   ├── shared/
-    │   │   ├── auth.ts                   # GPT token validation middleware
-    │   │   ├── events.ts                 # EventPublisher for audit
-    │   │   ├── helpers.ts                # Common helpers
-    │   │   └── pagination.ts             # Reuse shared pagination
-    │   ├── oauth/
-    │   │   ├── types.ts                  # OAuth types (AuthCode, Token, Client)
-    │   │   ├── repository.ts             # oauth_clients, gpt_auth_codes, gpt_tokens CRUD
-    │   │   ├── service.ts                # OAuth flow logic (validate, issue, refresh, revoke)
-    │   │   └── routes.ts                 # /authorize, /callback, /token, /revoke
-    │   ├── jobs/
-    │   │   ├── types.ts                  # GPT job search types
-    │   │   ├── repository.ts             # Job queries (read from existing jobs table)
-    │   │   ├── service.ts                # Search logic, natural language parsing
-    │   │   └── routes.ts                 # GET /api/v1/gpt/jobs
-    │   ├── applications/
-    │   │   ├── types.ts                  # GPT application types
-    │   │   ├── repository.ts             # Application queries/writes
-    │   │   ├── service.ts                # Confirmation enforcement, status logic
-    │   │   └── routes.ts                 # GET/POST /api/v1/gpt/applications
-    │   ├── resume/
-    │   │   ├── types.ts                  # Resume analysis types
-    │   │   ├── service.ts                # AI-powered resume parsing + fit scoring
-    │   │   └── routes.ts                 # POST /api/v1/gpt/resume/analyze
-    │   └── routes.ts                     # Route registry
-    └── openapi/
-        └── schema.yaml                   # OpenAPI 3.0 spec served at /.well-known/openapi.yaml
-```
-
-### GPT Token Validation Middleware
-
-```typescript
-// services/gpt-service/src/v2/shared/auth.ts
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { AccessContextResolver } from '@splits-network/shared-access-context';
-
-export interface GptAuthContext {
-    tokenId: string;
-    clerkUserId: string;
-    scope: string;
-    // AccessContext fields resolved from clerkUserId
-    candidateId: string | null;
-    identityUserId: string | null;
-}
-
-export class GptAuthMiddleware {
-    private accessResolver: AccessContextResolver;
-
-    constructor(private supabase: SupabaseClient) {
-        this.accessResolver = new AccessContextResolver(supabase);
+    constructor(
+        private livekitHost: string,    // http://livekit-server:7880
+        private apiKey: string,
+        private apiSecret: string,
+    ) {
+        this.roomService = new RoomServiceClient(livekitHost, apiKey, apiSecret);
     }
 
-    createMiddleware() {
-        return async (request: FastifyRequest, reply: FastifyReply) => {
-            const authHeader = request.headers.authorization;
-            if (!authHeader?.startsWith('Bearer ')) {
-                return reply.status(401).send({
-                    error: { code: 'UNAUTHORIZED', message: 'Missing bearer token' }
-                });
-            }
-
-            const token = authHeader.substring(7);
-
-            // Look up token in database
-            const { data: tokenRecord, error } = await this.supabase
-                .from('gpt_tokens')
-                .select('id, clerk_user_id, scope, expires_at, revoked_at')
-                .eq('access_token_hash', this.hashToken(token))
-                .is('revoked_at', null)
-                .maybeSingle();
-
-            if (error || !tokenRecord) {
-                return reply.status(401).send({
-                    error: { code: 'INVALID_TOKEN', message: 'Invalid or expired token' }
-                });
-            }
-
-            // Check expiry
-            if (new Date(tokenRecord.expires_at) < new Date()) {
-                return reply.status(401).send({
-                    error: { code: 'TOKEN_EXPIRED', message: 'Token has expired' }
-                });
-            }
-
-            // Resolve full access context from clerk_user_id
-            const context = await this.accessResolver.resolve(tokenRecord.clerk_user_id);
-
-            // Attach GPT auth context to request
-            (request as any).gptAuth = {
-                tokenId: tokenRecord.id,
-                clerkUserId: tokenRecord.clerk_user_id,
-                scope: tokenRecord.scope,
-                candidateId: context.candidateId,
-                identityUserId: context.identityUserId,
-            } as GptAuthContext;
-        };
+    /** Create or get a room for an interview */
+    async ensureRoom(interviewId: string): Promise<string> {
+        const roomName = `interview-${interviewId}`;
+        await this.roomService.createRoom({
+            name: roomName,
+            emptyTimeout: 300,       // Close 5 min after last participant leaves
+            maxParticipants: 10,     // Panel interviews
+        });
+        return roomName;
     }
 
-    private hashToken(token: string): string {
-        // SHA-256 hash for secure token storage
-        const crypto = require('crypto');
-        return crypto.createHash('sha256').update(token).digest('hex');
+    /** Generate an access token for a participant */
+    generateToken(
+        roomName: string,
+        participantIdentity: string,
+        participantName: string,
+        grants: { canPublish: boolean; canSubscribe: boolean; canPublishData: boolean },
+    ): string {
+        const token = new AccessToken(this.apiKey, this.apiSecret, {
+            identity: participantIdentity,
+            name: participantName,
+            ttl: '4h',  // Token valid for 4 hours
+        });
+        token.addGrant({
+            room: roomName,
+            roomJoin: true,
+            canPublish: grants.canPublish,
+            canSubscribe: grants.canSubscribe,
+            canPublishData: grants.canPublishData,
+        } as VideoGrant);
+        return token.toJwt();
     }
 }
 ```
@@ -401,492 +426,602 @@ export class GptAuthMiddleware {
 ### New Tables
 
 ```sql
--- OAuth2 client registration (the Custom GPT itself)
-CREATE TABLE oauth_clients (
+-- Interview sessions
+CREATE TABLE interviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    client_id TEXT UNIQUE NOT NULL,          -- Public client identifier
-    client_secret_hash TEXT NOT NULL,         -- SHA-256 hash of client secret
-    name TEXT NOT NULL,                       -- "Applicant Network GPT"
-    redirect_uris TEXT[] NOT NULL,            -- Allowed callback URLs
-    scopes TEXT[] NOT NULL DEFAULT '{candidate}', -- Allowed scopes
-    is_active BOOLEAN NOT NULL DEFAULT true,
+    application_id UUID REFERENCES applications(id),
+    job_id UUID REFERENCES jobs(id),
+    title TEXT NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('screening', 'technical', 'panel', 'final')),
+    status TEXT NOT NULL DEFAULT 'scheduled'
+        CHECK (status IN ('scheduled', 'in_progress', 'completed', 'cancelled', 'no_show')),
+    scheduled_at TIMESTAMPTZ NOT NULL,
+    started_at TIMESTAMPTZ,
+    ended_at TIMESTAMPTZ,
+    duration_minutes INTEGER NOT NULL DEFAULT 60,
+    livekit_room_name TEXT,           -- Set when room is created
+    auto_record BOOLEAN NOT NULL DEFAULT false,
+    created_by TEXT NOT NULL,          -- clerk_user_id of scheduler
+    organization_id UUID,             -- For RBAC scoping
+    notes TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Short-lived authorization codes (10 minute TTL)
-CREATE TABLE gpt_auth_codes (
+CREATE INDEX idx_interviews_application ON interviews(application_id);
+CREATE INDEX idx_interviews_scheduled ON interviews(scheduled_at) WHERE status = 'scheduled';
+CREATE INDEX idx_interviews_status ON interviews(status);
+
+-- Interview participants (both authenticated and magic-link)
+CREATE TABLE interview_participants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    code TEXT UNIQUE NOT NULL,               -- The authorization code
-    client_id TEXT NOT NULL REFERENCES oauth_clients(client_id),
-    clerk_user_id TEXT NOT NULL,             -- User who authorized
-    scope TEXT NOT NULL DEFAULT 'candidate',
-    redirect_uri TEXT NOT NULL,              -- Must match on exchange
-    expires_at TIMESTAMPTZ NOT NULL,         -- code + 10 minutes
-    used_at TIMESTAMPTZ,                     -- Set when exchanged (prevents replay)
+    interview_id UUID NOT NULL REFERENCES interviews(id) ON DELETE CASCADE,
+    role TEXT NOT NULL CHECK (role IN ('host', 'interviewer', 'candidate', 'observer')),
+    -- Authenticated participants (Clerk users)
+    clerk_user_id TEXT,               -- NULL for magic-link participants
+    user_id UUID,                     -- identity-service user ID
+    -- Magic-link participants (candidates without accounts)
+    email TEXT,
+    display_name TEXT,
+    magic_link_token TEXT UNIQUE,     -- Hashed token for joining
+    magic_link_expires_at TIMESTAMPTZ,
+    -- Status
+    status TEXT NOT NULL DEFAULT 'invited'
+        CHECK (status IN ('invited', 'joined', 'left', 'no_show')),
+    joined_at TIMESTAMPTZ,
+    left_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT participant_identity CHECK (
+        clerk_user_id IS NOT NULL OR email IS NOT NULL
+    )
+);
+
+CREATE INDEX idx_interview_participants_interview ON interview_participants(interview_id);
+CREATE INDEX idx_interview_participants_magic_link ON interview_participants(magic_link_token)
+    WHERE magic_link_token IS NOT NULL;
+CREATE INDEX idx_interview_participants_clerk_user ON interview_participants(clerk_user_id)
+    WHERE clerk_user_id IS NOT NULL;
+
+-- Interview recordings
+CREATE TABLE interview_recordings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    interview_id UUID NOT NULL REFERENCES interviews(id) ON DELETE CASCADE,
+    livekit_egress_id TEXT NOT NULL,   -- LiveKit egress ID for tracking
+    status TEXT NOT NULL DEFAULT 'recording'
+        CHECK (status IN ('recording', 'processing', 'completed', 'failed')),
+    storage_path TEXT,                 -- Azure Blob path when completed
+    storage_url TEXT,                  -- Signed URL (generated on demand, not stored permanently)
+    duration_seconds INTEGER,
+    file_size_bytes BIGINT,
+    format TEXT NOT NULL DEFAULT 'mp4',
+    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMPTZ,
+    error_message TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Access and refresh tokens
-CREATE TABLE gpt_tokens (
+CREATE INDEX idx_interview_recordings_interview ON interview_recordings(interview_id);
+
+-- Interview transcripts (populated by ai-service)
+CREATE TABLE interview_transcripts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    client_id TEXT NOT NULL REFERENCES oauth_clients(client_id),
-    clerk_user_id TEXT NOT NULL,
-    access_token_hash TEXT UNIQUE NOT NULL,   -- SHA-256 of access token
-    refresh_token_hash TEXT UNIQUE,           -- SHA-256 of refresh token
-    scope TEXT NOT NULL DEFAULT 'candidate',
-    access_token_expires_at TIMESTAMPTZ NOT NULL,  -- 1 hour
-    refresh_token_expires_at TIMESTAMPTZ,          -- 30 days
-    revoked_at TIMESTAMPTZ,                        -- Null = active
+    recording_id UUID NOT NULL REFERENCES interview_recordings(id) ON DELETE CASCADE,
+    interview_id UUID NOT NULL REFERENCES interviews(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,             -- Full transcript text
+    segments JSONB,                    -- Timestamped segments with speaker labels
+    language TEXT NOT NULL DEFAULT 'en',
+    status TEXT NOT NULL DEFAULT 'processing'
+        CHECK (status IN ('processing', 'completed', 'failed')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Indexes for token lookup performance
-CREATE INDEX idx_gpt_tokens_access_hash ON gpt_tokens(access_token_hash) WHERE revoked_at IS NULL;
-CREATE INDEX idx_gpt_tokens_refresh_hash ON gpt_tokens(refresh_token_hash) WHERE revoked_at IS NULL;
-CREATE INDEX idx_gpt_tokens_clerk_user ON gpt_tokens(clerk_user_id);
-CREATE INDEX idx_gpt_auth_codes_code ON gpt_auth_codes(code) WHERE used_at IS NULL;
-
--- OAuth flow session state
-CREATE TABLE gpt_sessions (
+-- Interview AI analysis (populated by ai-service)
+CREATE TABLE interview_analyses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    state TEXT UNIQUE NOT NULL,              -- CSRF state parameter
-    client_id TEXT NOT NULL,
-    scope TEXT NOT NULL DEFAULT 'candidate',
-    redirect_uri TEXT NOT NULL,
-    clerk_redirect_url TEXT,                 -- Where to redirect after Clerk login
-    expires_at TIMESTAMPTZ NOT NULL,         -- 15 minute TTL
+    interview_id UUID NOT NULL REFERENCES interviews(id) ON DELETE CASCADE,
+    transcript_id UUID REFERENCES interview_transcripts(id),
+    analysis_type TEXT NOT NULL CHECK (analysis_type IN ('summary', 'scorecard', 'sentiment')),
+    content JSONB NOT NULL,            -- Structured analysis output
+    model_version TEXT,                -- AI model used
+    status TEXT NOT NULL DEFAULT 'processing'
+        CHECK (status IN ('processing', 'completed', 'failed')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Audit log for all GPT-initiated actions
-CREATE TABLE gpt_audit_log (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    token_id UUID REFERENCES gpt_tokens(id),
-    clerk_user_id TEXT NOT NULL,
-    action TEXT NOT NULL,                    -- e.g., 'search_jobs', 'submit_application'
-    endpoint TEXT NOT NULL,                  -- e.g., 'GET /api/v1/gpt/jobs'
-    request_summary JSONB,                   -- Sanitized request params
-    response_status INTEGER NOT NULL,
-    confirmed BOOLEAN DEFAULT false,         -- For write actions
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_gpt_audit_log_user ON gpt_audit_log(clerk_user_id);
-CREATE INDEX idx_gpt_audit_log_created ON gpt_audit_log(created_at);
+CREATE INDEX idx_interview_analyses_interview ON interview_analyses(interview_id);
 ```
 
-### Token Lifecycle
+## Integration Points with Existing Architecture
 
-| State | access_token | refresh_token | access_token_expires_at | revoked_at |
-|-------|-------------|---------------|------------------------|------------|
-| Active | hash present | hash present | future | NULL |
-| Access expired | hash present | hash present | past | NULL |
-| Refreshed | NEW hash | same or new | future | NULL (old row revoked) |
-| Revoked | hash present | hash present | any | SET |
+### 1. API Gateway Integration
 
-**Token durations:**
-- Access token: 1 hour (short-lived, limits blast radius)
-- Refresh token: 30 days (allows persistent session)
-- Authorization code: 10 minutes (one-time use)
-- OAuth session state: 15 minutes (login flow timeout)
+Same pattern as all other services. Add `video` to the ServiceName union and register the service.
 
-## Key Decision: gpt-service Goes Through api-gateway
+**api-gateway changes:**
 
-**Decision:** GPT requests route through api-gateway, NOT directly to gpt-service via separate ingress.
-
-**Rationale:**
-
-1. **Single ingress point** -- all api.splits.network traffic goes through api-gateway. Adding a second ingress for GPT creates operational complexity (separate TLS certs, separate rate limiting, separate CORS).
-
-2. **Rate limiting** -- api-gateway already has Redis-backed rate limiting. GPT requests benefit from this without reimplementing.
-
-3. **Observability** -- all requests logged in one place with correlation IDs.
-
-4. **CORS irrelevant** -- ChatGPT makes server-to-server calls, not browser calls. CORS doesn't apply. The api-gateway's CORS config won't block GPT requests because they aren't browser-origin requests.
-
-5. **Auth skip is trivial** -- adding one `if (request.url.startsWith('/api/v1/gpt/'))` check to the auth hook is a 1-line change.
-
-**Alternative considered:** Separate K8s ingress for gpt-service at e.g., `gpt.splits.network`. Rejected because it adds infrastructure complexity for no real benefit. The api-gateway proxy is lightweight (same pattern as all other services).
-
-## Key Decision: Opaque Tokens (Not JWTs)
-
-**Decision:** GPT access tokens are opaque random strings, validated via database lookup.
-
-**Rationale:**
-
-1. **Revocation** -- JWTs can't be revoked before expiry without a blacklist (which is just a database lookup anyway). Opaque tokens can be instantly revoked by setting `revoked_at`.
-
-2. **Simplicity** -- no JWT signing keys to manage, no key rotation, no JWT library needed in gpt-service.
-
-3. **Security** -- token value is never stored (only hash), so database compromise doesn't leak usable tokens.
-
-4. **Performance** -- single indexed DB lookup per request is fast enough. At GPT scale (tens of requests per user per session, not thousands per second), DB validation is not a bottleneck.
-
-**Alternative considered:** JWT access tokens with short expiry. Would eliminate DB lookup per request but makes revocation complex and adds JWT infrastructure. Not worth it at GPT scale.
-
-## Key Decision: /api/v1/gpt/* Namespace
-
-**Decision:** GPT endpoints live under `/api/v1/gpt/` not `/api/v2/`.
-
-**Rationale:**
-
-1. **Separate API surface** -- GPT API serves a different client (ChatGPT) with different auth, different response formats, different rate limits. It's not a v2 extension.
-
-2. **Versioning independence** -- GPT API can evolve independently of the main v2 API. When GPT needs v2, it becomes `/api/v2/gpt/`.
-
-3. **Clean auth boundary** -- api-gateway can skip Clerk auth for all `/api/v1/gpt/*` in one rule.
-
-4. **OpenAPI isolation** -- GPT Actions require their own OpenAPI schema. Keeping the namespace separate makes the schema self-contained.
-
-## Key Decision: Direct DB Access (Not Service-to-Service HTTP)
-
-**Decision:** gpt-service queries the Supabase database directly for jobs, applications, candidates data.
-
-**Rationale:**
-
-1. **Codebase rule** -- CLAUDE.md explicitly states "No HTTP calls between services -- use direct database queries or RabbitMQ events."
-
-2. **Performance** -- direct DB query is faster than gpt-service -> api-gateway -> ats-service -> DB -> ats-service -> api-gateway -> gpt-service.
-
-3. **Existing pattern** -- all V2 services access the shared Supabase database directly. gpt-service is no different.
-
-4. **Access control** -- gpt-service uses `resolveAccessContext(clerkUserId)` from `shared-access-context` package, same as all other services.
-
-**What gpt-service reads from existing tables:**
-- `jobs` (with `companies` join) -- job search, job details
-- `candidates` -- candidate profile for the authenticated user
-- `applications` (with `jobs` join) -- application status, history
-- `users`, `memberships`, `user_roles` -- via resolveAccessContext (automatic)
-
-**What gpt-service writes to existing tables:**
-- `applications` -- creating new applications (with confirmation enforcement)
-- `gpt_audit_log` -- logging all actions (new table, owned by gpt-service)
-
-## OpenAPI Schema Strategy
-
-**Decision:** Serve a static OpenAPI 3.0 YAML file at a well-known endpoint.
-
-**How Custom GPT Actions work (from training data, MEDIUM confidence):**
-1. When configuring a Custom GPT, you paste or link an OpenAPI schema
-2. ChatGPT reads the schema to understand available endpoints
-3. `operationId` values become the action names the GPT can invoke
-4. `description` fields on operations and parameters guide the GPT's understanding
-5. The schema must include server URL and auth configuration
-
-**Schema serving approach:**
 ```typescript
-// services/gpt-service/src/v2/routes.ts
-import fs from 'fs';
-import path from 'path';
+// services/api-gateway/src/routes/v2/common.ts
+export type ServiceName =
+    | 'analytics' | 'ats' | 'network' | 'billing'
+    | 'notification' | 'identity' | 'document'
+    | 'automation' | 'search' | 'gpt' | 'content'
+    | 'integration' | 'matching' | 'gamification'
+    | 'video';  // NEW
 
-// Serve OpenAPI schema for GPT configuration
-app.get('/api/v1/gpt/openapi.yaml', async (request, reply) => {
-    const schemaPath = path.join(__dirname, '../openapi/schema.yaml');
-    const schema = fs.readFileSync(schemaPath, 'utf8');
-    reply.header('Content-Type', 'text/yaml').send(schema);
-});
+// services/api-gateway/src/routes/v2/video.ts (new file)
+const VIDEO_RESOURCES: ResourceDefinition[] = [
+    { name: 'interviews', service: 'video', basePath: '/video/interviews', tag: 'video' },
+    { name: 'recordings', service: 'video', basePath: '/video/recordings', tag: 'video' },
+];
 
-// Also serve at well-known path
-app.get('/.well-known/openapi.yaml', async (request, reply) => {
-    const schemaPath = path.join(__dirname, '../openapi/schema.yaml');
-    const schema = fs.readFileSync(schemaPath, 'utf8');
-    reply.header('Content-Type', 'text/yaml').send(schema);
-});
+// Plus custom routes for:
+// - POST /api/v2/video/interviews/join-by-token (no auth -- magic link)
+// - POST /api/v2/video/webhooks/livekit (no auth -- webhook signature verification)
 ```
 
-**Schema structure:**
+**Auth skip for magic link and webhooks:**
+```typescript
+// api-gateway auth hook additions
+if (request.url.startsWith('/api/v2/video/interviews/join-by-token')) return;  // Magic link
+if (request.url.startsWith('/api/v2/video/webhooks/')) return;                 // LiveKit webhooks
+```
+
+### 2. RabbitMQ Event Integration
+
+video-service publishes domain events that other services consume:
+
+| Event | Publisher | Consumer(s) | Payload |
+|-------|-----------|-------------|---------|
+| `interview.scheduled` | video-service | notification-service, integration-service | interview_id, participants, scheduled_at |
+| `interview.started` | video-service | notification-service | interview_id |
+| `interview.completed` | video-service | ats-service (update stage?), notification-service | interview_id, duration |
+| `interview.cancelled` | video-service | notification-service, integration-service | interview_id, reason |
+| `recording.completed` | video-service | ai-service | recording_id, interview_id, storage_path |
+| `interview.analysis_completed` | ai-service | notification-service | interview_id, analysis_id |
+| `application.stage_changed` | ats-service | video-service (optional: auto-schedule?) | application_id, new_stage |
+
+### 3. Calendar Integration
+
+When an interview is scheduled, video-service publishes `interview.scheduled`. The integration-service can consume this event and create calendar events for participants who have connected Google/Microsoft calendars.
+
+**Important:** This is an event-driven integration, NOT an HTTP call. video-service does not call integration-service directly. It publishes the event, and integration-service decides whether to act based on whether participants have calendar connections.
+
+### 4. ai-service Integration
+
+ai-service consumes `recording.completed` events to:
+1. Download the MP4 from Azure Blob Storage
+2. Extract audio and transcribe via Whisper API or Azure Cognitive Services Speech
+3. Run analysis prompts on the transcript
+4. Store results in interview_transcripts and interview_analyses tables
+5. Publish `interview.analysis_completed` event
+
+This follows the existing pattern where ai-service processes domain events asynchronously.
+
+### 5. LiveKit Webhook Integration
+
+LiveKit sends webhooks to video-service for room lifecycle events:
+
+```typescript
+// services/video-service/src/v2/webhooks/livekit-webhook.ts
+// LiveKit signs webhooks with the API key/secret pair
+// Use livekit-server-sdk WebhookReceiver to verify signatures
+
+// Events we care about:
+// - room_started: Room was created (update interview status)
+// - room_finished: Last participant left (update interview status)
+// - participant_joined: Track who joined and when
+// - participant_left: Track who left and when
+// - egress_started: Recording began successfully
+// - egress_ended: Recording completed (trigger recording.completed event)
+```
+
+**Webhook route goes through api-gateway** but skips Clerk auth (same pattern as Stripe webhooks). video-service verifies the LiveKit webhook signature itself.
+
+### 6. LiveKit Direct Browser Access
+
+**Critical:** Unlike all other backend services, LiveKit needs direct browser access. Browsers connect to LiveKit via WebSocket for signaling and WebRTC for media. This traffic does NOT go through api-gateway.
+
+**Options for exposing LiveKit:**
+
+**Option A: Separate subdomain (RECOMMENDED)**
+- `livekit.splits.network` points to LiveKit LoadBalancer/Ingress
+- Separate TLS certificate (add to cert-manager)
+- Clean separation of concerns
+- LiveKit handles its own WebSocket upgrade
+
+**Option B: Path-based routing on existing ingress**
+- `api.splits.network/livekit/` routes to LiveKit
+- Reuses existing TLS cert
+- More complex ingress rules, potential conflicts with WebSocket upgrade handling
+
+**Recommendation: Option A.** LiveKit's network requirements (UDP ports, WebSocket upgrades, TURN) are different enough from standard HTTP services that a separate ingress/LB is cleaner. The existing ingress already handles WebSocket for chat-gateway and analytics-gateway, but LiveKit also needs UDP which NGINX ingress handles poorly.
+
+## Kubernetes Resources
+
+### New K8s Manifests
+
+```
+infra/k8s/
++-- livekit/
+|   +-- configmap.yaml          # LiveKit server config
+|   +-- deployment.yaml         # LiveKit server pod (hostNetwork: true)
+|   +-- service.yaml            # ClusterIP for internal API access
+|   +-- ingress.yaml            # Or LoadBalancer for external WebRTC access
++-- livekit-egress/
+|   +-- deployment.yaml         # Egress worker pod
++-- livekit-secrets/
+|   +-- secrets.yaml            # API key, API secret, Azure credentials
++-- video-service/
+    +-- deployment.yaml         # Standard Fastify service deployment
+```
+
+### LiveKit Server Deployment (MEDIUM confidence)
+
 ```yaml
-openapi: 3.0.1
-info:
-  title: Applicant Network GPT API
-  version: 1.0.0
-  description: >
-    API for the Applicant Network Custom GPT. Enables job search,
-    resume analysis, application management via natural language.
-servers:
-  - url: https://api.splits.network
-security:
-  - OAuth2: [candidate]
-components:
-  securitySchemes:
-    OAuth2:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://api.splits.network/api/v1/gpt/oauth/authorize
-          tokenUrl: https://api.splits.network/api/v1/gpt/oauth/token
-          scopes:
-            candidate: Access candidate features (jobs, applications, resume)
-paths:
-  /api/v1/gpt/jobs:
-    get:
-      operationId: searchJobs
-      summary: Search for job postings
-      description: >
-        Search available job postings by keywords, location, salary range,
-        commute type, and job level. Returns paginated results.
-      parameters:
-        - name: keywords
-          in: query
-          schema:
-            type: string
-          description: Search terms (job title, skills, company name)
-        - name: location
-          in: query
-          schema:
-            type: string
-          description: City, state, or "remote"
-        # ... more parameters
-      responses:
-        '200':
-          description: Job search results
-          # ... schema
-  # ... more paths
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: livekit-server
+  namespace: splits-network
+spec:
+  replicas: 1                    # Start with 1, scale later
+  selector:
+    matchLabels:
+      app: livekit-server
+  template:
+    metadata:
+      labels:
+        app: livekit-server
+    spec:
+      hostNetwork: true          # Required for WebRTC UDP ports
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: livekit
+          image: livekit/livekit-server:latest  # Pin to specific version in prod
+          ports:
+            - containerPort: 7880
+              name: http
+            - containerPort: 7881
+              name: rtc-tcp
+            - containerPort: 3478
+              name: turn-udp
+              protocol: UDP
+          args: ["--config", "/etc/livekit/config.yaml"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/livekit
+          env:
+            - name: LIVEKIT_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: livekit-secrets
+                  key: livekit-keys
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+      volumes:
+        - name: config
+          configMap:
+            name: livekit-config
 ```
 
-**OpenAPI requirements for GPT Actions (MEDIUM confidence, from training):**
-- Must be OpenAPI 3.0 (not 3.1 -- ChatGPT may not support 3.1 yet)
-- operationId is required and must be unique
-- Descriptions are critical -- the GPT uses them to decide when to call each action
-- Maximum ~30 endpoints per GPT (practical limit)
-- Request bodies should be simple, flat objects when possible
-- Response schemas help the GPT format output
+### LiveKit Egress Deployment (MEDIUM confidence)
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: livekit-egress
+  namespace: splits-network
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: livekit-egress
+  template:
+    metadata:
+      labels:
+        app: livekit-egress
+    spec:
+      containers:
+        - name: egress
+          image: livekit/egress:latest   # Pin version in prod
+          env:
+            - name: EGRESS_CONFIG_BODY
+              valueFrom:
+                secretKeyRef:
+                  name: livekit-secrets
+                  key: egress-config
+          resources:
+            requests:
+              cpu: 1000m            # Recording is CPU intensive
+              memory: 2Gi           # Headless Chrome needs RAM
+            limits:
+              cpu: 4000m
+              memory: 4Gi
+```
+
+### video-service Deployment
+
+Standard pattern matching existing services:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-service
+  namespace: splits-network
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: video-service
+  template:
+    metadata:
+      labels:
+        app: video-service
+    spec:
+      containers:
+        - name: video-service
+          image: ${ACR_SERVER}/video-service:${IMAGE_TAG}
+          ports:
+            - containerPort: 3020
+              name: http
+          env:
+            - name: PORT
+              value: "3020"
+            - name: LIVEKIT_HOST
+              value: "http://livekit-server:7880"
+            - name: LIVEKIT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: livekit-secrets
+                  key: api-key
+            - name: LIVEKIT_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: livekit-secrets
+                  key: api-secret
+            - name: LIVEKIT_WS_URL
+              value: "wss://livekit.splits.network"
+            # Standard env vars (Supabase, RabbitMQ, etc.)
+            - name: SUPABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: supabase-url
+            # ... (same pattern as other services)
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+```
+
+## Frontend Architecture
+
+### video-ui Package
+
+Shared React components used by both portal and candidate apps:
+
+```
+packages/video-ui/
++-- src/
+|   +-- components/
+|   |   +-- pre-join-screen.tsx      # Camera/mic preview, device selection
+|   |   +-- video-room.tsx           # Main video room with LiveKit provider
+|   |   +-- participant-tile.tsx     # Single participant video/audio
+|   |   +-- controls-bar.tsx         # Mute, camera, screen share, record, leave
+|   |   +-- screen-share-view.tsx    # Screen share layout
+|   |   +-- recording-indicator.tsx  # "Recording" badge
+|   |   +-- chat-panel.tsx           # In-call text chat (LiveKit data channels)
+|   +-- hooks/
+|   |   +-- use-interview.ts         # Fetch interview details, join flow
+|   |   +-- use-recording.ts         # Recording start/stop
+|   |   +-- use-devices.ts           # Camera/mic enumeration and selection
+|   +-- index.ts
++-- package.json                     # Depends on @livekit/components-react
+```
+
+**Key dependency:** `@livekit/components-react` provides pre-built React components and hooks for LiveKit. The video-ui package wraps these with Splits Network styling (DaisyUI + TailwindCSS) and business logic.
+
+### Portal App Pages
+
+```
+apps/portal/src/app/(authenticated)/interviews/
++-- page.tsx                         # List interviews (upcoming, past)
++-- [id]/
+|   +-- page.tsx                     # Interview detail (participants, recording, transcript)
++-- schedule/
+    +-- page.tsx                     # Schedule new interview (linked from application)
+
+apps/portal/src/app/(authenticated)/applications/[id]/
++-- (existing page, add "Schedule Interview" button to actions toolbar)
+```
+
+### Candidate App Pages
+
+```
+apps/candidate/src/app/interview/
++-- join/
+    +-- page.tsx                     # Magic link landing page
+                                     # Validates token, shows pre-join, enters room
+```
 
 ## Patterns to Follow
 
-### Pattern 1: Confirmation Safety for Write Actions
+### Pattern 1: LiveKit Token as Authorization Bridge
 
-**What:** All mutation endpoints require `confirmed: true` in the request body. If missing, return a CONFIRMATION_REQUIRED error with a summary of what will happen.
+**What:** video-service generates short-lived LiveKit access tokens that encode participant identity and room permissions. The frontend uses these tokens to connect directly to LiveKit -- no further backend calls needed for media.
 
-**When:** Any POST/PATCH/DELETE endpoint that modifies data.
+**Why:** Separates session orchestration (video-service) from media routing (LiveKit). The token is the authorization bridge between them.
 
-**Why:** Prevents the AI from accidentally executing actions. Forces a human-in-the-loop confirmation step within the ChatGPT conversation.
+### Pattern 2: Event-Driven Cross-Service Integration
 
-**Example:**
-```typescript
-// services/gpt-service/src/v2/applications/service.ts
-async createApplication(
-    clerkUserId: string,
-    data: { jobId: string; confirmed?: boolean }
-): Promise<any> {
-    // Load job details for confirmation summary
-    const job = await this.jobRepository.findJob(data.jobId);
-    if (!job) throw new Error('Job not found');
+**What:** video-service publishes RabbitMQ events for all interview lifecycle transitions. Other services consume events they care about.
 
-    // Resolve user's candidate profile
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (!context.candidateId) {
-        throw new Error('No candidate profile found. Please create a profile first.');
-    }
+**Why:** No HTTP calls between services (codebase rule). Calendar creation, email notifications, AI analysis, and stage updates all happen via events.
 
-    // Confirmation check
-    if (!data.confirmed) {
-        return {
-            status: 'CONFIRMATION_REQUIRED',
-            message: 'Please confirm you want to submit this application.',
-            summary: {
-                job_title: job.title,
-                company: job.company?.name,
-                location: job.location,
-                salary_range: job.salary_min && job.salary_max
-                    ? `$${job.salary_min.toLocaleString()} - $${job.salary_max.toLocaleString()}`
-                    : 'Not specified',
-            },
-            instruction: 'Call this endpoint again with confirmed: true to proceed.'
-        };
-    }
+### Pattern 3: Magic Link with Scoped Access
 
-    // Execute the write
-    const application = await this.applicationRepository.create({
-        job_id: data.jobId,
-        candidate_id: context.candidateId,
-        status: 'draft',
-        source: 'gpt',  // Track GPT-originated applications
-        created_at: new Date().toISOString(),
-    }, clerkUserId);
+**What:** Magic link tokens grant access to exactly one interview room, nothing else. They encode the interview_id and participant role, expire after the scheduled time, and are single-use.
 
-    // Audit log
-    await this.auditLog('submit_application', clerkUserId, {
-        application_id: application.id,
-        job_id: data.jobId,
-        confirmed: true,
-    });
+**Why:** Candidates may not have accounts. Magic links provide frictionless join without compromising security. The token scope is narrower than any authenticated session.
 
-    return { status: 'SUCCESS', application };
-}
-```
+### Pattern 4: Webhook Signature Verification
 
-### Pattern 2: GPT-Optimized Response Format
+**What:** LiveKit webhooks are verified using the LiveKit server SDK's WebhookReceiver, which validates the signature using the shared API key/secret.
 
-**What:** GPT responses should be concise, structured, and include only fields the GPT needs to present to the user. No internal IDs unless needed for follow-up actions.
-
-**When:** All GPT API endpoints.
-
-**Why:** ChatGPT has a context window. Sending full database rows wastes tokens and confuses the model. Lean responses produce better GPT outputs.
-
-**Example:**
-```typescript
-// Transform job for GPT consumption (not raw DB row)
-function formatJobForGpt(job: any): GptJobResult {
-    return {
-        id: job.id,  // Needed for "apply to this job" follow-up
-        title: job.title,
-        company: job.company?.name || 'Unknown',
-        location: job.location || 'Not specified',
-        commute_type: job.commute_types?.join(', ') || 'Not specified',
-        job_level: job.job_level || 'Not specified',
-        salary_range: formatSalaryRange(job.salary_min, job.salary_max),
-        posted: formatRelativeDate(job.created_at),  // "3 days ago" not ISO timestamp
-        description_preview: truncate(job.description, 200),  // Short preview
-        // Intentionally omit: internal_notes, job_owner_id, organization_id, etc.
-    };
-}
-```
-
-### Pattern 3: Scope-Restricted Access
-
-**What:** GPT tokens are scoped to `candidate` role. Even if the underlying Clerk user has recruiter/admin roles, GPT access is limited to candidate-level operations.
-
-**When:** All GPT API endpoints.
-
-**Why:** Security principle of least privilege. The GPT should only access what a candidate needs -- not admin functions, not recruiter functions.
-
-**Example:**
-```typescript
-// GPT auth middleware enforces scope
-if (gptAuth.scope !== 'candidate') {
-    return reply.status(403).send({
-        error: { code: 'SCOPE_DENIED', message: 'This GPT only supports candidate operations' }
-    });
-}
-
-// Even if user is a platform_admin, GPT sees candidate-level data
-// Override isPlatformAdmin for GPT requests
-const context = await this.accessResolver.resolve(gptAuth.clerkUserId);
-const gptContext = {
-    ...context,
-    isPlatformAdmin: false,  // Never admin via GPT
-    roles: ['candidate'],     // Force candidate scope
-};
-```
+**Why:** Same pattern as Stripe webhooks in billing-service. Never trust webhook payloads without signature verification.
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Proxying GPT Requests Through Other Services
+### Anti-Pattern 1: Routing Media Through api-gateway
 
-**What:** gpt-service calls ats-service HTTP endpoints to get job data.
+**What:** Trying to proxy WebRTC connections through the api-gateway or any backend service.
 
-**Why bad:** Violates "no HTTP between services" rule. Adds latency. Creates coupling.
+**Why bad:** WebRTC requires direct peer-to-SFU connections. HTTP proxying adds unacceptable latency for real-time video. WebSocket upgrade through NGINX is possible but fragile for WebRTC signaling.
 
-**Instead:** gpt-service queries Supabase directly using its own repository layer.
+**Instead:** LiveKit gets its own ingress/LoadBalancer. Browsers connect directly. Only the REST API (room management, token generation) goes through api-gateway.
 
-### Anti-Pattern 2: Sharing Clerk JWTs as GPT Tokens
+### Anti-Pattern 2: Storing Recordings in Supabase Storage
 
-**What:** Using Clerk JWTs directly as the OAuth2 access token.
+**What:** Using Supabase Storage (the existing document-service approach) for video recordings.
 
-**Why bad:** Clerk JWTs are issued for browser sessions with specific audience/issuer claims. ChatGPT can't obtain Clerk JWTs. You'd need Clerk to issue tokens for ChatGPT as a client, which isn't how Clerk works.
+**Why bad:** Video files are large (100MB-1GB+ per interview). Supabase Storage has upload limits, is expensive for large files, and lacks streaming playback. LiveKit Egress natively supports Azure Blob/S3 output.
 
-**Instead:** gpt-service is a custom OAuth2 provider. It issues its own opaque tokens. Clerk is only used during the authorization flow to verify the user's identity.
+**Instead:** Use Azure Blob Storage with LiveKit Egress direct upload. Generate signed URLs in video-service for playback.
 
-### Anti-Pattern 3: Storing Tokens in Plaintext
+### Anti-Pattern 3: Building Custom WebRTC Components
 
-**What:** Storing access_token and refresh_token values directly in the database.
+**What:** Implementing WebRTC signaling, ICE negotiation, or media rendering from scratch.
 
-**Why bad:** Database breach exposes all active tokens. Tokens can be used to impersonate users.
+**Why bad:** WebRTC is extremely complex. Browser compatibility, NAT traversal, codec negotiation, bandwidth adaptation -- all solved problems in LiveKit's SDK.
 
-**Instead:** Store SHA-256 hashes of tokens. Generate tokens with `crypto.randomBytes(32).toString('hex')`, store `crypto.createHash('sha256').update(token).digest('hex')`. Validate by hashing the incoming token and comparing to stored hash.
+**Instead:** Use `@livekit/components-react` for all video UI. Customize styling with DaisyUI, not media handling.
 
-### Anti-Pattern 4: Returning Full Database Rows to GPT
+### Anti-Pattern 4: Synchronous Recording Processing
 
-**What:** Sending `reply.send({ data: rawDbRow })` from GPT endpoints.
+**What:** Waiting for transcription/analysis to complete before returning the recording endpoint response.
 
-**Why bad:** Leaks internal fields (organization_id, deleted_at, internal_notes). Wastes GPT context window with irrelevant data. Produces worse GPT responses.
+**Why bad:** Transcription takes minutes. Blocking the request creates timeouts and poor UX.
 
-**Instead:** Transform all responses through GPT-specific formatter functions that select only user-relevant fields.
+**Instead:** Recording completion triggers async RabbitMQ event. ai-service processes in background. Frontend polls or receives WebSocket notification when analysis is ready.
 
-### Anti-Pattern 5: Separate Ingress for GPT Service
+### Anti-Pattern 5: One Giant LiveKit Pod with Everything
 
-**What:** Creating a new K8s ingress at `gpt.splits.network` pointing directly to gpt-service.
+**What:** Running LiveKit Server and Egress in the same pod/deployment.
 
-**Why bad:** Bypasses rate limiting, CORS, logging, correlation IDs. Two ingresses to manage. ChatGPT OpenAPI schema references a different domain.
+**Why bad:** Egress is resource-intensive (headless Chrome). A recording spike could starve the media server of CPU/memory, degrading all active calls.
 
-**Instead:** Route through api-gateway at `api.splits.network/api/v1/gpt/*`. One ingress, one domain, consistent infrastructure.
+**Instead:** Separate deployments with independent resource limits. Egress can scale independently.
 
 ## Scalability Considerations
 
-| Concern | At 100 GPT users | At 10K GPT users | At 100K GPT users |
-|---------|-------------------|-------------------|--------------------|
-| **Token validation** | DB lookup per request (~5ms) | Same, indexed query | Add Redis token cache (30s TTL) |
-| **gpt-service pods** | 1 pod | 2 pods | 3-5 pods (stateless, horizontal) |
-| **Token storage** | Hundreds of rows | Tens of thousands | Partition by created_at, auto-expire old tokens |
-| **Rate limiting** | api-gateway default | Per-user GPT throttle (lower than web) | Per-user + global GPT ceiling |
-| **Audit log** | Small table | Index on created_at | Partition by month, archive old |
+| Concern | At 10 concurrent calls | At 100 concurrent calls | At 1000 concurrent calls |
+|---------|------------------------|-------------------------|--------------------------|
+| **LiveKit Server** | 1 pod (hostNetwork) | 2-3 pods (need Azure UDP LB) | LiveKit Cloud or multi-node with load balancer |
+| **LiveKit Egress** | 1 pod (handles ~3-5 recordings) | 3-5 pods | 10+ pods, consider dedicated node pool |
+| **video-service** | 2 pods (same as other services) | 2 pods (lightweight) | 3-5 pods |
+| **Azure Blob Storage** | Default tier | Default tier | Hot tier, lifecycle policies |
+| **Database** | Minimal rows | Thousands of rows | Partition interviews by date |
+| **Transcription** | Sequential in ai-service | Queue in ai-service | Dedicated transcription workers |
+
+**Initial scale target:** 5-10 concurrent interviews is realistic for early deployment. The architecture supports this with minimal resources (1 LiveKit pod, 1 Egress pod, 2 video-service pods).
 
 ## Suggested Build Order
 
-Based on dependency analysis of the architecture:
+Based on dependency analysis:
 
-### Phase 1: Foundation (OAuth + Token Infrastructure)
-**Build in this order:**
-1. Database migration (oauth_clients, gpt_tokens, gpt_auth_codes, gpt_sessions, gpt_audit_log)
-2. gpt-service scaffold (Fastify server, health check, basic config)
-3. Token generation and validation (hash, store, lookup)
-4. OAuth routes (/authorize, /callback, /token, /revoke)
-5. api-gateway integration (auth skip, proxy routes, service registration)
+### Phase 1: Infrastructure + Core Service
 
-**Why first:** Everything else depends on authentication working. Can't test any GPT endpoint without a valid token flow.
+**Build:**
+1. Database migration (interviews, participants, recordings tables)
+2. video-service scaffold (Fastify, V2 pattern, health check)
+3. LiveKit Server K8s deployment (ConfigMap, Deployment, Service)
+4. LiveKit SDK integration in video-service (room create, token generate)
+5. api-gateway integration (ServiceName, routes, auth skip for webhooks)
+6. DNS + TLS for livekit.splits.network
 
-### Phase 2: Core GPT Endpoints
-**Build in this order:**
-1. Job search endpoint (read-only, simplest)
-2. Application status endpoint (read-only)
-3. Application submission endpoint (write with confirmation)
-4. Resume analysis endpoint (AI integration)
+**Why first:** Everything depends on LiveKit being deployed and video-service being able to create rooms and issue tokens. This is the foundation.
 
-**Why second:** These are the actual GPT Actions. Build read endpoints first (safer, simpler), then writes (need confirmation pattern).
+### Phase 2: Join Flow + Video UI
 
-### Phase 3: OpenAPI Schema + GPT Configuration
-**Build in this order:**
-1. OpenAPI 3.0 schema (YAML file documenting all endpoints)
-2. Schema serving endpoint
-3. GPT Instructions document
-4. Custom GPT configuration in OpenAI platform
+**Build:**
+1. video-ui package scaffold (pre-join screen, video room, controls)
+2. Authenticated join flow (portal app)
+3. Magic link generation and validation
+4. Candidate magic link join flow (candidate app)
+5. Interview scheduling UI (linked from application actions toolbar)
 
-**Why third:** Schema documents what was built in Phase 2. Can't configure the GPT until endpoints exist.
+**Why second:** Users need to actually join video calls. This phase produces a working end-to-end interview experience without recording.
 
-### Phase 4: Production Hardening
-1. GPT-specific rate limiting (per-user throttle)
-2. Audit log integration
-3. Token cleanup cron job (expire old tokens)
-4. Monitoring and alerting
-5. K8s deployment manifest
+### Phase 3: Recording + Storage
+
+**Build:**
+1. LiveKit Egress K8s deployment
+2. Azure Blob Storage container setup
+3. Recording start/stop endpoints
+4. LiveKit webhook handler (egress.ended)
+5. Recording playback (signed URL generation)
+6. Recording UI (indicator, playback page)
+
+**Why third:** Recording is an enhancement to the core video call. Requires Egress infrastructure and storage, which are independent of the basic call flow.
+
+### Phase 4: Transcription + AI Analysis
+
+**Build:**
+1. RabbitMQ event: recording.completed
+2. ai-service consumer for recording.completed
+3. Whisper/Azure Speech transcription integration
+4. Transcript storage and display UI
+5. AI interview analysis (summary, scorecard)
+6. Analysis display UI
+
+**Why fourth:** Depends on recordings (Phase 3) existing. AI analysis is the highest-value differentiator but has the most external dependencies (AI APIs).
+
+### Phase 5: Calendar + Notifications Integration
+
+**Build:**
+1. interview.scheduled event consumer in integration-service
+2. Calendar event creation with video link
+3. Email templates for interview invitations
+4. Reminder notifications (15 min before)
+5. Post-interview follow-up notifications
+
+**Why fifth:** These are polish features that enhance the experience but don't block core functionality. Can be developed in parallel with Phase 3/4.
 
 ## Sources
 
 **HIGH confidence (codebase analysis):**
-- `services/api-gateway/src/auth.ts` -- Clerk JWT validation pattern, multi-tenant auth
-- `services/api-gateway/src/index.ts` -- Auth skip patterns, service registration, rate limiting
-- `services/api-gateway/src/routes/v2/common.ts` -- Standard proxy pattern
-- `services/api-gateway/src/helpers/auth-headers.ts` -- x-clerk-user-id forwarding
-- `packages/shared-access-context/src/index.ts` -- resolveAccessContext, AccessContext interface
-- `services/ats-service/src/v2/jobs/service.ts` -- V2 service pattern with AccessContextResolver
-- `infra/k8s/ingress.yaml` -- Current ingress routing (api.splits.network -> api-gateway)
-- `infra/k8s/api-gateway/deployment.yaml` -- Service URL env vars, resource config
-- `docs/deployment/internal-service-authentication.md` -- Internal service key pattern
-- `docs/guidance/service-architecture-pattern.md` -- V2 service file structure
-- `docs/gpt/01_PRD_Custom_GPT.md` -- Product requirements
-- `docs/gpt/02_Architecture_Custom_GPT.md` -- Architecture overview
-- `docs/gpt/03_Technical_Specification.md` -- Technical spec
-- `docs/gpt/04_OpenAPI_Starter.yaml` -- OpenAPI starter schema
+- `services/api-gateway/src/clients.ts` -- ServiceRegistry pattern for adding new services
+- `services/api-gateway/src/routes/v2/common.ts` -- ServiceName type, ResourceDefinition pattern
+- `services/api-gateway/src/routes/v2/ats.ts` -- Resource registration pattern for new service
+- `services/chat-gateway/src/index.ts` -- WebSocket gateway pattern, Clerk multi-tenant auth
+- `services/integration-service/src/v2/calendar/service.ts` -- Calendar integration pattern
+- `packages/shared-types/src/events.ts` -- DomainEvent interface for RabbitMQ events
+- `packages/shared-job-queue/src/index.ts` -- RabbitMQ job queue pattern (amqplib)
+- `infra/k8s/ingress.yaml` -- Current ingress routing, WebSocket support annotations
+- `infra/k8s/ats-service/deployment.yaml` -- Standard K8s deployment pattern
+- `infra/k8s/rabbitmq/deployment.yaml` -- Third-party service deployment pattern in K8s
 
 **MEDIUM confidence (training data, not live-verified):**
-- OpenAI Custom GPT Actions OAuth2 specification -- based on training data through May 2025. The OAuth2 flow (authorization code grant) is standard; specific GPT Actions requirements (e.g., exact callback URL format, supported OpenAPI versions) should be verified against current OpenAI documentation before implementation.
-- OpenAPI 3.0 schema requirements for GPT Actions -- general structure is well-understood, but edge cases (max endpoints, field length limits, supported auth schemes) should be verified.
+- LiveKit Server architecture (SFU model, ports, configuration) -- based on training data through May 2025. Core architecture is stable but specific config options and API details should be verified against current LiveKit docs.
+- LiveKit Egress (headless Chrome recording, S3/Azure output) -- general approach is well-established but exact configuration format and Azure Blob integration details should be verified.
+- `livekit-server-sdk` Node.js API (AccessToken, RoomServiceClient, VideoGrant) -- API shape is stable but method signatures and options may have changed. Verify with Context7 or npm docs during implementation.
+- `@livekit/components-react` -- React component library exists and is actively maintained. Specific component names and props should be verified.
+- LiveKit webhook events and signature format -- verify with current LiveKit docs.
+- Kubernetes hostNetwork for WebRTC UDP -- standard K8s pattern, verified approach for WebRTC workloads.
 
 **LOW confidence (needs validation during implementation):**
-- Exact ChatGPT OAuth callback URL format (`https://chatgpt.com/aip/<plugin_id>/oauth/callback` vs other patterns) -- verify in OpenAI GPT configuration UI
-- Whether GPT Actions support refresh tokens or only access tokens -- verify in OpenAI docs
-- Maximum number of actions per GPT -- anecdotal "~30" from training data
-- Whether OpenAPI 3.1 is supported -- recommend 3.0 to be safe, verify later
+- Exact LiveKit Egress Azure Blob Storage configuration format -- may differ from S3 config.
+- LiveKit resource consumption per room (CPU/memory estimates are approximate).
+- Whether LiveKit's built-in TURN server is sufficient or if a separate TURN server (coturn) is needed for production.
+- Specific `@livekit/components-react` component hierarchy and customization points.

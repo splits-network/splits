@@ -184,6 +184,22 @@ const navItems: NavItemData[] = [
         shortcut: "M",
     },
     {
+        href: "/portal/email",
+        label: "Email",
+        icon: "fa-duotone fa-regular fa-envelope",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "management",
+        isNew: true,
+    },
+    {
+        href: "/portal/calendar",
+        label: "Calendar",
+        icon: "fa-duotone fa-regular fa-calendar",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "management",
+        isNew: true,
+    },
+    {
         href: "/portal/placements",
         label: "Placements",
         icon: "fa-duotone fa-regular fa-trophy",

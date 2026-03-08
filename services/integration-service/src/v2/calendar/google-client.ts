@@ -161,6 +161,61 @@ export class GoogleCalendarClient {
         return res.json() as Promise<GoogleEvent>;
     }
 
+    async updateEvent(
+        accessToken: string,
+        calendarId: string,
+        eventId: string,
+        params: Partial<Omit<CreateEventParams, 'calendarId'>>,
+    ): Promise<GoogleEvent> {
+        const body: Record<string, any> = {};
+        if (params.summary !== undefined) body.summary = params.summary;
+        if (params.description !== undefined) body.description = params.description;
+        if (params.location !== undefined) body.location = params.location;
+        if (params.startDateTime && params.timeZone) {
+            body.start = { dateTime: params.startDateTime, timeZone: params.timeZone };
+        }
+        if (params.endDateTime && params.timeZone) {
+            body.end = { dateTime: params.endDateTime, timeZone: params.timeZone };
+        }
+        if (params.attendeeEmails) {
+            body.attendees = params.attendeeEmails.map(email => ({ email }));
+        }
+
+        const url = `/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`;
+        const res = await fetch(`${BASE_URL}${url}`, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Google updateEvent failed (${res.status}): ${text}`);
+        }
+
+        return res.json() as Promise<GoogleEvent>;
+    }
+
+    async deleteEvent(
+        accessToken: string,
+        calendarId: string,
+        eventId: string,
+    ): Promise<void> {
+        const url = `/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`;
+        const res = await fetch(`${BASE_URL}${url}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!res.ok && res.status !== 410) {
+            const text = await res.text();
+            throw new Error(`Google deleteEvent failed (${res.status}): ${text}`);
+        }
+    }
+
     /* ── Private ───────────────────────────────────────────────────────── */
 
     private async request(accessToken: string, path: string): Promise<any> {

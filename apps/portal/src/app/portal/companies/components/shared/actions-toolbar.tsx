@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { Company, CompanyRelationship } from "../../types";
 import RequestRepresentationModal from "../modals/request-connection-modal";
 import TerminateModal from "../modals/terminate-company-modal";
+import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
+import CreateEventModal from "@/components/basel/calendar/create-event-modal";
 
 export interface CompanyActionsToolbarProps {
     company: Company;
@@ -28,10 +31,15 @@ export default function CompanyActionsToolbar({
     onRefresh,
     className = "",
 }: CompanyActionsToolbarProps) {
+    const { isRecruiter, isCompanyUser, isAdmin } = useUserProfile();
     const refresh = onRefresh ?? (() => {});
 
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
+
+    const canEmailOrSchedule = isRecruiter || isCompanyUser || isAdmin;
 
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
@@ -67,6 +75,25 @@ export default function CompanyActionsToolbar({
                     targetRole="company"
                 />
             )}
+            {showEmailModal && (
+                <ComposeEmailModal
+                    subject={`Re: ${company.name}`}
+                    onClose={() => setShowEmailModal(false)}
+                    onSent={() => {
+                        setShowEmailModal(false);
+                        refresh();
+                    }}
+                />
+            )}
+            {showScheduleModal && (
+                <CreateEventModal
+                    onClose={() => setShowScheduleModal(false)}
+                    onSuccess={() => {
+                        setShowScheduleModal(false);
+                        refresh();
+                    }}
+                />
+            )}
         </ModalPortal>
     );
 
@@ -99,6 +126,22 @@ export default function CompanyActionsToolbar({
                 label: "Request Pending",
                 variant: "btn-ghost",
                 disabled: true,
+            });
+        }
+        if (canEmailOrSchedule) {
+            speedDialActions.push({
+                key: "schedule",
+                icon: "fa-duotone fa-regular fa-calendar-plus",
+                label: "Schedule Meeting",
+                variant: "btn-info",
+                onClick: () => setShowScheduleModal(true),
+            });
+            speedDialActions.push({
+                key: "send-email",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Send Email",
+                variant: "btn-secondary",
+                onClick: () => setShowEmailModal(true),
             });
         }
         if (onViewDetails) {
@@ -166,6 +209,32 @@ export default function CompanyActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-clock" />
                         <span className="hidden md:inline">Awaiting Review</span>
+                    </button>
+                )}
+
+                {/* Schedule Meeting */}
+                {canEmailOrSchedule && (
+                    <button
+                        onClick={() => setShowScheduleModal(true)}
+                        className={`btn ${getSizeClass()} btn-info gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title="Schedule Meeting"
+                    >
+                        <i className="fa-duotone fa-regular fa-calendar-plus" />
+                        <span className="hidden md:inline">Schedule</span>
+                    </button>
+                )}
+
+                {/* Send Email */}
+                {canEmailOrSchedule && (
+                    <button
+                        onClick={() => setShowEmailModal(true)}
+                        className={`btn ${getSizeClass()} btn-secondary gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title="Send Email"
+                    >
+                        <i className="fa-duotone fa-regular fa-envelope" />
+                        <span className="hidden md:inline">Email</span>
                     </button>
                 )}
 

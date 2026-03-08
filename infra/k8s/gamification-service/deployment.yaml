@@ -4,7 +4,7 @@ metadata:
     name: gamification-service
     namespace: splits-network
 spec:
-    replicas: 2
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: gamification-service
@@ -13,6 +13,13 @@ spec:
             labels:
                 app: gamification-service
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: gamification-service
                   image: ${ACR_SERVER}/gamification-service:${IMAGE_TAG}

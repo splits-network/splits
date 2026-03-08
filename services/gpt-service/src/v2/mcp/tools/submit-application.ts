@@ -14,7 +14,7 @@ import {
     getConfirmationToken,
     deleteConfirmationToken,
 } from '../../actions/helpers';
-import { McpAuthContext, toolError } from '../types';
+import { McpAuthContext, toolError, safeTool } from '../types';
 import { requireMcpScope } from '../auth';
 import { IEventPublisher } from '../../shared/events';
 
@@ -92,7 +92,7 @@ export function registerSubmitApplicationTool(
             },
             _meta: { 'ui/resourceUri': 'ui://career-copilot/application-submit.html' },
         },
-        async ({ job_id, confirmed, confirmation_token, pre_screen_answers, cover_letter, resume_data }) => {
+        safeTool('submit_application', async ({ job_id, confirmed, confirmation_token, pre_screen_answers, cover_letter, resume_data }) => {
             const auth = getAuth();
             requireMcpScope(auth, 'applications:write');
 
@@ -340,6 +340,6 @@ export function registerSubmitApplicationTool(
                         : `Application submitted for ${job?.title || 'the position'} at ${job?.company?.name || 'the company'}. AI review is in progress — you'll be notified when it's complete.`,
                 }],
             };
-        },
+        }),
     );
 }

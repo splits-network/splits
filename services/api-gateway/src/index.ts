@@ -473,6 +473,51 @@ async function main() {
             return;
         }
 
+        // Skip auth for video interview magic link join (candidates use magic links without Clerk auth)
+        // POST /api/v2/interviews/join - token exchange for LiveKit room access
+        if (request.method === 'POST' && request.url.startsWith('/api/v2/interviews/join')) {
+            return;
+        }
+
+        // Skip auth for video interview magic-link and webhook routes
+        // These routes handle their own authentication:
+        // - reschedule-request: validates magic link token in body
+        // - available-slots: validates magic link token as query param
+        // - recording/consent: dual-auth (magic link OR Clerk)
+        // - recording/webhook: LiveKit signature verification
+
+        // Skip auth for candidate reschedule request (magic link token in body)
+        // POST /api/v2/interviews/:id/reschedule-request
+        if (request.method === 'POST' && /^\/api\/v2\/interviews\/[^/]+\/reschedule-request/.test(request.url)) {
+            return;
+        }
+
+        // Skip auth for candidate available-slots fetch (magic link token as query param)
+        // GET /api/v2/interviews/:id/available-slots
+        if (request.method === 'GET' && /^\/api\/v2\/interviews\/[^/]+\/available-slots/.test(request.url)) {
+            return;
+        }
+
+        // Skip auth for recording consent (dual-auth: magic link token OR Clerk, handled by video-service)
+        // POST /api/v2/interviews/:id/recording/consent
+        if (request.method === 'POST' && /^\/api\/v2\/interviews\/[^/]+\/recording\/consent/.test(request.url)) {
+            return;
+        }
+
+        // Skip auth for LiveKit Egress recording webhook (signature verified by video-service)
+        // POST /api/v2/interviews/recording/webhook
+        if (request.method === 'POST' && request.url.startsWith('/api/v2/interviews/recording/webhook')) {
+            return;
+        }
+
+        // Skip auth for interview notes (dual-auth: magic link OR Clerk, handled by video-service)
+        // PUT /api/v2/interviews/:id/notes - upsert note (token in body)
+        // GET /api/v2/interviews/:id/notes - get notes (token in query param)
+        // Note: POST /notes/post-to-application is NOT bypassed (interviewer-only, requires Clerk)
+        if ((request.method === 'PUT' || request.method === 'GET') && /^\/api\/v2\/interviews\/[^/]+\/notes(\?|$)/.test(request.url)) {
+            return;
+        }
+
         // Skip auth for public gamification endpoints (badges, XP, leaderboards)
         // These use optionalAuth() at the route level — try auth if present, don't fail if missing
         if (request.method === 'GET' && (
@@ -514,6 +559,7 @@ async function main() {
     services.register('integration', process.env.INTEGRATION_SERVICE_URL || 'http://localhost:3016');
     services.register('matching', process.env.MATCHING_SERVICE_URL || 'http://localhost:3017');
     services.register('gamification', process.env.GAMIFICATION_SERVICE_URL || 'http://localhost:3018');
+    services.register('video', process.env.VIDEO_SERVICE_URL || 'http://localhost:3019');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

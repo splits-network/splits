@@ -23,6 +23,13 @@ spec:
                         app: billing-service
                         component: cron-job
                 spec:
+                    nodeSelector:
+                        agentpool: userpool
+                    tolerations:
+                        - key: "kubernetes.azure.com/scalesetpriority"
+                          operator: "Equal"
+                          value: "spot"
+                          effect: "NoSchedule"
                     restartPolicy: Never
                     containers:
                         - name: billing-finalize-placement-invoices

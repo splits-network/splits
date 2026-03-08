@@ -4,7 +4,7 @@ metadata:
     name: candidate
     namespace: splits-network
 spec:
-    replicas: 3
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: candidate
@@ -13,6 +13,13 @@ spec:
             labels:
                 app: candidate
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: candidate
                   image: ${ACR_SERVER}/candidate:${IMAGE_TAG}
@@ -58,6 +65,8 @@ spec:
                         value: "http://ai-service.splits-network.svc.cluster.local:3009"
                       - name: ANALYTICS_SERVICE_URL
                         value: "http://analytics-service.splits-network.svc.cluster.local:3010"
+                      - name: NEXT_PUBLIC_LIVEKIT_URL
+                        value: "${LIVEKIT_PUBLIC_URL:-wss://livekit.splitsnetwork.com}"
                       - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
                         valueFrom:
                             secretKeyRef:

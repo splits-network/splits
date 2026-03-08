@@ -12,6 +12,15 @@ import {
     RecruiterReminderData,
     candidateMatchDigestEmail,
     CandidateMatchDigestData,
+    recruiterAftercareEmail,
+    getRecruiterAftercareSubject,
+    RecruiterAftercareData,
+    candidateAftercareEmail,
+    getCandidateAftercareSubject,
+    CandidateAftercareData,
+    companyAftercareEmail,
+    getCompanyAftercareSubject,
+    CompanyAftercareData,
 } from '../../templates/engagement';
 
 export class EngagementEmailService {
@@ -166,6 +175,65 @@ export class EngagementEmailService {
                 recruiterName: data.recruiterName,
                 daysSinceActivity: data.daysSinceActivity,
                 pendingApplications: data.pendingApplications,
+            },
+        });
+    }
+
+    async sendRecruiterAftercare(
+        email: string,
+        data: RecruiterAftercareData & { userId?: string; placementId: string }
+    ): Promise<void> {
+        const html = recruiterAftercareEmail(data);
+        const subject = getRecruiterAftercareSubject(data);
+
+        await this.sendEmail(email, subject, html, {
+            eventType: `aftercare.recruiter_${data.milestone}`,
+            userId: data.userId,
+            payload: {
+                placementId: data.placementId,
+                milestone: data.milestone,
+                candidateName: data.candidateName,
+                companyName: data.companyName,
+            },
+        });
+    }
+
+    async sendCandidateAftercare(
+        email: string,
+        data: CandidateAftercareData & { userId?: string; placementId: string }
+    ): Promise<void> {
+        const html = candidateAftercareEmail(data);
+        const subject = getCandidateAftercareSubject(data);
+        if (!html || !subject) return;
+
+        await this.sendEmail(email, subject, html, {
+            eventType: `aftercare.candidate_${data.milestone}`,
+            userId: data.userId,
+            payload: {
+                placementId: data.placementId,
+                milestone: data.milestone,
+                candidateName: data.candidateName,
+                companyName: data.companyName,
+            },
+        });
+    }
+
+    async sendCompanyAftercare(
+        email: string,
+        data: CompanyAftercareData & { userId?: string; placementId: string }
+    ): Promise<void> {
+        const html = companyAftercareEmail(data);
+        const subject = getCompanyAftercareSubject(data);
+        if (!html || !subject) return;
+
+        await this.sendEmail(email, subject, html, {
+            eventType: `aftercare.company_${data.milestone}`,
+            userId: data.userId,
+            payload: {
+                placementId: data.placementId,
+                milestone: data.milestone,
+                candidateName: data.candidateName,
+                companyName: data.companyName,
             },
         });
     }

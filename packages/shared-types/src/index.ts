@@ -77,6 +77,9 @@ export type {
     CompanyPerk,
     CompanyCultureTag,
     CompanySkill,
+    // Interview transcript types
+    TranscriptSegment,
+    InterviewTranscript,
 } from './models';
 
 // Content CMS block types and page structure

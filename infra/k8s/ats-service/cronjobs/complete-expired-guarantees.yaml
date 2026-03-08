@@ -23,6 +23,13 @@ spec:
                         app: ats-service
                         component: cron-job
                 spec:
+                    nodeSelector:
+                        agentpool: userpool
+                    tolerations:
+                        - key: "kubernetes.azure.com/scalesetpriority"
+                          operator: "Equal"
+                          value: "spot"
+                          effect: "NoSchedule"
                     restartPolicy: Never
                     containers:
                         - name: ats-complete-expired-guarantees
