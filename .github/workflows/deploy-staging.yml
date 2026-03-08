@@ -69,6 +69,10 @@ jobs:
                           name: gamification-service,
                           path: services/gamification-service,
                       }
+                    - {
+                          name: video-service,
+                          path: services/video-service,
+                      }
                     - { name: portal, path: apps/portal }
                     - { name: candidate, path: apps/candidate }
                     - { name: corporate, path: apps/corporate }
@@ -361,7 +365,7 @@ jobs:
 
             - name: Deploy backend services
               run: |
-                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service matching-service analytics-service chat-gateway analytics-gateway chat-service gpt-service content-service integration-service health-monitor gamification-service admin-gateway"
+                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service matching-service analytics-service chat-gateway analytics-gateway chat-service gpt-service content-service integration-service health-monitor gamification-service video-service admin-gateway"
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }}
@@ -395,6 +399,7 @@ jobs:
                   kubectl rollout status deployment/content-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/integration-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/gamification-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/video-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/admin-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy API Gateway
