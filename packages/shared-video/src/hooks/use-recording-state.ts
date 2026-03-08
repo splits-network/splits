@@ -53,19 +53,34 @@ export function useRecordingState(
     }, [apiCall]);
 
     const submitConsent = useCallback(
-        async (token?: string) => {
-            const authToken = token || (await getToken());
-            if (!authToken) return;
-            await fetch(
-                `${apiBase}/api/v2/interviews/${interviewId}/recording/consent`,
-                {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${authToken}`,
-                        'Content-Type': 'application/json',
+        async (magicToken?: string) => {
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+            };
+
+            if (magicToken) {
+                // Magic link path: send token in body (backend reads body.token)
+                await fetch(
+                    `${apiBase}/api/v2/interviews/${interviewId}/recording/consent`,
+                    {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ token: magicToken }),
                     },
-                },
-            );
+                );
+            } else {
+                // Clerk auth path: send token as Bearer header
+                const authToken = await getToken();
+                if (!authToken) return;
+                headers['Authorization'] = `Bearer ${authToken}`;
+                await fetch(
+                    `${apiBase}/api/v2/interviews/${interviewId}/recording/consent`,
+                    {
+                        method: 'POST',
+                        headers,
+                    },
+                );
+            }
         },
         [interviewId, apiBase], // eslint-disable-line react-hooks/exhaustive-deps
     );
