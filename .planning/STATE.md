@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 35 of 38 (Scheduling & Notifications)
-Plan: 01 of 10
+Plan: 02 of 10
 Status: In progress
-Last activity: 2026-03-08 — Completed 35-01-PLAN.md (schema foundation)
+Last activity: 2026-03-08 — Completed 35-02-PLAN.md (calendar event lifecycle and webhooks)
 
 Progress: ████████████████████░░░░ 85%
 
@@ -23,7 +23,7 @@ Progress: ████████████████████░░░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 16
+- Plans completed: 17
 - Phases completed: 2 (Phases 33-34), Phase 35 in progress
 
 ## Accumulated Context
@@ -59,6 +59,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | meeting_platform as TEXT not enum | 35-01 | Easier to extend than PostgreSQL enum |
 | Reschedule requests in separate table | 35-01 | Preserves audit trail of multiple reschedule attempts |
 | working_days as ISO day numbers | 35-01 | International compatibility (1=Monday, 7=Sunday) |
+| Channel token connectionId:calendarId for webhooks | 35-02 | Simple routing without DB lookup |
+| Webhook receivers always return success | 35-02 | Prevent provider retry storms on processing errors |
 
 ### Pending Todos
 
@@ -73,10 +75,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 35-01-PLAN.md (schema foundation)
+Stopped at: Completed 35-02-PLAN.md (calendar event lifecycle and webhooks)
 Resume file: None
-Next: 35-02-PLAN.md
+Next: 35-03-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 35-01 complete)*
+*Last updated: 2026-03-08 (Plan 35-02 complete)*
