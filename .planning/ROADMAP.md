@@ -98,7 +98,12 @@ Plans:
   2. Navigating to `video.applicant.network` renders the same video experience with Applicant Network branding (different logo, colors, copy)
   3. A portal user clicking "Join Call" receives a magic-link token and is redirected to the video app, where the token is exchanged for a LiveKit room JWT
   4. Both subdomains have working TLS certificates and K8s ingress rules in production
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 43-01-PLAN.md — App scaffold with brand detection, themes, and gateway token exchange route
+- [ ] 43-02-PLAN.md — Magic-link join flow with token exchange, identity confirmation, error pages
+- [ ] 43-03-PLAN.md — Video call experience with shared-video components, type adapter, side panel
+- [ ] 43-04-PLAN.md — Dockerfile, K8s deployment, ingress rules for both subdomains
 
 ### Phase 44: Recruiter-Company Calls & Portal Integration
 **Goal**: Recruiters can schedule and conduct video calls with company contacts, and all users can browse their full call history (interviews and recruiting calls) in the portal
@@ -161,7 +166,7 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
 | 40. Candidate Magic-Link Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 41. Schedule & Recording Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 42. Call Data Model & Service Layer | v10.0 | 4/4 | Complete | 2026-03-08 |
-| 43. Video App & Infrastructure | v10.0 | 0/TBD | Not started | - |
+| 43. Video App & Infrastructure | v10.0 | 0/4 | Not started | - |
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 0/TBD | Not started | - |
 | 45. AI Pipeline Generalization | v10.0 | 0/TBD | Not started | - |
 | 46. Interview Migration | v10.0 | 0/TBD | Not started | - |
