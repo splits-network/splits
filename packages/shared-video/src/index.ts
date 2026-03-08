@@ -19,3 +19,11 @@ export { AudioLevelMeter } from './components/audio-level-meter';
 export { DeviceSelector } from './components/device-selector';
 export { CameraOffFallback } from './components/camera-off-fallback';
 export { WaitingIndicator } from './components/waiting-indicator';
+
+// Room components (34-03)
+export { VideoRoom } from './components/video-room';
+export { VideoControls } from './components/video-controls';
+export { ParticipantTile } from './components/participant-tile';
+export { SelfViewPip } from './components/self-view-pip';
+export { ConnectionQualityBars } from './components/connection-quality';
+export { PostCallSummary } from './components/post-call-summary';
