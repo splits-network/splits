@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 35 of 38 (Scheduling & Notifications)
-Plan: 07 of 10
+Plan: 08 of 10
 Status: In progress
-Last activity: 2026-03-08 — Completed 35-07-PLAN.md (reschedule & cancel interview flows)
+Last activity: 2026-03-08 — Completed 35-08-PLAN.md (interview notification pipeline)
 
-Progress: █████████████████████░░░ 90%
+Progress: █████████████████████░░░ 91%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: █████████████████████░░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 22
+- Plans completed: 23
 - Phases completed: 2 (Phases 33-34), Phase 35 in progress
 
 ## Accumulated Context
@@ -75,6 +75,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Toast ref timer with cleanup | 35-06 | Prevent memory leaks on unmount for auto-dismiss |
 | BaselWizardModal for reschedule, plain modal for cancel | 35-07 | Multi-step flow needs wizard; single-step cancel doesn't |
 | Best-effort calendar event deletion on cancel | 35-07 | Don't block interview cancellation if calendar API fails |
+| Company admins as interviewer recipients | 35-08 | Resolved via identity_organization_id, consistent with job notification pattern |
+| All interview notifications use 'both' channel | 35-08 | High-priority events need email + in-app visibility |
 
 ### Pending Todos
 
@@ -89,10 +91,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 35-07-PLAN.md (reschedule & cancel interview flows)
+Stopped at: Completed 35-08-PLAN.md (interview notification pipeline)
 Resume file: None
-Next: 35-08-PLAN.md
+Next: 35-09-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 35-07 complete)*
+*Last updated: 2026-03-08 (Plan 35-08 complete)*
