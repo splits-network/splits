@@ -27,6 +27,8 @@ spec:
               - status.employment-networks.com
               - admin.employment-networks.com
               - admin.api.employment-networks.com
+              - video.splits.network
+              - video.applicant.network
           secretName: splits-network-tls
     rules:
         - host: splits.network
@@ -131,6 +133,26 @@ spec:
                     backend:
                         service:
                             name: admin-gateway
+                            port:
+                                number: 80
+        - host: video.splits.network
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: video
+                            port:
+                                number: 80
+        - host: video.applicant.network
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: video
                             port:
                                 number: 80
 ---
