@@ -27,10 +27,10 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 ### Scheduling
 
-- [ ] **SCHED-01**: User can schedule an interview from the application detail page, creating both a Google Calendar event and an `interviews` DB record
-- [ ] **SCHED-02**: Moving an application to `interview` stage prompts the user to schedule an interview
-- [ ] **SCHED-03**: User can cancel or reschedule an interview, triggering calendar event updates and notification cascade
-- [ ] **SCHED-04**: Scheduling UI shows interviewer free/busy slots from Google Calendar to prevent double-booking
+- [x] **SCHED-01**: User can schedule an interview from the application detail page, creating both a Google Calendar event and an `interviews` DB record
+- [x] **SCHED-02**: Moving an application to `interview` stage prompts the user to schedule an interview
+- [x] **SCHED-03**: User can cancel or reschedule an interview, triggering calendar event updates and notification cascade
+- [x] **SCHED-04**: Scheduling UI shows interviewer free/busy slots from Google Calendar to prevent double-booking
 
 ### Participant Access
 
@@ -52,10 +52,10 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 ### Notifications
 
-- [ ] **NOTIF-01**: Participants receive email confirmation when an interview is scheduled (with join link)
-- [ ] **NOTIF-02**: Participants receive automated reminder emails (24h and 1h before interview)
-- [ ] **NOTIF-03**: Participants are notified when an interview is cancelled or rescheduled
-- [ ] **NOTIF-04**: In-app notifications for interview lifecycle events (scheduled, reminder, completed, recording ready)
+- [x] **NOTIF-01**: Participants receive email confirmation when an interview is scheduled (with join link)
+- [x] **NOTIF-02**: Participants receive automated reminder emails (24h and 1h before interview)
+- [x] **NOTIF-03**: Participants are notified when an interview is cancelled or rescheduled
+- [x] **NOTIF-04**: In-app notifications for interview lifecycle events (scheduled, reminder, completed, recording ready)
 
 ### Application Integration
 
@@ -104,29 +104,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-04 | Phase 33 | Complete |
 | INFRA-05 | Phase 33 | Complete |
 | INFRA-06 | Phase 33 | Complete |
-| ROOM-01 | Phase 34 | Pending |
-| ROOM-02 | Phase 34 | Pending |
+| ROOM-01 | Phase 34 | Complete |
+| ROOM-02 | Phase 34 | Complete |
 | ROOM-03 | Phase 38 | Pending |
 | ROOM-04 | Phase 38 | Pending |
-| ROOM-05 | Phase 34 | Pending |
-| ROOM-06 | Phase 34 | Pending |
-| SCHED-01 | Phase 35 | Pending |
-| SCHED-02 | Phase 35 | Pending |
-| SCHED-03 | Phase 35 | Pending |
-| SCHED-04 | Phase 35 | Pending |
-| JOIN-01 | Phase 34 | Pending |
-| JOIN-02 | Phase 34 | Pending |
-| JOIN-03 | Phase 34 | Pending |
+| ROOM-05 | Phase 34 | Complete |
+| ROOM-06 | Phase 34 | Complete |
+| SCHED-01 | Phase 35 | Complete |
+| SCHED-02 | Phase 35 | Complete |
+| SCHED-03 | Phase 35 | Complete |
+| SCHED-04 | Phase 35 | Complete |
+| JOIN-01 | Phase 34 | Complete |
+| JOIN-02 | Phase 34 | Complete |
+| JOIN-03 | Phase 34 | Complete |
 | REC-01 | Phase 36 | Pending |
 | REC-02 | Phase 36 | Pending |
 | REC-03 | Phase 36 | Pending |
 | AI-01 | Phase 37 | Pending |
 | AI-02 | Phase 37 | Pending |
 | AI-03 | Phase 37 | Pending |
-| NOTIF-01 | Phase 35 | Pending |
-| NOTIF-02 | Phase 35 | Pending |
-| NOTIF-03 | Phase 35 | Pending |
-| NOTIF-04 | Phase 35 | Pending |
+| NOTIF-01 | Phase 35 | Complete |
+| NOTIF-02 | Phase 35 | Complete |
+| NOTIF-03 | Phase 35 | Complete |
+| NOTIF-04 | Phase 35 | Complete |
 | INT-01 | Phase 38 | Pending |
 | INT-02 | Phase 38 | Pending |
 | INT-03 | Phase 36 | Pending |

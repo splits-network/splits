@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 35 complete
+**Current focus:** v9.0 Video Interviewing — Phase 35 complete, Phase 36 next
 
 ## Current Position
 

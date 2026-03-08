@@ -51,7 +51,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 
 - [x] **Phase 33: Infrastructure** - LiveKit K8s deployment, video-service scaffold, database schema, token system, gateway routes
 - [x] **Phase 34: Video Call Experience** - 1:1 calls, lobby, controls, magic link join, in-app join, candidate prep page
-- [ ] **Phase 35: Scheduling & Notifications** - Calendar integration, stage triggers, cancel/reschedule, email and in-app notifications
+- [x] **Phase 35: Scheduling & Notifications** - Calendar integration, stage triggers, cancel/reschedule, email and in-app notifications
 - [ ] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
 - [ ] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
 - [ ] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
@@ -105,16 +105,16 @@ Plans:
   5. Participants receive email confirmation when scheduled, reminders at 24h and 1h before, and notification on cancellation/reschedule
 **Plans:** 10 plans
 Plans:
-- [ ] 35-01-PLAN.md — Database schema extensions (calendar linking, working hours, reschedule tracking)
-- [ ] 35-02-PLAN.md — Integration-service calendar extensions (update/delete, ICS, webhooks)
-- [ ] 35-03-PLAN.md — Video-service scheduling APIs (reschedule, slots, gateway routes)
-- [ ] 35-04-PLAN.md — ScheduleInterviewModal overhaul (platform choice, slots, auto-title)
-- [ ] 35-05-PLAN.md — Calendar page enhancements (slot-click, app linking, interview styling)
-- [ ] 35-06-PLAN.md — Integrations page calendar preferences + stage trigger toast
-- [ ] 35-07-PLAN.md — Reschedule and cancel flows (modals, dialogs, calendar sync)
-- [ ] 35-08-PLAN.md — Notification consumer + email templates (scheduled, cancelled, rescheduled)
-- [ ] 35-09-PLAN.md — Interview reminder system (24h, 1h, 10min scheduled job)
-- [ ] 35-10-PLAN.md — Candidate reschedule flow + in-app countdown notifications
+- [x] 35-01-PLAN.md — Database schema extensions (calendar linking, working hours, reschedule tracking)
+- [x] 35-02-PLAN.md — Integration-service calendar extensions (update/delete, ICS, webhooks)
+- [x] 35-03-PLAN.md — Video-service scheduling APIs (reschedule, slots, gateway routes)
+- [x] 35-04-PLAN.md — ScheduleInterviewModal overhaul (platform choice, slots, auto-title)
+- [x] 35-05-PLAN.md — Calendar page enhancements (slot-click, app linking, interview styling)
+- [x] 35-06-PLAN.md — Integrations page calendar preferences + stage trigger toast
+- [x] 35-07-PLAN.md — Reschedule and cancel flows (modals, dialogs, calendar sync)
+- [x] 35-08-PLAN.md — Notification consumer + email templates (scheduled, cancelled, rescheduled)
+- [x] 35-09-PLAN.md — Interview reminder system (24h, 1h, 10min scheduled job)
+- [x] 35-10-PLAN.md — Candidate reschedule flow + in-app countdown notifications
 
 ### Phase 36: Recording & Playback
 **Goal**: Interviews are recorded server-side with consent, stored durably, and can be played back from the application page
@@ -170,7 +170,7 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | ~~32. Candidate UI~~ | ~~v8.0~~ | — | Shelved | — |
 | 33. Infrastructure | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 34. Video Call Experience | v9.0 | 6/6 | Complete | 2026-03-07 |
-| 35. Scheduling & Notifications | v9.0 | 0/10 | Pending | — |
+| 35. Scheduling & Notifications | v9.0 | 10/10 | Complete | 2026-03-08 |
 | 36. Recording & Playback | v9.0 | 0/TBD | Pending | — |
 | 37. AI Pipeline | v9.0 | 0/TBD | Pending | — |
 | 38. Panel, Notes & Polish | v9.0 | 0/TBD | Pending | — |
