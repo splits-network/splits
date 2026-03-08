@@ -79,6 +79,9 @@ export default function ScheduleInterviewModal({
     /* ── Platform ── */
     const [platform, setPlatform] = useState<MeetingPlatform>("splits_video");
 
+    /* ── Recording ── */
+    const [recordingEnabled, setRecordingEnabled] = useState(false);
+
     /* ── Slots ── */
     const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
     const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -307,6 +310,7 @@ export default function ScheduleInterviewModal({
                     calendar_event_id: calendarEvent?.id || undefined,
                     calendar_connection_id: selectedConnection?.id || undefined,
                     meeting_platform: "splits_video",
+                    recording_enabled: recordingEnabled,
                     participants: [],
                 });
             }
@@ -411,6 +415,31 @@ export default function ScheduleInterviewModal({
                             hasGoogleConnection={hasGoogleConnection}
                             hasMicrosoftConnection={hasMicrosoftConnection}
                         />
+
+                        {/* Record interview toggle — splits_video only */}
+                        {platform === "splits_video" && (
+                            <fieldset className="mt-4">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox checkbox-primary"
+                                        checked={recordingEnabled}
+                                        onChange={(e) =>
+                                            setRecordingEnabled(e.target.checked)
+                                        }
+                                    />
+                                    <div>
+                                        <span className="text-sm font-semibold">
+                                            Record this interview
+                                        </span>
+                                        <p className="text-sm text-base-content/50">
+                                            Interview will be recorded, transcribed,
+                                            and summarized
+                                        </p>
+                                    </div>
+                                </label>
+                            </fieldset>
+                        )}
 
                         {/* Calendar connection selector */}
                         {connections.length > 0 ? (
@@ -668,6 +697,19 @@ export default function ScheduleInterviewModal({
                                         </p>
                                     </div>
                                 </div>
+
+                                {platform === "splits_video" && (
+                                    <div>
+                                        <p className="text-sm font-bold text-base-content/50 uppercase">
+                                            Recording
+                                        </p>
+                                        <p className="text-sm font-semibold">
+                                            {recordingEnabled
+                                                ? "Enabled"
+                                                : "Disabled"}
+                                        </p>
+                                    </div>
+                                )}
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>

@@ -9,6 +9,7 @@ import { AudioLevelMeter } from './audio-level-meter';
 import { CameraOffFallback } from './camera-off-fallback';
 import { DeviceSelector } from './device-selector';
 import { WaitingIndicator } from './waiting-indicator';
+import { RecordingConsent } from './recording-consent';
 
 interface VideoLobbyProps {
     interviewContext: InterviewContext;
@@ -22,6 +23,10 @@ interface VideoLobbyProps {
         name: string;
         avatarUrl?: string;
     };
+    /** Whether this interview has recording enabled */
+    recordingEnabled?: boolean;
+    /** Called when participant gives recording consent */
+    onRecordingConsent?: () => void;
 }
 
 function formatScheduledTime(isoString: string): string {
@@ -44,12 +49,15 @@ export function VideoLobby({
     onJoin,
     participantPresence,
     localUser,
+    recordingEnabled,
+    onRecordingConsent,
 }: VideoLobbyProps) {
     const [audioEnabled, setAudioEnabled] = useState(true);
     const [videoEnabled, setVideoEnabled] = useState(true);
     const [audioDeviceId, setAudioDeviceId] = useState<string | undefined>();
     const [videoDeviceId, setVideoDeviceId] = useState<string | undefined>();
     const [permissionError, setPermissionError] = useState<string | null>(null);
+    const [consentGiven, setConsentGiven] = useState(!recordingEnabled);
 
     const videoElRef = useRef<HTMLVideoElement>(null);
 
@@ -224,6 +232,19 @@ export function VideoLobby({
                         />
                     )}
 
+                    {/* Recording consent gate */}
+                    {recordingEnabled && (
+                        <RecordingConsent
+                            consentGiven={consentGiven}
+                            onConsent={() => {
+                                setConsentGiven((v) => !v);
+                                if (!consentGiven && onRecordingConsent) {
+                                    onRecordingConsent();
+                                }
+                            }}
+                        />
+                    )}
+
                     {/* Device selectors */}
                     <div className="space-y-2">
                         <DeviceSelector
@@ -250,6 +271,7 @@ export function VideoLobby({
                         type="button"
                         className="btn btn-primary btn-lg w-full"
                         onClick={handleJoin}
+                        disabled={recordingEnabled && !consentGiven}
                     >
                         Join Interview
                     </button>

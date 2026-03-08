@@ -6,11 +6,28 @@ import {
     MediaDeviceSelect,
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
+import { RecordingIndicator } from './recording-indicator';
 
-export function VideoControls() {
+interface VideoControlsProps {
+    isRecording?: boolean;
+    onStopRecording?: () => void;
+    canStopRecording?: boolean;
+}
+
+export function VideoControls({
+    isRecording,
+    onStopRecording,
+    canStopRecording,
+}: VideoControlsProps = {}) {
     return (
         <div className="fixed bottom-0 left-0 right-0 bg-base-300/90 backdrop-blur-md z-20">
             <div className="flex items-center justify-center gap-4 py-4">
+                {/* Recording indicator — left side */}
+                <RecordingIndicator
+                    isRecording={!!isRecording}
+                    onStopRecording={onStopRecording}
+                    canStop={!!canStopRecording}
+                />
                 {/* Microphone toggle */}
                 <TrackToggle
                     source={Track.Source.Microphone}
