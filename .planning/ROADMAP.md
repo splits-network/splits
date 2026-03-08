@@ -53,7 +53,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 34: Video Call Experience** - 1:1 calls, lobby, controls, magic link join, in-app join, candidate prep page
 - [x] **Phase 35: Scheduling & Notifications** - Calendar integration, stage triggers, cancel/reschedule, email and in-app notifications
 - [x] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
-- [ ] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
+- [x] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
 - [ ] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
 
 ## Phase Details
@@ -144,9 +144,9 @@ Plans:
   3. The AI summary is auto-posted as an `interview_summary` note on the application, visible in application notes
 **Plans:** 3 plans
 Plans:
-- [ ] 37-01-PLAN.md — Database schema + TypeScript types (transcript table, interview_summary note type, pipeline status)
-- [ ] 37-02-PLAN.md — Transcription & summarization pipeline (Whisper, GPT, event consumer, note posting)
-- [ ] 37-03-PLAN.md — Frontend: AI badge on notes, transcript panel, pipeline status indicator
+- [x] 37-01-PLAN.md — Database schema + TypeScript types (transcript table, interview_summary note type, pipeline status)
+- [x] 37-02-PLAN.md — Transcription & summarization pipeline (Whisper, GPT, event consumer, note posting)
+- [x] 37-03-PLAN.md — Frontend: AI badge on notes, transcript panel, pipeline status indicator
 
 ### Phase 38: Panel, Notes & Polish
 **Goal**: The interview experience supports multi-party calls, screen sharing, in-call note-taking, and a dedicated interviews tab with full history
@@ -183,5 +183,5 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 34. Video Call Experience | v9.0 | 6/6 | Complete | 2026-03-07 |
 | 35. Scheduling & Notifications | v9.0 | 10/10 | Complete | 2026-03-08 |
 | 36. Recording & Playback | v9.0 | 6/6 | Complete | 2026-03-08 |
-| 37. AI Pipeline | v9.0 | 0/3 | Pending | — |
+| 37. AI Pipeline | v9.0 | 3/3 | Complete | 2026-03-08 |
 | 38. Panel, Notes & Polish | v9.0 | 0/TBD | Pending | — |

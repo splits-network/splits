@@ -46,9 +46,9 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 ### AI Pipeline
 
-- [ ] **AI-01**: Completed interview recordings are transcribed asynchronously via ai-service (Whisper)
-- [ ] **AI-02**: Transcripts are summarized into structured format (key points, strengths, concerns, overall impression) via ai-service
-- [ ] **AI-03**: AI summary is auto-posted as an `interview_summary` note type to `application_notes`
+- [x] **AI-01**: Completed interview recordings are transcribed asynchronously via ai-service (Whisper)
+- [x] **AI-02**: Transcripts are summarized into structured format (key points, strengths, concerns, overall impression) via ai-service
+- [x] **AI-03**: AI summary is auto-posted as an `interview_summary` note type to `application_notes`
 
 ### Notifications
 

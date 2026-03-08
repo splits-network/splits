@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 37 in progress
+**Current focus:** v9.0 Video Interviewing — Phase 37 complete, Phase 38 next
 
 ## Current Position
 
@@ -109,15 +109,15 @@ None.
 
 - Phase 33: LiveKit K8s deployment has infrastructure risks (UDP port exposure, hostNetwork vs LoadBalancer, TURN on TCP 443). Highest-risk work -- fail fast. **Plan 01 complete -- manifests written.**
 - Phase 36: LiveKit Egress to Azure Blob Storage compatibility (S3-compat API vs native Azure) needs verification during planning.
-- Phase 37: Whisper API 25MB file limit for long recordings -- may need FFmpeg audio extraction fallback.
+- Phase 37: Whisper API 25MB file limit handled via FFmpeg audio extraction fallback. ✓ Resolved.
 
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 37-02-PLAN.md (transcription pipeline)
+Stopped at: Phase 37 complete (all 3 plans executed)
 Resume file: None
-Next: 37-03-PLAN.md (frontend transcript UI)
+Next: Phase 38 (Panel, Notes & Polish)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 37-02 complete)*
+*Last updated: 2026-03-08 (Phase 37 complete)*
