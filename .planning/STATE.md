@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 36 of 38 (Recording & Playback)
-Plan: 5 of 6
-Status: In progress
-Last activity: 2026-03-08 — Completed 36-05-PLAN.md (recording playback)
+Plan: 6 of 6
+Status: Phase complete
+Last activity: 2026-03-08 — Completed 36-06-PLAN.md (recording integration)
 
-Progress: ██████████████████████░░ 96%
+Progress: ██████████████████████░░ 97%
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ██████████████████████░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 29
-- Phases completed: 3 (Phases 33-35)
+- Plans completed: 30
+- Phases completed: 4 (Phases 33-36)
 
 ## Accumulated Context
 
@@ -94,6 +94,7 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | SAS URL helper as reusable module | 36-05 | Avoids duplication between playback and download endpoints |
 | Company admin auth via app->job->company chain | 36-05 | Sequential queries, consistent with existing token endpoint pattern |
 | 1-hour SAS token expiry | 36-05 | Balances security with reasonable viewing session length |
+| Task 1 changes already in codebase from 36-05 | 36-06 | Frontend recording integration was done as part of 36-05 component work |
 
 ### Pending Todos
 
@@ -108,10 +109,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 36-05-PLAN.md (recording playback)
+Stopped at: Completed 36-06-PLAN.md (recording integration)
 Resume file: None
-Next: 36-06-PLAN.md
+Next: Phase 37 (Transcription & AI)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 36-05 complete)*
+*Last updated: 2026-03-08 (Plan 36-06 complete — Phase 36 done)*
