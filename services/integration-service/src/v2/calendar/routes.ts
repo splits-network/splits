@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { ConnectionRepository } from '../connections/repository';
 import { TokenRefreshService } from './token-refresh';
 import { CalendarService, CreateCalendarEventParams, UpdateCalendarEventParams } from './service';
+import { CalendarWebhookService } from './webhook-service';
 import { IEventPublisher } from '../shared/events';
 import { requireUserContext } from '../shared/helpers';
 import { Logger } from '@splits-network/shared-logging';
@@ -19,6 +20,8 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
     const connectionRepo = new ConnectionRepository(config.supabaseUrl, config.supabaseKey);
     const tokenRefresh = new TokenRefreshService(connectionRepo, config.eventPublisher, config.logger, config.crypto);
     const service = new CalendarService(connectionRepo, tokenRefresh, config.logger);
+    const webhookBaseUrl = process.env.INTEGRATION_WEBHOOK_URL ?? '';
+    const webhookService = new CalendarWebhookService(connectionRepo, tokenRefresh, config.logger, webhookBaseUrl);
 
     // GET /api/v2/integrations/calendar/:connectionId/calendars
     app.get('/api/v2/integrations/calendar/:connectionId/calendars', async (request, reply) => {
@@ -201,6 +204,106 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
                 : err.message.includes('not found') ? 404
                 : 500;
             return reply.status(status).send({ error: err.message });
+        }
+    });
+
+    // POST /api/v2/integrations/calendar/:connectionId/webhooks/subscribe
+    app.post('/api/v2/integrations/calendar/:connectionId/webhooks/subscribe', async (request, reply) => {
+        const { clerkUserId } = requireUserContext(request);
+        const { connectionId } = request.params as { connectionId: string };
+        const body = request.body as { calendar_id: string };
+
+        if (!body.calendar_id) {
+            return reply.status(400).send({ error: 'calendar_id is required' });
+        }
+
+        try {
+            const subscription = await webhookService.subscribeToChanges(connectionId, clerkUserId, body.calendar_id);
+            return reply.status(201).send({ data: subscription });
+        } catch (err: any) {
+            config.logger.error({ err, connectionId }, 'Failed to create webhook subscription');
+            return reply.status(500).send({ error: err.message });
+        }
+    });
+}
+
+/* ── Webhook Receiver Routes (NO AUTH) ────────────────────────────────── */
+
+export async function registerCalendarWebhookRoutes(app: FastifyInstance, config: RegisterConfig) {
+    const connectionRepo = new ConnectionRepository(config.supabaseUrl, config.supabaseKey);
+    const tokenRefresh = new TokenRefreshService(connectionRepo, config.eventPublisher, config.logger, config.crypto);
+    const webhookBaseUrl = process.env.INTEGRATION_WEBHOOK_URL ?? '';
+    const webhookService = new CalendarWebhookService(connectionRepo, tokenRefresh, config.logger, webhookBaseUrl);
+
+    // POST /api/v2/integrations/webhooks/google — NO AUTH (Google sends this)
+    app.post('/api/v2/integrations/webhooks/google', async (request, reply) => {
+        try {
+            const headers = request.headers as Record<string, string | undefined>;
+            const changeEvent = webhookService.handleGoogleWebhook({
+                'x-goog-channel-id': headers['x-goog-channel-id'],
+                'x-goog-resource-id': headers['x-goog-resource-id'],
+                'x-goog-resource-state': headers['x-goog-resource-state'],
+                'x-goog-channel-token': headers['x-goog-channel-token'],
+            });
+
+            if (changeEvent) {
+                await config.eventPublisher.publish('calendar.event_changed', {
+                    connection_id: changeEvent.connectionId,
+                    calendar_id: changeEvent.calendarId,
+                    change_type: changeEvent.changeType,
+                    resource_id: changeEvent.resourceId,
+                    provider: 'google',
+                    timestamp: new Date().toISOString(),
+                });
+
+                config.logger.info(
+                    { connectionId: changeEvent.connectionId, changeType: changeEvent.changeType },
+                    'Google calendar webhook processed',
+                );
+            }
+
+            return reply.status(200).send();
+        } catch (err: any) {
+            config.logger.error({ err }, 'Error processing Google webhook');
+            return reply.status(200).send(); // Always 200 to prevent retries
+        }
+    });
+
+    // POST /api/v2/integrations/webhooks/microsoft — NO AUTH
+    app.post('/api/v2/integrations/webhooks/microsoft', async (request, reply) => {
+        // Microsoft validation: return validationToken as text/plain
+        const query = request.query as { validationToken?: string };
+        if (query.validationToken) {
+            return reply
+                .status(200)
+                .header('content-type', 'text/plain')
+                .send(query.validationToken);
+        }
+
+        try {
+            const body = request.body as { value: any[] };
+            const changeEvents = webhookService.handleMicrosoftWebhook(body);
+
+            for (const changeEvent of changeEvents) {
+                await config.eventPublisher.publish('calendar.event_changed', {
+                    connection_id: changeEvent.connectionId,
+                    calendar_id: changeEvent.calendarId,
+                    change_type: changeEvent.changeType,
+                    resource_id: changeEvent.resourceId,
+                    provider: 'microsoft',
+                    timestamp: new Date().toISOString(),
+                });
+
+                config.logger.info(
+                    { connectionId: changeEvent.connectionId, changeType: changeEvent.changeType },
+                    'Microsoft calendar webhook processed',
+                );
+            }
+
+            return reply.status(202).send();
+        } catch (err: any) {
+            config.logger.error({ err }, 'Error processing Microsoft webhook');
+            return reply.status(202).send(); // Always 202 to prevent retries
         }
     });
 }
