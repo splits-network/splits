@@ -3,9 +3,17 @@
 /**
  * Event detail panel — right side of the split view.
  * Shows full event info, attendees, conference link, description.
+ * Interview events get additional info card, join button, and action buttons.
  */
 
-import { useCalendar } from "./calendar-context";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import {
+    useCalendar,
+    isInterviewEvent,
+    parseInterviewSummary,
+} from "./calendar-context";
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 
@@ -82,6 +90,110 @@ function getResponseStatusBadge(status: string) {
     }
 }
 
+/**
+ * Check if the event is within the joinable window:
+ * 10 minutes before start OR currently in progress.
+ */
+function isJoinWindowActive(startDT?: string, endDT?: string): boolean {
+    if (!startDT) return false;
+    const now = Date.now();
+    const start = new Date(startDT).getTime();
+    const end = endDT ? new Date(endDT).getTime() : start + 3600000;
+    const tenMinBefore = start - 10 * 60 * 1000;
+    return now >= tenMinBefore && now <= end;
+}
+
+/* ─── Interview Detail Section ─────────────────────────────────────── */
+
+function InterviewDetailSection({
+    eventId,
+    joinable,
+}: {
+    eventId: string;
+    joinable: boolean;
+}) {
+    const { getToken } = useAuth();
+    const getTokenRef = useRef(getToken);
+    getTokenRef.current = getToken;
+    const [interviewId, setInterviewId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const fetchInterview = useCallback(async () => {
+        try {
+            const token = await getTokenRef.current();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            const res = (await client.get("/interviews", {
+                params: { calendar_event_id: eventId, limit: 1 },
+            })) as { data: any[] };
+            const interviews = res.data ?? [];
+            if (interviews.length > 0) {
+                setInterviewId(interviews[0].id);
+            }
+        } catch {
+            // Interview lookup failed — non-critical
+        } finally {
+            setLoading(false);
+        }
+    }, [eventId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        fetchInterview();
+    }, [fetchInterview]);
+
+    const handleJoin = () => {
+        if (interviewId) {
+            window.open(`/portal/interviews/${interviewId}`, "_blank");
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center gap-2 py-2">
+                <span className="loading loading-spinner loading-sm" />
+                <span className="text-sm text-base-content/50">
+                    Loading interview details...
+                </span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-3">
+            {interviewId && joinable && (
+                <button
+                    onClick={handleJoin}
+                    className="btn btn-accent w-full"
+                >
+                    <i className="fa-duotone fa-regular fa-video" />
+                    Join Interview
+                </button>
+            )}
+
+            <div className="flex gap-2">
+                <button
+                    onClick={() =>
+                        console.log("TODO: implement in plan 07")
+                    }
+                    className="btn btn-outline btn-sm flex-1"
+                >
+                    <i className="fa-duotone fa-regular fa-calendar-pen" />
+                    Reschedule
+                </button>
+                <button
+                    onClick={() =>
+                        console.log("TODO: implement in plan 07")
+                    }
+                    className="btn btn-outline btn-error btn-sm flex-1"
+                >
+                    <i className="fa-duotone fa-regular fa-xmark" />
+                    Cancel
+                </button>
+            </div>
+        </div>
+    );
+}
+
 /* ─── Component ─────────────────────────────────────────────────────── */
 
 export default function CalendarEventDetail() {
@@ -116,25 +228,46 @@ export default function CalendarEventDetail() {
         (ep) => ep.entryPointType === "video",
     );
 
+    const interview = isInterviewEvent(selectedEvent);
+    const interviewInfo = interview
+        ? parseInterviewSummary(selectedEvent.summary ?? "")
+        : null;
+    const joinable = interview
+        ? isJoinWindowActive(
+              selectedEvent.start.dateTime,
+              selectedEvent.end.dateTime,
+          )
+        : false;
+
     return (
         <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="bg-neutral text-neutral-content px-6 py-5 shrink-0">
+            <div
+                className={`${interview ? "bg-accent text-accent-content" : "bg-neutral text-neutral-content"} px-6 py-5 shrink-0`}
+            >
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                         <button
                             onClick={closeEvent}
-                            className="lg:hidden btn btn-ghost btn-sm text-neutral-content/60 mb-2 rounded-none"
+                            className={`lg:hidden btn btn-ghost btn-sm ${interview ? "text-accent-content/60" : "text-neutral-content/60"} mb-2`}
                         >
                             <i className="fa-duotone fa-regular fa-arrow-left" />
                             Back
                         </button>
+                        {interview && (
+                            <div className="flex items-center gap-2 mb-1">
+                                <i className="fa-duotone fa-regular fa-video" />
+                                <span className="text-sm font-bold uppercase tracking-wider opacity-70">
+                                    Interview
+                                </span>
+                            </div>
+                        )}
                         <h2 className="text-xl font-black tracking-tight truncate">
                             {selectedEvent.summary || "(No title)"}
                         </h2>
                         {selectedEvent.status && (
                             <span
-                                className={`badge badge-sm rounded-none mt-2 ${
+                                className={`badge badge-sm mt-2 ${
                                     selectedEvent.status === "confirmed"
                                         ? "badge-success"
                                         : selectedEvent.status === "cancelled"
@@ -148,7 +281,7 @@ export default function CalendarEventDetail() {
                     </div>
                     <button
                         onClick={closeEvent}
-                        className="hidden lg:flex btn btn-ghost btn-sm btn-square text-neutral-content/60 rounded-none"
+                        className={`hidden lg:flex btn btn-ghost btn-sm btn-square ${interview ? "text-accent-content/60" : "text-neutral-content/60"}`}
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
@@ -157,6 +290,38 @@ export default function CalendarEventDetail() {
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                {/* Interview info card */}
+                {interview && interviewInfo && (
+                    <div className="border-l-4 border-accent bg-accent/5 p-4">
+                        <div className="space-y-2">
+                            <div>
+                                <p className="text-sm font-bold text-base-content/50 uppercase">
+                                    Candidate
+                                </p>
+                                <p className="text-sm font-bold">
+                                    {interviewInfo.candidateName}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-base-content/50 uppercase">
+                                    Position
+                                </p>
+                                <p className="text-sm font-bold">
+                                    {interviewInfo.jobTitle}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Interview action buttons (join, reschedule, cancel) */}
+                {interview && (
+                    <InterviewDetailSection
+                        eventId={selectedEvent.id}
+                        joinable={joinable}
+                    />
+                )}
+
                 {/* Date & Time */}
                 <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -251,7 +416,7 @@ export default function CalendarEventDetail() {
                                             )}
                                         </div>
                                         <span
-                                            className={`badge badge-sm rounded-none ${getResponseStatusBadge(att.responseStatus)}`}
+                                            className={`badge badge-sm ${getResponseStatusBadge(att.responseStatus)}`}
                                         >
                                             {att.responseStatus}
                                         </span>
@@ -268,7 +433,7 @@ export default function CalendarEventDetail() {
                             href={selectedEvent.htmlLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn btn-sm btn-outline rounded-none font-bold uppercase tracking-wider"
+                            className="btn btn-sm btn-outline font-bold uppercase tracking-wider"
                         >
                             <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                             Open in Calendar

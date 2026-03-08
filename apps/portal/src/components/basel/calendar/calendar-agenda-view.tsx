@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from "react";
-import { useCalendar } from "./calendar-context";
+import { useCalendar, isInterviewEvent } from "./calendar-context";
 import type { CalendarEvent } from "@splits-network/shared-types";
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
@@ -140,6 +140,7 @@ export default function CalendarAgendaView() {
                                 const isSelected =
                                     selectedEvent?.id === evt.id;
                                 const time = getEventTime(evt);
+                                const interview = isInterviewEvent(evt);
                                 const hasConference =
                                     evt.conferenceData?.entryPoints?.some(
                                         (ep) => ep.entryPointType === "video",
@@ -151,21 +152,35 @@ export default function CalendarAgendaView() {
                                         onClick={() => selectEvent(evt)}
                                         className={`w-full text-left border transition-colors ${
                                             isSelected
-                                                ? "border-primary bg-primary/5 border-l-4"
-                                                : "border-base-300 hover:border-primary/30 border-l-4 border-l-transparent"
+                                                ? interview
+                                                    ? "border-accent bg-accent/5 border-l-4"
+                                                    : "border-primary bg-primary/5 border-l-4"
+                                                : interview
+                                                    ? "border-base-300 hover:border-accent/30 border-l-4 border-l-accent"
+                                                    : "border-base-300 hover:border-primary/30 border-l-4 border-l-transparent"
                                         } ${past ? "opacity-50" : ""}`}
                                     >
                                         <div className="px-4 py-3 flex items-start gap-4">
                                             {/* Time column */}
                                             <div className="w-28 shrink-0">
-                                                <p className="text-sm font-bold text-base-content">
-                                                    {time}
-                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm font-bold text-base-content">
+                                                        {time}
+                                                    </p>
+                                                    {interview && (
+                                                        <span className="badge badge-accent badge-sm">
+                                                            Interview
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             {/* Details */}
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold text-base-content truncate">
+                                                    {interview && (
+                                                        <i className="fa-duotone fa-regular fa-video mr-1.5 text-accent" />
+                                                    )}
                                                     {evt.summary ||
                                                         "(No title)"}
                                                 </p>
@@ -195,15 +210,15 @@ export default function CalendarAgendaView() {
 
                                             {/* Indicators */}
                                             <div className="flex items-center gap-2 shrink-0">
-                                                {hasConference && (
-                                                    <span className="badge badge-sm badge-ghost rounded-none">
+                                                {hasConference && !interview && (
+                                                    <span className="badge badge-sm badge-ghost">
                                                         <i className="fa-duotone fa-regular fa-video mr-1" />
                                                         Video
                                                     </span>
                                                 )}
                                                 {evt.status ===
                                                     "tentative" && (
-                                                    <span className="badge badge-sm badge-warning rounded-none">
+                                                    <span className="badge badge-sm badge-warning">
                                                         Tentative
                                                     </span>
                                                 )}
