@@ -1,16 +1,11 @@
 import { AccessToken } from 'livekit-server-sdk';
 import { InterviewRepository } from './repository';
-import { InterviewStatus } from './types';
+import { InterviewStatus, InterviewContext } from './types';
 
 interface TokenResponse {
     jwt: string;
     room_name: string;
-    interview: {
-        id: string;
-        status: InterviewStatus;
-        interview_type: string;
-        scheduled_at: string;
-    };
+    interview: InterviewContext;
     participant: {
         id: string;
         role: string;
@@ -57,15 +52,33 @@ export class TokenService {
             roomName,
         );
 
+        // Fetch enriched context for the response
+        const context = await this.repository.findByIdWithContext(interview.id);
+
         return {
             jwt,
             room_name: roomName,
-            interview: {
-                id: interview.id,
-                status: interview.status,
-                interview_type: interview.interview_type,
-                scheduled_at: interview.scheduled_at,
-            },
+            interview: context
+                ? {
+                      id: context.id,
+                      status: context.status,
+                      interview_type: context.interview_type,
+                      title: context.title,
+                      scheduled_at: context.scheduled_at,
+                      scheduled_duration_minutes: context.scheduled_duration_minutes,
+                      job: context.job,
+                      participants: context.participants,
+                  }
+                : {
+                      id: interview.id,
+                      status: interview.status,
+                      interview_type: interview.interview_type,
+                      title: interview.title,
+                      scheduled_at: interview.scheduled_at,
+                      scheduled_duration_minutes: interview.scheduled_duration_minutes,
+                      job: { id: '', title: 'Interview', company_name: '' },
+                      participants: [],
+                  },
             participant: {
                 id: participant.id,
                 role: participant.role,
@@ -77,7 +90,7 @@ export class TokenService {
         interviewId: string,
         userId: string,
     ): Promise<TokenResponse> {
-        const interview = await this.repository.findByIdWithParticipants(interviewId);
+        const interview = await this.repository.findByIdWithContext(interviewId);
         if (!interview) {
             throw Object.assign(
                 new Error('Interview not found'),
@@ -122,7 +135,11 @@ export class TokenService {
                 id: interview.id,
                 status: interview.status,
                 interview_type: interview.interview_type,
+                title: interview.title,
                 scheduled_at: interview.scheduled_at,
+                scheduled_duration_minutes: interview.scheduled_duration_minutes,
+                job: interview.job,
+                participants: interview.participants,
             },
             participant: {
                 id: participant.id,

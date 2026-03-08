@@ -61,6 +61,35 @@ export interface InterviewWithParticipants extends Interview {
     participants: InterviewParticipant[];
 }
 
+export interface InterviewParticipantWithUser extends InterviewParticipant {
+    name: string;
+    avatar_url: string | null;
+}
+
+export interface InterviewContext {
+    id: string;
+    status: InterviewStatus;
+    interview_type: InterviewType;
+    title: string | null;
+    scheduled_at: string;
+    scheduled_duration_minutes: number;
+    job: {
+        id: string;
+        title: string;
+        company_name: string;
+    };
+    participants: InterviewParticipantWithUser[];
+}
+
+export interface InterviewWithContext extends Interview {
+    job: {
+        id: string;
+        title: string;
+        company_name: string;
+    };
+    participants: InterviewParticipantWithUser[];
+}
+
 export interface CreateInterviewInput {
     application_id: string;
     interview_type?: InterviewType;

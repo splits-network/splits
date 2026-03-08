@@ -4,6 +4,8 @@ import {
     InterviewParticipant,
     InterviewAccessToken,
     InterviewWithParticipants,
+    InterviewWithContext,
+    InterviewParticipantWithUser,
     InterviewStatus,
 } from './types';
 
@@ -125,6 +127,115 @@ export class InterviewRepository {
         return {
             ...(interview as Interview),
             participants: (participants || []) as InterviewParticipant[],
+        };
+    }
+
+    async findByIdWithContext(id: string): Promise<InterviewWithContext | null> {
+        // Fetch the interview
+        const { data: interview, error: interviewError } = await this.supabase
+            .from('interviews')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (interviewError) {
+            throw interviewError;
+        }
+        if (!interview) {
+            return null;
+        }
+
+        // Fetch job and company info via application
+        const { data: application, error: appError } = await this.supabase
+            .from('applications')
+            .select('job_id')
+            .eq('id', interview.application_id)
+            .maybeSingle();
+
+        if (appError) {
+            throw appError;
+        }
+
+        let job = { id: '', title: 'Interview', company_name: '' };
+
+        if (application?.job_id) {
+            const { data: jobRow, error: jobError } = await this.supabase
+                .from('jobs')
+                .select('id, title, company_id')
+                .eq('id', application.job_id)
+                .maybeSingle();
+
+            if (jobError) {
+                throw jobError;
+            }
+
+            if (jobRow) {
+                job.id = jobRow.id;
+                job.title = jobRow.title || 'Interview';
+
+                if (jobRow.company_id) {
+                    const { data: company, error: companyError } = await this.supabase
+                        .from('companies')
+                        .select('id, name')
+                        .eq('id', jobRow.company_id)
+                        .maybeSingle();
+
+                    if (companyError) {
+                        throw companyError;
+                    }
+
+                    job.company_name = company?.name || '';
+                }
+            }
+        }
+
+        // Fetch participants with user details
+        const { data: participants, error: participantsError } = await this.supabase
+            .from('interview_participants')
+            .select('*')
+            .eq('interview_id', id)
+            .order('created_at', { ascending: true });
+
+        if (participantsError) {
+            throw participantsError;
+        }
+
+        const userIds = (participants || []).map((p: InterviewParticipant) => p.user_id);
+        let userMap = new Map<string, { name: string; profile_image_url: string | null }>();
+
+        if (userIds.length > 0) {
+            const { data: users, error: usersError } = await this.supabase
+                .from('users')
+                .select('id, name, profile_image_url')
+                .in('id', userIds);
+
+            if (usersError) {
+                throw usersError;
+            }
+
+            for (const user of users || []) {
+                userMap.set(user.id, {
+                    name: user.name || '',
+                    profile_image_url: user.profile_image_url || null,
+                });
+            }
+        }
+
+        const enrichedParticipants: InterviewParticipantWithUser[] = (participants || []).map(
+            (p: InterviewParticipant) => {
+                const user = userMap.get(p.user_id);
+                return {
+                    ...p,
+                    name: user?.name || '',
+                    avatar_url: user?.profile_image_url || null,
+                };
+            },
+        );
+
+        return {
+            ...(interview as Interview),
+            job,
+            participants: enrichedParticipants,
         };
     }
 
