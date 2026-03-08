@@ -10,23 +10,23 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 42 (1 of 5 in v10.0)
-Plan: 2 of 4 complete
+Plan: 3 of 4 complete
 Status: In progress
-Last activity: 2026-03-08 — Completed 42-02-PLAN.md (Call Service Scaffold & Repository)
+Last activity: 2026-03-08 — Completed 42-03-PLAN.md (Service Layer & Routes)
 
-Progress: [██░░░░░░░░░░░░░░░░░░] 2/20 plans (10%)
+Progress: [███░░░░░░░░░░░░░░░░░] 3/20 plans (15%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 2
+- v10.0 plans completed: 3
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 42-call-data-model-service-layer | 2/4 | 6min | 3min |
+| 42-call-data-model-service-layer | 3/4 | 9min | 3min |
 
 ## Accumulated Context
 
@@ -45,6 +45,8 @@ Recent decisions affecting current work:
 - [42-01]: call_types as lookup table (not enum) for extensibility without migrations
 - [42-02]: Split repository into 3 files (main + participant + artifact) for ~200 line architecture compliance
 - [42-02]: Entity-based list filtering uses pre-query on call_entity_links then IN clause
+- [42-03]: Auto-add creator as host participant when not in participants list
+- [42-03]: State transitions use 409 Conflict; access tokens 24h expiry, LiveKit JWTs 4h TTL
 
 ### Pending Todos
 
@@ -59,9 +61,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 42-02-PLAN.md (Call Service Scaffold & Repository)
+Stopped at: Completed 42-03-PLAN.md (Service Layer & Routes)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (42-02 complete — call-service scaffolded with repository layer)*
+*Last updated: 2026-03-08 (42-03 complete — service layer, token service, and 13 Fastify routes)*
