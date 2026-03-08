@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 35 complete, Phase 36 next
+**Current focus:** v9.0 Video Interviewing — Phase 36 in progress
 
 ## Current Position
 
-Phase: 35 of 38 (Scheduling & Notifications)
-Plan: 10 of 10
-Status: Phase complete
-Last activity: 2026-03-08 — Completed 35-10-PLAN.md (candidate reschedule & countdown)
+Phase: 36 of 38 (Recording & Playback)
+Plan: 2 of 6
+Status: In progress
+Last activity: 2026-03-08 — Completed 36-02-PLAN.md (egress Azure Blob config)
 
 Progress: ██████████████████████░░ 96%
 
@@ -23,7 +23,7 @@ Progress: ██████████████████████░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 25
+- Plans completed: 26
 - Phases completed: 3 (Phases 33-35)
 
 ## Accumulated Context
@@ -81,6 +81,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Reminder deduplication via notification_log | 35-09 | Prevents duplicate reminders on overlapping job runs |
 | Available slots uses working hours, no busy slots | 35-10 | Simple approach for candidate-initiated reschedule |
 | 60-second setInterval for countdown polling | 35-10 | Per CONTEXT.md guidance, no WebSocket needed |
+| Azure credentials on both egress and video-service | 36-02 | Video-service orchestrates egress requests, needs credentials to pass per-request |
+| emptyDir 10Gi for egress temp storage | 36-02 | Ephemeral encoding files, no need for PVC |
+| 90-day recording retention with 30-day tier transition | 36-02 | Hot→Cool at 30 days, delete at 90 per CONTEXT.md |
 
 ### Pending Todos
 
@@ -95,10 +98,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 35-10-PLAN.md (candidate reschedule & countdown) — Phase 35 complete
+Stopped at: Completed 36-02-PLAN.md (egress Azure Blob config)
 Resume file: None
-Next: Phase 36 planning
+Next: 36-03-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 35-10 complete — Phase 35 done)*
+*Last updated: 2026-03-08 (Plan 36-02 complete)*
