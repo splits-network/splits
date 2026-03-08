@@ -65,7 +65,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 
 **Milestone Goal:** Generalize video from interview-only to platform-wide recruiting conversations, with a dedicated full-screen video app on branded subdomains and recruiter-company calls as the first new call type.
 
-- [ ] **Phase 42: Call Data Model & Service Layer** - calls table, call_participants, call_access_tokens, video-service calls module, gateway routes
+- [ ] **Phase 42: Call Data Model & Service Layer** - calls table, call_participants, call_access_tokens, call-service microservice, gateway routes
 - [ ] **Phase 43: Video App & Infrastructure** - apps/video/ with brand detection, magic-link auth, K8s deployment, dual-subdomain ingress
 - [ ] **Phase 44: Recruiter-Company Calls & Portal Integration** - Call creation, scheduling, notifications, call history, in-call context panel
 - [ ] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
@@ -74,7 +74,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 ## Phase Details
 
 ### Phase 42: Call Data Model & Service Layer
-**Goal**: A generalized call entity exists in the database and video-service can create, read, and manage calls with polymorphic entity linking independent of the interview system
+**Goal**: A generalized call entity exists in the database and a new call-service can create, read, and manage calls with polymorphic entity linking independent of the interview system
 **Depends on**: Nothing (foundation phase for v10.0)
 **Requirements**: DATA-01, DATA-02, DATA-03
 **Success Criteria** (what must be TRUE):
@@ -82,7 +82,12 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
   2. Call participants are tracked in `call_participants` with role and join status, supporting both Clerk-authenticated users and magic-link participants
   3. Call artifacts (recordings, transcripts, summaries, notes) are stored on the call record, not on entity-specific note tables
   4. Existing interview creation also creates a linked call record via `call_id` FK, maintaining backward compatibility
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 42-01-PLAN.md — Database migration: call tables, enums, indexes, RLS, interview FK
+- [ ] 42-02-PLAN.md — call-service scaffold, TypeScript types, repository layer
+- [ ] 42-03-PLAN.md — Service layer, Fastify routes, token service, RabbitMQ events
+- [ ] 42-04-PLAN.md — Dockerfile, K8s deployment, gateway routing
 
 ### Phase 43: Video App & Infrastructure
 **Goal**: A dedicated full-screen video app runs on two branded subdomains, and participants can join calls via magic link without Clerk authentication
@@ -155,7 +160,7 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
 | 39. Integration Wiring & Auth Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 40. Candidate Magic-Link Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 41. Schedule & Recording Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
-| 42. Call Data Model & Service Layer | v10.0 | 0/TBD | Not started | - |
+| 42. Call Data Model & Service Layer | v10.0 | 0/4 | Not started | - |
 | 43. Video App & Infrastructure | v10.0 | 0/TBD | Not started | - |
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 0/TBD | Not started | - |
 | 45. AI Pipeline Generalization | v10.0 | 0/TBD | Not started | - |
