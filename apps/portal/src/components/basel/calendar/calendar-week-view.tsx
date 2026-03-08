@@ -5,8 +5,8 @@
  * Events rendered as positioned blocks within day columns.
  */
 
-import { useMemo } from "react";
-import { useCalendar } from "./calendar-context";
+import { useMemo, useCallback } from "react";
+import { useCalendar, isInterviewEvent } from "./calendar-context";
 import type { CalendarEvent } from "@splits-network/shared-types";
 
 /* ─── Constants ─────────────────────────────────────────────────────── */
@@ -127,7 +127,7 @@ function AllDayBar({
 /* ─── Component ─────────────────────────────────────────────────────── */
 
 export default function CalendarWeekView() {
-    const { currentDate, events, loading, selectEvent } = useCalendar();
+    const { currentDate, events, loading, selectEvent, openCreateWithTime } = useCalendar();
 
     const weekDays = useMemo(() => getWeekDays(currentDate), [currentDate]);
     const hours = useMemo(
@@ -152,6 +152,28 @@ export default function CalendarWeekView() {
     }, [events, weekDays]);
 
     const totalHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT;
+
+    const handleSlotClick = useCallback(
+        (dayIdx: number, e: React.MouseEvent<HTMLDivElement>) => {
+            // Only handle clicks on the column itself, not on event buttons
+            if ((e.target as HTMLElement).closest("button")) return;
+
+            const rect = e.currentTarget.getBoundingClientRect();
+            const offsetY = e.clientY - rect.top;
+            const totalMinutes = START_HOUR * 60 + (offsetY / HOUR_HEIGHT) * 60;
+            // Snap to 15-minute intervals
+            const snappedMinutes = Math.floor(totalMinutes / 15) * 15;
+            const hour = Math.floor(snappedMinutes / 60);
+            const minute = snappedMinutes % 60;
+
+            const day = weekDays[dayIdx];
+            const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+            const timeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+
+            openCreateWithTime(dateStr, timeStr);
+        },
+        [weekDays, openCreateWithTime],
+    );
 
     if (loading && events.length === 0) {
         return (
@@ -227,10 +249,11 @@ export default function CalendarWeekView() {
                     {weekDays.map((day, dayIdx) => (
                         <div
                             key={dayIdx}
-                            className={`relative border-r border-base-300 last:border-r-0 ${
+                            className={`relative border-r border-base-300 last:border-r-0 cursor-pointer hover:bg-primary/[0.03] ${
                                 isToday(day) ? "bg-primary/[0.02]" : ""
                             }`}
                             style={{ height: totalHeight }}
+                            onClick={(e) => handleSlotClick(dayIdx, e)}
                         >
                             {/* Hour lines */}
                             {hours.map((h) => (
@@ -244,26 +267,38 @@ export default function CalendarWeekView() {
                             ))}
 
                             {/* Events */}
-                            {eventsByDay[dayIdx]?.map((evt) => (
-                                <button
-                                    key={evt.id}
-                                    onClick={() => selectEvent(evt)}
-                                    className="absolute left-0.5 right-0.5 bg-primary/15 border-l-2 border-primary hover:bg-primary/25 transition-colors overflow-hidden px-1.5 py-0.5 text-left cursor-pointer group"
-                                    style={{
-                                        top: evt.pos.top,
-                                        height: evt.pos.height,
-                                    }}
-                                >
-                                    <p className="text-sm font-bold text-primary truncate">
-                                        {evt.summary || "(No title)"}
-                                    </p>
-                                    {evt.pos.height > 30 && (
-                                        <p className="text-sm text-base-content/50 truncate">
-                                            {formatTime(evt.pos.start)}
+                            {eventsByDay[dayIdx]?.map((evt) => {
+                                const interview = isInterviewEvent(evt);
+                                return (
+                                    <button
+                                        key={evt.id}
+                                        onClick={() => selectEvent(evt)}
+                                        className={`absolute left-0.5 right-0.5 transition-colors overflow-hidden px-1.5 py-0.5 text-left cursor-pointer group ${
+                                            interview
+                                                ? "bg-accent/15 border-l-4 border-accent hover:bg-accent/25"
+                                                : "bg-primary/15 border-l-2 border-primary hover:bg-primary/25"
+                                        }`}
+                                        style={{
+                                            top: evt.pos.top,
+                                            height: evt.pos.height,
+                                        }}
+                                    >
+                                        <p className={`text-sm font-bold truncate ${
+                                            interview ? "text-accent-content" : "text-primary"
+                                        }`}>
+                                            {interview && (
+                                                <i className="fa-duotone fa-regular fa-video mr-1" />
+                                            )}
+                                            {evt.summary || "(No title)"}
                                         </p>
-                                    )}
-                                </button>
-                            ))}
+                                        {evt.pos.height > 30 && (
+                                            <p className="text-sm text-base-content/50 truncate">
+                                                {formatTime(evt.pos.start)}
+                                            </p>
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                     ))}
                 </div>

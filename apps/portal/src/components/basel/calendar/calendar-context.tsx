@@ -21,6 +21,11 @@ import type {
 
 export type CalendarView = "week" | "agenda";
 
+export interface PrefillTime {
+    date: string;
+    startTime: string;
+}
+
 interface CalendarContextValue {
     /* connections */
     connections: OAuthConnectionPublic[];
@@ -54,8 +59,28 @@ interface CalendarContextValue {
 
     /* create */
     showCreate: boolean;
+    prefillTime: PrefillTime | null;
     openCreate: () => void;
+    openCreateWithTime: (date: string, startTime: string) => void;
     closeCreate: () => void;
+}
+
+/* ─── Utils ─────────────────────────────────────────────────────────── */
+
+export function isInterviewEvent(event: CalendarEvent): boolean {
+    return (event.summary ?? "").startsWith("Interview:");
+}
+
+export function parseInterviewSummary(summary: string): {
+    candidateName: string;
+    jobTitle: string;
+} {
+    // Format: "Interview: [Candidate Name] — [Job Title]"
+    const match = summary.match(/^Interview:\s*(.+?)\s*—\s*(.+)$/);
+    if (match) {
+        return { candidateName: match[1], jobTitle: match[2] };
+    }
+    return { candidateName: "", jobTitle: "" };
 }
 
 const CalendarContext = createContext<CalendarContextValue | null>(null);
@@ -126,6 +151,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
 
     /* create */
     const [showCreate, setShowCreate] = useState(false);
+    const [prefillTime, setPrefillTime] = useState<PrefillTime | null>(null);
 
     /* ── Fetch connections ── */
     const fetchConnections = useCallback(async () => {
@@ -337,8 +363,16 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
                 selectEvent: setSelectedEvent,
                 closeEvent: () => setSelectedEvent(null),
                 showCreate,
+                prefillTime,
                 openCreate: () => setShowCreate(true),
-                closeCreate: () => setShowCreate(false),
+                openCreateWithTime: (date: string, startTime: string) => {
+                    setPrefillTime({ date, startTime });
+                    setShowCreate(true);
+                },
+                closeCreate: () => {
+                    setShowCreate(false);
+                    setPrefillTime(null);
+                },
             }}
         >
             {children}

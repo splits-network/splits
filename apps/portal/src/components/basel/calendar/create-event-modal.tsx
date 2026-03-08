@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Quick-create calendar event modal — standalone version
- * that doesn't require candidate/job context.
+ * Quick-create calendar event modal — supports both standalone events
+ * and application-linked interview scheduling.
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -15,6 +15,12 @@ import type {
 } from "@splits-network/shared-types";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { BaselWizardModal, BaselAlertBox } from "@splits-network/basel-ui";
+import ApplicationSearch, {
+    type ApplicationSearchResult,
+} from "@/components/basel/scheduling/application-search";
+import PlatformSelector, {
+    type MeetingPlatform,
+} from "@/components/basel/scheduling/platform-selector";
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -23,6 +29,10 @@ interface CreateEventModalProps {
     onSuccess?: (event: CalendarEvent) => void;
     /** Pre-select a connection if already known */
     preselectedConnectionId?: string;
+    /** Pre-fill date from slot click (YYYY-MM-DD) */
+    prefillDate?: string;
+    /** Pre-fill start time from slot click (HH:MM) */
+    prefillStartTime?: string;
 }
 
 type Step = "details" | "confirm";
@@ -38,6 +48,8 @@ export default function CreateEventModal({
     onClose,
     onSuccess,
     preselectedConnectionId,
+    prefillDate,
+    prefillStartTime,
 }: CreateEventModalProps) {
     const { getToken } = useAuth();
 
@@ -55,14 +67,23 @@ export default function CreateEventModal({
     /* Form */
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [date, setDate] = useState("");
-    const [startTime, setStartTime] = useState("09:00");
+    const [date, setDate] = useState(prefillDate ?? "");
+    const [startTime, setStartTime] = useState(prefillStartTime ?? "09:00");
     const [duration, setDuration] = useState(60);
     const [timeZone] = useState(
         Intl.DateTimeFormat().resolvedOptions().timeZone,
     );
     const [addVideo, setAddVideo] = useState(false);
     const [attendeeEmails, setAttendeeEmails] = useState("");
+
+    /* Application linking */
+    const [linkToApplication, setLinkToApplication] = useState(false);
+    const [selectedApplication, setSelectedApplication] =
+        useState<ApplicationSearchResult | null>(null);
+    const [selectedPlatform, setSelectedPlatform] =
+        useState<MeetingPlatform>("splits_video");
+    const [showStageConfirm, setShowStageConfirm] = useState(false);
+    const [stageConfirmPending, setStageConfirmPending] = useState(false);
 
     /* ── Fetch connections ── */
     const fetchConnections = useCallback(async () => {
@@ -125,9 +146,62 @@ export default function CreateEventModal({
         await fetchCalendars(conn.id);
     };
 
+    /* ── Application linking handlers ── */
+    const handleApplicationSelect = (app: ApplicationSearchResult) => {
+        setSelectedApplication(app);
+        setTitle(`Interview: ${app.candidateName} \u2014 ${app.jobTitle}`);
+        setDuration(30);
+        // Auto-add candidate email
+        if (app.candidateEmail) {
+            setAttendeeEmails((prev) => {
+                const existing = prev
+                    .split(",")
+                    .map((e) => e.trim())
+                    .filter(Boolean);
+                if (existing.includes(app.candidateEmail)) return prev;
+                return [...existing, app.candidateEmail]
+                    .filter(Boolean)
+                    .join(", ");
+            });
+        }
+    };
+
+    const handleLinkToggle = (checked: boolean) => {
+        setLinkToApplication(checked);
+        if (!checked) {
+            setSelectedApplication(null);
+            setTitle("");
+            setDuration(60);
+            setSelectedPlatform("splits_video");
+        }
+    };
+
+    /* ── Stage promotion ── */
+    const promoteToInterview = async (applicationId: string) => {
+        const token = await getToken();
+        if (!token) return;
+        const client = createAuthenticatedClient(token);
+        await client.patch(`/applications/${applicationId}`, {
+            stage: "interview",
+        });
+    };
+
+    /* ── Submit ── */
     const handleSubmit = async () => {
         if (!selectedConnection || !selectedCalendar || !date || !startTime)
             return;
+
+        // Check if application needs stage promotion
+        if (
+            linkToApplication &&
+            selectedApplication &&
+            selectedApplication.stage !== "interview" &&
+            !stageConfirmPending
+        ) {
+            setShowStageConfirm(true);
+            return;
+        }
+
         setSubmitting(true);
         setError("");
 
@@ -148,6 +222,19 @@ export default function CreateEventModal({
                 .map((e) => e.trim())
                 .filter(Boolean);
 
+            // Determine video conference setting
+            const shouldAddVideo =
+                linkToApplication && selectedApplication
+                    ? selectedPlatform === "google_meet" ||
+                      selectedPlatform === "microsoft_teams"
+                    : addVideo;
+
+            // Stage promotion if confirmed
+            if (stageConfirmPending && selectedApplication) {
+                await promoteToInterview(selectedApplication.id);
+            }
+
+            // Create calendar event
             const res = (await client.post(
                 `/integrations/calendar/${selectedConnection.id}/events`,
                 {
@@ -158,9 +245,25 @@ export default function CreateEventModal({
                     end_date_time: endDateTime,
                     time_zone: timeZone,
                     attendee_emails: emails.length > 0 ? emails : undefined,
-                    add_video_conference: addVideo,
+                    add_video_conference: shouldAddVideo,
                 },
             )) as { data: CalendarEvent };
+
+            // Create interview record if linked to application with splits_video
+            if (
+                linkToApplication &&
+                selectedApplication &&
+                selectedPlatform === "splits_video"
+            ) {
+                await client.post("/interviews", {
+                    application_id: selectedApplication.id,
+                    scheduled_at: startDateTime,
+                    duration_minutes: duration,
+                    meeting_platform: "splits_video",
+                    calendar_event_id: res.data.id,
+                    time_zone: timeZone,
+                });
+            }
 
             onSuccess?.(res.data);
             onClose();
@@ -171,19 +274,37 @@ export default function CreateEventModal({
         }
     };
 
+    const handleStageConfirm = (confirmed: boolean) => {
+        setShowStageConfirm(false);
+        if (confirmed) {
+            setStageConfirmPending(true);
+            // Re-trigger submit with stage promotion
+            setTimeout(() => handleSubmit(), 0);
+        }
+    };
+
     /* Derived */
     const noConnections = !loading && connections.length === 0;
     const stepIndex = STEPS.findIndex((s) => s.key === step);
+    const titleRequired = linkToApplication ? !!selectedApplication : !!title;
     const nextDisabled =
         loading ||
         noConnections ||
         !selectedCalendar ||
-        !title ||
+        !titleRequired ||
         !date ||
         !startTime;
 
     const isMicrosoft =
         selectedConnection?.provider_slug.startsWith("microsoft_");
+    const hasGoogleConnection = connections.some(
+        (c) =>
+            c.provider_slug.includes("google") && c.status === "active",
+    );
+    const hasMicrosoftConnection = connections.some(
+        (c) =>
+            c.provider_slug.includes("microsoft") && c.status === "active",
+    );
 
     return (
         <ModalPortal>
@@ -201,7 +322,11 @@ export default function CreateEventModal({
                 submitting={submitting}
                 nextDisabled={nextDisabled}
                 nextLabel="Continue"
-                submitLabel="Create Event"
+                submitLabel={
+                    linkToApplication && selectedPlatform === "splits_video"
+                        ? "Create Event & Interview"
+                        : "Create Event"
+                }
                 submittingLabel="Creating..."
                 maxWidth="max-w-2xl"
                 footer={
@@ -242,7 +367,7 @@ export default function CreateEventModal({
                         </p>
                         <a
                             href="/portal/integrations"
-                            className="btn btn-primary btn-sm rounded-none"
+                            className="btn btn-primary btn-sm"
                         >
                             <i className="fa-duotone fa-regular fa-plug" />
                             Connect Calendar
@@ -253,6 +378,65 @@ export default function CreateEventModal({
                 {/* Step 1: Details */}
                 {!loading && !noConnections && step === "details" && (
                     <div className="space-y-4">
+                        {/* Link to Application toggle */}
+                        <div className="flex items-center justify-between px-4 py-3 bg-base-200 border border-base-300">
+                            <div className="flex items-center gap-3">
+                                <i className="fa-duotone fa-regular fa-link text-primary" />
+                                <div>
+                                    <p className="text-sm font-bold">
+                                        Link to Application
+                                    </p>
+                                    <p className="text-sm text-base-content/50">
+                                        Schedule an interview for a candidate
+                                    </p>
+                                </div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={linkToApplication}
+                                onChange={(e) =>
+                                    handleLinkToggle(e.target.checked)
+                                }
+                                className="toggle toggle-primary"
+                            />
+                        </div>
+
+                        {/* Application search when linked */}
+                        {linkToApplication && (
+                            <div className="space-y-4">
+                                <ApplicationSearch
+                                    onSelect={handleApplicationSelect}
+                                    selectedApplication={selectedApplication}
+                                />
+
+                                {selectedApplication && (
+                                    <>
+                                        <div className="flex items-center gap-2 px-3 py-2 bg-accent/10 border border-accent/20">
+                                            <i className="fa-duotone fa-regular fa-video text-accent" />
+                                            <span className="badge badge-accent badge-sm">
+                                                Interview
+                                            </span>
+                                            <span className="text-sm text-base-content/60">
+                                                Title auto-generated from
+                                                application
+                                            </span>
+                                        </div>
+
+                                        <PlatformSelector
+                                            selectedPlatform={selectedPlatform}
+                                            onSelect={setSelectedPlatform}
+                                            hasGoogleConnection={
+                                                hasGoogleConnection
+                                            }
+                                            hasMicrosoftConnection={
+                                                hasMicrosoftConnection
+                                            }
+                                        />
+                                    </>
+                                )}
+                            </div>
+                        )}
+
                         {/* Connection selector */}
                         {connections.length > 1 && (
                             <fieldset>
@@ -323,18 +507,35 @@ export default function CreateEventModal({
                             </fieldset>
                         )}
 
-                        <fieldset>
-                            <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                Event Title
-                            </legend>
-                            <input
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Meeting, Interview, Call..."
-                                className="input w-full rounded-none"
-                            />
-                        </fieldset>
+                        {/* Title — only editable when NOT linked */}
+                        {!linkToApplication && (
+                            <fieldset>
+                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                    Event Title
+                                </legend>
+                                <input
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="Meeting, Interview, Call..."
+                                    className="input w-full"
+                                />
+                            </fieldset>
+                        )}
+
+                        {linkToApplication && selectedApplication && (
+                            <fieldset>
+                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                    Event Title
+                                </legend>
+                                <input
+                                    type="text"
+                                    value={title}
+                                    readOnly
+                                    className="input w-full bg-base-200 cursor-not-allowed"
+                                />
+                            </fieldset>
+                        )}
 
                         <div className="grid grid-cols-2 gap-4">
                             <fieldset>
@@ -346,7 +547,7 @@ export default function CreateEventModal({
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
                                     min={new Date().toISOString().split("T")[0]}
-                                    className="input w-full rounded-none"
+                                    className="input w-full"
                                 />
                             </fieldset>
                             <fieldset>
@@ -359,7 +560,7 @@ export default function CreateEventModal({
                                     onChange={(e) =>
                                         setStartTime(e.target.value)
                                     }
-                                    className="input w-full rounded-none"
+                                    className="input w-full"
                                 />
                             </fieldset>
                         </div>
@@ -373,7 +574,7 @@ export default function CreateEventModal({
                                 onChange={(e) =>
                                     setDuration(Number(e.target.value))
                                 }
-                                className="select w-full rounded-none"
+                                className="select w-full"
                             >
                                 <option value={15}>15 minutes</option>
                                 <option value={30}>30 minutes</option>
@@ -393,7 +594,7 @@ export default function CreateEventModal({
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Notes, agenda, details..."
                                 rows={3}
-                                className="textarea w-full rounded-none"
+                                className="textarea w-full"
                             />
                         </fieldset>
 
@@ -408,34 +609,39 @@ export default function CreateEventModal({
                                     setAttendeeEmails(e.target.value)
                                 }
                                 placeholder="email1@example.com, email2@example.com"
-                                className="input w-full rounded-none"
+                                className="input w-full"
                             />
                             <p className="text-sm text-base-content/40 mt-1">
                                 Comma-separated email addresses
                             </p>
                         </fieldset>
 
-                        <label className="flex items-center gap-3 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={addVideo}
-                                onChange={(e) => setAddVideo(e.target.checked)}
-                                className="checkbox checkbox-sm checkbox-primary"
-                            />
-                            <span className="text-sm font-semibold">
-                                {isMicrosoft ? (
-                                    <>
-                                        <i className="fa-brands fa-microsoft mr-1.5 text-primary" />
-                                        Add Teams meeting link
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-brands fa-google mr-1.5 text-primary" />
-                                        Add Google Meet link
-                                    </>
-                                )}
-                            </span>
-                        </label>
+                        {/* Video conference — only show when NOT linked */}
+                        {!linkToApplication && (
+                            <label className="flex items-center gap-3 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={addVideo}
+                                    onChange={(e) =>
+                                        setAddVideo(e.target.checked)
+                                    }
+                                    className="checkbox checkbox-sm checkbox-primary"
+                                />
+                                <span className="text-sm font-semibold">
+                                    {isMicrosoft ? (
+                                        <>
+                                            <i className="fa-brands fa-microsoft mr-1.5 text-primary" />
+                                            Add Teams meeting link
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa-brands fa-google mr-1.5 text-primary" />
+                                            Add Google Meet link
+                                        </>
+                                    )}
+                                </span>
+                            </label>
+                        )}
                     </div>
                 )}
 
@@ -451,9 +657,17 @@ export default function CreateEventModal({
                                     <p className="text-sm font-bold text-base-content/50 uppercase">
                                         Title
                                     </p>
-                                    <p className="text-sm font-semibold">
-                                        {title}
-                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm font-semibold">
+                                            {title}
+                                        </p>
+                                        {linkToApplication &&
+                                            selectedApplication && (
+                                                <span className="badge badge-accent badge-sm">
+                                                    Interview
+                                                </span>
+                                            )}
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
@@ -461,13 +675,14 @@ export default function CreateEventModal({
                                             Date
                                         </p>
                                         <p className="text-sm font-semibold">
-                                            {new Date(
-                                                date + "T00:00:00",
-                                            ).toLocaleDateString("en-US", {
-                                                weekday: "long",
-                                                month: "long",
-                                                day: "numeric",
-                                            })}
+                                            {date &&
+                                                new Date(
+                                                    date + "T00:00:00",
+                                                ).toLocaleDateString("en-US", {
+                                                    weekday: "long",
+                                                    month: "long",
+                                                    day: "numeric",
+                                                })}
                                         </p>
                                     </div>
                                     <div>
@@ -487,6 +702,23 @@ export default function CreateEventModal({
                                         {selectedCalendar?.summary}
                                     </p>
                                 </div>
+                                {linkToApplication &&
+                                    selectedApplication && (
+                                        <div>
+                                            <p className="text-sm font-bold text-base-content/50 uppercase">
+                                                Platform
+                                            </p>
+                                            <p className="text-sm font-semibold">
+                                                {selectedPlatform ===
+                                                "splits_video"
+                                                    ? "Splits Network Video"
+                                                    : selectedPlatform ===
+                                                        "google_meet"
+                                                      ? "Google Meet"
+                                                      : "Microsoft Teams"}
+                                            </p>
+                                        </div>
+                                    )}
                                 {description && (
                                     <div>
                                         <p className="text-sm font-bold text-base-content/50 uppercase">
@@ -507,7 +739,7 @@ export default function CreateEventModal({
                                         </p>
                                     </div>
                                 )}
-                                {addVideo && (
+                                {!linkToApplication && addVideo && (
                                     <div className="flex items-center gap-2 pt-1">
                                         <i
                                             className={`${isMicrosoft ? "fa-brands fa-microsoft" : "fa-brands fa-google"} text-primary text-sm`}
@@ -524,6 +756,44 @@ export default function CreateEventModal({
                     </div>
                 )}
             </BaselWizardModal>
+
+            {/* Stage promotion confirmation dialog */}
+            {showStageConfirm && selectedApplication && (
+                <dialog className="modal modal-open">
+                    <div className="modal-box max-w-sm">
+                        <h3 className="font-bold text-lg">
+                            Move to Interview Stage?
+                        </h3>
+                        <p className="text-sm text-base-content/60 mt-2">
+                            {selectedApplication.candidateName} is currently at{" "}
+                            <span className="font-bold">
+                                {selectedApplication.stage}
+                            </span>{" "}
+                            stage. Move to{" "}
+                            <span className="font-bold">interview</span> stage?
+                        </p>
+                        <div className="modal-action">
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => handleStageConfirm(false)}
+                            >
+                                No, Cancel
+                            </button>
+                            <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => handleStageConfirm(true)}
+                            >
+                                Yes, Move to Interview
+                            </button>
+                        </div>
+                    </div>
+                    <form method="dialog" className="modal-backdrop">
+                        <button onClick={() => handleStageConfirm(false)}>
+                            close
+                        </button>
+                    </form>
+                </dialog>
+            )}
         </ModalPortal>
     );
 }

@@ -9,7 +9,7 @@ import CalendarSplitView from "@/components/basel/calendar/calendar-split-view";
 import CreateEventModal from "@/components/basel/calendar/create-event-modal";
 
 function CalendarPageInner() {
-    const { showCreate, closeCreate, refresh } = useCalendar();
+    const { showCreate, closeCreate, refresh, prefillTime } = useCalendar();
 
     return (
         <>
@@ -64,6 +64,8 @@ function CalendarPageInner() {
                         closeCreate();
                         refresh();
                     }}
+                    prefillDate={prefillTime?.date}
+                    prefillStartTime={prefillTime?.startTime}
                 />
             )}
         </>
