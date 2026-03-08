@@ -10,24 +10,24 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 43 (2 of 5 in v10.0) — Video App Infrastructure
-Plan: 2 of 4 complete
+Plan: 3 of 4 complete
 Status: In progress
-Last activity: 2026-03-08 — Completed 43-02-PLAN.md (Magic-Link Join Flow)
+Last activity: 2026-03-08 — Completed 43-03-PLAN.md (Active Call Experience)
 
-Progress: [██████░░░░░░░░░░░░░░] 6/20 plans (30%)
+Progress: [███████░░░░░░░░░░░░░] 7/20 plans (35%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 6
+- v10.0 plans completed: 7
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
-| 43-video-app-infrastructure | 2/4 | 7min | 3.5min |
+| 43-video-app-infrastructure | 3/4 | 10min | 3.3min |
 
 ## Accumulated Context
 
@@ -55,6 +55,9 @@ Recent decisions affecting current work:
 - [43-02]: SessionStorage keyed by callId to pass LiveKit token between join and call pages
 - [43-02]: First participant in exchange response treated as current user for identity display
 - [43-02]: Server-side token length validation (32+ chars) before client rendering
+- [43-03]: LiveKitRoom wraps entire CallExperience; connect gated on state (connecting|in-call)
+- [43-03]: Prep state auto-skips to lobby since identity confirmation happens in join flow
+- [43-03]: Inner CallStateRouter component pattern for hooks requiring LiveKit context
 
 ### Pending Todos
 
@@ -69,9 +72,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 43-02-PLAN.md (Magic-Link Join Flow)
+Stopped at: Completed 43-03-PLAN.md (Active Call Experience)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (43-02 complete — Join flow with token exchange, identity confirmation, branded error pages)*
+*Last updated: 2026-03-08 (43-03 complete — Active call page with 5-state flow, type adapter, reconnection overlay, side panel, call-ended screen)*
