@@ -33,6 +33,10 @@ export { PostCallSummary } from './components/post-call-summary';
 export { ParticipantSidebar } from './components/participant-sidebar';
 export { ScreenShareTile } from './components/screen-share-tile';
 
+// Notes components (38-03)
+export { NotesPanel } from './components/notes-panel';
+export { useInterviewNotes } from './hooks/use-interview-notes';
+
 // Recording components (36-04)
 export { RecordingConsent } from './components/recording-consent';
 export { RecordingIndicator } from './components/recording-indicator';

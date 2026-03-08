@@ -12,12 +12,16 @@ interface VideoControlsProps {
     isRecording?: boolean;
     onStopRecording?: () => void;
     canStopRecording?: boolean;
+    onNotesToggle?: () => void;
+    notesOpen?: boolean;
 }
 
 export function VideoControls({
     isRecording,
     onStopRecording,
     canStopRecording,
+    onNotesToggle,
+    notesOpen,
 }: VideoControlsProps = {}) {
     return (
         <div className="bg-base-300/90 backdrop-blur-md z-20">
@@ -56,6 +60,17 @@ export function VideoControls({
                 >
                     <i className="fa-duotone fa-regular fa-screen-share" />
                 </TrackToggle>
+
+                {/* Notes toggle */}
+                {onNotesToggle && (
+                    <button
+                        className={`btn btn-circle btn-sm lg:btn-md ${notesOpen ? 'btn-primary' : ''}`}
+                        onClick={onNotesToggle}
+                        aria-label={notesOpen ? 'Close notes' : 'Open notes'}
+                    >
+                        <i className="fa-duotone fa-regular fa-note-sticky" />
+                    </button>
+                )}
 
                 {/* Device settings dropdown */}
                 <div className="dropdown dropdown-top">
