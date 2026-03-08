@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { InterviewRepository } from './repository';
 import { InterviewService } from './service';
+import { TokenService } from './token-service';
 import { requireUserContext } from '../shared/helpers';
 import { IEventPublisher } from '../shared/events';
 
@@ -8,6 +9,8 @@ interface RegisterInterviewRoutesConfig {
     supabaseUrl: string;
     supabaseKey: string;
     eventPublisher: IEventPublisher;
+    livekitApiKey: string;
+    livekitApiSecret: string;
 }
 
 export async function registerInterviewRoutes(
@@ -19,6 +22,11 @@ export async function registerInterviewRoutes(
         config.supabaseKey,
     );
     const service = new InterviewService(repository, config.eventPublisher);
+    const tokenService = new TokenService(
+        repository,
+        config.livekitApiKey,
+        config.livekitApiSecret,
+    );
 
     // POST /api/v2/interviews - Create interview
     app.post('/api/v2/interviews', async (request, reply) => {
@@ -113,6 +121,45 @@ export async function registerInterviewRoutes(
             );
 
             return reply.send({ data: interview });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // POST /api/v2/interviews/join - Magic link token exchange (NO AUTH REQUIRED)
+    // Candidates use magic links to join interviews without Clerk authentication
+    app.post('/api/v2/interviews/join', async (request, reply) => {
+        try {
+            const body = request.body as { token?: string };
+
+            if (!body?.token) {
+                return reply.code(400).send({ error: 'token is required' });
+            }
+
+            const result = await tokenService.exchangeMagicLink(body.token);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // POST /api/v2/interviews/:id/token - Authenticated token generation
+    // Requires x-clerk-user-id header (authenticated users)
+    app.post('/api/v2/interviews/:id/token', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+
+            const result = await tokenService.generateAuthenticatedToken(
+                id,
+                clerkUserId,
+            );
+
+            return reply.send({ data: result });
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 400)

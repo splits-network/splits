@@ -117,11 +117,20 @@ async function main() {
     outboxWorker.start();
     logger.info('Outbox worker started - events will be durably delivered');
 
+    const livekitApiKey = process.env.LIVEKIT_API_KEY || '';
+    const livekitApiSecret = process.env.LIVEKIT_API_SECRET || '';
+
+    if (!livekitApiKey || !livekitApiSecret) {
+        logger.warn('LIVEKIT_API_KEY or LIVEKIT_API_SECRET not set - token generation will fail');
+    }
+
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
         rabbitMqUrl: rabbitConfig.url,
         eventPublisher: outboxPublisher,
+        livekitApiKey,
+        livekitApiSecret,
     });
 
     app.get("/health", async (request, reply) => {

@@ -7,6 +7,8 @@ interface RegisterConfig {
     supabaseKey: string;
     rabbitMqUrl: string;
     eventPublisher: IEventPublisher;
+    livekitApiKey: string;
+    livekitApiSecret: string;
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
@@ -14,5 +16,7 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         supabaseUrl: config.supabaseUrl,
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,
+        livekitApiKey: config.livekitApiKey,
+        livekitApiSecret: config.livekitApiSecret,
     });
 }

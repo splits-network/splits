@@ -211,6 +211,17 @@ export class InterviewRepository {
         };
     }
 
+    async updateRoomName(id: string, roomName: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('interviews')
+            .update({ room_name: roomName, updated_at: new Date().toISOString() })
+            .eq('id', id);
+
+        if (error) {
+            throw error;
+        }
+    }
+
     async updateStatus(
         id: string,
         status: InterviewStatus,
