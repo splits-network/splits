@@ -1,7 +1,16 @@
 import { useState, useCallback } from 'react';
+import { SplitsApiClient } from '@splits-network/shared-api-client';
 import type { TokenResult } from '../types';
 
-export function useInterviewToken(apiBaseUrl: string) {
+type GetTokenFn = () => Promise<string | null>;
+
+/**
+ * Hook for fetching LiveKit interview tokens.
+ *
+ * @param apiBaseUrl - Gateway base URL (e.g. http://localhost:3000)
+ * @param getToken - Clerk getToken for authenticated calls (omit for magic link only)
+ */
+export function useInterviewToken(apiBaseUrl: string, getToken?: GetTokenFn) {
     const [tokenData, setTokenData] = useState<TokenResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -11,20 +20,18 @@ export function useInterviewToken(apiBaseUrl: string) {
             setLoading(true);
             setError(null);
             try {
-                const res = await fetch(
-                    `${apiBaseUrl}/api/v2/interviews/${interviewId}/token`,
-                    {
-                        method: 'POST',
-                        credentials: 'include',
-                    },
+                const authToken = getToken ? await getToken() : null;
+                const client = new SplitsApiClient({
+                    baseUrl: apiBaseUrl,
+                    authToken: authToken || undefined,
+                });
+
+                const result = await client.post<{ data: TokenResult }>(
+                    `/interviews/${interviewId}/token`,
                 );
-                if (!res.ok) {
-                    const body = await res.json().catch(() => ({}));
-                    throw new Error(body.error || 'Failed to get token');
-                }
-                const { data } = await res.json();
+                const data = result.data;
                 setTokenData(data);
-                return data as TokenResult;
+                return data;
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : 'Failed to get token';
                 setError(message);
@@ -33,6 +40,7 @@ export function useInterviewToken(apiBaseUrl: string) {
                 setLoading(false);
             }
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [apiBaseUrl],
     );
 
@@ -41,18 +49,14 @@ export function useInterviewToken(apiBaseUrl: string) {
             setLoading(true);
             setError(null);
             try {
-                const res = await fetch(`${apiBaseUrl}/api/v2/interviews/join`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: magicToken }),
-                });
-                if (!res.ok) {
-                    const body = await res.json().catch(() => ({}));
-                    throw new Error(body.error || 'Invalid or expired link');
-                }
-                const { data } = await res.json();
+                const client = new SplitsApiClient({ baseUrl: apiBaseUrl });
+                const result = await client.post<{ data: TokenResult }>(
+                    '/interviews/join',
+                    { token: magicToken },
+                );
+                const data = result.data;
                 setTokenData(data);
-                return data as TokenResult;
+                return data;
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : 'Invalid or expired link';
                 setError(message);

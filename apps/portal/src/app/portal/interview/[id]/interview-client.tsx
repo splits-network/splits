@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { LiveKitRoom } from '@livekit/components-react';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useAuth } from '@clerk/nextjs';
 import {
     type CallState,
     type LocalUserChoices,
@@ -25,6 +25,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_GATEWAY_URL || process.env.NEXT_PUB
 
 export function InterviewClient({ interviewId }: InterviewClientProps) {
     const { user } = useUser();
+    const { getToken } = useAuth();
     const [callState, setCallState] = useState<CallState>('lobby');
     const [livekitToken, setLivekitToken] = useState<string | null>(null);
     const [userChoices, setUserChoices] = useState<LocalUserChoices | null>(null);
@@ -32,7 +33,7 @@ export function InterviewClient({ interviewId }: InterviewClientProps) {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const tokenFetchedRef = useRef(false);
-    const { fetchAuthenticatedToken, loading, error } = useInterviewToken(API_BASE);
+    const { fetchAuthenticatedToken, loading, error } = useInterviewToken(API_BASE, getToken);
     const callDuration = useCallDuration();
 
     // Fetch interview context on mount (but NOT the LiveKit JWT yet)
