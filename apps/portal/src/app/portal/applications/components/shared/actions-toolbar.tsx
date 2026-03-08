@@ -410,6 +410,7 @@ export default function ActionsToolbar({
                 "company_review",
                 "company_feedback",
                 "interview",
+                "offer",
             ].includes(application.stage ?? ""),
         sendEmail: isRecruiter || isCompanyUser || isAdmin,
         joinInterview: !!scheduledInterview,
