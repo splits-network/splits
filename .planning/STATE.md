@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 34 of 38 (Video Call Experience)
-Plan: 03 of 06
+Plan: 05 of 06
 Status: In progress
-Last activity: 2026-03-08 — Completed 34-03-PLAN.md (in-call room components)
+Last activity: 2026-03-08 — Completed 34-05-PLAN.md (candidate interview flow)
 
-Progress: ██████░░░░░░░░░░░░░░ 30%
+Progress: ██████████░░░░░░░░░░ 50%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: ██████░░░░░░░░░░░░░░ 30%
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 6
+- Plans completed: 8
 - Phases completed: 1 (Phase 33)
 
 ## Accumulated Context
@@ -50,6 +50,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Web Audio API for lobby audio meter | 34-02 | LiveKit BarVisualizer requires room context, lobby uses raw tracks |
 | isTrackReference guard for VideoTrack | 34-03 | useTracks returns placeholder union type; narrow before passing to VideoTrack |
 | Always-visible controls bar | 34-03 | Professional interview context needs instant mute access |
+| Splits Network branding on candidate prep page | 34-05 | Not company-branded per CONTEXT.md deferred items |
+| Lobby gate at 10 minutes before start | 34-05 | Prevents early access while allowing reasonable arrival |
+| No auto-redirect for candidate post-call | 34-05 | Candidates close tab themselves; no redirect destination |
 
 ### Pending Todos
 
@@ -64,10 +67,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 34-03-PLAN.md (in-call room components)
+Stopped at: Completed 34-05-PLAN.md (candidate interview flow)
 Resume file: None
-Next: 34-04-PLAN.md
+Next: 34-06-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (34-03 complete)*
+*Last updated: 2026-03-08 (34-05 complete)*
