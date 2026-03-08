@@ -428,6 +428,25 @@ export async function registerInterviewRoutes(
         }
     });
 
+    // GET /api/v2/interviews/:id/transcript - Get interview transcript
+    app.get('/api/v2/interviews/:id/transcript', async (request, reply) => {
+        try {
+            requireUserContext(request);
+            const { id } = request.params as { id: string };
+
+            const transcript = await repository.getTranscriptByInterviewId(id);
+            if (!transcript) {
+                return reply.code(404).send({ error: 'Transcript not found' });
+            }
+
+            return reply.send({ data: transcript });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
     // PATCH /api/v2/interviews/:id - Update interview fields (authenticated)
     // Used for linking calendar events or updating meeting info after creation
     app.patch('/api/v2/interviews/:id', async (request, reply) => {

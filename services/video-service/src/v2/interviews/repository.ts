@@ -687,6 +687,19 @@ export class InterviewRepository {
         return membership?.role === 'admin' || membership?.role === 'owner';
     }
 
+    async getTranscriptByInterviewId(interviewId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('interview_transcripts')
+            .select('*')
+            .eq('interview_id', interviewId)
+            .maybeSingle();
+
+        if (error) {
+            throw error;
+        }
+        return data;
+    }
+
     async findRecordingConsents(interviewId: string): Promise<RecordingConsent[]> {
         const { data, error } = await this.supabase
             .from('interview_recording_consents')
