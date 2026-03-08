@@ -175,7 +175,7 @@ Plans:
   2. LiveKit Egress POSTs recording completion webhook to video-service, triggering the recording_ready event
   3. Recording→Transcription→Summary pipeline completes end-to-end without manual intervention
   4. Candidate can take and save notes during a call using magic link auth (no Clerk session)
-**Plans:** TBD
+**Plans:** 2 plans
 Plans:
 - [ ] 39-01-PLAN.md — Gateway auth bypasses + LiveKit webhook configuration
 - [ ] 39-02-PLAN.md — Candidate notes dual-auth + E2E flow verification
