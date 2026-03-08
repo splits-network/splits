@@ -260,6 +260,9 @@ jobs:
                     --from-literal=supabase-url="${{ secrets.SUPABASE_URL }}" \
                     --from-literal=supabase-anon-key="${{ secrets.SUPABASE_ANON_KEY }}" \
                     --from-literal=supabase-service-role-key="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+                    --from-literal=supabase-s3-endpoint="${{ secrets.SUPABASE_S3_ENDPOINT }}" \
+                    --from-literal=supabase-s3-access-key="${{ secrets.SUPABASE_S3_ACCESS_KEY }}" \
+                    --from-literal=supabase-s3-secret-key="${{ secrets.SUPABASE_S3_SECRET_KEY }}" \
                     --namespace=splits-network \
                     --dry-run=client -o yaml | kubectl apply -f -
 
@@ -316,6 +319,12 @@ jobs:
                     --from-literal=microsoft-client-secret="${{ secrets.MICROSOFT_CLIENT_SECRET }}" \
                     --from-literal=linkedin-client-id="${{ secrets.LINKEDIN_CLIENT_ID }}" \
                     --from-literal=linkedin-client-secret="${{ secrets.LINKEDIN_CLIENT_SECRET }}" \
+                    --namespace=splits-network \
+                    --dry-run=client -o yaml | kubectl apply -f -
+
+                  kubectl create secret generic livekit-secrets \
+                    --from-literal=livekit-api-key="${{ secrets.LIVEKIT_API_KEY }}" \
+                    --from-literal=livekit-api-secret="${{ secrets.LIVEKIT_API_SECRET }}" \
                     --namespace=splits-network \
                     --dry-run=client -o yaml | kubectl apply -f -
 

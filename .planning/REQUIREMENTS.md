@@ -20,8 +20,8 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 - [x] **ROOM-01**: User can conduct a 1:1 video call within the app using LiveKit React components
 - [x] **ROOM-02**: User sees a pre-join lobby with device check (camera, mic, speaker test) and waiting room before entering
-- [ ] **ROOM-03**: User can share their screen during a video call
-- [ ] **ROOM-04**: User can conduct panel interviews with 3-6+ simultaneous participants
+- [x] **ROOM-03**: User can share their screen during a video call
+- [x] **ROOM-04**: User can conduct panel interviews with 3-6+ simultaneous participants
 - [x] **ROOM-05**: User can mute/unmute mic, toggle camera, select devices, and leave the call
 - [x] **ROOM-06**: User sees a connection quality indicator during the call
 
@@ -59,10 +59,10 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 ### Application Integration
 
-- [ ] **INT-01**: Application detail page has a dedicated interviews tab showing all interviews with status, recordings, transcripts, and summaries
-- [ ] **INT-02**: Interviewer can take notes in a side panel during the call, auto-saved and posted to application notes on call end
+- [x] **INT-01**: Application detail page has a dedicated interviews tab showing all interviews with status, recordings, transcripts, and summaries
+- [x] **INT-02**: Interviewer can take notes in a side panel during the call, auto-saved and posted to application notes on call end
 - [x] **INT-03**: `interview.recording_ready` RabbitMQ event triggers the AI transcription + summary pipeline
-- [ ] **INT-04**: Multiple interviews per application are tracked chronologically (multi-round support)
+- [x] **INT-04**: Multiple interviews per application are tracked chronologically (multi-round support)
 
 ## Future Requirements
 
@@ -106,8 +106,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-06 | Phase 33 | Complete |
 | ROOM-01 | Phase 34 | Complete |
 | ROOM-02 | Phase 34 | Complete |
-| ROOM-03 | Phase 38 | Pending |
-| ROOM-04 | Phase 38 | Pending |
+| ROOM-03 | Phase 38 | Complete |
+| ROOM-04 | Phase 38 | Complete |
 | ROOM-05 | Phase 34 | Complete |
 | ROOM-06 | Phase 34 | Complete |
 | SCHED-01 | Phase 35 | Complete |
@@ -120,17 +120,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REC-01 | Phase 36 | Complete |
 | REC-02 | Phase 36 | Complete |
 | REC-03 | Phase 36 | Complete |
-| AI-01 | Phase 37 | Pending |
-| AI-02 | Phase 37 | Pending |
-| AI-03 | Phase 37 | Pending |
+| AI-01 | Phase 37 | Complete |
+| AI-02 | Phase 37 | Complete |
+| AI-03 | Phase 37 | Complete |
 | NOTIF-01 | Phase 35 | Complete |
 | NOTIF-02 | Phase 35 | Complete |
 | NOTIF-03 | Phase 35 | Complete |
 | NOTIF-04 | Phase 35 | Complete |
-| INT-01 | Phase 38 | Pending |
-| INT-02 | Phase 38 | Pending |
+| INT-01 | Phase 38 | Complete |
+| INT-02 | Phase 38 | Complete |
 | INT-03 | Phase 36 | Complete |
-| INT-04 | Phase 38 | Pending |
+| INT-04 | Phase 38 | Complete |
 
 **Coverage:**
 - v9.0 requirements: 33 total

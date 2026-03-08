@@ -9,7 +9,7 @@
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
-- [ ] **v9.0 Video Interviewing** - Phases 33-38 (active)
+- [x] **v9.0 Video Interviewing** - Phases 33-38 (shipped 2026-03-08)
 
 ## Phases
 
@@ -54,7 +54,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 35: Scheduling & Notifications** - Calendar integration, stage triggers, cancel/reschedule, email and in-app notifications
 - [x] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
 - [x] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
-- [ ] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
+- [x] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
 
 ## Phase Details
 
@@ -159,10 +159,10 @@ Plans:
   4. Application detail page has a dedicated interviews tab showing all interviews chronologically with status, recordings, transcripts, and summaries
 **Plans:** 4 plans
 Plans:
-- [ ] 38-01-PLAN.md — Database migration (round_name, interview_notes) + backend API for notes and enriched listing
-- [ ] 38-02-PLAN.md — Panel layout (multi-participant grid) + screen sharing
-- [ ] 38-03-PLAN.md — In-call notes panel with auto-save and auto-post on call end
-- [ ] 38-04-PLAN.md — Interviews tab on application detail page + round naming in schedule modal
+- [x] 38-01-PLAN.md — Database migration (round_name, interview_notes) + backend API for notes and enriched listing
+- [x] 38-02-PLAN.md — Panel layout (multi-participant grid) + screen sharing
+- [x] 38-03-PLAN.md — In-call notes panel with auto-save and auto-post on call end
+- [x] 38-04-PLAN.md — Interviews tab on application detail page + round naming in schedule modal
 
 ## Progress
 
@@ -189,4 +189,4 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 35. Scheduling & Notifications | v9.0 | 10/10 | Complete | 2026-03-08 |
 | 36. Recording & Playback | v9.0 | 6/6 | Complete | 2026-03-08 |
 | 37. AI Pipeline | v9.0 | 3/3 | Complete | 2026-03-08 |
-| 38. Panel, Notes & Polish | v9.0 | 0/4 | Pending | — |
+| 38. Panel, Notes & Polish | v9.0 | 4/4 | Complete | 2026-03-08 |
