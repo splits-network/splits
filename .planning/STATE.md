@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 33 Infrastructure complete
+**Current focus:** v9.0 Video Interviewing — Phase 34 Video Call Experience in progress
 
 ## Current Position
 
-Phase: 33 of 38 (Infrastructure)
-Plan: 03 of 03
-Status: Phase complete
-Last activity: 2026-03-08 — Completed 33-03-PLAN.md (token system + gateway routing)
+Phase: 34 of 38 (Video Call Experience)
+Plan: 01 of 04
+Status: In progress
+Last activity: 2026-03-08 — Completed 34-01-PLAN.md (shared-video package + token enrichment)
 
-Progress: ███░░░░░░░░░░░░░░░░░ 15%
+Progress: ████░░░░░░░░░░░░░░░░ 20%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: ███░░░░░░░░░░░░░░░░░ 15%
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 3
+- Plans completed: 4
 - Phases completed: 1 (Phase 33)
 
 ## Accumulated Context
@@ -44,6 +44,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Room name format: interview-{uuid} | 33-02 | Unique, predictable, no PII exposure |
 | Auth bypass for /join endpoint | 33-03 | Magic link candidates have no Clerk session |
 | Lazy room name assignment | 33-03 | Room name set on first token generation if not already present |
+| Sequential queries for context enrichment | 34-01 | Simpler than complex joins, negligible overhead for once-per-session token endpoint |
+| User names from DB not Clerk API | 34-01 | Self-contained backend, no external API during token generation |
 
 ### Pending Todos
 
@@ -58,10 +60,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 33-03-PLAN.md (token system + gateway routing)
+Stopped at: Completed 34-01-PLAN.md (shared-video package + token enrichment)
 Resume file: None
-Next: Phase 34 planning
+Next: 34-02-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Phase 33 complete)*
+*Last updated: 2026-03-08 (34-01 complete)*
