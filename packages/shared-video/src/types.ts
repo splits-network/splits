@@ -8,6 +8,7 @@ export interface InterviewContext {
     scheduled_at: string;
     scheduled_duration_minutes: number;
     reschedule_count: number;
+    recording_enabled: boolean;
     job: {
         id: string;
         title: string;

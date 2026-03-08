@@ -9,6 +9,7 @@ export type {
 // Hooks
 export { useInterviewToken } from './hooks/use-interview-token';
 export { useCallDuration } from './hooks/use-call-duration';
+export { useRecordingState } from './hooks/use-recording-state';
 
 // Config
 export { getLiveKitUrl, defaultRoomOptions } from './lib/livekit-config';
@@ -27,3 +28,7 @@ export { ParticipantTile } from './components/participant-tile';
 export { SelfViewPip } from './components/self-view-pip';
 export { ConnectionQualityBars } from './components/connection-quality';
 export { PostCallSummary } from './components/post-call-summary';
+
+// Recording components (36-04)
+export { RecordingConsent } from './components/recording-consent';
+export { RecordingIndicator } from './components/recording-indicator';
