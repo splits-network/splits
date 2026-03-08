@@ -24,7 +24,7 @@ export class InterviewRepository {
 
     async createInterview(input: {
         application_id: string;
-        room_name: string;
+        room_name: string | null;
         status: InterviewStatus;
         interview_type: string;
         title: string | null;
@@ -34,6 +34,10 @@ export class InterviewRepository {
         grace_period_seconds: number;
         metadata: Record<string, any> | null;
         created_by: string;
+        calendar_event_id?: string | null;
+        calendar_connection_id?: string | null;
+        meeting_platform?: string;
+        meeting_link?: string | null;
     }): Promise<Interview> {
         const { data, error } = await this.supabase
             .from('interviews')
@@ -495,6 +499,19 @@ export class InterviewRepository {
             throw error;
         }
         return data as InterviewRescheduleRequest;
+    }
+
+    async findRescheduleRequestById(id: string): Promise<InterviewRescheduleRequest | null> {
+        const { data, error } = await this.supabase
+            .from('interview_reschedule_requests')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (error) {
+            throw error;
+        }
+        return data as InterviewRescheduleRequest | null;
     }
 
     async updateRescheduleRequest(

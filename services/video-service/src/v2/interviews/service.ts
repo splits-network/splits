@@ -49,8 +49,11 @@ export class InterviewService {
             );
         }
 
-        // Generate a unique room name
-        const roomName = `interview-${crypto.randomUUID()}`;
+        // Generate a unique room name only for splits_video platform
+        const meetingPlatform = input.meeting_platform ?? 'splits_video';
+        const roomName = meetingPlatform === 'splits_video'
+            ? `interview-${crypto.randomUUID()}`
+            : null;
 
         // Create interview record
         const interview = await this.repository.createInterview({
@@ -65,6 +68,10 @@ export class InterviewService {
             grace_period_seconds: 300, // 5 minutes
             metadata: null,
             created_by: createdByUserId,
+            calendar_event_id: input.calendar_event_id ?? null,
+            calendar_connection_id: input.calendar_connection_id ?? null,
+            meeting_platform: meetingPlatform,
+            meeting_link: input.meeting_link ?? null,
         });
 
         // Add participants
