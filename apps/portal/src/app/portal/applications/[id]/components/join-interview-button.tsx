@@ -13,6 +13,7 @@ interface JoinInterviewButtonProps {
     recordingStartedAt?: string;
     recordingDurationSeconds?: number;
     participantNames?: string[];
+    transcriptStatus?: string | null;
 }
 
 function formatScheduledTime(isoString: string): string {
@@ -34,6 +35,7 @@ export function JoinInterviewButton({
     recordingStartedAt,
     recordingDurationSeconds,
     participantNames,
+    transcriptStatus,
 }: JoinInterviewButtonProps) {
     const isJoinable = status === 'scheduled' || status === 'in_progress';
 
@@ -63,6 +65,7 @@ export function JoinInterviewButton({
                 durationSeconds={recordingDurationSeconds ?? null}
                 participantNames={participantNames ?? []}
                 recordingStatus={recordingStatus}
+                transcriptStatus={transcriptStatus}
             />
         );
     }
