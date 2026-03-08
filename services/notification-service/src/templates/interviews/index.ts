@@ -30,3 +30,12 @@ export type {
     CandidateInterviewRescheduledData,
     CandidateRescheduleAcceptedData,
 } from './candidate-emails';
+
+export {
+    interviewReminderEmail,
+} from './reminder-emails';
+
+export type {
+    InterviewReminderEmailParams,
+    ReminderType,
+} from './reminder-emails';
