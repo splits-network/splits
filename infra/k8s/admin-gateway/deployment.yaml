@@ -13,6 +13,13 @@ spec:
             labels:
                 app: admin-gateway
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: admin-gateway
                   image: ${ACR_SERVER}/admin-gateway:${IMAGE_TAG}

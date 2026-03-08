@@ -13,6 +13,13 @@ spec:
       labels:
         app: document-service
     spec:
+        nodeSelector:
+            agentpool: userpool
+        tolerations:
+            - key: "kubernetes.azure.com/scalesetpriority"
+              operator: "Equal"
+              value: "spot"
+              effect: "NoSchedule"
       containers:
         - name: document-service
           image: ${ACR_SERVER}/document-service:${IMAGE_TAG}

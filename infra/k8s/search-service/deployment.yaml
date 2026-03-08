@@ -13,6 +13,13 @@ spec:
             labels:
                 app: search-service
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: search-service
                   image: ${ACR_SERVER}/search-service:${IMAGE_TAG}

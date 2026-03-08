@@ -13,6 +13,13 @@ spec:
       labels:
         app: content-service
     spec:
+        nodeSelector:
+            agentpool: userpool
+        tolerations:
+            - key: "kubernetes.azure.com/scalesetpriority"
+              operator: "Equal"
+              value: "spot"
+              effect: "NoSchedule"
       containers:
         - name: content-service
           image: ${ACR_SERVER}/content-service:${IMAGE_TAG}

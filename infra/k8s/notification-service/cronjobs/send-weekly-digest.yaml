@@ -31,6 +31,13 @@ spec:
                         component: cron
                         job-type: weekly-digest
                 spec:
+                    nodeSelector:
+                        agentpool: userpool
+                    tolerations:
+                        - key: "kubernetes.azure.com/scalesetpriority"
+                          operator: "Equal"
+                          value: "spot"
+                          effect: "NoSchedule"
                     restartPolicy: Never
 
                     containers:

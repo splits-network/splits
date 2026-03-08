@@ -13,6 +13,13 @@ spec:
             labels:
                 app: candidate
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: candidate
                   image: ${ACR_SERVER}/candidate:${IMAGE_TAG}

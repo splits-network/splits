@@ -13,6 +13,13 @@ spec:
       labels:
         app: ats-service
     spec:
+        nodeSelector:
+            agentpool: userpool
+        tolerations:
+            - key: "kubernetes.azure.com/scalesetpriority"
+              operator: "Equal"
+              value: "spot"
+              effect: "NoSchedule"
       containers:
         - name: ats-service
           image: ${ACR_SERVER}/ats-service:${IMAGE_TAG}

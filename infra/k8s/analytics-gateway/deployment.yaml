@@ -13,6 +13,13 @@ spec:
             labels:
                 app: analytics-gateway
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: analytics-gateway
                   image: ${ACR_SERVER}/analytics-gateway:${IMAGE_TAG}

@@ -13,6 +13,13 @@ spec:
             labels:
                 app: chat-service
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: chat-service
                   image: ${ACR_SERVER}/chat-service:${IMAGE_TAG}

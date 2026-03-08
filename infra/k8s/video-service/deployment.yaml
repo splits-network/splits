@@ -13,6 +13,13 @@ spec:
             labels:
                 app: video-service
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: video-service
                   image: ${ACR_SERVER}/video-service:${IMAGE_TAG}

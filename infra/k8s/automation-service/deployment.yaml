@@ -13,6 +13,13 @@ spec:
       labels:
         app: automation-service
     spec:
+        nodeSelector:
+            agentpool: userpool
+        tolerations:
+            - key: "kubernetes.azure.com/scalesetpriority"
+              operator: "Equal"
+              value: "spot"
+              effect: "NoSchedule"
       containers:
         - name: automation-service
           image: ${ACR_SERVER}/automation-service:${IMAGE_TAG}

@@ -15,6 +15,13 @@ spec:
             labels:
                 app: clamav
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: clamav
                   image: clamav/clamav:latest
