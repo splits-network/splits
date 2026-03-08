@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 36 of 38 (Recording & Playback)
-Plan: 3 of 6
+Plan: 4 of 6
 Status: In progress
-Last activity: 2026-03-08 — Completed 36-03-PLAN.md (recording API routes)
+Last activity: 2026-03-08 — Completed 36-04-PLAN.md (recording consent UX)
 
 Progress: ██████████████████████░░ 96%
 
@@ -23,7 +23,7 @@ Progress: ██████████████████████░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 27
+- Plans completed: 28
 - Phases completed: 3 (Phases 33-35)
 
 ## Accumulated Context
@@ -89,6 +89,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Interviewer-only recording start/stop | 36-03 | Only interviewer participant role can control recording |
 | Dual auth on consent endpoint | 36-03 | Magic link token OR Clerk header for candidate/authenticated user consent |
 | Participant-gated blob URL | 36-03 | Only interview participants see recording blob URL |
+| Warning-themed consent card | 36-04 | Draws attention without being alarming (bg-warning/5) |
+| Recording opt-in per interview | 36-04 | Default unchecked; auto-record means auto-start IF enabled |
 
 ### Pending Todos
 
@@ -103,10 +105,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 36-03-PLAN.md (recording API routes)
+Stopped at: Completed 36-04-PLAN.md (recording consent UX)
 Resume file: None
-Next: 36-04-PLAN.md
+Next: 36-05-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 36-03 complete)*
+*Last updated: 2026-03-08 (Plan 36-04 complete)*
