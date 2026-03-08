@@ -17,11 +17,11 @@ export class InterviewService {
         input: CreateInterviewInput,
         createdByUserId: string,
     ): Promise<InterviewWithParticipants> {
-        // Validate application exists
+        // Validate application exists and fetch candidate user_id
         const { data: application, error: appError } = await this.repository
             .getSupabase()
             .from('applications')
-            .select('id')
+            .select('id, candidate:candidates(user_id)')
             .eq('id', input.application_id)
             .maybeSingle();
 
@@ -41,12 +41,23 @@ export class InterviewService {
             );
         }
 
-        // Validate participants
+        // Auto-resolve participants from application when array is empty
         if (!input.participants || input.participants.length === 0) {
-            throw Object.assign(
-                new Error('At least one participant is required'),
-                { statusCode: 400 },
-            );
+            const resolvedCreatorId = await this.repository.resolveUserId(createdByUserId);
+
+            const candidateArr = application.candidate as { user_id: string }[] | null;
+            const candidateUserId = candidateArr?.[0]?.user_id;
+            if (!candidateUserId) {
+                throw Object.assign(
+                    new Error('Could not resolve candidate for this application'),
+                    { statusCode: 400 },
+                );
+            }
+
+            input.participants = [
+                { user_id: resolvedCreatorId, role: 'interviewer' },
+                { user_id: candidateUserId, role: 'candidate' },
+            ];
         }
 
         // Generate a unique room name only for splits_video platform
