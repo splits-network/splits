@@ -44,7 +44,16 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         },
     );
 
-    await registerRecordingRoutes(app, { repository, recordingService, tokenService });
+    await registerRecordingRoutes(app, {
+        repository,
+        recordingService,
+        tokenService,
+        azureConfig: {
+            accountName: config.azureStorageAccountName,
+            accountKey: config.azureStorageAccountKey,
+            containerName: config.azureStorageContainerName,
+        },
+    });
     await registerRecordingWebhook(app, {
         recordingService,
         eventPublisher: config.eventPublisher,

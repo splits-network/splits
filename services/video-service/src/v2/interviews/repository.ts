@@ -655,6 +655,37 @@ export class InterviewRepository {
         return data as RecordingConsent;
     }
 
+    async isCompanyAdminForInterview(
+        applicationId: string,
+        userId: string,
+    ): Promise<boolean> {
+        // Trace: application -> job -> company -> check user is company admin
+        const { data: application } = await this.supabase
+            .from('applications')
+            .select('job_id')
+            .eq('id', applicationId)
+            .maybeSingle();
+
+        if (!application?.job_id) return false;
+
+        const { data: job } = await this.supabase
+            .from('jobs')
+            .select('company_id')
+            .eq('id', application.job_id)
+            .maybeSingle();
+
+        if (!job?.company_id) return false;
+
+        const { data: membership } = await this.supabase
+            .from('company_members')
+            .select('role')
+            .eq('company_id', job.company_id)
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        return membership?.role === 'admin' || membership?.role === 'owner';
+    }
+
     async findRecordingConsents(interviewId: string): Promise<RecordingConsent[]> {
         const { data, error } = await this.supabase
             .from('interview_recording_consents')

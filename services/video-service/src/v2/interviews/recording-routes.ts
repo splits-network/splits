@@ -3,18 +3,26 @@ import { InterviewRepository } from './repository';
 import { RecordingService } from './recording-service';
 import { TokenService } from './token-service';
 import { requireUserContext } from '../shared/helpers';
+import { generateSasUrl } from './sas-url-helper';
+
+interface AzureConfig {
+    accountName: string;
+    accountKey: string;
+    containerName: string;
+}
 
 interface RecordingRoutesConfig {
     repository: InterviewRepository;
     recordingService: RecordingService;
     tokenService: TokenService;
+    azureConfig: AzureConfig;
 }
 
 export async function registerRecordingRoutes(
     app: FastifyInstance,
     config: RecordingRoutesConfig,
 ) {
-    const { repository, recordingService, tokenService } = config;
+    const { repository, recordingService, tokenService, azureConfig } = config;
 
     // POST /api/v2/interviews/:id/recording/start - Start recording (authenticated, interviewer only)
     app.post('/api/v2/interviews/:id/recording/start', async (request, reply) => {
@@ -102,6 +110,63 @@ export async function registerRecordingRoutes(
             return reply.code(error.statusCode || 400).send({ error: error.message });
         }
     });
+
+    // GET /api/v2/interviews/:id/recording/playback-url - Get time-limited SAS URL for playback
+    app.get('/api/v2/interviews/:id/recording/playback-url', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+
+            const interview = await repository.findByIdWithParticipants(id);
+            if (!interview) {
+                return reply.code(404).send({ error: 'Interview not found' });
+            }
+
+            if (interview.recording_status !== 'ready' || !interview.recording_blob_url) {
+                return reply.code(400).send({ error: 'Recording is not available' });
+            }
+
+            await verifyRecordingAccess(repository, interview, clerkUserId);
+
+            const result = generateSasUrl(azureConfig, {
+                blobUrl: interview.recording_blob_url,
+                containerName: azureConfig.containerName,
+            });
+
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 400).send({ error: error.message });
+        }
+    });
+
+    // GET /api/v2/interviews/:id/recording/download-url - Get time-limited SAS URL for download
+    app.get('/api/v2/interviews/:id/recording/download-url', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+
+            const interview = await repository.findByIdWithParticipants(id);
+            if (!interview) {
+                return reply.code(404).send({ error: 'Interview not found' });
+            }
+
+            if (interview.recording_status !== 'ready' || !interview.recording_blob_url) {
+                return reply.code(400).send({ error: 'Recording is not available' });
+            }
+
+            await verifyRecordingAccess(repository, interview, clerkUserId);
+
+            const result = generateSasUrl(azureConfig, {
+                blobUrl: interview.recording_blob_url,
+                containerName: azureConfig.containerName,
+                contentDisposition: `attachment; filename=interview-recording-${id}.mp4`,
+            });
+
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 400).send({ error: error.message });
+        }
+    });
 }
 
 async function verifyInterviewer(
@@ -152,4 +217,28 @@ async function isUserParticipant(
     } catch {
         return false;
     }
+}
+
+async function verifyRecordingAccess(
+    repository: InterviewRepository,
+    interview: { id: string; application_id: string; participants: Array<{ user_id: string }> },
+    clerkUserId: string,
+): Promise<void> {
+    const userId = await repository.resolveUserId(clerkUserId);
+
+    // Check if user is an interview participant
+    const isParticipant = interview.participants.some((p) => p.user_id === userId);
+    if (isParticipant) return;
+
+    // Check if user is a company admin for the job's company
+    const isCompanyAdmin = await repository.isCompanyAdminForInterview(
+        interview.application_id,
+        userId,
+    );
+    if (isCompanyAdmin) return;
+
+    throw Object.assign(
+        new Error('You do not have access to this recording'),
+        { statusCode: 403 },
+    );
 }
