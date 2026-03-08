@@ -94,7 +94,7 @@ Plans:
 - [x] 34-06-PLAN.md — Integration verification and build validation
 
 ### Phase 35: Scheduling & Notifications
-**Goal**: Users can schedule, reschedule, and cancel interviews with Google Calendar sync and all participants are notified at every step
+**Goal**: Users can schedule, reschedule, and cancel interviews with Google Calendar and Microsoft Outlook sync, and all participants are notified at every step
 **Depends on**: Phase 34
 **Requirements**: SCHED-01, SCHED-02, SCHED-03, SCHED-04, NOTIF-01, NOTIF-02, NOTIF-03, NOTIF-04
 **Success Criteria** (what must be TRUE):
@@ -103,7 +103,18 @@ Plans:
   3. User can cancel or reschedule an interview, which updates the calendar event and notifies all participants
   4. Scheduling UI shows interviewer free/busy slots from Google Calendar to prevent double-booking
   5. Participants receive email confirmation when scheduled, reminders at 24h and 1h before, and notification on cancellation/reschedule
-**Plans**: TBD
+**Plans:** 10 plans
+Plans:
+- [ ] 35-01-PLAN.md — Database schema extensions (calendar linking, working hours, reschedule tracking)
+- [ ] 35-02-PLAN.md — Integration-service calendar extensions (update/delete, ICS, webhooks)
+- [ ] 35-03-PLAN.md — Video-service scheduling APIs (reschedule, slots, gateway routes)
+- [ ] 35-04-PLAN.md — ScheduleInterviewModal overhaul (platform choice, slots, auto-title)
+- [ ] 35-05-PLAN.md — Calendar page enhancements (slot-click, app linking, interview styling)
+- [ ] 35-06-PLAN.md — Integrations page calendar preferences + stage trigger toast
+- [ ] 35-07-PLAN.md — Reschedule and cancel flows (modals, dialogs, calendar sync)
+- [ ] 35-08-PLAN.md — Notification consumer + email templates (scheduled, cancelled, rescheduled)
+- [ ] 35-09-PLAN.md — Interview reminder system (24h, 1h, 10min scheduled job)
+- [ ] 35-10-PLAN.md — Candidate reschedule flow + in-app countdown notifications
 
 ### Phase 36: Recording & Playback
 **Goal**: Interviews are recorded server-side with consent, stored durably, and can be played back from the application page
@@ -159,7 +170,7 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | ~~32. Candidate UI~~ | ~~v8.0~~ | — | Shelved | — |
 | 33. Infrastructure | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 34. Video Call Experience | v9.0 | 6/6 | Complete | 2026-03-07 |
-| 35. Scheduling & Notifications | v9.0 | 0/TBD | Pending | — |
+| 35. Scheduling & Notifications | v9.0 | 0/10 | Pending | — |
 | 36. Recording & Playback | v9.0 | 0/TBD | Pending | — |
 | 37. AI Pipeline | v9.0 | 0/TBD | Pending | — |
 | 38. Panel, Notes & Polish | v9.0 | 0/TBD | Pending | — |
