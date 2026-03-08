@@ -9,7 +9,7 @@
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
-- [ ] **v9.0 Video Interviewing** - Phases 33-39 (Phase 39: gap closure)
+- [x] **v9.0 Video Interviewing** - Phases 33-39 (shipped 2026-03-08)
 
 ## Phases
 
@@ -55,7 +55,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
 - [x] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
 - [x] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
-- [ ] **Phase 39: Integration Wiring & Auth Fixes** - Gateway auth bypasses, LiveKit webhook config, candidate notes dual-auth
+- [x] **Phase 39: Integration Wiring & Auth Fixes** - Gateway auth bypasses, LiveKit webhook config, candidate notes dual-auth
 
 ## Phase Details
 
@@ -177,8 +177,8 @@ Plans:
   4. Candidate can take and save notes during a call using magic link auth (no Clerk session)
 **Plans:** 2 plans
 Plans:
-- [ ] 39-01-PLAN.md — Gateway auth bypasses + LiveKit webhook configuration
-- [ ] 39-02-PLAN.md — Candidate notes dual-auth + E2E flow verification
+- [x] 39-01-PLAN.md — Gateway auth bypasses + LiveKit webhook configuration
+- [x] 39-02-PLAN.md — Candidate notes dual-auth + E2E flow verification
 
 ## Progress
 
@@ -206,4 +206,4 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 36. Recording & Playback | v9.0 | 6/6 | Complete | 2026-03-08 |
 | 37. AI Pipeline | v9.0 | 3/3 | Complete | 2026-03-08 |
 | 38. Panel, Notes & Polish | v9.0 | 4/4 | Complete | 2026-03-08 |
-| 39. Integration Wiring & Auth Fixes | v9.0 | 0/2 | Not Started | — |
+| 39. Integration Wiring & Auth Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
