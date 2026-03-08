@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 36 in progress
+**Current focus:** v9.0 Video Interviewing — Phase 37 in progress
 
 ## Current Position
 
-Phase: 36 of 38 (Recording & Playback)
-Plan: 6 of 6
-Status: Phase complete
-Last activity: 2026-03-08 — Completed 36-06-PLAN.md (recording integration)
+Phase: 37 of 38 (Transcription & AI)
+Plan: 1 of 3
+Status: In progress
+Last activity: 2026-03-08 — Completed 37-01-PLAN.md (AI pipeline schema)
 
 Progress: ██████████████████████░░ 97%
 
@@ -23,7 +23,7 @@ Progress: ██████████████████████░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 30
+- Plans completed: 31
 - Phases completed: 4 (Phases 33-36)
 
 ## Accumulated Context
@@ -95,6 +95,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Company admin auth via app->job->company chain | 36-05 | Sequential queries, consistent with existing token endpoint pattern |
 | 1-hour SAS token expiry | 36-05 | Balances security with reasonable viewing session length |
 | Task 1 changes already in codebase from 36-05 | 36-06 | Frontend recording integration was done as part of 36-05 component work |
+| Transcript segments as JSONB | 37-01 | Flexible schema for speaker diarization without separate table overhead |
+| Six-state pipeline status | 37-01 | Granular step display per CONTEXT.md locked decision (incl posting) |
 
 ### Pending Todos
 
@@ -109,10 +111,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 36-06-PLAN.md (recording integration)
+Stopped at: Completed 37-01-PLAN.md (AI pipeline schema)
 Resume file: None
-Next: Phase 37 (Transcription & AI)
+Next: 37-02-PLAN.md (transcription service)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 36-06 complete — Phase 36 done)*
+*Last updated: 2026-03-08 (Plan 37-01 complete)*
