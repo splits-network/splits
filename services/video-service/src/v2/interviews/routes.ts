@@ -346,6 +346,87 @@ export async function registerInterviewRoutes(
         }
     });
 
+    // GET /api/v2/interviews/:id/available-slots - Get available slots for candidate reschedule (NO AUTH - token-based)
+    app.get('/api/v2/interviews/:id/available-slots', async (request, reply) => {
+        try {
+            const { id } = request.params as { id: string };
+            const query = request.query as { token?: string };
+
+            if (!query?.token) {
+                return reply.code(400).send({ error: 'token query parameter is required' });
+            }
+
+            // Validate magic link token
+            const tokenResult = await tokenService.validateMagicLinkToken(query.token);
+            if (!tokenResult) {
+                return reply.code(401).send({ error: 'Invalid or expired token' });
+            }
+
+            if (tokenResult.interview.id !== id) {
+                return reply.code(403).send({ error: 'Token does not match this interview' });
+            }
+
+            // Get interview to find interviewer
+            const interview = await repository.findByIdWithParticipants(id);
+            if (!interview) {
+                return reply.code(404).send({ error: 'Interview not found' });
+            }
+
+            const interviewer = interview.participants.find(p => p.role === 'interviewer');
+            if (!interviewer) {
+                return reply.code(400).send({ error: 'No interviewer found for this interview' });
+            }
+
+            // Get interviewer's calendar preferences for working hours
+            let prefs;
+            try {
+                prefs = await repository.getCalendarPreferences(interviewer.user_id);
+            } catch {
+                // No preferences — use defaults
+            }
+
+            const workingHoursStart = prefs?.working_hours_start || '09:00';
+            const workingHoursEnd = prefs?.working_hours_end || '17:00';
+            const workingDays = prefs?.working_days || [1, 2, 3, 4, 5];
+            const timezone = prefs?.timezone || 'America/New_York';
+
+            // Compute available slots for next 2 weeks using working hours
+            const now = new Date();
+            const startDate = now.toISOString().split('T')[0];
+            const endDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
+                .toISOString()
+                .split('T')[0];
+
+            const slots = schedulingService.getAvailableSlots({
+                busySlots: [],
+                startDate,
+                endDate,
+                workingHoursStart: workingHoursStart,
+                workingHoursEnd: workingHoursEnd,
+                workingDays: workingDays,
+                timezone,
+                durationMinutes: interview.scheduled_duration_minutes || 60,
+            });
+
+            // Check for pending reschedule requests
+            const rescheduleRequests = await repository.findRescheduleRequests(id);
+            const pendingRequest = rescheduleRequests.find(r => r.status === 'pending');
+
+            return reply.send({
+                data: {
+                    slots,
+                    timezone,
+                    reschedule_count: interview.reschedule_count,
+                    has_pending_request: !!pendingRequest,
+                },
+            });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
     // PATCH /api/v2/interviews/:id - Update interview fields (authenticated)
     // Used for linking calendar events or updating meeting info after creation
     app.patch('/api/v2/interviews/:id', async (request, reply) => {

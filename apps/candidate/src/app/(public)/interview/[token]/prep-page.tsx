@@ -1,12 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { InterviewContext } from '@splits-network/shared-video';
+import { RescheduleRequestForm } from './components/reschedule-request-form';
 
 interface PrepPageProps {
     interviewContext: InterviewContext;
+    magicToken: string;
     onReady: () => void;
 }
+
+interface AvailableSlotsResponse {
+    slots: Array<{ start: string; end: string }>;
+    timezone: string;
+    reschedule_count: number;
+    has_pending_request: boolean;
+}
+
+const API_BASE =
+    process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
+
+const MAX_RESCHEDULES = 2;
 
 /** Minutes before scheduled time when lobby becomes available */
 const EARLY_ACCESS_MINUTES = 10;
@@ -61,13 +75,42 @@ const TIPS = [
     'Use a wired internet connection if possible',
 ];
 
-export function PrepPage({ interviewContext, onReady }: PrepPageProps) {
+export function PrepPage({ interviewContext, magicToken, onReady }: PrepPageProps) {
     const [now, setNow] = useState(() => Date.now());
+    const [rescheduleOpen, setRescheduleOpen] = useState(false);
+    const [slotsData, setSlotsData] = useState<AvailableSlotsResponse | null>(null);
+    const [slotsLoading, setSlotsLoading] = useState(false);
+    const [rescheduleSubmitted, setRescheduleSubmitted] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(() => setNow(Date.now()), 1000);
         return () => clearInterval(interval);
     }, []);
+
+    const fetchAvailableSlots = useCallback(async () => {
+        if (slotsData || slotsLoading) return;
+        setSlotsLoading(true);
+        try {
+            const res = await fetch(
+                `${API_BASE}/api/v2/interviews/${interviewContext.id}/available-slots?token=${encodeURIComponent(magicToken)}`,
+            );
+            if (res.ok) {
+                const json = await res.json();
+                setSlotsData(json.data);
+            }
+        } catch {
+            // Silently fail — reschedule is optional
+        } finally {
+            setSlotsLoading(false);
+        }
+    }, [interviewContext.id, magicToken, slotsData, slotsLoading]);
+
+    const handleRescheduleToggle = () => {
+        if (!rescheduleOpen) {
+            fetchAvailableSlots();
+        }
+        setRescheduleOpen(!rescheduleOpen);
+    };
 
     const scheduledAt = new Date(interviewContext.scheduled_at).getTime();
     const msUntilStart = scheduledAt - now;
@@ -180,6 +223,66 @@ export function PrepPage({ interviewContext, onReady }: PrepPageProps) {
                             <i className="fa-duotone fa-regular fa-circle-check mr-2" />
                             Ready to join
                         </p>
+                    </div>
+                )}
+
+                {/* Reschedule section */}
+                {interviewContext.status === 'scheduled' &&
+                    interviewContext.reschedule_count < MAX_RESCHEDULES &&
+                    !rescheduleSubmitted && (
+                        <div className="border border-base-300 bg-base-200">
+                            <button
+                                type="button"
+                                className="w-full flex items-center justify-between p-4 text-left"
+                                onClick={handleRescheduleToggle}
+                            >
+                                <span className="text-sm font-semibold text-base-content/70">
+                                    <i className="fa-duotone fa-regular fa-calendar-xmark mr-2" />
+                                    Need to reschedule?
+                                </span>
+                                <i
+                                    className={`fa-duotone fa-regular fa-chevron-${rescheduleOpen ? 'up' : 'down'} text-base-content/40`}
+                                />
+                            </button>
+                            {rescheduleOpen && (
+                                <div className="px-4 pb-4">
+                                    {slotsLoading ? (
+                                        <div className="flex items-center justify-center py-6">
+                                            <span className="loading loading-spinner loading-md text-primary" />
+                                            <span className="ml-2 text-sm text-base-content/60">
+                                                Loading available times...
+                                            </span>
+                                        </div>
+                                    ) : slotsData ? (
+                                        <RescheduleRequestForm
+                                            interviewId={interviewContext.id}
+                                            token={magicToken}
+                                            availableSlots={slotsData.slots}
+                                            candidateTimezone={
+                                                Intl.DateTimeFormat().resolvedOptions().timeZone
+                                            }
+                                            rescheduleCount={slotsData.reschedule_count}
+                                            maxReschedules={MAX_RESCHEDULES}
+                                            hasPendingRequest={slotsData.has_pending_request}
+                                            onSuccess={() => setRescheduleSubmitted(true)}
+                                        />
+                                    ) : (
+                                        <p className="text-sm text-base-content/60 py-4">
+                                            Unable to load available times. Please try again later.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                {/* Show if reschedule just submitted */}
+                {rescheduleSubmitted && (
+                    <div className="alert alert-success">
+                        <i className="fa-duotone fa-regular fa-circle-check" />
+                        <span className="text-sm">
+                            Reschedule request sent. The interviewer will review your proposed times.
+                        </span>
                     </div>
                 )}
 

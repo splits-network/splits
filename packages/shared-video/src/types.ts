@@ -7,6 +7,7 @@ export interface InterviewContext {
     title: string | null;
     scheduled_at: string;
     scheduled_duration_minutes: number;
+    reschedule_count: number;
     job: {
         id: string;
         title: string;

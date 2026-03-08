@@ -135,6 +135,7 @@ export function InterviewClient({ magicToken }: InterviewClientProps) {
             return (
                 <PrepPage
                     interviewContext={interviewContext}
+                    magicToken={magicToken}
                     onReady={() => setCallState('lobby')}
                 />
             );
