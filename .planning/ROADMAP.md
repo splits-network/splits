@@ -9,7 +9,7 @@
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
-- [x] **v9.0 Video Interviewing** - Phases 33-38 (shipped 2026-03-08)
+- [ ] **v9.0 Video Interviewing** - Phases 33-39 (Phase 39: gap closure)
 
 ## Phases
 
@@ -55,6 +55,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
 - [x] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
 - [x] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
+- [ ] **Phase 39: Integration Wiring & Auth Fixes** - Gateway auth bypasses, LiveKit webhook config, candidate notes dual-auth
 
 ## Phase Details
 
@@ -164,10 +165,25 @@ Plans:
 - [x] 38-03-PLAN.md — In-call notes panel with auto-save and auto-post on call end
 - [x] 38-04-PLAN.md — Interviews tab on application detail page + round naming in schedule modal
 
+### Phase 39: Integration Wiring & Auth Fixes
+**Goal**: All candidate magic-link flows and the recording→AI pipeline work end-to-end
+**Depends on**: Phase 38
+**Requirements**: SCHED-03 (partial), REC-01, REC-02, REC-03, AI-01, AI-02, AI-03, INT-02, INT-03 (integration fixes)
+**Gap Closure**: Closes all 3 integration gaps and 3 broken E2E flows from v9.0 audit
+**Success Criteria** (what must be TRUE):
+  1. Candidate can reschedule an interview via magic link without hitting gateway auth rejection
+  2. LiveKit Egress POSTs recording completion webhook to video-service, triggering the recording_ready event
+  3. Recording→Transcription→Summary pipeline completes end-to-end without manual intervention
+  4. Candidate can take and save notes during a call using magic link auth (no Clerk session)
+**Plans:** TBD
+Plans:
+- [ ] 39-01-PLAN.md — Gateway auth bypasses + LiveKit webhook configuration
+- [ ] 39-02-PLAN.md — Candidate notes dual-auth + E2E flow verification
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38
+Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39
 
 Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on Phase 34 but is independent of Phase 35, so they could theoretically run in parallel. Phase 37 (AI) depends on Phase 36. Phase 38 depends on Phases 35 and 37.
 
@@ -190,3 +206,4 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 36. Recording & Playback | v9.0 | 6/6 | Complete | 2026-03-08 |
 | 37. AI Pipeline | v9.0 | 3/3 | Complete | 2026-03-08 |
 | 38. Panel, Notes & Polish | v9.0 | 4/4 | Complete | 2026-03-08 |
+| 39. Integration Wiring & Auth Fixes | v9.0 | 0/2 | Not Started | — |
