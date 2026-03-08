@@ -142,7 +142,11 @@ Plans:
   1. After a recording completes, ai-service transcribes it asynchronously via Whisper without manual trigger
   2. The transcript is summarized into a structured format (key points, strengths, concerns, overall impression)
   3. The AI summary is auto-posted as an `interview_summary` note on the application, visible in application notes
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 37-01-PLAN.md — Database schema + TypeScript types (transcript table, interview_summary note type, pipeline status)
+- [ ] 37-02-PLAN.md — Transcription & summarization pipeline (Whisper, GPT, event consumer, note posting)
+- [ ] 37-03-PLAN.md — Frontend: AI badge on notes, transcript panel, pipeline status indicator
 
 ### Phase 38: Panel, Notes & Polish
 **Goal**: The interview experience supports multi-party calls, screen sharing, in-call note-taking, and a dedicated interviews tab with full history
@@ -179,5 +183,5 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 34. Video Call Experience | v9.0 | 6/6 | Complete | 2026-03-07 |
 | 35. Scheduling & Notifications | v9.0 | 10/10 | Complete | 2026-03-08 |
 | 36. Recording & Playback | v9.0 | 6/6 | Complete | 2026-03-08 |
-| 37. AI Pipeline | v9.0 | 0/TBD | Pending | — |
+| 37. AI Pipeline | v9.0 | 0/3 | Pending | — |
 | 38. Panel, Notes & Polish | v9.0 | 0/TBD | Pending | — |
