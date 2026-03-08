@@ -119,9 +119,18 @@ async function main() {
 
     const livekitApiKey = process.env.LIVEKIT_API_KEY || '';
     const livekitApiSecret = process.env.LIVEKIT_API_SECRET || '';
+    const livekitWsUrl = process.env.LIVEKIT_WS_URL || '';
 
     if (!livekitApiKey || !livekitApiSecret) {
         logger.warn('LIVEKIT_API_KEY or LIVEKIT_API_SECRET not set - token generation will fail');
+    }
+
+    const azureStorageAccountName = process.env.AZURE_STORAGE_ACCOUNT_NAME || '';
+    const azureStorageAccountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY || '';
+    const azureStorageContainerName = process.env.AZURE_STORAGE_CONTAINER_NAME || '';
+
+    if (!azureStorageAccountName || !azureStorageAccountKey || !azureStorageContainerName) {
+        logger.warn('Azure storage vars not set - recording upload will fail');
     }
 
     await registerV2Routes(app, {
@@ -131,6 +140,10 @@ async function main() {
         eventPublisher: outboxPublisher,
         livekitApiKey,
         livekitApiSecret,
+        livekitWsUrl,
+        azureStorageAccountName,
+        azureStorageAccountKey,
+        azureStorageContainerName,
     });
 
     app.get("/health", async (request, reply) => {
