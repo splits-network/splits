@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v9.0 Video Interviewing — Phase 38 in progress
+**Current focus:** v9.0 Video Interviewing — Phase 38 complete
 
 ## Current Position
 
 Phase: 38 of 38 (Panel, Notes & Polish)
-Plan: 2 of 4
-Status: In progress
-Last activity: 2026-03-08 — Completed 38-02-PLAN.md (Panel layout and screen sharing)
+Plan: 4 of 4
+Status: Phase complete
+Last activity: 2026-03-08 — Completed 38-04-PLAN.md (Interviews tab and round naming)
 
-Progress: ████████████████████████ 99%
+Progress: █████████████████████████ 100%
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ███████████████████████�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 35
-- Phases completed: 5 (Phases 33-37), Phase 38 in progress
+- Plans completed: 37
+- Phases completed: 6 (Phases 33-38)
 
 ## Accumulated Context
 
@@ -107,6 +107,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Flex-based controls bar instead of fixed | 38-02 | Works within new layout hierarchy with sidebar |
 | TrackToggle for screen share | 38-02 | LiveKit built-in handles browser permission prompts |
 | useRef identity tracking for join/leave | 38-02 | Compare previous vs current participant set each render |
+| Timeline card layout for interviews tab | 38-04 | Card-based vertical timeline with dot connectors for interview history |
+| Highlighted upcoming interview | 38-04 | Most recent upcoming/in-progress interview gets primary left border accent |
 
 ### Pending Todos
 
@@ -121,10 +123,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 38-02-PLAN.md
+Stopped at: Completed 38-04-PLAN.md (Phase 38 complete)
 Resume file: None
-Next: 38-03-PLAN.md
+Next: v9.0 complete
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Phase 38 Plan 02 complete)*
+*Last updated: 2026-03-08 (Phase 38 Plan 04 complete)*
