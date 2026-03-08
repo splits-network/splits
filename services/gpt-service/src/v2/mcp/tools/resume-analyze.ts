@@ -8,7 +8,7 @@
 import { z, ZodTypeAny } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { GptActionRepository } from '../../actions/repository';
-import { McpAuthContext, toolError } from '../types';
+import { McpAuthContext, toolError, safeTool } from '../types';
 import { requireMcpScope } from '../auth';
 import { IEventPublisher } from '../../shared/events';
 
@@ -40,7 +40,7 @@ export function registerAnalyzeResumeTool(
             },
             _meta: { 'ui/resourceUri': 'ui://career-copilot/resume-analysis.html' },
         },
-        async ({ job_id, resume_text }) => {
+        safeTool('analyze_resume', async ({ job_id, resume_text }) => {
             const auth = getAuth();
             requireMcpScope(auth, 'resume:read');
 
@@ -115,26 +115,36 @@ export function registerAnalyzeResumeTool(
                     'x-internal-service-key': process.env.INTERNAL_SERVICE_KEY || '',
                 },
                 body: JSON.stringify(aiPayload),
+                signal: AbortSignal.timeout(60_000),
             });
 
             if (!aiResponse.ok) {
-                const errorBody = await aiResponse.text().catch(() => '');
+                await aiResponse.text().catch(() => '');
                 const errorDetail = aiResponse.status === 500
                     ? 'The AI analysis service encountered an error'
                     : `Unexpected response (${aiResponse.status})`;
                 return toolError(`Resume analysis failed: ${errorDetail}. Please try again later.`);
             }
 
-            const aiResult = (await aiResponse.json()) as { data: any };
-            const review = aiResult.data;
+            let review: any;
+            try {
+                const aiResult = (await aiResponse.json()) as { data: any };
+                review = aiResult?.data;
+            } catch {
+                return toolError('Resume analysis failed: received an invalid response from the AI service.');
+            }
+
+            if (!review || typeof review.fit_score !== 'number') {
+                return toolError('Resume analysis returned incomplete results. Please try again.');
+            }
 
             const analysis = {
                 fit_score: review.fit_score,
                 strengths: review.strengths || [],
                 gaps: review.concerns || review.missing_skills || [],
-                recommendation: review.recommendation,
-                overall_summary: review.overall_summary,
-                job_title: job.title,
+                recommendation: review.recommendation || 'unknown',
+                overall_summary: review.overall_summary || '',
+                job_title: job.title || 'Unknown Position',
                 company_name: job.company?.name || 'Unknown',
             };
 
@@ -161,6 +171,6 @@ export function registerAnalyzeResumeTool(
                     text: `Resume analysis for ${job.title} at ${job.company?.name || 'Unknown'}: Fit score ${review.fit_score}/100. ${review.strengths?.length || 0} strengths, ${(review.concerns || review.missing_skills || []).length} gaps identified.`,
                 }],
             };
-        },
+        }),
     );
 }

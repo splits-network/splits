@@ -55,3 +55,29 @@ export function toolText(text: string) {
         content: [{ type: 'text' as const, text }],
     };
 }
+
+/**
+ * Wrap an MCP tool handler so unhandled errors become user-friendly toolError
+ * results instead of crashing the transport. Every tool should use this.
+ */
+export function safeTool<T>(
+    toolName: string,
+    handler: (args: T) => Promise<any>,
+): (args: T) => Promise<any> {
+    return async (args: T) => {
+        try {
+            return await handler(args);
+        } catch (err: any) {
+            // Scope/auth errors get a clear message, not a generic "something went wrong"
+            if (err?.name === 'McpAuthError') {
+                if (err.code === 'insufficient_scope') {
+                    return toolError(`You don't have permission for this action. Re-authorize Career Copilot with the required permissions.`);
+                }
+                return toolError(`Authentication error: ${err.message}`);
+            }
+            const message = err?.message || 'Unknown error';
+            console.error(`[MCP] ${toolName} unhandled error:`, message);
+            return toolError(`Something went wrong with ${toolName}. Please try again.`);
+        }
+    };
+}
