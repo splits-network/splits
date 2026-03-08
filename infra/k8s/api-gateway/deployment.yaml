@@ -117,6 +117,8 @@ spec:
                         value: "http://matching-service:3017"
                       - name: GAMIFICATION_SERVICE_URL
                         value: "http://gamification-service:3018"
+                      - name: VIDEO_SERVICE_URL
+                        value: "http://video-service:80"
                   resources:
                       requests:
                           cpu: 200m
