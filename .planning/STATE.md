@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 35 of 38 (Scheduling & Notifications)
-Plan: 04 of 10
+Plan: 05 of 10
 Status: In progress
-Last activity: 2026-03-08 — Completed 35-04-PLAN.md (schedule interview modal overhaul)
+Last activity: 2026-03-08 — Completed 35-05-PLAN.md (calendar interview integration)
 
-Progress: █████████████████████░░░ 87%
+Progress: █████████████████████░░░ 88%
 
 ## Performance Metrics
 
@@ -23,7 +23,7 @@ Progress: █████████████████████░░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 19
+- Plans completed: 20
 - Phases completed: 2 (Phases 33-34), Phase 35 in progress
 
 ## Accumulated Context
@@ -66,6 +66,10 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Busy slots as input parameter | 35-03 | Frontend orchestrates calendar API; scheduling service receives pre-fetched busy data |
 | Optional applicationId/applicationStage props | 35-04 | Backward compat with candidate toolbar which has no application context |
 | Client-side slot computation from free/busy | 35-04 | Simpler than backend endpoint; slots capped at 100 |
+| Interview events by "Interview:" prefix | 35-05 | Simple string convention, no DB lookup for rendering |
+| Accent color for interview events | 35-05 | Visual distinction from regular calendar events |
+| Join button 10-min pre-start window | 35-05 | Consistent with lobby gate timing from 34-05 |
+| Stage promotion dialog on non-interview apps | 35-05 | User confirmation before changing application stage |
 
 ### Pending Todos
 
@@ -80,10 +84,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 35-04-PLAN.md (schedule interview modal overhaul)
+Stopped at: Completed 35-05-PLAN.md (calendar interview integration)
 Resume file: None
-Next: 35-05-PLAN.md
+Next: 35-06-PLAN.md
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 35-04 complete)*
+*Last updated: 2026-03-08 (Plan 35-05 complete)*
