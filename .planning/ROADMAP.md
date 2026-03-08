@@ -125,7 +125,14 @@ Plans:
   2. Completed recordings are stored in Azure Blob Storage with lifecycle rules (Hot to Cool at 30 days, 90-day retention)
   3. User can play back a recording from the application page
   4. An `interview.recording_ready` RabbitMQ event is published when a recording completes, enabling downstream processing
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [ ] 36-01-PLAN.md — Database migration + RecordingService (LiveKit Egress API)
+- [ ] 36-02-PLAN.md — Egress K8s config + Azure Blob lifecycle rules
+- [ ] 36-03-PLAN.md — Recording API endpoints (start/stop/webhook/consent)
+- [ ] 36-04-PLAN.md — Consent UX, recording indicator, schedule modal checkbox
+- [ ] 36-05-PLAN.md — Playback UI + SAS URL endpoint + download
+- [ ] 36-06-PLAN.md — Interview client integration + auto-start + API updates
 
 ### Phase 37: AI Pipeline
 **Goal**: Completed interview recordings are automatically transcribed and summarized, with summaries posted as application notes
@@ -171,6 +178,6 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 33. Infrastructure | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 34. Video Call Experience | v9.0 | 6/6 | Complete | 2026-03-07 |
 | 35. Scheduling & Notifications | v9.0 | 10/10 | Complete | 2026-03-08 |
-| 36. Recording & Playback | v9.0 | 0/TBD | Pending | — |
+| 36. Recording & Playback | v9.0 | 0/6 | Pending | — |
 | 37. AI Pipeline | v9.0 | 0/TBD | Pending | — |
 | 38. Panel, Notes & Polish | v9.0 | 0/TBD | Pending | — |
