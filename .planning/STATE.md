@@ -50,6 +50,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Web Audio API for lobby audio meter | 34-02 | LiveKit BarVisualizer requires room context, lobby uses raw tracks |
 | isTrackReference guard for VideoTrack | 34-03 | useTracks returns placeholder union type; narrow before passing to VideoTrack |
 | Always-visible controls bar | 34-03 | Professional interview context needs instant mute access |
+| LiveKitRoom conditional mount (never in lobby) | 34-04 | Avoids premature WebRTC negotiation during lobby |
+| New-tab interview via window.open | 34-04 | Preserves application context in original tab |
+| Self-fetch interview in detail header | 34-04 | Follows existing AI score self-fetch pattern |
 | Splits Network branding on candidate prep page | 34-05 | Not company-branded per CONTEXT.md deferred items |
 | Lobby gate at 10 minutes before start | 34-05 | Prevents early access while allowing reasonable arrival |
 | No auto-redirect for candidate post-call | 34-05 | Candidates close tab themselves; no redirect destination |
