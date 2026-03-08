@@ -188,6 +188,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Candidate can submit recording consent via magic link without auth failure
   2. Interview notes restore correctly when a user refreshes or reconnects during a call
+**Plans:** 2 plans
+Plans:
+- [ ] 40-01-PLAN.md — Fix recording consent to send magic token in request body
+- [ ] 40-02-PLAN.md — Fix notes load-on-mount to read array response correctly
 
 ## Progress
 
@@ -216,4 +220,4 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 37. AI Pipeline | v9.0 | 3/3 | Complete | 2026-03-08 |
 | 38. Panel, Notes & Polish | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 39. Integration Wiring & Auth Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
-| 40. Candidate Magic-Link Bug Fixes | v9.0 | 0/1 | Not Started | — |
+| 40. Candidate Magic-Link Bug Fixes | v9.0 | 0/2 | Not Started | — |
