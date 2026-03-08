@@ -50,7 +50,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 **Milestone Goal:** Add in-app video interviewing powered by self-hosted LiveKit -- schedule, conduct, record, transcribe, and AI-summarize interviews directly within the recruiting workflow.
 
 - [x] **Phase 33: Infrastructure** - LiveKit K8s deployment, video-service scaffold, database schema, token system, gateway routes
-- [ ] **Phase 34: Video Call Experience** - 1:1 calls, lobby, controls, magic link join, in-app join, candidate prep page
+- [x] **Phase 34: Video Call Experience** - 1:1 calls, lobby, controls, magic link join, in-app join, candidate prep page
 - [ ] **Phase 35: Scheduling & Notifications** - Calendar integration, stage triggers, cancel/reschedule, email and in-app notifications
 - [ ] **Phase 36: Recording & Playback** - LiveKit Egress, Azure Blob Storage, playback UI, consent, event pipeline
 - [ ] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
@@ -86,12 +86,12 @@ Plans:
   4. During the call, participants can mute/unmute, toggle camera, switch devices, see connection quality, and leave the call
 **Plans:** 6 plans
 Plans:
-- [ ] 34-01-PLAN.md — Shared video package scaffold, hooks, types + token endpoint enrichment
-- [ ] 34-02-PLAN.md — Lobby components (split layout, device selector, audio meter, waiting indicator)
-- [ ] 34-03-PLAN.md — Room components (active speaker layout, controls bar, connection quality, post-call)
-- [ ] 34-04-PLAN.md — Portal interview page with state machine + Join Interview button
-- [ ] 34-05-PLAN.md — Candidate prep page + magic link interview flow
-- [ ] 34-06-PLAN.md — Integration verification and build validation
+- [x] 34-01-PLAN.md — Shared video package scaffold, hooks, types + token endpoint enrichment
+- [x] 34-02-PLAN.md — Lobby components (split layout, device selector, audio meter, waiting indicator)
+- [x] 34-03-PLAN.md — Room components (active speaker layout, controls bar, connection quality, post-call)
+- [x] 34-04-PLAN.md — Portal interview page with state machine + Join Interview button
+- [x] 34-05-PLAN.md — Candidate prep page + magic link interview flow
+- [x] 34-06-PLAN.md — Integration verification and build validation
 
 ### Phase 35: Scheduling & Notifications
 **Goal**: Users can schedule, reschedule, and cancel interviews with Google Calendar sync and all participants are notified at every step
@@ -158,7 +158,7 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | ~~31. Portal UI~~ | ~~v8.0~~ | — | Shelved | — |
 | ~~32. Candidate UI~~ | ~~v8.0~~ | — | Shelved | — |
 | 33. Infrastructure | v9.0 | 4/4 | Complete | 2026-03-08 |
-| 34. Video Call Experience | v9.0 | 0/6 | Pending | — |
+| 34. Video Call Experience | v9.0 | 6/6 | Complete | 2026-03-07 |
 | 35. Scheduling & Notifications | v9.0 | 0/TBD | Pending | — |
 | 36. Recording & Playback | v9.0 | 0/TBD | Pending | — |
 | 37. AI Pipeline | v9.0 | 0/TBD | Pending | — |

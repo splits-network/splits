@@ -18,12 +18,12 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 ### Video Room
 
-- [ ] **ROOM-01**: User can conduct a 1:1 video call within the app using LiveKit React components
-- [ ] **ROOM-02**: User sees a pre-join lobby with device check (camera, mic, speaker test) and waiting room before entering
+- [x] **ROOM-01**: User can conduct a 1:1 video call within the app using LiveKit React components
+- [x] **ROOM-02**: User sees a pre-join lobby with device check (camera, mic, speaker test) and waiting room before entering
 - [ ] **ROOM-03**: User can share their screen during a video call
 - [ ] **ROOM-04**: User can conduct panel interviews with 3-6+ simultaneous participants
-- [ ] **ROOM-05**: User can mute/unmute mic, toggle camera, select devices, and leave the call
-- [ ] **ROOM-06**: User sees a connection quality indicator during the call
+- [x] **ROOM-05**: User can mute/unmute mic, toggle camera, select devices, and leave the call
+- [x] **ROOM-06**: User sees a connection quality indicator during the call
 
 ### Scheduling
 
@@ -34,9 +34,9 @@ Requirements for in-app video interviewing powered by self-hosted LiveKit. Each 
 
 ### Participant Access
 
-- [ ] **JOIN-01**: Candidate can join an interview via magic link (no account required) — token-based URL in calendar invite and email
-- [ ] **JOIN-02**: Authenticated user can join an interview via "Join Interview" button on application detail page
-- [ ] **JOIN-03**: Candidate sees an interview prep landing page with job details, interviewer info, and join button
+- [x] **JOIN-01**: Candidate can join an interview via magic link (no account required) — token-based URL in calendar invite and email
+- [x] **JOIN-02**: Authenticated user can join an interview via "Join Interview" button on application detail page
+- [x] **JOIN-03**: Candidate sees an interview prep landing page with job details, interviewer info, and join button
 
 ### Recording & Playback
 
