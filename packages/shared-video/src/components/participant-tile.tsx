@@ -10,9 +10,10 @@ interface ParticipantTileProps {
     participant: RemoteParticipant;
     name: string;
     avatarUrl?: string;
+    isCandidate?: boolean;
 }
 
-export function ParticipantTile({ participant, name, avatarUrl }: ParticipantTileProps) {
+export function ParticipantTile({ participant, name, avatarUrl, isCandidate }: ParticipantTileProps) {
     const tracks = useTracks(
         [{ source: Track.Source.Camera, withPlaceholder: true }],
         { onlySubscribed: true },
@@ -25,7 +26,14 @@ export function ParticipantTile({ participant, name, avatarUrl }: ParticipantTil
     );
 
     return (
-        <div className="relative w-full h-full bg-base-300">
+        <div className={`relative w-full h-full bg-base-300 ${isCandidate ? 'border-2 border-accent' : ''}`}>
+            {/* Candidate badge overlay */}
+            {isCandidate && (
+                <div className="absolute top-3 left-3 z-10">
+                    <span className="badge badge-accent badge-sm">Candidate</span>
+                </div>
+            )}
+
             {cameraTrack && isTrackReference(cameraTrack) ? (
                 <VideoTrack
                     trackRef={cameraTrack}

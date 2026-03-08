@@ -24,7 +24,7 @@ export function SelfViewPip({ name, avatarUrl }: SelfViewPipProps) {
     );
 
     return (
-        <div className="absolute bottom-20 right-4 w-24 lg:w-48 overflow-hidden shadow-lg z-10 bg-base-300">
+        <div className="absolute bottom-4 right-4 w-24 lg:w-48 overflow-hidden shadow-lg z-10 bg-base-300">
             {localCameraTrack && isTrackReference(localCameraTrack) ? (
                 <VideoTrack
                     trackRef={localCameraTrack}
