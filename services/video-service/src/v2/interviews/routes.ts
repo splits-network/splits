@@ -528,11 +528,15 @@ export async function registerInterviewRoutes(
         }
     });
 
-    // GET /api/v2/interviews/:id/notes - Get all notes for an interview (dual-auth: magic link OR Clerk)
+    // GET /api/v2/interviews/:id/notes - Get notes for an interview (dual-auth: magic link OR Clerk)
+    // When mine=true, returns only the current user's note as a single object (or null)
     app.get('/api/v2/interviews/:id/notes', async (request, reply) => {
         try {
             const { id } = request.params as { id: string };
-            const query = request.query as { token?: string };
+            const query = request.query as { token?: string; mine?: string };
+
+            let filterUserId: string | undefined;
+            let filterParticipantId: string | undefined;
 
             if (query?.token) {
                 // Magic link auth path (candidates)
@@ -543,12 +547,29 @@ export async function registerInterviewRoutes(
                 if (tokenResult.interview.id !== id) {
                     return reply.code(403).send({ error: 'Token does not match this interview' });
                 }
+                if (query.mine === 'true') {
+                    filterParticipantId = tokenResult.participant.id;
+                }
             } else {
                 // Clerk auth path (authenticated users)
-                requireUserContext(request);
+                const { clerkUserId } = requireUserContext(request);
+                if (query.mine === 'true') {
+                    filterUserId = await repository.resolveUserId(clerkUserId);
+                }
             }
 
             const notes = await repository.getInterviewNotes(id);
+
+            // When mine=true, return a single note object (or null) instead of an array
+            if (query.mine === 'true') {
+                const myNote = notes.find(n =>
+                    filterParticipantId
+                        ? n.participant_id === filterParticipantId
+                        : n.user_id === filterUserId,
+                );
+                return reply.send({ data: myNote || null });
+            }
+
             return reply.send({ data: notes });
         } catch (error: any) {
             return reply
