@@ -66,7 +66,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 **Milestone Goal:** Generalize video from interview-only to platform-wide recruiting conversations, with a dedicated full-screen video app on branded subdomains and recruiter-company calls as the first new call type.
 
 - [x] **Phase 42: Call Data Model & Service Layer** - calls table, call_participants, call_access_tokens, call-service microservice, gateway routes
-- [ ] **Phase 43: Video App & Infrastructure** - apps/video/ with brand detection, magic-link auth, K8s deployment, dual-subdomain ingress
+- [x] **Phase 43: Video App & Infrastructure** - apps/video/ with brand detection, magic-link auth, K8s deployment, dual-subdomain ingress
 - [ ] **Phase 44: Recruiter-Company Calls & Portal Integration** - Call creation, scheduling, notifications, call history, in-call context panel
 - [ ] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
 - [ ] **Phase 46: Interview Migration** - Redirect existing interview flows to video app, magic link URL continuity, data migration to call-owned artifacts
@@ -166,7 +166,7 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
 | 40. Candidate Magic-Link Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 41. Schedule & Recording Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 42. Call Data Model & Service Layer | v10.0 | 4/4 | Complete | 2026-03-08 |
-| 43. Video App & Infrastructure | v10.0 | 0/4 | Not started | - |
+| 43. Video App & Infrastructure | v10.0 | 4/4 | Complete | 2026-03-08 |
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 0/TBD | Not started | - |
 | 45. AI Pipeline Generalization | v10.0 | 0/TBD | Not started | - |
 | 46. Interview Migration | v10.0 | 0/TBD | Not started | - |

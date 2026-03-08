@@ -15,10 +15,10 @@ Requirements for generalizing video from interview-only to platform-wide recruit
 
 ### Video App
 
-- [ ] **APP-01**: Dedicated `apps/video/` Next.js app with full-screen video experience (no portal navigation chrome)
-- [ ] **APP-02**: Single app serves both `video.splits.network` and `video.applicant.network` — brand detection via Host header switches logo, colors, and copy per domain
-- [ ] **APP-03**: Magic-link-only auth for all participants in the video app (Clerk-authenticated users receive a magic link token before redirect)
-- [ ] **APP-04**: K8s deployment with ingress rules for both `video.splits.network` and `video.applicant.network` subdomains with TLS
+- [x] **APP-01**: Dedicated `apps/video/` Next.js app with full-screen video experience (no portal navigation chrome)
+- [x] **APP-02**: Single app serves both `video.splits.network` and `video.applicant.network` — brand detection via Host header switches logo, colors, and copy per domain
+- [x] **APP-03**: Magic-link-only auth for all participants in the video app (Clerk-authenticated users receive a magic link token before redirect)
+- [x] **APP-04**: K8s deployment with ingress rules for both `video.splits.network` and `video.applicant.network` subdomains with TLS
 
 ### Recruiter-Company Calls
 
@@ -90,13 +90,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 42 | Pending |
-| DATA-02 | Phase 42 | Pending |
-| DATA-03 | Phase 42 | Pending |
-| APP-01 | Phase 43 | Pending |
-| APP-02 | Phase 43 | Pending |
-| APP-03 | Phase 43 | Pending |
-| APP-04 | Phase 43 | Pending |
+| DATA-01 | Phase 42 | Complete |
+| DATA-02 | Phase 42 | Complete |
+| DATA-03 | Phase 42 | Complete |
+| APP-01 | Phase 43 | Complete |
+| APP-02 | Phase 43 | Complete |
+| APP-03 | Phase 43 | Complete |
+| APP-04 | Phase 43 | Complete |
 | CALL-01 | Phase 44 | Pending |
 | CALL-02 | Phase 44 | Pending |
 | CALL-03 | Phase 44 | Pending |
