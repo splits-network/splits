@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 Phase: 38 of 38 (Panel, Notes & Polish)
 Plan: 4 of 4
 Status: Phase complete
-Last activity: 2026-03-08 — Completed 38-04-PLAN.md (Interviews tab and round naming)
+Last activity: 2026-03-08 — Completed 38-03-PLAN.md (In-call notes panel) and 38-04-PLAN.md (Interviews tab and round naming)
 
 Progress: █████████████████████████ 100%
 
@@ -107,6 +107,8 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Flex-based controls bar instead of fixed | 38-02 | Works within new layout hierarchy with sidebar |
 | TrackToggle for screen share | 38-02 | LiveKit built-in handles browser permission prompts |
 | useRef identity tracking for join/leave | 38-02 | Compare previous vs current participant set each render |
+| Notes panel as render prop to VideoRoom | 38-03 | Flexible composition, each client configures auth differently |
+| All participants can take notes | 38-03 | Both interviewers and candidates, per CONTEXT.md |
 | Timeline card layout for interviews tab | 38-04 | Card-based vertical timeline with dot connectors for interview history |
 | Highlighted upcoming interview | 38-04 | Most recent upcoming/in-progress interview gets primary left border accent |
 
@@ -129,4 +131,4 @@ Next: v9.0 complete
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Phase 38 Plan 04 complete)*
+*Last updated: 2026-03-08 (Phase 38 Plan 03 complete)*
