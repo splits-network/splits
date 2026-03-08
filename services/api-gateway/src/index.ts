@@ -560,6 +560,7 @@ async function main() {
     services.register('matching', process.env.MATCHING_SERVICE_URL || 'http://localhost:3017');
     services.register('gamification', process.env.GAMIFICATION_SERVICE_URL || 'http://localhost:3018');
     services.register('video', process.env.VIDEO_SERVICE_URL || 'http://localhost:3019');
+    services.register('call', process.env.CALL_SERVICE_URL || 'http://localhost:3020');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

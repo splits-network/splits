@@ -126,6 +126,8 @@ spec:
                         value: "http://gamification-service:3018"
                       - name: VIDEO_SERVICE_URL
                         value: "http://video-service:80"
+                      - name: CALL_SERVICE_URL
+                        value: "http://call-service:80"
                   resources:
                       requests:
                           cpu: 200m
