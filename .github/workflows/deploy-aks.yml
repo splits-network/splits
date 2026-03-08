@@ -332,6 +332,9 @@ jobs:
                   export CORPORATE_URL="https://employment-networks.com"
                   export STATUS_URL="https://status.splits.network"
 
+                  # Normalize legacy replica placeholders to envsubst-compatible format
+                  find infra/k8s -name deployment.yaml -exec sed -i 's/\${REPLICAS:-2}/\${REPLICAS}/g' {} +
+
                   # Use envsubst to replace image tags in all deployment files
                   for file in infra/k8s/*/deployment.yaml; do
                     envsubst < "$file" > "${file}.tmp"
@@ -355,6 +358,9 @@ jobs:
 
             - name: Deploy infrastructure (Redis, RabbitMQ)
               run: |
+                  for dep in $(kubectl get deployments -n splits-network -o jsonpath='{.items[*].metadata.name}'); do
+                    kubectl annotate deployment "$dep" kubectl.kubernetes.io/last-applied-configuration- --namespace=splits-network || true
+                  done
                   kubectl apply -f infra/k8s/redis/ --namespace=splits-network
                   kubectl apply -f infra/k8s/rabbitmq/ --namespace=splits-network
 
