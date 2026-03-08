@@ -11,8 +11,11 @@ interface ScheduledInterview {
 }
 
 const JOINABLE_STAGES = new Set([
+    "submitted",
+    "recruiter_review",
     "screen",
     "company_review",
+    "company_feedback",
     "interview",
     "offer",
 ]);

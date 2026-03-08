@@ -403,9 +403,14 @@ export default function ActionsToolbar({
             permissions.canRequestChanges,
         scheduleInterview:
             (isRecruiter || isCompanyUser || isAdmin) &&
-            ["screen", "company_review", "interview", "offer"].includes(
-                application.stage ?? "",
-            ),
+            [
+                "submitted",
+                "recruiter_review",
+                "screen",
+                "company_review",
+                "company_feedback",
+                "interview",
+            ].includes(application.stage ?? ""),
         sendEmail: isRecruiter || isCompanyUser || isAdmin,
         joinInterview: !!scheduledInterview,
     };
