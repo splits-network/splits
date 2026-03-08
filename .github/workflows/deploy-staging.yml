@@ -97,6 +97,7 @@ jobs:
                   # Build with appropriate build args based on service
                   if [ "${{ matrix.service.name }}" = "portal" ]; then
                     docker build \
+                      --platform linux/amd64 \
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
@@ -110,6 +111,7 @@ jobs:
                       .
                   elif [ "${{ matrix.service.name }}" = "candidate" ]; then
                     docker build \
+                      --platform linux/amd64 \
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
@@ -123,6 +125,7 @@ jobs:
                       .
                   elif [ "${{ matrix.service.name }}" = "corporate" ]; then
                     docker build \
+                      --platform linux/amd64 \
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
@@ -130,6 +133,7 @@ jobs:
                       .
                   elif [ "${{ matrix.service.name }}" = "status" ]; then
                     docker build \
+                      --platform linux/amd64 \
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
@@ -138,6 +142,7 @@ jobs:
                       .
                   elif [ "${{ matrix.service.name }}" = "admin" ]; then
                     docker build \
+                      --platform linux/amd64 \
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
@@ -146,6 +151,7 @@ jobs:
                       .
                   else
                     docker build \
+                      --platform linux/amd64 \
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
