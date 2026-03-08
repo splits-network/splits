@@ -82,6 +82,9 @@ export default function ScheduleInterviewModal({
     /* ── Recording ── */
     const [recordingEnabled, setRecordingEnabled] = useState(false);
 
+    /* ── Round name ── */
+    const [roundName, setRoundName] = useState("");
+
     /* ── Slots ── */
     const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
     const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -305,6 +308,7 @@ export default function ScheduleInterviewModal({
                     application_id: applicationId,
                     interview_type: "screening",
                     title: autoTitle,
+                    round_name: roundName || undefined,
                     scheduled_at: startDateTime,
                     scheduled_duration_minutes: duration,
                     calendar_event_id: calendarEvent?.id || undefined,
@@ -669,6 +673,24 @@ export default function ScheduleInterviewModal({
                 {/* Step 3: Confirm */}
                 {!isTerminalState && step === "confirm" && (
                     <div className="space-y-4">
+                        {/* Round Name (optional) */}
+                        <fieldset>
+                            <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                Round Name (optional)
+                            </legend>
+                            <input
+                                type="text"
+                                value={roundName}
+                                onChange={(e) => setRoundName(e.target.value)}
+                                placeholder="e.g., Technical Screen, Culture Fit"
+                                maxLength={100}
+                                className="input w-full rounded-none"
+                            />
+                            <p className="text-sm text-base-content/40 mt-1">
+                                Label this round for multi-interview tracking
+                            </p>
+                        </fieldset>
+
                         <div className="bg-base-200 border border-base-300 p-5">
                             <p className="text-sm font-bold tracking-[0.2em] uppercase text-base-content/50 mb-3">
                                 Review Details
