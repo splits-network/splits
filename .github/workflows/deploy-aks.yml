@@ -316,6 +316,7 @@ jobs:
               run: |
                   export IMAGE_TAG=${{ github.sha }}
                   export ACR_SERVER=${{ secrets.ACR_LOGIN_SERVER }}
+                  export REPLICAS=2
                   export API_BASE_URL="https://api.splits.network"
                   export CHAT_GATEWAY_URL="wss://api.splits.network/ws/chat"
                   export ANALYTICS_GATEWAY_URL="wss://api.splits.network/ws/analytics"

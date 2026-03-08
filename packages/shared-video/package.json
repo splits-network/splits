@@ -1,0 +1,26 @@
+{
+    "name": "@splits-network/shared-video",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -b",
+        "clean": "rm -rf dist *.tsbuildinfo",
+        "dev": "tsc -b --watch"
+    },
+    "dependencies": {
+        "@livekit/components-react": "^2.9.20",
+        "@livekit/components-styles": "^1.2.0",
+        "livekit-client": "^2.17.2"
+    },
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.1",
+        "@types/react-dom": "^19.0.2",
+        "typescript": "^5.9.3"
+    }
+}

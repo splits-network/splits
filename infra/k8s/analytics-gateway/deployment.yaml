@@ -4,7 +4,7 @@ metadata:
     name: analytics-gateway
     namespace: splits-network
 spec:
-    replicas: 2
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: analytics-gateway

@@ -4,7 +4,7 @@ metadata:
   name: ats-service
   namespace: splits-network
 spec:
-  replicas: 2
+  replicas: ${REPLICAS:-2}
   selector:
     matchLabels:
       app: ats-service

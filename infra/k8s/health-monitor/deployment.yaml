@@ -5,7 +5,7 @@ metadata:
   namespace: splits-network
 spec:
   # Single replica - only one monitor should poll services
-  replicas: 1
+  replicas: ${REPLICAS:-2}
   selector:
     matchLabels:
       app: health-monitor

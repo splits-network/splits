@@ -5,7 +5,7 @@ metadata:
     namespace: splits-network
 spec:
     # 2 replicas for redundancy - audit consumer uses exclusive queues so each message goes to one replica only
-    replicas: 2
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: gpt-service

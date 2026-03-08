@@ -4,7 +4,7 @@ metadata:
   name: rabbitmq
   namespace: splits-network
 spec:
-  replicas: 1
+  replicas: ${REPLICAS:-2}
   selector:
     matchLabels:
       app: rabbitmq
