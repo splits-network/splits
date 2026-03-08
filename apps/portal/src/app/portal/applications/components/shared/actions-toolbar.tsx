@@ -480,6 +480,8 @@ export default function ActionsToolbar({
                     }
                     candidateEmail={application.candidate?.email || undefined}
                     jobTitle={application.job?.title || undefined}
+                    applicationId={application.id}
+                    applicationStage={application.stage ?? undefined}
                     onClose={() => setShowScheduleModal(false)}
                     onSuccess={() => {
                         setShowScheduleModal(false);

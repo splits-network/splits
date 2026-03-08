@@ -10,6 +10,10 @@ import type {
 } from "@splits-network/shared-types";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { BaselWizardModal, BaselAlertBox } from "@splits-network/basel-ui";
+import PlatformSelector from "./platform-selector";
+import type { MeetingPlatform } from "./platform-selector";
+import AvailableSlotsList from "./available-slots-list";
+import type { TimeSlot } from "./available-slots-list";
 
 /* ─── Types ────────────────────────────────────────────────────────────── */
 
@@ -17,16 +21,29 @@ interface ScheduleInterviewModalProps {
     candidateName: string;
     candidateEmail?: string;
     jobTitle?: string;
+    applicationId?: string;
+    applicationStage?: string;
     onClose: () => void;
-    onSuccess?: (event: CalendarEvent) => void;
+    onSuccess?: (event?: CalendarEvent) => void;
 }
 
-type Step = "select-calendar" | "pick-time" | "confirm";
+type Step = "platform-calendar" | "pick-time" | "confirm";
 
 const STEPS: { key: Step; label: string }[] = [
-    { key: "select-calendar", label: "Calendar" },
+    { key: "platform-calendar", label: "Platform & Calendar" },
     { key: "pick-time", label: "Date & Time" },
     { key: "confirm", label: "Confirm" },
+];
+
+const TERMINAL_STAGES = new Set(["rejected", "hired", "withdrawn"]);
+
+const DURATION_OPTIONS = [
+    { value: 15, label: "15 minutes" },
+    { value: 30, label: "30 minutes" },
+    { value: 45, label: "45 minutes" },
+    { value: 60, label: "1 hour" },
+    { value: 90, label: "1.5 hours" },
+    { value: 120, label: "2 hours" },
 ];
 
 /* ─── Component ────────────────────────────────────────────────────────── */
@@ -35,13 +52,20 @@ export default function ScheduleInterviewModal({
     candidateName,
     candidateEmail,
     jobTitle,
+    applicationId,
+    applicationStage,
     onClose,
     onSuccess,
 }: ScheduleInterviewModalProps) {
     const { getToken } = useAuth();
 
+    /* ── Terminal state check ── */
+    const isTerminalState = applicationStage
+        ? TERMINAL_STAGES.has(applicationStage)
+        : false;
+
     /* ── State ── */
-    const [step, setStep] = useState<Step>("select-calendar");
+    const [step, setStep] = useState<Step>("platform-calendar");
     const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
     const [calendars, setCalendars] = useState<CalendarInfo[]>([]);
     const [selectedConnection, setSelectedConnection] =
@@ -52,21 +76,42 @@ export default function ScheduleInterviewModal({
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
+    /* ── Platform ── */
+    const [platform, setPlatform] = useState<MeetingPlatform>("splits_video");
+
+    /* ── Slots ── */
+    const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+    const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+    const [slotsLoading, setSlotsLoading] = useState(false);
+
     /* ── Form fields ── */
-    const [title, setTitle] = useState(
-        jobTitle
-            ? `Interview: ${candidateName} — ${jobTitle}`
-            : `Interview with ${candidateName}`,
-    );
-    const [description, setDescription] = useState("");
+    const autoTitle = jobTitle
+        ? `Interview: ${candidateName} \u2014 ${jobTitle}`
+        : `Interview with ${candidateName}`;
+    const autoDescription = jobTitle
+        ? `Interview for ${jobTitle} position\nCandidate: ${candidateName}${applicationId ? `\nApplication: /portal/applications/${applicationId}` : ""}`
+        : `Interview with ${candidateName}`;
+
     const [date, setDate] = useState("");
     const [startTime, setStartTime] = useState("09:00");
-    const [duration, setDuration] = useState(60);
+    const [duration, setDuration] = useState(30);
     const [timeZone] = useState(
         Intl.DateTimeFormat().resolvedOptions().timeZone,
     );
-    const [addMeet, setAddMeet] = useState(true);
-    const [attendeeEmails, setAttendeeEmails] = useState(candidateEmail || "");
+    const [attendeeEmails, setAttendeeEmails] = useState("");
+
+    /* ── Derived ── */
+    const hasGoogleConnection = connections.some(
+        (c) =>
+            c.provider_slug.includes("google") && c.status === "active",
+    );
+    const hasMicrosoftConnection = connections.some(
+        (c) =>
+            c.provider_slug.includes("microsoft") && c.status === "active",
+    );
+    const hasCalendarConnection = selectedConnection && selectedCalendar;
+    const isMicrosoft =
+        selectedConnection?.provider_slug.startsWith("microsoft_");
 
     /* ── Fetch calendar connections ── */
     const fetchConnections = useCallback(async () => {
@@ -85,7 +130,6 @@ export default function ScheduleInterviewModal({
             );
             setConnections(calendarConns);
 
-            // Auto-select if only one
             if (calendarConns.length === 1) {
                 setSelectedConnection(calendarConns[0]);
                 await fetchCalendars(calendarConns[0].id, token);
@@ -108,7 +152,6 @@ export default function ScheduleInterviewModal({
             const cals = res.data ?? [];
             setCalendars(cals);
 
-            // Auto-select primary calendar
             const primary = cals.find((c) => c.primary);
             if (primary) setSelectedCalendar(primary);
         } catch {
@@ -122,6 +165,52 @@ export default function ScheduleInterviewModal({
         fetchConnections();
     }, [fetchConnections]);
 
+    /* ── Fetch available slots when calendar is connected ── */
+    const fetchAvailableSlots = useCallback(async () => {
+        if (!selectedConnection || !selectedCalendar) return;
+
+        setSlotsLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+
+            const now = new Date();
+            const twoWeeks = new Date(
+                now.getTime() + 14 * 24 * 60 * 60 * 1000,
+            );
+
+            const availability = (await client.post(
+                `/integrations/calendar/${selectedConnection.id}/availability`,
+                {
+                    calendar_ids: [selectedCalendar.id],
+                    time_min: now.toISOString(),
+                    time_max: twoWeeks.toISOString(),
+                },
+            )) as { data: any };
+
+            // Compute 30-min available slots from busy data
+            const slots = computeAvailableSlots(
+                availability.data,
+                now,
+                twoWeeks,
+                30,
+            );
+            setAvailableSlots(slots);
+        } catch {
+            // Silently fail — user can still use manual time entry
+            setAvailableSlots([]);
+        } finally {
+            setSlotsLoading(false);
+        }
+    }, [selectedConnection, selectedCalendar]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        if (step === "pick-time" && hasCalendarConnection) {
+            fetchAvailableSlots();
+        }
+    }, [step, hasCalendarConnection, fetchAvailableSlots]);
+
     /* ── Handlers ── */
 
     const handleSelectConnection = async (conn: OAuthConnectionPublic) => {
@@ -131,8 +220,17 @@ export default function ScheduleInterviewModal({
         await fetchCalendars(conn.id);
     };
 
+    const handleSlotSelect = (slot: TimeSlot) => {
+        setSelectedSlot(slot);
+        const slotDate = new Date(slot.start);
+        setDate(slotDate.toISOString().split("T")[0]);
+        setStartTime(
+            `${String(slotDate.getHours()).padStart(2, "0")}:${String(slotDate.getMinutes()).padStart(2, "0")}`,
+        );
+    };
+
     const handleNext = () => {
-        if (step === "select-calendar" && selectedCalendar) {
+        if (step === "platform-calendar") {
             setStep("pick-time");
         } else if (step === "pick-time" && date && startTime) {
             setStep("confirm");
@@ -141,12 +239,11 @@ export default function ScheduleInterviewModal({
 
     const handleBack = () => {
         if (step === "confirm") setStep("pick-time");
-        else if (step === "pick-time") setStep("select-calendar");
+        else if (step === "pick-time") setStep("platform-calendar");
     };
 
     const handleSubmit = async () => {
-        if (!selectedConnection || !selectedCalendar || !date || !startTime)
-            return;
+        if (!date || !startTime) return;
         setSubmitting(true);
         setError("");
 
@@ -163,53 +260,95 @@ export default function ScheduleInterviewModal({
             const endDate = new Date(endMs);
             const endDateTime = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}T${String(endDate.getHours()).padStart(2, "0")}:${String(endDate.getMinutes()).padStart(2, "0")}:00`;
 
-            const emails = attendeeEmails
-                .split(",")
-                .map((e) => e.trim())
-                .filter(Boolean);
+            const allEmails = [
+                candidateEmail,
+                ...attendeeEmails
+                    .split(",")
+                    .map((e) => e.trim())
+                    .filter(Boolean),
+            ].filter(Boolean) as string[];
 
-            const res = (await client.post(
-                `/integrations/calendar/${selectedConnection.id}/events`,
-                {
-                    calendar_id: selectedCalendar.id,
-                    summary: title,
-                    description,
-                    start_date_time: startDateTime,
-                    end_date_time: endDateTime,
-                    time_zone: timeZone,
-                    attendee_emails: emails,
-                    add_video_conference: addMeet,
-                },
-            )) as { data: CalendarEvent };
+            let calendarEvent: CalendarEvent | undefined;
 
-            onSuccess?.(res.data);
+            // Step 1: Create calendar event if calendar connected
+            if (hasCalendarConnection && selectedConnection && selectedCalendar) {
+                const addVideoConference =
+                    platform === "google_meet"
+                        ? true
+                        : platform === "microsoft_teams"
+                          ? true
+                          : false;
+
+                const res = (await client.post(
+                    `/integrations/calendar/${selectedConnection.id}/events`,
+                    {
+                        calendar_id: selectedCalendar.id,
+                        summary: autoTitle,
+                        description: autoDescription,
+                        start_date_time: startDateTime,
+                        end_date_time: endDateTime,
+                        time_zone: timeZone,
+                        attendee_emails: allEmails,
+                        add_video_conference: addVideoConference,
+                    },
+                )) as { data: CalendarEvent };
+
+                calendarEvent = res.data;
+            }
+
+            // Step 2: Create interview record for splits_video only
+            if (platform === "splits_video" && applicationId) {
+                await client.post("/interviews", {
+                    application_id: applicationId,
+                    interview_type: "screening",
+                    title: autoTitle,
+                    scheduled_at: startDateTime,
+                    scheduled_duration_minutes: duration,
+                    calendar_event_id: calendarEvent?.id || undefined,
+                    calendar_connection_id: selectedConnection?.id || undefined,
+                    meeting_platform: "splits_video",
+                    participants: [],
+                });
+            }
+
+            onSuccess?.(calendarEvent);
             onClose();
         } catch (err: any) {
-            setError(err.message || "Failed to create event");
+            setError(err.message || "Failed to schedule interview");
         } finally {
             setSubmitting(false);
         }
     };
 
-    /* ── Derived ── */
+    /* ── Derived UI ── */
     const noConnections = !loading && connections.length === 0;
     const stepIndex = STEPS.findIndex((s) => s.key === step);
 
     const nextDisabled =
+        isTerminalState ||
         loading ||
-        noConnections ||
-        (step === "select-calendar" && !selectedCalendar) ||
         (step === "pick-time" && (!date || !startTime));
 
-    const isMicrosoft =
-        selectedConnection?.provider_slug.startsWith("microsoft_");
-
     const stepTitle =
-        step === "select-calendar"
-            ? "Select Calendar"
+        step === "platform-calendar"
+            ? "Platform & Calendar"
             : step === "pick-time"
               ? "Date & Time"
               : "Review & Confirm";
+
+    const platformIcon =
+        platform === "splits_video"
+            ? "fa-duotone fa-regular fa-video"
+            : platform === "google_meet"
+              ? "fa-brands fa-google"
+              : "fa-brands fa-microsoft";
+
+    const platformLabel =
+        platform === "splits_video"
+            ? "Splits Network Video"
+            : platform === "google_meet"
+              ? "Google Meet"
+              : "Microsoft Teams";
 
     /* ── Render ── */
     return (
@@ -228,11 +367,11 @@ export default function ScheduleInterviewModal({
                 submitting={submitting}
                 nextDisabled={nextDisabled}
                 nextLabel="Continue"
-                submitLabel="Create Event"
-                submittingLabel="Creating..."
+                submitLabel="Schedule Interview"
+                submittingLabel="Scheduling..."
                 maxWidth="max-w-2xl"
                 footer={
-                    noConnections ? (
+                    isTerminalState ? (
                         <div className="flex justify-end w-full">
                             <button className="btn btn-ghost" onClick={onClose}>
                                 Close
@@ -241,8 +380,16 @@ export default function ScheduleInterviewModal({
                     ) : undefined
                 }
             >
+                {/* Terminal state blocking */}
+                {isTerminalState && (
+                    <BaselAlertBox variant="error" className="mb-4">
+                        Cannot schedule interview for an application in{" "}
+                        <strong>{applicationStage}</strong> state
+                    </BaselAlertBox>
+                )}
+
                 {/* Error */}
-                {error && (
+                {error && !isTerminalState && (
                     <BaselAlertBox variant="error" className="mb-4">
                         {error}
                     </BaselAlertBox>
@@ -255,176 +402,203 @@ export default function ScheduleInterviewModal({
                     </div>
                 )}
 
-                {/* No connections */}
-                {noConnections && (
-                    <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-base-200 border border-base-300 flex items-center justify-center mx-auto mb-4">
-                            <i className="fa-duotone fa-regular fa-calendar-xmark text-2xl text-base-content/30" />
-                        </div>
-                        <p className="text-sm font-bold text-base-content/50 mb-2">
-                            No calendar connected
-                        </p>
-                        <p className="text-xs text-base-content/40 mb-4">
-                            Connect Google Calendar or Microsoft Outlook to
-                            schedule interviews directly from Splits.
-                        </p>
-                        <a
-                            href="/portal/integrations"
-                            className="btn btn-primary btn-sm rounded-none"
-                        >
-                            <i className="fa-duotone fa-regular fa-plug" />
-                            Connect Calendar
-                        </a>
-                    </div>
-                )}
+                {/* Step 1: Platform & Calendar */}
+                {!loading && !isTerminalState && step === "platform-calendar" && (
+                    <div className="space-y-6">
+                        <PlatformSelector
+                            selectedPlatform={platform}
+                            onSelect={setPlatform}
+                            hasGoogleConnection={hasGoogleConnection}
+                            hasMicrosoftConnection={hasMicrosoftConnection}
+                        />
 
-                {/* Step 1: Select Calendar */}
-                {!loading && !noConnections && step === "select-calendar" && (
-                    <div className="space-y-4">
-                        {/* Connection selector (if multiple) */}
-                        {connections.length > 1 && (
-                            <fieldset>
-                                <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                    Calendar Account
-                                </legend>
-                                <div className="space-y-2">
-                                    {connections.map((conn) => (
-                                        <button
-                                            key={conn.id}
-                                            onClick={() =>
-                                                handleSelectConnection(conn)
-                                            }
-                                            className={`w-full text-left px-4 py-3 border transition-colors ${
-                                                selectedConnection?.id ===
-                                                conn.id
-                                                    ? "border-primary bg-primary/5"
-                                                    : "border-base-300 hover:border-primary/30"
-                                            }`}
+                        {/* Calendar connection selector */}
+                        {connections.length > 0 ? (
+                            <div className="space-y-4">
+                                {connections.length > 1 && (
+                                    <fieldset>
+                                        <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                            Calendar Account
+                                        </legend>
+                                        <div className="space-y-2">
+                                            {connections.map((conn) => (
+                                                <button
+                                                    key={conn.id}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleSelectConnection(
+                                                            conn,
+                                                        )
+                                                    }
+                                                    className={`w-full text-left px-4 py-3 border transition-colors ${
+                                                        selectedConnection
+                                                            ?.id === conn.id
+                                                            ? "border-primary bg-primary/5"
+                                                            : "border-base-300 hover:border-primary/30"
+                                                    }`}
+                                                >
+                                                    <p className="text-sm font-bold">
+                                                        {conn.provider_account_name ||
+                                                            conn.provider_slug}
+                                                    </p>
+                                                    <p className="text-sm text-base-content/50">
+                                                        {
+                                                            conn.provider_account_id
+                                                        }
+                                                    </p>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </fieldset>
+                                )}
+
+                                {calendars.length > 0 && (
+                                    <fieldset>
+                                        <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                            Calendar
+                                        </legend>
+                                        <div className="space-y-2">
+                                            {calendars
+                                                .filter(
+                                                    (c) =>
+                                                        c.accessRole ===
+                                                            "owner" ||
+                                                        c.accessRole ===
+                                                            "writer",
+                                                )
+                                                .map((cal) => (
+                                                    <button
+                                                        key={cal.id}
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setSelectedCalendar(
+                                                                cal,
+                                                            )
+                                                        }
+                                                        className={`w-full text-left px-4 py-3 border transition-colors ${
+                                                            selectedCalendar
+                                                                ?.id === cal.id
+                                                                ? "border-primary bg-primary/5"
+                                                                : "border-base-300 hover:border-primary/30"
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <i className="fa-duotone fa-regular fa-calendar text-primary" />
+                                                            <div>
+                                                                <p className="text-sm font-bold">
+                                                                    {
+                                                                        cal.summary
+                                                                    }
+                                                                    {cal.primary && (
+                                                                        <span className="ml-2 text-sm font-bold uppercase bg-primary/10 text-primary px-1.5 py-0.5">
+                                                                            Primary
+                                                                        </span>
+                                                                    )}
+                                                                </p>
+                                                                {cal.description && (
+                                                                    <p className="text-sm text-base-content/50">
+                                                                        {
+                                                                            cal.description
+                                                                        }
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                        </div>
+                                    </fieldset>
+                                )}
+
+                                {selectedConnection &&
+                                    calendars.length === 0 &&
+                                    !loading && (
+                                        <div className="text-center py-8">
+                                            <span className="loading loading-spinner loading-sm" />
+                                            <p className="text-sm text-base-content/50 mt-2">
+                                                Loading calendars...
+                                            </p>
+                                        </div>
+                                    )}
+                            </div>
+                        ) : (
+                            <BaselAlertBox variant="info" className="mt-2">
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-duotone fa-regular fa-info-circle" />
+                                    <span>
+                                        No calendar connected. The interview
+                                        will be created in Splits Network only.{" "}
+                                        <a
+                                            href="/portal/integrations"
+                                            className="font-bold text-primary hover:underline"
                                         >
-                                            <p className="text-sm font-bold">
-                                                {conn.provider_account_name ||
-                                                    conn.provider_slug}
-                                            </p>
-                                            <p className="text-xs text-base-content/50">
-                                                {conn.provider_account_id}
-                                            </p>
-                                        </button>
-                                    ))}
+                                            Connect a calendar
+                                        </a>
+                                    </span>
                                 </div>
-                            </fieldset>
+                            </BaselAlertBox>
                         )}
-
-                        {/* Calendar selector */}
-                        {calendars.length > 0 && (
-                            <fieldset>
-                                <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                    Calendar
-                                </legend>
-                                <div className="space-y-2">
-                                    {calendars
-                                        .filter(
-                                            (c) =>
-                                                c.accessRole === "owner" ||
-                                                c.accessRole === "writer",
-                                        )
-                                        .map((cal) => (
-                                            <button
-                                                key={cal.id}
-                                                onClick={() =>
-                                                    setSelectedCalendar(cal)
-                                                }
-                                                className={`w-full text-left px-4 py-3 border transition-colors ${
-                                                    selectedCalendar?.id ===
-                                                    cal.id
-                                                        ? "border-primary bg-primary/5"
-                                                        : "border-base-300 hover:border-primary/30"
-                                                }`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <i className="fa-duotone fa-regular fa-calendar text-primary" />
-                                                    <div>
-                                                        <p className="text-sm font-bold">
-                                                            {cal.summary}
-                                                            {cal.primary && (
-                                                                <span className="ml-2 text-sm font-bold uppercase bg-primary/10 text-primary px-1.5 py-0.5">
-                                                                    Primary
-                                                                </span>
-                                                            )}
-                                                        </p>
-                                                        {cal.description && (
-                                                            <p className="text-xs text-base-content/50">
-                                                                {
-                                                                    cal.description
-                                                                }
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                </div>
-                            </fieldset>
-                        )}
-
-                        {selectedConnection &&
-                            calendars.length === 0 &&
-                            !loading && (
-                                <div className="text-center py-8">
-                                    <span className="loading loading-spinner loading-sm" />
-                                    <p className="text-xs text-base-content/50 mt-2">
-                                        Loading calendars...
-                                    </p>
-                                </div>
-                            )}
                     </div>
                 )}
 
                 {/* Step 2: Pick Date & Time */}
-                {step === "pick-time" && (
+                {!isTerminalState && step === "pick-time" && (
                     <div className="space-y-4">
-                        <fieldset>
-                            <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                Event Title
-                            </legend>
-                            <input
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                className="input input-bordered w-full rounded-none"
+                        {/* Available slots from calendar */}
+                        {hasCalendarConnection && (
+                            <AvailableSlotsList
+                                slots={availableSlots}
+                                selectedSlot={selectedSlot}
+                                onSelect={handleSlotSelect}
+                                loading={slotsLoading}
+                                timezone={timeZone}
                             />
-                        </fieldset>
+                        )}
+
+                        {/* Manual time entry */}
+                        {hasCalendarConnection && availableSlots.length > 0 && (
+                            <div className="divider text-sm text-base-content/40">
+                                Or pick a custom time
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-2 gap-4">
                             <fieldset>
-                                <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
                                     Date
                                 </legend>
                                 <input
                                     type="date"
                                     value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                    min={new Date().toISOString().split("T")[0]}
-                                    className="input input-bordered w-full rounded-none"
+                                    onChange={(e) => {
+                                        setDate(e.target.value);
+                                        setSelectedSlot(null);
+                                    }}
+                                    min={
+                                        new Date().toISOString().split("T")[0]
+                                    }
+                                    className="input w-full rounded-none"
                                 />
                             </fieldset>
 
                             <fieldset>
-                                <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
                                     Start Time
                                 </legend>
                                 <input
                                     type="time"
                                     value={startTime}
-                                    onChange={(e) =>
-                                        setStartTime(e.target.value)
-                                    }
-                                    className="input input-bordered w-full rounded-none"
+                                    onChange={(e) => {
+                                        setStartTime(e.target.value);
+                                        setSelectedSlot(null);
+                                    }}
+                                    className="input w-full rounded-none"
                                 />
                             </fieldset>
                         </div>
 
                         <fieldset>
-                            <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                            <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
                                 Duration
                             </legend>
                             <select
@@ -434,31 +608,17 @@ export default function ScheduleInterviewModal({
                                 }
                                 className="select w-full rounded-none"
                             >
-                                <option value={15}>15 minutes</option>
-                                <option value={30}>30 minutes</option>
-                                <option value={45}>45 minutes</option>
-                                <option value={60}>1 hour</option>
-                                <option value={90}>1.5 hours</option>
-                                <option value={120}>2 hours</option>
+                                {DURATION_OPTIONS.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
                             </select>
                         </fieldset>
 
                         <fieldset>
-                            <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                Description
-                            </legend>
-                            <textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Interview notes, preparation details..."
-                                rows={3}
-                                className="textarea textarea-bordered w-full rounded-none"
-                            />
-                        </fieldset>
-
-                        <fieldset>
-                            <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                Attendee Emails
+                            <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                Additional Attendees
                             </legend>
                             <input
                                 type="text"
@@ -467,39 +627,18 @@ export default function ScheduleInterviewModal({
                                     setAttendeeEmails(e.target.value)
                                 }
                                 placeholder="email1@example.com, email2@example.com"
-                                className="input input-bordered w-full rounded-none"
+                                className="input w-full rounded-none"
                             />
                             <p className="text-sm text-base-content/40 mt-1">
-                                Comma-separated email addresses
+                                Comma-separated. Candidate ({candidateEmail}) is
+                                auto-added.
                             </p>
                         </fieldset>
-
-                        <label className="flex items-center gap-3 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={addMeet}
-                                onChange={(e) => setAddMeet(e.target.checked)}
-                                className="checkbox checkbox-sm checkbox-primary"
-                            />
-                            <span className="text-sm font-semibold">
-                                {isMicrosoft ? (
-                                    <>
-                                        <i className="fa-brands fa-microsoft mr-1.5 text-primary" />
-                                        Add Teams meeting link
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-brands fa-google mr-1.5 text-primary" />
-                                        Add Google Meet link
-                                    </>
-                                )}
-                            </span>
-                        </label>
                     </div>
                 )}
 
                 {/* Step 3: Confirm */}
-                {step === "confirm" && (
+                {!isTerminalState && step === "confirm" && (
                     <div className="space-y-4">
                         <div className="bg-base-200 border border-base-300 p-5">
                             <p className="text-sm font-bold tracking-[0.2em] uppercase text-base-content/50 mb-3">
@@ -508,17 +647,31 @@ export default function ScheduleInterviewModal({
 
                             <div className="space-y-3">
                                 <div>
-                                    <p className="text-xs font-bold text-base-content/50 uppercase">
+                                    <p className="text-sm font-bold text-base-content/50 uppercase">
                                         Title
                                     </p>
                                     <p className="text-sm font-semibold">
-                                        {title}
+                                        {autoTitle}
                                     </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-sm font-bold text-base-content/50 uppercase">
+                                        Platform
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <i
+                                            className={`${platformIcon} text-primary text-sm`}
+                                        />
+                                        <p className="text-sm font-semibold">
+                                            {platformLabel}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <p className="text-xs font-bold text-base-content/50 uppercase">
+                                        <p className="text-sm font-bold text-base-content/50 uppercase">
                                             Date
                                         </p>
                                         <p className="text-sm font-semibold">
@@ -533,7 +686,7 @@ export default function ScheduleInterviewModal({
                                         </p>
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-base-content/50 uppercase">
+                                        <p className="text-sm font-bold text-base-content/50 uppercase">
                                             Time
                                         </p>
                                         <p className="text-sm font-semibold">
@@ -542,54 +695,49 @@ export default function ScheduleInterviewModal({
                                     </div>
                                 </div>
 
+                                {hasCalendarConnection && (
+                                    <div>
+                                        <p className="text-sm font-bold text-base-content/50 uppercase">
+                                            Calendar
+                                        </p>
+                                        <p className="text-sm font-semibold">
+                                            {selectedCalendar?.summary}
+                                        </p>
+                                    </div>
+                                )}
+
                                 <div>
-                                    <p className="text-xs font-bold text-base-content/50 uppercase">
-                                        Calendar
+                                    <p className="text-sm font-bold text-base-content/50 uppercase">
+                                        Attendees
                                     </p>
-                                    <p className="text-sm font-semibold">
-                                        {selectedCalendar?.summary}
+                                    <p className="text-sm text-base-content/70">
+                                        {candidateEmail && (
+                                            <span className="font-semibold">
+                                                {candidateEmail} (candidate)
+                                            </span>
+                                        )}
+                                        {attendeeEmails && (
+                                            <span>
+                                                {candidateEmail ? ", " : ""}
+                                                {attendeeEmails}
+                                            </span>
+                                        )}
+                                        {!candidateEmail && !attendeeEmails && (
+                                            <span className="text-base-content/40">
+                                                No attendees
+                                            </span>
+                                        )}
                                     </p>
                                 </div>
 
-                                {description && (
-                                    <div>
-                                        <p className="text-xs font-bold text-base-content/50 uppercase">
-                                            Description
-                                        </p>
-                                        <p className="text-sm text-base-content/70">
-                                            {description}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {attendeeEmails && (
-                                    <div>
-                                        <p className="text-xs font-bold text-base-content/50 uppercase">
-                                            Attendees
-                                        </p>
-                                        <p className="text-sm text-base-content/70">
-                                            {attendeeEmails}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {addMeet && (
-                                    <div className="flex items-center gap-2 pt-1">
-                                        {isMicrosoft ? (
-                                            <>
-                                                <i className="fa-brands fa-microsoft text-primary text-sm" />
-                                                <p className="text-sm font-semibold text-primary">
-                                                    Teams meeting included
-                                                </p>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="fa-brands fa-google text-primary text-sm" />
-                                                <p className="text-sm font-semibold text-primary">
-                                                    Google Meet included
-                                                </p>
-                                            </>
-                                        )}
+                                {!hasCalendarConnection && (
+                                    <div className="flex items-center gap-2 pt-1 text-sm text-base-content/50">
+                                        <i className="fa-duotone fa-regular fa-info-circle" />
+                                        <span>
+                                            No calendar connected — interview
+                                            will be created in Splits Network
+                                            only
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -599,4 +747,78 @@ export default function ScheduleInterviewModal({
             </BaselWizardModal>
         </ModalPortal>
     );
+}
+
+/* ─── Slot Computation ─────────────────────────────────────────────────── */
+
+/**
+ * Compute available 30-min slots from free/busy data.
+ * Filters to business hours (9am-5pm) on weekdays.
+ */
+function computeAvailableSlots(
+    availabilityData: any,
+    rangeStart: Date,
+    rangeEnd: Date,
+    slotMinutes: number,
+): TimeSlot[] {
+    const busyPeriods: Array<{ start: Date; end: Date }> = [];
+
+    // Parse busy periods from availability response
+    if (availabilityData?.calendars) {
+        for (const calData of Object.values(availabilityData.calendars) as any[]) {
+            if (calData?.busy) {
+                for (const b of calData.busy) {
+                    busyPeriods.push({
+                        start: new Date(b.start),
+                        end: new Date(b.end),
+                    });
+                }
+            }
+        }
+    } else if (Array.isArray(availabilityData?.busy)) {
+        for (const b of availabilityData.busy) {
+            busyPeriods.push({
+                start: new Date(b.start),
+                end: new Date(b.end),
+            });
+        }
+    }
+
+    const slots: TimeSlot[] = [];
+    const slotMs = slotMinutes * 60 * 1000;
+
+    // Start from next full slot boundary
+    const cursor = new Date(rangeStart);
+    cursor.setMinutes(
+        Math.ceil(cursor.getMinutes() / slotMinutes) * slotMinutes,
+        0,
+        0,
+    );
+
+    while (cursor.getTime() + slotMs <= rangeEnd.getTime()) {
+        const day = cursor.getDay();
+        const hour = cursor.getHours();
+
+        // Weekdays only (Mon-Fri), business hours (9-17)
+        if (day >= 1 && day <= 5 && hour >= 9 && hour < 17) {
+            const slotEnd = new Date(cursor.getTime() + slotMs);
+
+            // Check if slot overlaps any busy period
+            const isBusy = busyPeriods.some(
+                (bp) => cursor < bp.end && slotEnd > bp.start,
+            );
+
+            if (!isBusy) {
+                slots.push({
+                    start: cursor.toISOString(),
+                    end: slotEnd.toISOString(),
+                });
+            }
+        }
+
+        cursor.setTime(cursor.getTime() + slotMs);
+    }
+
+    // Limit to reasonable number to avoid massive lists
+    return slots.slice(0, 100);
 }
