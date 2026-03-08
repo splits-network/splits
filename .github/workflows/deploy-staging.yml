@@ -355,6 +355,8 @@ jobs:
               run: |
                   kubectl annotate deployment redis kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
                   kubectl delete deployment redis --namespace=${{ env.NAMESPACE }} --ignore-not-found=true
+                  kubectl annotate deployment rabbitmq kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
+                  kubectl delete deployment rabbitmq --namespace=${{ env.NAMESPACE }} --ignore-not-found=true
                   kubectl apply -f infra/k8s/redis/ --namespace=${{ env.NAMESPACE }}
                   kubectl apply -f infra/k8s/rabbitmq/ --namespace=${{ env.NAMESPACE }}
 
