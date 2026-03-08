@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 37 of 38 (Transcription & AI)
-Plan: 1 of 3
+Plan: 2 of 3
 Status: In progress
-Last activity: 2026-03-08 — Completed 37-01-PLAN.md (AI pipeline schema)
+Last activity: 2026-03-08 — Completed 37-02-PLAN.md (transcription pipeline)
 
 Progress: ██████████████████████░░ 97%
 
@@ -23,7 +23,7 @@ Progress: ██████████████████████░�
 - v7.0: 14 plans, 6 phases
 
 **v9.0 (current):**
-- Plans completed: 31
+- Plans completed: 32
 - Phases completed: 4 (Phases 33-36)
 
 ## Accumulated Context
@@ -97,6 +97,9 @@ Recent: LiveKit over Daily/Twilio/100ms (self-hostable on existing K8s, zero per
 | Task 1 changes already in codebase from 36-05 | 36-06 | Frontend recording integration was done as part of 36-05 component work |
 | Transcript segments as JSONB | 37-01 | Flexible schema for speaker diarization without separate table overhead |
 | Six-state pipeline status | 37-01 | Granular step display per CONTEXT.md locked decision (incl posting) |
+| Gap-based speaker alternation heuristic | 37-02 | Whisper-1 lacks diarization; gap > 1s triggers speaker switch |
+| Interview creator as AI note author | 37-02 | Valid FK required; platform_admin type + interview_summary note_type distinguishes AI |
+| FFmpeg 64kbps/16kHz for large recordings | 37-02 | Keeps under Whisper 25MB while preserving speech quality |
 
 ### Pending Todos
 
@@ -111,10 +114,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 37-01-PLAN.md (AI pipeline schema)
+Stopped at: Completed 37-02-PLAN.md (transcription pipeline)
 Resume file: None
-Next: 37-02-PLAN.md (transcription service)
+Next: 37-03-PLAN.md (frontend transcript UI)
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (Plan 37-01 complete)*
+*Last updated: 2026-03-08 (Plan 37-02 complete)*
