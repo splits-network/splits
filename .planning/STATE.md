@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 
 ## Current Position
 
-Phase: 40 of 40 (Candidate Magic-Link Bug Fixes)
-Plan: 2 of 2
-Status: Phase complete -- v9.0 milestone complete (all 8 phases done)
-Last activity: 2026-03-08 — Completed 40-02-PLAN.md
+Phase: 41 of 41 (Schedule & Recording Bug Fixes)
+Plan: 0 of 2
+Status: Not started — gap closure phase from 2nd milestone audit
+Last activity: 2026-03-08 — Gap closure phase created
 
-Progress: █████████████████████████ 100% (plan 2/2 in phase 40)
+Progress: ░░░░░░░░░░░░░░░░░░░░░░░░░ 0% (plan 0/2 in phase 41)
 
 ## Performance Metrics
 
@@ -132,10 +132,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 40-02-PLAN.md
+Stopped at: Created Phase 41 gap closure phase
 Resume file: None
-Next: v9.0 milestone complete — run /basel:audit-milestone
+Next: Plan Phase 41 — /basel:plan-phase 41
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (40-02 complete — interview notes mine=true filter and hook fix)*
+*Last updated: 2026-03-08 (Phase 41 created — gap closure for BUG-03 + BUG-04)*

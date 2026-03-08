@@ -9,7 +9,7 @@
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
-- [x] **v9.0 Video Interviewing** - Phases 33-40 (shipped 2026-03-08)
+- [ ] **v9.0 Video Interviewing** - Phases 33-41
 
 ## Phases
 
@@ -57,6 +57,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
 - [x] **Phase 39: Integration Wiring & Auth Fixes** - Gateway auth bypasses, LiveKit webhook config, candidate notes dual-auth
 - [x] **Phase 40: Candidate Magic-Link Bug Fixes** - Recording consent token location, notes load-on-mount array mismatch
+- [ ] **Phase 41: Schedule & Recording Bug Fixes** - Empty participants array on schedule, recording status field mismatch
 
 ## Phase Details
 
@@ -193,10 +194,23 @@ Plans:
 - [x] 40-01-PLAN.md — Fix recording consent to send magic token in request body
 - [x] 40-02-PLAN.md — Fix notes load-on-mount to read array response correctly
 
+### Phase 41: Schedule & Recording Bug Fixes
+**Goal**: All interview scheduling and recording status polling work correctly end-to-end
+**Depends on**: Phase 40
+**Requirements**: SCHED-01 (fix)
+**Gap Closure**: Closes BUG-03 and BUG-04 from v9.0 milestone audit (2nd audit)
+**Success Criteria** (what must be TRUE):
+  1. User can schedule an interview from the application detail page — POST creates interview with correct participants
+  2. Recording status polling reads the correct field, so observers and page refreshes show accurate recording state
+**Plans:** 2 plans
+Plans:
+- [ ] 41-01-PLAN.md — Fix schedule modal empty participants array (BUG-03)
+- [ ] 41-02-PLAN.md — Fix recording status polling field mismatch (BUG-04)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39 -> 40
+Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39 -> 40 -> 41
 
 Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on Phase 34 but is independent of Phase 35, so they could theoretically run in parallel. Phase 37 (AI) depends on Phase 36. Phase 38 depends on Phases 35 and 37.
 
@@ -221,3 +235,4 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 38. Panel, Notes & Polish | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 39. Integration Wiring & Auth Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 40. Candidate Magic-Link Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
+| 41. Schedule & Recording Bug Fixes | v9.0 | 0/2 | Not Started | — |
