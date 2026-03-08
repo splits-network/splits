@@ -328,6 +328,33 @@ jobs:
                     --namespace=splits-network \
                     --dry-run=client -o yaml | kubectl apply -f -
 
+            - name: Verify required secrets
+              run: |
+                  set -euo pipefail
+
+                  check_secret_key() {
+                    local secret_name="$1"
+                    local key_name="$2"
+                    local encoded
+
+                    encoded=$(kubectl get secret "$secret_name" --namespace=splits-network -o "jsonpath={.data['$key_name']}" 2>/dev/null || true)
+                    if [ -z "$encoded" ]; then
+                      echo "❌ Missing required secret key: ${secret_name}/${key_name}"
+                      exit 1
+                    fi
+                  }
+
+                  check_secret_key "supabase-secrets" "supabase-url"
+                  check_secret_key "supabase-secrets" "supabase-anon-key"
+                  check_secret_key "supabase-secrets" "supabase-service-role-key"
+                  check_secret_key "supabase-secrets" "supabase-s3-endpoint"
+                  check_secret_key "supabase-secrets" "supabase-s3-access-key"
+                  check_secret_key "supabase-secrets" "supabase-s3-secret-key"
+                  check_secret_key "livekit-secrets" "livekit-api-key"
+                  check_secret_key "livekit-secrets" "livekit-api-secret"
+
+                  echo "✅ Required deployment secrets verified"
+
             - name: Update image tags in manifests
               run: |
                   export IMAGE_TAG=${{ github.sha }}
