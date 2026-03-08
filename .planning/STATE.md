@@ -10,23 +10,23 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 42 (1 of 5 in v10.0)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-03-08 — Roadmap created for v10.0
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-03-08 — Completed 42-01-PLAN.md (Call Data Model)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░░░░░░░░░░░] 1/20 plans (5%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 0
+- v10.0 plans completed: 1
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 42-call-data-model-service-layer | 1/4 | 2min | 2min |
 
 ## Accumulated Context
 
@@ -40,6 +40,9 @@ Recent decisions affecting current work:
 - [v10.0 Research]: Magic-link-only auth for video app (no Clerk in video app)
 - [v10.0 Research]: Single `apps/video/` serving two subdomains via Host header brand detection
 - [v10.0 Research]: Call artifacts owned by call record, not posted to entity note tables
+- [42-01]: RLS uses participant-based access only; entity stakeholder access at service layer
+- [42-01]: Polymorphic entity index on (entity_type, entity_id) resolves research performance concern
+- [42-01]: call_types as lookup table (not enum) for extensibility without migrations
 
 ### Pending Todos
 
@@ -47,16 +50,16 @@ None.
 
 ### Blockers/Concerns
 
-- [Research]: Polymorphic entity query performance needs index strategy validation (Phase 42)
+- [RESOLVED]: Polymorphic entity query performance — composite index on (entity_type, entity_id) created in 42-01
 - [Research]: Host header behind nginx ingress needs staging verification (Phase 43)
 - [Research]: Summary storage for non-interview calls needs resolution (Phase 45)
 
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Roadmap created for v10.0 milestone
+Stopped at: Completed 42-01-PLAN.md (Call Data Model)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (v10.0 roadmap created — Phases 42-46)*
+*Last updated: 2026-03-08 (42-01 complete — call schema created)*
