@@ -69,10 +69,7 @@ jobs:
                           name: gamification-service,
                           path: services/gamification-service,
                       }
-                    - {
-                          name: video-service,
-                          path: services/video-service,
-                      }
+                    - { name: video-service, path: services/video-service }
                     - { name: portal, path: apps/portal }
                     - { name: candidate, path: apps/candidate }
                     - { name: corporate, path: apps/corporate }
@@ -321,6 +318,7 @@ jobs:
                   export IMAGE_TAG=${{ github.sha }}
                   export ACR_SERVER=${{ secrets.ACR_LOGIN_SERVER }}
                   export REPLICAS=1
+                  export REPLICAS="${REPLICAS:-2}"
                   export API_BASE_URL="https://api.staging.splits.network"
                   export CHAT_GATEWAY_URL="wss://api.staging.splits.network/ws/chat"
                   export ANALYTICS_GATEWAY_URL="wss://api.staging.splits.network/ws/analytics"
@@ -355,6 +353,7 @@ jobs:
 
             - name: Deploy infrastructure (Redis, RabbitMQ)
               run: |
+                  kubectl annotate deployment redis kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
                   kubectl apply -f infra/k8s/redis/ --namespace=${{ env.NAMESPACE }}
                   kubectl apply -f infra/k8s/rabbitmq/ --namespace=${{ env.NAMESPACE }}
 

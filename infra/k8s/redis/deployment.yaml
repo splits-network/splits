@@ -14,7 +14,7 @@ metadata:
     name: redis
     namespace: splits-network
 spec:
-    replicas: ${REPLICAS:-2}
+    replicas: ${REPLICAS}
     selector:
         matchLabels:
             app: redis
