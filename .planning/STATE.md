@@ -10,23 +10,23 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 42 (1 of 5 in v10.0)
-Plan: 1 of 4 complete
+Plan: 2 of 4 complete
 Status: In progress
-Last activity: 2026-03-08 — Completed 42-01-PLAN.md (Call Data Model)
+Last activity: 2026-03-08 — Completed 42-02-PLAN.md (Call Service Scaffold & Repository)
 
-Progress: [██░░░░░░░░░░░░░░░░░░] 1/20 plans (5%)
+Progress: [██░░░░░░░░░░░░░░░░░░] 2/20 plans (10%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 1
+- v10.0 plans completed: 2
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 42-call-data-model-service-layer | 1/4 | 2min | 2min |
+| 42-call-data-model-service-layer | 2/4 | 6min | 3min |
 
 ## Accumulated Context
 
@@ -43,6 +43,8 @@ Recent decisions affecting current work:
 - [42-01]: RLS uses participant-based access only; entity stakeholder access at service layer
 - [42-01]: Polymorphic entity index on (entity_type, entity_id) resolves research performance concern
 - [42-01]: call_types as lookup table (not enum) for extensibility without migrations
+- [42-02]: Split repository into 3 files (main + participant + artifact) for ~200 line architecture compliance
+- [42-02]: Entity-based list filtering uses pre-query on call_entity_links then IN clause
 
 ### Pending Todos
 
@@ -57,9 +59,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 42-01-PLAN.md (Call Data Model)
+Stopped at: Completed 42-02-PLAN.md (Call Service Scaffold & Repository)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (42-01 complete — call schema created)*
+*Last updated: 2026-03-08 (42-02 complete — call-service scaffolded with repository layer)*
