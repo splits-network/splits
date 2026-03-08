@@ -43,6 +43,7 @@ export interface Interview {
     status: InterviewStatus;
     interview_type: InterviewType;
     title: string | null;
+    round_name: string | null;
     scheduled_at: string;
     scheduled_duration_minutes: number;
     actual_start_at: string | null;
@@ -69,6 +70,8 @@ export interface Interview {
     recording_started_at: string | null;
     recording_ended_at: string | null;
     recording_consent_given_at: string | null;
+    transcript_status: string | null;
+    transcript_error: string | null;
     created_by: string;
     created_at: string;
     updated_at: string;
@@ -127,6 +130,29 @@ export interface InterviewWithContext extends Interview {
     participants: InterviewParticipantWithUser[];
 }
 
+export interface InterviewWithFullContext extends InterviewWithContext {
+    round_number: number;
+    has_recording: boolean;
+    has_transcript: boolean;
+    has_summary: boolean;
+    transcript_status: string | null;
+}
+
+export interface InterviewNote {
+    id: string;
+    interview_id: string;
+    participant_id: string;
+    user_id: string;
+    content: string;
+    updated_at: string;
+    created_at: string;
+}
+
+export interface InterviewNoteWithUser extends InterviewNote {
+    user_name: string;
+    participant_role: ParticipantRole;
+}
+
 export interface UserCalendarPreferences {
     id: string;
     user_id: string;
@@ -158,6 +184,7 @@ export interface CreateInterviewInput {
     application_id: string;
     interview_type?: InterviewType;
     title?: string;
+    round_name?: string;
     scheduled_at: string;
     scheduled_duration_minutes?: number;
     calendar_event_id?: string;

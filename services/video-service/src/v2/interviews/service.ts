@@ -62,6 +62,7 @@ export class InterviewService {
             status: 'scheduled',
             interview_type: input.interview_type ?? 'screening',
             title: input.title ?? null,
+            round_name: input.round_name ?? null,
             scheduled_at: input.scheduled_at,
             scheduled_duration_minutes: input.scheduled_duration_minutes ?? 60,
             max_duration_seconds: 14400, // 4 hours

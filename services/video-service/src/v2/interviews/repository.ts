@@ -5,7 +5,10 @@ import {
     InterviewAccessToken,
     InterviewWithParticipants,
     InterviewWithContext,
+    InterviewWithFullContext,
     InterviewParticipantWithUser,
+    InterviewNote,
+    InterviewNoteWithUser,
     InterviewStatus,
     InterviewRescheduleRequest,
     RecordingConsent,
@@ -31,6 +34,7 @@ export class InterviewRepository {
         status: InterviewStatus;
         interview_type: string;
         title: string | null;
+        round_name?: string | null;
         scheduled_at: string;
         scheduled_duration_minutes: number;
         max_duration_seconds: number;
@@ -711,5 +715,262 @@ export class InterviewRepository {
             throw error;
         }
         return (data || []) as RecordingConsent[];
+    }
+
+    // ── Interview Notes ─────────────────────────────────────────────────
+
+    async saveInterviewNote(
+        interviewId: string,
+        participantId: string,
+        userId: string,
+        content: string,
+    ): Promise<InterviewNote> {
+        const { data, error } = await this.supabase
+            .from('interview_notes')
+            .upsert(
+                {
+                    interview_id: interviewId,
+                    participant_id: participantId,
+                    user_id: userId,
+                    content,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: 'interview_id,participant_id' },
+            )
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+        return data as InterviewNote;
+    }
+
+    async getInterviewNotes(interviewId: string): Promise<InterviewNoteWithUser[]> {
+        const { data: notes, error } = await this.supabase
+            .from('interview_notes')
+            .select('*')
+            .eq('interview_id', interviewId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            throw error;
+        }
+
+        if (!notes || notes.length === 0) {
+            return [];
+        }
+
+        // Enrich with user names and participant roles
+        const userIds = notes.map((n: InterviewNote) => n.user_id);
+        const participantIds = notes.map((n: InterviewNote) => n.participant_id);
+
+        const [usersResult, participantsResult] = await Promise.all([
+            this.supabase.from('users').select('id, name').in('id', userIds),
+            this.supabase.from('interview_participants').select('id, role').in('id', participantIds),
+        ]);
+
+        if (usersResult.error) throw usersResult.error;
+        if (participantsResult.error) throw participantsResult.error;
+
+        const userMap = new Map<string, string>();
+        for (const u of usersResult.data || []) {
+            userMap.set(u.id, u.name || '');
+        }
+
+        const participantMap = new Map<string, string>();
+        for (const p of participantsResult.data || []) {
+            participantMap.set(p.id, p.role);
+        }
+
+        return notes.map((n: InterviewNote) => ({
+            ...n,
+            user_name: userMap.get(n.user_id) || '',
+            participant_role: (participantMap.get(n.participant_id) || 'interviewer') as any,
+        }));
+    }
+
+    async findByApplicationIdWithContext(
+        applicationId: string,
+        options?: { limit?: number; offset?: number },
+    ): Promise<{ data: InterviewWithFullContext[]; total: number }> {
+        // 1. Fetch interviews ordered by scheduled_at ASC (chronological for round numbering)
+        const limit = options?.limit ?? 25;
+        const offset = options?.offset ?? 0;
+
+        const { data: interviews, error: intError, count } = await this.supabase
+            .from('interviews')
+            .select('*', { count: 'exact' })
+            .eq('application_id', applicationId)
+            .order('scheduled_at', { ascending: true })
+            .range(offset, offset + limit - 1);
+
+        if (intError) throw intError;
+        if (!interviews || interviews.length === 0) {
+            return { data: [], total: 0 };
+        }
+
+        const interviewIds = interviews.map((i: Interview) => i.id);
+
+        // 2. Fetch participants with user details
+        const { data: participants, error: pError } = await this.supabase
+            .from('interview_participants')
+            .select('*')
+            .in('interview_id', interviewIds)
+            .order('created_at', { ascending: true });
+
+        if (pError) throw pError;
+
+        const userIds = [...new Set((participants || []).map((p: InterviewParticipant) => p.user_id))];
+        let userMap = new Map<string, { name: string; profile_image_url: string | null }>();
+
+        if (userIds.length > 0) {
+            const { data: users, error: uError } = await this.supabase
+                .from('users')
+                .select('id, name, profile_image_url')
+                .in('id', userIds);
+
+            if (uError) throw uError;
+            for (const user of users || []) {
+                userMap.set(user.id, {
+                    name: user.name || '',
+                    profile_image_url: user.profile_image_url || null,
+                });
+            }
+        }
+
+        // 3. Fetch transcript status for all interviews
+        const { data: transcripts, error: tError } = await this.supabase
+            .from('interview_transcripts')
+            .select('interview_id')
+            .in('interview_id', interviewIds);
+
+        if (tError) throw tError;
+
+        const transcriptInterviewIds = new Set(
+            (transcripts || []).map((t: { interview_id: string }) => t.interview_id),
+        );
+
+        // 4. Fetch job and company info via application
+        const { data: application, error: appError } = await this.supabase
+            .from('applications')
+            .select('job_id')
+            .eq('id', applicationId)
+            .maybeSingle();
+
+        if (appError) throw appError;
+
+        let job = { id: '', title: 'Interview', company_name: '' };
+
+        if (application?.job_id) {
+            const { data: jobRow, error: jobError } = await this.supabase
+                .from('jobs')
+                .select('id, title, company_id')
+                .eq('id', application.job_id)
+                .maybeSingle();
+
+            if (jobError) throw jobError;
+
+            if (jobRow) {
+                job.id = jobRow.id;
+                job.title = jobRow.title || 'Interview';
+
+                if (jobRow.company_id) {
+                    const { data: company, error: companyError } = await this.supabase
+                        .from('companies')
+                        .select('id, name')
+                        .eq('id', jobRow.company_id)
+                        .maybeSingle();
+
+                    if (companyError) throw companyError;
+                    job.company_name = company?.name || '';
+                }
+            }
+        }
+
+        // 5. Build enriched results with round numbers
+        // For round numbering, we need ALL interviews for this application in chronological order
+        // Since we already fetched with ascending order, the index gives us round_number
+        // But if paginated, we need offset-aware numbering
+        const result: InterviewWithFullContext[] = interviews.map(
+            (interview: Interview, index: number) => {
+                const interviewParticipants = (participants || [])
+                    .filter((p: InterviewParticipant) => p.interview_id === interview.id)
+                    .map((p: InterviewParticipant) => {
+                        const user = userMap.get(p.user_id);
+                        return {
+                            ...p,
+                            name: user?.name || '',
+                            avatar_url: user?.profile_image_url || null,
+                        } as InterviewParticipantWithUser;
+                    });
+
+                const hasTranscript = transcriptInterviewIds.has(interview.id);
+
+                return {
+                    ...interview,
+                    job,
+                    participants: interviewParticipants,
+                    round_number: offset + index + 1,
+                    has_recording: !!interview.recording_blob_url,
+                    has_transcript: hasTranscript,
+                    has_summary: hasTranscript && interview.transcript_status === 'complete',
+                    transcript_status: interview.transcript_status || null,
+                } as InterviewWithFullContext;
+            },
+        );
+
+        return { data: result, total: count || 0 };
+    }
+
+    async postNotesToApplication(
+        interviewId: string,
+        applicationId: string,
+    ): Promise<{ posted: number }> {
+        // 1. Fetch interview for title
+        const interview = await this.findById(interviewId);
+        if (!interview) {
+            throw Object.assign(new Error('Interview not found'), { statusCode: 404 });
+        }
+
+        // 2. Fetch all notes with participant info
+        const notes = await this.getInterviewNotes(interviewId);
+        if (notes.length === 0) {
+            return { posted: 0 };
+        }
+
+        // 3. Map participant roles to application note creator types
+        const roleToCreatorType: Record<string, string> = {
+            interviewer: 'company_admin',
+            observer: 'company_admin',
+            candidate: 'candidate',
+        };
+
+        // 4. Insert application notes
+        const interviewTitle = interview.title || interview.round_name || 'Interview';
+        const rows = notes
+            .filter((n) => n.content.trim().length > 0)
+            .map((note) => ({
+                application_id: applicationId,
+                created_by_user_id: note.user_id,
+                created_by_type: roleToCreatorType[note.participant_role] || 'company_admin',
+                note_type: 'interview_note',
+                visibility: 'company_only',
+                message_text: `**Interview Notes - ${interviewTitle}**\n\n${note.content}`,
+            }));
+
+        if (rows.length === 0) {
+            return { posted: 0 };
+        }
+
+        const { error } = await this.supabase
+            .from('application_notes')
+            .insert(rows);
+
+        if (error) {
+            throw error;
+        }
+
+        return { posted: rows.length };
     }
 }

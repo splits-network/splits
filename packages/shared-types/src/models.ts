@@ -493,7 +493,8 @@ export type ApplicationNoteType =
     | 'interview_feedback' // Company interview notes
     | 'general'            // Catch-all type
     | 'pitch'              // Recruiter pitch when submitting candidate
-    | 'interview_summary'; // AI-generated interview summary
+    | 'interview_summary' // AI-generated interview summary
+    | 'interview_note';   // Auto-posted from in-call interview notes
 
 export type ApplicationNoteCreatorType =
     | 'candidate'

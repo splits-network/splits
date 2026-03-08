@@ -41,6 +41,7 @@ export async function registerInterviewRoutes(
                     application_id: body.application_id,
                     interview_type: body.interview_type,
                     title: body.title,
+                    round_name: body.round_name,
                     scheduled_at: body.scheduled_at,
                     scheduled_duration_minutes: body.scheduled_duration_minutes,
                     calendar_event_id: body.calendar_event_id,
@@ -77,6 +78,7 @@ export async function registerInterviewRoutes(
     });
 
     // GET /api/v2/interviews - List by application_id
+    // When include_context=true, returns enriched data with participants, recording/transcript status
     app.get('/api/v2/interviews', async (request, reply) => {
         try {
             requireUserContext(request);
@@ -90,8 +92,26 @@ export async function registerInterviewRoutes(
             const limit = Math.min(parseInt(query.limit || '25', 10), 100);
             const page = Math.max(parseInt(query.page || '1', 10), 1);
             const offset = (page - 1) * limit;
-            const status = query.status as string | undefined;
+            const includeContext = query.include_context === 'true';
 
+            if (includeContext) {
+                const result = await repository.findByApplicationIdWithContext(
+                    applicationId,
+                    { limit, offset },
+                );
+
+                return reply.send({
+                    data: result.data,
+                    pagination: {
+                        total: result.total,
+                        page,
+                        limit,
+                        total_pages: Math.ceil(result.total / limit),
+                    },
+                });
+            }
+
+            const status = query.status as string | undefined;
             const result = await service.listByApplication(applicationId, {
                 status,
                 limit,
@@ -447,6 +467,110 @@ export async function registerInterviewRoutes(
         }
     });
 
+    // ── Interview Notes ─────────────────────────────────────────────────
+
+    // PUT /api/v2/interviews/:id/notes - Upsert in-call note for current participant
+    app.put('/api/v2/interviews/:id/notes', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+            const body = request.body as { content?: string };
+
+            if (body?.content === undefined) {
+                return reply.code(400).send({ error: 'content is required' });
+            }
+
+            // Resolve clerk user to internal user ID
+            const userId = await repository.resolveUserId(clerkUserId);
+
+            // Find participant record for this user in this interview
+            const { data: participant, error: pError } = await repository
+                .getSupabase()
+                .from('interview_participants')
+                .select('id')
+                .eq('interview_id', id)
+                .eq('user_id', userId)
+                .maybeSingle();
+
+            if (pError) throw pError;
+            if (!participant) {
+                return reply.code(403).send({ error: 'You are not a participant in this interview' });
+            }
+
+            const note = await repository.saveInterviewNote(
+                id,
+                participant.id,
+                userId,
+                body.content,
+            );
+
+            return reply.send({ data: note });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // GET /api/v2/interviews/:id/notes - Get all notes for an interview
+    app.get('/api/v2/interviews/:id/notes', async (request, reply) => {
+        try {
+            requireUserContext(request);
+            const { id } = request.params as { id: string };
+
+            const notes = await repository.getInterviewNotes(id);
+            return reply.send({ data: notes });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // POST /api/v2/interviews/:id/notes/post-to-application - Convert interview notes to application notes
+    app.post('/api/v2/interviews/:id/notes/post-to-application', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+
+            // Verify interview exists and get application_id
+            const interview = await repository.findById(id);
+            if (!interview) {
+                return reply.code(404).send({ error: 'Interview not found' });
+            }
+
+            // Verify caller is an interviewer/observer (not candidate)
+            const userId = await repository.resolveUserId(clerkUserId);
+            const { data: participant, error: pError } = await repository
+                .getSupabase()
+                .from('interview_participants')
+                .select('id, role')
+                .eq('interview_id', id)
+                .eq('user_id', userId)
+                .maybeSingle();
+
+            if (pError) throw pError;
+            if (!participant) {
+                return reply.code(403).send({ error: 'You are not a participant in this interview' });
+            }
+
+            if (participant.role === 'candidate') {
+                return reply.code(403).send({ error: 'Only interviewers can post notes to applications' });
+            }
+
+            const result = await repository.postNotesToApplication(
+                id,
+                interview.application_id,
+            );
+
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
     // PATCH /api/v2/interviews/:id - Update interview fields (authenticated)
     // Used for linking calendar events or updating meeting info after creation
     app.patch('/api/v2/interviews/:id', async (request, reply) => {
@@ -462,6 +586,7 @@ export async function registerInterviewRoutes(
                 'meeting_platform',
                 'meeting_link',
                 'title',
+                'round_name',
                 'metadata',
                 'recording_enabled',
             ];
