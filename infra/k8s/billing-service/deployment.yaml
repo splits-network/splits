@@ -78,14 +78,18 @@ spec:
                       httpGet:
                           path: /health
                           port: 3004
-                      initialDelaySeconds: 30
+                      initialDelaySeconds: 60
                       periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
                   readinessProbe:
                       httpGet:
                           path: /health
                           port: 3004
-                      initialDelaySeconds: 10
+                      initialDelaySeconds: 15
                       periodSeconds: 5
+                      timeoutSeconds: 5
+                      failureThreshold: 2
 ---
 apiVersion: v1
 kind: Service

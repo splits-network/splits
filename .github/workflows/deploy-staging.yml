@@ -360,8 +360,8 @@ jobs:
                   kubectl delete deployment redis --namespace=${{ env.NAMESPACE }} --ignore-not-found=true
                   kubectl annotate deployment rabbitmq kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
                   kubectl delete deployment rabbitmq --namespace=${{ env.NAMESPACE }} --ignore-not-found=true
-                  kubectl apply -f infra/k8s/redis/ --namespace=${{ env.NAMESPACE }}
-                  kubectl apply -f infra/k8s/rabbitmq/ --namespace=${{ env.NAMESPACE }}
+                  kubectl apply -f infra/k8s/redis/ --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
+                  kubectl apply -f infra/k8s/rabbitmq/ --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
 
             - name: Wait for infrastructure to be ready
               run: |
@@ -374,12 +374,12 @@ jobs:
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl annotate deployment "$svc" kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
-                      kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }}
+                      kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
                       if [ "$svc" = "ats-service" ]; then
-                        kubectl apply -f "infra/k8s/$svc/cronjobs/" --namespace=${{ env.NAMESPACE }}
+                        kubectl apply -f "infra/k8s/$svc/cronjobs/" --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
                       fi
                       if [ "$svc" = "billing-service" ]; then
-                        kubectl apply -f "infra/k8s/$svc/cronjobs/" --namespace=${{ env.NAMESPACE }}
+                        kubectl apply -f "infra/k8s/$svc/cronjobs/" --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
                       fi
                     fi
                   done
@@ -411,7 +411,7 @@ jobs:
             - name: Deploy API Gateway
               run: |
                   kubectl annotate deployment api-gateway kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
-                  kubectl apply -f infra/k8s/api-gateway/ --namespace=${{ env.NAMESPACE }}
+                  kubectl apply -f infra/k8s/api-gateway/ --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
 
             - name: Wait for API Gateway to be ready
               run: |
@@ -423,7 +423,7 @@ jobs:
                   for app in $FRONTENDS; do
                     if [ -f "infra/k8s/$app/deployment.yaml" ]; then
                       kubectl annotate deployment "$app" kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
-                      kubectl apply -f "infra/k8s/$app/" --namespace=${{ env.NAMESPACE }}
+                      kubectl apply -f "infra/k8s/$app/" --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
                     fi
                   done
 
@@ -437,9 +437,9 @@ jobs:
 
             - name: Deploy staging ingress
               run: |
-                  kubectl apply -f infra/k8s/staging-ingress.yaml --namespace=${{ env.NAMESPACE }}
+                  kubectl apply -f infra/k8s/staging-ingress.yaml --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
                   kubectl delete job ats-backfill-guarantee-expires --ignore-not-found --namespace=${{ env.NAMESPACE }}
-                  kubectl apply -f infra/k8s/ats-service/jobs/backfill-guarantee-expires.yaml --namespace=${{ env.NAMESPACE }}
+                  kubectl apply -f infra/k8s/ats-service/jobs/backfill-guarantee-expires.yaml --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
 
             - name: Get deployment status
               run: |
