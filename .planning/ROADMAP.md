@@ -9,7 +9,7 @@
 - [x] **v6.0 Admin App Extraction** - Phases 16-21 (shipped 2026-02-27)
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
-- [x] **v9.0 Video Interviewing** - Phases 33-39 (shipped 2026-03-08)
+- [x] **v9.0 Video Interviewing** - Phases 33-40 (shipped 2026-03-08)
 
 ## Phases
 
@@ -56,6 +56,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 37: AI Pipeline** - Transcription via Whisper, structured summary, auto-post to application notes
 - [x] **Phase 38: Panel, Notes & Polish** - Panel interviews, screen share, in-call notes, interviews tab, multi-round tracking
 - [x] **Phase 39: Integration Wiring & Auth Fixes** - Gateway auth bypasses, LiveKit webhook config, candidate notes dual-auth
+- [ ] **Phase 40: Candidate Magic-Link Bug Fixes** - Recording consent token location, notes load-on-mount array mismatch
 
 ## Phase Details
 
@@ -180,10 +181,18 @@ Plans:
 - [x] 39-01-PLAN.md — Gateway auth bypasses + LiveKit webhook configuration
 - [x] 39-02-PLAN.md — Candidate notes dual-auth + E2E flow verification
 
+### Phase 40: Candidate Magic-Link Bug Fixes
+**Goal**: All candidate magic-link flows work correctly — recording consent submits and notes restore on page load
+**Depends on**: Phase 39
+**Gap Closure**: Closes 2 bugs found in v9.0 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. Candidate can submit recording consent via magic link without auth failure
+  2. Interview notes restore correctly when a user refreshes or reconnects during a call
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39
+Phases execute in numeric order: 33 -> 34 -> 35 -> 36 -> 37 -> 38 -> 39 -> 40
 
 Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on Phase 34 but is independent of Phase 35, so they could theoretically run in parallel. Phase 37 (AI) depends on Phase 36. Phase 38 depends on Phases 35 and 37.
 
@@ -207,3 +216,4 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | 37. AI Pipeline | v9.0 | 3/3 | Complete | 2026-03-08 |
 | 38. Panel, Notes & Polish | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 39. Integration Wiring & Auth Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
+| 40. Candidate Magic-Link Bug Fixes | v9.0 | 0/1 | Not Started | — |
