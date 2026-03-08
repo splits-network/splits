@@ -68,11 +68,12 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
   3. Creating an interview via video-service API returns an interview record with status `scheduled` linked to an application
   4. A magic link token can be exchanged for a LiveKit room JWT without requiring Clerk authentication
   5. All video-service endpoints are accessible through api-gateway
-**Plans:** 3 plans
+**Plans:** 4 plans
 Plans:
 - [x] 33-01-PLAN.md — LiveKit K8s manifests + interviews database schema
 - [x] 33-02-PLAN.md — video-service scaffold with interview CRUD
 - [x] 33-03-PLAN.md — Token system (magic links + LiveKit JWT) + gateway routing
+- [x] 33-04-PLAN.md — Docker-compose, CI/CD workflows, and K8s env vars for video-service
 
 ### Phase 34: Video Call Experience
 **Goal**: Users can conduct 1:1 video interviews within the app with a professional pre-join and in-call experience
@@ -156,7 +157,7 @@ Note: Phase 35 (Scheduling) depends on Phase 34. Phase 36 (Recording) depends on
 | ~~30. Notifications~~ | ~~v8.0~~ | — | Shelved | — |
 | ~~31. Portal UI~~ | ~~v8.0~~ | — | Shelved | — |
 | ~~32. Candidate UI~~ | ~~v8.0~~ | — | Shelved | — |
-| 33. Infrastructure | v9.0 | 3/3 | Complete | 2026-03-08 |
+| 33. Infrastructure | v9.0 | 4/4 | Complete | 2026-03-08 |
 | 34. Video Call Experience | v9.0 | 0/6 | Pending | — |
 | 35. Scheduling & Notifications | v9.0 | 0/TBD | Pending | — |
 | 36. Recording & Playback | v9.0 | 0/TBD | Pending | — |
