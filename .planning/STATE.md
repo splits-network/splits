@@ -5,28 +5,29 @@
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 42 complete, ready for Phase 43
+**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 43 in progress
 
 ## Current Position
 
-Phase: 42 (1 of 5 in v10.0) — COMPLETE
-Plan: 4 of 4 complete
-Status: Phase complete
-Last activity: 2026-03-08 — Completed 42-04-PLAN.md (Deployment & Gateway Integration)
+Phase: 43 (2 of 5 in v10.0) — Video App Infrastructure
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-03-08 — Completed 43-01-PLAN.md (Video App Scaffold & Token Exchange)
 
-Progress: [████░░░░░░░░░░░░░░░░] 4/20 plans (20%)
+Progress: [█████░░░░░░░░░░░░░░░] 5/20 plans (25%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 4
+- v10.0 plans completed: 5
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
+| 43-video-app-infrastructure | 1/4 | 3min | 3min |
 
 ## Accumulated Context
 
@@ -49,6 +50,8 @@ Recent decisions affecting current work:
 - [42-03]: State transitions use 409 Conflict; access tokens 24h expiry, LiveKit JWTs 4h TTL
 - [42-04]: No auth bypass for call routes in Phase 42; magic-link bypass deferred to Phase 43
 - [42-04]: No S3 env vars in call-service K8s — recording upload stays in video-service/ai-service
+- [43-01]: Applicant Network theme uses violet-600 (#7c3aed) primary to distinguish from Splits indigo
+- [43-01]: Brand detection defaults to Splits Network for unknown hostnames
 
 ### Pending Todos
 
@@ -63,9 +66,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 42-04-PLAN.md (Deployment & Gateway Integration) — Phase 42 complete
+Stopped at: Completed 43-01-PLAN.md (Video App Scaffold & Token Exchange)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (42-04 complete — Phase 42 finished: Dockerfile, K8s manifests, gateway proxy routes)*
+*Last updated: 2026-03-08 (43-01 complete — Video app scaffold, brand detection, exchange-token route, gateway auth bypass, CORS)*
