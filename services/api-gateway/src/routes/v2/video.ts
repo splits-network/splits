@@ -24,6 +24,10 @@ export function registerVideoRoutes(app: FastifyInstance, services: ServiceRegis
                         const data = await videoService().post(path, request.body, correlationId, authHeaders);
                         return reply.send(data);
                     }
+                    case 'PUT': {
+                        const data = await videoService().put(path, request.body, correlationId, authHeaders);
+                        return reply.send(data);
+                    }
                     case 'PATCH': {
                         const data = await videoService().patch(path, request.body, correlationId, authHeaders);
                         return reply.send(data);

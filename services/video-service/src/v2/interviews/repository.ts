@@ -9,6 +9,7 @@ import {
     InterviewStatus,
     InterviewRescheduleRequest,
     RescheduleRequestStatus,
+    UserCalendarPreferences,
 } from './types';
 
 export class InterviewRepository {
@@ -532,5 +533,67 @@ export class InterviewRepository {
             throw error;
         }
         return data as InterviewRescheduleRequest;
+    }
+
+    // ── Calendar Preferences ─────────────────────────────────────────────
+
+    async resolveUserId(clerkUserId: string): Promise<string> {
+        const { data, error } = await this.supabase
+            .from('users')
+            .select('id')
+            .eq('clerk_user_id', clerkUserId)
+            .maybeSingle();
+
+        if (error) {
+            throw error;
+        }
+        if (!data) {
+            throw Object.assign(new Error('User not found'), { statusCode: 404 });
+        }
+        return data.id;
+    }
+
+    async getCalendarPreferences(userId: string): Promise<UserCalendarPreferences | null> {
+        const { data, error } = await this.supabase
+            .from('user_calendar_preferences')
+            .select('*')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (error) {
+            throw error;
+        }
+        return data as UserCalendarPreferences | null;
+    }
+
+    async upsertCalendarPreferences(
+        userId: string,
+        prefs: {
+            connection_id?: string | null;
+            primary_calendar_id?: string | null;
+            additional_calendar_ids?: string[];
+            working_hours_start?: string;
+            working_hours_end?: string;
+            working_days?: number[];
+            timezone?: string;
+        },
+    ): Promise<UserCalendarPreferences> {
+        const { data, error } = await this.supabase
+            .from('user_calendar_preferences')
+            .upsert(
+                {
+                    user_id: userId,
+                    ...prefs,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: 'user_id' },
+            )
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+        return data as UserCalendarPreferences;
     }
 }

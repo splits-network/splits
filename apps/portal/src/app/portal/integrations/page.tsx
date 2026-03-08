@@ -16,6 +16,7 @@ import { MarketplaceProviderCard } from "@/components/basel/integrations/marketp
 import { InstalledIntegrations } from "@/components/basel/integrations/installed-integrations";
 import { ProviderDetailModal } from "@/components/basel/integrations/provider-detail-modal";
 import ATSConfigPanel from "@/components/basel/ats/ats-config-panel";
+import CalendarPreferencesPanel from "./components/calendar-preferences-panel";
 
 type Tab = "browse" | "installed";
 
@@ -306,6 +307,12 @@ export default function IntegrationsMarketplacePage() {
                         onDisconnect={handleDisconnect}
                     />
                 )}
+
+                {/* Calendar preferences (shown when calendar is connected) */}
+                <CalendarPreferencesPanel
+                    connections={connections}
+                    providers={providers}
+                />
             </section>
 
             {/* Provider detail modal */}

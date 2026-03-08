@@ -295,6 +295,57 @@ export async function registerInterviewRoutes(
         }
     });
 
+    // GET /api/v2/interviews/calendar-preferences - Get user's calendar preferences
+    app.get('/api/v2/interviews/calendar-preferences', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const userId = await repository.resolveUserId(clerkUserId);
+            const prefs = await repository.getCalendarPreferences(userId);
+
+            // Return defaults if no preferences exist yet
+            const defaults = {
+                connection_id: null,
+                primary_calendar_id: null,
+                additional_calendar_ids: [],
+                working_hours_start: '09:00',
+                working_hours_end: '17:00',
+                working_days: [1, 2, 3, 4, 5],
+                timezone: 'America/New_York',
+            };
+
+            return reply.send({ data: prefs || defaults });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    // PUT /api/v2/interviews/calendar-preferences - Upsert user's calendar preferences
+    app.put('/api/v2/interviews/calendar-preferences', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const userId = await repository.resolveUserId(clerkUserId);
+            const body = request.body as any;
+
+            const result = await repository.upsertCalendarPreferences(userId, {
+                connection_id: body.connection_id,
+                primary_calendar_id: body.primary_calendar_id,
+                additional_calendar_ids: body.additional_calendar_ids,
+                working_hours_start: body.working_hours_start,
+                working_hours_end: body.working_hours_end,
+                working_days: body.working_days,
+                timezone: body.timezone,
+            });
+
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
     // PATCH /api/v2/interviews/:id - Update interview fields (authenticated)
     // Used for linking calendar events or updating meeting info after creation
     app.patch('/api/v2/interviews/:id', async (request, reply) => {
