@@ -21,7 +21,7 @@ interface InterviewClientProps {
     interviewId: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_GATEWAY_URL || '';
+const API_BASE = process.env.NEXT_PUBLIC_API_GATEWAY_URL || process.env.NEXT_PUBLIC_API_URL || '';
 
 export function InterviewClient({ interviewId }: InterviewClientProps) {
     const { user } = useUser();
