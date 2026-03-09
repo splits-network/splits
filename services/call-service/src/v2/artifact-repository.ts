@@ -3,6 +3,7 @@ import {
     CallEntityType,
     CallEntityLink,
     CallAccessToken,
+    CallRecording,
     CallNoteWithUser,
     CallTag,
     CallTagLink,
@@ -133,6 +134,53 @@ export class ArtifactRepository {
 
         if (error) throw error;
         return (data || []) as CallTag[];
+    }
+
+    // ── Recordings ────────────────────────────────────────────────────────
+
+    async getRecording(recordingId: string): Promise<CallRecording | null> {
+        const { data, error } = await this.supabase
+            .from('call_recordings')
+            .select('*')
+            .eq('id', recordingId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data as CallRecording | null;
+    }
+
+    async generateRecordingSignedUrl(blobUrl: string): Promise<{ url: string; expires_in: number }> {
+        const storagePath = this.extractStoragePath(blobUrl);
+        const expiresIn = 3600;
+
+        const { data, error } = await this.supabase.storage
+            .from('interview-recordings')
+            .createSignedUrl(storagePath, expiresIn);
+
+        if (error || !data?.signedUrl) {
+            throw Object.assign(
+                new Error(`Failed to generate signed URL: ${error?.message || 'Unknown error'}`),
+                { statusCode: 500 },
+            );
+        }
+
+        return { url: data.signedUrl, expires_in: expiresIn };
+    }
+
+    private extractStoragePath(blobUrl: string): string {
+        if (!blobUrl.startsWith('http')) return blobUrl;
+
+        try {
+            const parsed = new URL(blobUrl);
+            const pathParts = parsed.pathname.split('/');
+            const bucketIndex = pathParts.indexOf('interview-recordings');
+            if (bucketIndex !== -1) {
+                return pathParts.slice(bucketIndex + 1).join('/');
+            }
+            return pathParts.slice(-3).join('/');
+        } catch {
+            return blobUrl;
+        }
     }
 
     // ── Notes ─────────────────────────────────────────────────────────────

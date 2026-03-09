@@ -157,6 +157,41 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         }
     });
 
+    // ── GET /api/v2/calls/:id/recordings/:recordingId/playback-url ──────
+    app.get('/api/v2/calls/:id/recordings/:recordingId/playback-url', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id, recordingId } = request.params as { id: string; recordingId: string };
+
+            // Verify caller is a participant
+            const userId = await repository.resolveUserId(clerkUserId);
+            if (!userId) {
+                return reply.code(403).send({ error: 'User not found' });
+            }
+
+            const participants = await repository.participants.getCallParticipants(id);
+            const isParticipant = participants.some((p) => p.user_id === userId);
+            if (!isParticipant) {
+                return reply.code(403).send({ error: 'You are not a participant in this call' });
+            }
+
+            // Fetch recording and verify it belongs to this call
+            const recording = await repository.artifacts.getRecording(recordingId);
+            if (!recording || recording.call_id !== id) {
+                return reply.code(404).send({ error: 'Recording not found' });
+            }
+
+            if (recording.recording_status !== 'ready' || !recording.blob_url) {
+                return reply.code(400).send({ error: 'Recording is not ready for playback' });
+            }
+
+            const result = await repository.artifacts.generateRecordingSignedUrl(recording.blob_url);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 400).send({ error: error.message });
+        }
+    });
+
     // ── DELETE /api/v2/calls/:id — Soft delete call ─────────────────────
     app.delete('/api/v2/calls/:id', async (request, reply) => {
         try {
