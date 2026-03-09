@@ -200,6 +200,13 @@ const navItems: NavItemData[] = [
         isNew: true,
     },
     {
+        href: "/portal/calls",
+        label: "Calls",
+        icon: "fa-duotone fa-regular fa-video",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "management",
+    },
+    {
         href: "/portal/placements",
         label: "Placements",
         icon: "fa-duotone fa-regular fa-trophy",
