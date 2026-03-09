@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 4 of 12 complete
+Plan: 5 of 12 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 44-05-PLAN.md (Google Calendar Integration for Calls)
+Last activity: 2026-03-09 — Completed 44-02-PLAN.md (Call Scheduling API & Authorization)
 
-Progress: [████████████░░░░░░░░] 12/20 plans (60%)
+Progress: [█████████████░░░░░░░] 13/20 plans (65%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 12
+- v10.0 plans completed: 13
 
 **By Phase:**
 
@@ -28,7 +28,7 @@ Progress: [████████████░░░░░░░░] 12/20 p
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
-| 44-recruiter-company-calls-portal-integration | 4/12 | 13min | 3.25min |
+| 44-recruiter-company-calls-portal-integration | 5/12 | 22min | 4.4min |
 
 ## Accumulated Context
 
@@ -71,6 +71,10 @@ Recent decisions affecting current work:
 - [44-05]: HTTP routes (not RabbitMQ consumer) for calendar operations — integration-service has no consumer infrastructure
 - [44-05]: call_calendar_events tracking table with UNIQUE(call_id, user_id) for per-participant event mapping
 - [44-05]: Multi-user availability endpoint at /api/v2/integrations/calendar/availability (no connectionId required)
+- [44-02]: Extract lifecycle methods into call-lifecycle-service.ts for 200-line compliance
+- [44-02]: Extract action routes into call-action-routes.ts for 200-line compliance
+- [44-02]: Stats use parallel Supabase count queries, not RPC/raw SQL
+- [44-02]: Search pre-filters extracted into list-helpers.ts as standalone function
 
 ### Pending Todos
 
@@ -85,9 +89,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-05-PLAN.md (Google Calendar Integration for Calls)
+Stopped at: Completed 44-02-PLAN.md (Call Scheduling API & Authorization)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-05 complete — call calendar event CRUD, multi-user availability endpoint)*
+*Last updated: 2026-03-09 (44-02 complete — scheduling API, creator authorization, stats/tags endpoints)*
