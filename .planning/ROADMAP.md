@@ -68,7 +68,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 42: Call Data Model & Service Layer** - calls table, call_participants, call_access_tokens, call-service microservice, gateway routes
 - [x] **Phase 43: Video App & Infrastructure** - apps/video/ with brand detection, magic-link auth, K8s deployment, dual-subdomain ingress
 - [x] **Phase 44: Recruiter-Company Calls & Portal Integration** - Call creation, scheduling, notifications, call history, in-call context panel
-- [ ] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
+- [x] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
 - [ ] **Phase 46: Interview Migration** - Redirect existing interview flows to video app, magic link URL continuity, data migration to call-owned artifacts
 
 ## Phase Details
@@ -141,10 +141,10 @@ Plans:
   4. Summaries are stored on the call record and linked to the associated entity -- not posted to entity note tables
 **Plans:** 4 plans
 Plans:
-- [ ] 45-01-PLAN.md — Call recording pipeline in video-service: recording service, webhook, routes
-- [ ] 45-02-PLAN.md — Generalized AI pipeline in ai-service: per-call-type prompts, entity context, call transcript/summary storage
-- [ ] 45-03-PLAN.md — Gateway routing for call recordings and call-service playback URL endpoint
-- [ ] 45-04-PLAN.md — Portal UI: pipeline status stepper, TL;DR + markdown summary rendering
+- [x] 45-01-PLAN.md — Call recording pipeline in video-service: recording service, webhook, routes
+- [x] 45-02-PLAN.md — Generalized AI pipeline in ai-service: per-call-type prompts, entity context, call transcript/summary storage
+- [x] 45-03-PLAN.md — Gateway routing for call recordings and call-service playback URL endpoint
+- [x] 45-04-PLAN.md — Portal UI: pipeline status stepper, TL;DR + markdown summary rendering
 
 ### Phase 46: Interview Migration
 **Goal**: Existing interview video flows redirect to the dedicated video app, and all historical interview data is migrated to the call-owned artifact pattern
@@ -186,5 +186,5 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
 | 42. Call Data Model & Service Layer | v10.0 | 4/4 | Complete | 2026-03-08 |
 | 43. Video App & Infrastructure | v10.0 | 4/4 | Complete | 2026-03-08 |
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 12/12 | Complete | 2026-03-09 |
-| 45. AI Pipeline Generalization | v10.0 | 0/4 | Not started | - |
+| 45. AI Pipeline Generalization | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 46. Interview Migration | v10.0 | 0/TBD | Not started | - |

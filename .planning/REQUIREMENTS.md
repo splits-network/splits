@@ -34,9 +34,9 @@ Requirements for generalizing video from interview-only to platform-wide recruit
 
 ### AI Pipeline
 
-- [ ] **AI-04**: AI summaries are stored on the call record and linked to the associated entity — not posted to entity note tables
-- [ ] **AI-05**: Per-call-type summarizer prompts: interview summaries focus on candidate assessment, recruiting call summaries focus on business outcomes and action items
-- [ ] **AI-06**: AI summary includes entity context (job title, company name, candidate names) in the prompt for better output
+- [x] **AI-04**: AI summaries are stored on the call record and linked to the associated entity — not posted to entity note tables
+- [x] **AI-05**: Per-call-type summarizer prompts: interview summaries focus on candidate assessment, recruiting call summaries focus on business outcomes and action items
+- [x] **AI-06**: AI summary includes entity context (job title, company name, candidate names) in the prompt for better output
 
 ### In-Call Experience
 
