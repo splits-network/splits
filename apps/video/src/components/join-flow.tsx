@@ -20,7 +20,7 @@ export function JoinFlow({ token }: JoinFlowProps) {
 
         // Store call data in sessionStorage to avoid exposing JWT in URL
         sessionStorage.setItem(
-            `call:${result.call.id}`,
+            `call-${result.call.id}`,
             JSON.stringify({
                 livekitToken: result.livekit_token,
                 call: result.call,
