@@ -100,10 +100,10 @@ Plans:
   4. Both subdomains have working TLS certificates and K8s ingress rules in production
 **Plans:** 4 plans
 Plans:
-- [ ] 43-01-PLAN.md — App scaffold with brand detection, themes, and gateway token exchange route
-- [ ] 43-02-PLAN.md — Magic-link join flow with token exchange, identity confirmation, error pages
-- [ ] 43-03-PLAN.md — Video call experience with shared-video components, type adapter, side panel
-- [ ] 43-04-PLAN.md — Dockerfile, K8s deployment, ingress rules for both subdomains
+- [x] 43-01-PLAN.md — App scaffold with brand detection, themes, and gateway token exchange route
+- [x] 43-02-PLAN.md — Magic-link join flow with token exchange, identity confirmation, error pages
+- [x] 43-03-PLAN.md — Video call experience with shared-video components, type adapter, side panel
+- [x] 43-04-PLAN.md — Dockerfile, K8s deployment, ingress rules for both subdomains
 
 ### Phase 44: Recruiter-Company Calls & Portal Integration
 **Goal**: Recruiters can schedule and conduct video calls with company contacts, and all users can browse their full call history (interviews and recruiting calls) in the portal
@@ -115,7 +115,20 @@ Plans:
   3. Recruiter can schedule a call with Google Calendar integration and the selected entity link
   4. Both participants receive email confirmation, 24h and 1h reminders, and cancellation/reschedule notifications
   5. Portal has a "Calls" section listing all calls with filtering by type, date, and entity, with detail views showing recording, transcript, AI summary, and notes
-**Plans**: TBD
+**Plans:** 12 plans
+Plans:
+- [ ] 44-01-PLAN.md — Database migration: scheduling fields, tags, follow-up tracking, expanded statuses
+- [ ] 44-02-PLAN.md — Call-service extensions: scheduling logic, authorization, stats, search, tags
+- [ ] 44-03-PLAN.md — Notification consumer and email templates for call lifecycle
+- [ ] 44-04-PLAN.md — Reminder scheduler: 24h/1h/5min reminders, instant call timeout, no-show detection
+- [ ] 44-05-PLAN.md — Google Calendar integration: event CRUD for calls, availability endpoint
+- [ ] 44-06-PLAN.md — Portal call list page: sidebar nav, table/grid views, filters, stats bar
+- [ ] 44-07-PLAN.md — Call creation modal: participant picker, entity linker, scheduling panel, tags
+- [ ] 44-08-PLAN.md — Call detail page: recording/transcript/summary tabs, synced playback, context panel
+- [ ] 44-09-PLAN.md — Entity-scoped call tabs on company and job detail pages
+- [ ] 44-10-PLAN.md — Video app context panel: Context/Chat/History tabs, role-aware content
+- [ ] 44-11-PLAN.md — Post-call summary screen and chat widget call integration
+- [ ] 44-12-PLAN.md — In-app notifications: toasts, notification bell, real-time call events
 
 ### Phase 45: AI Pipeline Generalization
 **Goal**: Recording, transcription, and AI summarization work for all call types with context-aware prompts that produce relevant output per call type
@@ -167,6 +180,6 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
 | 41. Schedule & Recording Bug Fixes | v9.0 | 2/2 | Complete | 2026-03-08 |
 | 42. Call Data Model & Service Layer | v10.0 | 4/4 | Complete | 2026-03-08 |
 | 43. Video App & Infrastructure | v10.0 | 4/4 | Complete | 2026-03-08 |
-| 44. Recruiter-Company Calls & Portal Integration | v10.0 | 0/TBD | Not started | - |
+| 44. Recruiter-Company Calls & Portal Integration | v10.0 | 0/12 | Not started | - |
 | 45. AI Pipeline Generalization | v10.0 | 0/TBD | Not started | - |
 | 46. Interview Migration | v10.0 | 0/TBD | Not started | - |
