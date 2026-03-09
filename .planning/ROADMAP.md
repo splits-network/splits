@@ -10,7 +10,7 @@
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
-- [ ] **v10.0 Video Platform & Recruiting Calls** - Phases 42-48 (gap closure in progress)
+- [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-48 (shipped 2026-03-09)
 
 ## Phases
 
@@ -71,7 +71,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
 - [x] **Phase 46: Interview Migration** - Drop interview schema, delete interview-specific code from all services, replace application Interviews tab with Calls tab
 - [x] **Phase 47: Critical Bug Fixes & Event Wiring** - SessionStorage key mismatch, event name mismatch, missing reminder binding
-- [ ] **Phase 48: Interview Migration Cleanup** - Dead gateway auth rules, dead shared-video hooks, legacy S3 bucket name
+- [x] **Phase 48: Interview Migration Cleanup** - Dead gateway auth rules, dead shared-video hooks, legacy S3 bucket name
 
 ## Phase Details
 
@@ -187,9 +187,9 @@ Plans:
   3. S3/Azure Blob Storage bucket references use `call-recordings` instead of `interview-recordings`
 **Plans:** 3 plans
 Plans:
-- [ ] 48-01-PLAN.md — Remove dead interview auth-skip rules from gateway, fix LiveKit webhook URL
-- [ ] 48-02-PLAN.md — Delete dead shared-video exports, rename interview_type to call_type end-to-end
-- [ ] 48-03-PLAN.md — Rename interview-recordings bucket references to call-recordings across services and infra
+- [x] 48-01-PLAN.md — Remove dead interview auth-skip rules from gateway, fix LiveKit webhook URL
+- [x] 48-02-PLAN.md — Delete dead shared-video exports, rename interview_type to call_type end-to-end
+- [x] 48-03-PLAN.md — Rename interview-recordings bucket references to call-recordings across services and infra
 
 ## Progress
 
@@ -224,4 +224,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48
 | 45. AI Pipeline Generalization | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 47. Critical Bug Fixes & Event Wiring | v10.0 | 1/1 | Complete | 2026-03-09 |
-| 48. Interview Migration Cleanup | v10.0 | 0/3 | Not Started | — |
+| 48. Interview Migration Cleanup | v10.0 | 3/3 | Complete | 2026-03-09 |
