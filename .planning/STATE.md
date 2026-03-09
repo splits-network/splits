@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 7 of 12 complete
+Plan: 8 of 12 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 44-06-PLAN.md (Portal Calls List Page)
+Last activity: 2026-03-09 — Completed 44-10-PLAN.md (In-Call Side Panel)
 
-Progress: [███████████████░░░░░] 15/20 plans (75%)
+Progress: [████████████████░░░░] 16/20 plans (80%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 15
+- v10.0 plans completed: 16
 
 **By Phase:**
 
@@ -28,7 +28,7 @@ Progress: [███████████████░░░░░] 15/20 p
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
-| 44-recruiter-company-calls-portal-integration | 7/12 | 34min | 4.86min |
+| 44-recruiter-company-calls-portal-integration | 8/12 | 37min | 4.63min |
 
 ## Accumulated Context
 
@@ -82,6 +82,9 @@ Recent decisions affecting current work:
 - [44-06]: Calls sidebar item placed after Calendar in management section
 - [44-06]: Table view as default viewMode for calls (data-dense content)
 - [44-06]: Call list uses useStandardList hook following roles feature pattern
+- [44-10]: Guest detection via accessToken presence (null = guest, Chat tab only)
+- [44-10]: Panel preference stored per callId in localStorage
+- [44-10]: Chat uses call:{callId} WebSocket channel for real-time messaging
 
 ### Pending Todos
 
@@ -96,9 +99,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-06-PLAN.md (Portal Calls List Page)
+Stopped at: Completed 44-10-PLAN.md (In-Call Side Panel)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-06 complete — portal calls list page with table/grid views, filters, stats bar)*
+*Last updated: 2026-03-09 (44-10 complete — in-call side panel with Context/Chat/History tabs)*
