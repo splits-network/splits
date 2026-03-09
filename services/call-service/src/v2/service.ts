@@ -168,6 +168,54 @@ export class CallService {
         return this.lifecycle.rescheduleCall(id, newScheduledAt, clerkUserId);
     }
 
+    async declineCall(id: string, clerkUserId: string): Promise<void> {
+        const resolvedUserId = await this.repository.resolveUserId(clerkUserId);
+        if (!resolvedUserId) {
+            throw Object.assign(new Error('Could not resolve user'), { statusCode: 400 });
+        }
+
+        const call = await this.repository.getCall(id);
+        if (!call) {
+            throw Object.assign(new Error('Call not found'), { statusCode: 404 });
+        }
+
+        if (call.status !== 'scheduled' && call.status !== 'active') {
+            throw Object.assign(
+                new Error(`Cannot decline call with status "${call.status}"`),
+                { statusCode: 409 },
+            );
+        }
+
+        // Verify user is a participant
+        const participants = await this.repository.participants.getCallParticipants(id);
+        const participant = participants.find((p) => p.user_id === resolvedUserId);
+        if (!participant) {
+            throw Object.assign(
+                new Error('You are not a participant in this call'),
+                { statusCode: 403 },
+            );
+        }
+
+        // Remove the declining participant
+        await this.repository.participants.removeParticipant(participant.id);
+
+        // Publish declined event with remaining participants
+        const remainingParticipants = participants.filter(
+            (p) => p.user_id !== resolvedUserId,
+        );
+
+        await this.eventPublisher.publish('call.declined', {
+            call_id: id,
+            call_type: call.call_type,
+            title: call.title,
+            declined_by: resolvedUserId,
+            participants: remainingParticipants.map((p) => ({
+                user_id: p.user_id,
+                role: p.role,
+            })),
+        });
+    }
+
     // ── Stats & Tags ──────────────────────────────────────────────────────
 
     async getStats(clerkUserId: string): Promise<CallStats> {

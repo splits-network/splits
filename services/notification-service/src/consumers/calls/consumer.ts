@@ -10,11 +10,12 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { CallsEmailService } from '../../services/calls/service';
+import { CallInAppNotificationService } from '../../services/calls/in-app-service';
 import { ContactLookupHelper } from '../../helpers/contact-lookup';
 import { DataLookupHelper } from '../../helpers/data-lookup';
 import { EmailSource } from '../../templates/base';
 
-/** Shape of call event payloads from call-service */
+/** Normalized call event payload (camelCase, after normalizePayload) */
 interface CallEventPayload {
     callId: string;
     title?: string;
@@ -29,6 +30,10 @@ interface CallEventPayload {
     joinUrl?: string;
     recordingId?: string;
     duration?: number;
+    /** Decline-specific */
+    declinedBy?: string;
+    /** Participant joined-specific */
+    participantUserId?: string;
 }
 
 interface ParticipantContact {
@@ -53,17 +58,50 @@ function formatDateTime(isoString: string): string {
 export class CallsEventConsumer {
     constructor(
         private emailService: CallsEmailService,
+        private inAppService: CallInAppNotificationService,
         private logger: Logger,
         private portalUrl: string,
         private contactLookup: ContactLookupHelper,
-        private dataLookup: DataLookupHelper
+        private dataLookup: DataLookupHelper,
     ) {}
+
+    /** Normalize snake_case payload from call-service to camelCase */
+    private normalizePayload(raw: any): CallEventPayload {
+        const participants = (raw.participants || []).map((p: any) => ({
+            userId: p.userId || p.user_id || '',
+            role: p.role,
+            email: p.email,
+            first_name: p.first_name,
+            last_name: p.last_name,
+        })).filter((p: any) => p.userId);
+
+        return {
+            callId: raw.callId || raw.call_id,
+            title: raw.title,
+            scheduledAt: raw.scheduledAt || raw.scheduled_at,
+            agenda: raw.agenda,
+            createdBy: raw.createdBy || raw.created_by,
+            cancelledBy: raw.cancelledBy || raw.cancelled_by,
+            cancelReason: raw.cancelReason || raw.cancel_reason,
+            newScheduledAt: raw.newScheduledAt || raw.new_scheduled_at,
+            participants,
+            entityLinks: raw.entityLinks || raw.entity_links?.map((l: any) => ({
+                entityType: l.entityType || l.entity_type,
+                entityId: l.entityId || l.entity_id,
+            })),
+            joinUrl: raw.joinUrl,
+            recordingId: raw.recordingId,
+            duration: raw.duration,
+            declinedBy: raw.declinedBy || raw.declined_by,
+            participantUserId: raw.participantUserId || raw.participant_user_id,
+        };
+    }
 
     // ─── Call Created ────────────────────────────────────────────────────────
 
     async handleCallCreated(event: DomainEvent): Promise<void> {
         try {
-            const payload = event.payload as CallEventPayload;
+            const payload = this.normalizePayload(event.payload);
             const { callId, scheduledAt } = payload;
 
             this.logger.info({ callId }, 'Processing call created notification');
@@ -86,7 +124,7 @@ export class CallsEventConsumer {
 
     async handleCallCancelled(event: DomainEvent): Promise<void> {
         try {
-            const payload = event.payload as CallEventPayload;
+            const payload = this.normalizePayload(event.payload);
             const { callId } = payload;
 
             this.logger.info({ callId }, 'Processing call cancelled notification');
@@ -135,7 +173,7 @@ export class CallsEventConsumer {
 
     async handleCallRescheduled(event: DomainEvent): Promise<void> {
         try {
-            const payload = event.payload as CallEventPayload;
+            const payload = this.normalizePayload(event.payload);
             const { callId } = payload;
 
             this.logger.info({ callId }, 'Processing call rescheduled notification');
@@ -180,7 +218,7 @@ export class CallsEventConsumer {
 
     async handleRecordingReady(event: DomainEvent): Promise<void> {
         try {
-            const payload = event.payload as CallEventPayload;
+            const payload = this.normalizePayload(event.payload);
             const { callId } = payload;
 
             this.logger.info({ callId }, 'Processing call recording ready notification');
@@ -217,6 +255,153 @@ export class CallsEventConsumer {
             this.logger.error(
                 { error, event_payload: event.payload },
                 'Failed to process call.recording.ready'
+            );
+            throw error;
+        }
+    }
+
+    // ─── Starting Soon (5-min toast) ────────────────────────────────────────
+
+    async handleStartingSoon(event: DomainEvent): Promise<void> {
+        try {
+            const payload = this.normalizePayload(event.payload);
+            const { callId } = payload;
+
+            this.logger.info({ callId }, 'Processing call starting soon notification');
+
+            const contacts = await this.resolveParticipantContacts(payload.participants || []);
+            if (contacts.length === 0) return;
+
+            const allNames = contacts.map(c => c.name);
+
+            const dateTime = payload.scheduledAt
+                ? formatDateTime(payload.scheduledAt)
+                : 'Now';
+
+            // Send email reminder
+            for (const contact of contacts) {
+                await this.emailService.sendReminder(contact.email, {
+                    title: payload.title || undefined,
+                    participantNames: allNames.filter(n => n !== contact.name),
+                    dateTime,
+                    timeUntil: '5 minutes',
+                    joinUrl: `${this.portalUrl}/portal/calls/${callId}`,
+                    entityContext: undefined,
+                    source: 'portal',
+                    userId: contact.userId,
+                });
+            }
+
+            // Send in-app toast notification
+            for (const contact of contacts) {
+                await this.inAppService.notifyStartingSoon(contact.userId, {
+                    callId,
+                    title: payload.title,
+                    scheduledAt: payload.scheduledAt || new Date().toISOString(),
+                    participantNames: allNames.filter(n => n !== contact.name),
+                });
+            }
+
+            this.logger.info(
+                { callId, recipientCount: contacts.length },
+                'Call starting soon notifications sent',
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to process call.starting_soon',
+            );
+            throw error;
+        }
+    }
+
+    // ─── Call Declined ────────────────────────────────────────────────────────
+
+    async handleCallDeclined(event: DomainEvent): Promise<void> {
+        try {
+            const payload = this.normalizePayload(event.payload);
+            const { callId, declinedBy } = payload;
+
+            this.logger.info({ callId, declinedBy }, 'Processing call declined notification');
+
+            if (!declinedBy) {
+                this.logger.warn({ callId }, 'call.declined event missing declinedBy');
+                return;
+            }
+
+            // Resolve who declined
+            let declinedByName = 'A participant';
+            const declinerContact = await this.contactLookup.getContactByUserId(declinedBy);
+            if (declinerContact) declinedByName = declinerContact.name;
+
+            // Notify the call creator (and other participants except the decliner)
+            const contacts = await this.resolveParticipantContacts(
+                (payload.participants || []).filter(p => p.userId !== declinedBy),
+            );
+            if (contacts.length === 0) return;
+
+            for (const contact of contacts) {
+                await this.inAppService.notifyDecline(contact.userId, {
+                    callId,
+                    title: payload.title,
+                    declinedByName,
+                });
+            }
+
+            this.logger.info(
+                { callId, recipientCount: contacts.length, declinedByName },
+                'Call declined notifications sent',
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to process call.declined',
+            );
+            throw error;
+        }
+    }
+
+    // ─── Participant Joined ───────────────────────────────────────────────────
+
+    async handleParticipantJoined(event: DomainEvent): Promise<void> {
+        try {
+            const payload = this.normalizePayload(event.payload);
+            const { callId, participantUserId } = payload;
+
+            this.logger.info({ callId, participantUserId }, 'Processing participant joined notification');
+
+            if (!participantUserId) {
+                this.logger.warn({ callId }, 'call.participant.joined event missing participantUserId');
+                return;
+            }
+
+            // Resolve who joined
+            let participantName = 'Someone';
+            const joinedContact = await this.contactLookup.getContactByUserId(participantUserId);
+            if (joinedContact) participantName = joinedContact.name;
+
+            // Notify other participants (not the one who joined)
+            const contacts = await this.resolveParticipantContacts(
+                (payload.participants || []).filter(p => p.userId !== participantUserId),
+            );
+            if (contacts.length === 0) return;
+
+            for (const contact of contacts) {
+                await this.inAppService.notifyParticipantJoined(contact.userId, {
+                    callId,
+                    title: payload.title,
+                    participantName,
+                });
+            }
+
+            this.logger.info(
+                { callId, recipientCount: contacts.length, participantName },
+                'Participant joined notifications sent',
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to process call.participant.joined',
             );
             throw error;
         }

@@ -66,6 +66,19 @@ export function registerCallActionRoutes(
         }
     });
 
+    // ── POST /api/v2/calls/:id/decline — Decline call invitation ────────
+    app.post('/api/v2/calls/:id/decline', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+
+            await service.declineCall(id, clerkUserId);
+            return reply.send({ data: { success: true } });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 400).send({ error: error.message });
+        }
+    });
+
     // ── POST /api/v2/calls/:id/participants — Add participant ───────────
     app.post('/api/v2/calls/:id/participants', async (request, reply) => {
         try {

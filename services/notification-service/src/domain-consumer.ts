@@ -28,6 +28,7 @@ import { GamificationEventConsumer } from './consumers/gamification/consumer';
 import { MatchesEventConsumer } from './consumers/matches/consumer';
 import { InterviewsEventConsumer } from './consumers/interviews/consumer';
 import { CallsEventConsumer } from './consumers/calls/consumer';
+import { CallInAppNotificationService } from './services/calls/in-app-service';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -239,12 +240,14 @@ export class DomainEventConsumer {
             contactLookup,
             dataLookup
         );
+        const callInAppService = new CallInAppNotificationService(repository, logger, portalUrl);
         this.callsConsumer = new CallsEventConsumer(
             notificationService.calls,
+            callInAppService,
             logger,
             portalUrl,
             contactLookup,
-            dataLookup
+            dataLookup,
         );
     }
 
@@ -434,6 +437,9 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'call.cancelled');
             await this.channel.bindQueue(this.queue, this.exchange, 'call.rescheduled');
             await this.channel.bindQueue(this.queue, this.exchange, 'call.recording.ready');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.starting_soon');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.declined');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.participant.joined');
 
             // Gamification events
             await this.channel.bindQueue(this.queue, this.exchange, 'badge.awarded');
@@ -844,6 +850,15 @@ export class DomainEventConsumer {
                 break;
             case 'call.recording.ready':
                 await this.callsConsumer.handleRecordingReady(event);
+                break;
+            case 'call.starting_soon':
+                await this.callsConsumer.handleStartingSoon(event);
+                break;
+            case 'call.declined':
+                await this.callsConsumer.handleCallDeclined(event);
+                break;
+            case 'call.participant.joined':
+                await this.callsConsumer.handleParticipantJoined(event);
                 break;
 
             // Gamification domain
