@@ -70,7 +70,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 44: Recruiter-Company Calls & Portal Integration** - Call creation, scheduling, notifications, call history, in-call context panel
 - [x] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
 - [x] **Phase 46: Interview Migration** - Drop interview schema, delete interview-specific code from all services, replace application Interviews tab with Calls tab
-- [ ] **Phase 47: Critical Bug Fixes & Event Wiring** - SessionStorage key mismatch, event name mismatch, missing reminder binding
+- [x] **Phase 47: Critical Bug Fixes & Event Wiring** - SessionStorage key mismatch, event name mismatch, missing reminder binding
 - [ ] **Phase 48: Interview Migration Cleanup** - Dead gateway auth rules, dead shared-video hooks, legacy S3 bucket name
 
 ## Phase Details
@@ -218,5 +218,5 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 12/12 | Complete | 2026-03-09 |
 | 45. AI Pipeline Generalization | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |
-| 47. Critical Bug Fixes & Event Wiring | v10.0 | 0/1 | Not Started | — |
+| 47. Critical Bug Fixes & Event Wiring | v10.0 | 1/1 | Complete | 2026-03-09 |
 | 48. Interview Migration Cleanup | v10.0 | 0/0 | Not Started | — |
