@@ -11,6 +11,8 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { getCachedCurrentUserId } from "@/lib/current-user-profile";
 import { useToast } from "@/lib/toast-context";
 import ThreadPanel from "@/components/chat/thread-panel";
+import { CallCreationModal } from "@/components/calls/call-creation-modal";
+import type { Participant } from "@/components/calls/participant-picker";
 
 export function PortalChatSidebar({
     children,
@@ -20,6 +22,8 @@ export function PortalChatSidebar({
     const { isSignedIn, getToken } = useAuth();
     const toast = useToast();
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [callModalOpen, setCallModalOpen] = useState(false);
+    const [callParticipants, setCallParticipants] = useState<Participant[]>([]);
 
     // Resolve user ID when signed in, clear on sign-out
     useEffect(() => {
@@ -61,6 +65,51 @@ export function PortalChatSidebar({
         <ThreadPanel conversationId={conversationId} />
     ), []);
 
+    const handleCallClick = useCallback(async (otherUserId: string | null) => {
+        const participants: Participant[] = [];
+
+        // If we have the other user's ID, look up their details for pre-fill
+        if (otherUserId) {
+            try {
+                const token = await getToken();
+                if (token) {
+                    const client = createAuthenticatedClient(token);
+                    const response: any = await client.get(`/users/${otherUserId}/profile`);
+                    const profile = response?.data;
+                    if (profile) {
+                        participants.push({
+                            user_id: otherUserId,
+                            first_name: profile.first_name || '',
+                            last_name: profile.last_name || '',
+                            email: profile.email || '',
+                            avatar_url: profile.avatar_url || null,
+                            role: 'participant',
+                        });
+                    }
+                }
+            } catch {
+                // If lookup fails, still open modal without pre-fill
+                participants.push({
+                    user_id: otherUserId,
+                    first_name: '',
+                    last_name: '',
+                    email: '',
+                    avatar_url: null,
+                    role: 'participant',
+                });
+            }
+        }
+
+        setCallParticipants(participants);
+        setCallModalOpen(true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleCallModalClose = useCallback(() => {
+        setCallModalOpen(false);
+        setCallParticipants([]);
+    }, []);
+
     return (
         <ChatSidebarProvider
             userId={currentUserId}
@@ -74,6 +123,12 @@ export function PortalChatSidebar({
                 threadRenderer={threadRenderer}
                 messagesPagePath="/portal/messages"
                 currentUserId={currentUserId}
+                onCallClick={handleCallClick}
+            />
+            <CallCreationModal
+                isOpen={callModalOpen}
+                onClose={handleCallModalClose}
+                defaultParticipants={callParticipants}
             />
         </ChatSidebarProvider>
     );

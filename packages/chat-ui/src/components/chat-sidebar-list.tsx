@@ -65,8 +65,12 @@ export function ChatSidebarList({ currentUserId }: ChatSidebarListProps) {
 
     const handleSelect = (row: typeof sorted[number]) => {
         const other = getOtherParticipant(row.conversation, currentUserId);
+        const otherId = currentUserId === row.conversation.participant_a_id
+            ? row.conversation.participant_b_id
+            : row.conversation.participant_a_id;
         openToThread(row.conversation.id, {
             otherUserName: other?.name ?? undefined,
+            otherUserId: otherId,
         });
     };
 

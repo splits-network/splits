@@ -13,6 +13,8 @@ export interface ChatSidebarShellProps {
     messagesPagePath?: string;
     /** Current user ID for conversation list */
     currentUserId: string | null;
+    /** Called when user clicks call icon. Receives other user ID when in thread view. */
+    onCallClick?: (otherUserId: string | null) => void;
 }
 
 const SIDEBAR_WIDTH = 420;
@@ -21,6 +23,7 @@ export function ChatSidebarShell({
     threadRenderer,
     messagesPagePath = "/portal/messages",
     currentUserId,
+    onCallClick,
 }: ChatSidebarShellProps) {
     const { isOpen, isMinimized, view, activeConversationId, close } =
         useChatSidebar();
@@ -47,7 +50,7 @@ export function ChatSidebarShell({
         >
             {isOpen && (
                 <div className="flex flex-col h-full bg-base-100 border-l-4 border-primary overflow-hidden">
-                    <ChatSidebarHeader messagesPagePath={messagesPagePath} />
+                    <ChatSidebarHeader messagesPagePath={messagesPagePath} onCallClick={onCallClick} />
                     {!isMinimized && (
                         <div className="flex-1 min-h-0 flex flex-col">
                             {view === "list" && (

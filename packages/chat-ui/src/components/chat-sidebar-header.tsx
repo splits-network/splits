@@ -5,10 +5,13 @@ import { useChatSidebar } from "../context/chat-sidebar-context";
 
 export interface ChatSidebarHeaderProps {
     messagesPagePath?: string;
+    /** Called when user clicks call icon. Receives other user ID when in thread view. */
+    onCallClick?: (otherUserId: string | null) => void;
 }
 
 export function ChatSidebarHeader({
     messagesPagePath = "/portal/messages",
+    onCallClick,
 }: ChatSidebarHeaderProps) {
     const {
         view,
@@ -94,6 +97,21 @@ export function ChatSidebarHeader({
                 </div>
 
                 <div className="flex items-center gap-1 flex-none">
+                    {onCallClick && (
+                        <button
+                            onClick={() => onCallClick(
+                                view === "thread"
+                                    ? activeConversationMeta?.otherUserId ?? null
+                                    : null,
+                            )}
+                            className="btn btn-ghost btn-sm btn-square"
+                            aria-label={view === "thread" ? "Call this person" : "Start a call"}
+                            title={view === "thread" ? "Call" : "New call"}
+                        >
+                            <i className="fa-duotone fa-regular fa-phone" />
+                        </button>
+                    )}
+
                     {view === "thread" && activeConversationId && (
                         <Link
                             href={`${messagesPagePath}?conversationId=${activeConversationId}`}
