@@ -10,7 +10,7 @@
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
-- [ ] **v10.0 Video Platform & Recruiting Calls** - Phases 42-46 (in progress)
+- [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-46 (shipped 2026-03-09)
 
 ## Phases
 
@@ -69,7 +69,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 43: Video App & Infrastructure** - apps/video/ with brand detection, magic-link auth, K8s deployment, dual-subdomain ingress
 - [x] **Phase 44: Recruiter-Company Calls & Portal Integration** - Call creation, scheduling, notifications, call history, in-call context panel
 - [x] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
-- [ ] **Phase 46: Interview Migration** - Drop interview schema, delete interview-specific code from all services, replace application Interviews tab with Calls tab
+- [x] **Phase 46: Interview Migration** - Drop interview schema, delete interview-specific code from all services, replace application Interviews tab with Calls tab
 
 ## Phase Details
 
@@ -156,10 +156,10 @@ Plans:
   3. Application detail panel shows "Calls" tab (not "Interviews") with entity-linked calls and a "Schedule Call" shortcut
 **Plans:** 4 plans
 Plans:
-- [ ] 46-01-PLAN.md — Database migration: drop all interview tables, enums, and columns
-- [ ] 46-02-PLAN.md — Backend service cleanup: remove interview code from video-service, ai-service, gateway, notification-service
-- [ ] 46-03-PLAN.md — Frontend cleanup: delete interview pages/components, rename shared-video hooks, clean shared-types
-- [ ] 46-04-PLAN.md — Application integration: replace Interviews tab with Calls tab, add Schedule Call shortcut
+- [x] 46-01-PLAN.md — Database migration: drop all interview tables, enums, and columns
+- [x] 46-02-PLAN.md — Backend service cleanup: remove interview code from video-service, ai-service, gateway, notification-service
+- [x] 46-03-PLAN.md — Frontend cleanup: delete interview pages/components, rename shared-video hooks, clean shared-types
+- [x] 46-04-PLAN.md — Application integration: replace Interviews tab with Calls tab, add Schedule Call shortcut
 
 ## Progress
 
@@ -192,4 +192,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
 | 43. Video App & Infrastructure | v10.0 | 4/4 | Complete | 2026-03-08 |
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 12/12 | Complete | 2026-03-09 |
 | 45. AI Pipeline Generalization | v10.0 | 4/4 | Complete | 2026-03-09 |
-| 46. Interview Migration | v10.0 | 0/4 | Not started | - |
+| 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |

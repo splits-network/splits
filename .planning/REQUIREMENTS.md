@@ -104,12 +104,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HIST-01 | Phase 44 | Complete |
 | HIST-02 | Phase 44 | Complete |
 | EXP-01 | Phase 44 | Complete |
-| AI-04 | Phase 45 | Pending |
-| AI-05 | Phase 45 | Pending |
-| AI-06 | Phase 45 | Pending |
-| MIG-01 | Phase 46 | Pending |
-| MIG-02 | Phase 46 | Pending |
-| MIG-03 | Phase 46 | Pending |
+| AI-04 | Phase 45 | Complete |
+| AI-05 | Phase 45 | Complete |
+| AI-06 | Phase 45 | Complete |
+| MIG-01 | Phase 46 | Complete |
+| MIG-02 | Phase 46 | Complete |
+| MIG-03 | Phase 46 | Complete |
 
 **Coverage:**
 - v10.0 requirements: 20 total

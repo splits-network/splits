@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 46 next
+**Current focus:** v10.0 Video Platform & Recruiting Calls — Complete
 
 ## Current Position
 
 Phase: 46 (5 of 5 in v10.0) — Interview Migration
-Plan: 3 of 4 complete
-Status: In progress
-Last activity: 2026-03-09 — Completed 46-03-PLAN.md (Frontend Interview Cleanup)
+Plan: 4 of 4 complete
+Status: Phase complete — v10.0 milestone complete
+Last activity: 2026-03-09 — Completed 46-04-PLAN.md (Application Calls Tab Integration)
 
-Progress: [███████████████████████████░] 27/28 plans (96%)
+Progress: [████████████████████████████] 28/28 plans (100%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 27
+- v10.0 plans completed: 28
 
 **By Phase:**
 
@@ -30,7 +30,7 @@ Progress: [███████████████████████
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
 | 44-recruiter-company-calls-portal-integration | 12/12 | 78min | 6.50min |
 | 45-ai-pipeline-generalization | 4/4 | 11min | 2.75min |
-| 46-interview-migration | 3/4 | 57min | 19.00min |
+| 46-interview-migration | 4/4 | 59min | 14.75min |
 
 ## Accumulated Context
 
@@ -116,6 +116,9 @@ Recent decisions affecting current work:
 - [46-03]: Left API endpoint paths in use-call-notes.ts unchanged — backend migration separate
 - [46-03]: Kept interview_type field name in CallContext (matches existing API response shape)
 
+- [46-04]: CallCreationModal used inline with defaultEntityType/defaultEntityId/defaultParticipants props for Schedule Call shortcut
+- [46-04]: Schedule Call added to speed dial actions in actions-toolbar, available to recruiters/company users/admins
+
 ### Pending Todos
 
 None.
@@ -129,9 +132,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 46-03-PLAN.md (Frontend Interview Cleanup)
+Stopped at: v10.0 milestone complete — all 28 plans across 5 phases shipped
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (46-03 complete — Frontend interview pages/components deleted, shared-video hooks renamed to call terminology)*
+*Last updated: 2026-03-09 (Phase 46 complete — Interview migration done, v10.0 milestone shipped)*
