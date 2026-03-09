@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 5 of 12 complete
+Plan: 6 of 12 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 44-02-PLAN.md (Call Scheduling API & Authorization)
+Last activity: 2026-03-09 — Completed 44-07-PLAN.md (Call Creation Modal & Sub-Components)
 
-Progress: [█████████████░░░░░░░] 13/20 plans (65%)
+Progress: [██████████████░░░░░░] 14/20 plans (70%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 13
+- v10.0 plans completed: 14
 
 **By Phase:**
 
@@ -28,7 +28,7 @@ Progress: [█████████████░░░░░░░] 13/20 p
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
-| 44-recruiter-company-calls-portal-integration | 5/12 | 22min | 4.4min |
+| 44-recruiter-company-calls-portal-integration | 6/12 | 29min | 4.83min |
 
 ## Accumulated Context
 
@@ -75,6 +75,10 @@ Recent decisions affecting current work:
 - [44-02]: Extract action routes into call-action-routes.ts for 200-line compliance
 - [44-02]: Stats use parallel Supabase count queries, not RPC/raw SQL
 - [44-02]: Search pre-filters extracted into list-helpers.ts as standalone function
+- [44-07]: Instant calls show confirmation dialog before initiating
+- [44-07]: Email-only participants use email: prefix for user_id
+- [44-07]: Scheduling panel shows 30-min slots 8am-6pm when calendar available
+- [44-07]: Tags use badge-lg with toggle selection pattern
 
 ### Pending Todos
 
@@ -89,9 +93,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-02-PLAN.md (Call Scheduling API & Authorization)
+Stopped at: Completed 44-07-PLAN.md (Call Creation Modal & Sub-Components)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-02 complete — scheduling API, creator authorization, stats/tags endpoints)*
+*Last updated: 2026-03-09 (44-07 complete — call creation modal with participant picker, entity linker, scheduling panel, tag picker)*
