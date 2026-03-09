@@ -6,6 +6,7 @@ import { requireUserContext } from './shared/helpers';
 import { IEventPublisher } from './shared/events';
 import { CallListFilters } from './types';
 import { StandardListParams } from '@splits-network/shared-types';
+import { registerCallActionRoutes } from './call-action-routes';
 
 export interface RegisterConfig {
     supabaseUrl: string;
@@ -27,13 +28,33 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
     );
 
     // ── POST /api/v2/calls/exchange-token — Public token exchange ───────
-    // This route does NOT require authentication — it is the public entry
-    // point for the video app magic-link flow.
     app.post('/api/v2/calls/exchange-token', async (request, reply) => {
         try {
             const { token } = request.body as { token: string };
             const result = await tokenService.exchangeToken(token);
             return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 400).send({ error: error.message });
+        }
+    });
+
+    // ── GET /api/v2/calls/stats — Call stats (BEFORE /:id) ──────────────
+    app.get('/api/v2/calls/stats', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const stats = await service.getStats(clerkUserId);
+            return reply.send({ data: stats });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 400).send({ error: error.message });
+        }
+    });
+
+    // ── GET /api/v2/calls/tags — List available tags (BEFORE /:id) ──────
+    app.get('/api/v2/calls/tags', async (request, reply) => {
+        try {
+            requireUserContext(request);
+            const tags = await service.listTags();
+            return reply.send({ data: tags });
         } catch (error: any) {
             return reply.code(error.statusCode || 400).send({ error: error.message });
         }
@@ -59,6 +80,9 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
                 status: query.status as any || undefined,
                 date_from: query.date_from || undefined,
                 date_to: query.date_to || undefined,
+                tag: query.tag || undefined,
+                needs_follow_up: query.needs_follow_up === 'true' || undefined,
+                search: query.search || undefined,
             };
 
             const result = await service.listCalls(params, filters);
@@ -97,6 +121,10 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
                     call_type: body.call_type,
                     title: body.title,
                     scheduled_at: body.scheduled_at,
+                    agenda: body.agenda,
+                    duration_minutes_planned: body.duration_minutes_planned,
+                    pre_call_notes: body.pre_call_notes,
+                    tags: body.tags,
                     entity_links: body.entity_links || [],
                     participants: body.participants || [],
                 },
@@ -119,6 +147,8 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
             const call = await service.updateCall(id, {
                 title: body.title,
                 scheduled_at: body.scheduled_at,
+                agenda: body.agenda,
+                needs_follow_up: body.needs_follow_up,
             });
 
             return reply.send({ data: call });
@@ -140,120 +170,6 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         }
     });
 
-    // ── POST /api/v2/calls/:id/start — Start call ──────────────────────
-    app.post('/api/v2/calls/:id/start', async (request, reply) => {
-        try {
-            requireUserContext(request);
-            const { id } = request.params as { id: string };
-
-            const call = await service.startCall(id);
-            return reply.send({ data: call });
-        } catch (error: any) {
-            return reply.code(error.statusCode || 400).send({ error: error.message });
-        }
-    });
-
-    // ── POST /api/v2/calls/:id/end — End call ──────────────────────────
-    app.post('/api/v2/calls/:id/end', async (request, reply) => {
-        try {
-            requireUserContext(request);
-            const { id } = request.params as { id: string };
-
-            const call = await service.endCall(id);
-            return reply.send({ data: call });
-        } catch (error: any) {
-            return reply.code(error.statusCode || 400).send({ error: error.message });
-        }
-    });
-
-    // ── POST /api/v2/calls/:id/cancel — Cancel call ────────────────────
-    app.post('/api/v2/calls/:id/cancel', async (request, reply) => {
-        try {
-            requireUserContext(request);
-            const { id } = request.params as { id: string };
-
-            const call = await service.cancelCall(id);
-            return reply.send({ data: call });
-        } catch (error: any) {
-            return reply.code(error.statusCode || 400).send({ error: error.message });
-        }
-    });
-
-    // ── POST /api/v2/calls/:id/participants — Add participant ───────────
-    app.post('/api/v2/calls/:id/participants', async (request, reply) => {
-        try {
-            requireUserContext(request);
-            const { id } = request.params as { id: string };
-            const body = request.body as { user_id: string; role: string };
-
-            const participant = await service.addParticipant(id, {
-                user_id: body.user_id,
-                role: body.role as any,
-            });
-
-            return reply.code(201).send({ data: participant });
-        } catch (error: any) {
-            return reply.code(error.statusCode || 400).send({ error: error.message });
-        }
-    });
-
-    // ── DELETE /api/v2/calls/:id/participants/:participantId ────────────
-    app.delete('/api/v2/calls/:id/participants/:participantId', async (request, reply) => {
-        try {
-            requireUserContext(request);
-            const { id, participantId } = request.params as {
-                id: string;
-                participantId: string;
-            };
-
-            await service.removeParticipant(id, participantId);
-            return reply.code(204).send();
-        } catch (error: any) {
-            return reply.code(error.statusCode || 400).send({ error: error.message });
-        }
-    });
-
-    // ── POST /api/v2/calls/:id/entities — Add entity link ──────────────
-    app.post('/api/v2/calls/:id/entities', async (request, reply) => {
-        try {
-            requireUserContext(request);
-            const { id } = request.params as { id: string };
-            const body = request.body as { entity_type: string; entity_id: string };
-
-            const link = await service.addEntityLink(id, {
-                entity_type: body.entity_type as any,
-                entity_id: body.entity_id,
-            });
-
-            return reply.code(201).send({ data: link });
-        } catch (error: any) {
-            return reply.code(error.statusCode || 400).send({ error: error.message });
-        }
-    });
-
-    // ── DELETE /api/v2/calls/:id/entities/:linkId ───────────────────────
-    app.delete('/api/v2/calls/:id/entities/:linkId', async (request, reply) => {
-        try {
-            requireUserContext(request);
-            const { id, linkId } = request.params as { id: string; linkId: string };
-
-            await service.removeEntityLink(id, linkId);
-            return reply.code(204).send();
-        } catch (error: any) {
-            return reply.code(error.statusCode || 400).send({ error: error.message });
-        }
-    });
-
-    // ── POST /api/v2/calls/:id/token — Generate access + LiveKit token ──
-    app.post('/api/v2/calls/:id/token', async (request, reply) => {
-        try {
-            const { clerkUserId } = requireUserContext(request);
-            const { id } = request.params as { id: string };
-
-            const result = await tokenService.createToken(id, clerkUserId);
-            return reply.send({ data: result });
-        } catch (error: any) {
-            return reply.code(error.statusCode || 400).send({ error: error.message });
-        }
-    });
+    // Register per-call action routes (start, end, cancel, reschedule, etc.)
+    registerCallActionRoutes(app, service, tokenService);
 }

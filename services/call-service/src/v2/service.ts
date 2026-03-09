@@ -1,5 +1,5 @@
-import crypto from 'crypto';
 import { CallRepository } from './repository';
+import { CallLifecycleService } from './call-lifecycle-service';
 import { IEventPublisher } from './shared/events';
 import {
     Call,
@@ -9,6 +9,8 @@ import {
     CallEntityType,
     CallParticipant,
     CallParticipantRole,
+    CallTag,
+    CallStats,
     CreateCallInput,
     UpdateCallInput,
     CallListFilters,
@@ -16,25 +18,24 @@ import {
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export class CallService {
+    readonly lifecycle: CallLifecycleService;
+
     constructor(
         private repository: CallRepository,
         private eventPublisher: IEventPublisher,
-    ) {}
+    ) {
+        this.lifecycle = new CallLifecycleService(repository, eventPublisher);
+    }
 
     async createCall(
         input: CreateCallInput,
         createdByClerkUserId: string,
     ): Promise<CallWithParticipants> {
-        // Resolve Clerk user ID to internal user ID
         const resolvedUserId = await this.repository.resolveUserId(createdByClerkUserId);
         if (!resolvedUserId) {
-            throw Object.assign(
-                new Error('Could not resolve user'),
-                { statusCode: 400 },
-            );
+            throw Object.assign(new Error('Could not resolve user'), { statusCode: 400 });
         }
 
-        // Validate scheduled_at is in the future if provided
         if (input.scheduled_at) {
             const scheduledAt = new Date(input.scheduled_at);
             if (scheduledAt <= new Date()) {
@@ -45,8 +46,13 @@ export class CallService {
             }
         }
 
-        // Create call record
+        // Create call record (includes agenda, duration_minutes_planned, pre_call_notes)
         const call = await this.repository.createCall(input, resolvedUserId);
+
+        // Add tags if provided
+        if (input.tags && input.tags.length > 0) {
+            await this.repository.artifacts.addCallTags(call.id, input.tags);
+        }
 
         // Bulk insert entity links
         const entityLinks: CallEntityLink[] = [];
@@ -69,14 +75,18 @@ export class CallService {
             createdParticipants.push(created);
         }
 
-        // Enrich participants with user data
         const enrichedParticipants = await this.repository.participants.getCallParticipants(call.id);
 
-        // Publish event
+        const tags = input.tags && input.tags.length > 0
+            ? await this.repository.artifacts.getCallTags(call.id)
+            : [];
+
         await this.eventPublisher.publish('call.created', {
             call_id: call.id,
             call_type: call.call_type,
             created_by: resolvedUserId,
+            scheduled_at: call.scheduled_at,
+            agenda: call.agenda,
             entity_links: entityLinks.map((l) => ({
                 entity_type: l.entity_type,
                 entity_id: l.entity_id,
@@ -88,6 +98,7 @@ export class CallService {
             ...call,
             participants: enrichedParticipants,
             entity_links: entityLinks,
+            tags,
         };
     }
 
@@ -139,89 +150,39 @@ export class CallService {
         await this.repository.deleteCall(id);
     }
 
+    // ── Lifecycle (delegated) ─────────────────────────────────────────────
+
     async startCall(id: string): Promise<Call> {
-        const call = await this.repository.getCall(id);
-        if (!call) {
-            throw Object.assign(new Error('Call not found'), { statusCode: 404 });
-        }
-        if (call.status !== 'scheduled') {
-            throw Object.assign(
-                new Error(`Cannot start call with status "${call.status}"`),
-                { statusCode: 409 },
-            );
-        }
-
-        const roomName = `call-${id}-${Date.now()}`;
-        const updated = await this.repository.updateCallStatus(id, 'active', {
-            started_at: new Date().toISOString(),
-            livekit_room_name: roomName,
-        });
-
-        await this.eventPublisher.publish('call.started', {
-            call_id: id,
-            call_type: call.call_type,
-            room_name: roomName,
-            started_at: updated.started_at,
-        });
-
-        return updated;
+        return this.lifecycle.startCall(id);
     }
 
     async endCall(id: string): Promise<Call> {
-        const call = await this.repository.getCall(id);
-        if (!call) {
-            throw Object.assign(new Error('Call not found'), { statusCode: 404 });
-        }
-        if (call.status !== 'active') {
-            throw Object.assign(
-                new Error(`Cannot end call with status "${call.status}"`),
-                { statusCode: 409 },
-            );
-        }
-
-        const endedAt = new Date();
-        const startedAt = call.started_at ? new Date(call.started_at) : endedAt;
-        const durationMinutes = Math.round(
-            (endedAt.getTime() - startedAt.getTime()) / 60000,
-        );
-
-        const updated = await this.repository.updateCallStatus(id, 'completed', {
-            ended_at: endedAt.toISOString(),
-            duration_minutes: durationMinutes,
-        });
-
-        await this.eventPublisher.publish('call.ended', {
-            call_id: id,
-            call_type: call.call_type,
-            duration_minutes: durationMinutes,
-            ended_at: updated.ended_at,
-        });
-
-        return updated;
+        return this.lifecycle.endCall(id);
     }
 
-    async cancelCall(id: string): Promise<Call> {
-        const call = await this.repository.getCall(id);
-        if (!call) {
-            throw Object.assign(new Error('Call not found'), { statusCode: 404 });
-        }
-        if (call.status !== 'scheduled' && call.status !== 'active') {
-            throw Object.assign(
-                new Error(`Cannot cancel call with status "${call.status}"`),
-                { statusCode: 409 },
-            );
-        }
-
-        const updated = await this.repository.updateCallStatus(id, 'cancelled');
-
-        await this.eventPublisher.publish('call.cancelled', {
-            call_id: id,
-            call_type: call.call_type,
-            cancelled_at: new Date().toISOString(),
-        });
-
-        return updated;
+    async cancelCall(id: string, clerkUserId: string, reason?: string): Promise<Call> {
+        return this.lifecycle.cancelCall(id, clerkUserId, reason);
     }
+
+    async rescheduleCall(id: string, newScheduledAt: string, clerkUserId: string): Promise<Call> {
+        return this.lifecycle.rescheduleCall(id, newScheduledAt, clerkUserId);
+    }
+
+    // ── Stats & Tags ──────────────────────────────────────────────────────
+
+    async getStats(clerkUserId: string): Promise<CallStats> {
+        const resolvedUserId = await this.repository.resolveUserId(clerkUserId);
+        if (!resolvedUserId) {
+            throw Object.assign(new Error('Could not resolve user'), { statusCode: 400 });
+        }
+        return this.repository.stats.getCallStats(resolvedUserId);
+    }
+
+    async listTags(): Promise<CallTag[]> {
+        return this.repository.artifacts.listTags();
+    }
+
+    // ── Participants ──────────────────────────────────────────────────────
 
     async addParticipant(
         callId: string,
@@ -235,7 +196,6 @@ export class CallService {
     }
 
     async removeParticipant(callId: string, participantId: string): Promise<void> {
-        // Validate participant belongs to this call
         const participants = await this.repository.participants.getCallParticipants(callId);
         const participant = participants.find((p) => p.id === participantId);
         if (!participant) {
@@ -246,6 +206,8 @@ export class CallService {
         }
         await this.repository.participants.removeParticipant(participantId);
     }
+
+    // ── Entity Links ──────────────────────────────────────────────────────
 
     async addEntityLink(
         callId: string,
@@ -259,7 +221,6 @@ export class CallService {
     }
 
     async removeEntityLink(callId: string, linkId: string): Promise<void> {
-        // Validate link belongs to this call
         const links = await this.repository.artifacts.getCallEntityLinks(callId);
         const link = links.find((l) => l.id === linkId);
         if (!link) {
