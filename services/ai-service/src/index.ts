@@ -23,6 +23,8 @@ import { ResumeExtractionRepository } from "./v2/resume-extraction/repository";
 import { TranscriptionRepository } from "./v2/transcription/repository";
 import { SummaryService } from "./v2/transcription/summarizer";
 import { TranscriptionPipelineService } from "./v2/transcription/service";
+import { CallPipelineRepository } from "./v2/call-pipeline/repository";
+import { CallPipelineService } from "./v2/call-pipeline/service";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -182,6 +184,14 @@ async function main() {
         logger,
     );
 
+    // Initialize generalized call pipeline
+    const callPipelineRepository = new CallPipelineRepository(supabaseClient, logger);
+    const callPipelineService = new CallPipelineService(
+        callPipelineRepository,
+        outboxPublisher || undefined,
+        logger,
+    );
+
     // Initialize domain event consumer (listens for application + document + recording events)
     let domainConsumer: DomainEventConsumer | null = null;
     try {
@@ -191,6 +201,7 @@ async function main() {
             resumeExtractionService,
             resumeExtractionRepository,
             transcriptionPipeline,
+            callPipelineService,
             outboxPublisher || undefined,
             logger,
         );
