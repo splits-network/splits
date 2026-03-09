@@ -10,7 +10,7 @@
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
-- [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-46 (shipped 2026-03-09)
+- [ ] **v10.0 Video Platform & Recruiting Calls** - Phases 42-48 (gap closure in progress)
 
 ## Phases
 
@@ -70,6 +70,8 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 44: Recruiter-Company Calls & Portal Integration** - Call creation, scheduling, notifications, call history, in-call context panel
 - [x] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
 - [x] **Phase 46: Interview Migration** - Drop interview schema, delete interview-specific code from all services, replace application Interviews tab with Calls tab
+- [ ] **Phase 47: Critical Bug Fixes & Event Wiring** - SessionStorage key mismatch, event name mismatch, missing reminder binding
+- [ ] **Phase 48: Interview Migration Cleanup** - Dead gateway auth rules, dead shared-video hooks, legacy S3 bucket name
 
 ## Phase Details
 
@@ -161,10 +163,30 @@ Plans:
 - [x] 46-03-PLAN.md — Frontend cleanup: delete interview pages/components, rename shared-video hooks, clean shared-types
 - [x] 46-04-PLAN.md — Application integration: replace Interviews tab with Calls tab, add Schedule Call shortcut
 
+### Phase 47: Critical Bug Fixes & Event Wiring
+**Goal**: All video call flows work end-to-end — participants can join calls, recording notifications fire, and 24h/1h reminders are delivered
+**Depends on**: Phase 46
+**Requirements**: APP-03, MIG-01, MIG-02, CALL-04
+**Gap Closure**: Closes P0/P1 gaps from v10.0 audit
+**Success Criteria** (what must be TRUE):
+  1. After token exchange, session data is stored and read with the same key — users can join video calls
+  2. Recording-ready events from video-service are received by notification-service and trigger email/in-app notifications
+  3. 24h and 1h reminder emails are sent for scheduled calls (not just the 5-min reminder)
+
+### Phase 48: Interview Migration Cleanup
+**Goal**: No dead interview-era code or references remain in the codebase after the Phase 46 migration
+**Depends on**: Phase 47
+**Requirements**: None (tech debt)
+**Gap Closure**: Closes P2/P3 tech debt from v10.0 audit
+**Success Criteria** (what must be TRUE):
+  1. No interview-specific auth-skip rules remain in api-gateway
+  2. No dead interview hooks remain in shared-video package
+  3. S3/Azure Blob Storage bucket references use `call-recordings` instead of `interview-recordings`
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
+Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -193,3 +215,5 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 12/12 | Complete | 2026-03-09 |
 | 45. AI Pipeline Generalization | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |
+| 47. Critical Bug Fixes & Event Wiring | v10.0 | 0/0 | Not Started | — |
+| 48. Interview Migration Cleanup | v10.0 | 0/0 | Not Started | — |
