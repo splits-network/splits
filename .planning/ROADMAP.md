@@ -69,7 +69,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 43: Video App & Infrastructure** - apps/video/ with brand detection, magic-link auth, K8s deployment, dual-subdomain ingress
 - [x] **Phase 44: Recruiter-Company Calls & Portal Integration** - Call creation, scheduling, notifications, call history, in-call context panel
 - [x] **Phase 45: AI Pipeline Generalization** - Per-call-type summarizers, entity-linked summary storage, polymorphic recording access
-- [ ] **Phase 46: Interview Migration** - Redirect existing interview flows to video app, magic link URL continuity, data migration to call-owned artifacts
+- [ ] **Phase 46: Interview Migration** - Drop interview schema, delete interview-specific code from all services, replace application Interviews tab with Calls tab
 
 ## Phase Details
 
@@ -147,14 +147,19 @@ Plans:
 - [x] 45-04-PLAN.md — Portal UI: pipeline status stepper, TL;DR + markdown summary rendering
 
 ### Phase 46: Interview Migration
-**Goal**: Existing interview video flows redirect to the dedicated video app, and all historical interview data is migrated to the call-owned artifact pattern
+**Goal**: Remove all interview-specific code, database tables, and infrastructure now that the call system fully replaces the interview system
 **Depends on**: Phase 45
 **Requirements**: MIG-01, MIG-02, MIG-03
 **Success Criteria** (what must be TRUE):
-  1. Clicking "Join Interview" in the portal redirects to `video.splits.network` instead of the in-portal interview page
-  2. Candidate magic link URLs from previously-sent emails still work, redirecting to `video.applicant.network` with the token forwarded
-  3. Existing v9.0 interview recordings, transcripts, and summaries are accessible through the call-owned artifact pattern
-**Plans**: TBD
+  1. All interview database tables, enums, and columns are dropped via migration
+  2. No interview-specific code remains in any backend service (video-service, ai-service, notification-service, api-gateway)
+  3. Application detail panel shows "Calls" tab (not "Interviews") with entity-linked calls and a "Schedule Call" shortcut
+**Plans:** 4 plans
+Plans:
+- [ ] 46-01-PLAN.md — Database migration: drop all interview tables, enums, and columns
+- [ ] 46-02-PLAN.md — Backend service cleanup: remove interview code from video-service, ai-service, gateway, notification-service
+- [ ] 46-03-PLAN.md — Frontend cleanup: delete interview pages/components, rename shared-video hooks, clean shared-types
+- [ ] 46-04-PLAN.md — Application integration: replace Interviews tab with Calls tab, add Schedule Call shortcut
 
 ## Progress
 
@@ -187,4 +192,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46
 | 43. Video App & Infrastructure | v10.0 | 4/4 | Complete | 2026-03-08 |
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 12/12 | Complete | 2026-03-09 |
 | 45. AI Pipeline Generalization | v10.0 | 4/4 | Complete | 2026-03-09 |
-| 46. Interview Migration | v10.0 | 0/TBD | Not started | - |
+| 46. Interview Migration | v10.0 | 0/4 | Not started | - |
