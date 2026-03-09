@@ -7,9 +7,7 @@ export type {
 } from './types';
 
 // Hooks
-export { useCallToken } from './hooks/use-call-token';
 export { useCallDuration } from './hooks/use-call-duration';
-export { useRecordingState } from './hooks/use-recording-state';
 
 // Config
 export { getLiveKitUrl, defaultRoomOptions } from './lib/livekit-config';
@@ -33,10 +31,5 @@ export { PostCallSummary } from './components/post-call-summary';
 export { ParticipantSidebar } from './components/participant-sidebar';
 export { ScreenShareTile } from './components/screen-share-tile';
 
-// Notes components (38-03)
-export { NotesPanel } from './components/notes-panel';
-export { useCallNotes } from './hooks/use-call-notes';
-
 // Recording components (36-04)
-export { RecordingConsent } from './components/recording-consent';
 export { RecordingIndicator } from './components/recording-indicator';
