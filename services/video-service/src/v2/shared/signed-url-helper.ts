@@ -14,7 +14,7 @@ interface SignedUrlOptions {
 }
 
 /**
- * Generate a time-limited signed URL for an interview recording in Supabase Storage.
+ * Generate a time-limited signed URL for a recording in Supabase Storage.
  */
 export async function generateSignedUrl(
     supabase: SupabaseClient,

@@ -84,8 +84,8 @@ async function main() {
             ],
             tags: [
                 {
-                    name: "interviews",
-                    description: "Video interview lifecycle management",
+                    name: "calls",
+                    description: "Call recording lifecycle management",
                 },
             ],
         },

@@ -3,7 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { CallRecordingRepository } from './call-repository';
 import { CallRecordingService } from './call-recording-service';
 import { requireUserContext } from '../shared/helpers';
-import { generateSignedUrl, extractStoragePath } from '../interviews/signed-url-helper';
+import { generateSignedUrl, extractStoragePath } from '../shared/signed-url-helper';
 
 interface CallRecordingRoutesConfig {
     repository: CallRecordingRepository;

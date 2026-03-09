@@ -1,15 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
 import { IEventPublisher } from './shared/events';
-import { registerInterviewRoutes } from './interviews/routes';
-import { registerRecordingRoutes } from './interviews/recording-routes';
-import { registerRecordingWebhook } from './interviews/recording-webhook';
-import { RecordingService } from './interviews/recording-service';
-import { InterviewRepository } from './interviews/repository';
-import { TokenService } from './interviews/token-service';
 import { CallRecordingRepository } from './calls/call-repository';
 import { CallRecordingService } from './calls/call-recording-service';
 import { registerCallRecordingRoutes } from './calls/call-recording-routes';
+import { registerCallRecordingWebhook } from './calls/call-recording-webhook';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -27,17 +22,7 @@ interface RegisterConfig {
 }
 
 export async function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
-    const repository = new InterviewRepository(config.supabaseUrl, config.supabaseKey);
-    const tokenService = new TokenService(repository, config.livekitApiKey, config.livekitApiSecret);
     const supabase = createClient(config.supabaseUrl, config.supabaseKey);
-
-    await registerInterviewRoutes(app, {
-        supabaseUrl: config.supabaseUrl,
-        supabaseKey: config.supabaseKey,
-        eventPublisher: config.eventPublisher,
-        livekitApiKey: config.livekitApiKey,
-        livekitApiSecret: config.livekitApiSecret,
-    });
 
     const s3Config = {
         endpoint: config.supabaseS3Endpoint,
@@ -46,14 +31,6 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         secretKey: config.supabaseS3SecretKey,
         bucket: config.supabaseS3Bucket,
     };
-
-    const recordingService = new RecordingService(
-        repository,
-        config.livekitApiKey,
-        config.livekitApiSecret,
-        config.livekitWsUrl,
-        s3Config,
-    );
 
     // Call recording infrastructure
     const callRecordingRepository = new CallRecordingRepository(supabase);
@@ -65,22 +42,13 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         s3Config,
     );
 
-    await registerRecordingRoutes(app, {
-        repository,
-        recordingService,
-        tokenService,
-        supabase,
-    });
-
     await registerCallRecordingRoutes(app, {
         repository: callRecordingRepository,
         recordingService: callRecordingService,
         supabase,
     });
 
-    // Unified webhook handles both interview and call egress events
-    await registerRecordingWebhook(app, {
-        recordingService,
+    await registerCallRecordingWebhook(app, {
         callRecordingService,
         eventPublisher: config.eventPublisher,
         livekitApiKey: config.livekitApiKey,
