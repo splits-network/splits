@@ -9,7 +9,6 @@ import {
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { CallFilters, CallTag } from "../../types";
-import { CALL_STATUS_LABELS } from "../../types";
 import { CallFilterDropdowns } from "./call-filters";
 
 interface ControlsBarProps {
