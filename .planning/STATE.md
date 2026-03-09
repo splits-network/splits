@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 45 (4 of 5 in v10.0) — AI Pipeline Generalization
-Plan: 2 of 4 complete
-Status: In progress
-Last activity: 2026-03-09 — Completed 45-03-PLAN.md (Call Recording Gateway Routing)
+Plan: 4 of 4 complete
+Status: Phase complete
+Last activity: 2026-03-09 — Completed 45-04-PLAN.md (Call Detail Pipeline UI)
 
-Progress: [██████████████████████░░] 22/24 plans (92%)
+Progress: [████████████████████████] 24/24 plans (100%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 22
+- v10.0 plans completed: 24
 
 **By Phase:**
 
@@ -29,7 +29,7 @@ Progress: [██████████████████████░
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
 | 44-recruiter-company-calls-portal-integration | 12/12 | 78min | 6.50min |
-| 45-ai-pipeline-generalization | 2/4 | 8min | 4.00min |
+| 45-ai-pipeline-generalization | 4/4 | 11min | 2.75min |
 
 ## Accumulated Context
 
@@ -103,6 +103,9 @@ Recent decisions affecting current work:
 - [45-02]: CallPipelineService has own OpenAI method rather than reusing interview-specific SummaryService
 - [45-03]: Separate playback URL paths for video-service (in-call) vs call-service (portal detail page)
 - [45-03]: Call recording webhook gateway route added for future direct call webhook endpoint
+- [45-04]: Detect new vs legacy summary format via presence of tldr or content fields
+- [45-04]: Pipeline status hides when complete — summary content is sufficient indicator
+- [45-04]: 15-second polling interval for auto-refresh during processing
 
 ### Pending Todos
 
@@ -117,9 +120,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 45-03-PLAN.md (Call Recording Gateway Routing)
+Stopped at: Completed 45-04-PLAN.md (Call Detail Pipeline UI) — Phase 45 complete
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (45-03 complete — gateway routing for call recording operations)*
+*Last updated: 2026-03-09 (45-04 complete — Phase 45 AI Pipeline Generalization complete)*
