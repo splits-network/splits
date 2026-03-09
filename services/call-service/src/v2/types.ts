@@ -3,7 +3,7 @@
 // =============================================================================
 
 // Enums
-export type CallStatus = 'scheduled' | 'active' | 'completed' | 'cancelled';
+export type CallStatus = 'scheduled' | 'active' | 'completed' | 'cancelled' | 'missed' | 'no_show';
 export type CallEntityType = 'application' | 'job' | 'company' | 'firm' | 'candidate';
 export type CallParticipantRole = 'host' | 'participant' | 'observer';
 export type RecordingStatus = 'pending' | 'recording' | 'processing' | 'ready' | 'failed';
@@ -36,6 +36,12 @@ export interface Call {
     ended_at: string | null;
     duration_minutes: number | null;
     created_by: string;
+    agenda: string | null;
+    duration_minutes_planned: number | null;
+    pre_call_notes: string | null;
+    needs_follow_up: boolean;
+    cancelled_by: string | null;
+    cancel_reason: string | null;
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
@@ -122,6 +128,21 @@ export interface CallNote {
     updated_at: string;
 }
 
+/** Lookup table: call_tags */
+export interface CallTag {
+    slug: string;
+    label: string;
+    created_at: string;
+}
+
+/** Junction table: call_tag_links */
+export interface CallTagLink {
+    id: string;
+    call_id: string;
+    tag_slug: string;
+    created_at: string;
+}
+
 // =============================================================================
 // Composite / API Response Types
 // =============================================================================
@@ -145,6 +166,7 @@ export interface CallNoteWithUser extends CallNote {
 export interface CallWithParticipants extends Call {
     participants: CallParticipantWithUser[];
     entity_links: CallEntityLink[];
+    tags?: CallTagLink[];
 }
 
 export interface CallDetail extends CallWithParticipants {
@@ -152,6 +174,7 @@ export interface CallDetail extends CallWithParticipants {
     transcript?: CallTranscript | null;
     summary?: CallSummary | null;
     notes?: CallNoteWithUser[];
+    tags?: CallTagLink[];
 }
 
 // =============================================================================
@@ -162,6 +185,10 @@ export interface CreateCallInput {
     call_type: string;
     title?: string;
     scheduled_at?: string;
+    agenda?: string;
+    duration_minutes_planned?: number;
+    pre_call_notes?: string;
+    tags?: string[];
     entity_links: { entity_type: CallEntityType; entity_id: string }[];
     participants: { user_id: string; role: CallParticipantRole }[];
 }
@@ -169,6 +196,8 @@ export interface CreateCallInput {
 export interface UpdateCallInput {
     title?: string;
     scheduled_at?: string;
+    agenda?: string;
+    needs_follow_up?: boolean;
 }
 
 export interface CallListFilters {
@@ -178,4 +207,7 @@ export interface CallListFilters {
     status?: CallStatus;
     date_from?: string;
     date_to?: string;
+    tag?: string;
+    needs_follow_up?: boolean;
+    search?: string;
 }
