@@ -77,7 +77,7 @@ spec:
                                 name: supabase-secrets
                                 key: supabase-s3-secret-key
                       - name: SUPABASE_S3_BUCKET
-                        value: "interview-recordings"
+                        value: "call-recordings"
                   resources:
                       requests:
                           cpu: 100m
