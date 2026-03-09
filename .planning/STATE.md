@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 10 of 12 complete
+Plan: 11 of 12 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 44-09-PLAN.md (Entity Call Tabs)
+Last activity: 2026-03-09 — Completed 44-11-PLAN.md (Post-Call Summary & Chat Call Integration)
 
-Progress: [██████████████████░░] 18/20 plans (90%)
+Progress: [███████████████████░] 19/20 plans (95%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 18
+- v10.0 plans completed: 19
 
 **By Phase:**
 
@@ -28,7 +28,7 @@ Progress: [██████████████████░░] 18/20 p
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
-| 44-recruiter-company-calls-portal-integration | 10/12 | 61min | 6.10min |
+| 44-recruiter-company-calls-portal-integration | 11/12 | 69min | 6.27min |
 
 ## Accumulated Context
 
@@ -91,6 +91,9 @@ Recent decisions affecting current work:
 - [44-09]: Entity call tabs use syncToUrl: false to avoid polluting parent page URL
 - [44-09]: Entity-scoped stats via /calls/stats?entity_type=X&entity_id=Y
 - [44-09]: Default limit 10 for entity tabs (secondary content within detail panel)
+- [44-11]: Call icon added to shared ChatSidebarHeader via optional onCallClick prop
+- [44-11]: activeConversationMeta extended with otherUserId for call pre-fill context
+- [44-11]: Schedule Follow-up uses URL params to pre-fill portal call creation page
 
 ### Pending Todos
 
@@ -105,9 +108,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-09-PLAN.md (Entity Call Tabs)
+Stopped at: Completed 44-11-PLAN.md (Post-Call Summary & Chat Call Integration)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-09 complete — calls tabs on company and job detail pages with full filtering)*
+*Last updated: 2026-03-09 (44-11 complete — post-call summary screen and chat widget call initiation)*
