@@ -11,11 +11,12 @@ import { CandidateDescriptionTab } from "./job-detail-candidate-tab";
 import { FinancialsTab } from "./job-detail-financials-tab";
 import { CompanyTab } from "./job-detail-company-tab";
 import { JobMatchesTab } from "./job-matches-tab";
+import { JobCallsTab } from "./job-calls-tab";
 import { JobHeroHeader } from "./job-detail-header";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
-type TabKey = "brief" | "candidate" | "financials" | "company" | "matches";
+type TabKey = "brief" | "candidate" | "financials" | "company" | "matches" | "calls";
 
 const TABS = [
     { value: "brief", label: "Recruiter Brief", icon: "fa-duotone fa-regular fa-file-lines" },
@@ -23,6 +24,7 @@ const TABS = [
     { value: "financials", label: "Financials", icon: "fa-duotone fa-regular fa-calculator" },
     { value: "company", label: "Company", icon: "fa-duotone fa-regular fa-building" },
     { value: "matches", label: "Matches", icon: "fa-duotone fa-regular fa-bullseye" },
+    { value: "calls", label: "Calls", icon: "fa-duotone fa-regular fa-video" },
 ];
 
 /* ─── Detail Panel ───────────────────────────────────────────────────────── */
@@ -68,6 +70,9 @@ export function JobDetail({
                 {activeTab === "company" && <CompanyTab job={job} />}
                 {activeTab === "matches" && (
                     <JobMatchesTab job={job} isPartner={planTier === "partner"} isRecruiter={isRecruiter} />
+                )}
+                {activeTab === "calls" && (
+                    <JobCallsTab jobId={job.id} jobTitle={job.title} />
                 )}
             </div>
         </div>
