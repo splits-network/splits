@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 3 of 12 complete
+Plan: 4 of 12 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 44-03-PLAN.md (Call Notification Consumer & Email Templates)
+Last activity: 2026-03-09 — Completed 44-05-PLAN.md (Google Calendar Integration for Calls)
 
-Progress: [██████████░░░░░░░░░░] 11/20 plans (55%)
+Progress: [████████████░░░░░░░░] 12/20 plans (60%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 11
+- v10.0 plans completed: 12
 
 **By Phase:**
 
@@ -28,7 +28,7 @@ Progress: [██████████░░░░░░░░░░] 11/20 p
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
-| 44-recruiter-company-calls-portal-integration | 3/12 | 8min | 2.67min |
+| 44-recruiter-company-calls-portal-integration | 4/12 | 13min | 3.25min |
 
 ## Accumulated Context
 
@@ -68,6 +68,9 @@ Recent decisions affecting current work:
 - [44-04]: Scheduler repository in separate file to keep main repository under 200 lines
 - [44-04]: Reminder windows use ranges (23h-25h) to tolerate 1-min interval drift
 - [44-04]: 5-min reminders publish separate call.starting_soon event for in-app toast handling
+- [44-05]: HTTP routes (not RabbitMQ consumer) for calendar operations — integration-service has no consumer infrastructure
+- [44-05]: call_calendar_events tracking table with UNIQUE(call_id, user_id) for per-participant event mapping
+- [44-05]: Multi-user availability endpoint at /api/v2/integrations/calendar/availability (no connectionId required)
 
 ### Pending Todos
 
@@ -82,9 +85,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-03-PLAN.md (Call Notification Consumer & Email Templates)
+Stopped at: Completed 44-05-PLAN.md (Google Calendar Integration for Calls)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-03 complete — call notification consumer, email service, and 6 email templates)*
+*Last updated: 2026-03-09 (44-05 complete — call calendar event CRUD, multi-user availability endpoint)*
