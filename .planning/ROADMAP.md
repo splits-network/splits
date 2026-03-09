@@ -10,7 +10,7 @@
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
-- [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-48 (shipped 2026-03-09)
+- [ ] **v10.0 Video Platform & Recruiting Calls** - Phases 42-50 (gap closure in progress)
 
 ## Phases
 
@@ -72,6 +72,8 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 46: Interview Migration** - Drop interview schema, delete interview-specific code from all services, replace application Interviews tab with Calls tab
 - [x] **Phase 47: Critical Bug Fixes & Event Wiring** - SessionStorage key mismatch, event name mismatch, missing reminder binding
 - [x] **Phase 48: Interview Migration Cleanup** - Dead gateway auth rules, dead shared-video hooks, legacy S3 bucket name
+- [ ] **Phase 49: Critical Flow Fixes** - Event payload participants, token field mismatch, join route, recording playback
+- [ ] **Phase 50: Post-Migration Text & Metadata Cleanup** - User-facing interview text, Swagger description, notification metadata key
 
 ## Phase Details
 
@@ -191,10 +193,31 @@ Plans:
 - [x] 48-02-PLAN.md — Delete dead shared-video exports, rename interview_type to call_type end-to-end
 - [x] 48-03-PLAN.md — Rename interview-recordings bucket references to call-recordings across services and infra
 
+### Phase 49: Critical Flow Fixes
+**Goal**: All call flows work end-to-end — notification emails are delivered, instant calls redirect correctly, Join Call works from the portal, and recording playback loads media
+**Depends on**: Phase 48
+**Requirements**: APP-03, CALL-04, HIST-02
+**Gap Closure**: Closes P0/P1 gaps from v10.0 re-audit
+**Success Criteria** (what must be TRUE):
+  1. call.created, call.cancelled, call.rescheduled, and call.recording_ready events include `participants` array — notification emails are sent
+  2. Instant call token redirect uses the correct field name — users reach the video app with a valid token
+  3. Join Call button on call detail page works — users are redirected to the video app
+  4. Recording tab fetches a signed URL from the playback-url endpoint — media player loads the recording
+
+### Phase 50: Post-Migration Text & Metadata Cleanup
+**Goal**: No interview-era text or metadata mismatches remain in user-facing UI or service internals
+**Depends on**: Phase 49
+**Requirements**: None (tech debt)
+**Gap Closure**: Closes P3/P4 tech debt from v10.0 re-audit
+**Success Criteria** (what must be TRUE):
+  1. recording-consent.tsx says "This Call Will Be Recorded" (not "Interview")
+  2. video-service Swagger description says "video call service" (not "interview")
+  3. Notification metadata key matches RabbitMQ routing key format (`call.recording_ready` not `call.recording.ready`)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48
+Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 -> 50
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -225,3 +248,5 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48
 | 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 47. Critical Bug Fixes & Event Wiring | v10.0 | 1/1 | Complete | 2026-03-09 |
 | 48. Interview Migration Cleanup | v10.0 | 3/3 | Complete | 2026-03-09 |
+| 49. Critical Flow Fixes | v10.0 | 0/? | Not Started | — |
+| 50. Post-Migration Text & Metadata Cleanup | v10.0 | 0/? | Not Started | — |
