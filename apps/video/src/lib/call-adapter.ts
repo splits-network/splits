@@ -1,11 +1,11 @@
-import type { InterviewContext } from '@splits-network/shared-video';
+import type { CallContext } from '@splits-network/shared-video';
 import type { CallDetail } from './types';
 
 /**
- * Adapt call-service CallDetail to shared-video InterviewContext.
- * Bridges the call data model to the interview-oriented shared-video components.
+ * Adapt call-service CallDetail to shared-video CallContext.
+ * Bridges the call data model to the shared-video components.
  */
-export function adaptCallToInterviewContext(call: CallDetail): InterviewContext {
+export function adaptCallToCallContext(call: CallDetail): CallContext {
     const jobLink = call.entity_links.find((l) => l.entity_type === 'job');
 
     return {

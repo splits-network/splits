@@ -5,12 +5,12 @@ import type { TokenResult } from '../types';
 type GetTokenFn = () => Promise<string | null>;
 
 /**
- * Hook for fetching LiveKit interview tokens.
+ * Hook for fetching LiveKit call tokens.
  *
  * @param apiBaseUrl - Gateway base URL (e.g. http://localhost:3000)
  * @param getToken - Clerk getToken for authenticated calls (omit for magic link only)
  */
-export function useInterviewToken(apiBaseUrl: string, getToken?: GetTokenFn) {
+export function useCallToken(apiBaseUrl: string, getToken?: GetTokenFn) {
     const [tokenData, setTokenData] = useState<TokenResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);

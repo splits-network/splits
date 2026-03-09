@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePreviewTracks } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import type { LocalAudioTrack, LocalVideoTrack } from 'livekit-client';
-import type { InterviewContext, LocalUserChoices } from '../types';
+import type { CallContext, LocalUserChoices } from '../types';
 import { AudioLevelMeter } from './audio-level-meter';
 import { CameraOffFallback } from './camera-off-fallback';
 import { DeviceSelector } from './device-selector';
@@ -12,7 +12,7 @@ import { WaitingIndicator } from './waiting-indicator';
 import { RecordingConsent } from './recording-consent';
 
 interface VideoLobbyProps {
-    interviewContext: InterviewContext;
+    callContext: CallContext;
     onJoin: (choices: LocalUserChoices) => void;
     participantPresence?: {
         name: string;
@@ -45,7 +45,7 @@ function formatInterviewType(type: string): string {
 }
 
 export function VideoLobby({
-    interviewContext,
+    callContext,
     onJoin,
     participantPresence,
     localUser,
@@ -105,7 +105,7 @@ export function VideoLobby({
         });
     };
 
-    const { job, participants, interview_type, scheduled_at } = interviewContext;
+    const { job, participants, interview_type, scheduled_at } = callContext;
 
     // Find the other participant (not the local user) for display
     const otherParticipant = participants.find(

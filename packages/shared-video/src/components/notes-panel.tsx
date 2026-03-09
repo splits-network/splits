@@ -1,7 +1,7 @@
 'use client';
 
 import { MarkdownEditor } from '@splits-network/shared-ui';
-import { useInterviewNotes } from '../hooks/use-interview-notes';
+import { useCallNotes } from '../hooks/use-call-notes';
 
 interface NotesPanelProps {
     isOpen: boolean;
@@ -59,7 +59,7 @@ export function NotesPanel({
     getToken,
     magicLinkToken,
 }: NotesPanelProps) {
-    const { content, setContent, saving, lastSaved, error } = useInterviewNotes(
+    const { content, setContent, saving, lastSaved, error } = useCallNotes(
         interviewId,
         apiBase,
         getToken,

@@ -13,7 +13,7 @@ import {
     defaultRoomOptions,
 } from '@splits-network/shared-video';
 import type { CallDetail } from '@/lib/types';
-import { adaptCallToInterviewContext } from '@/lib/call-adapter';
+import { adaptCallToCallContext } from '@/lib/call-adapter';
 import { ReconnectingOverlay } from './reconnecting-overlay';
 import { CallEnded } from './call-ended';
 import { CallSidePanel } from './call-side-panel';
@@ -30,7 +30,7 @@ interface CallExperienceProps {
 export function CallExperience({ livekitToken, call }: CallExperienceProps) {
     const [callState, setCallState] = useState<CallState>('prep');
     const [localChoices, setLocalChoices] = useState<LocalUserChoices | null>(null);
-    const interviewContext = adaptCallToInterviewContext(call);
+    const callContext = adaptCallToCallContext(call);
     const { duration, start: startTimer, stop: stopTimer } = useCallDuration();
 
     // Skip prep -- identity confirmation already happened in join flow
@@ -77,7 +77,7 @@ export function CallExperience({ livekitToken, call }: CallExperienceProps) {
             <CallStateRouter
                 callState={callState}
                 setCallState={setCallState}
-                interviewContext={interviewContext}
+                callContext={callContext}
                 call={call}
                 localName={localName}
                 localAvatarUrl={localAvatarUrl}
@@ -95,7 +95,7 @@ export function CallExperience({ livekitToken, call }: CallExperienceProps) {
 function CallStateRouter({
     callState,
     setCallState,
-    interviewContext,
+    callContext,
     call,
     localName,
     localAvatarUrl,
@@ -105,7 +105,7 @@ function CallStateRouter({
 }: {
     callState: CallState;
     setCallState: (s: CallState) => void;
-    interviewContext: ReturnType<typeof adaptCallToInterviewContext>;
+    callContext: ReturnType<typeof adaptCallToCallContext>;
     call: CallDetail;
     localName: string;
     localAvatarUrl?: string;
@@ -151,7 +151,7 @@ function CallStateRouter({
             return (
                 <div className="min-h-screen">
                     <VideoLobby
-                        interviewContext={interviewContext}
+                        callContext={callContext}
                         onJoin={onJoin}
                         localUser={{ name: localName, avatarUrl: localAvatarUrl }}
                     />
@@ -162,7 +162,7 @@ function CallStateRouter({
             return (
                 <div className="min-h-screen relative">
                     <VideoLobby
-                        interviewContext={interviewContext}
+                        callContext={callContext}
                         onJoin={onJoin}
                         localUser={{ name: localName, avatarUrl: localAvatarUrl }}
                     />
@@ -179,7 +179,7 @@ function CallStateRouter({
             return (
                 <div className="h-screen relative">
                     <VideoRoom
-                        interviewContext={interviewContext}
+                        callContext={callContext}
                         localName={localName}
                         localAvatarUrl={localAvatarUrl}
                         onDisconnect={() => setCallState('post-call')}

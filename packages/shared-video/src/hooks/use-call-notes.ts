@@ -2,11 +2,11 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-interface UseInterviewNotesOptions {
+interface UseCallNotesOptions {
     magicLinkToken?: string;
 }
 
-interface UseInterviewNotesResult {
+interface UseCallNotesResult {
     content: string;
     setContent: (value: string) => void;
     saving: boolean;
@@ -15,12 +15,12 @@ interface UseInterviewNotesResult {
     postToApplication: () => Promise<void>;
 }
 
-export function useInterviewNotes(
-    interviewId: string,
+export function useCallNotes(
+    callId: string,
     apiBase: string,
     getToken: () => Promise<string | null>,
-    options?: UseInterviewNotesOptions,
-): UseInterviewNotesResult {
+    options?: UseCallNotesOptions,
+): UseCallNotesResult {
     const [content, setContentState] = useState('');
     const [saving, setSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -58,13 +58,13 @@ export function useInterviewNotes(
     // Build URL with optional magic link token query param
     const buildUrl = useCallback(
         (path: string) => {
-            const url = `${apiBase}/api/v2/interviews/${interviewId}${path}`;
+            const url = `${apiBase}/api/v2/interviews/${callId}${path}`;
             if (magicLinkToken) {
                 return `${url}?token=${encodeURIComponent(magicLinkToken)}`;
             }
             return url;
         },
-        [apiBase, interviewId, magicLinkToken],
+        [apiBase, callId, magicLinkToken],
     );
 
     // Load existing notes on mount

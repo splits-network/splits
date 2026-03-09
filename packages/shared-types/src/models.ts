@@ -525,28 +525,6 @@ export interface ApplicationNote {
     in_response_to?: ApplicationNote;
 }
 
-// ============================================================================
-// Interview Transcript Types (AI pipeline)
-// ============================================================================
-
-export interface TranscriptSegment {
-    start: number;    // seconds from recording start
-    end: number;      // seconds from recording start
-    text: string;
-    speaker: string;  // participant name or role
-}
-
-export interface InterviewTranscript {
-    id: string;
-    interview_id: string;
-    full_text: string;
-    segments: TranscriptSegment[];
-    language: string;
-    whisper_model?: string;
-    processing_time_ms?: number;
-    created_at: string;
-}
-
 // Legacy aliases for backwards compatibility during migration
 /** @deprecated Use ApplicationNoteType instead */
 export type ApplicationFeedbackType = ApplicationNoteType;

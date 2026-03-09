@@ -1,13 +1,13 @@
 // Types
 export type {
     CallState,
-    InterviewContext,
+    CallContext,
     TokenResult,
     LocalUserChoices,
 } from './types';
 
 // Hooks
-export { useInterviewToken } from './hooks/use-interview-token';
+export { useCallToken } from './hooks/use-call-token';
 export { useCallDuration } from './hooks/use-call-duration';
 export { useRecordingState } from './hooks/use-recording-state';
 
@@ -35,7 +35,7 @@ export { ScreenShareTile } from './components/screen-share-tile';
 
 // Notes components (38-03)
 export { NotesPanel } from './components/notes-panel';
-export { useInterviewNotes } from './hooks/use-interview-notes';
+export { useCallNotes } from './hooks/use-call-notes';
 
 // Recording components (36-04)
 export { RecordingConsent } from './components/recording-consent';

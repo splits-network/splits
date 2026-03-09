@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RemoteParticipant } from 'livekit-client';
 import { Track } from 'livekit-client';
-import type { InterviewContext } from '../types';
+import type { CallContext } from '../types';
 
 interface ParticipantSidebarProps {
     participants: RemoteParticipant[];
-    interviewContext: InterviewContext;
+    callContext: CallContext;
     localName: string;
 }
 
@@ -73,7 +73,7 @@ function ParticipantEntry({
 
 export function ParticipantSidebar({
     participants,
-    interviewContext,
+    callContext,
     localName,
 }: ParticipantSidebarProps) {
     const prevIdentitiesRef = useRef<Set<string>>(new Set());
@@ -127,7 +127,7 @@ export function ParticipantSidebar({
         prevIdentitiesRef.current = currentIdentities;
     }, [participants]);
 
-    const localParticipantInfo = interviewContext.participants.find(
+    const localParticipantInfo = callContext.participants.find(
         (p) => p.name === localName,
     );
     const localRole = localParticipantInfo?.role ?? 'interviewer';
@@ -166,7 +166,7 @@ export function ParticipantSidebar({
 
                     {/* Remote participants */}
                     {participants.map((participant) => {
-                        const info = interviewContext.participants.find(
+                        const info = callContext.participants.find(
                             (p) => p.id === participant.identity,
                         );
                         const name = info?.name ?? 'Participant';

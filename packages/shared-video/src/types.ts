@@ -1,6 +1,6 @@
 export type CallState = 'prep' | 'lobby' | 'connecting' | 'in-call' | 'post-call';
 
-export interface InterviewContext {
+export interface CallContext {
     id: string;
     status: string;
     interview_type: string;
@@ -25,7 +25,7 @@ export interface InterviewContext {
 export interface TokenResult {
     jwt: string;
     room_name: string;
-    interview: InterviewContext;
+    call: CallContext;
     participant: {
         id: string;
         role: string;

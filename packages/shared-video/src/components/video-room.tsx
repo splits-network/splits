@@ -9,7 +9,7 @@ import {
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import type { TrackReference } from '@livekit/components-react';
-import type { InterviewContext } from '../types';
+import type { CallContext } from '../types';
 import { ParticipantTile } from './participant-tile';
 import { SelfViewPip } from './self-view-pip';
 import { VideoControls } from './video-controls';
@@ -18,7 +18,7 @@ import { ParticipantSidebar } from './participant-sidebar';
 import { ScreenShareTile } from './screen-share-tile';
 
 interface VideoRoomProps {
-    interviewContext: InterviewContext;
+    callContext: CallContext;
     localName: string;
     localAvatarUrl?: string;
     onDisconnect: () => void;
@@ -64,7 +64,7 @@ function JoinLeaveToast({ toast, onRemove }: { toast: Toast; onRemove: () => voi
 }
 
 export function VideoRoom({
-    interviewContext,
+    callContext,
     localName,
     localAvatarUrl,
     isRecording,
@@ -96,7 +96,7 @@ export function VideoRoom({
         // Detect joins
         for (const identity of currentIdentities) {
             if (!prevIdentities.has(identity)) {
-                const info = interviewContext.participants.find((p) => p.id === identity);
+                const info = callContext.participants.find((p) => p.id === identity);
                 const name = info?.name ?? 'A participant';
                 newToasts.push({
                     id: `join-${identity}-${Date.now()}`,
@@ -109,7 +109,7 @@ export function VideoRoom({
         // Detect leaves
         for (const identity of prevIdentities) {
             if (!currentIdentities.has(identity)) {
-                const info = interviewContext.participants.find((p) => p.id === identity);
+                const info = callContext.participants.find((p) => p.id === identity);
                 const name = info?.name ?? 'A participant';
                 newToasts.push({
                     id: `leave-${identity}-${Date.now()}`,
@@ -124,14 +124,14 @@ export function VideoRoom({
         }
 
         prevIdentitiesRef.current = currentIdentities;
-    }, [remoteParticipants, interviewContext.participants]);
+    }, [remoteParticipants, callContext.participants]);
 
     const removeToast = useCallback((id: string) => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
     }, []);
 
     // Name of the person we're waiting for (first participant that isn't us)
-    const waitingForName = interviewContext.participants.find(
+    const waitingForName = callContext.participants.find(
         (p) => p.name !== localName,
     )?.name ?? 'other participants';
 
@@ -152,12 +152,12 @@ export function VideoRoom({
                         <ScreenShareLayout
                             screenShareTracks={screenShareTracks}
                             remoteParticipants={remoteParticipants}
-                            interviewContext={interviewContext}
+                            callContext={callContext}
                         />
                     ) : (
                         <GridLayout
                             remoteParticipants={remoteParticipants}
-                            interviewContext={interviewContext}
+                            callContext={callContext}
                         />
                     )}
 
@@ -192,7 +192,7 @@ export function VideoRoom({
             {/* Participant sidebar */}
             <ParticipantSidebar
                 participants={remoteParticipants}
-                interviewContext={interviewContext}
+                callContext={callContext}
                 localName={localName}
             />
 
@@ -208,17 +208,17 @@ export function VideoRoom({
 /** Grid layout for participants when no screen share is active */
 function GridLayout({
     remoteParticipants,
-    interviewContext,
+    callContext,
 }: {
     remoteParticipants: ReturnType<typeof useRemoteParticipants>;
-    interviewContext: InterviewContext;
+    callContext: CallContext;
 }) {
     const gridClasses = getGridClasses(remoteParticipants.length);
 
     return (
         <div className={`grid ${gridClasses} gap-1 h-full ${remoteParticipants.length > 6 ? 'overflow-y-auto' : ''}`}>
             {remoteParticipants.map((participant) => {
-                const info = interviewContext.participants.find(
+                const info = callContext.participants.find(
                     (p) => p.id === participant.identity,
                 );
                 const name = info?.name ?? 'Participant';
@@ -243,18 +243,18 @@ function GridLayout({
 function ScreenShareLayout({
     screenShareTracks,
     remoteParticipants,
-    interviewContext,
+    callContext,
 }: {
     screenShareTracks: TrackReference[];
     remoteParticipants: ReturnType<typeof useRemoteParticipants>;
-    interviewContext: InterviewContext;
+    callContext: CallContext;
 }) {
     return (
         <div className="flex h-full">
             {/* Participant strip (left side) */}
             <div className="w-48 flex flex-col gap-1 overflow-y-auto bg-base-300">
                 {remoteParticipants.map((participant) => {
-                    const info = interviewContext.participants.find(
+                    const info = callContext.participants.find(
                         (p) => p.id === participant.identity,
                     );
                     const name = info?.name ?? 'Participant';
