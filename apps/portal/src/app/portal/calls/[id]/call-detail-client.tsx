@@ -1,0 +1,135 @@
+"use client";
+
+import { useState } from "react";
+import { useCallDetail } from "../hooks/use-call-detail";
+import { CallDetailHeader } from "./components/call-detail-header";
+import { RecordingTab } from "./components/recording-tab";
+import { TranscriptTab } from "./components/transcript-tab";
+import { SummaryTab } from "./components/summary-tab";
+import { CallContextPanel } from "./components/call-context-panel";
+import { CallNotesSection } from "./components/call-notes-section";
+import { CallParticipantsSection } from "./components/call-participants-section";
+import { RelatedCallsSection } from "./components/related-calls-section";
+
+type TabKey = "recording" | "transcript" | "summary";
+
+const TABS: { key: TabKey; label: string; icon: string }[] = [
+    { key: "recording", label: "Recording", icon: "fa-circle-play" },
+    { key: "transcript", label: "Transcript", icon: "fa-file-lines" },
+    { key: "summary", label: "AI Summary", icon: "fa-sparkles" },
+];
+
+export function CallDetailClient({ callId }: { callId: string }) {
+    const {
+        call,
+        relatedCalls,
+        isLoading,
+        error,
+        refetch,
+        currentTimestamp,
+        setCurrentTimestamp,
+    } = useCallDetail(callId);
+    const [activeTab, setActiveTab] = useState<TabKey>("recording");
+
+    if (isLoading) {
+        return (
+            <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
+                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    Loading call...
+                </p>
+            </div>
+        );
+    }
+
+    if (error || !call) {
+        return (
+            <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                <i className="fa-duotone fa-regular fa-triangle-exclamation text-5xl text-error/30 mb-6 block" />
+                <h3 className="text-2xl font-black tracking-tight mb-2">
+                    Failed to load call
+                </h3>
+                <p className="text-base-content/50 mb-6">
+                    {error || "Call not found."}
+                </p>
+                <a
+                    href="/portal/calls"
+                    className="btn btn-outline btn-sm"
+                    style={{ borderRadius: 0 }}
+                >
+                    Back to Calls
+                </a>
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            <CallDetailHeader call={call} onRefetch={refetch} />
+
+            <div className="flex flex-col lg:flex-row">
+                {/* Main Content — left column */}
+                <div className="flex-1 min-w-0 p-6">
+                    {/* Tabs */}
+                    <div
+                        role="tablist"
+                        className="tabs tabs-bordered mb-6"
+                    >
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.key}
+                                role="tab"
+                                className={`tab gap-2 ${activeTab === tab.key ? "tab-active font-bold" : ""}`}
+                                onClick={() => setActiveTab(tab.key)}
+                            >
+                                <i className={`fa-duotone fa-regular ${tab.icon}`} />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Tab Content */}
+                    {activeTab === "recording" && (
+                        <RecordingTab
+                            recordings={call.recordings}
+                            currentTimestamp={currentTimestamp}
+                            onTimestampChange={setCurrentTimestamp}
+                        />
+                    )}
+                    {activeTab === "transcript" && (
+                        <TranscriptTab
+                            transcript={call.transcript}
+                            currentTimestamp={currentTimestamp}
+                            onTimestampSeek={setCurrentTimestamp}
+                        />
+                    )}
+                    {activeTab === "summary" && (
+                        <SummaryTab summary={call.summary} />
+                    )}
+
+                    {/* Below-tab sections */}
+                    <div className="mt-8 space-y-8">
+                        <CallNotesSection
+                            callId={call.id}
+                            notes={call.notes || []}
+                            onRefetch={refetch}
+                        />
+                        <CallParticipantsSection
+                            participants={call.participants}
+                        />
+                        <RelatedCallsSection
+                            calls={relatedCalls}
+                            currentCallId={call.id}
+                            entityLink={call.entity_links?.[0] || null}
+                        />
+                    </div>
+                </div>
+
+                {/* Context Panel — right column */}
+                <div className="w-full lg:w-[380px] lg:border-l-2 border-base-300 p-6">
+                    <CallContextPanel call={call} />
+                </div>
+            </div>
+        </div>
+    );
+}
