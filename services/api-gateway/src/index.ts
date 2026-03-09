@@ -516,6 +516,12 @@ async function main() {
             return;
         }
 
+        // Skip auth for call recording webhook (signature verified by video-service)
+        // POST /api/v2/calls/recording/webhook
+        if (request.method === 'POST' && request.url.startsWith('/api/v2/calls/recording/webhook')) {
+            return;
+        }
+
         // Skip auth for interview notes (dual-auth: magic link OR Clerk, handled by video-service)
         // PUT /api/v2/interviews/:id/notes - upsert note (token in body)
         // GET /api/v2/interviews/:id/notes - get notes (token in query param)
