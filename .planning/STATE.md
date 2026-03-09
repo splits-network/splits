@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 45 (4 of 5 in v10.0) — AI Pipeline Generalization
-Plan: 1 of 4 complete
+Plan: 2 of 4 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 45-01-PLAN.md (Call Recording Infrastructure)
+Last activity: 2026-03-09 — Completed 45-03-PLAN.md (Call Recording Gateway Routing)
 
-Progress: [█████████████████████░░░] 21/24 plans (88%)
+Progress: [██████████████████████░░] 22/24 plans (92%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 21
+- v10.0 plans completed: 22
 
 **By Phase:**
 
@@ -29,7 +29,7 @@ Progress: [█████████████████████░░
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
 | 44-recruiter-company-calls-portal-integration | 12/12 | 78min | 6.50min |
-| 45-ai-pipeline-generalization | 1/4 | 4min | 4.00min |
+| 45-ai-pipeline-generalization | 2/4 | 8min | 4.00min |
 
 ## Accumulated Context
 
@@ -100,6 +100,8 @@ Recent decisions affecting current work:
 - [44-12]: Call toasts poll at 10s intervals for time-sensitive events
 - [44-12]: normalizePayload handles both snake_case and camelCase event payloads
 - [45-01]: Unified webhook with fallback pattern — tries interview egress first, falls back to call recording
+- [45-03]: Separate playback URL paths for video-service (in-call) vs call-service (portal detail page)
+- [45-03]: Call recording webhook gateway route added for future direct call webhook endpoint
 
 ### Pending Todos
 
@@ -114,9 +116,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 45-01-PLAN.md (Call Recording Infrastructure)
+Stopped at: Completed 45-03-PLAN.md (Call Recording Gateway Routing)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (45-01 complete — call recording pipeline for generalized calls)*
+*Last updated: 2026-03-09 (45-03 complete — gateway routing for call recording operations)*
