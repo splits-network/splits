@@ -7,7 +7,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 
-const RECORDING_BUCKET = 'interview-recordings';
+const RECORDING_BUCKET = 'call-recordings';
 
 export interface CallContext {
     call: {

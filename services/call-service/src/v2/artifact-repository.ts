@@ -154,7 +154,7 @@ export class ArtifactRepository {
         const expiresIn = 3600;
 
         const { data, error } = await this.supabase.storage
-            .from('interview-recordings')
+            .from('call-recordings')
             .createSignedUrl(storagePath, expiresIn);
 
         if (error || !data?.signedUrl) {
@@ -173,7 +173,7 @@ export class ArtifactRepository {
         try {
             const parsed = new URL(blobUrl);
             const pathParts = parsed.pathname.split('/');
-            const bucketIndex = pathParts.indexOf('interview-recordings');
+            const bucketIndex = pathParts.indexOf('call-recordings');
             if (bucketIndex !== -1) {
                 return pathParts.slice(bucketIndex + 1).join('/');
             }

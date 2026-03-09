@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-const BUCKET = 'interview-recordings';
+const BUCKET = 'call-recordings';
 
 interface SignedUrlResult {
     url: string;

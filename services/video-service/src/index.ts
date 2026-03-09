@@ -129,7 +129,7 @@ async function main() {
     const supabaseS3Region = process.env.SUPABASE_S3_REGION || 'us-east-1';
     const supabaseS3AccessKey = process.env.SUPABASE_S3_ACCESS_KEY || '';
     const supabaseS3SecretKey = process.env.SUPABASE_S3_SECRET_KEY || '';
-    const supabaseS3Bucket = process.env.SUPABASE_S3_BUCKET || 'interview-recordings';
+    const supabaseS3Bucket = process.env.SUPABASE_S3_BUCKET || 'call-recordings';
 
     if (!supabaseS3Endpoint || !supabaseS3AccessKey || !supabaseS3SecretKey) {
         logger.warn('Supabase S3 storage vars not set - recording upload will fail');
