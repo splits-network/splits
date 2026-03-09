@@ -30,6 +30,8 @@ interface CallEventPayload {
     joinUrl?: string;
     recordingId?: string;
     duration?: number;
+    /** Reminder-specific */
+    reminderType?: string;
     /** Decline-specific */
     declinedBy?: string;
     /** Participant joined-specific */
@@ -92,6 +94,7 @@ export class CallsEventConsumer {
             joinUrl: raw.joinUrl,
             recordingId: raw.recordingId,
             duration: raw.duration,
+            reminderType: raw.reminderType || raw.reminder_type,
             declinedBy: raw.declinedBy || raw.declined_by,
             participantUserId: raw.participantUserId || raw.participant_user_id,
         };
@@ -310,6 +313,56 @@ export class CallsEventConsumer {
             this.logger.error(
                 { error, event_payload: event.payload },
                 'Failed to process call.starting_soon',
+            );
+            throw error;
+        }
+    }
+
+    // ─── Call Reminder (24h / 1h) ────────────────────────────────────────────
+
+    async handleReminder(event: DomainEvent): Promise<void> {
+        try {
+            const payload = this.normalizePayload(event.payload);
+            const { callId, reminderType } = payload;
+
+            this.logger.info({ callId, reminderType }, 'Processing call reminder notification');
+
+            const contacts = await this.resolveParticipantContacts(payload.participants || []);
+            if (contacts.length === 0) return;
+
+            const allNames = contacts.map(c => c.name);
+            const entityContext = await this.resolveEntityContext(payload.entityLinks);
+            const source = this.determineBrand(payload.entityLinks);
+
+            const dateTime = payload.scheduledAt
+                ? formatDateTime(payload.scheduledAt)
+                : 'Upcoming';
+
+            const timeUntil = reminderType === '24h' ? '24 hours' : '1 hour';
+
+            for (const contact of contacts) {
+                await this.emailService.sendReminder(contact.email, {
+                    title: payload.title || undefined,
+                    participantNames: allNames.filter(n => n !== contact.name),
+                    dateTime,
+                    timeUntil,
+                    joinUrl: `${this.portalUrl}/portal/calls/${callId}`,
+                    entityContext,
+                    source,
+                    userId: contact.userId,
+                });
+            }
+
+            // No in-app toast for 24h/1h reminders (only 5-min starting_soon gets toast)
+
+            this.logger.info(
+                { callId, recipientCount: contacts.length, reminderType },
+                'Call reminder notifications sent',
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to process call.reminder',
             );
             throw error;
         }

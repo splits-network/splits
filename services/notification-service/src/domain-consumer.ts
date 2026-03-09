@@ -419,8 +419,9 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'call.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'call.cancelled');
             await this.channel.bindQueue(this.queue, this.exchange, 'call.rescheduled');
-            await this.channel.bindQueue(this.queue, this.exchange, 'call.recording.ready');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.recording_ready');
             await this.channel.bindQueue(this.queue, this.exchange, 'call.starting_soon');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.reminder');
             await this.channel.bindQueue(this.queue, this.exchange, 'call.declined');
             await this.channel.bindQueue(this.queue, this.exchange, 'call.participant.joined');
 
@@ -814,11 +815,14 @@ export class DomainEventConsumer {
             case 'call.rescheduled':
                 await this.callsConsumer.handleCallRescheduled(event);
                 break;
-            case 'call.recording.ready':
+            case 'call.recording_ready':
                 await this.callsConsumer.handleRecordingReady(event);
                 break;
             case 'call.starting_soon':
                 await this.callsConsumer.handleStartingSoon(event);
+                break;
+            case 'call.reminder':
+                await this.callsConsumer.handleReminder(event);
                 break;
             case 'call.declined':
                 await this.callsConsumer.handleCallDeclined(event);
