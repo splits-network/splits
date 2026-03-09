@@ -13,10 +13,11 @@ import ResumeTab from "./resume-tab";
 import { ApplicationDocumentsTab } from "./application-documents-tab";
 import AIReviewPanel from "@/components/basel/applications/ai-review-panel";
 import { ApplicationNotesTab } from "./application-notes-tab";
+import { ApplicationCallsTab } from "./application-calls-tab";
 import ApplicationTimeline from "./application-timeline";
 import type { Application } from "../../types";
 
-type TabKey = "overview" | "candidate" | "job" | "resume" | "documents" | "ai_review" | "notes" | "timeline";
+type TabKey = "overview" | "candidate" | "job" | "resume" | "documents" | "ai_review" | "calls" | "notes" | "timeline";
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "overview", label: "Overview", icon: "fa-clipboard" },
@@ -25,6 +26,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "resume", label: "Resume", icon: "fa-file-user" },
     { key: "documents", label: "Documents", icon: "fa-file" },
     { key: "ai_review", label: "AI Analysis", icon: "fa-brain" },
+    { key: "calls", label: "Calls", icon: "fa-phone" },
     { key: "notes", label: "Notes", icon: "fa-comments" },
     { key: "timeline", label: "Timeline", icon: "fa-timeline" },
 ];
@@ -85,6 +87,12 @@ export function ApplicationDetailPanel({
                 {activeTab === "resume" && <ResumeTab resumeData={application.resume_data} />}
                 {activeTab === "documents" && <ApplicationDocumentsTab application={application} />}
                 {activeTab === "ai_review" && <AIReviewPanel applicationId={application.id} />}
+                {activeTab === "calls" && (
+                    <ApplicationCallsTab
+                        applicationId={application.id}
+                        applicationTitle={`${application.candidate?.full_name || "Candidate"} — ${application.job?.title || "Application"}`}
+                    />
+                )}
                 {activeTab === "notes" && <ApplicationNotesTab applicationId={application.id} />}
                 {activeTab === "timeline" && (
                     <ApplicationTimeline auditLogs={auditLogs} currentStage={application.stage || "draft"} />
