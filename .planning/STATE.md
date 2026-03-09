@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 44 in progress
+**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 45 in progress
 
 ## Current Position
 
-Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 12 of 12 complete
-Status: Phase complete
-Last activity: 2026-03-09 — Completed 44-12-PLAN.md (In-App Call Notifications)
+Phase: 45 (4 of 5 in v10.0) — AI Pipeline Generalization
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-03-09 — Completed 45-01-PLAN.md (Call Recording Infrastructure)
 
-Progress: [████████████████████] 20/20 plans (100%)
+Progress: [█████████████████████░░░] 21/24 plans (88%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 20
+- v10.0 plans completed: 21
 
 **By Phase:**
 
@@ -29,6 +29,7 @@ Progress: [████████████████████] 20/20 p
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
 | 44-recruiter-company-calls-portal-integration | 12/12 | 78min | 6.50min |
+| 45-ai-pipeline-generalization | 1/4 | 4min | 4.00min |
 
 ## Accumulated Context
 
@@ -98,6 +99,7 @@ Recent decisions affecting current work:
 - [44-12]: Decline removes participant and publishes call.declined event
 - [44-12]: Call toasts poll at 10s intervals for time-sensitive events
 - [44-12]: normalizePayload handles both snake_case and camelCase event payloads
+- [45-01]: Unified webhook with fallback pattern — tries interview egress first, falls back to call recording
 
 ### Pending Todos
 
@@ -112,9 +114,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-12-PLAN.md (In-App Call Notifications) — Phase 44 complete
+Stopped at: Completed 45-01-PLAN.md (Call Recording Infrastructure)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-12 complete — Phase 44 fully complete, all 12 plans done)*
+*Last updated: 2026-03-09 (45-01 complete — call recording pipeline for generalized calls)*
