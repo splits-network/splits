@@ -32,8 +32,41 @@ export interface CallDetail {
     status: CallStatus;
     scheduled_at: string | null;
     livekit_room_name: string | null;
+    agenda: string | null;
+    pre_call_notes: string | null;
+    created_by: string;
     participants: CallParticipant[];
     entity_links: CallEntityLink[];
+}
+
+/** Enriched entity data fetched separately for the context panel */
+export interface EntityData {
+    entity_type: CallEntityType;
+    entity_id: string;
+    name: string;
+    subtitle: string | null;
+    logo_url: string | null;
+    details: Record<string, string | null>;
+}
+
+/** Compact call history entry */
+export interface CallHistoryEntry {
+    id: string;
+    title: string | null;
+    call_type: string;
+    status: CallStatus;
+    scheduled_at: string | null;
+    started_at: string | null;
+    duration_minutes: number | null;
+}
+
+/** Chat message for the in-call chat */
+export interface ChatMessage {
+    id: string;
+    sender_name: string;
+    sender_id: string;
+    body: string;
+    created_at: string;
 }
 
 /** Response from the token exchange endpoint */
