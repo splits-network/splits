@@ -202,6 +202,48 @@ export class CallCalendarService {
         return deletedCount;
     }
 
+    /**
+     * Get busy slots for multiple users by their Clerk user IDs.
+     * Returns availability per user. Users without calendar connections return empty busy_slots.
+     */
+    async getMultiUserAvailability(
+        clerkUserIds: string[],
+        dateFrom: string,
+        dateTo: string,
+    ): Promise<{ clerk_user_id: string; busy_slots: { start: string; end: string }[] }[]> {
+        const results: { clerk_user_id: string; busy_slots: { start: string; end: string }[] }[] = [];
+
+        for (const clerkUserId of clerkUserIds) {
+            try {
+                const connection = await this.findCalendarConnection(clerkUserId);
+                if (!connection) {
+                    results.push({ clerk_user_id: clerkUserId, busy_slots: [] });
+                    continue;
+                }
+
+                const calendarId = await this.getPrimaryCalendarId(connection.id, clerkUserId);
+                const busyMap = await this.calendarService.getAvailability(
+                    connection.id, clerkUserId, [calendarId], dateFrom, dateTo,
+                );
+
+                const busySlots = Object.values(busyMap).flat().map(slot => ({
+                    start: slot.start,
+                    end: slot.end,
+                }));
+
+                results.push({ clerk_user_id: clerkUserId, busy_slots: busySlots });
+            } catch (err) {
+                this.logger.error(
+                    { err, clerkUserId },
+                    'Failed to fetch availability for user, returning empty',
+                );
+                results.push({ clerk_user_id: clerkUserId, busy_slots: [] });
+            }
+        }
+
+        return results;
+    }
+
     /* ── Private helpers ───────────────────────────────────────────────── */
 
     private buildDescription(agenda: string | null, joinUrl?: string): string {

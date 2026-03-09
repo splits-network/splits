@@ -25,6 +25,38 @@ export async function registerCallCalendarRoutes(app: FastifyInstance, config: R
         calendarService, callCalendarRepo, connectionRepo, tokenRefresh, config.logger,
     );
 
+    // GET /api/v2/integrations/calendar/availability — multi-user availability for call scheduling
+    app.get('/api/v2/integrations/calendar/availability', async (request, reply) => {
+        const query = request.query as {
+            user_ids?: string;
+            date_from?: string;
+            date_to?: string;
+        };
+
+        if (!query.user_ids || !query.date_from || !query.date_to) {
+            return reply.status(400).send({
+                error: 'user_ids (comma-separated), date_from, and date_to are required',
+            });
+        }
+
+        const clerkUserIds = query.user_ids.split(',').map(id => id.trim()).filter(Boolean);
+        if (clerkUserIds.length === 0) {
+            return reply.status(400).send({ error: 'At least one user_id is required' });
+        }
+
+        try {
+            const availability = await service.getMultiUserAvailability(
+                clerkUserIds,
+                query.date_from,
+                query.date_to,
+            );
+            return reply.send({ data: availability });
+        } catch (err: any) {
+            config.logger.error({ err }, 'Failed to get multi-user availability');
+            return reply.status(500).send({ error: err.message });
+        }
+    });
+
     // POST /api/v2/integrations/calendar/calls — create calendar events for a call
     app.post('/api/v2/integrations/calendar/calls', async (request, reply) => {
         const body = request.body as {
