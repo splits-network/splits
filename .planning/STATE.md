@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 43 complete, ready for Phase 44
+**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 44 in progress
 
 ## Current Position
 
-Phase: 43 (2 of 5 in v10.0) — Video App Infrastructure
-Plan: 4 of 4 complete
-Status: Phase complete
-Last activity: 2026-03-08 — Completed 43-04-PLAN.md (Docker & K8s Deployment)
+Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
+Plan: 1 of 12 complete
+Status: In progress
+Last activity: 2026-03-09 — Completed 44-01-PLAN.md (Call Scheduling & Tags Schema)
 
-Progress: [████████░░░░░░░░░░░░] 8/20 plans (40%)
+Progress: [█████████░░░░░░░░░░░] 9/20 plans (45%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 8
+- v10.0 plans completed: 9
 
 **By Phase:**
 
@@ -28,6 +28,7 @@ Progress: [████████░░░░░░░░░░░░] 8/20 pl
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
+| 44-recruiter-company-calls-portal-integration | 1/12 | 2min | 2min |
 
 ## Accumulated Context
 
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - [43-04]: Lighter resource limits for video (100m/128Mi) since no SSR auth overhead
 - [43-04]: No Sentry DSN in initial video deployment - add when monitoring configured
 - [43-04]: No direct service URLs in video deployment - communicates only through API gateway
+- [44-01]: call_status is Postgres ENUM (ALTER TYPE ADD VALUE), not CHECK constraint
+- [44-01]: cancelled_by is UUID REFERENCES users(id), matching created_by column type
+- [44-01]: Call tags use lookup table + junction table pattern with participant-based RLS
 
 ### Pending Todos
 
@@ -74,10 +78,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-08
-Stopped at: Completed 43-04-PLAN.md (Docker & K8s Deployment) — Phase 43 complete
+Last session: 2026-03-09
+Stopped at: Completed 44-01-PLAN.md (Call Scheduling & Tags Schema)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-08 (43-04 complete — Dockerfile, K8s deployment, dual-subdomain ingress for video app)*
+*Last updated: 2026-03-09 (44-01 complete — call_status enum expansion, scheduling columns, call_tags tables)*
