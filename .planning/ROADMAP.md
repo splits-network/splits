@@ -172,6 +172,9 @@ Plans:
   1. After token exchange, session data is stored and read with the same key — users can join video calls
   2. Recording-ready events from video-service are received by notification-service and trigger email/in-app notifications
   3. 24h and 1h reminder emails are sent for scheduled calls (not just the 5-min reminder)
+**Plans:** 1 plan
+Plans:
+- [ ] 47-01-PLAN.md — Fix sessionStorage key mismatch, recording event name mismatch, add call.reminder binding and handler
 
 ### Phase 48: Interview Migration Cleanup
 **Goal**: No dead interview-era code or references remain in the codebase after the Phase 46 migration
@@ -215,5 +218,5 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48
 | 44. Recruiter-Company Calls & Portal Integration | v10.0 | 12/12 | Complete | 2026-03-09 |
 | 45. AI Pipeline Generalization | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |
-| 47. Critical Bug Fixes & Event Wiring | v10.0 | 0/0 | Not Started | — |
+| 47. Critical Bug Fixes & Event Wiring | v10.0 | 0/1 | Not Started | — |
 | 48. Interview Migration Cleanup | v10.0 | 0/0 | Not Started | — |
