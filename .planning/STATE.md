@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 46 (5 of 5 in v10.0) — Interview Migration
-Plan: 2 of 4 complete
+Plan: 3 of 4 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 46-02-PLAN.md (Backend Interview Code Removal)
+Last activity: 2026-03-09 — Completed 46-03-PLAN.md (Frontend Interview Cleanup)
 
-Progress: [██████████████████████████░░] 26/28 plans (93%)
+Progress: [███████████████████████████░] 27/28 plans (96%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 26
+- v10.0 plans completed: 27
 
 **By Phase:**
 
@@ -30,7 +30,7 @@ Progress: [███████████████████████
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
 | 44-recruiter-company-calls-portal-integration | 12/12 | 78min | 6.50min |
 | 45-ai-pipeline-generalization | 4/4 | 11min | 2.75min |
-| 46-interview-migration | 2/4 | 7min | 3.50min |
+| 46-interview-migration | 3/4 | 57min | 19.00min |
 
 ## Accumulated Context
 
@@ -111,6 +111,10 @@ Recent decisions affecting current work:
 - [46-01]: No interview_id column on applications -- FK was interviews.application_id, dropped with table
 - [46-02]: Moved signed-url-helper from interviews/ to shared/ -- call-recording-routes depends on it
 - [46-02]: Created dedicated call recording webhook replacing unified interview+call webhook
+- [46-03]: Kept application-search.tsx and platform-selector.tsx in scheduling dir (used by calendar create-event-modal)
+- [46-03]: Deleted available-slots-list.tsx (only used by deleted interview scheduling modals)
+- [46-03]: Left API endpoint paths in use-call-notes.ts unchanged — backend migration separate
+- [46-03]: Kept interview_type field name in CallContext (matches existing API response shape)
 
 ### Pending Todos
 
@@ -125,9 +129,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 46-02-PLAN.md (Backend Interview Code Removal)
+Stopped at: Completed 46-03-PLAN.md (Frontend Interview Cleanup)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (46-02 complete — Backend interview code removed from 5 services)*
+*Last updated: 2026-03-09 (46-03 complete — Frontend interview pages/components deleted, shared-video hooks renamed to call terminology)*
