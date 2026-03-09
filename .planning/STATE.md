@@ -100,6 +100,7 @@ Recent decisions affecting current work:
 - [44-12]: Call toasts poll at 10s intervals for time-sensitive events
 - [44-12]: normalizePayload handles both snake_case and camelCase event payloads
 - [45-01]: Unified webhook with fallback pattern — tries interview egress first, falls back to call recording
+- [45-02]: CallPipelineService has own OpenAI method rather than reusing interview-specific SummaryService
 - [45-03]: Separate playback URL paths for video-service (in-call) vs call-service (portal detail page)
 - [45-03]: Call recording webhook gateway route added for future direct call webhook endpoint
 
@@ -111,7 +112,7 @@ None.
 
 - [RESOLVED]: Polymorphic entity query performance — composite index on (entity_type, entity_id) created in 42-01
 - [Research]: Host header behind nginx ingress needs staging verification (Phase 43)
-- [Research]: Summary storage for non-interview calls needs resolution (Phase 45)
+- [RESOLVED]: Summary storage for non-interview calls — JSONB in call_summaries table, resolved in 45-02
 
 ## Session Continuity
 
