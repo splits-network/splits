@@ -117,6 +117,38 @@ export class CallRecordingRepository {
         return (data || []) as CallParticipantRow[];
     }
 
+    async findReadyRecording(callId: string, recordingId?: string): Promise<string> {
+        if (recordingId) {
+            const { data, error } = await this.supabase
+                .from('call_recordings')
+                .select('blob_url, recording_status')
+                .eq('id', recordingId)
+                .eq('call_id', callId)
+                .maybeSingle();
+
+            if (error) throw error;
+            if (!data || data.recording_status !== 'ready' || !data.blob_url) {
+                throw Object.assign(new Error('Recording is not available'), { statusCode: 400 });
+            }
+            return data.blob_url;
+        }
+
+        const { data, error } = await this.supabase
+            .from('call_recordings')
+            .select('blob_url')
+            .eq('call_id', callId)
+            .eq('recording_status', 'ready')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data?.blob_url) {
+            throw Object.assign(new Error('No ready recording available'), { statusCode: 400 });
+        }
+        return data.blob_url;
+    }
+
     async resolveUserId(clerkUserId: string): Promise<string> {
         const { data, error } = await this.supabase
             .from('users')

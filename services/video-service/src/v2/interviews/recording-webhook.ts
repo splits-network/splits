@@ -1,10 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { WebhookReceiver, EgressStatus } from 'livekit-server-sdk';
 import { RecordingService } from './recording-service';
+import { CallRecordingService } from '../calls/call-recording-service';
 import { IEventPublisher } from '../shared/events';
 
 interface RecordingWebhookConfig {
     recordingService: RecordingService;
+    callRecordingService: CallRecordingService;
     eventPublisher: IEventPublisher;
     livekitApiKey: string;
     livekitApiSecret: string;
@@ -14,7 +16,7 @@ export async function registerRecordingWebhook(
     app: FastifyInstance,
     config: RecordingWebhookConfig,
 ) {
-    const { recordingService, eventPublisher, livekitApiKey, livekitApiSecret } = config;
+    const { recordingService, callRecordingService, eventPublisher, livekitApiKey, livekitApiSecret } = config;
     const webhookReceiver = new WebhookReceiver(livekitApiKey, livekitApiSecret);
 
     // POST /api/v2/interviews/recording/webhook - LiveKit Egress webhook (NO AUTH -- signature verified)
@@ -41,24 +43,46 @@ export async function registerRecordingWebhook(
                 const durationSeconds = Math.round(durationNs / 1_000_000_000);
                 const fileSize = Number(fileResult?.size || 0);
 
-                const interviewId = await recordingService.handleEgressComplete(
-                    egressId,
-                    blobUrl,
-                    durationSeconds,
-                    fileSize,
-                );
+                // Try interview first, fall back to call recording
+                try {
+                    const interviewId = await recordingService.handleEgressComplete(
+                        egressId,
+                        blobUrl,
+                        durationSeconds,
+                        fileSize,
+                    );
 
-                await eventPublisher.publish('interview.recording_ready', {
-                    interview_id: interviewId,
-                    recording_url: blobUrl,
-                    duration_seconds: durationSeconds,
-                    file_size_bytes: fileSize,
-                });
+                    await eventPublisher.publish('interview.recording_ready', {
+                        interview_id: interviewId,
+                        recording_url: blobUrl,
+                        duration_seconds: durationSeconds,
+                        file_size_bytes: fileSize,
+                    });
+                } catch {
+                    // Not an interview recording — try call recording
+                    const { callId } = await callRecordingService.handleEgressComplete(
+                        egressId,
+                        blobUrl,
+                        durationSeconds,
+                        fileSize,
+                    );
+
+                    await eventPublisher.publish('call.recording_ready', {
+                        call_id: callId,
+                        recording_url: blobUrl,
+                        duration_seconds: durationSeconds,
+                        file_size_bytes: fileSize,
+                    });
+                }
             } else if (egressInfo.status === EgressStatus.EGRESS_FAILED) {
-                await recordingService.handleEgressFailed(
-                    egressId,
-                    egressInfo.error || 'Unknown egress failure',
-                );
+                const errorMsg = egressInfo.error || 'Unknown egress failure';
+
+                // Try interview first, fall back to call recording
+                try {
+                    await recordingService.handleEgressFailed(egressId, errorMsg);
+                } catch {
+                    await callRecordingService.handleEgressFailed(egressId, errorMsg);
+                }
             }
 
             return reply.send({ received: true });

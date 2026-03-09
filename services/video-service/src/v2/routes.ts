@@ -7,6 +7,9 @@ import { registerRecordingWebhook } from './interviews/recording-webhook';
 import { RecordingService } from './interviews/recording-service';
 import { InterviewRepository } from './interviews/repository';
 import { TokenService } from './interviews/token-service';
+import { CallRecordingRepository } from './calls/call-repository';
+import { CallRecordingService } from './calls/call-recording-service';
+import { registerCallRecordingRoutes } from './calls/call-recording-routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -36,18 +39,30 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         livekitApiSecret: config.livekitApiSecret,
     });
 
+    const s3Config = {
+        endpoint: config.supabaseS3Endpoint,
+        region: config.supabaseS3Region,
+        accessKey: config.supabaseS3AccessKey,
+        secretKey: config.supabaseS3SecretKey,
+        bucket: config.supabaseS3Bucket,
+    };
+
     const recordingService = new RecordingService(
         repository,
         config.livekitApiKey,
         config.livekitApiSecret,
         config.livekitWsUrl,
-        {
-            endpoint: config.supabaseS3Endpoint,
-            region: config.supabaseS3Region,
-            accessKey: config.supabaseS3AccessKey,
-            secretKey: config.supabaseS3SecretKey,
-            bucket: config.supabaseS3Bucket,
-        },
+        s3Config,
+    );
+
+    // Call recording infrastructure
+    const callRecordingRepository = new CallRecordingRepository(supabase);
+    const callRecordingService = new CallRecordingService(
+        callRecordingRepository,
+        config.livekitApiKey,
+        config.livekitApiSecret,
+        config.livekitWsUrl,
+        s3Config,
     );
 
     await registerRecordingRoutes(app, {
@@ -56,8 +71,17 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         tokenService,
         supabase,
     });
+
+    await registerCallRecordingRoutes(app, {
+        repository: callRecordingRepository,
+        recordingService: callRecordingService,
+        supabase,
+    });
+
+    // Unified webhook handles both interview and call egress events
     await registerRecordingWebhook(app, {
         recordingService,
+        callRecordingService,
         eventPublisher: config.eventPublisher,
         livekitApiKey: config.livekitApiKey,
         livekitApiSecret: config.livekitApiSecret,
