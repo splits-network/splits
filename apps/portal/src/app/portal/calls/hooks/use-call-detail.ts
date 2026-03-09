@@ -44,8 +44,15 @@ export interface CallSummary {
     id: string;
     call_id: string;
     summary: {
-        key_points?: string[];
+        // New pipeline format
+        tldr?: string;
+        content?: string;
+        call_type?: string;
+        prompt_version?: string;
+        model?: string;
         action_items?: string[];
+        // Legacy fields (backward compat)
+        key_points?: string[];
         decisions?: string[];
         follow_ups?: string[];
     };
