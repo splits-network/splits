@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 9 of 12 complete
+Plan: 10 of 12 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 44-08-PLAN.md (Call Detail Page)
+Last activity: 2026-03-09 — Completed 44-09-PLAN.md (Entity Call Tabs)
 
-Progress: [█████████████████░░░] 17/20 plans (85%)
+Progress: [██████████████████░░] 18/20 plans (90%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 17
+- v10.0 plans completed: 18
 
 **By Phase:**
 
@@ -28,7 +28,7 @@ Progress: [█████████████████░░░] 17/20 p
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
-| 44-recruiter-company-calls-portal-integration | 9/12 | 56min | 6.22min |
+| 44-recruiter-company-calls-portal-integration | 10/12 | 61min | 6.10min |
 
 ## Accumulated Context
 
@@ -88,6 +88,9 @@ Recent decisions affecting current work:
 - [44-08]: Shared currentTimestamp state in useCallDetail for recording-transcript sync
 - [44-08]: Two-column 60/40 layout for call detail (main tabs + context panel)
 - [44-08]: Pre-call notes visible to all participants for transparency
+- [44-09]: Entity call tabs use syncToUrl: false to avoid polluting parent page URL
+- [44-09]: Entity-scoped stats via /calls/stats?entity_type=X&entity_id=Y
+- [44-09]: Default limit 10 for entity tabs (secondary content within detail panel)
 
 ### Pending Todos
 
@@ -102,9 +105,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-08-PLAN.md (Call Detail Page)
+Stopped at: Completed 44-09-PLAN.md (Entity Call Tabs)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-08 complete — call detail page with tabbed recording/transcript/summary views)*
+*Last updated: 2026-03-09 (44-09 complete — calls tabs on company and job detail pages with full filtering)*
