@@ -12,9 +12,7 @@ import { DomainEventConsumer } from './domain-consumer';
 import { ServiceRegistry } from './clients';
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
-import { Cron } from 'croner';
 import * as Sentry from '@sentry/node';
-import { sendInterviewReminders } from './jobs/send-interview-reminders';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
 if (process.env.SENTRY_DSN) {
@@ -199,30 +197,6 @@ async function main() {
         },
     });
 
-    // Schedule interview reminders every 5 minutes
-    const { Resend } = await import('resend');
-    const resend = new Resend(resendConfig.apiKey);
-    const reminderJob = new Cron('*/5 * * * *', async () => {
-        try {
-            const result = await sendInterviewReminders(
-                supabaseClient,
-                resend,
-                logger,
-                portalUrl,
-                candidateWebsiteUrl,
-            );
-            if (result.sent > 0 || result.failed > 0) {
-                logger.info(result, 'Interview reminders job completed');
-            }
-        } catch (error) {
-            logger.error(
-                { error: error instanceof Error ? error.message : String(error) },
-                'Interview reminders job failed'
-            );
-        }
-    });
-    logger.info('Interview reminders cron scheduled (every 5 minutes)');
-
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
@@ -232,13 +206,6 @@ async function main() {
             logger.info('Domain event consumer closed');
         } catch (error) {
             logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error closing consumer');
-        }
-
-        try {
-            reminderJob.stop();
-            logger.info('Interview reminders cron stopped');
-        } catch (error) {
-            logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error stopping reminder cron');
         }
 
         try {
@@ -264,7 +231,6 @@ async function main() {
             await Sentry.flush(2000);
         }
         await consumer.close();
-        reminderJob.stop();
         outboxWorker.stop();
         await v2EventPublisher.close();
         process.exit(1);

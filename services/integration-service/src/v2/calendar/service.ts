@@ -164,7 +164,7 @@ export class CalendarService {
     }
 
     /**
-     * Create a calendar event (interview scheduling).
+     * Create a calendar event (call scheduling).
      * Returns a normalized CalendarEvent.
      */
     async createEvent(

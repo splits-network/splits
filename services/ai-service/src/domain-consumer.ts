@@ -4,7 +4,6 @@ import { DomainEvent } from '@splits-network/shared-types';
 import { AIReviewServiceV2 } from './v2/reviews/service';
 import { ResumeExtractionService } from './v2/resume-extraction/service';
 import { ResumeExtractionRepository } from './v2/resume-extraction/repository';
-import { TranscriptionPipelineService } from './v2/transcription/service';
 import { CallPipelineService } from './v2/call-pipeline/service';
 import { EventPublisher, IEventPublisher } from './v2/shared/events';
 
@@ -14,6 +13,7 @@ import { EventPublisher, IEventPublisher } from './v2/shared/events';
  * Listens for:
  * - application.stage_changed / application.created → triggers AI reviews
  * - document.processed → triggers structured resume metadata extraction
+ * - call.recording_ready → triggers generalized call AI pipeline
  */
 export class DomainEventConsumer {
     private connection: Connection | null = null;
@@ -26,7 +26,6 @@ export class DomainEventConsumer {
         private aiReviewService: AIReviewServiceV2,
         private resumeExtractionService: ResumeExtractionService,
         private resumeExtractionRepository: ResumeExtractionRepository,
-        private transcriptionPipeline: TranscriptionPipelineService,
         private callPipeline: CallPipelineService,
         private eventPublisher: IEventPublisher | undefined,
         private logger: Logger
@@ -51,15 +50,13 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'application.created');
             // Listen for processed documents to extract structured resume metadata
             await this.channel.bindQueue(this.queue, this.exchange, 'document.processed');
-            // Listen for completed interview recordings to trigger transcription pipeline
-            await this.channel.bindQueue(this.queue, this.exchange, 'interview.recording_ready');
             // Listen for completed call recordings to trigger generalized call AI pipeline
             await this.channel.bindQueue(this.queue, this.exchange, 'call.recording_ready');
 
             this.logger.info({
                 exchange: this.exchange,
                 queue: this.queue,
-                bindings: ['application.stage_changed', 'application.created', 'document.processed', 'interview.recording_ready', 'call.recording_ready']
+                bindings: ['application.stage_changed', 'application.created', 'document.processed', 'call.recording_ready']
             }, 'AI service connected to RabbitMQ and bound to events');
 
             await this.startConsuming();
@@ -142,9 +139,6 @@ export class DomainEventConsumer {
                 break;
             case 'document.processed':
                 await this.handleDocumentProcessed(event);
-                break;
-            case 'interview.recording_ready':
-                await this.handleRecordingReady(event);
                 break;
             case 'call.recording_ready':
                 await this.handleCallRecordingReady(event);
@@ -352,27 +346,6 @@ export class DomainEventConsumer {
             // Don't rethrow - structured extraction failure should not nack the message
             // The document was processed successfully, we just couldn't extract structured data
         }
-    }
-
-    /**
-     * Handle interview.recording_ready events
-     * Trigger transcription pipeline for completed recordings
-     */
-    private async handleRecordingReady(event: DomainEvent): Promise<void> {
-        const { interview_id, recording_url, duration_seconds, file_size_bytes } = event.payload;
-
-        this.logger.info(
-            { interview_id, duration_seconds, file_size_bytes },
-            'Recording ready, starting transcription pipeline'
-        );
-
-        // Pipeline handles its own errors (sets status to 'failed') — don't rethrow
-        await this.transcriptionPipeline.processRecording({
-            interview_id,
-            recording_url,
-            duration_seconds,
-            file_size_bytes,
-        });
     }
 
     /**

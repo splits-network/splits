@@ -26,7 +26,7 @@ describe('DomainEventConsumer (unit)', () => {
             createReview: vi.fn(),
         } as unknown as AIReviewServiceV2;
         const logger = createLoggerMock();
-        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, logger);
+        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, {} as any, {} as any, {} as any, undefined, logger);
 
         const event = {
             event_type: 'application.created',
@@ -50,7 +50,7 @@ describe('DomainEventConsumer (unit)', () => {
             createReview: vi.fn().mockResolvedValue({ id: 'review-1' }),
         } as unknown as AIReviewServiceV2;
         const logger = createLoggerMock();
-        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, logger);
+        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, {} as any, {} as any, {} as any, undefined, logger);
 
         const event = {
             event_type: 'application.created',
@@ -78,7 +78,7 @@ describe('DomainEventConsumer (unit)', () => {
             createReview: vi.fn(),
         } as unknown as AIReviewServiceV2;
         const logger = createLoggerMock();
-        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, logger);
+        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, {} as any, {} as any, {} as any, undefined, logger);
 
         const event = {
             event_type: 'application.stage_changed',
@@ -103,7 +103,7 @@ describe('DomainEventConsumer (unit)', () => {
             createReview: vi.fn().mockResolvedValue({ id: 'review-2' }),
         } as unknown as AIReviewServiceV2;
         const logger = createLoggerMock();
-        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, logger);
+        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, {} as any, {} as any, {} as any, undefined, logger);
 
         const event = {
             event_type: 'application.stage_changed',

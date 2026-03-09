@@ -20,9 +20,6 @@ import { AIReviewRepository } from "./v2/reviews/repository";
 import { AIReviewServiceV2 } from "./v2/reviews/service";
 import { ResumeExtractionService } from "./v2/resume-extraction/service";
 import { ResumeExtractionRepository } from "./v2/resume-extraction/repository";
-import { TranscriptionRepository } from "./v2/transcription/repository";
-import { SummaryService } from "./v2/transcription/summarizer";
-import { TranscriptionPipelineService } from "./v2/transcription/service";
 import { CallPipelineRepository } from "./v2/call-pipeline/repository";
 import { CallPipelineService } from "./v2/call-pipeline/service";
 import * as Sentry from "@sentry/node";
@@ -174,16 +171,6 @@ async function main() {
     const resumeExtractionService = new ResumeExtractionService(logger);
     const resumeExtractionRepository = new ResumeExtractionRepository(supabaseClient, logger);
 
-    // Initialize transcription pipeline
-    const transcriptionRepository = new TranscriptionRepository(supabaseClient, logger);
-    const summaryService = new SummaryService(logger);
-    const transcriptionPipeline = new TranscriptionPipelineService(
-        transcriptionRepository,
-        summaryService,
-        outboxPublisher || undefined,
-        logger,
-    );
-
     // Initialize generalized call pipeline
     const callPipelineRepository = new CallPipelineRepository(supabaseClient, logger);
     const callPipelineService = new CallPipelineService(
@@ -192,7 +179,7 @@ async function main() {
         logger,
     );
 
-    // Initialize domain event consumer (listens for application + document + recording events)
+    // Initialize domain event consumer (listens for application + document + call recording events)
     let domainConsumer: DomainEventConsumer | null = null;
     try {
         domainConsumer = new DomainEventConsumer(
@@ -200,7 +187,6 @@ async function main() {
             aiReviewService,
             resumeExtractionService,
             resumeExtractionRepository,
-            transcriptionPipeline,
             callPipelineService,
             outboxPublisher || undefined,
             logger,

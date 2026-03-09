@@ -26,7 +26,6 @@ import { RecruiterCodesEventConsumer } from './consumers/recruiter-codes/consume
 import { DocumentsEventConsumer } from './consumers/documents/consumer';
 import { GamificationEventConsumer } from './consumers/gamification/consumer';
 import { MatchesEventConsumer } from './consumers/matches/consumer';
-import { InterviewsEventConsumer } from './consumers/interviews/consumer';
 import { CallsEventConsumer } from './consumers/calls/consumer';
 import { CallInAppNotificationService } from './services/calls/in-app-service';
 import { ContactLookupHelper } from './helpers/contact-lookup';
@@ -66,7 +65,6 @@ export class DomainEventConsumer {
     private documentsConsumer: DocumentsEventConsumer;
     private gamificationConsumer: GamificationEventConsumer;
     private matchesConsumer: MatchesEventConsumer;
-    private interviewsConsumer: InterviewsEventConsumer;
     private callsConsumer: CallsEventConsumer;
 
     constructor(
@@ -226,14 +224,6 @@ export class DomainEventConsumer {
         );
         this.matchesConsumer = new MatchesEventConsumer(
             notificationService.matches,
-            logger,
-            portalUrl,
-            candidateWebsiteUrl,
-            contactLookup,
-            dataLookup
-        );
-        this.interviewsConsumer = new InterviewsEventConsumer(
-            notificationService.interviews,
             logger,
             portalUrl,
             candidateWebsiteUrl,
@@ -424,13 +414,6 @@ export class DomainEventConsumer {
             // Match invite events
             await this.channel.bindQueue(this.queue, this.exchange, 'match.invited');
             await this.channel.bindQueue(this.queue, this.exchange, 'match.invite_denied');
-
-            // Interview lifecycle events
-            await this.channel.bindQueue(this.queue, this.exchange, 'interview.created');
-            await this.channel.bindQueue(this.queue, this.exchange, 'interview.cancelled');
-            await this.channel.bindQueue(this.queue, this.exchange, 'interview.rescheduled');
-            await this.channel.bindQueue(this.queue, this.exchange, 'interview.reschedule_requested');
-            await this.channel.bindQueue(this.queue, this.exchange, 'interview.reschedule_accepted');
 
             // Call lifecycle events
             await this.channel.bindQueue(this.queue, this.exchange, 'call.created');
@@ -819,23 +802,6 @@ export class DomainEventConsumer {
                 break;
             case 'match.invite_denied':
                 await this.matchesConsumer.handleMatchInviteDenied(event);
-                break;
-
-            // Interviews domain
-            case 'interview.created':
-                await this.interviewsConsumer.handleInterviewCreated(event);
-                break;
-            case 'interview.cancelled':
-                await this.interviewsConsumer.handleInterviewCancelled(event);
-                break;
-            case 'interview.rescheduled':
-                await this.interviewsConsumer.handleInterviewRescheduled(event);
-                break;
-            case 'interview.reschedule_requested':
-                await this.interviewsConsumer.handleRescheduleRequested(event);
-                break;
-            case 'interview.reschedule_accepted':
-                await this.interviewsConsumer.handleRescheduleAccepted(event);
                 break;
 
             // Calls domain

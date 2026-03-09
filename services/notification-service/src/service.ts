@@ -27,7 +27,6 @@ import { RecruiterCodesEmailService } from './services/recruiter-codes/service';
 import { DocumentsEmailService } from './services/documents/service';
 import { EngagementEmailService } from './services/engagement/service';
 import { MatchesEmailService } from './services/matches/service';
-import { InterviewsEmailService } from './services/interviews/service';
 import { CallsEmailService } from './services/calls/service';
 
 export class NotificationService {
@@ -52,7 +51,6 @@ export class NotificationService {
     public readonly documents: DocumentsEmailService;
     public readonly engagement: EngagementEmailService;
     public readonly matches: MatchesEmailService;
-    public readonly interviews: InterviewsEmailService;
     public readonly calls: CallsEmailService;
 
     constructor(
@@ -84,7 +82,6 @@ export class NotificationService {
         this.documents = new DocumentsEmailService(resend, repository, fromEmail, logger);
         this.engagement = new EngagementEmailService(resend, repository, fromEmail, logger);
         this.matches = new MatchesEmailService(resend, repository, fromEmail, logger);
-        this.interviews = new InterviewsEmailService(resend, repository, fromEmail, logger);
         this.calls = new CallsEmailService(resend, repository, fromEmail, logger);
     }
 
