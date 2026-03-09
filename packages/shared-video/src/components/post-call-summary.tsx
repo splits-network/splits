@@ -52,7 +52,7 @@ export function PostCallSummary({ duration, isCandidate, onClose }: PostCallSumm
                         <i className="fa-duotone fa-regular fa-video text-4xl text-base-content/40" />
                     </div>
 
-                    <h2 className="card-title text-2xl font-black">Interview Ended</h2>
+                    <h2 className="card-title text-2xl font-black">Call Ended</h2>
 
                     <div className="mt-4">
                         <p className="text-sm text-base-content/60">Call duration</p>

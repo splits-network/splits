@@ -10,7 +10,7 @@ export function adaptCallToCallContext(call: CallDetail): CallContext {
 
     return {
         id: call.id,
-        interview_type: call.call_type,
+        call_type: call.call_type,
         title: call.title,
         scheduled_at: call.scheduled_at ?? new Date().toISOString(),
         status: call.status,

@@ -3,7 +3,7 @@ export type CallState = 'prep' | 'lobby' | 'connecting' | 'in-call' | 'post-call
 export interface CallContext {
     id: string;
     status: string;
-    interview_type: string;
+    call_type: string;
     title: string | null;
     scheduled_at: string;
     scheduled_duration_minutes: number;

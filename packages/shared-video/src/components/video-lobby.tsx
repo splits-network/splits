@@ -23,7 +23,7 @@ interface VideoLobbyProps {
         name: string;
         avatarUrl?: string;
     };
-    /** Whether this interview has recording enabled */
+    /** Whether this call has recording enabled */
     recordingEnabled?: boolean;
     /** Called when participant gives recording consent */
     onRecordingConsent?: () => void;
@@ -40,7 +40,7 @@ function formatScheduledTime(isoString: string): string {
     });
 }
 
-function formatInterviewType(type: string): string {
+function formatCallType(type: string): string {
     return type.replace(/_/g, ' ').toUpperCase();
 }
 
@@ -105,7 +105,7 @@ export function VideoLobby({
         });
     };
 
-    const { job, participants, interview_type, scheduled_at } = callContext;
+    const { job, participants, call_type, scheduled_at } = callContext;
 
     // Find the other participant (not the local user) for display
     const otherParticipant = participants.find(
@@ -174,12 +174,12 @@ export function VideoLobby({
                 )}
             </div>
 
-            {/* Right panel: Interview info + controls */}
+            {/* Right panel: Call info + controls */}
             <div className="bg-base-100 flex flex-col justify-center p-6 lg:p-8">
                 <div className="max-w-md mx-auto w-full space-y-6">
-                    {/* Interview type kicker */}
+                    {/* Call type kicker */}
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-                        {formatInterviewType(interview_type)}
+                        {formatCallType(call_type)}
                     </p>
 
                     {/* Job title */}
@@ -273,7 +273,7 @@ export function VideoLobby({
                         onClick={handleJoin}
                         disabled={recordingEnabled && !consentGiven}
                     >
-                        Join Interview
+                        Join Call
                     </button>
                 </div>
             </div>

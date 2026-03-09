@@ -57,7 +57,7 @@ function ParticipantEntry({
                 <span
                     className={`badge badge-sm ${isCandidate ? 'badge-accent' : 'badge-neutral'}`}
                 >
-                    {role === 'candidate' ? 'Candidate' : 'Interviewer'}
+                    {role === 'candidate' ? 'Candidate' : 'Host'}
                 </span>
             </div>
             <div className="flex-shrink-0">
@@ -130,7 +130,7 @@ export function ParticipantSidebar({
     const localParticipantInfo = callContext.participants.find(
         (p) => p.name === localName,
     );
-    const localRole = localParticipantInfo?.role ?? 'interviewer';
+    const localRole = localParticipantInfo?.role ?? 'host';
     const isLocalCandidate = localRole === 'candidate';
 
     return (
@@ -170,7 +170,7 @@ export function ParticipantSidebar({
                             (p) => p.id === participant.identity,
                         );
                         const name = info?.name ?? 'Participant';
-                        const role = info?.role ?? 'interviewer';
+                        const role = info?.role ?? 'host';
                         const isCandidate = role === 'candidate';
                         const micPub = participant.getTrackPublication(
                             Track.Source.Microphone,
