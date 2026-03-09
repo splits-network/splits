@@ -174,7 +174,7 @@ Plans:
   3. 24h and 1h reminder emails are sent for scheduled calls (not just the 5-min reminder)
 **Plans:** 1 plan
 Plans:
-- [ ] 47-01-PLAN.md — Fix sessionStorage key mismatch, recording event name mismatch, add call.reminder binding and handler
+- [x] 47-01-PLAN.md — Fix sessionStorage key mismatch, recording event name mismatch, add call.reminder binding and handler
 
 ### Phase 48: Interview Migration Cleanup
 **Goal**: No dead interview-era code or references remain in the codebase after the Phase 46 migration
@@ -185,6 +185,11 @@ Plans:
   1. No interview-specific auth-skip rules remain in api-gateway
   2. No dead interview hooks remain in shared-video package
   3. S3/Azure Blob Storage bucket references use `call-recordings` instead of `interview-recordings`
+**Plans:** 3 plans
+Plans:
+- [ ] 48-01-PLAN.md — Remove dead interview auth-skip rules from gateway, fix LiveKit webhook URL
+- [ ] 48-02-PLAN.md — Delete dead shared-video exports, rename interview_type to call_type end-to-end
+- [ ] 48-03-PLAN.md — Rename interview-recordings bucket references to call-recordings across services and infra
 
 ## Progress
 
@@ -219,4 +224,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48
 | 45. AI Pipeline Generalization | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 47. Critical Bug Fixes & Event Wiring | v10.0 | 1/1 | Complete | 2026-03-09 |
-| 48. Interview Migration Cleanup | v10.0 | 0/0 | Not Started | — |
+| 48. Interview Migration Cleanup | v10.0 | 0/3 | Not Started | — |
