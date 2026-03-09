@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 45 in progress
+**Current focus:** v10.0 Video Platform & Recruiting Calls — Phase 46 next
 
 ## Current Position
 
-Phase: 45 (4 of 5 in v10.0) — AI Pipeline Generalization
-Plan: 4 of 4 complete
-Status: Phase complete
-Last activity: 2026-03-09 — Completed 45-04-PLAN.md (Call Detail Pipeline UI)
+Phase: 46 (5 of 5 in v10.0) — Interview Migration
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-03-09 — Completed 46-01-PLAN.md (Drop Interview Database Objects)
 
-Progress: [████████████████████████] 24/24 plans (100%)
+Progress: [█████████████████████████░░░] 25/28 plans (89%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 24
+- v10.0 plans completed: 25
 
 **By Phase:**
 
@@ -30,6 +30,7 @@ Progress: [███████████████████████
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
 | 44-recruiter-company-calls-portal-integration | 12/12 | 78min | 6.50min |
 | 45-ai-pipeline-generalization | 4/4 | 11min | 2.75min |
+| 46-interview-migration | 1/4 | 2min | 2.00min |
 
 ## Accumulated Context
 
@@ -106,6 +107,8 @@ Recent decisions affecting current work:
 - [45-04]: Detect new vs legacy summary format via presence of tldr or content fields
 - [45-04]: Pipeline status hides when complete — summary content is sufficient indicator
 - [45-04]: 15-second polling interval for auto-refresh during processing
+- [46-01]: Kept interview_feedback note type -- general-purpose, not tied to interview schema
+- [46-01]: No interview_id column on applications -- FK was interviews.application_id, dropped with table
 
 ### Pending Todos
 
@@ -120,9 +123,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 45-04-PLAN.md (Call Detail Pipeline UI) — Phase 45 complete
+Stopped at: Completed 46-01-PLAN.md (Drop Interview Database Objects)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (45-04 complete — Phase 45 AI Pipeline Generalization complete)*
+*Last updated: 2026-03-09 (46-01 complete — Interview schema dropped)*
