@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 8 of 12 complete
+Plan: 9 of 12 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 44-10-PLAN.md (In-Call Side Panel)
+Last activity: 2026-03-09 — Completed 44-08-PLAN.md (Call Detail Page)
 
-Progress: [████████████████░░░░] 16/20 plans (80%)
+Progress: [█████████████████░░░] 17/20 plans (85%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 16
+- v10.0 plans completed: 17
 
 **By Phase:**
 
@@ -28,7 +28,7 @@ Progress: [████████████████░░░░] 16/20 p
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
-| 44-recruiter-company-calls-portal-integration | 8/12 | 37min | 4.63min |
+| 44-recruiter-company-calls-portal-integration | 9/12 | 56min | 6.22min |
 
 ## Accumulated Context
 
@@ -85,6 +85,9 @@ Recent decisions affecting current work:
 - [44-10]: Guest detection via accessToken presence (null = guest, Chat tab only)
 - [44-10]: Panel preference stored per callId in localStorage
 - [44-10]: Chat uses call:{callId} WebSocket channel for real-time messaging
+- [44-08]: Shared currentTimestamp state in useCallDetail for recording-transcript sync
+- [44-08]: Two-column 60/40 layout for call detail (main tabs + context panel)
+- [44-08]: Pre-call notes visible to all participants for transparency
 
 ### Pending Todos
 
@@ -99,9 +102,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-10-PLAN.md (In-Call Side Panel)
+Stopped at: Completed 44-08-PLAN.md (Call Detail Page)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-10 complete — in-call side panel with Context/Chat/History tabs)*
+*Last updated: 2026-03-09 (44-08 complete — call detail page with tabbed recording/transcript/summary views)*
