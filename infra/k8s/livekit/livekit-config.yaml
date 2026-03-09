@@ -24,5 +24,5 @@ data:
             $(LIVEKIT_API_KEY): $(LIVEKIT_API_SECRET)
         webhook:
             urls:
-                - http://video-service:3019/api/v2/interviews/recording/webhook
+                - http://video-service:3019/api/v2/calls/recording/webhook
             api_key: $(LIVEKIT_API_KEY)
