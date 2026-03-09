@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 44 (3 of 5 in v10.0) — Recruiter-Company Calls & Portal Integration
-Plan: 1 of 12 complete
+Plan: 2 of 12 complete
 Status: In progress
-Last activity: 2026-03-09 — Completed 44-01-PLAN.md (Call Scheduling & Tags Schema)
+Last activity: 2026-03-09 — Completed 44-04-PLAN.md (Call Scheduler & Lifecycle Automation)
 
-Progress: [█████████░░░░░░░░░░░] 9/20 plans (45%)
+Progress: [██████████░░░░░░░░░░] 10/20 plans (50%)
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 9
+- v10.0 plans completed: 10
 
 **By Phase:**
 
@@ -28,7 +28,7 @@ Progress: [█████████░░░░░░░░░░░] 9/20 pl
 |-------|-------|-------|----------|
 | 42-call-data-model-service-layer | 4/4 | 11min | 2.75min |
 | 43-video-app-infrastructure | 4/4 | 13min | 3.25min |
-| 44-recruiter-company-calls-portal-integration | 1/12 | 2min | 2min |
+| 44-recruiter-company-calls-portal-integration | 2/12 | 4min | 2min |
 
 ## Accumulated Context
 
@@ -65,6 +65,9 @@ Recent decisions affecting current work:
 - [44-01]: call_status is Postgres ENUM (ALTER TYPE ADD VALUE), not CHECK constraint
 - [44-01]: cancelled_by is UUID REFERENCES users(id), matching created_by column type
 - [44-01]: Call tags use lookup table + junction table pattern with participant-based RLS
+- [44-04]: Scheduler repository in separate file to keep main repository under 200 lines
+- [44-04]: Reminder windows use ranges (23h-25h) to tolerate 1-min interval drift
+- [44-04]: 5-min reminders publish separate call.starting_soon event for in-app toast handling
 
 ### Pending Todos
 
@@ -79,9 +82,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 44-01-PLAN.md (Call Scheduling & Tags Schema)
+Stopped at: Completed 44-04-PLAN.md (Call Scheduler & Lifecycle Automation)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (44-01 complete — call_status enum expansion, scheduling columns, call_tags tables)*
+*Last updated: 2026-03-09 (44-04 complete — call scheduler with reminders, timeouts, no-show detection)*
