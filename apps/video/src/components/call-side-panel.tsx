@@ -1,37 +1,55 @@
 'use client';
 
-import { useState } from 'react';
 import type { CallDetail } from '@/lib/types';
+import { useCallContext } from '@/hooks/use-call-context';
+import { usePanelPreference } from '@/hooks/use-panel-preference';
+import { ContextTab } from './context-tab';
+import { ChatTab } from './chat-tab';
+import { HistoryTab } from './history-tab';
 
 interface CallSidePanelProps {
     call: CallDetail;
+    accessToken?: string | null;
 }
 
-function formatRole(role: string): string {
-    return role.charAt(0).toUpperCase() + role.slice(1);
-}
+type PanelTab = 'context' | 'chat' | 'history';
+
+const TABS: { id: PanelTab; label: string; icon: string; guestOnly?: boolean }[] = [
+    { id: 'context', label: 'Context', icon: 'fa-circle-info' },
+    { id: 'chat', label: 'Chat', icon: 'fa-messages' },
+    { id: 'history', label: 'History', icon: 'fa-clock-rotate-left' },
+];
 
 /**
- * Collapsible side panel showing entity context during a call.
- * Starts collapsed. Slides in from the right on desktop, full-width overlay on mobile.
+ * Collapsible side panel with Context, Chat, and History tabs.
+ * Open by default on desktop, closed on mobile.
+ * Magic-link guests see Chat tab only.
  */
-export function CallSidePanel({ call }: CallSidePanelProps) {
-    const [open, setOpen] = useState(false);
+export function CallSidePanel({ call, accessToken = null }: CallSidePanelProps) {
+    const { entities, history, isLoading, isGuest } = useCallContext(call, accessToken);
+    const { activeTab, isOpen, setActiveTab, toggleOpen, setOpen } = usePanelPreference(
+        call.id,
+        typeof window !== 'undefined' && window.innerWidth >= 1024,
+    );
+
+    // Guest users only see Chat tab
+    const visibleTabs = isGuest ? TABS.filter((t) => t.id === 'chat') : TABS;
+    const currentTab = isGuest ? 'chat' : activeTab;
 
     return (
         <>
-            {/* Toggle button -- always visible at edge */}
+            {/* Toggle button -- always visible at panel edge */}
             <button
                 type="button"
                 className="fixed right-0 top-1/2 -translate-y-1/2 z-40 btn btn-sm btn-neutral h-12"
-                onClick={() => setOpen((v) => !v)}
-                aria-label={open ? 'Close side panel' : 'Open side panel'}
+                onClick={toggleOpen}
+                aria-label={isOpen ? 'Close side panel' : 'Open side panel'}
             >
-                <i className={`fa-duotone fa-regular fa-sidebar ${open ? 'text-primary' : ''}`} />
+                <i className={`fa-duotone fa-regular ${isOpen ? 'fa-chevron-right' : 'fa-sidebar'}`} />
             </button>
 
             {/* Backdrop on mobile */}
-            {open && (
+            {isOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-black/30 lg:hidden"
                     onClick={() => setOpen(false)}
@@ -41,13 +59,15 @@ export function CallSidePanel({ call }: CallSidePanelProps) {
             {/* Panel */}
             <div
                 className={`fixed top-0 right-0 z-40 h-full bg-base-100 border-l border-base-300 shadow-lg
-                    w-full sm:w-80 transition-transform duration-200
-                    ${open ? 'translate-x-0' : 'translate-x-full'}`}
+                    w-full sm:w-[350px] transition-transform duration-200
+                    ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >
                 <div className="flex flex-col h-full">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-base-300">
-                        <h2 className="font-bold text-base-content">Call Details</h2>
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-base-300">
+                        <h2 className="font-bold text-base-content">
+                            {call.title || 'Video Call'}
+                        </h2>
                         <button
                             type="button"
                             className="btn btn-ghost btn-sm btn-square"
@@ -58,94 +78,52 @@ export function CallSidePanel({ call }: CallSidePanelProps) {
                         </button>
                     </div>
 
-                    {/* Content */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                        {/* Call info */}
-                        <div className="space-y-2">
-                            <h3 className="text-lg font-bold text-base-content">
-                                {call.title || 'Video Call'}
-                            </h3>
-                            <p className="text-sm text-base-content/60 uppercase tracking-wider">
-                                {call.call_type.replace(/_/g, ' ')}
-                            </p>
-                        </div>
-
-                        {/* Entity links */}
-                        {call.entity_links.length > 0 && (
-                            <div className="space-y-2">
-                                <p className="text-sm font-semibold text-base-content/50 uppercase tracking-wider">
-                                    Related
-                                </p>
-                                <div className="space-y-2">
-                                    {call.entity_links.map((link) => (
-                                        <div
-                                            key={`${link.entity_type}-${link.entity_id}`}
-                                            className="flex items-center gap-2 bg-base-200 p-3"
-                                        >
-                                            <i className={`fa-duotone fa-regular ${getEntityIcon(link.entity_type)} text-base-content/60`} />
-                                            <div>
-                                                <p className="text-sm font-medium text-base-content capitalize">
-                                                    {link.entity_type}
-                                                </p>
-                                                <p className="text-sm text-base-content/50 font-mono">
-                                                    {link.entity_id.slice(0, 8)}...
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Participants */}
-                        <div className="space-y-2">
-                            <p className="text-sm font-semibold text-base-content/50 uppercase tracking-wider">
-                                Participants
-                            </p>
-                            <div className="space-y-2">
-                                {call.participants.map((p) => (
-                                    <div key={p.id} className="flex items-center gap-3 p-2">
-                                        <div className="avatar placeholder">
-                                            <div className="w-9 h-9 bg-secondary text-secondary-content flex items-center justify-center">
-                                                {p.user.avatar_url ? (
-                                                    <img
-                                                        src={p.user.avatar_url}
-                                                        alt={`${p.user.first_name} ${p.user.last_name}`}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <span className="text-sm font-bold">
-                                                        {p.user.first_name.charAt(0)}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-base-content">
-                                                {p.user.first_name} {p.user.last_name}
-                                            </p>
-                                            <p className="text-sm text-base-content/50">
-                                                {formatRole(p.role)}
-                                            </p>
-                                        </div>
-                                    </div>
+                    {/* DaisyUI Tabs */}
+                    {visibleTabs.length > 1 && (
+                        <div className="border-b border-base-300" role="tablist">
+                            <div className="flex">
+                                {visibleTabs.map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        type="button"
+                                        role="tab"
+                                        className={`flex-1 py-2.5 text-sm font-medium transition-colors
+                                            ${currentTab === tab.id
+                                                ? 'text-primary border-b-2 border-primary'
+                                                : 'text-base-content/50 hover:text-base-content'
+                                            }`}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        aria-selected={currentTab === tab.id}
+                                    >
+                                        <i className={`fa-duotone fa-regular ${tab.icon} mr-1.5`} />
+                                        {tab.label}
+                                    </button>
                                 ))}
                             </div>
                         </div>
+                    )}
+
+                    {/* Tab content */}
+                    <div className="flex-1 overflow-y-auto p-4">
+                        {currentTab === 'context' && (
+                            <ContextTab
+                                call={call}
+                                entities={entities}
+                                isLoading={isLoading}
+                            />
+                        )}
+                        {currentTab === 'chat' && (
+                            <ChatTab call={call} />
+                        )}
+                        {currentTab === 'history' && (
+                            <HistoryTab
+                                history={history}
+                                isLoading={isLoading}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
         </>
     );
-}
-
-function getEntityIcon(entityType: string): string {
-    switch (entityType) {
-        case 'job': return 'fa-briefcase';
-        case 'company': return 'fa-building';
-        case 'firm': return 'fa-buildings';
-        case 'application': return 'fa-file-user';
-        case 'candidate': return 'fa-user';
-        default: return 'fa-link';
-    }
 }
