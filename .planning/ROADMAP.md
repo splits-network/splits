@@ -203,6 +203,10 @@ Plans:
   2. Instant call token redirect uses the correct field name — users reach the video app with a valid token
   3. Join Call button on call detail page works — users are redirected to the video app
   4. Recording tab fetches a signed URL from the playback-url endpoint — media player loads the recording
+**Plans:** 2 plans
+Plans:
+- [ ] 49-01-PLAN.md — Add participants to event payloads, fix token field name
+- [ ] 49-02-PLAN.md — Create join page, fix recording playback signed URL
 
 ### Phase 50: Post-Migration Text & Metadata Cleanup
 **Goal**: No interview-era text or metadata mismatches remain in user-facing UI or service internals
@@ -248,5 +252,5 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 ->
 | 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 47. Critical Bug Fixes & Event Wiring | v10.0 | 1/1 | Complete | 2026-03-09 |
 | 48. Interview Migration Cleanup | v10.0 | 3/3 | Complete | 2026-03-09 |
-| 49. Critical Flow Fixes | v10.0 | 0/? | Not Started | — |
+| 49. Critical Flow Fixes | v10.0 | 0/2 | Not Started | — |
 | 50. Post-Migration Text & Metadata Cleanup | v10.0 | 0/? | Not Started | — |
