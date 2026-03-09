@@ -22,15 +22,15 @@ Requirements for generalizing video from interview-only to platform-wide recruit
 
 ### Recruiter-Company Calls
 
-- [ ] **CALL-01**: Recruiter can initiate a video call with a company contact, linked to a job, company, or general relationship
-- [ ] **CALL-02**: Both participants are authenticated portal users with equal peer-to-peer roles (no host/candidate hierarchy)
-- [ ] **CALL-03**: User can schedule a recruiter-company call with Google Calendar integration, selecting entity to link
-- [ ] **CALL-04**: Participants receive email confirmation, reminders (24h, 1h), and cancellation/reschedule notifications for recruiting calls
+- [x] **CALL-01**: Recruiter can initiate a video call with a company contact, linked to a job, company, or general relationship
+- [x] **CALL-02**: Both participants are authenticated portal users with equal peer-to-peer roles (no host/candidate hierarchy)
+- [x] **CALL-03**: User can schedule a recruiter-company call with Google Calendar integration, selecting entity to link
+- [x] **CALL-04**: Participants receive email confirmation, reminders (24h, 1h), and cancellation/reschedule notifications for recruiting calls
 
 ### Call History
 
-- [ ] **HIST-01**: Portal has a "Calls" section listing all calls (interviews and recruiting calls) with filtering by type, date, entity
-- [ ] **HIST-02**: Call detail view shows recording, transcript, AI summary, and in-call notes — all from the call record
+- [x] **HIST-01**: Portal has a "Calls" section listing all calls (interviews and recruiting calls) with filtering by type, date, entity
+- [x] **HIST-02**: Call detail view shows recording, transcript, AI summary, and in-call notes — all from the call record
 
 ### AI Pipeline
 
@@ -40,7 +40,7 @@ Requirements for generalizing video from interview-only to platform-wide recruit
 
 ### In-Call Experience
 
-- [ ] **EXP-01**: In-call context panel shows entity data alongside notes (job details, candidate profiles, company info) based on what the call is linked to
+- [x] **EXP-01**: In-call context panel shows entity data alongside notes (job details, candidate profiles, company info) based on what the call is linked to
 
 ### Migration
 
@@ -97,13 +97,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | APP-02 | Phase 43 | Complete |
 | APP-03 | Phase 43 | Complete |
 | APP-04 | Phase 43 | Complete |
-| CALL-01 | Phase 44 | Pending |
-| CALL-02 | Phase 44 | Pending |
-| CALL-03 | Phase 44 | Pending |
-| CALL-04 | Phase 44 | Pending |
-| HIST-01 | Phase 44 | Pending |
-| HIST-02 | Phase 44 | Pending |
-| EXP-01 | Phase 44 | Pending |
+| CALL-01 | Phase 44 | Complete |
+| CALL-02 | Phase 44 | Complete |
+| CALL-03 | Phase 44 | Complete |
+| CALL-04 | Phase 44 | Complete |
+| HIST-01 | Phase 44 | Complete |
+| HIST-02 | Phase 44 | Complete |
+| EXP-01 | Phase 44 | Complete |
 | AI-04 | Phase 45 | Pending |
 | AI-05 | Phase 45 | Pending |
 | AI-06 | Phase 45 | Pending |
