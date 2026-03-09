@@ -9,6 +9,8 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
+import { CallScheduler } from "./v2/scheduler";
+import { SchedulerRepository } from "./v2/scheduler-repository";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -135,6 +137,14 @@ async function main() {
         livekitWsUrl,
     });
 
+    // ── Scheduler ─────────────────────────────────────────────────────
+    const schedulerRepo = new SchedulerRepository(supabaseClient);
+    const scheduler = new CallScheduler(schedulerRepo, outboxPublisher, logger);
+    scheduler.start();
+    logger.info('Call scheduler started - reminders, timeouts, no-shows');
+
+    app.addHook('onClose', () => scheduler.stop());
+
     app.get("/health", async (request, reply) => {
         return reply.status(200).send({
             status: "healthy",
@@ -146,6 +156,7 @@ async function main() {
 
     process.on("SIGTERM", async () => {
         logger.info("SIGTERM received, shutting down gracefully");
+        scheduler.stop();
         outboxWorker.stop();
         await eventPublisher.close();
         await app.close();
