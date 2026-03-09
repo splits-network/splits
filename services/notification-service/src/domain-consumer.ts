@@ -27,6 +27,7 @@ import { DocumentsEventConsumer } from './consumers/documents/consumer';
 import { GamificationEventConsumer } from './consumers/gamification/consumer';
 import { MatchesEventConsumer } from './consumers/matches/consumer';
 import { InterviewsEventConsumer } from './consumers/interviews/consumer';
+import { CallsEventConsumer } from './consumers/calls/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -65,6 +66,7 @@ export class DomainEventConsumer {
     private gamificationConsumer: GamificationEventConsumer;
     private matchesConsumer: MatchesEventConsumer;
     private interviewsConsumer: InterviewsEventConsumer;
+    private callsConsumer: CallsEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -234,6 +236,13 @@ export class DomainEventConsumer {
             logger,
             portalUrl,
             candidateWebsiteUrl,
+            contactLookup,
+            dataLookup
+        );
+        this.callsConsumer = new CallsEventConsumer(
+            notificationService.calls,
+            logger,
+            portalUrl,
             contactLookup,
             dataLookup
         );
@@ -419,6 +428,12 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'interview.rescheduled');
             await this.channel.bindQueue(this.queue, this.exchange, 'interview.reschedule_requested');
             await this.channel.bindQueue(this.queue, this.exchange, 'interview.reschedule_accepted');
+
+            // Call lifecycle events
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.cancelled');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.rescheduled');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.recording.ready');
 
             // Gamification events
             await this.channel.bindQueue(this.queue, this.exchange, 'badge.awarded');
@@ -815,6 +830,20 @@ export class DomainEventConsumer {
                 break;
             case 'interview.reschedule_accepted':
                 await this.interviewsConsumer.handleRescheduleAccepted(event);
+                break;
+
+            // Calls domain
+            case 'call.created':
+                await this.callsConsumer.handleCallCreated(event);
+                break;
+            case 'call.cancelled':
+                await this.callsConsumer.handleCallCancelled(event);
+                break;
+            case 'call.rescheduled':
+                await this.callsConsumer.handleCallRescheduled(event);
+                break;
+            case 'call.recording.ready':
+                await this.callsConsumer.handleRecordingReady(event);
                 break;
 
             // Gamification domain

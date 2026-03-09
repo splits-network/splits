@@ -4,6 +4,8 @@ import {
     CallEntityLink,
     CallAccessToken,
     CallNoteWithUser,
+    CallTag,
+    CallTagLink,
 } from './types';
 
 export class ArtifactRepository {
@@ -81,6 +83,56 @@ export class ArtifactRepository {
             .eq('id', tokenId);
 
         if (error) throw error;
+    }
+
+    // ── Notes ─────────────────────────────────────────────────────────────
+
+    // ── Tags ────────────────────────────────────────────────────────────
+
+    async addCallTags(callId: string, tagSlugs: string[]): Promise<CallTagLink[]> {
+        if (tagSlugs.length === 0) return [];
+
+        const rows = tagSlugs.map((slug) => ({ call_id: callId, tag_slug: slug }));
+        const { data, error } = await this.supabase
+            .from('call_tag_links')
+            .upsert(rows, { onConflict: 'call_id,tag_slug', ignoreDuplicates: true })
+            .select();
+
+        if (error) throw error;
+        return (data || []) as CallTagLink[];
+    }
+
+    async removeCallTags(callId: string, tagSlugs: string[]): Promise<void> {
+        if (tagSlugs.length === 0) return;
+
+        const { error } = await this.supabase
+            .from('call_tag_links')
+            .delete()
+            .eq('call_id', callId)
+            .in('tag_slug', tagSlugs);
+
+        if (error) throw error;
+    }
+
+    async getCallTags(callId: string): Promise<CallTagLink[]> {
+        const { data, error } = await this.supabase
+            .from('call_tag_links')
+            .select('*')
+            .eq('call_id', callId)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        return (data || []) as CallTagLink[];
+    }
+
+    async listTags(): Promise<CallTag[]> {
+        const { data, error } = await this.supabase
+            .from('call_tags')
+            .select('*')
+            .order('label', { ascending: true });
+
+        if (error) throw error;
+        return (data || []) as CallTag[];
     }
 
     // ── Notes ─────────────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { CryptoService } from '@splits-network/shared-config/src/crypto';
 import { registerProviderRoutes } from './providers/routes';
 import { registerConnectionRoutes } from './connections/routes';
 import { registerCalendarRoutes } from './calendar/routes';
+import { registerCallCalendarRoutes } from './calendar/call-calendar-routes';
 import { registerEmailRoutes } from './email/routes';
 import { registerLinkedInRoutes } from './linkedin/routes';
 import { registerATSRoutes } from './ats/routes';
@@ -33,6 +34,14 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
     });
 
     await registerCalendarRoutes(app, {
+        supabaseUrl: config.supabaseUrl,
+        supabaseKey: config.supabaseKey,
+        eventPublisher: config.eventPublisher,
+        logger: config.logger,
+        crypto: config.crypto,
+    });
+
+    await registerCallCalendarRoutes(app, {
         supabaseUrl: config.supabaseUrl,
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,

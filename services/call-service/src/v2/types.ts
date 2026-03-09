@@ -211,3 +211,11 @@ export interface CallListFilters {
     needs_follow_up?: boolean;
     search?: string;
 }
+
+export interface CallStats {
+    upcoming_count: number;
+    this_week_count: number;
+    this_month_count: number;
+    avg_duration_minutes: number;
+    needs_follow_up_count: number;
+}

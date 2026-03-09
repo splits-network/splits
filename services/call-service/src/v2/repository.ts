@@ -5,7 +5,6 @@ import {
     CallStatus,
     CallEntityLink,
     CallParticipant,
-    CallParticipantWithUser,
     CallWithParticipants,
     CallDetail,
     CreateCallInput,
@@ -14,16 +13,20 @@ import {
 } from './types';
 import { ParticipantRepository } from './participant-repository';
 import { ArtifactRepository } from './artifact-repository';
+import { StatsRepository } from './stats-repository';
+import { resolveCallIdFilters } from './list-helpers';
 
 export class CallRepository {
     private supabase: SupabaseClient;
     readonly participants: ParticipantRepository;
     readonly artifacts: ArtifactRepository;
+    readonly stats: StatsRepository;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey);
         this.participants = new ParticipantRepository(this.supabase);
         this.artifacts = new ArtifactRepository(this.supabase);
+        this.stats = new StatsRepository(this.supabase);
     }
 
     getSupabase(): SupabaseClient {
@@ -42,20 +45,10 @@ export class CallRepository {
         const sortBy = params.sort_by || 'created_at';
         const sortOrder = params.sort_order || 'desc';
 
-        // If filtering by entity, get call IDs first
-        let entityCallIds: string[] | null = null;
-        if (filters.entity_type && filters.entity_id) {
-            const { data: links, error: linkError } = await this.supabase
-                .from('call_entity_links')
-                .select('call_id')
-                .eq('entity_type', filters.entity_type)
-                .eq('entity_id', filters.entity_id);
-
-            if (linkError) throw linkError;
-            entityCallIds = (links || []).map((l: { call_id: string }) => l.call_id);
-            if (entityCallIds.length === 0) {
-                return { data: [], pagination: buildPaginationResponse(page, limit, 0) };
-            }
+        // Pre-filter call IDs from related tables (entity, tag, search)
+        const filteredCallIds = await resolveCallIdFilters(this.supabase, filters);
+        if (filteredCallIds !== null && filteredCallIds.length === 0) {
+            return { data: [], pagination: buildPaginationResponse(page, limit, 0) };
         }
 
         // Count query
@@ -68,7 +61,8 @@ export class CallRepository {
         if (filters.status) countQuery = countQuery.eq('status', filters.status);
         if (filters.date_from) countQuery = countQuery.gte('scheduled_at', filters.date_from);
         if (filters.date_to) countQuery = countQuery.lte('scheduled_at', filters.date_to);
-        if (entityCallIds) countQuery = countQuery.in('id', entityCallIds);
+        if (filters.needs_follow_up) countQuery = countQuery.eq('needs_follow_up', true);
+        if (filteredCallIds) countQuery = countQuery.in('id', filteredCallIds);
 
         const { count, error: countError } = await countQuery;
         if (countError) throw countError;
@@ -86,7 +80,8 @@ export class CallRepository {
         if (filters.status) dataQuery = dataQuery.eq('status', filters.status);
         if (filters.date_from) dataQuery = dataQuery.gte('scheduled_at', filters.date_from);
         if (filters.date_to) dataQuery = dataQuery.lte('scheduled_at', filters.date_to);
-        if (entityCallIds) dataQuery = dataQuery.in('id', entityCallIds);
+        if (filters.needs_follow_up) dataQuery = dataQuery.eq('needs_follow_up', true);
+        if (filteredCallIds) dataQuery = dataQuery.in('id', filteredCallIds);
 
         const { data: calls, error: dataError } = await dataQuery;
         if (dataError) throw dataError;
@@ -173,6 +168,9 @@ export class CallRepository {
                 call_type: input.call_type,
                 title: input.title || null,
                 scheduled_at: input.scheduled_at || null,
+                agenda: input.agenda || null,
+                duration_minutes_planned: input.duration_minutes_planned || null,
+                pre_call_notes: input.pre_call_notes || null,
                 created_by: createdBy,
             })
             .select()
@@ -215,6 +213,29 @@ export class CallRepository {
 
         const { data, error } = await this.supabase
             .from('calls').update(updates).eq('id', id).select().single();
+
+        if (error) throw error;
+        return data as Call;
+    }
+
+    async cancelCall(
+        id: string,
+        cancelledBy: string,
+        cancelReason?: string,
+    ): Promise<Call> {
+        const updates: Record<string, unknown> = {
+            status: 'cancelled',
+            cancelled_by: cancelledBy,
+            cancel_reason: cancelReason || null,
+            updated_at: new Date().toISOString(),
+        };
+
+        const { data, error } = await this.supabase
+            .from('calls')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
 
         if (error) throw error;
         return data as Call;
