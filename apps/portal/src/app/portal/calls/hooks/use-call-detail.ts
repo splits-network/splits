@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type {
@@ -145,12 +145,46 @@ export function useCallDetail(callId: string) {
         fetchCall();
     }, [fetchCall]);
 
+    // Detect pipeline in progress for auto-refresh
+    const isPipelineProcessing = (() => {
+        if (!call) return false;
+        const hasReadyRecording = call.recordings?.some(
+            (r) => r.recording_status === "ready"
+        );
+        if (!hasReadyRecording) {
+            // Still processing if recordings exist but none ready
+            return (call.recordings?.length ?? 0) > 0;
+        }
+        // Recording ready but summary not complete
+        return (
+            !call.summary || call.summary.summary_status !== "ready"
+        );
+    })();
+
+    // Auto-refresh while pipeline is processing (15s interval)
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    useEffect(() => {
+        if (isPipelineProcessing) {
+            intervalRef.current = setInterval(() => {
+                fetchCall();
+            }, 15_000);
+        }
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isPipelineProcessing]);
+
     return {
         call,
         relatedCalls,
         isLoading,
         error,
         refetch: fetchCall,
+        isPipelineProcessing,
         currentTimestamp,
         setCurrentTimestamp,
     };

@@ -6,6 +6,7 @@ import { CallDetailHeader } from "./components/call-detail-header";
 import { RecordingTab } from "./components/recording-tab";
 import { TranscriptTab } from "./components/transcript-tab";
 import { SummaryTab } from "./components/summary-tab";
+import { PipelineStatus } from "./components/pipeline-status";
 import { CallContextPanel } from "./components/call-context-panel";
 import { CallNotesSection } from "./components/call-notes-section";
 import { CallParticipantsSection } from "./components/call-participants-section";
@@ -26,6 +27,7 @@ export function CallDetailClient({ callId }: { callId: string }) {
         isLoading,
         error,
         refetch,
+        isPipelineProcessing,
         currentTimestamp,
         setCurrentTimestamp,
     } = useCallDetail(callId);
@@ -70,6 +72,17 @@ export function CallDetailClient({ callId }: { callId: string }) {
             <div className="flex flex-col lg:flex-row">
                 {/* Main Content — left column */}
                 <div className="flex-1 min-w-0 p-6">
+                    {/* Pipeline Status */}
+                    {isPipelineProcessing && (
+                        <div className="mb-6">
+                            <PipelineStatus
+                                recordings={call.recordings}
+                                transcript={call.transcript}
+                                summary={call.summary}
+                            />
+                        </div>
+                    )}
+
                     {/* Tabs */}
                     <div
                         role="tablist"
