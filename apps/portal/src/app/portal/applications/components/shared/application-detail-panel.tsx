@@ -13,11 +13,10 @@ import ResumeTab from "./resume-tab";
 import { ApplicationDocumentsTab } from "./application-documents-tab";
 import AIReviewPanel from "@/components/basel/applications/ai-review-panel";
 import { ApplicationNotesTab } from "./application-notes-tab";
-import { ApplicationInterviewsTab } from "./application-interviews-tab";
 import ApplicationTimeline from "./application-timeline";
 import type { Application } from "../../types";
 
-type TabKey = "overview" | "candidate" | "job" | "resume" | "documents" | "ai_review" | "notes" | "interviews" | "timeline";
+type TabKey = "overview" | "candidate" | "job" | "resume" | "documents" | "ai_review" | "notes" | "timeline";
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "overview", label: "Overview", icon: "fa-clipboard" },
@@ -27,7 +26,6 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "documents", label: "Documents", icon: "fa-file" },
     { key: "ai_review", label: "AI Analysis", icon: "fa-brain" },
     { key: "notes", label: "Notes", icon: "fa-comments" },
-    { key: "interviews", label: "Interviews", icon: "fa-video" },
     { key: "timeline", label: "Timeline", icon: "fa-timeline" },
 ];
 
@@ -88,7 +86,6 @@ export function ApplicationDetailPanel({
                 {activeTab === "documents" && <ApplicationDocumentsTab application={application} />}
                 {activeTab === "ai_review" && <AIReviewPanel applicationId={application.id} />}
                 {activeTab === "notes" && <ApplicationNotesTab applicationId={application.id} />}
-                {activeTab === "interviews" && <ApplicationInterviewsTab applicationId={application.id} />}
                 {activeTab === "timeline" && (
                     <ApplicationTimeline auditLogs={auditLogs} currentStage={application.stage || "draft"} />
                 )}

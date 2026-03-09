@@ -21,7 +21,6 @@ import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-c
 import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import RequestToRepresentModal from "../modals/request-to-represent-modal";
 import VerificationModal from "../modals/verification-modal";
-import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
 import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -35,7 +34,6 @@ export interface CandidateActionsToolbarProps {
         viewDetails?: boolean;
         message?: boolean;
         sendJobOpportunity?: boolean;
-        scheduleInterview?: boolean;
         sendEmail?: boolean;
         verify?: boolean;
         endRepresentation?: boolean;
@@ -77,7 +75,6 @@ export default function CandidateActionsToolbar({
     const [showSubmitWizard, setShowSubmitWizard] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
-    const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
     const [showRTRModal, setShowRTRModal] = useState(false);
 
@@ -156,8 +153,6 @@ export default function CandidateActionsToolbar({
         message: showActions.message !== false,
         sendJobOpportunity:
             showActions.sendJobOpportunity !== false && canSendJobOpportunity,
-        scheduleInterview:
-            showActions.scheduleInterview !== false && (isRecruiter || isCompanyUser || isAdmin),
         sendEmail:
             showActions.sendEmail !== false && (isRecruiter || isCompanyUser || isAdmin),
         verify: showActions.verify !== false && canVerifyCandidate,
@@ -232,17 +227,6 @@ export default function CandidateActionsToolbar({
                     candidateEmail={candidate.email || ""}
                 />
             )}
-            {showScheduleModal && (
-                <ScheduleInterviewModal
-                    candidateName={candidate.full_name || "Unknown"}
-                    candidateEmail={candidate.email || undefined}
-                    onClose={() => setShowScheduleModal(false)}
-                    onSuccess={() => {
-                        setShowScheduleModal(false);
-                        refresh();
-                    }}
-                />
-            )}
             {showEmailModal && (
                 <ComposeEmailModal
                     toEmail={candidate.email || undefined}
@@ -268,15 +252,6 @@ export default function CandidateActionsToolbar({
                 label: "Send Job Opportunity",
                 variant: "btn-primary",
                 onClick: () => setShowSubmitWizard(true),
-            });
-        }
-        if (actions.scheduleInterview) {
-            speedDialActions.push({
-                key: "schedule-interview",
-                icon: "fa-duotone fa-regular fa-calendar-plus",
-                label: "Schedule Interview",
-                variant: "btn-info",
-                onClick: () => setShowScheduleModal(true),
             });
         }
         if (actions.sendEmail) {
@@ -369,19 +344,6 @@ export default function CandidateActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-paper-plane" />
                         <span className="hidden md:inline">Send Job</span>
-                    </button>
-                )}
-
-                {/* Schedule Interview */}
-                {actions.scheduleInterview && (
-                    <button
-                        onClick={() => setShowScheduleModal(true)}
-                        className={`btn ${getSizeClass()} btn-info gap-2`}
-                        style={{ borderRadius: 0 }}
-                        title="Schedule Interview"
-                    >
-                        <i className="fa-duotone fa-regular fa-calendar-plus" />
-                        <span className="hidden md:inline">Schedule</span>
                     </button>
                 )}
 

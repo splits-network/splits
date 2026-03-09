@@ -14,8 +14,6 @@ import { ApplicationDetailsEmbed } from "@/app/portal/applications/components/sh
 import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
 import { DetailLoader as PlacementDetailLoader } from "@/app/portal/placements/components/shared/placement-detail";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
-import { InterviewCountdown } from "@/components/basel/notifications/interview-countdown";
-
 interface DetailPanelProps {
     id: string;
     onClose: () => void;
@@ -342,16 +340,6 @@ function NotificationFallback({
                     </p>
                 </div>
             </div>
-
-            {isInterview && notification.payload?.scheduled_at && (
-                <div className="p-4 bg-base-200 border border-base-300">
-                    <InterviewCountdown
-                        scheduledAt={notification.payload.scheduled_at}
-                        interviewId={notification.payload.interview_id}
-                        actionUrl={notification.action_url}
-                    />
-                </div>
-            )}
 
             <div className="flex flex-wrap gap-2">
                 {isInterview ? (

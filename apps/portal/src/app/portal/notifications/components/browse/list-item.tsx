@@ -3,8 +3,6 @@ import {
     formatNotificationTime,
     getNotificationIcon,
 } from "@/lib/notifications";
-import { InterviewCountdown } from "@/components/basel/notifications/interview-countdown";
-
 interface NotificationListItemProps {
     item: InAppNotification;
     isSelected: boolean;
@@ -69,17 +67,6 @@ export default function NotificationListItem({
                         <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1"></div>
                     )}
                 </div>
-
-                {/* Interview countdown */}
-                {isInterview && item.payload?.scheduled_at && (
-                    <div className="mt-1">
-                        <InterviewCountdown
-                            scheduledAt={item.payload.scheduled_at}
-                            interviewId={item.payload.interview_id}
-                            actionUrl={item.action_url}
-                        />
-                    </div>
-                )}
 
                 <div className="flex items-center gap-2 mt-1">
                     <span className="text-sm text-base-content/50">

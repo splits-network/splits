@@ -6,17 +6,11 @@
  * Interview events get additional info card, join button, and action buttons.
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
 import {
     useCalendar,
     isInterviewEvent,
     parseInterviewSummary,
 } from "./calendar-context";
-import RescheduleInterviewModal from "@/components/basel/scheduling/reschedule-interview-modal";
-import CancelInterviewDialog from "@/components/basel/scheduling/cancel-interview-dialog";
-import type { ScheduledInterview } from "@/app/portal/applications/hooks/use-scheduled-interview";
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 
@@ -93,146 +87,6 @@ function getResponseStatusBadge(status: string) {
     }
 }
 
-/**
- * Check if the event is within the joinable window:
- * 10 minutes before start OR currently in progress.
- */
-function isJoinWindowActive(startDT?: string, endDT?: string): boolean {
-    if (!startDT) return false;
-    const now = Date.now();
-    const start = new Date(startDT).getTime();
-    const end = endDT ? new Date(endDT).getTime() : start + 3600000;
-    const tenMinBefore = start - 10 * 60 * 1000;
-    return now >= tenMinBefore && now <= end;
-}
-
-/* ─── Interview Detail Section ─────────────────────────────────────── */
-
-function InterviewDetailSection({
-    eventId,
-    candidateName,
-    jobTitle,
-    joinable,
-}: {
-    eventId: string;
-    candidateName: string;
-    jobTitle: string;
-    joinable: boolean;
-}) {
-    const { getToken } = useAuth();
-    const { selectedConnection, refresh } = useCalendar();
-    const getTokenRef = useRef(getToken);
-    getTokenRef.current = getToken;
-    const [interviewData, setInterviewData] = useState<ScheduledInterview | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [showReschedule, setShowReschedule] = useState(false);
-    const [showCancel, setShowCancel] = useState(false);
-
-    const fetchInterview = useCallback(async () => {
-        try {
-            const token = await getTokenRef.current();
-            if (!token) return;
-            const client = createAuthenticatedClient(token);
-            const res = (await client.get("/interviews", {
-                params: { calendar_event_id: eventId, limit: 1 },
-            })) as { data: any[] };
-            const interviews = res.data ?? [];
-            if (interviews.length > 0) {
-                setInterviewData(interviews[0]);
-            }
-        } catch {
-            // Interview lookup failed -- non-critical
-        } finally {
-            setLoading(false);
-        }
-    }, [eventId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    useEffect(() => {
-        fetchInterview();
-    }, [fetchInterview]);
-
-    const handleJoin = () => {
-        if (interviewData?.id) {
-            window.open(`/portal/interviews/${interviewData.id}`, "_blank");
-        }
-    };
-
-    const handleSuccess = () => {
-        fetchInterview();
-        refresh();
-    };
-
-    if (loading) {
-        return (
-            <div className="flex items-center gap-2 py-2">
-                <span className="loading loading-spinner loading-sm" />
-                <span className="text-sm text-base-content/50">
-                    Loading interview details...
-                </span>
-            </div>
-        );
-    }
-
-    if (!interviewData) return null;
-
-    return (
-        <div className="space-y-3">
-            {joinable && (
-                <button
-                    onClick={handleJoin}
-                    className="btn btn-accent w-full"
-                >
-                    <i className="fa-duotone fa-regular fa-video" />
-                    Join Interview
-                </button>
-            )}
-
-            <div className="flex gap-2">
-                <button
-                    onClick={() => setShowReschedule(true)}
-                    className="btn btn-outline btn-sm flex-1"
-                >
-                    <i className="fa-duotone fa-regular fa-calendar-pen" />
-                    Reschedule
-                </button>
-                <button
-                    onClick={() => setShowCancel(true)}
-                    className="btn btn-outline btn-error btn-sm flex-1"
-                >
-                    <i className="fa-duotone fa-regular fa-xmark" />
-                    Cancel
-                </button>
-            </div>
-
-            {showReschedule && (
-                <RescheduleInterviewModal
-                    interviewId={interviewData.id}
-                    currentScheduledAt={interviewData.scheduled_at}
-                    currentDuration={interviewData.scheduled_duration_minutes || 30}
-                    candidateName={candidateName}
-                    jobTitle={jobTitle}
-                    calendarEventId={eventId}
-                    calendarConnectionId={selectedConnection?.id}
-                    onClose={() => setShowReschedule(false)}
-                    onSuccess={handleSuccess}
-                />
-            )}
-
-            {showCancel && (
-                <CancelInterviewDialog
-                    interviewId={interviewData.id}
-                    candidateName={candidateName}
-                    scheduledAt={interviewData.scheduled_at}
-                    calendarEventId={eventId}
-                    calendarConnectionId={selectedConnection?.id}
-                    onClose={() => setShowCancel(false)}
-                    onSuccess={handleSuccess}
-                />
-            )}
-        </div>
-    );
-}
-
 /* ─── Component ─────────────────────────────────────────────────────── */
 
 export default function CalendarEventDetail() {
@@ -271,13 +125,6 @@ export default function CalendarEventDetail() {
     const interviewInfo = interview
         ? parseInterviewSummary(selectedEvent.summary ?? "")
         : null;
-    const joinable = interview
-        ? isJoinWindowActive(
-              selectedEvent.start.dateTime,
-              selectedEvent.end.dateTime,
-          )
-        : false;
-
     return (
         <div className="flex flex-col h-full">
             {/* Header */}
@@ -351,16 +198,6 @@ export default function CalendarEventDetail() {
                             </div>
                         </div>
                     </div>
-                )}
-
-                {/* Interview action buttons (join, reschedule, cancel) */}
-                {interview && interviewInfo && (
-                    <InterviewDetailSection
-                        eventId={selectedEvent.id}
-                        candidateName={interviewInfo.candidateName}
-                        jobTitle={interviewInfo.jobTitle}
-                        joinable={joinable}
-                    />
                 )}
 
                 {/* Date & Time */}
