@@ -91,7 +91,7 @@ export class CallService {
                 entity_type: l.entity_type,
                 entity_id: l.entity_id,
             })),
-            participant_count: createdParticipants.length,
+            participants: enrichedParticipants.map(p => ({ user_id: p.user_id, role: p.role })),
         });
 
         return {

@@ -96,12 +96,15 @@ export class CallLifecycleService {
 
         const updated = await this.repository.cancelCall(id, resolvedUserId, reason);
 
+        const participants = await this.repository.participants.getCallParticipants(id);
+
         await this.eventPublisher.publish('call.cancelled', {
             call_id: id,
             call_type: call.call_type,
             cancelled_by: resolvedUserId,
             cancel_reason: reason || null,
             cancelled_at: new Date().toISOString(),
+            participants: participants.map(p => ({ user_id: p.user_id, role: p.role })),
         });
 
         return updated;
@@ -149,12 +152,15 @@ export class CallLifecycleService {
             scheduled_at: newScheduledAt,
         });
 
+        const participants = await this.repository.participants.getCallParticipants(id);
+
         await this.eventPublisher.publish('call.rescheduled', {
             call_id: id,
             call_type: call.call_type,
             old_scheduled_at: oldScheduledAt,
             new_scheduled_at: newScheduledAt,
             rescheduled_by: resolvedUserId,
+            participants: participants.map(p => ({ user_id: p.user_id, role: p.role })),
         });
 
         return updated;

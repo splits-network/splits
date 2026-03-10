@@ -1,10 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { WebhookReceiver, EgressStatus } from 'livekit-server-sdk';
 import { CallRecordingService } from './call-recording-service';
+import { CallRecordingRepository } from './call-repository';
 import { IEventPublisher } from '../shared/events';
 
 interface CallRecordingWebhookConfig {
     callRecordingService: CallRecordingService;
+    callRecordingRepository: CallRecordingRepository;
     eventPublisher: IEventPublisher;
     livekitApiKey: string;
     livekitApiSecret: string;
@@ -14,7 +16,7 @@ export async function registerCallRecordingWebhook(
     app: FastifyInstance,
     config: CallRecordingWebhookConfig,
 ) {
-    const { callRecordingService, eventPublisher, livekitApiKey, livekitApiSecret } = config;
+    const { callRecordingService, callRecordingRepository, eventPublisher, livekitApiKey, livekitApiSecret } = config;
     const webhookReceiver = new WebhookReceiver(livekitApiKey, livekitApiSecret);
 
     // POST /api/v2/calls/recording/webhook - LiveKit Egress webhook (NO AUTH -- signature verified)
@@ -48,11 +50,14 @@ export async function registerCallRecordingWebhook(
                     fileSize,
                 );
 
+                const participants = await callRecordingRepository.getCallParticipants(callId);
+
                 await eventPublisher.publish('call.recording_ready', {
                     call_id: callId,
                     recording_url: blobUrl,
                     duration_seconds: durationSeconds,
                     file_size_bytes: fileSize,
+                    participants: participants.map(p => ({ user_id: p.user_id, role: p.role })),
                 });
             } else if (egressInfo.status === EgressStatus.EGRESS_FAILED) {
                 const errorMsg = egressInfo.error || 'Unknown egress failure';

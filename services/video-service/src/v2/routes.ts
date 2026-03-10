@@ -50,6 +50,7 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
 
     await registerCallRecordingWebhook(app, {
         callRecordingService,
+        callRecordingRepository,
         eventPublisher: config.eventPublisher,
         livekitApiKey: config.livekitApiKey,
         livekitApiSecret: config.livekitApiSecret,
