@@ -39,12 +39,12 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: livekit-secrets
-                                key: api-key
+                                key: livekit-api-key
                       - name: LIVEKIT_API_SECRET
                         valueFrom:
                             secretKeyRef:
                                 name: livekit-secrets
-                                key: api-secret
+                                key: livekit-api-secret
                   volumeMounts:
                       - name: livekit-config
                         mountPath: /etc/livekit
