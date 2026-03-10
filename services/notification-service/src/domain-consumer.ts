@@ -230,12 +230,13 @@ export class DomainEventConsumer {
             contactLookup,
             dataLookup
         );
-        const callInAppService = new CallInAppNotificationService(repository, logger, portalUrl);
+        const callInAppService = new CallInAppNotificationService(repository, logger, portalUrl, candidateWebsiteUrl);
         this.callsConsumer = new CallsEventConsumer(
             notificationService.calls,
             callInAppService,
             logger,
             portalUrl,
+            candidateWebsiteUrl,
             contactLookup,
             dataLookup,
         );

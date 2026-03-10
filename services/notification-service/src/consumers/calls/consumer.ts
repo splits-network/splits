@@ -63,9 +63,33 @@ export class CallsEventConsumer {
         private inAppService: CallInAppNotificationService,
         private logger: Logger,
         private portalUrl: string,
+        private candidateWebsiteUrl: string,
         private contactLookup: ContactLookupHelper,
         private dataLookup: DataLookupHelper,
     ) {}
+
+    /** Build a map of userId -> isCandidate for all contacts */
+    private async buildCandidateStatusMap(contacts: ParticipantContact[]): Promise<Map<string, boolean>> {
+        const statusMap = new Map<string, boolean>();
+        for (const contact of contacts) {
+            statusMap.set(contact.userId, await this.dataLookup.isCandidate(contact.userId));
+        }
+        return statusMap;
+    }
+
+    /** Get the join URL for a call participant based on candidate status */
+    private getJoinUrl(callId: string, isCandidate: boolean): string {
+        const baseUrl = isCandidate ? this.candidateWebsiteUrl : this.portalUrl;
+        return `${baseUrl}/portal/calls/${callId}/join`;
+    }
+
+    /** Get the detail URL for a call participant based on candidate status */
+    private getDetailUrl(callId: string, isCandidate: boolean): string {
+        if (isCandidate) {
+            return `${this.candidateWebsiteUrl}/portal/dashboard`;
+        }
+        return `${this.portalUrl}/portal/calls/${callId}`;
+    }
 
     /** Normalize snake_case payload from call-service to camelCase */
     private normalizePayload(raw: any): CallEventPayload {
@@ -190,9 +214,12 @@ export class CallsEventConsumer {
             const newDateTime = payload.newScheduledAt
                 ? formatDateTime(payload.newScheduledAt)
                 : 'TBD';
-            const joinUrl = payload.joinUrl || `${this.portalUrl}/portal/calls/${callId}`;
+            const candidateStatus = await this.buildCandidateStatusMap(contacts);
 
             for (const contact of contacts) {
+                const isCandidate = candidateStatus.get(contact.userId) || false;
+                const joinUrl = payload.joinUrl || this.getDetailUrl(callId, isCandidate);
+
                 await this.emailService.sendRescheduleNotification(contact.email, {
                     title: payload.title || undefined,
                     participantNames: allNames.filter(n => n !== contact.name),
@@ -232,12 +259,15 @@ export class CallsEventConsumer {
             const entityContext = await this.resolveEntityContext(payload.entityLinks);
             const source = this.determineBrand(payload.entityLinks);
             const allNames = contacts.map(c => c.name);
-            const viewRecordingUrl = `${this.portalUrl}/portal/calls/${callId}`;
             const callDate = payload.scheduledAt
                 ? formatDateTime(payload.scheduledAt)
                 : 'Recent call';
+            const candidateStatus = await this.buildCandidateStatusMap(contacts);
 
             for (const contact of contacts) {
+                const isCandidate = candidateStatus.get(contact.userId) || false;
+                const viewRecordingUrl = this.getDetailUrl(callId, isCandidate);
+
                 await this.emailService.sendRecordingReady(contact.email, {
                     title: payload.title || undefined,
                     participantNames: allNames.filter(n => n !== contact.name),
@@ -281,14 +311,18 @@ export class CallsEventConsumer {
                 ? formatDateTime(payload.scheduledAt)
                 : 'Now';
 
+            const candidateStatus = await this.buildCandidateStatusMap(contacts);
+
             // Send email reminder
             for (const contact of contacts) {
+                const isCandidate = candidateStatus.get(contact.userId) || false;
+
                 await this.emailService.sendReminder(contact.email, {
                     title: payload.title || undefined,
                     participantNames: allNames.filter(n => n !== contact.name),
                     dateTime,
                     timeUntil: '5 minutes',
-                    joinUrl: `${this.portalUrl}/portal/calls/${callId}`,
+                    joinUrl: this.getJoinUrl(callId, isCandidate),
                     entityContext: undefined,
                     source: 'portal',
                     userId: contact.userId,
@@ -297,11 +331,14 @@ export class CallsEventConsumer {
 
             // Send in-app toast notification
             for (const contact of contacts) {
+                const isCandidate = candidateStatus.get(contact.userId) || false;
+
                 await this.inAppService.notifyStartingSoon(contact.userId, {
                     callId,
                     title: payload.title,
                     scheduledAt: payload.scheduledAt || new Date().toISOString(),
                     participantNames: allNames.filter(n => n !== contact.name),
+                    isCandidate,
                 });
             }
 
@@ -339,14 +376,17 @@ export class CallsEventConsumer {
                 : 'Upcoming';
 
             const timeUntil = reminderType === '24h' ? '24 hours' : '1 hour';
+            const candidateStatus = await this.buildCandidateStatusMap(contacts);
 
             for (const contact of contacts) {
+                const isCandidate = candidateStatus.get(contact.userId) || false;
+
                 await this.emailService.sendReminder(contact.email, {
                     title: payload.title || undefined,
                     participantNames: allNames.filter(n => n !== contact.name),
                     dateTime,
                     timeUntil,
-                    joinUrl: `${this.portalUrl}/portal/calls/${callId}`,
+                    joinUrl: this.getJoinUrl(callId, isCandidate),
                     entityContext,
                     source,
                     userId: contact.userId,
@@ -393,11 +433,16 @@ export class CallsEventConsumer {
             );
             if (contacts.length === 0) return;
 
+            const candidateStatus = await this.buildCandidateStatusMap(contacts);
+
             for (const contact of contacts) {
+                const isCandidate = candidateStatus.get(contact.userId) || false;
+
                 await this.inAppService.notifyDecline(contact.userId, {
                     callId,
                     title: payload.title,
                     declinedByName,
+                    isCandidate,
                 });
             }
 
@@ -439,11 +484,16 @@ export class CallsEventConsumer {
             );
             if (contacts.length === 0) return;
 
+            const candidateStatus = await this.buildCandidateStatusMap(contacts);
+
             for (const contact of contacts) {
+                const isCandidate = candidateStatus.get(contact.userId) || false;
+
                 await this.inAppService.notifyParticipantJoined(contact.userId, {
                     callId,
                     title: payload.title,
                     participantName,
+                    isCandidate,
                 });
             }
 
@@ -472,10 +522,13 @@ export class CallsEventConsumer {
         const source = this.determineBrand(payload.entityLinks);
         const allNames = contacts.map(c => c.name);
         const dateTime = formatDateTime(payload.scheduledAt!);
-        const joinUrl = payload.joinUrl || `${this.portalUrl}/portal/calls/${callId}`;
-        const portalDetailUrl = `${this.portalUrl}/portal/calls/${callId}`;
+        const candidateStatus = await this.buildCandidateStatusMap(contacts);
 
         for (const contact of contacts) {
+            const isCandidate = candidateStatus.get(contact.userId) || false;
+            const joinUrl = payload.joinUrl || this.getJoinUrl(callId, isCandidate);
+            const portalDetailUrl = this.getDetailUrl(callId, isCandidate);
+
             await this.emailService.sendConfirmation(contact.email, {
                 title: payload.title || undefined,
                 participantNames: allNames.filter(n => n !== contact.name),
@@ -515,9 +568,12 @@ export class CallsEventConsumer {
 
         const entityContext = await this.resolveEntityContext(payload.entityLinks);
         const source = this.determineBrand(payload.entityLinks);
-        const joinUrl = payload.joinUrl || `${this.portalUrl}/portal/calls/${callId}`;
+        const candidateStatus = await this.buildCandidateStatusMap(contacts);
 
         for (const contact of contacts) {
+            const isCandidate = candidateStatus.get(contact.userId) || false;
+            const joinUrl = payload.joinUrl || this.getJoinUrl(callId, isCandidate);
+
             await this.emailService.sendInstantCallNotification(contact.email, {
                 callerName,
                 joinUrl,

@@ -522,6 +522,19 @@ export class DataLookupHelper {
     }
 
     /**
+     * Check if a user is a candidate (has a candidates table entry)
+     */
+    async isCandidate(userId: string): Promise<boolean> {
+        const { data } = await this.supabase
+            .from('candidates')
+            .select('id')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        return !!data;
+    }
+
+    /**
      * Get firm by ID
      */
     async getFirm(firmId: string): Promise<{ id: string; name: string } | null> {
