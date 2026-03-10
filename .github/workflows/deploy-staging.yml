@@ -71,6 +71,7 @@ jobs:
                       }
                     - { name: video-service, path: services/video-service }
                     - { name: call-service, path: services/call-service }
+                    - { name: video, path: apps/video }
                     - { name: portal, path: apps/portal }
                     - { name: candidate, path: apps/candidate }
                     - { name: corporate, path: apps/corporate }
@@ -149,6 +150,16 @@ jobs:
                       --target production \
                       --build-arg NEXT_PUBLIC_ADMIN_GATEWAY_URL=https://admin.api.staging.employment-networks.com \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.ADMIN_CLERK_PUBLISHABLE_KEY }} \
+                      .
+                  elif [ "${{ matrix.service.name }}" = "video" ]; then
+                    docker build \
+                      --platform linux/amd64 \
+                      -f ${{ matrix.service.path }}/Dockerfile \
+                      -t $IMAGE_TAG \
+                      --target production \
+                      --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network \
+                      --build-arg NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.LIVEKIT_PUBLIC_URL }} \
+                      --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
                   else
                     docker build \
@@ -463,7 +474,7 @@ jobs:
 
             - name: Deploy frontend apps
               run: |
-                  FRONTENDS="portal candidate corporate status admin"
+                  FRONTENDS="portal candidate corporate status admin video"
                   for app in $FRONTENDS; do
                     if [ -f "infra/k8s/$app/deployment.yaml" ]; then
                       kubectl annotate deployment "$app" kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
@@ -478,6 +489,7 @@ jobs:
                   kubectl rollout status deployment/corporate --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/status --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/admin --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/video --timeout=180s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy staging ingress
               run: |

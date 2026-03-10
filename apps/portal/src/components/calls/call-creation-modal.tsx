@@ -347,7 +347,7 @@ export function CallCreationModal({
 
             {/* Instant call confirmation dialog */}
             {showConfirm && (
-                <dialog className="modal modal-open" style={{ zIndex: 60 }}>
+                <dialog className="modal modal-open" style={{ zIndex: 1000 }}>
                     <div className="modal-box max-w-sm">
                         <div className="text-center py-4">
                             <div className="w-16 h-16 bg-primary/10 flex items-center justify-center mx-auto mb-4">
