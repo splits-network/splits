@@ -24,7 +24,21 @@ export class CallInAppNotificationService {
         private repository: NotificationRepository,
         private logger: Logger,
         private portalUrl: string,
+        private candidateWebsiteUrl: string,
     ) {}
+
+    /** Get the appropriate base URL based on candidate status */
+    private getBaseUrl(isCandidate: boolean): string {
+        return isCandidate ? this.candidateWebsiteUrl : this.portalUrl;
+    }
+
+    /** Get the action URL for a call (candidates go to dashboard, portal users to call detail) */
+    private getCallActionUrl(callId: string, isCandidate: boolean): string {
+        if (isCandidate) {
+            return `${this.candidateWebsiteUrl}/portal/dashboard`;
+        }
+        return `${this.portalUrl}/portal/calls/${callId}`;
+    }
 
     // ─── Starting Soon (5-min reminder, high priority toast) ─────────────
 
@@ -35,10 +49,12 @@ export class CallInAppNotificationService {
             title?: string;
             scheduledAt: string;
             participantNames: string[];
+            isCandidate?: boolean;
         },
     ): Promise<void> {
         const title = data.title || `Call with ${data.participantNames.join(', ')}`;
-        const joinUrl = `${this.portalUrl}/portal/calls/${data.callId}`;
+        const baseUrl = this.getBaseUrl(data.isCandidate || false);
+        const joinUrl = `${baseUrl}/portal/calls/${data.callId}/join`;
 
         await this.createInAppNotification({
             userId,
@@ -66,9 +82,11 @@ export class CallInAppNotificationService {
             callId: string;
             callerName: string;
             joinUrl?: string;
+            isCandidate?: boolean;
         },
     ): Promise<void> {
-        const joinUrl = data.joinUrl || `${this.portalUrl}/portal/calls/${data.callId}`;
+        const baseUrl = this.getBaseUrl(data.isCandidate || false);
+        const joinUrl = data.joinUrl || `${baseUrl}/portal/calls/${data.callId}/join`;
 
         await this.createInAppNotification({
             userId,
@@ -94,6 +112,7 @@ export class CallInAppNotificationService {
             callId: string;
             title?: string;
             participantName: string;
+            isCandidate?: boolean;
         },
     ): Promise<void> {
         const title = data.title || 'your call';
@@ -110,7 +129,7 @@ export class CallInAppNotificationService {
                 participantName: data.participantName,
                 toastType: 'participant_joined',
             },
-            actionUrl: `${this.portalUrl}/portal/calls/${data.callId}`,
+            actionUrl: this.getCallActionUrl(data.callId, data.isCandidate || false),
             actionLabel: 'View Call',
         });
     }
@@ -123,6 +142,7 @@ export class CallInAppNotificationService {
             callId: string;
             title?: string;
             declinedByName: string;
+            isCandidate?: boolean;
         },
     ): Promise<void> {
         const title = data.title || 'the call';
@@ -139,7 +159,7 @@ export class CallInAppNotificationService {
                 declinedByName: data.declinedByName,
                 toastType: 'decline',
             },
-            actionUrl: `${this.portalUrl}/portal/calls/${data.callId}`,
+            actionUrl: this.getCallActionUrl(data.callId, data.isCandidate || false),
             actionLabel: 'View Call',
         });
     }
@@ -152,6 +172,7 @@ export class CallInAppNotificationService {
             callId: string;
             title?: string;
             callDate: string;
+            isCandidate?: boolean;
         },
     ): Promise<void> {
         const title = data.title || 'your call';
@@ -168,7 +189,7 @@ export class CallInAppNotificationService {
                 callDate: data.callDate,
                 toastType: 'recording_ready',
             },
-            actionUrl: `${this.portalUrl}/portal/calls/${data.callId}`,
+            actionUrl: this.getCallActionUrl(data.callId, data.isCandidate || false),
             actionLabel: 'View Recording',
         });
     }
@@ -209,6 +230,7 @@ export class CallInAppNotificationService {
             callId: string;
             title?: string;
             newDateTime: string;
+            isCandidate?: boolean;
         },
     ): Promise<void> {
         const title = data.title || 'a call';
@@ -224,7 +246,7 @@ export class CallInAppNotificationService {
                 title,
                 newDateTime: data.newDateTime,
             },
-            actionUrl: `${this.portalUrl}/portal/calls/${data.callId}`,
+            actionUrl: this.getCallActionUrl(data.callId, data.isCandidate || false),
             actionLabel: 'View Call',
         });
     }
