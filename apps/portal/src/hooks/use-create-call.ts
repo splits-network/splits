@@ -68,5 +68,46 @@ export function useCreateCall() {
         return res.data;
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    return { createCall, generateToken, isLoading, error };
+    const createCalendarEvents = useCallback(async (params: {
+        callId: string;
+        title: string;
+        scheduledAt: string;
+        durationMinutes: number;
+        agenda?: string;
+        participants: { user_id: string; first_name: string; last_name: string; email: string }[];
+    }) => {
+        try {
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+
+            // Filter out email-only participants — they won't have calendar connections
+            const calendarParticipants = params.participants
+                .filter(p => !p.user_id.startsWith('email:'))
+                .map(p => ({
+                    user_id: p.user_id,
+                    clerk_user_id: p.user_id,
+                    email: p.email,
+                    name: `${p.first_name} ${p.last_name}`.trim(),
+                }));
+
+            if (calendarParticipants.length === 0) return;
+
+            await client.post('/integrations/calendar/calls', {
+                call_id: params.callId,
+                title: params.title || 'Video Call',
+                scheduled_at: params.scheduledAt,
+                duration_minutes: params.durationMinutes,
+                agenda: params.agenda || null,
+                participants: calendarParticipants,
+                join_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://portal.splits.network'}/portal/calls/${params.callId}/join`,
+            });
+        } catch (err) {
+            // Calendar creation is best-effort — never block the call flow
+            console.warn('[Calendar] Failed to create calendar events:', err);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return { createCall, generateToken, createCalendarEvents, isLoading, error };
 }
