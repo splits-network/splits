@@ -26,6 +26,7 @@ import {
 } from "./helpers";
 import ActionsToolbar from "./actions-toolbar";
 import AIReviewPanel from "./ai-review-panel";
+import { ApplicationCallsSection } from "./application-calls-section";
 import ApplicationTimeline from "./application-timeline";
 import DocumentViewerModal from "../modals/document-viewer-modal";
 
@@ -590,6 +591,9 @@ export function ApplicationDetail({
                         />
                     </div>
                 )}
+
+                {/* Calls */}
+                <ApplicationCallsSection applicationId={application.id} />
 
                 {/* Timeline */}
                 {auditLogs.length > 0 && (
