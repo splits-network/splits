@@ -159,7 +159,7 @@ export class CallInAppNotificationService {
         await this.createInAppNotification({
             userId,
             subject: `Recording ready: ${title}`,
-            eventType: 'call.recording.ready',
+            eventType: 'call.recording_ready',
             priority: 'low',
             category: 'calls',
             payload: {

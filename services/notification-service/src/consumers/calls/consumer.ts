@@ -1,7 +1,7 @@
 /**
  * Calls Event Consumer
  * Handles call lifecycle events: created (scheduled + instant),
- * cancelled, rescheduled, and recording.ready.
+ * cancelled, rescheduled, and recording_ready.
  *
  * Sends email notifications to all call participants and creates
  * in-app notifications for each.
@@ -257,7 +257,7 @@ export class CallsEventConsumer {
         } catch (error) {
             this.logger.error(
                 { error, event_payload: event.payload },
-                'Failed to process call.recording.ready'
+                'Failed to process call.recording_ready'
             );
             throw error;
         }

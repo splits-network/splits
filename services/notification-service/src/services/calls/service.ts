@@ -236,7 +236,7 @@ export class CallsEmailService {
             `Recording Ready: ${title}`,
             html,
             {
-                eventType: 'call.recording.ready',
+                eventType: 'call.recording_ready',
                 userId: data.userId,
                 payload: { title, callDate: data.callDate },
                 channel: 'both',
