@@ -10,6 +10,7 @@ import { randomUUID } from 'crypto';
 import { AuthMiddleware } from './auth';
 import { ServiceRegistry } from './clients';
 import { registerV2GatewayRoutes } from './routes/v2/routes';
+import { registerV3GatewayRoutes } from './routes/v3/routes';
 import * as Sentry from '@sentry/node';
 import { EventPublisher } from './events/event-publisher';
 
@@ -535,8 +536,11 @@ async function main() {
         supabaseKey,
     );
 
-    // Register V2 proxy routes only
+    // Register V2 proxy routes (legacy)
     registerV2GatewayRoutes(app, services, { eventPublisher, redis, supabase });
+
+    // Register V3 proxy routes (declarative, no custom handlers)
+    registerV3GatewayRoutes(app, services);
 
     // Health check endpoint (no auth required)
     app.get('/health', async (request, reply) => {

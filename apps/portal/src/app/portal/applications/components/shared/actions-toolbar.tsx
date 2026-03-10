@@ -21,6 +21,8 @@ import BaselAddNoteModal from "@/components/basel/applications/add-note-modal";
 import RequestChangesModal from "../modals/request-changes-modal";
 import PreScreenRequestModal from "../modals/pre-screen-request-modal";
 import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
+import { CallCreationModal } from "@/components/calls/call-creation-modal";
+import type { Participant } from "@/components/calls/participant-picker";
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
@@ -99,6 +101,7 @@ export default function ActionsToolbar({
     const [showRequestChangesModal, setShowRequestChangesModal] =
         useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
+    const [showCallModal, setShowCallModal] = useState(false);
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
@@ -114,6 +117,23 @@ export default function ActionsToolbar({
     const presenceStatus = candidateUserId
         ? presence[candidateUserId]?.status
         : undefined;
+
+    // Pre-fill for Schedule Call modal
+    const callDefaultParticipants: Participant[] = useMemo(() => {
+        if (!candidateUserId) return [];
+        const candidate = application.candidate;
+        const nameParts = (candidate?.full_name || "").split(" ");
+        return [{
+            user_id: candidateUserId,
+            first_name: nameParts[0] || "",
+            last_name: nameParts.slice(1).join(" ") || "",
+            email: candidate?.email || "",
+            avatar_url: null,
+            role: "participant" as const,
+        }];
+    }, [candidateUserId, application.candidate]);
+
+    const callEntityLabel = `${application.candidate?.full_name || "Candidate"} — ${application.job?.title || "Application"}`;
 
     const isFirmJob = !application.job?.company_id && !!application.job?.source_firm_id;
 
@@ -397,6 +417,7 @@ export default function ActionsToolbar({
             showActions.requestChanges !== false &&
             permissions.canRequestChanges,
         sendEmail: isRecruiter || isCompanyUser || isAdmin,
+        scheduleCall: isRecruiter || isCompanyUser || isAdmin,
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -471,6 +492,19 @@ export default function ActionsToolbar({
                     }}
                 />
             )}
+            <CallCreationModal
+                isOpen={showCallModal}
+                onClose={() => setShowCallModal(false)}
+                defaultParticipants={callDefaultParticipants}
+                defaultEntityType="application"
+                defaultEntityId={application.id}
+                defaultEntityLabel={callEntityLabel}
+                defaultMode="scheduled"
+                onSuccess={() => {
+                    setShowCallModal(false);
+                    refresh();
+                }}
+            />
         </ModalPortal>
     );
 
@@ -495,6 +529,15 @@ export default function ActionsToolbar({
                 variant: "btn-warning",
                 disabled: actionLoading,
                 onClick: () => setShowPreScreenModal(true),
+            });
+        }
+        if (actions.scheduleCall) {
+            speedDialActions.push({
+                key: "schedule-call",
+                icon: "fa-duotone fa-regular fa-phone",
+                label: "Schedule Call",
+                variant: "btn-primary btn-outline",
+                onClick: () => setShowCallModal(true),
             });
         }
         if (actions.sendEmail) {
@@ -636,6 +679,15 @@ export default function ActionsToolbar({
                 onClick: () => setShowNoteModal(true),
             });
         }
+        if (actions.scheduleCall) {
+            speedDialActions.push({
+                key: "schedule-call",
+                icon: "fa-duotone fa-regular fa-phone",
+                label: "Schedule Call",
+                variant: "btn-primary btn-outline",
+                onClick: () => setShowCallModal(true),
+            });
+        }
         if (actions.sendEmail) {
             speedDialActions.push({
                 key: "send-email",
@@ -709,6 +761,15 @@ export default function ActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-user-check" />
                         Request Pre-Screen
+                    </button>
+                )}
+                {actions.scheduleCall && (
+                    <button
+                        onClick={() => setShowCallModal(true)}
+                        className={`btn ${sizeClass} btn-primary btn-outline gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-phone" />
+                        Schedule Call
                     </button>
                 )}
                 {actions.sendEmail && (

@@ -9,6 +9,7 @@ import { ApplicationRepository } from './v2/applications/repository';
 import { CandidateRepository } from './v2/candidates/repository';
 import { CandidateSourcerRepository } from './v2/candidate-sourcers/repository';
 import { registerV2Routes } from './v2/routes';
+import { registerV3Routes } from './v3/routes';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -180,10 +181,16 @@ async function main() {
 
     logger.info('✅ RabbitMQ initialization complete - EventPublisher and DomainConsumer ready');
 
-    // Register V2 routes (V2-only architecture)
+    // Register V2 routes (legacy — coexists with V3)
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
+        eventPublisher: outboxPublisher,
+    });
+
+    // Register V3 routes (jobs, job-requirements, job-skills, saved-jobs)
+    registerV3Routes(app, {
+        supabase,
         eventPublisher: outboxPublisher,
     });
 
@@ -211,7 +218,7 @@ async function main() {
             return reply.status(200).send({
                 status: 'healthy',
                 service: 'ats-service',
-                version: 'v2-only',
+                version: 'v2+v3',
                 timestamp: new Date().toISOString(),
                 rabbitmq: {
                     connected: rabbitHealthy,

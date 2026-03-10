@@ -140,6 +140,25 @@ Execute each task in the plan.
 
 </execution_flow>
 
+<domain_skills>
+
+## Domain-Specific Skills & Agents
+
+When a task references a domain skill or agent, **use it**. These provide established patterns:
+
+| Domain | Agent/Skill | What It Provides |
+|--------|-------------|------------------|
+| Backend API | `api` agent (`@.claude/agents/api.md`) | V3 resource patterns: route/service/repository, views, actions, gateway config |
+| Database | `/migration` | Safe migration patterns |
+| Email | `/email:scaffold` | Branded email templates |
+| Events | `/event:scaffold` | RabbitMQ publisher/consumer patterns |
+| Tests | `/test:scaffold` | Vitest patterns with mocked dependencies |
+| UI | `/ui` | DaisyUI 5 component patterns |
+
+**Execution rule:** If a task's `<action>` references a skill (e.g., "follow `/api` patterns" or "reference `@.claude/agents/api.md`"), read that agent/skill file FIRST before implementing. The patterns are specific and must be followed exactly — don't improvise when a standard exists.
+
+</domain_skills>
+
 <deviation_rules>
 **While executing tasks, you WILL discover work not in the plan.** This is normal.
 
