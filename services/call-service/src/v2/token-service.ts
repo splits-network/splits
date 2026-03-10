@@ -13,7 +13,7 @@ export class TokenService {
     async createToken(
         callId: string,
         userClerkId: string,
-    ): Promise<{ token: string; livekit_token: string }> {
+    ): Promise<{ access_token: string; livekit_token: string; call_id: string }> {
         // Resolve Clerk user ID to internal user ID
         const userId = await this.repository.resolveUserId(userClerkId);
         if (!userId) {
@@ -64,7 +64,7 @@ export class TokenService {
             call.livekit_room_name,
         );
 
-        return { token, livekit_token: livekitToken };
+        return { access_token: token, livekit_token: livekitToken, call_id: callId };
     }
 
     async exchangeToken(
