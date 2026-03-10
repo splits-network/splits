@@ -137,6 +137,13 @@ spec:
         - host: video.staging.splits.network
           http:
               paths:
+                  - path: /rtc
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: livekit-server
+                            port:
+                                number: 80
                   - path: /
                     pathType: Prefix
                     backend:
@@ -147,6 +154,13 @@ spec:
         - host: video.staging.applicant.network
           http:
               paths:
+                  - path: /rtc
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: livekit-server
+                            port:
+                                number: 80
                   - path: /
                     pathType: Prefix
                     backend:

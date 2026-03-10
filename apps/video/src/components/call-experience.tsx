@@ -70,7 +70,7 @@ export function CallExperience({ livekitToken, call }: CallExperienceProps) {
     try {
         livekitUrl = getLiveKitUrl();
     } catch {
-        livekitUrl = 'wss://livekit.splitsnetwork.com';
+        livekitUrl = 'wss://video.splits.network';
     }
 
     const shouldConnect = callState === 'connecting' || callState === 'in-call';
