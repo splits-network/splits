@@ -217,6 +217,10 @@ Plans:
   1. recording-consent.tsx says "This Call Will Be Recorded" (not "Interview")
   2. video-service Swagger description says "video call service" (not "interview")
   3. Notification metadata key matches RabbitMQ routing key format (`call.recording_ready` not `call.recording.ready`)
+**Plans:** 2 plans
+Plans:
+- [ ] 50-01-PLAN.md — Fix notification metadata eventType keys and video-service Swagger description
+- [ ] 50-02-PLAN.md — Fix recording consent text and portal UI interview references
 
 ## Progress
 
@@ -253,4 +257,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 ->
 | 47. Critical Bug Fixes & Event Wiring | v10.0 | 1/1 | Complete | 2026-03-09 |
 | 48. Interview Migration Cleanup | v10.0 | 3/3 | Complete | 2026-03-09 |
 | 49. Critical Flow Fixes | v10.0 | 2/2 | Complete | 2026-03-09 |
-| 50. Post-Migration Text & Metadata Cleanup | v10.0 | 0/? | Not Started | — |
+| 50. Post-Migration Text & Metadata Cleanup | v10.0 | 0/2 | Not Started | — |
