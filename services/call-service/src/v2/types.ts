@@ -170,6 +170,7 @@ export interface CallWithParticipants extends Call {
 }
 
 export interface CallDetail extends CallWithParticipants {
+    recording_consent_required?: boolean;
     recordings?: CallRecording[];
     transcript?: CallTranscript | null;
     summary?: CallSummary | null;

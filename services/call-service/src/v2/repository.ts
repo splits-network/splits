@@ -119,7 +119,19 @@ export class CallRepository {
             this.artifacts.getCallEntityLinks(id),
         ]);
 
-        const detail: CallDetail = { ...call, participants, entity_links: entityLinks };
+        // Look up call_type metadata for recording consent
+        const { data: callTypeRow } = await this.supabase
+            .from('call_types')
+            .select('requires_recording_consent')
+            .eq('slug', call.call_type)
+            .maybeSingle();
+
+        const detail: CallDetail = {
+            ...call,
+            participants,
+            entity_links: entityLinks,
+            recording_consent_required: callTypeRow?.requires_recording_consent ?? true,
+        };
 
         if (!include || include.length === 0) return detail;
 
