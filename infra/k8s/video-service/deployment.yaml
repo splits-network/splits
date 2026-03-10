@@ -58,8 +58,8 @@ spec:
                             secretKeyRef:
                                 name: livekit-secrets
                                 key: livekit-api-secret
-                      - name: LIVEKIT_URL
-                        value: "ws://livekit:7880"
+                      - name: LIVEKIT_WS_URL
+                        value: "ws://livekit-server:80"
                       # Supabase S3-compatible storage for recording egress
                       - name: SUPABASE_S3_ENDPOINT
                         valueFrom:

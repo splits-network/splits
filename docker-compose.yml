@@ -540,7 +540,7 @@ services:
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret}
-      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_WS_URL: ws://livekit:7880
     volumes:
       - ./services/video-service/src:/app/services/video-service/src
       - ./packages:/app/packages

@@ -58,8 +58,8 @@ spec:
                             secretKeyRef:
                                 name: livekit-secrets
                                 key: livekit-api-secret
-                      - name: LIVEKIT_URL
-                        value: "ws://livekit:7880"
+                      - name: LIVEKIT_WS_URL
+                        value: "ws://livekit-server:80"
                   resources:
                       requests:
                           cpu: 100m
