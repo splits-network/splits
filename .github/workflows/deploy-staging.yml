@@ -385,6 +385,8 @@ jobs:
                   export CANDIDATE_URL="https://staging.applicant.network"
                   export CORPORATE_URL="https://staging.employment-networks.com"
                   export STATUS_URL="https://staging.status.splits.network"
+                  export LIVEKIT_API_KEY="${{ secrets.LIVEKIT_API_KEY }}"
+                  export LIVEKIT_API_SECRET="${{ secrets.LIVEKIT_API_SECRET }}"
                   export LIVEKIT_TURN_DOMAIN="video.staging.splits.network"
 
                   # Normalize legacy replica placeholders to envsubst-compatible format
