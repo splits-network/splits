@@ -385,6 +385,7 @@ jobs:
                   export CANDIDATE_URL="https://staging.applicant.network"
                   export CORPORATE_URL="https://staging.employment-networks.com"
                   export STATUS_URL="https://staging.status.splits.network"
+                  export LIVEKIT_TURN_DOMAIN="video.staging.splits.network"
 
                   # Normalize legacy replica placeholders to envsubst-compatible format
                   find infra/k8s -name deployment.yaml -exec sed -i 's/\${REPLICAS:-2}/\${REPLICAS}/g' {} +
@@ -404,6 +405,14 @@ jobs:
                   done
 
                   for file in infra/k8s/*/jobs/*.yaml; do
+                    if [ -f "$file" ]; then
+                      envsubst < "$file" > "${file}.tmp"
+                      mv "${file}.tmp" "$file"
+                    fi
+                  done
+
+                  # Process livekit config files
+                  for file in infra/k8s/livekit/*.yaml; do
                     if [ -f "$file" ]; then
                       envsubst < "$file" > "${file}.tmp"
                       mv "${file}.tmp" "$file"
