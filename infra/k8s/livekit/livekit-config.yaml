@@ -17,7 +17,6 @@ data:
         room:
             max_participants: 10
             empty_timeout: 300
-            max_duration: 14400
         redis:
             address: redis:6379
         keys:

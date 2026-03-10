@@ -458,7 +458,7 @@ export class EventPublisher implements IEventPublisher {
         if (!this.isConnected()) {
             this.logger.error(
                 { event_type: eventType },
-                '❌ CRITICAL: RabbitMQ event publisher not connected - event will NOT be published!'
+                '❌ CRITICAL: RabbitMQ event publisher not connected - attempting reconnect'
             );
             if (!this.isConnecting && !this.isClosing) {
                 try {
@@ -471,7 +471,7 @@ export class EventPublisher implements IEventPublisher {
                     this.logger.error({ err: error }, 'Failed to reconnect for publish retry');
                 }
             }
-            return;
+            throw new Error(`RabbitMQ not connected — cannot publish ${eventType}`);
         }
 
         const event: DomainEvent = {
