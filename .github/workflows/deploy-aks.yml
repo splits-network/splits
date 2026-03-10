@@ -70,6 +70,7 @@ jobs:
                           path: services/gamification-service,
                       }
                     - { name: video-service, path: services/video-service }
+                    - { name: call-service, path: services/call-service }
                     - { name: portal, path: apps/portal }
                     - { name: candidate, path: apps/candidate }
                     - { name: corporate, path: apps/corporate }
@@ -433,6 +434,7 @@ jobs:
                   kubectl apply -f infra/k8s/integration-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/gamification-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/video-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/call-service/ --namespace=splits-network
                   kubectl delete job ats-backfill-guarantee-expires --ignore-not-found --namespace=splits-network
                   kubectl apply -f infra/k8s/ats-service/jobs/backfill-guarantee-expires.yaml --namespace=splits-network
 
@@ -458,6 +460,7 @@ jobs:
                   kubectl rollout status deployment/integration-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/gamification-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/video-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/call-service --timeout=180s --namespace=splits-network
 
             - name: Deploy API Gateway
               run: |

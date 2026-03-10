@@ -834,6 +834,34 @@ services:
       billing-service:
         condition: service_started
 
+  call-service:
+    build:
+      context: .
+      dockerfile: services/call-service/Dockerfile
+      target: development
+    container_name: splits-call-service
+    ports:
+      - "3021:3020"
+    environment:
+      NODE_ENV: development
+      PORT: 3020
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret}
+      LIVEKIT_WS_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+    volumes:
+      - ./services/call-service/src:/app/services/call-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   api-gateway:
     build:
       context: .
@@ -868,6 +896,7 @@ services:
       MATCHING_SERVICE_URL: http://matching-service:3017
       GAMIFICATION_SERVICE_URL: http://gamification-service:3018
       VIDEO_SERVICE_URL: http://video-service:3019
+      CALL_SERVICE_URL: http://call-service:3020
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
