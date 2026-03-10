@@ -24,13 +24,13 @@ spec:
                 - name: video
                   image: ${ACR_SERVER}/video:${IMAGE_TAG}
                   ports:
-                      - containerPort: 3102
+                      - containerPort: 3104
                         name: http
                   env:
                       - name: NODE_ENV
                         value: "production"
                       - name: PORT
-                        value: "3102"
+                        value: "3104"
                       - name: NEXT_PUBLIC_API_URL
                         value: "${API_BASE_URL}"
                       - name: NEXT_PUBLIC_LIVEKIT_URL
@@ -45,13 +45,13 @@ spec:
                   livenessProbe:
                       httpGet:
                           path: /
-                          port: 3102
+                          port: 3104
                       initialDelaySeconds: 30
                       periodSeconds: 10
                   readinessProbe:
                       httpGet:
                           path: /
-                          port: 3102
+                          port: 3104
                       initialDelaySeconds: 10
                       periodSeconds: 5
 ---
@@ -64,7 +64,7 @@ spec:
     type: ClusterIP
     ports:
         - port: 80
-          targetPort: 3102
+          targetPort: 3104
           name: http
     selector:
         app: video
