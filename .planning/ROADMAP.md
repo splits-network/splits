@@ -10,7 +10,7 @@
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
-- [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-50 (shipped 2026-03-09)
+- [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-51 (shipped 2026-03-09)
 
 ## Phases
 
@@ -74,7 +74,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 48: Interview Migration Cleanup** - Dead gateway auth rules, dead shared-video hooks, legacy S3 bucket name
 - [x] **Phase 49: Critical Flow Fixes** - Event payload participants, token field mismatch, join route, recording playback
 - [x] **Phase 50: Post-Migration Text & Metadata Cleanup** - User-facing interview text, Swagger description, notification metadata key
-- [ ] **Phase 51: Recording Consent & Calendar Auto-Creation** - Pass recordingEnabled prop, wire Google Calendar event creation on call.created
+- [x] **Phase 51: Recording Consent & Calendar Auto-Creation** - Pass recordingEnabled prop, wire Google Calendar event creation on call.created
 
 ## Phase Details
 
@@ -233,8 +233,8 @@ Plans:
   2. A Google Calendar event is automatically created for each participant when a call is scheduled
 **Plans:** 2 plans
 Plans:
-- [ ] 51-01-PLAN.md — Pass recording_consent_required through call detail to video app VideoLobby
-- [ ] 51-02-PLAN.md — Wire Google Calendar auto-creation after scheduled call creation in portal
+- [x] 51-01-PLAN.md — Pass recording_consent_required through call detail to video app VideoLobby
+- [x] 51-02-PLAN.md — Wire Google Calendar auto-creation after scheduled call creation in portal
 
 ## Progress
 
@@ -272,4 +272,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 ->
 | 48. Interview Migration Cleanup | v10.0 | 3/3 | Complete | 2026-03-09 |
 | 49. Critical Flow Fixes | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 50. Post-Migration Text & Metadata Cleanup | v10.0 | 2/2 | Complete | 2026-03-09 |
-| 51. Recording Consent & Calendar Auto-Creation | v10.0 | 0/2 | Not Started | — |
+| 51. Recording Consent & Calendar Auto-Creation | v10.0 | 2/2 | Complete | 2026-03-09 |
