@@ -107,6 +107,7 @@ jobs:
                       --build-arg NEXT_PUBLIC_CHAT_GATEWAY_URL=wss://api.staging.splits.network/ws/chat \
                       --build-arg NEXT_PUBLIC_ANALYTICS_GATEWAY_URL=wss://api.staging.splits.network/ws/analytics \
                       --build-arg NEXT_PUBLIC_CANDIDATE_APP_URL=https://staging.applicant.network \
+                      --build-arg NEXT_PUBLIC_VIDEO_APP_URL=https://video.staging.splits.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
@@ -122,6 +123,7 @@ jobs:
                       --build-arg NEXT_PUBLIC_CHAT_GATEWAY_URL=wss://api.staging.splits.network/ws/chat \
                       --build-arg NEXT_PUBLIC_ANALYTICS_GATEWAY_URL=wss://api.staging.splits.network/ws/analytics \
                       --build-arg NEXT_PUBLIC_APP_URL=https://staging.applicant.network \
+                      --build-arg NEXT_PUBLIC_VIDEO_APP_URL=https://video.staging.applicant.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
