@@ -308,7 +308,7 @@ export default function CalendarPreferencesPanel({
 
                         <p className="text-sm text-base-content/60 mb-4">
                             Select which connected calendars should be checked
-                            for availability when scheduling interviews.
+                            for availability when scheduling calls.
                         </p>
 
                         <div className="space-y-3">
