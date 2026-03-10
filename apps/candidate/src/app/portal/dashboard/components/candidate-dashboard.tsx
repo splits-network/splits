@@ -19,6 +19,8 @@ import CandidateUrgencyBar from "./candidate-urgency-bar";
 import NextStepsFeed from "./next-steps-feed";
 import QuickActionsGrid from "./quick-actions-grid";
 import MatchPreviewWidget from "./match-preview-widget";
+import UpcomingCallsWidget from "./upcoming-calls-widget";
+import { useUpcomingCalls } from "../hooks/use-upcoming-calls";
 import { relationshipColor } from "./status-color";
 
 interface CandidateDashboardProps {
@@ -40,6 +42,7 @@ export default function CandidateDashboard({
         error: dataError,
     } = useCandidateDashboardData();
 
+    const { calls, loading: callsLoading } = useUpcomingCalls();
     const { unreadMessages, unreadNotifications } = useCandidateNotifications();
 
     const {
@@ -290,6 +293,11 @@ export default function CandidateDashboard({
                 matches={topMatches}
                 loading={dataLoading}
             />
+
+            {/* ── Section 2c: Upcoming Calls ── */}
+            {(calls.length > 0 || callsLoading) && (
+                <UpcomingCallsWidget calls={calls} loading={callsLoading} />
+            )}
 
             {/* ── Section 3: Pipeline + Momentum (7/5) ── */}
             <section className="py-12 bg-base-100">
