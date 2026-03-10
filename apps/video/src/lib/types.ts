@@ -35,6 +35,7 @@ export interface CallDetail {
     agenda: string | null;
     pre_call_notes: string | null;
     created_by: string;
+    recording_consent_required?: boolean;
     participants: CallParticipant[];
     entity_links: CallEntityLink[];
 }

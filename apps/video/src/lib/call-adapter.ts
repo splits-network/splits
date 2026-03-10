@@ -16,7 +16,7 @@ export function adaptCallToCallContext(call: CallDetail): CallContext {
         status: call.status,
         scheduled_duration_minutes: 60,
         reschedule_count: 0,
-        recording_enabled: false,
+        recording_enabled: call.recording_consent_required ?? true,
         participants: call.participants.map((p) => ({
             id: p.id,
             role: p.role,

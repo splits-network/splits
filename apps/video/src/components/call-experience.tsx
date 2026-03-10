@@ -154,6 +154,7 @@ function CallStateRouter({
                         callContext={callContext}
                         onJoin={onJoin}
                         localUser={{ name: localName, avatarUrl: localAvatarUrl }}
+                        recordingEnabled={callContext.recording_enabled}
                     />
                 </div>
             );
@@ -165,6 +166,7 @@ function CallStateRouter({
                         callContext={callContext}
                         onJoin={onJoin}
                         localUser={{ name: localName, avatarUrl: localAvatarUrl }}
+                        recordingEnabled={callContext.recording_enabled}
                     />
                     <div className="absolute inset-0 z-30 flex items-center justify-center bg-base-300/60 backdrop-blur-sm">
                         <div className="flex flex-col items-center gap-3">
