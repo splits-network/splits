@@ -12,14 +12,14 @@ export function RecordingConsent({ onConsent, consentGiven }: RecordingConsentPr
                 <i className="fa-duotone fa-regular fa-circle-dot text-error text-xl mt-0.5" />
                 <div className="space-y-2">
                     <h3 className="text-lg font-black text-base-content">
-                        This Interview Will Be Recorded
+                        This Call Will Be Recorded
                     </h3>
                     <p className="text-sm text-base-content/70">
-                        This interview will be recorded, transcribed, and summarized using AI.
+                        This call will be recorded, transcribed, and summarized using AI.
                         By joining, you consent to the recording and processing of this session.
                     </p>
                     <p className="text-sm text-base-content/50">
-                        The recording will be available to the interviewer and company
+                        The recording will be available to call participants and
                         administrators.
                     </p>
                 </div>
