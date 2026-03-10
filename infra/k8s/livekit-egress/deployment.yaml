@@ -4,7 +4,7 @@ metadata:
     name: livekit-egress
     namespace: splits-network
 spec:
-    replicas: ${REPLICAS:-2}
+    replicas: 1
     selector:
         matchLabels:
             app: livekit-egress
@@ -13,17 +13,20 @@ spec:
             labels:
                 app: livekit-egress
         spec:
-            nodeSelector:
-                workload: egress
-            tolerations:
-                - key: workload
-                  operator: Equal
-                  value: egress
-                  effect: NoSchedule
             containers:
                 - name: livekit-egress
                   image: livekit/egress:v1.8
                   env:
+                      - name: LIVEKIT_API_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: livekit-secrets
+                                key: livekit-api-key
+                      - name: LIVEKIT_API_SECRET
+                        valueFrom:
+                            secretKeyRef:
+                                name: livekit-secrets
+                                key: livekit-api-secret
                       - name: EGRESS_CONFIG_BODY
                         value: |
                             {
@@ -35,16 +38,6 @@ spec:
                                 },
                                 "temp_path": "/tmp/egress"
                             }
-                      - name: LIVEKIT_API_KEY
-                        valueFrom:
-                            secretKeyRef:
-                                name: livekit-secrets
-                                key: livekit-api-key
-                      - name: LIVEKIT_API_SECRET
-                        valueFrom:
-                            secretKeyRef:
-                                name: livekit-secrets
-                                key: livekit-api-secret
                   volumeMounts:
                       - name: egress-tmp
                         mountPath: /tmp/egress
