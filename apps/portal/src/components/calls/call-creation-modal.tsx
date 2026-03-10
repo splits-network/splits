@@ -48,7 +48,7 @@ export function CallCreationModal({
     onSuccess,
 }: CallCreationModalProps) {
     const { user } = useUser();
-    const { createCall, generateToken, isLoading, error } = useCreateCall();
+    const { createCall, generateToken, createCalendarEvents, isLoading, error } = useCreateCall();
 
     /* ── State ── */
     const [mode, setMode] = useState<CallMode>(defaultMode);
@@ -113,6 +113,20 @@ export function CallCreationModal({
                 const tokenResult = await generateToken(call.id);
                 const videoBaseUrl = process.env.NEXT_PUBLIC_VIDEO_APP_URL || 'https://video.splits.network';
                 window.location.href = `${videoBaseUrl}/join/${tokenResult.access_token}`;
+            }
+
+            // Fire-and-forget: create calendar events for scheduled calls
+            if (mode === 'scheduled' && schedule) {
+                createCalendarEvents({
+                    callId: call.id,
+                    title: title || `Call with ${otherParticipants.map(p => p.first_name).join(', ')}`,
+                    scheduledAt: schedule.dateTime,
+                    durationMinutes: duration,
+                    agenda: agenda || undefined,
+                    participants: participants.filter(p => !p.user_id.startsWith('email:')),
+                }).catch(() => {
+                    // Silently ignore — calendar is best-effort
+                });
             }
 
             onSuccess?.(call.id, mode);
