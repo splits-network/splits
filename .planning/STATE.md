@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 52 (1 of 1 in v11.0) — Candidate Call Experience
-Plan: 2 of 3
-Status: In progress
-Last activity: 2026-03-09 — Completed 52-02-PLAN.md
+Plan: 3 of 3
+Status: Phase complete
+Last activity: 2026-03-09 — Completed 52-03-PLAN.md
 
-Progress: [██████████████████████████░░░░░░░░░░░░░░] 2/3 plans
+Progress: [████████████████████████████████████████] 3/3 plans
 
 ## Performance Metrics
 
@@ -36,7 +36,7 @@ Progress: [███████████████████████
 | 49-critical-flow-fixes | 2/2 | 5min | 2.50min |
 | 50-post-migration-text-metadata-cleanup | 2/2 | 3min | 1.50min |
 | 51-recording-consent-calendar-auto-creation | 2/2 | 3min | 1.50min |
-| 52-candidate-call-experience | 2/3 | 9min | 4.50min |
+| 52-candidate-call-experience | 3/3 | 16min | 5.33min |
 
 ## Accumulated Context
 
@@ -126,6 +126,8 @@ Recent decisions affecting current work:
 - [46-04]: Schedule Call added to speed dial actions in actions-toolbar, available to recruiters/company users/admins
 - [50-02]: API endpoint paths (/interviews/calendar-preferences) left unchanged to preserve backend contract
 - [50-02]: All remaining portal "interview" references confirmed as legitimate domain concepts (application pipeline stage)
+- [52-03]: isCandidate() added to DataLookupHelper for centralized candidate detection by user_id
+- [52-03]: Candidate call detail URLs point to /portal/dashboard (no call detail page in candidate app)
 
 ### Roadmap Evolution
 
@@ -144,9 +146,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 52-02-PLAN.md
+Stopped at: Completed 52-03-PLAN.md — Phase 52 complete
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (52-02 completed — application calls section and notification icons)*
+*Last updated: 2026-03-09 (52-03 completed — call notification URL routing for candidates)*
