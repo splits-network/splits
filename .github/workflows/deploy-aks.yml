@@ -160,7 +160,7 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network \
-                      --build-arg NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.LIVEKIT_PUBLIC_URL }} \
+                      --build-arg NEXT_PUBLIC_LIVEKIT_URL=wss://video.splits.network \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
                   else
