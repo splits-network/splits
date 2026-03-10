@@ -73,7 +73,7 @@ async function main() {
         openapi: {
             info: {
                 title: "Video Service API",
-                description: "Internal video interview service for Splits Network",
+                description: "Internal video call service for Splits Network",
                 version: "1.0.0",
             },
             servers: [
