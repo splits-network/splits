@@ -8,21 +8,21 @@ interface HistoryTabProps {
     isLoading: boolean;
 }
 
-function getStatusBadge(status: string): { label: string; className: string } {
+function getStatusAccent(status: string): { label: string; badgeClass: string; borderClass: string } {
     switch (status) {
         case 'completed':
-            return { label: 'Completed', className: 'badge badge-success badge-sm' };
+            return { label: 'Completed', badgeClass: 'badge badge-success badge-sm rounded-none', borderClass: 'border-l-4 border-success' };
         case 'cancelled':
-            return { label: 'Cancelled', className: 'badge badge-error badge-sm' };
+            return { label: 'Cancelled', badgeClass: 'badge badge-error badge-sm rounded-none', borderClass: 'border-l-4 border-error' };
         case 'missed':
         case 'no_show':
-            return { label: 'Missed', className: 'badge badge-warning badge-sm' };
+            return { label: 'Missed', badgeClass: 'badge badge-warning badge-sm rounded-none', borderClass: 'border-l-4 border-warning' };
         case 'scheduled':
-            return { label: 'Scheduled', className: 'badge badge-info badge-sm' };
+            return { label: 'Scheduled', badgeClass: 'badge badge-info badge-sm rounded-none', borderClass: 'border-l-4 border-info' };
         case 'active':
-            return { label: 'Active', className: 'badge badge-primary badge-sm' };
+            return { label: 'Active', badgeClass: 'badge badge-primary badge-sm rounded-none', borderClass: 'border-l-4 border-primary' };
         default:
-            return { label: status, className: 'badge badge-ghost badge-sm' };
+            return { label: status, badgeClass: 'badge badge-ghost badge-sm rounded-none', borderClass: 'border-l-4 border-base-300' };
     }
 }
 
@@ -65,34 +65,35 @@ export function HistoryTab({ history, isLoading }: HistoryTabProps) {
     if (history.length === 0) {
         return (
             <div className="text-center py-12">
-                <i className="fa-duotone fa-regular fa-clock-rotate-left text-3xl text-base-content/30 mb-3" />
-                <p className="text-sm text-base-content/50">No previous calls with this entity</p>
+                <i className="fa-duotone fa-regular fa-clock-rotate-left text-5xl text-base-content/15 mb-4" />
+                <p className="text-sm font-semibold text-base-content/40">No call history</p>
+                <p className="text-sm text-base-content/30 mt-1">Previous calls with this entity will appear here.</p>
             </div>
         );
     }
 
     return (
         <div className="space-y-4">
-            <p className="text-sm font-semibold text-base-content/50 uppercase tracking-wider">
+            <p className="text-sm font-black uppercase tracking-widest text-base-content/50">
                 Recent Calls ({history.length})
             </p>
 
             <div className="space-y-2">
                 {history.map((entry) => {
-                    const badge = getStatusBadge(entry.status);
+                    const status = getStatusAccent(entry.status);
                     return (
-                        <div key={entry.id} className="bg-base-200 p-3 space-y-1">
+                        <div key={entry.id} className={`${status.borderClass} bg-base-200 p-3 space-y-1 shadow-sm`}>
                             <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-base-content truncate flex-1 mr-2">
+                                <p className="text-sm font-bold text-base-content truncate flex-1 mr-2">
                                     {entry.title || 'Untitled Call'}
                                 </p>
-                                <span className={badge.className}>{badge.label}</span>
+                                <span className={status.badgeClass}>{status.label}</span>
                             </div>
                             <div className="flex items-center gap-3 text-sm text-base-content/50">
-                                <span>{formatDate(entry.scheduled_at || entry.started_at)}</span>
+                                <span className="font-semibold">{formatDate(entry.scheduled_at || entry.started_at)}</span>
                                 <span className="capitalize">{entry.call_type.replace(/_/g, ' ')}</span>
                                 {entry.duration_minutes && (
-                                    <span>{formatDuration(entry.duration_minutes)}</span>
+                                    <span className="font-semibold">{formatDuration(entry.duration_minutes)}</span>
                                 )}
                             </div>
                         </div>
@@ -105,7 +106,7 @@ export function HistoryTab({ history, isLoading }: HistoryTabProps) {
                 href={`${brand.portalUrl}/portal/calls`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-ghost btn-sm w-full"
+                className="btn btn-ghost btn-sm rounded-none border border-base-300 w-full"
             >
                 View all calls
                 <i className="fa-duotone fa-regular fa-arrow-up-right-from-square ml-1" />

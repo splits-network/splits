@@ -18,6 +18,14 @@ const nextConfig = {
             __dirname,
             "../../node_modules/@tanstack/react-query",
         );
+        config.resolve.alias["@livekit/components-react"] = path.resolve(
+            __dirname,
+            "../../node_modules/@livekit/components-react",
+        );
+        config.resolve.alias["livekit-client"] = path.resolve(
+            __dirname,
+            "../../node_modules/livekit-client",
+        );
         return config;
     },
 };

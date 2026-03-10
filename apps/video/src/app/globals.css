@@ -1,6 +1,64 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@source "../../../../packages/shared-video/src";
+@source "../../../../packages/basel-ui/src";
+@source "../../../../packages/chat-ui/src";
+
 @import "./themes/splits-light.css";
 @import "./themes/applicant-light.css";
 @import "../../../../packages/basel-ui/src/animations/animations.css";
+
+/* ── Lobby entrance animations (auto-play on mount) ───────────────── */
+@keyframes lobby-fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.lobby-entrance > * {
+    opacity: 0;
+    animation: lobby-fade-up 0.5s ease-out forwards;
+}
+.lobby-entrance > *:nth-child(1) { animation-delay: 0.1s; }
+.lobby-entrance > *:nth-child(2) { animation-delay: 0.2s; }
+.lobby-entrance > *:nth-child(3) { animation-delay: 0.3s; }
+.lobby-entrance > *:nth-child(4) { animation-delay: 0.4s; }
+.lobby-entrance > *:nth-child(5) { animation-delay: 0.5s; }
+.lobby-entrance > *:nth-child(6) { animation-delay: 0.6s; }
+.lobby-entrance > *:nth-child(7) { animation-delay: 0.7s; }
+.lobby-entrance > *:nth-child(8) { animation-delay: 0.8s; }
+.lobby-entrance > *:nth-child(9) { animation-delay: 0.9s; }
+
+@keyframes lobby-panel-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.lobby-panel-fade {
+    animation: lobby-panel-in 0.8s ease-out 0.4s forwards;
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lobby-entrance > *,
+    .lobby-panel-fade {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* ── Override LiveKit injected styles ────────────────────────────── */
+/* LiveKit components inject .lk-button / .lk-disconnect-button with
+   their own padding, colors, border-radius, etc. Zero them out so
+   DaisyUI btn classes have full control. */
+.lk-button,
+.lk-disconnect-button {
+    background: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: inherit !important;
+    font: inherit !important;
+    min-width: unset !important;
+    min-height: unset !important;
+}

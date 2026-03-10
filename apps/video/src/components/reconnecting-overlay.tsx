@@ -15,11 +15,15 @@ export function ReconnectingOverlay() {
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-base-300/80 backdrop-blur-sm">
-            <span className="loading loading-spinner loading-lg text-primary" />
-            <p className="mt-4 text-lg font-semibold text-base-content">
-                Reconnecting...
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-base-300/70 backdrop-blur-md">
+            <i className="fa-duotone fa-regular fa-wifi-exclamation text-4xl text-warning animate-pulse" />
+            <h3 className="mt-4 text-xl font-black text-base-content">
+                Connection Interrupted
+            </h3>
+            <p className="mt-1 text-sm text-base-content/60">
+                Attempting to reconnect...
             </p>
+            <span className="loading loading-spinner loading-sm text-base-content/40 mt-4" />
         </div>
     );
 }

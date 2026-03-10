@@ -9,17 +9,17 @@ export function CameraOffFallback({ name, avatarUrl }: CameraOffFallbackProps) {
     return (
         <div className="flex flex-col items-center justify-center h-full bg-base-300">
             <div className="avatar">
-                <div className="w-24 rounded-full">
+                <div className="w-24 rounded-none">
                     {avatarUrl ? (
-                        <img src={avatarUrl} alt={name} />
+                        <img src={avatarUrl} alt={name} className="rounded-none" />
                     ) : (
-                        <div className="bg-primary text-primary-content flex items-center justify-center text-3xl font-bold w-24 h-24 rounded-full">
+                        <div className="bg-primary text-primary-content flex items-center justify-center text-3xl font-bold w-24 h-24 rounded-none">
                             {initial}
                         </div>
                     )}
                 </div>
             </div>
-            <p className="mt-4 text-lg font-medium text-base-content">{name}</p>
+            <p className="mt-4 text-lg font-semibold text-base-content">{name}</p>
         </div>
     );
 }

@@ -12,12 +12,14 @@ export function BrandedHeader({ visible = true }: BrandedHeaderProps) {
     if (!visible) return null;
 
     return (
-        <header className="flex items-center h-14 px-4 border-b border-base-300 bg-base-100">
-            <img
-                src={brand.logoUrl}
-                alt={`${brand.name} logo`}
-                className="h-8"
-            />
+        <header className="sticky top-0 z-50 backdrop-blur-md bg-base-100/90 border-b border-base-300 rounded-none">
+            <div className="flex items-center h-14 px-6">
+                <img
+                    src={brand.logoUrl}
+                    alt={`${brand.name}`}
+                    className="h-8 rounded-none"
+                />
+            </div>
         </header>
     );
 }

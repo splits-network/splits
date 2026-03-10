@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { LiveKitRoom, useConnectionState } from '@livekit/components-react';
 import { ConnectionState } from 'livekit-client';
-import '@livekit/components-styles';
 import type { CallState, LocalUserChoices } from '@splits-network/shared-video';
 import {
     VideoLobby,
@@ -30,6 +29,8 @@ interface CallExperienceProps {
 export function CallExperience({ livekitToken, call }: CallExperienceProps) {
     const [callState, setCallState] = useState<CallState>('prep');
     const [localChoices, setLocalChoices] = useState<LocalUserChoices | null>(null);
+    const wasConnected = useRef(false);
+    const [connectionError, setConnectionError] = useState<string | null>(null);
     const callContext = adaptCallToCallContext(call);
     const { duration, start: startTimer, stop: stopTimer } = useCallDuration();
 
@@ -42,18 +43,26 @@ export function CallExperience({ livekitToken, call }: CallExperienceProps) {
 
     const handleJoin = useCallback((choices: LocalUserChoices) => {
         setLocalChoices(choices);
+        setConnectionError(null);
         setCallState('connecting');
     }, []);
 
     const handleDisconnected = useCallback(() => {
-        stopTimer();
-        setCallState('post-call');
+        if (wasConnected.current) {
+            // Genuine disconnect after being in-call → show post-call summary
+            stopTimer();
+            setCallState('post-call');
+        } else {
+            // Connection failed before ever joining → return to lobby with error
+            setConnectionError('Unable to connect to the call server. Please try again.');
+            setCallState('lobby');
+        }
     }, [stopTimer]);
 
     // Derive local user name from first participant (the current user joined via magic link)
     const localParticipant = call.participants[0];
     const localName = localParticipant
-        ? `${localParticipant.user.first_name} ${localParticipant.user.last_name}`
+        ? localParticipant.user.name || 'You'
         : 'You';
     const localAvatarUrl = localParticipant?.user.avatar_url ?? undefined;
 
@@ -84,6 +93,8 @@ export function CallExperience({ livekitToken, call }: CallExperienceProps) {
                 duration={duration}
                 startTimer={startTimer}
                 onJoin={handleJoin}
+                wasConnected={wasConnected}
+                connectionError={connectionError}
             />
         </LiveKitRoom>
     );
@@ -102,6 +113,8 @@ function CallStateRouter({
     duration,
     startTimer,
     onJoin,
+    wasConnected,
+    connectionError,
 }: {
     callState: CallState;
     setCallState: (s: CallState) => void;
@@ -112,6 +125,8 @@ function CallStateRouter({
     duration: number;
     startTimer: () => void;
     onJoin: (choices: LocalUserChoices) => void;
+    wasConnected: React.RefObject<boolean>;
+    connectionError: string | null;
 }) {
     const connectionState = useConnectionState();
     const hasTransitioned = useRef(false);
@@ -120,10 +135,11 @@ function CallStateRouter({
     useEffect(() => {
         if (callState === 'connecting' && connectionState === ConnectionState.Connected && !hasTransitioned.current) {
             hasTransitioned.current = true;
+            wasConnected.current = true;
             startTimer();
             setCallState('in-call');
         }
-    }, [callState, connectionState, setCallState, startTimer]);
+    }, [callState, connectionState, setCallState, startTimer, wasConnected]);
 
     // Reset transition ref when going back to lobby
     useEffect(() => {
@@ -150,6 +166,12 @@ function CallStateRouter({
         case 'lobby':
             return (
                 <div className="min-h-screen">
+                    {connectionError && (
+                        <div className="border-l-4 border-error bg-base-200 px-4 py-3 mx-4 mt-4 flex items-center gap-3">
+                            <i className="fa-duotone fa-regular fa-circle-exclamation text-error" />
+                            <span className="text-sm font-medium text-base-content">{connectionError}</span>
+                        </div>
+                    )}
                     <VideoLobby
                         callContext={callContext}
                         onJoin={onJoin}
@@ -168,18 +190,30 @@ function CallStateRouter({
                         localUser={{ name: localName, avatarUrl: localAvatarUrl }}
                         recordingEnabled={callContext.recording_enabled}
                     />
-                    <div className="absolute inset-0 z-30 flex items-center justify-center bg-base-300/60 backdrop-blur-sm">
-                        <div className="flex flex-col items-center gap-3">
-                            <span className="loading loading-spinner loading-lg text-primary" />
-                            <p className="text-lg font-semibold text-base-content">Connecting...</p>
+                    <div className="absolute inset-0 z-30 flex items-center justify-center bg-base-300/60 backdrop-blur-md">
+                        <div className="flex flex-col items-center gap-4">
+                            <i className="fa-duotone fa-regular fa-signal-stream text-4xl text-primary animate-pulse" />
+                            <div className="text-center">
+                                <h3 className="text-xl font-black text-base-content">Entering the Room</h3>
+                                <p className="text-sm text-base-content/60 mt-1">Establishing a secure connection</p>
+                            </div>
+                            <span className="loading loading-spinner loading-sm text-base-content/40" />
                         </div>
                     </div>
                 </div>
             );
 
         case 'in-call':
+            // Guard: wait for Room context to be fully available
+            if (connectionState !== ConnectionState.Connected) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-base-100">
+                        <span className="loading loading-spinner loading-lg text-primary" />
+                    </div>
+                );
+            }
             return (
-                <div className="h-screen relative">
+                <div className="h-screen relative bg-base-100">
                     <VideoRoom
                         callContext={callContext}
                         localName={localName}

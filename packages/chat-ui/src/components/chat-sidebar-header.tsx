@@ -2,15 +2,28 @@
 
 import Link from "next/link";
 import { useChatSidebar } from "../context/chat-sidebar-context";
+import { getOtherParticipant } from "../types/chat-types";
 
 export interface ChatSidebarHeaderProps {
     messagesPagePath?: string;
-    /** Called when user clicks call icon. Receives other user ID when in thread view. */
-    onCallClick?: (otherUserId: string | null) => void;
+    /** Current user ID for resolving other participant */
+    currentUserId?: string | null;
+    /** Called when user clicks call icon. Receives other user ID, participant details, and entity context when in thread view. */
+    onCallClick?: (otherUserId: string | null, otherUserDetails?: {
+        name: string | null;
+        email: string;
+        profile_image_url?: string | null;
+    } | null, entityContext?: {
+        application_id?: string | null;
+        job_id?: string | null;
+        company_id?: string | null;
+        candidate_id?: string | null;
+    }) => void;
 }
 
 export function ChatSidebarHeader({
     messagesPagePath = "/portal/messages",
+    currentUserId,
     onCallClick,
 }: ChatSidebarHeaderProps) {
     const {
@@ -18,6 +31,7 @@ export function ChatSidebarHeader({
         isMinimized,
         activeConversationId,
         activeConversationMeta,
+        conversations,
         close,
         minimize,
         restore,
@@ -99,11 +113,36 @@ export function ChatSidebarHeader({
                 <div className="flex items-center gap-1 flex-none">
                     {onCallClick && (
                         <button
-                            onClick={() => onCallClick(
-                                view === "thread"
-                                    ? activeConversationMeta?.otherUserId ?? null
-                                    : null,
-                            )}
+                            onClick={() => {
+                                if (view === "thread") {
+                                    const conv = conversations.find(c => c.conversation.id === activeConversationId);
+                                    // Resolve other user ID: prefer meta, fall back to conversation participants
+                                    let otherUserId = activeConversationMeta?.otherUserId ?? null;
+                                    if (!otherUserId && conv && currentUserId) {
+                                        otherUserId = currentUserId === conv.conversation.participant_a_id
+                                            ? conv.conversation.participant_b_id
+                                            : conv.conversation.participant_a_id;
+                                    }
+                                    // Get other participant details from conversation data
+                                    const otherDetails = conv ? getOtherParticipant(conv.conversation, currentUserId ?? null) : null;
+                                    onCallClick(
+                                        otherUserId,
+                                        otherDetails ? {
+                                            name: otherDetails.name,
+                                            email: otherDetails.email,
+                                            profile_image_url: otherDetails.profile_image_url,
+                                        } : null,
+                                        conv ? {
+                                            application_id: conv.conversation.application_id,
+                                            job_id: conv.conversation.job_id,
+                                            company_id: conv.conversation.company_id,
+                                            candidate_id: conv.conversation.candidate_id,
+                                        } : undefined,
+                                    );
+                                } else {
+                                    onCallClick(null);
+                                }
+                            }}
                             className="btn btn-ghost btn-sm btn-square"
                             aria-label={view === "thread" ? "Call this person" : "Start a call"}
                             title={view === "thread" ? "Call" : "New call"}

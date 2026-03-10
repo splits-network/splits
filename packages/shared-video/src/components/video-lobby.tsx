@@ -14,29 +14,15 @@ import { RecordingConsent } from './recording-consent';
 interface VideoLobbyProps {
     callContext: CallContext;
     onJoin: (choices: LocalUserChoices) => void;
-    participantPresence?: {
-        name: string;
-        isWaiting: boolean;
-    };
-    /** Name and avatar for local user (shown when camera is off) */
-    localUser: {
-        name: string;
-        avatarUrl?: string;
-    };
-    /** Whether this call has recording enabled */
+    participantPresence?: { name: string; isWaiting: boolean };
+    localUser: { name: string; avatarUrl?: string };
     recordingEnabled?: boolean;
-    /** Called when participant gives recording consent */
     onRecordingConsent?: () => void;
 }
 
-function formatScheduledTime(isoString: string): string {
-    const date = new Date(isoString);
-    return date.toLocaleString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
+function formatScheduledTime(iso: string): string {
+    return new Date(iso).toLocaleString(undefined, {
+        weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
     });
 }
 
@@ -62,13 +48,10 @@ export function VideoLobby({
     const videoElRef = useRef<HTMLVideoElement>(null);
 
     const handlePreviewError = useCallback((err: Error) => {
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-            setPermissionError(
-                'Camera/microphone access was denied. Click the camera icon in your browser\'s address bar to allow access, then refresh the page.',
-            );
-        } else {
-            setPermissionError(`Device error: ${err.message}`);
-        }
+        const denied = err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+        setPermissionError(denied
+            ? 'Camera/microphone access was denied. Click the camera icon in your browser\'s address bar to allow access, then refresh.'
+            : `Device error: ${err.message}`);
     }, []);
 
     const tracks = usePreviewTracks(
@@ -79,97 +62,68 @@ export function VideoLobby({
         handlePreviewError,
     );
 
-    const videoTrack = tracks?.find(
-        (t): t is LocalVideoTrack => t.kind === Track.Kind.Video,
-    );
-    const audioTrack = tracks?.find(
-        (t): t is LocalAudioTrack => t.kind === Track.Kind.Audio,
-    );
+    const videoTrack = tracks?.find((t): t is LocalVideoTrack => t.kind === Track.Kind.Video);
+    const audioTrack = tracks?.find((t): t is LocalAudioTrack => t.kind === Track.Kind.Audio);
 
     useEffect(() => {
         const el = videoElRef.current;
         if (videoTrack && el) {
             videoTrack.attach(el);
-            return () => {
-                videoTrack.detach(el);
-            };
+            return () => { videoTrack.detach(el); };
         }
     }, [videoTrack]);
 
     const handleJoin = () => {
-        onJoin({
-            audioEnabled,
-            videoEnabled,
-            audioDeviceId,
-            videoDeviceId,
-        });
+        onJoin({ audioEnabled, videoEnabled, audioDeviceId, videoDeviceId });
     };
 
     const { job, participants, call_type, scheduled_at } = callContext;
-
-    // Find the other participant (not the local user) for display
-    const otherParticipant = participants.find(
-        (p) => p.name !== localUser.name,
-    ) ?? participants[0];
+    const otherParticipant = participants.find((p) => p.name !== localUser.name) ?? participants[0];
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
             {/* Left panel: Camera preview */}
-            <div className="bg-base-300 flex flex-col items-center justify-center p-6 lg:p-8 gap-4">
-                <div className="relative w-full max-w-lg aspect-video bg-neutral overflow-hidden">
+            <div className="bg-neutral flex flex-col items-center justify-center p-6 lg:p-8 gap-4">
+                <div className="relative w-full max-w-lg aspect-video bg-neutral rounded-none overflow-hidden">
                     {videoEnabled && videoTrack ? (
                         <video
                             ref={videoElRef}
-                            className="w-full h-full object-cover mirror"
-                            autoPlay
-                            playsInline
-                            muted
+                            className="w-full h-full object-cover rounded-none"
+                            autoPlay playsInline muted
                             style={{ transform: 'scaleX(-1)' }}
                         />
                     ) : (
-                        <CameraOffFallback
-                            name={localUser.name}
-                            avatarUrl={localUser.avatarUrl}
-                        />
+                        <CameraOffFallback name={localUser.name} avatarUrl={localUser.avatarUrl} />
                     )}
                 </div>
 
-                {/* Audio level meter */}
                 <AudioLevelMeter audioTrack={audioEnabled ? audioTrack : undefined} />
 
-                {/* Media toggle buttons */}
                 <div className="flex gap-3">
                     <button
                         type="button"
-                        className={`btn btn-circle ${audioEnabled ? 'btn-neutral' : 'btn-error'}`}
+                        className={`btn btn-square rounded-none ${audioEnabled ? 'btn-neutral' : 'btn-error'}`}
                         onClick={() => setAudioEnabled((v) => !v)}
                         aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
                     >
-                        <i
-                            className={`fa-duotone fa-regular ${
-                                audioEnabled ? 'fa-microphone' : 'fa-microphone-slash'
-                            } text-lg`}
-                        />
+                        <i className={`fa-duotone fa-regular ${audioEnabled ? 'fa-microphone' : 'fa-microphone-slash'} text-lg`} />
                     </button>
                     <button
                         type="button"
-                        className={`btn btn-circle ${videoEnabled ? 'btn-neutral' : 'btn-error'}`}
+                        className={`btn btn-square rounded-none ${videoEnabled ? 'btn-neutral' : 'btn-error'}`}
                         onClick={() => setVideoEnabled((v) => !v)}
                         aria-label={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
                     >
-                        <i
-                            className={`fa-duotone fa-regular ${
-                                videoEnabled ? 'fa-video' : 'fa-video-slash'
-                            } text-lg`}
-                        />
+                        <i className={`fa-duotone fa-regular ${videoEnabled ? 'fa-video' : 'fa-video-slash'} text-lg`} />
                     </button>
                 </div>
 
-                {/* Permission error */}
                 {permissionError && (
-                    <div className="alert alert-error max-w-lg">
-                        <i className="fa-duotone fa-regular fa-triangle-exclamation" />
-                        <span className="text-sm">{permissionError}</span>
+                    <div className="border-l-4 border-error bg-error/5 p-4 max-w-lg">
+                        <div className="flex items-start gap-3">
+                            <i className="fa-duotone fa-regular fa-triangle-exclamation text-error mt-0.5" />
+                            <span className="text-sm text-base-content">{permissionError}</span>
+                        </div>
                     </div>
                 )}
             </div>
@@ -177,103 +131,65 @@ export function VideoLobby({
             {/* Right panel: Call info + controls */}
             <div className="bg-base-100 flex flex-col justify-center p-6 lg:p-8">
                 <div className="max-w-md mx-auto w-full space-y-6">
-                    {/* Call type kicker */}
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
                         {formatCallType(call_type)}
                     </p>
-
-                    {/* Job title */}
-                    <h1 className="text-2xl font-black text-base-content">
-                        {job.title}
-                    </h1>
-
-                    {/* Company */}
+                    <h1 className="text-2xl md:text-3xl font-black text-base-content">{job.title}</h1>
                     <p className="text-base-content/70">{job.company_name}</p>
 
-                    {/* Scheduled time */}
                     <div className="flex items-center gap-2 text-sm text-base-content/60">
                         <i className="fa-duotone fa-regular fa-calendar-clock" />
                         <span>{formatScheduledTime(scheduled_at)}</span>
                     </div>
 
-                    {/* Other participant info */}
                     {otherParticipant && (
                         <div className="flex items-center gap-3">
                             <div className="avatar">
-                                <div className="w-10 rounded-full">
+                                <div className="w-10 rounded-none">
                                     {otherParticipant.avatar_url ? (
-                                        <img
-                                            src={otherParticipant.avatar_url}
-                                            alt={otherParticipant.name}
-                                        />
+                                        <img src={otherParticipant.avatar_url} alt={otherParticipant.name} className="rounded-none" />
                                     ) : (
-                                        <div className="bg-secondary text-secondary-content flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold">
+                                        <div className="bg-secondary text-secondary-content flex items-center justify-center w-10 h-10 rounded-none text-sm font-bold">
                                             {otherParticipant.name.charAt(0).toUpperCase()}
                                         </div>
                                     )}
                                 </div>
                             </div>
                             <div>
-                                <p className="font-medium text-base-content">
-                                    {otherParticipant.name}
-                                </p>
-                                <p className="text-sm text-base-content/60 capitalize">
-                                    {otherParticipant.role}
-                                </p>
+                                <p className="font-semibold text-base-content">{otherParticipant.name}</p>
+                                <p className="text-sm text-base-content/60 capitalize">{otherParticipant.role}</p>
                             </div>
                         </div>
                     )}
 
-                    {/* Participant waiting status */}
                     {participantPresence && (
-                        <WaitingIndicator
-                            participantName={participantPresence.name}
-                            isWaiting={participantPresence.isWaiting}
-                        />
+                        <WaitingIndicator participantName={participantPresence.name} isWaiting={participantPresence.isWaiting} />
                     )}
 
-                    {/* Recording consent gate */}
                     {recordingEnabled && (
                         <RecordingConsent
                             consentGiven={consentGiven}
                             onConsent={() => {
                                 setConsentGiven((v) => !v);
-                                if (!consentGiven && onRecordingConsent) {
-                                    onRecordingConsent();
-                                }
+                                if (!consentGiven && onRecordingConsent) onRecordingConsent();
                             }}
                         />
                     )}
 
-                    {/* Device selectors */}
                     <div className="space-y-2">
-                        <DeviceSelector
-                            kind="videoinput"
-                            activeDeviceId={videoDeviceId}
-                            onDeviceChange={setVideoDeviceId}
-                        />
-                        <DeviceSelector
-                            kind="audioinput"
-                            activeDeviceId={audioDeviceId}
-                            onDeviceChange={setAudioDeviceId}
-                        />
-                        <DeviceSelector
-                            kind="audiooutput"
-                            activeDeviceId={undefined}
-                            onDeviceChange={() => {
-                                // Speaker output selection — used by the app layer
-                            }}
-                        />
+                        <DeviceSelector kind="videoinput" activeDeviceId={videoDeviceId} onDeviceChange={setVideoDeviceId} />
+                        <DeviceSelector kind="audioinput" activeDeviceId={audioDeviceId} onDeviceChange={setAudioDeviceId} />
+                        <DeviceSelector kind="audiooutput" activeDeviceId={undefined} onDeviceChange={() => {}} />
                     </div>
 
-                    {/* Join button */}
                     <button
                         type="button"
-                        className="btn btn-primary btn-lg w-full"
+                        className="btn btn-primary btn-lg w-full rounded-none"
                         onClick={handleJoin}
                         disabled={recordingEnabled && !consentGiven}
                     >
-                        Join Call
+                        Enter the Room
+                        <i className="fa-duotone fa-regular fa-arrow-right ml-2" />
                     </button>
                 </div>
             </div>

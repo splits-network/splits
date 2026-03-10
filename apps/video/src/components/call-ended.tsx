@@ -16,9 +16,10 @@ interface CallEndedProps {
 export function CallEnded({ call, duration }: CallEndedProps) {
     return (
         <div className="min-h-screen bg-base-200 flex flex-col">
+            <div className="h-1 bg-primary w-full" />
             <BrandedHeader visible />
 
-            <div className="flex-1 flex items-center justify-center p-6">
+            <div className="flex-1 flex items-center justify-center p-8">
                 <PostCallSummary call={call} duration={duration} />
             </div>
         </div>

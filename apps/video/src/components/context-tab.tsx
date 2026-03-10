@@ -36,11 +36,11 @@ export function ContextTab({ call, entities, isLoading }: ContextTabProps) {
         <div className="space-y-5">
             {/* Agenda card */}
             {call.agenda && (
-                <div className="border-l-4 border-primary bg-base-200 p-4">
-                    <p className="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+                <div className="border-l-4 border-primary bg-base-200 p-4 shadow-sm">
+                    <p className="text-sm font-black uppercase tracking-widest text-base-content/50 mb-2">
                         Agenda
                     </p>
-                    <p className="text-sm text-base-content whitespace-pre-wrap">
+                    <p className="text-sm text-base-content leading-relaxed whitespace-pre-wrap">
                         {call.agenda}
                     </p>
                 </div>
@@ -48,12 +48,12 @@ export function ContextTab({ call, entities, isLoading }: ContextTabProps) {
 
             {/* Pre-call notes (creator only — we show if present in data) */}
             {call.pre_call_notes && (
-                <div className="bg-base-200 p-4">
-                    <p className="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+                <div className="border-l-4 border-warning bg-base-200 p-4 shadow-sm">
+                    <p className="text-sm font-black uppercase tracking-widest text-base-content/50 mb-2">
                         <i className="fa-duotone fa-regular fa-lock mr-1" />
                         Pre-call Notes
                     </p>
-                    <p className="text-sm text-base-content whitespace-pre-wrap">
+                    <p className="text-sm text-base-content leading-relaxed whitespace-pre-wrap">
                         {call.pre_call_notes}
                     </p>
                 </div>
@@ -62,7 +62,7 @@ export function ContextTab({ call, entities, isLoading }: ContextTabProps) {
             {/* Entity cards */}
             {entities.length > 0 ? (
                 <div className="space-y-3">
-                    <p className="text-sm font-semibold text-base-content/50 uppercase tracking-wider">
+                    <p className="text-sm font-black uppercase tracking-widest text-base-content/50">
                         Related
                     </p>
                     {entities.map((entity) => (
@@ -78,16 +78,16 @@ export function ContextTab({ call, entities, isLoading }: ContextTabProps) {
 
 function EntityCard({ entity }: { entity: EntityData }) {
     return (
-        <div className="bg-base-200 p-4 space-y-2">
+        <div className="border-l-4 border-secondary bg-base-200 p-4 space-y-2 shadow-sm">
             <div className="flex items-center gap-3">
                 {entity.logo_url ? (
                     <img
                         src={entity.logo_url}
                         alt={entity.name}
-                        className="w-10 h-10 object-contain bg-base-100 p-1"
+                        className="w-10 h-10 rounded-none object-contain bg-base-100 p-1"
                     />
                 ) : (
-                    <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-none bg-base-300 flex items-center justify-center">
                         <i className={`fa-duotone fa-regular ${getEntityIcon(entity.entity_type)} text-base-content/60`} />
                     </div>
                 )}
@@ -105,10 +105,10 @@ function EntityCard({ entity }: { entity: EntityData }) {
                     {Object.entries(entity.details).map(([key, value]) =>
                         value ? (
                             <div key={key}>
-                                <p className="text-sm text-base-content/50 capitalize">
+                                <p className="text-sm text-base-content/50 uppercase tracking-wide">
                                     {key.replace(/_/g, ' ')}
                                 </p>
-                                <p className="text-sm text-base-content">{value}</p>
+                                <p className="text-sm text-base-content font-medium">{value}</p>
                             </div>
                         ) : null,
                     )}
@@ -121,31 +121,31 @@ function EntityCard({ entity }: { entity: EntityData }) {
 function ParticipantFallback({ call }: { call: CallDetail }) {
     return (
         <div className="space-y-3">
-            <p className="text-sm font-semibold text-base-content/50 uppercase tracking-wider">
+            <p className="text-sm font-black uppercase tracking-widest text-base-content/50">
                 Participants
             </p>
             {call.participants.map((p) => (
                 <div key={p.id} className="flex items-center gap-3 p-2">
                     <div className="avatar placeholder">
-                        <div className="w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-none bg-secondary text-secondary-content flex items-center justify-center">
                             {p.user.avatar_url ? (
                                 <img
                                     src={p.user.avatar_url}
-                                    alt={`${p.user.first_name} ${p.user.last_name}`}
+                                    alt={p.user.name || ''}
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
                                 <span className="text-sm font-bold">
-                                    {p.user.first_name.charAt(0)}{p.user.last_name.charAt(0)}
+                                    {(p.user.name || '?').split(' ').map(n => n[0]).join('').slice(0, 2)}
                                 </span>
                             )}
                         </div>
                     </div>
                     <div>
                         <p className="text-sm font-medium text-base-content">
-                            {p.user.first_name} {p.user.last_name}
+                            {p.user.name || 'Unknown'}
                         </p>
-                        <p className="text-sm text-base-content/50 capitalize">{p.role}</p>
+                        <p className="text-sm text-base-content/50 uppercase tracking-wide">{p.role}</p>
                     </div>
                 </div>
             ))}

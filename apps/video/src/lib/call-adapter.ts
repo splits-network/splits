@@ -20,7 +20,7 @@ export function adaptCallToCallContext(call: CallDetail): CallContext {
         participants: call.participants.map((p) => ({
             id: p.id,
             role: p.role,
-            name: `${p.user.first_name} ${p.user.last_name}`,
+            name: p.user.name || '',
             avatar_url: p.user.avatar_url,
         })),
         job: jobLink

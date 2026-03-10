@@ -7,7 +7,7 @@ interface RecordingConsentProps {
 
 export function RecordingConsent({ onConsent, consentGiven }: RecordingConsentProps) {
     return (
-        <div className="bg-warning/5 border border-warning/20 p-5 space-y-4">
+        <div className="bg-warning/5 border border-warning/20 rounded-none p-5 space-y-4">
             <div className="flex items-start gap-3">
                 <i className="fa-duotone fa-regular fa-circle-dot text-error text-xl mt-0.5" />
                 <div className="space-y-2">
@@ -28,7 +28,7 @@ export function RecordingConsent({ onConsent, consentGiven }: RecordingConsentPr
             <label className="flex items-center gap-3 cursor-pointer">
                 <input
                     type="checkbox"
-                    className="checkbox checkbox-warning"
+                    className="checkbox checkbox-warning rounded-none"
                     checked={consentGiven}
                     onChange={onConsent}
                 />

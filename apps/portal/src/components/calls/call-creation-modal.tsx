@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { ModalPortal } from '@splits-network/shared-ui';
 import { useCreateCall } from '@/hooks/use-create-call';
@@ -76,6 +76,34 @@ export function CallCreationModal({
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
+    /* ── Sync defaults when modal opens ── */
+    useEffect(() => {
+        if (!isOpen || !user) return;
+        const updated = [...defaultParticipants];
+        if (!updated.some((p) => p.user_id === user.id)) {
+            updated.unshift({
+                user_id: user.id,
+                first_name: user.firstName || '',
+                last_name: user.lastName || '',
+                email: user.primaryEmailAddress?.emailAddress || '',
+                avatar_url: user.imageUrl || null,
+                role: 'host',
+            });
+        }
+        setParticipants(updated);
+        setMode(defaultMode);
+        setTitle('');
+        setAgenda('');
+        setPreCallNotes('');
+        setSelectedTags([]);
+        setDuration(30);
+        setSchedule(null);
+        setEntities([]);
+        setShowConfirm(false);
+        setSubmitError(null);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, defaultParticipants, defaultMode]);
+
     /* ── Derived ── */
     const otherParticipants = participants.filter((p) => p.user_id !== user?.id);
     const hasParticipants = otherParticipants.length > 0;
@@ -113,7 +141,7 @@ export function CallCreationModal({
                 await startCall(call.id);
                 const tokenResult = await generateToken(call.id);
                 const videoBaseUrl = process.env.NEXT_PUBLIC_VIDEO_APP_URL || 'https://video.splits.network';
-                window.location.href = `${videoBaseUrl}/join/${tokenResult.access_token}`;
+                window.open(`${videoBaseUrl}/join/${tokenResult.access_token}`, '_blank');
             }
 
             // Fire-and-forget: create calendar events for scheduled calls

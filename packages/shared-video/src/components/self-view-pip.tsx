@@ -24,7 +24,7 @@ export function SelfViewPip({ name, avatarUrl }: SelfViewPipProps) {
     );
 
     return (
-        <div className="absolute bottom-4 right-4 w-24 lg:w-48 overflow-hidden shadow-lg z-10 bg-base-300">
+        <div className="absolute bottom-4 right-4 w-28 lg:w-48 overflow-hidden shadow-md z-10 bg-base-300 border-2 border-base-content/10">
             {localCameraTrack && isTrackReference(localCameraTrack) ? (
                 <VideoTrack
                     trackRef={localCameraTrack}
@@ -37,7 +37,7 @@ export function SelfViewPip({ name, avatarUrl }: SelfViewPipProps) {
             )}
 
             {/* Connection quality in corner */}
-            <div className="absolute top-1 right-1 bg-black/40 px-1 py-0.5">
+            <div className="absolute top-1 right-1 bg-neutral/70 px-1.5 py-0.5">
                 <ConnectionQualityBars participant={localParticipant} />
             </div>
         </div>

@@ -13,6 +13,25 @@ services:
       timeout: 10s
       retries: 3
 
+  livekit:
+    image: livekit/livekit-server:v1.8
+    container_name: splits-livekit
+    ports:
+      - "7880:7880"
+      - "7881:7881/udp"
+    command:
+      - --dev
+      - --bind=0.0.0.0
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-devkey}: ${LIVEKIT_API_SECRET:-devsecret}"
+    networks:
+      - splits-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7880"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: splits-redis
@@ -521,7 +540,7 @@ services:
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret}
-      LIVEKIT_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+      LIVEKIT_URL: ws://livekit:7880
     volumes:
       - ./services/video-service/src:/app/services/video-service/src
       - ./packages:/app/packages
@@ -530,6 +549,8 @@ services:
       - splits-network
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      livekit:
         condition: service_healthy
 
   analytics-service:
@@ -851,7 +872,7 @@ services:
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret}
-      LIVEKIT_WS_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+      LIVEKIT_WS_URL: ws://livekit:7880
     volumes:
       - ./services/call-service/src:/app/services/call-service/src
       - ./packages:/app/packages
@@ -860,6 +881,8 @@ services:
       - splits-network
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      livekit:
         condition: service_healthy
 
   api-gateway:
@@ -1068,6 +1091,31 @@ services:
     depends_on:
       - api-gateway
     command: pnpm --filter @splits-network/status dev
+
+  video:
+    build:
+      context: .
+      dockerfile: apps/video/Dockerfile
+      target: development
+    container_name: splits-video
+    ports:
+      - "3104:3104"
+    environment:
+      NODE_ENV: development
+      PORT: 3104
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_LIVEKIT_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+    volumes:
+      - ./apps/video/src:/app/apps/video/src
+      - ./apps/video/public:/app/apps/video/public
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/video/.next
+    networks:
+      - splits-network
+    depends_on:
+      - api-gateway
+    command: pnpm --filter @splits-network/video dev
 
 networks:
   splits-network:

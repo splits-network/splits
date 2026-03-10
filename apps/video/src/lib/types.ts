@@ -7,8 +7,7 @@ export type CallParticipantRole = 'host' | 'participant' | 'observer';
 export type CallEntityType = 'application' | 'job' | 'company' | 'firm' | 'candidate';
 
 export interface ParticipantUser {
-    first_name: string;
-    last_name: string;
+    name: string;
     avatar_url: string | null;
     email: string;
 }

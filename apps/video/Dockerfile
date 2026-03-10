@@ -16,6 +16,14 @@ COPY packages/shared-video/package.json ./packages/shared-video/
 COPY apps/video/package.json ./apps/video/
 RUN pnpm install --frozen-lockfile
 
+# Development stage
+FROM base AS development
+COPY --from=dependencies /app ./
+COPY packages ./packages
+COPY apps/video ./apps/video
+EXPOSE 3104
+CMD ["pnpm", "--filter", "@splits-network/video", "dev"]
+
 # Build stage
 FROM base AS build
 ARG NEXT_PUBLIC_API_URL
@@ -77,5 +85,5 @@ COPY --from=build /app/apps/video/.next ./apps/video/.next
 COPY --from=build /app/apps/video/public ./apps/video/public
 COPY --from=build /app/apps/video/next.config.mjs ./apps/video/
 
-EXPOSE 3102
+EXPOSE 3104
 CMD ["pnpm", "--filter", "@splits-network/video", "start"]

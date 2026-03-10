@@ -22,7 +22,7 @@ export default function JoinCallPage() {
                 const videoBaseUrl =
                     process.env.NEXT_PUBLIC_VIDEO_APP_URL ||
                     "https://video.applicant.network";
-                window.location.href = `${videoBaseUrl}/join/${result.access_token}`;
+                window.open(`${videoBaseUrl}/join/${result.access_token}`, '_blank');
             } catch (err: any) {
                 if (!cancelled) {
                     setError(err.message || "Failed to generate call token");

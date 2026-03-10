@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import { headers } from 'next/headers';
 import { detectBrand } from '@/lib/brand';
 import { BrandProvider } from '@/components/brand-provider';
@@ -23,6 +24,11 @@ export default async function RootLayout({
                 <BrandProvider brand={brand}>
                     {children}
                 </BrandProvider>
+                <Script
+                    src="https://kit.fontawesome.com/728c8ddec8.js"
+                    crossOrigin="anonymous"
+                    async
+                />
             </body>
         </html>
     );

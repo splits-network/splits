@@ -22,7 +22,6 @@ export function DeviceSelector({ kind, onDeviceChange, activeDeviceId }: DeviceS
             const allDevices = await navigator.mediaDevices.enumerateDevices();
             setDevices(allDevices.filter((d) => d.kind === kind));
         } catch {
-            // Permission not yet granted or not supported
             setDevices([]);
         }
     }, [kind]);
@@ -41,12 +40,12 @@ export function DeviceSelector({ kind, onDeviceChange, activeDeviceId }: DeviceS
     if (devices.length === 0) return null;
 
     return (
-        <label className="form-control w-full">
-            <div className="label">
-                <span className="label-text text-sm">{label}</span>
-            </div>
+        <fieldset className="fieldset w-full">
+            <legend className="fieldset-legend uppercase tracking-wide text-sm font-semibold text-base-content/60">
+                {label}
+            </legend>
             <select
-                className="select select-bordered select-sm w-full"
+                className="select select-bordered select-sm rounded-none w-full"
                 value={activeDeviceId ?? ''}
                 onChange={(e) => onDeviceChange(e.target.value)}
             >
@@ -56,6 +55,6 @@ export function DeviceSelector({ kind, onDeviceChange, activeDeviceId }: DeviceS
                     </option>
                 ))}
             </select>
-        </label>
+        </fieldset>
     );
 }

@@ -10,19 +10,17 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 ## Current State
 
-v9.0 Video Interviewing shipped. v8.0 Company Experience Enhancement shelved (requirements defined but not executed — see REQUIREMENTS-v8.md if resuming).
+v10.0 Video Platform & Recruiting Calls shipped. v8.0 Company Experience Enhancement shelved (requirements defined but not executed — see REQUIREMENTS-v8.md if resuming).
 
-## Current Milestone: v10.0 Video Platform & Recruiting Calls
+## Current Milestone: v11.0 Candidate Call Experience
 
-**Goal:** Generalize video from interview-only to platform-wide recruiting conversations, with dedicated full-screen video apps on branded subdomains.
+**Goal:** Surface video calls in the candidate app so candidates on the platform can see upcoming calls, receive notifications, and join calls via video.applicant.network.
 
 **Target features:**
-- Dedicated video app (`apps/video/`) — full-screen call experience replacing in-portal video pages
-- Two branded subdomains: `video.splits.network` (recruiters/companies) and `video.applicant.network` (candidates)
-- Recruiter ↔ Company calls — discuss candidates, roles, split terms with AI summaries linked to entities
-- Generalized call types beyond interviews: `interview`, `client_meeting`
-- Migration of existing interview video flows to the new video app
-- AI summaries for all call types — context-aware linking to applications, jobs, or companies
+- Upcoming calls on candidate dashboard with call details and Join button
+- Calls tab on application detail page showing entity-linked calls
+- Join flow from candidate app redirecting to video.applicant.network
+- In-app and email notifications when calls are scheduled, rescheduled, or cancelled involving candidates
 
 ## Requirements
 
@@ -101,13 +99,20 @@ v9.0 Video Interviewing shipped. v8.0 Company Experience Enhancement shelved (re
 - Dedicated interviews tab on applications/roles with recording playback — v9.0
 - AI summary auto-posted as application note — v9.0
 
-### Active
+<!-- v10.0 -->
 
 - Dedicated video app with full-screen call experience on branded subdomains — v10.0
 - Recruiter ↔ Company video calls with entity-linked AI summaries — v10.0
 - Generalized call types (`interview`, `client_meeting`) with polymorphic entity linking — v10.0
 - Migration of existing interview video flows from portal/candidate to video app — v10.0
 - Two branded video subdomains: video.splits.network and video.applicant.network — v10.0
+
+### Active
+
+- Upcoming calls on candidate dashboard with Join Call button — v11.0
+- Calls tab on candidate application detail page with entity-linked calls — v11.0
+- Candidate join flow redirecting to video.applicant.network — v11.0
+- Call notifications (in-app + email) for candidates when calls are scheduled/rescheduled/cancelled — v11.0
 
 ### Out of Scope
 

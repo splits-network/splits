@@ -418,11 +418,13 @@ jobs:
                   kubectl delete deployment rabbitmq --namespace=${{ env.NAMESPACE }} --ignore-not-found=true
                   kubectl apply -f infra/k8s/redis/ --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
                   kubectl apply -f infra/k8s/rabbitmq/ --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
+                  kubectl apply -f infra/k8s/livekit/ --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
 
             - name: Wait for infrastructure to be ready
               run: |
                   kubectl rollout status deployment/redis --timeout=120s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/rabbitmq --timeout=120s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/livekit-server --timeout=120s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy backend services
               run: |

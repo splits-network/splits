@@ -28,7 +28,7 @@ export function ChatTab({ call }: ChatTabProps) {
     const currentUser = call.participants[0];
     const currentUserId = currentUser?.user_id || 'unknown';
     const currentUserName = currentUser
-        ? `${currentUser.user.first_name} ${currentUser.user.last_name}`
+        ? currentUser.user.name || 'You'
         : 'You';
 
     // Auto-scroll on new messages
@@ -114,19 +114,22 @@ export function ChatTab({ call }: ChatTabProps) {
         <div className="flex flex-col h-full -m-4">
             {/* Connection status */}
             {!isConnected && (
-                <div className="px-4 py-2 bg-warning/10 text-warning text-sm text-center">
-                    <i className="fa-duotone fa-regular fa-wifi-slash mr-1" />
-                    Connecting to chat...
+                <div className="border-l-4 border-warning bg-warning/10 px-4 py-2 flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-wifi-slash text-warning" />
+                    <span className="text-sm font-medium text-warning">Connecting to chat...</span>
                 </div>
             )}
 
             {/* Messages area */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
                 {messages.length === 0 && (
-                    <div className="text-center py-8">
-                        <i className="fa-duotone fa-regular fa-messages text-3xl text-base-content/20 mb-3" />
-                        <p className="text-sm text-base-content/40">
-                            No messages yet. Start the conversation.
+                    <div className="text-center py-12">
+                        <i className="fa-duotone fa-regular fa-messages text-5xl text-base-content/15 mb-4" />
+                        <p className="text-sm font-semibold text-base-content/40">
+                            No messages yet
+                        </p>
+                        <p className="text-sm text-base-content/30 mt-1">
+                            Start the conversation with your team.
                         </p>
                     </div>
                 )}
@@ -144,7 +147,7 @@ export function ChatTab({ call }: ChatTabProps) {
                                 </span>
                             )}
                             <div
-                                className={`max-w-[85%] px-3 py-2 text-sm ${
+                                className={`max-w-[85%] px-3 py-2 text-sm rounded-none shadow-sm ${
                                     isOwn
                                         ? 'bg-primary text-primary-content'
                                         : 'bg-base-200 text-base-content'
@@ -163,11 +166,11 @@ export function ChatTab({ call }: ChatTabProps) {
             </div>
 
             {/* Input area */}
-            <div className="border-t border-base-300 p-3">
+            <div className="border-t-2 border-base-300 p-3">
                 <div className="flex gap-2">
                     <input
                         type="text"
-                        className="input input-bordered flex-1 text-sm"
+                        className="input input-bordered rounded-none flex-1 text-sm"
                         placeholder="Type a message..."
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
@@ -176,7 +179,7 @@ export function ChatTab({ call }: ChatTabProps) {
                     />
                     <button
                         type="button"
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-primary btn-sm rounded-none"
                         onClick={sendMessage}
                         disabled={!input.trim() || !isConnected}
                     >

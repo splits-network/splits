@@ -61,7 +61,7 @@ export function AudioLevelMeter({ audioTrack }: AudioLevelMeterProps) {
             {levels.map((level, i) => (
                 <div
                     key={i}
-                    className={`w-1.5 transition-all duration-75 ${
+                    className={`w-2 transition-all duration-75 ${
                         isMuted ? 'bg-base-content/20' : 'bg-success'
                     }`}
                     style={{ height: `${Math.max(4, level * 32)}px` }}

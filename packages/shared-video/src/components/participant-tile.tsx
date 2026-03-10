@@ -26,11 +26,13 @@ export function ParticipantTile({ participant, name, avatarUrl, isCandidate }: P
     );
 
     return (
-        <div className={`relative w-full h-full bg-base-300 ${isCandidate ? 'border-2 border-accent' : ''}`}>
+        <div className={`relative w-full h-full bg-base-300 ${isCandidate ? 'border-l-4 border-accent' : ''}`}>
             {/* Candidate badge overlay */}
             {isCandidate && (
                 <div className="absolute top-3 left-3 z-10">
-                    <span className="badge badge-accent badge-sm">Candidate</span>
+                    <span className="badge badge-accent rounded-none text-[11px] font-bold tracking-wide uppercase">
+                        Candidate
+                    </span>
                 </div>
             )}
 
@@ -44,13 +46,13 @@ export function ParticipantTile({ participant, name, avatarUrl, isCandidate }: P
             )}
 
             {/* Connection quality indicator */}
-            <div className="absolute top-3 right-3 bg-black/40 px-2 py-1">
+            <div className="absolute top-3 right-3 bg-neutral/70 px-2 py-1">
                 <ConnectionQualityBars participant={participant} />
             </div>
 
             {/* Participant name overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white px-4 py-2">
-                <span className="text-sm font-medium">{name}</span>
+            <div className="absolute bottom-0 left-0 right-0 bg-neutral/80 backdrop-blur-sm px-4 py-2.5">
+                <span className="text-sm font-semibold text-neutral-content">{name}</span>
             </div>
         </div>
     );

@@ -13,13 +13,6 @@ interface ParticipantSidebarProps {
 
 type HighlightType = 'joined' | 'left';
 
-interface HighlightEntry {
-    type: HighlightType;
-    identity: string;
-    name: string;
-    timestamp: number;
-}
-
 function getInitial(name: string): string {
     return name.charAt(0).toUpperCase();
 }
@@ -45,18 +38,18 @@ function ParticipantEntry({
 
     return (
         <div
-            className={`flex items-center gap-3 px-3 py-2 ${isCandidate ? 'border-l-4 border-accent' : ''} ${highlightClass}`}
+            className={`flex items-center gap-3 px-4 py-3 ${
+                isCandidate ? 'border-l-4 border-accent bg-accent/5' : 'border-l-4 border-transparent'
+            } ${highlightClass}`}
         >
             <div className="avatar placeholder">
-                <div className="bg-primary text-primary-content w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                <div className="bg-primary text-primary-content w-8 h-8 rounded-none flex items-center justify-center text-sm font-black">
                     {getInitial(name)}
                 </div>
             </div>
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{name}</p>
-                <span
-                    className={`badge badge-sm ${isCandidate ? 'badge-accent' : 'badge-neutral'}`}
-                >
+                <p className="text-sm font-semibold text-base-content truncate">{name}</p>
+                <span className="tracking-[0.1em] text-[11px] uppercase font-semibold text-base-content/50">
                     {role === 'candidate' ? 'Candidate' : 'Host'}
                 </span>
             </div>
@@ -135,18 +128,25 @@ export function ParticipantSidebar({
 
     return (
         <div
-            className={`bg-base-200/80 backdrop-blur-sm border-l border-base-300 flex flex-col transition-all ${isCollapsed ? 'w-12' : 'w-64'}`}
+            className={`bg-base-100 border-l-2 border-base-300 flex flex-col transition-all ${
+                isCollapsed ? 'w-12' : 'w-64'
+            }`}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-base-300">
+            <div className="flex items-center justify-between px-4 py-3 border-b-2 border-base-300 bg-base-200/50">
                 {!isCollapsed && (
-                    <span className="text-sm font-semibold">
-                        Participants ({participants.length + 1})
-                    </span>
+                    <div>
+                        <p className="tracking-[0.15em] text-[11px] uppercase font-semibold text-base-content/50">
+                            Participants
+                        </p>
+                        <p className="text-lg font-black text-base-content">
+                            {participants.length + 1}
+                        </p>
+                    </div>
                 )}
                 <button
                     type="button"
-                    className="btn btn-ghost btn-xs"
+                    className="btn btn-square btn-ghost btn-xs rounded-none"
                     onClick={() => setIsCollapsed(!isCollapsed)}
                 >
                     <i className={`fa-duotone fa-regular ${isCollapsed ? 'fa-chevron-left' : 'fa-chevron-right'}`} />
@@ -154,7 +154,7 @@ export function ParticipantSidebar({
             </div>
 
             {!isCollapsed && (
-                <div className="overflow-y-auto flex-1">
+                <div className="overflow-y-auto flex-1 divide-y divide-base-200">
                     {/* Local participant (you) */}
                     <ParticipantEntry
                         name={`${localName} (You)`}

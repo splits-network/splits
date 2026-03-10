@@ -581,6 +581,13 @@ export class CallsEventConsumer {
                 source,
                 userId: contact.userId,
             });
+
+            await this.inAppService.notifyInstantCall(contact.userId, {
+                callId,
+                callerName,
+                joinUrl,
+                isCandidate,
+            });
         }
 
         this.logger.info(

@@ -93,6 +93,7 @@ export class CallService {
         await this.eventPublisher.publish('call.created', {
             call_id: call.id,
             call_type: call.call_type,
+            title: call.title,
             created_by: resolvedUserId,
             scheduled_at: call.scheduled_at,
             agenda: call.agenda,

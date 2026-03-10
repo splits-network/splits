@@ -41,7 +41,7 @@ export function CallSidePanel({ call, accessToken = null }: CallSidePanelProps) 
             {/* Toggle button -- always visible at panel edge */}
             <button
                 type="button"
-                className="fixed right-0 top-1/2 -translate-y-1/2 z-40 btn btn-sm btn-neutral h-12"
+                className="fixed right-0 top-1/2 -translate-y-1/2 z-40 btn btn-sm btn-neutral rounded-none h-12"
                 onClick={toggleOpen}
                 aria-label={isOpen ? 'Close side panel' : 'Open side panel'}
             >
@@ -58,19 +58,19 @@ export function CallSidePanel({ call, accessToken = null }: CallSidePanelProps) 
 
             {/* Panel */}
             <div
-                className={`fixed top-0 right-0 z-40 h-full bg-base-100 border-l border-base-300 shadow-lg
+                className={`fixed top-0 right-0 z-40 h-full bg-base-100 border-l-2 border-base-300 shadow-md
                     w-full sm:w-[350px] transition-transform duration-200
                     ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >
                 <div className="flex flex-col h-full">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-base-300">
-                        <h2 className="font-bold text-base-content">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-base-300 backdrop-blur-sm bg-base-100/95">
+                        <h2 className="font-black text-lg text-base-content">
                             {call.title || 'Video Call'}
                         </h2>
                         <button
                             type="button"
-                            className="btn btn-ghost btn-sm btn-square"
+                            className="btn btn-ghost btn-sm btn-square rounded-none"
                             onClick={() => setOpen(false)}
                             aria-label="Close panel"
                         >
@@ -78,7 +78,7 @@ export function CallSidePanel({ call, accessToken = null }: CallSidePanelProps) 
                         </button>
                     </div>
 
-                    {/* DaisyUI Tabs */}
+                    {/* Tabs */}
                     {visibleTabs.length > 1 && (
                         <div className="border-b border-base-300" role="tablist">
                             <div className="flex">
@@ -87,9 +87,9 @@ export function CallSidePanel({ call, accessToken = null }: CallSidePanelProps) 
                                         key={tab.id}
                                         type="button"
                                         role="tab"
-                                        className={`flex-1 py-2.5 text-sm font-medium transition-colors
+                                        className={`flex-1 py-2.5 text-sm font-semibold tracking-wide transition-colors rounded-none
                                             ${currentTab === tab.id
-                                                ? 'text-primary border-b-2 border-primary'
+                                                ? 'text-primary border-b-2 border-primary bg-base-100'
                                                 : 'text-base-content/50 hover:text-base-content'
                                             }`}
                                         onClick={() => setActiveTab(tab.id)}

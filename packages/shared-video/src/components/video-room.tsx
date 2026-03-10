@@ -53,12 +53,16 @@ function JoinLeaveToast({ toast, onRemove }: { toast: Toast; onRemove: () => voi
 
     return (
         <div
-            className={`alert ${toast.type === 'join' ? 'alert-success' : 'alert-error'} py-2 px-4 shadow-lg animate-fade-in`}
+            className={`flex items-center gap-3 py-2.5 px-4 shadow-md border-l-4 ${
+                toast.type === 'join'
+                    ? 'bg-success/10 border-success text-success'
+                    : 'bg-error/10 border-error text-error'
+            }`}
         >
             <i
                 className={`fa-duotone fa-regular ${toast.type === 'join' ? 'fa-user-plus' : 'fa-user-minus'}`}
             />
-            <span className="text-sm">{toast.message}</span>
+            <span className="text-sm font-semibold">{toast.message}</span>
         </div>
     );
 }
@@ -136,7 +140,7 @@ export function VideoRoom({
     )?.name ?? 'other participants';
 
     return (
-        <div className="relative h-screen bg-base-300 flex">
+        <div className="relative h-screen bg-base-200 flex">
             {/* Main content area */}
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Video area */}
@@ -252,7 +256,7 @@ function ScreenShareLayout({
     return (
         <div className="flex h-full">
             {/* Participant strip (left side) */}
-            <div className="w-48 flex flex-col gap-1 overflow-y-auto bg-base-300">
+            <div className="w-48 flex flex-col gap-px overflow-y-auto bg-base-200 border-r-2 border-base-300">
                 {remoteParticipants.map((participant) => {
                     const info = callContext.participants.find(
                         (p) => p.id === participant.identity,
