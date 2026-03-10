@@ -11,6 +11,7 @@
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
 - [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-51 (shipped 2026-03-09)
+- [ ] **v11.0 Candidate Call Experience** - Phases 52+
 
 ## Phases
 
@@ -61,9 +62,8 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 
 </details>
 
-### v10.0 Video Platform & Recruiting Calls
-
-**Milestone Goal:** Generalize video from interview-only to platform-wide recruiting conversations, with a dedicated full-screen video app on branded subdomains and recruiter-company calls as the first new call type.
+<details>
+<summary>v10.0 Video Platform & Recruiting Calls (Phases 42-51) - Complete</summary>
 
 - [x] **Phase 42: Call Data Model & Service Layer** - calls table, call_participants, call_access_tokens, call-service microservice, gateway routes
 - [x] **Phase 43: Video App & Infrastructure** - apps/video/ with brand detection, magic-link auth, K8s deployment, dual-subdomain ingress
@@ -75,6 +75,14 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 49: Critical Flow Fixes** - Event payload participants, token field mismatch, join route, recording playback
 - [x] **Phase 50: Post-Migration Text & Metadata Cleanup** - User-facing interview text, Swagger description, notification metadata key
 - [x] **Phase 51: Recording Consent & Calendar Auto-Creation** - Pass recordingEnabled prop, wire Google Calendar event creation on call.created
+
+</details>
+
+### v11.0 Candidate Call Experience
+
+**Milestone Goal:** Surface video calls in the candidate app so candidates on the platform can see upcoming calls, receive notifications, and join calls via video.applicant.network — closing the gap where only portal users have call visibility.
+
+- [ ] **Phase 52: Candidate Call Experience** - Upcoming calls on dashboard and application detail, join flow via video.applicant.network, call notifications for candidates
 
 ## Phase Details
 
@@ -236,10 +244,25 @@ Plans:
 - [x] 51-01-PLAN.md — Pass recording_consent_required through call detail to video app VideoLobby
 - [x] 51-02-PLAN.md — Wire Google Calendar auto-creation after scheduled call creation in portal
 
+### Phase 52: Candidate Call Experience
+**Goal**: Candidates on the platform can see their upcoming calls, receive notifications when calls are scheduled, and join calls directly from the candidate app via video.applicant.network
+**Depends on**: Phase 51
+**Requirements**: CAND-01, CAND-02, CAND-03, CAND-04, CAND-05
+**Success Criteria** (what must be TRUE):
+  1. Candidate dashboard shows upcoming scheduled calls with call details (title, time, participants) and a "Join Call" button
+  2. Application detail page shows entity-linked calls in a Calls tab, matching the portal's application call tab
+  3. Clicking "Join Call" generates a token and redirects to `video.applicant.network/join/{token}`
+  4. Candidates receive in-app notifications and email when a call is scheduled, rescheduled, or cancelled involving them
+**Plans:** 3 plans
+Plans:
+- [ ] 52-01-PLAN.md — Dashboard upcoming calls widget and join call page
+- [ ] 52-02-PLAN.md — Application detail calls section and notification icon fix
+- [ ] 52-03-PLAN.md — Notification URL routing for candidate participants
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 -> 50 -> 51
+Phases execute in numeric order: 52
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -273,3 +296,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 ->
 | 49. Critical Flow Fixes | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 50. Post-Migration Text & Metadata Cleanup | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 51. Recording Consent & Calendar Auto-Creation | v10.0 | 2/2 | Complete | 2026-03-09 |
+| 52. Candidate Call Experience | v11.0 | 0/3 | Not Started | — |
