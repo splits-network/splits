@@ -61,16 +61,25 @@ export class CallService {
             entityLinks.push(created);
         }
 
+        // Resolve all participant Clerk IDs to internal UUIDs
+        const rawParticipants = [...(input.participants || [])];
+        const resolvedParticipants: { user_id: string; role: CallParticipantRole }[] = [];
+        for (const p of rawParticipants) {
+            const resolved = await this.repository.resolveUserId(p.user_id);
+            if (resolved) {
+                resolvedParticipants.push({ user_id: resolved, role: p.role });
+            }
+        }
+
         // Auto-add creator as host if not in participants list
-        const participants = [...(input.participants || [])];
-        const creatorInList = participants.some((p) => p.user_id === resolvedUserId);
+        const creatorInList = resolvedParticipants.some((p) => p.user_id === resolvedUserId);
         if (!creatorInList) {
-            participants.unshift({ user_id: resolvedUserId, role: 'host' });
+            resolvedParticipants.unshift({ user_id: resolvedUserId, role: 'host' });
         }
 
         // Bulk insert participants
         const createdParticipants = [];
-        for (const p of participants) {
+        for (const p of resolvedParticipants) {
             const created = await this.repository.participants.addParticipant(call.id, p);
             createdParticipants.push(created);
         }
