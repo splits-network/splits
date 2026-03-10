@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v10.0 Video Platform & Recruiting Calls — Complete
+**Current focus:** v11.0 Candidate Call Experience
 
 ## Current Position
 
-Phase: 51 (10 of 10 in v10.0) — Recording Consent & Calendar Auto-Creation
-Plan: 2 of 2
-Status: Phase complete
-Last activity: 2026-03-10 — Completed 51-02-PLAN.md
+Phase: 52 (1 of 1 in v11.0) — Candidate Call Experience
+Plan: 1 of 3
+Status: In progress
+Last activity: 2026-03-09 — Completed 52-01-PLAN.md
 
-Progress: [██████████████████████████████████████] 38/38 plans
+Progress: [█████████████░░░░░░░░░░░░░░░░░░░░░░░░░░] 1/3 plans
 
 ## Performance Metrics
 
@@ -36,6 +36,7 @@ Progress: [███████████████████████
 | 49-critical-flow-fixes | 2/2 | 5min | 2.50min |
 | 50-post-migration-text-metadata-cleanup | 2/2 | 3min | 1.50min |
 | 51-recording-consent-calendar-auto-creation | 2/2 | 3min | 1.50min |
+| 52-candidate-call-experience | 1/3 | 4min | 4.00min |
 
 ## Accumulated Context
 
@@ -126,6 +127,10 @@ Recent decisions affecting current work:
 - [50-02]: API endpoint paths (/interviews/calendar-preferences) left unchanged to preserve backend contract
 - [50-02]: All remaining portal "interview" references confirmed as legitimate domain concepts (application pipeline stage)
 
+### Roadmap Evolution
+
+- Phase 52 added: Candidate Call Experience — upcoming calls on dashboard/application detail, join flow via video.applicant.network, call notifications
+
 ### Pending Todos
 
 None.
@@ -138,10 +143,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10
-Stopped at: Completed 51-02-PLAN.md (calendar auto-creation wiring)
+Last session: 2026-03-09
+Stopped at: Completed 52-01-PLAN.md
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-10 (Completed 51-02: calendar auto-creation wiring — Phase 51 complete)*
+*Last updated: 2026-03-09 (52-01 completed — candidate call widget and join flow)*
