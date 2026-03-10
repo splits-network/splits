@@ -1,9 +1,24 @@
-# Requirements: Splits Network v10.0 — Video Platform & Recruiting Calls
+# Requirements: Splits Network v11.0 — Candidate Call Experience
 
-**Defined:** 2026-03-08
+**Defined:** 2026-03-09
 **Core Value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
 
-## v10.0 Requirements
+## v11.0 Requirements
+
+Requirements for surfacing video calls in the candidate app so candidates on the platform can see upcoming calls, receive notifications, and join calls directly.
+
+### Candidate Call Visibility
+
+- [x] **CAND-01**: Candidate dashboard shows upcoming scheduled calls with title, time, participants, and a "Join Call" button
+- [x] **CAND-02**: Application detail page shows entity-linked calls in a Calls tab matching the portal's application call tab
+- [x] **CAND-03**: Clicking "Join Call" generates a token and redirects to `video.applicant.network/join/{token}`
+
+### Candidate Call Notifications
+
+- [x] **CAND-04**: Candidates receive in-app notifications when a call is scheduled, rescheduled, or cancelled involving them
+- [x] **CAND-05**: Candidates receive email notifications for call scheduling, reminders, and cancellation
+
+## v10.0 Requirements (Complete)
 
 Requirements for generalizing video from interview-only to platform-wide recruiting conversations, with dedicated full-screen video apps on branded subdomains. Each maps to roadmap phases.
 
@@ -111,11 +126,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MIG-02 | Phase 46 | Complete |
 | MIG-03 | Phase 46 | Complete |
 
+| CAND-01 | Phase 52 | Pending |
+| CAND-02 | Phase 52 | Pending |
+| CAND-03 | Phase 52 | Pending |
+| CAND-04 | Phase 52 | Pending |
+| CAND-05 | Phase 52 | Pending |
+
 **Coverage:**
-- v10.0 requirements: 20 total
-- Mapped to phases: 20
+- v11.0 requirements: 5 total
+- Mapped to phases: 5
 - Unmapped: 0
+- v10.0 requirements: 20 total (all complete)
 
 ---
 *Requirements defined: 2026-03-08*
-*Last updated: 2026-03-08 after roadmap creation (all 20 requirements mapped to Phases 42-46)*
+*Last updated: 2026-03-09 after v11.0 milestone creation (5 new requirements mapped to Phase 52)*

@@ -11,7 +11,7 @@
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
 - [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-51 (shipped 2026-03-09)
-- [ ] **v11.0 Candidate Call Experience** - Phases 52+
+- [x] **v11.0 Candidate Call Experience** - Phase 52 (shipped 2026-03-09)
 
 ## Phases
 
@@ -82,7 +82,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 
 **Milestone Goal:** Surface video calls in the candidate app so candidates on the platform can see upcoming calls, receive notifications, and join calls via video.applicant.network — closing the gap where only portal users have call visibility.
 
-- [ ] **Phase 52: Candidate Call Experience** - Upcoming calls on dashboard and application detail, join flow via video.applicant.network, call notifications for candidates
+- [x] **Phase 52: Candidate Call Experience** - Upcoming calls on dashboard and application detail, join flow via video.applicant.network, call notifications for candidates
 
 ## Phase Details
 
@@ -255,9 +255,9 @@ Plans:
   4. Candidates receive in-app notifications and email when a call is scheduled, rescheduled, or cancelled involving them
 **Plans:** 3 plans
 Plans:
-- [ ] 52-01-PLAN.md — Dashboard upcoming calls widget and join call page
-- [ ] 52-02-PLAN.md — Application detail calls section and notification icon fix
-- [ ] 52-03-PLAN.md — Notification URL routing for candidate participants
+- [x] 52-01-PLAN.md — Dashboard upcoming calls widget and join call page
+- [x] 52-02-PLAN.md — Application detail calls section and notification icon fix
+- [x] 52-03-PLAN.md — Notification URL routing for candidate participants
 
 ## Progress
 
@@ -296,4 +296,4 @@ Phases execute in numeric order: 52
 | 49. Critical Flow Fixes | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 50. Post-Migration Text & Metadata Cleanup | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 51. Recording Consent & Calendar Auto-Creation | v10.0 | 2/2 | Complete | 2026-03-09 |
-| 52. Candidate Call Experience | v11.0 | 0/3 | Not Started | — |
+| 52. Candidate Call Experience | v11.0 | 3/3 | Complete | 2026-03-09 |

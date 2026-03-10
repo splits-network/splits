@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v11.0 Candidate Call Experience
+**Current focus:** v11.0 Candidate Call Experience (complete)
 
 ## Current Position
 
