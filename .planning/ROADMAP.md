@@ -10,7 +10,7 @@
 - [x] **v7.0 Company Profile Enhancement** - Phases 22-27 (shipped 2026-03-04)
 - [ ] ~~**v8.0 Company Experience Enhancement** - Phases 28-32 (shelved)~~
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
-- [ ] **v10.0 Video Platform & Recruiting Calls** - Phases 42-50 (gap closure in progress)
+- [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-50 (shipped 2026-03-09)
 
 ## Phases
 
@@ -73,7 +73,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 47: Critical Bug Fixes & Event Wiring** - SessionStorage key mismatch, event name mismatch, missing reminder binding
 - [x] **Phase 48: Interview Migration Cleanup** - Dead gateway auth rules, dead shared-video hooks, legacy S3 bucket name
 - [x] **Phase 49: Critical Flow Fixes** - Event payload participants, token field mismatch, join route, recording playback
-- [ ] **Phase 50: Post-Migration Text & Metadata Cleanup** - User-facing interview text, Swagger description, notification metadata key
+- [x] **Phase 50: Post-Migration Text & Metadata Cleanup** - User-facing interview text, Swagger description, notification metadata key
 
 ## Phase Details
 
@@ -219,8 +219,8 @@ Plans:
   3. Notification metadata key matches RabbitMQ routing key format (`call.recording_ready` not `call.recording.ready`)
 **Plans:** 2 plans
 Plans:
-- [ ] 50-01-PLAN.md — Fix notification metadata eventType keys and video-service Swagger description
-- [ ] 50-02-PLAN.md — Fix recording consent text and portal UI interview references
+- [x] 50-01-PLAN.md — Fix notification metadata eventType keys and video-service Swagger description
+- [x] 50-02-PLAN.md — Fix recording consent text and portal UI interview references
 
 ## Progress
 
@@ -257,4 +257,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 ->
 | 47. Critical Bug Fixes & Event Wiring | v10.0 | 1/1 | Complete | 2026-03-09 |
 | 48. Interview Migration Cleanup | v10.0 | 3/3 | Complete | 2026-03-09 |
 | 49. Critical Flow Fixes | v10.0 | 2/2 | Complete | 2026-03-09 |
-| 50. Post-Migration Text & Metadata Cleanup | v10.0 | 0/2 | Not Started | — |
+| 50. Post-Migration Text & Metadata Cleanup | v10.0 | 2/2 | Complete | 2026-03-09 |
