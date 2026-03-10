@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import type { CallRecording } from "../../hooks/use-call-detail";
 
 interface RecordingTabProps {
@@ -18,6 +20,9 @@ export function RecordingTab({
 }: RecordingTabProps) {
     const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
     const [playbackSpeed, setPlaybackSpeed] = useState(1);
+    const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
+    const [loadingUrl, setLoadingUrl] = useState(false);
+    const { getToken } = useAuth();
 
     // Find the first ready recording
     const readyRecording = recordings?.find(
@@ -32,6 +37,32 @@ export function RecordingTab({
     const failedRecording = recordings?.find(
         (r) => r.recording_status === "failed"
     );
+
+    // Fetch signed playback URL when a ready recording is found
+    useEffect(() => {
+        if (!readyRecording) return;
+        setLoadingUrl(true);
+        let cancelled = false;
+
+        async function fetchUrl() {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: { url: string } }>(
+                    `/calls/${readyRecording!.call_id}/recordings/${readyRecording!.id}/playback-url`
+                );
+                if (!cancelled) setPlaybackUrl(res.data.url);
+            } catch (err) {
+                console.error("Failed to load playback URL", err);
+            } finally {
+                if (!cancelled) setLoadingUrl(false);
+            }
+        }
+
+        fetchUrl();
+        return () => { cancelled = true; };
+    }, [readyRecording?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Sync external timestamp changes to the player
     useEffect(() => {
@@ -100,6 +131,19 @@ export function RecordingTab({
         ? formatSeconds(readyRecording.duration_seconds)
         : null;
 
+    // Loading signed URL
+    if (loadingUrl || !playbackUrl) {
+        return (
+            <div className="border-2 border-base-300 p-8 text-center">
+                <span className="loading loading-spinner loading-md text-primary mb-4 block" />
+                <p className="font-bold mb-1">Loading Recording</p>
+                <p className="text-sm text-base-content/50">
+                    Preparing playback...
+                </p>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-4">
             {/* Player */}
@@ -107,7 +151,7 @@ export function RecordingTab({
                 {isVideo ? (
                     <video
                         ref={mediaRef as React.RefObject<HTMLVideoElement>}
-                        src={readyRecording.blob_url!}
+                        src={playbackUrl}
                         controls
                         className="w-full max-h-[480px]"
                         onTimeUpdate={handleTimeUpdate}
@@ -116,7 +160,7 @@ export function RecordingTab({
                     <div className="p-6">
                         <audio
                             ref={mediaRef as React.RefObject<HTMLAudioElement>}
-                            src={readyRecording.blob_url!}
+                            src={playbackUrl}
                             controls
                             className="w-full"
                             onTimeUpdate={handleTimeUpdate}
