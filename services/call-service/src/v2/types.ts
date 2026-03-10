@@ -149,8 +149,7 @@ export interface CallTagLink {
 
 export interface CallParticipantWithUser extends CallParticipant {
     user: {
-        first_name: string;
-        last_name: string;
+        name: string;
         avatar_url: string | null;
         email: string;
     };
@@ -158,8 +157,7 @@ export interface CallParticipantWithUser extends CallParticipant {
 
 export interface CallNoteWithUser extends CallNote {
     user: {
-        first_name: string;
-        last_name: string;
+        name: string;
     };
 }
 

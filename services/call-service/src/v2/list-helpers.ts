@@ -68,7 +68,7 @@ async function resolveSearchFilter(
     const { data: matchedUsers, error: userErr } = await supabase
         .from('users')
         .select('id')
-        .or(`first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`);
+        .ilike('name', searchPattern);
 
     if (userErr) throw userErr;
 

@@ -198,19 +198,19 @@ export class ArtifactRepository {
         const userIds = [...new Set(notes.map((n: { user_id: string }) => n.user_id))];
         const { data: users, error: userError } = await this.supabase
             .from('users')
-            .select('id, first_name, last_name')
+            .select('id, name')
             .in('id', userIds);
 
         if (userError) throw userError;
 
-        const userMap = new Map<string, { first_name: string; last_name: string }>();
+        const userMap = new Map<string, { name: string }>();
         for (const u of users || []) {
-            userMap.set(u.id, { first_name: u.first_name || '', last_name: u.last_name || '' });
+            userMap.set(u.id, { name: u.name || '' });
         }
 
         return notes.map((n: any) => ({
             ...n,
-            user: userMap.get(n.user_id) || { first_name: '', last_name: '' },
+            user: userMap.get(n.user_id) || { name: '' },
         }));
     }
 }

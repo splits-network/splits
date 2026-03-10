@@ -53,7 +53,7 @@ export function CallNotesSection({
                         <div key={note.id} className="px-4 py-3">
                             <div className="flex items-center justify-between mb-1">
                                 <span className="text-sm font-bold">
-                                    {note.user.first_name} {note.user.last_name}
+                                    {note.user.name}
                                 </span>
                                 <span className="text-sm text-base-content/40">
                                     {new Date(

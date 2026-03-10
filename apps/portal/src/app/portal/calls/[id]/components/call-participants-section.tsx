@@ -56,7 +56,7 @@ function ParticipantRow({
 }: {
     participant: CallParticipantItem;
 }) {
-    const name = `${participant.user.first_name} ${participant.user.last_name}`;
+    const name = participant.user.name;
     const joined = participant.joined_at
         ? new Date(participant.joined_at).toLocaleTimeString([], {
               hour: "numeric",
@@ -100,7 +100,7 @@ function ParticipantRow({
                         <div className="avatar placeholder">
                             <div className="w-8 h-8 bg-base-300 text-base-content/50">
                                 <span className="text-sm">
-                                    {participant.user.first_name[0]}
+                                    {participant.user.name[0]}
                                 </span>
                             </div>
                         </div>

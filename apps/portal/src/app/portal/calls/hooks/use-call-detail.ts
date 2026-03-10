@@ -71,8 +71,7 @@ export interface CallNote {
     created_at: string;
     updated_at: string;
     user: {
-        first_name: string;
-        last_name: string;
+        name: string;
     };
 }
 

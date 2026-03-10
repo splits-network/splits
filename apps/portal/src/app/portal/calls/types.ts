@@ -7,8 +7,7 @@ export type CallEntityType = "application" | "job" | "company" | "firm" | "candi
 export type CallParticipantRole = "host" | "participant" | "observer";
 
 export interface CallParticipantUser {
-    first_name: string;
-    last_name: string;
+    name: string;
     avatar_url: string | null;
     email: string;
 }
@@ -158,6 +157,6 @@ export function formatScheduledDate(dateStr: string | null): string {
 
 export function participantNames(participants: CallParticipantItem[]): string {
     return participants
-        .map((p) => `${p.user.first_name} ${p.user.last_name}`)
+        .map((p) => p.user.name)
         .join(", ");
 }

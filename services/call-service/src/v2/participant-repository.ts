@@ -44,24 +44,23 @@ export class ParticipantRepository {
         const userIds = participants.map((p: CallParticipant) => p.user_id);
         const { data: users, error: userError } = await this.supabase
             .from('users')
-            .select('id, first_name, last_name, profile_image_url, email')
+            .select('id, name, profile_image_url, email')
             .in('id', userIds);
 
         if (userError) throw userError;
 
         const userMap = new Map<string, {
-            first_name: string; last_name: string; avatar_url: string | null; email: string;
+            name: string; avatar_url: string | null; email: string;
         }>();
         for (const u of users || []) {
             userMap.set(u.id, {
-                first_name: u.first_name || '',
-                last_name: u.last_name || '',
+                name: u.name || '',
                 avatar_url: u.profile_image_url || null,
                 email: u.email || '',
             });
         }
 
-        const defaultUser = { first_name: '', last_name: '', avatar_url: null, email: '' };
+        const defaultUser = { name: '', avatar_url: null, email: '' };
 
         return participants.map((p: CallParticipant) => ({
             ...p,

@@ -156,8 +156,7 @@ export class CallScheduler {
             user_id: p.user_id,
             role: p.role,
             email: p.user.email,
-            first_name: p.user.first_name,
-            last_name: p.user.last_name,
+            name: p.user.name,
         }));
     }
 }

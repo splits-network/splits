@@ -46,9 +46,9 @@ export function CallCard({ call }: { call: CallListItem }) {
                             <div
                                 key={p.id}
                                 className="w-7 h-7 bg-base-300 border-2 border-base-100 flex items-center justify-center text-sm font-bold"
-                                title={`${p.user.first_name} ${p.user.last_name}`}
+                                title={p.user.name}
                             >
-                                {p.user.first_name[0]}
+                                {p.user.name[0]}
                             </div>
                         ))}
                         {call.participants.length > 3 && (
