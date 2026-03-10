@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 
 ## Current Position
 
-Phase: 49 (8 of 9 in v10.0) — Critical Flow Fixes
-Plan: 2 of 2
-Status: Phase complete
-Last activity: 2026-03-09 — Completed 49-02-PLAN.md (call join page & recording playback)
+Phase: 50 (9 of 9 in v10.0) — Post-Migration Text & Metadata Cleanup
+Plan: 0 of ?
+Status: Phase not yet planned
+Last activity: 2026-03-09 — Phase 49 complete (critical flow fixes)
 
 Progress: [██████████████████████████████████] 34/34 plans
 

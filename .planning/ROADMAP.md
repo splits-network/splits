@@ -72,7 +72,7 @@ Shelved in favor of v9.0 Video Interviewing. Requirements preserved in REQUIREME
 - [x] **Phase 46: Interview Migration** - Drop interview schema, delete interview-specific code from all services, replace application Interviews tab with Calls tab
 - [x] **Phase 47: Critical Bug Fixes & Event Wiring** - SessionStorage key mismatch, event name mismatch, missing reminder binding
 - [x] **Phase 48: Interview Migration Cleanup** - Dead gateway auth rules, dead shared-video hooks, legacy S3 bucket name
-- [ ] **Phase 49: Critical Flow Fixes** - Event payload participants, token field mismatch, join route, recording playback
+- [x] **Phase 49: Critical Flow Fixes** - Event payload participants, token field mismatch, join route, recording playback
 - [ ] **Phase 50: Post-Migration Text & Metadata Cleanup** - User-facing interview text, Swagger description, notification metadata key
 
 ## Phase Details
@@ -205,8 +205,8 @@ Plans:
   4. Recording tab fetches a signed URL from the playback-url endpoint — media player loads the recording
 **Plans:** 2 plans
 Plans:
-- [ ] 49-01-PLAN.md — Add participants to event payloads, fix token field name
-- [ ] 49-02-PLAN.md — Create join page, fix recording playback signed URL
+- [x] 49-01-PLAN.md — Add participants to event payloads, fix token field name
+- [x] 49-02-PLAN.md — Create join page, fix recording playback signed URL
 
 ### Phase 50: Post-Migration Text & Metadata Cleanup
 **Goal**: No interview-era text or metadata mismatches remain in user-facing UI or service internals
@@ -252,5 +252,5 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 ->
 | 46. Interview Migration | v10.0 | 4/4 | Complete | 2026-03-09 |
 | 47. Critical Bug Fixes & Event Wiring | v10.0 | 1/1 | Complete | 2026-03-09 |
 | 48. Interview Migration Cleanup | v10.0 | 3/3 | Complete | 2026-03-09 |
-| 49. Critical Flow Fixes | v10.0 | 0/2 | Not Started | — |
+| 49. Critical Flow Fixes | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 50. Post-Migration Text & Metadata Cleanup | v10.0 | 0/? | Not Started | — |
