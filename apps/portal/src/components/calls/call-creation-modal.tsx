@@ -48,7 +48,7 @@ export function CallCreationModal({
     onSuccess,
 }: CallCreationModalProps) {
     const { user } = useUser();
-    const { createCall, generateToken, createCalendarEvents, isLoading, error } = useCreateCall();
+    const { createCall, startCall, generateToken, createCalendarEvents, isLoading, error } = useCreateCall();
 
     /* ── State ── */
     const [mode, setMode] = useState<CallMode>(defaultMode);
@@ -110,6 +110,7 @@ export function CallCreationModal({
             const call = await createCall(payload);
 
             if (mode === 'instant') {
+                await startCall(call.id);
                 const tokenResult = await generateToken(call.id);
                 const videoBaseUrl = process.env.NEXT_PUBLIC_VIDEO_APP_URL || 'https://video.splits.network';
                 window.location.href = `${videoBaseUrl}/join/${tokenResult.access_token}`;

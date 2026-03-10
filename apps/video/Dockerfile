@@ -74,6 +74,7 @@ COPY --from=build /app/apps/video/package.json ./apps/video/
 
 # Copy built artifacts
 COPY --from=build /app/apps/video/.next ./apps/video/.next
+COPY --from=build /app/apps/video/public ./apps/video/public
 COPY --from=build /app/apps/video/next.config.mjs ./apps/video/
 
 EXPOSE 3102

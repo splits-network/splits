@@ -59,6 +59,14 @@ export function useCreateCall() {
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const startCall = useCallback(async (callId: string): Promise<void> => {
+        const token = await getToken();
+        if (!token) throw new Error('Not authenticated');
+
+        const client = createAuthenticatedClient(token);
+        await client.post(`/calls/${callId}/start`, {});
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
     const generateToken = useCallback(async (callId: string): Promise<CallTokenResult> => {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
@@ -109,5 +117,5 @@ export function useCreateCall() {
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    return { createCall, generateToken, createCalendarEvents, isLoading, error };
+    return { createCall, startCall, generateToken, createCalendarEvents, isLoading, error };
 }

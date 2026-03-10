@@ -160,7 +160,10 @@ export class SplitsApiClient {
         endpoint: string,
         options: RequestInit = {}
     ): Promise<T> {
-        const url = `${this.baseUrl}${this.pathPrefix}${endpoint}`;
+        const hasVersionPrefix = endpoint.startsWith('/api/v');
+        const url = hasVersionPrefix
+            ? `${this.baseUrl}${endpoint}`
+            : `${this.baseUrl}${this.pathPrefix}${endpoint}`;
 
         const headers: Record<string, string> = {
             ...options.headers as Record<string, string>,
