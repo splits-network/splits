@@ -231,7 +231,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Recording consent banner appears in the video lobby when a call has recording enabled
   2. A Google Calendar event is automatically created for each participant when a call is scheduled
-**Plans:** TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 51-01-PLAN.md — Pass recording_consent_required through call detail to video app VideoLobby
+- [ ] 51-02-PLAN.md — Wire Google Calendar auto-creation after scheduled call creation in portal
 
 ## Progress
 
@@ -269,4 +272,4 @@ Phases execute in numeric order: 42 -> 43 -> 44 -> 45 -> 46 -> 47 -> 48 -> 49 ->
 | 48. Interview Migration Cleanup | v10.0 | 3/3 | Complete | 2026-03-09 |
 | 49. Critical Flow Fixes | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 50. Post-Migration Text & Metadata Cleanup | v10.0 | 2/2 | Complete | 2026-03-09 |
-| 51. Recording Consent & Calendar Auto-Creation | v10.0 | 0/? | Not Started | — |
+| 51. Recording Consent & Calendar Auto-Creation | v10.0 | 0/2 | Not Started | — |
