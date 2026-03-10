@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 49 (8 of 9 in v10.0) — Critical Flow Fixes
-Plan: 0 of ?
-Status: Phase not yet planned
-Last activity: 2026-03-09 — Gap closure phases 49-50 created from audit
+Plan: 1 of 2
+Status: In progress
+Last activity: 2026-03-09 — Completed 49-01-PLAN.md (call event participants & token fix)
 
-Progress: [████████████████████████████████] 32/32 plans + 2 gap phases
+Progress: [█████████████████████████████████] 33/34 plans
 
 ## Performance Metrics
 
 **Cumulative (v2.0-v9.0):**
 - Total plans completed: 114 (36 from v2.0-v5.0 + 20 from v6.0 + 14 from v7.0 + 44 from v9.0)
-- v10.0 plans completed: 32
+- v10.0 plans completed: 33
 
 **By Phase:**
 
@@ -33,6 +33,7 @@ Progress: [███████████████████████
 | 46-interview-migration | 4/4 | 59min | 14.75min |
 | 47-critical-bug-fixes-event-wiring | 1/1 | 4min | 4.00min |
 | 48-interview-migration-cleanup | 3/3 | 7min | 2.33min |
+| 49-critical-flow-fixes | 1/2 | 2min | 2.00min |
 
 ## Accumulated Context
 
@@ -134,9 +135,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 48-03-PLAN.md (bucket reference rename to call-recordings)
+Stopped at: Completed 49-01-PLAN.md (call event participants & token fix)
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (Completed 48-03: bucket reference rename — v10.0 complete)*
+*Last updated: 2026-03-09 (Completed 49-01: call event participants & token field fix)*
