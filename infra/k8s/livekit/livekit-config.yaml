@@ -13,7 +13,6 @@ data:
         turn:
             enabled: true
             domain: ${LIVEKIT_TURN_DOMAIN}
-            tls_port: 443
             udp_port: 3478
         room:
             max_participants: 10
