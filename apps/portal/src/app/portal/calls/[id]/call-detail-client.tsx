@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCallDetail } from "../hooks/use-call-detail";
+import { useUserProfile } from "@/contexts/user-profile-context";
 import { CallDetailHeader } from "./components/call-detail-header";
 import { RecordingTab } from "./components/recording-tab";
 import { TranscriptTab } from "./components/transcript-tab";
@@ -11,6 +12,7 @@ import { CallContextPanel } from "./components/call-context-panel";
 import { CallNotesSection } from "./components/call-notes-section";
 import { CallParticipantsSection } from "./components/call-participants-section";
 import { RelatedCallsSection } from "./components/related-calls-section";
+import { LockedTabUpgrade } from "./components/locked-tab-upgrade";
 
 type TabKey = "recording" | "transcript" | "summary";
 
@@ -31,6 +33,7 @@ export function CallDetailClient({ callId }: { callId: string }) {
         currentTimestamp,
         setCurrentTimestamp,
     } = useCallDetail(callId);
+    const { planTier } = useUserProfile();
     const [activeTab, setActiveTab] = useState<TabKey>("recording");
 
     if (isLoading) {
@@ -65,6 +68,92 @@ export function CallDetailClient({ callId }: { callId: string }) {
         );
     }
 
+    const { recording_enabled, transcription_enabled, ai_analysis_enabled } = call;
+
+    const isTranscriptLocked = planTier === "starter";
+    const isSummaryLocked = planTier === "starter" || planTier === "pro";
+
+    function renderTabContent() {
+        if (activeTab === "recording") {
+            return (
+                <RecordingTab
+                    recordings={call!.recordings}
+                    currentTimestamp={currentTimestamp}
+                    onTimestampChange={setCurrentTimestamp}
+                    recordingEnabled={recording_enabled}
+                />
+            );
+        }
+
+        if (activeTab === "transcript") {
+            if (isTranscriptLocked) {
+                return (
+                    <LockedTabUpgrade
+                        icon="fa-file-lines"
+                        title="Transcription"
+                        description="Automatic transcription is available on Pro and Partner plans. Partner also includes AI-powered summaries and analysis."
+                        upgradeTier="Pro"
+                    />
+                );
+            }
+            if (!transcription_enabled) {
+                return (
+                    <div className="border-2 border-base-300 p-8 text-center">
+                        <i className="fa-duotone fa-regular fa-file-lines text-4xl text-base-content/15 mb-4 block" />
+                        <p className="font-bold mb-1">Transcription Not Enabled</p>
+                        <p className="text-sm text-base-content/50">
+                            Transcription was not enabled for this call.
+                        </p>
+                    </div>
+                );
+            }
+            return (
+                <TranscriptTab
+                    transcript={call!.transcript}
+                    currentTimestamp={currentTimestamp}
+                    onTimestampSeek={setCurrentTimestamp}
+                />
+            );
+        }
+
+        if (activeTab === "summary") {
+            if (planTier === "starter") {
+                return (
+                    <LockedTabUpgrade
+                        icon="fa-sparkles"
+                        title="AI Summary"
+                        description="AI-powered call summaries are available on the Partner plan. Partner includes both automatic transcription and AI analysis."
+                        upgradeTier="Partner"
+                    />
+                );
+            }
+            if (planTier === "pro") {
+                return (
+                    <LockedTabUpgrade
+                        icon="fa-sparkles"
+                        title="AI Summary"
+                        description="AI-powered call summaries are available on the Partner plan. You already have transcription — upgrade to unlock AI analysis too."
+                        upgradeTier="Partner"
+                    />
+                );
+            }
+            if (!ai_analysis_enabled) {
+                return (
+                    <div className="border-2 border-base-300 p-8 text-center">
+                        <i className="fa-duotone fa-regular fa-sparkles text-4xl text-base-content/15 mb-4 block" />
+                        <p className="font-bold mb-1">AI Analysis Not Enabled</p>
+                        <p className="text-sm text-base-content/50">
+                            AI analysis was not enabled for this call.
+                        </p>
+                    </div>
+                );
+            }
+            return <SummaryTab summary={call!.summary} />;
+        }
+
+        return null;
+    }
+
     return (
         <div>
             <CallDetailHeader call={call} onRefetch={refetch} />
@@ -88,37 +177,29 @@ export function CallDetailClient({ callId }: { callId: string }) {
                         role="tablist"
                         className="tabs tabs-bordered mb-6"
                     >
-                        {TABS.map((tab) => (
-                            <button
-                                key={tab.key}
-                                role="tab"
-                                className={`tab gap-2 ${activeTab === tab.key ? "tab-active font-bold" : ""}`}
-                                onClick={() => setActiveTab(tab.key)}
-                            >
-                                <i className={`fa-duotone fa-regular ${tab.icon}`} />
-                                {tab.label}
-                            </button>
-                        ))}
+                        {TABS.map((tab) => {
+                            const isLocked =
+                                (tab.key === "transcript" && isTranscriptLocked) ||
+                                (tab.key === "summary" && isSummaryLocked);
+                            return (
+                                <button
+                                    key={tab.key}
+                                    role="tab"
+                                    className={`tab gap-2 ${activeTab === tab.key ? "tab-active font-bold" : ""}`}
+                                    onClick={() => setActiveTab(tab.key)}
+                                >
+                                    <i className={`fa-duotone fa-regular ${tab.icon}`} />
+                                    {tab.label}
+                                    {isLocked && (
+                                        <i className="fa-duotone fa-regular fa-lock text-base-content/30 text-xs" />
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* Tab Content */}
-                    {activeTab === "recording" && (
-                        <RecordingTab
-                            recordings={call.recordings}
-                            currentTimestamp={currentTimestamp}
-                            onTimestampChange={setCurrentTimestamp}
-                        />
-                    )}
-                    {activeTab === "transcript" && (
-                        <TranscriptTab
-                            transcript={call.transcript}
-                            currentTimestamp={currentTimestamp}
-                            onTimestampSeek={setCurrentTimestamp}
-                        />
-                    )}
-                    {activeTab === "summary" && (
-                        <SummaryTab summary={call.summary} />
-                    )}
+                    {renderTabContent()}
 
                     {/* Below-tab sections */}
                     <div className="mt-8 space-y-8">

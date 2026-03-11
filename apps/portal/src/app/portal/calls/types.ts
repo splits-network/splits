@@ -47,6 +47,9 @@ export interface CallListItem {
     created_by: string;
     agenda: string | null;
     needs_follow_up: boolean;
+    recording_enabled: boolean;
+    transcription_enabled: boolean;
+    ai_analysis_enabled: boolean;
     created_at: string;
     updated_at: string;
     participants: CallParticipantItem[];

@@ -9,6 +9,7 @@ interface RecordingTabProps {
     recordings?: CallRecording[];
     currentTimestamp: number;
     onTimestampChange: (ts: number) => void;
+    recordingEnabled?: boolean;
 }
 
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -17,7 +18,21 @@ export function RecordingTab({
     recordings,
     currentTimestamp,
     onTimestampChange,
+    recordingEnabled,
 }: RecordingTabProps) {
+    // Explicit false means recording was disabled for this call
+    if (recordingEnabled === false) {
+        return (
+            <div className="border-2 border-base-300 p-8 text-center">
+                <i className="fa-duotone fa-regular fa-microphone-slash text-4xl text-base-content/15 mb-4 block" />
+                <p className="font-bold mb-1">Recording Not Enabled</p>
+                <p className="text-sm text-base-content/50">
+                    Recording was not enabled for this call.
+                </p>
+            </div>
+        );
+    }
+
     const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
     const [playbackSpeed, setPlaybackSpeed] = useState(1);
     const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
