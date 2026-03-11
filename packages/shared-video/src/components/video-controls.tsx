@@ -16,8 +16,8 @@ interface VideoControlsProps {
     notesOpen?: boolean;
 }
 
-const trackBtn = 'btn btn-square btn-sm lg:btn-md rounded-none data-[lk-muted=true]:btn-error';
-const screenShareBtn = 'btn btn-square btn-sm lg:btn-md rounded-none data-[lk-enabled=true]:btn-success';
+const trackBtn = 'group btn btn-square btn-sm lg:btn-md rounded-none btn-success data-[lk-muted=true]:btn-error';
+const screenShareBtn = 'group btn btn-square btn-sm lg:btn-md rounded-none data-[lk-enabled=true]:btn-success';
 
 export function VideoControls({
     isRecording,
@@ -38,17 +38,19 @@ export function VideoControls({
 
                 {/* Microphone toggle */}
                 <TrackToggle source={Track.Source.Microphone} className={trackBtn} showIcon={false}>
-                    <i className="fa-duotone fa-regular fa-microphone" />
+                    <i className="fa-duotone fa-regular fa-microphone group-data-[lk-muted=true]:hidden" />
+                    <i className="fa-duotone fa-regular fa-microphone-slash hidden group-data-[lk-muted=true]:inline" />
                 </TrackToggle>
 
                 {/* Camera toggle */}
                 <TrackToggle source={Track.Source.Camera} className={trackBtn} showIcon={false}>
-                    <i className="fa-duotone fa-regular fa-video" />
+                    <i className="fa-duotone fa-regular fa-video group-data-[lk-muted=true]:hidden" />
+                    <i className="fa-duotone fa-regular fa-video-slash hidden group-data-[lk-muted=true]:inline" />
                 </TrackToggle>
 
                 {/* Screen share toggle */}
                 <TrackToggle source={Track.Source.ScreenShare} className={screenShareBtn} showIcon={false}>
-                    <i className="fa-duotone fa-regular fa-screen-share" />
+                    <i className="fa-duotone fa-regular fa-arrow-up-from-bracket" />
                 </TrackToggle>
 
                 <div className="w-px h-6 bg-base-300 mx-1" />
