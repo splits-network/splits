@@ -12,7 +12,7 @@
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
 - [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-51 (shipped 2026-03-09)
 - [x] **v11.0 Candidate Call Experience** - Phase 52 (shipped 2026-03-09)
-- [ ] **v12.0 Call Recording & AI Controls** - Phase 53
+- [x] **v12.0 Call Recording & AI Controls** - Phase 53 (shipped 2026-03-10)
 
 ## Phases
 
@@ -271,7 +271,12 @@ Plans:
   4. Free tier recordings auto-delete after 7 days with a 2-day email warning; paid tier retention is longer
   5. Call type selector (Interview, Recruiting Call, Client Meeting, Internal Call) is visible with context-inferred defaults and drives AI summary prompt selection
   6. Post-call detail page shows upgrade prompts on locked tabs (transcript for Free, summary for Pro)
-**Plans:** TBD
+**Plans:** 4 plans
+Plans:
+- [x] 53-01-PLAN.md — Database migration: add recording_enabled, transcription_enabled, ai_analysis_enabled to calls; drop deprecated call_types columns; update call-service types/repo/service/routes with tier validation
+- [x] 53-02-PLAN.md — AI pipeline tier enforcement: getCallFlags/getCreatorTier in ai-service, tier-gated decision tree in processRecording
+- [x] 53-03-PLAN.md — Call creation UI: CallTypeSelector with context-inferred defaults, RecordingControls with tier-gated toggles and upgrade badges
+- [x] 53-04-PLAN.md — Post-call detail tab gating with LockedTabUpgrade component, recording expiry cleanup job + K8s CronJob
 
 ## Progress
 
@@ -311,4 +316,4 @@ Phases execute in numeric order: 53
 | 50. Post-Migration Text & Metadata Cleanup | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 51. Recording Consent & Calendar Auto-Creation | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 52. Candidate Call Experience | v11.0 | 3/3 | Complete | 2026-03-09 |
-| 53. Per-Call Recording & AI Controls | v12.0 | 0/? | Not started | — |
+| 53. Per-Call Recording & AI Controls | v12.0 | 4/4 | Complete | 2026-03-10 |
