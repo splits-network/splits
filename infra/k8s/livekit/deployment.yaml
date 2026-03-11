@@ -20,8 +20,6 @@ spec:
                   operator: "Equal"
                   value: "spot"
                   effect: "NoSchedule"
-            hostNetwork: true
-            dnsPolicy: ClusterFirstWithHostNet
             containers:
                 - name: livekit-server
                   image: livekit/livekit-server:v1.8
@@ -31,8 +29,12 @@ spec:
                   ports:
                       - containerPort: 7880
                         name: http
+                        protocol: TCP
                       - containerPort: 7881
-                        name: rtc
+                        name: rtc-tcp
+                        protocol: TCP
+                      - containerPort: 3478
+                        name: turn-udp
                         protocol: UDP
                   env:
                       - name: LIVEKIT_API_KEY

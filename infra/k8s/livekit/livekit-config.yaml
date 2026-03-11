@@ -7,9 +7,9 @@ data:
     livekit.yaml: |
         port: 7880
         rtc:
+            node_ip: ${LIVEKIT_EXTERNAL_IP}
             port_range_start: 50000
             port_range_end: 60000
-            use_external_ip: true
         turn:
             enabled: true
             domain: ${LIVEKIT_TURN_DOMAIN}
