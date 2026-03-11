@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 53 (1 of 1 in v12.0) — Per-Call Recording & AI Controls
-Plan: 1 of 4
+Plan: 2 of 4
 Status: In progress
-Last activity: 2026-03-10 — Completed 53-01-PLAN.md
+Last activity: 2026-03-11 — Completed 53-02-PLAN.md
 
-Progress: [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 1/4 plans
+Progress: [████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 2/4 plans
 
 ## Performance Metrics
 
@@ -131,6 +131,9 @@ Recent decisions affecting current work:
 - [53-01]: recording_enabled replaces call_types.requires_recording_consent — per-call flag decouples consent from type categorization
 - [53-01]: ai_analysis_enabled returns 400 for non-Partner users (not silent strip) — explicit error prevents user confusion
 - [53-01]: getCreatorTier queries subscriptions + plans directly in call-service repository (no HTTP to billing-service)
+- [53-02]: getCreatorTier throws on DB error (not silent starter default) so caller can distinguish no-subscription from DB-down for retry
+- [53-02]: Pipeline skipping transcription also skips summarization — AI analysis always requires transcript as input
+- [53-02]: updatePipelineStatus(complete) fires for transcription-only completions (transcript ready is a valid completion state)
 
 ### Roadmap Evolution
 
@@ -149,10 +152,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10
-Stopped at: Completed 53-01-PLAN.md — backend recording flags and tier gating
+Last session: 2026-03-11
+Stopped at: Completed 53-02-PLAN.md — ai-service pipeline tier enforcement
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-10 (53-01 completed — recording_enabled/ai_analysis_enabled migration and call-service tier gating)*
+*Last updated: 2026-03-11 (53-02 completed — tier-gated AI pipeline with recording_enabled/transcription_enabled/ai_analysis_enabled flag checks)*
