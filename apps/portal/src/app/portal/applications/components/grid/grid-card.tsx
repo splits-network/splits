@@ -17,10 +17,7 @@ import {
     recruiterName,
     submittedDateLabel,
 } from "../shared/helpers";
-import {
-    getStageDisplayWithExpired,
-    getAIScoreColor,
-} from "../shared/status-color";
+import { getStageDisplayWithExpired } from "../shared/status-color";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";

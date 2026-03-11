@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { BaselTabBar } from "@splits-network/basel-ui";
+import { BaselBadge, BaselTabBar } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
@@ -266,14 +266,14 @@ function OverviewTab({
                         </p>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                             {candidate.open_to_remote && (
-                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-success/15 text-success">
+                                <BaselBadge color="success" size="sm" variant="soft">
                                     Remote
-                                </span>
+                                </BaselBadge>
                             )}
                             {candidate.open_to_relocation && (
-                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-info/15 text-info">
+                                <BaselBadge color="info" size="sm" variant="soft">
                                     Relocation
-                                </span>
+                                </BaselBadge>
                             )}
                             {!candidate.open_to_remote &&
                                 !candidate.open_to_relocation && (

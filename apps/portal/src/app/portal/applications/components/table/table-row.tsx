@@ -2,6 +2,7 @@
 
 import { Fragment } from "react";
 import type { Application } from "../../types";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     candidateName,
     roleTitle,
@@ -10,7 +11,7 @@ import {
     addedAgo,
     isNew,
 } from "../shared/helpers";
-import { getStageDisplayWithExpired, getAIScoreBadge } from "../shared/status-color";
+import { getStageDisplayWithExpired, getAIScoreBadgeColor } from "../shared/status-color";
 import { DetailLoader } from "../shared/application-detail";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 
@@ -58,9 +59,9 @@ export function TableRow({
                             {name}
                         </span>
                         {isNew(application) && (
-                            <span className="text-sm uppercase tracking-wider bg-info/15 text-info px-1.5 py-0.5 font-bold flex-shrink-0">
+                            <BaselBadge color="info" size="xs" variant="soft">
                                 New
-                            </span>
+                            </BaselBadge>
                         )}
                     </div>
                 </td>
@@ -79,33 +80,27 @@ export function TableRow({
 
                 {/* Stage */}
                 <td className="px-4 py-2">
-                    <span
-                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${stage.badge}`}
-                    >
-                        <i
-                            className={`fa-duotone fa-regular ${stage.icon} text-sm`}
-                        />
+                    <BaselBadge color={stage.color} size="xs" variant="soft">
+                        <i className={`fa-duotone fa-regular ${stage.icon} text-sm`} />
                         {stage.label}
-                    </span>
+                    </BaselBadge>
                 </td>
 
                 {/* AI Score */}
                 <td className="px-4 py-2">
                     {score !== null ? (
-                        <span
-                            className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${getAIScoreBadge(score)}`}
-                        >
+                        <BaselBadge color={getAIScoreBadgeColor(score)} size="xs" variant="soft">
                             {score}%
-                        </span>
+                        </BaselBadge>
                     ) : (
-                        <span className="text-xs text-base-content/30">
+                        <span className="text-sm text-base-content/30">
                             &mdash;
                         </span>
                     )}
                 </td>
 
                 {/* Added */}
-                <td className="px-4 py-2 text-xs text-base-content/50">
+                <td className="px-4 py-2 text-sm text-base-content/50">
                     {addedAgo(application)}
                 </td>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BaselBadge } from "@splits-network/basel-ui";
 import DocumentViewerModal from "@/app/portal/applications/components/modals/document-viewer-modal";
 import { categorizeDocuments } from "../../lib/permission-utils";
 import type { Application } from "../../types";
@@ -60,9 +61,9 @@ export function ApplicationDocumentsTab({ application }: DocumentsTabProps) {
                         </div>
                         <div className="flex items-center gap-2">
                             {doc.metadata?.is_primary && (
-                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-0.5 bg-primary/15 text-primary">
+                                <BaselBadge color="primary" size="xs" variant="soft">
                                     Primary
-                                </span>
+                                </BaselBadge>
                             )}
                             <button
                                 onClick={() => { setSelectedDocument(doc); setShowDocumentModal(true); }}

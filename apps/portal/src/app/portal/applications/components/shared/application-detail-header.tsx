@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import ActionsToolbar from "./actions-toolbar";
+import { BaselBadge } from "@splits-network/basel-ui";
 import { getStageDisplay, getStageDisplayWithExpired } from "./status-color";
 import { formatApplicationDate } from "../../types";
 import type { Application } from "../../types";
@@ -117,10 +118,10 @@ export function ApplicationDetailHeader({
                         Submitted {formatApplicationDate(application.created_at)}
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
-                        <span className={`badge badge-${stageDisplay.color}`}>
-                            <i className={`fa-duotone fa-regular ${stageDisplay.icon} mr-1`} />
+                        <BaselBadge color={stageDisplay.color} size="sm" variant="soft">
+                            <i className={`fa-duotone fa-regular ${stageDisplay.icon}`} />
                             {stageDisplay.label}
-                        </span>
+                        </BaselBadge>
                     </div>
                 </div>
 
