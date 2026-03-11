@@ -41,6 +41,7 @@ export interface Call {
     cancelled_by: string | null;
     cancel_reason: string | null;
     recording_enabled: boolean;
+    transcription_enabled: boolean;
     ai_analysis_enabled: boolean;
     deleted_at: string | null;
     created_at: string;
@@ -190,6 +191,7 @@ export interface CreateCallInput {
     entity_links: { entity_type: CallEntityType; entity_id: string }[];
     participants: { user_id: string; role: CallParticipantRole }[];
     recording_enabled?: boolean;
+    transcription_enabled?: boolean;
     ai_analysis_enabled?: boolean;
 }
 

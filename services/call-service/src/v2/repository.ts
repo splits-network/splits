@@ -177,6 +177,7 @@ export class CallRepository {
                 pre_call_notes: input.pre_call_notes || null,
                 created_by: createdBy,
                 recording_enabled: input.recording_enabled ?? false,
+                transcription_enabled: input.transcription_enabled ?? false,
                 ai_analysis_enabled: input.ai_analysis_enabled ?? false,
             })
             .select()

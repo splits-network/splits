@@ -46,10 +46,16 @@ export class CallService {
             }
         }
 
-        // Validate subscription tier for AI analysis
-        if (input.ai_analysis_enabled) {
+        // Validate subscription tier for transcription and AI analysis
+        if (input.transcription_enabled || input.ai_analysis_enabled) {
             const tier = await this.repository.getCreatorTier(resolvedUserId);
-            if (tier !== 'partner') {
+            if (input.transcription_enabled && tier === 'starter') {
+                throw Object.assign(
+                    new Error('Transcription requires a Pro or Partner subscription'),
+                    { statusCode: 400 },
+                );
+            }
+            if (input.ai_analysis_enabled && tier !== 'partner') {
                 throw Object.assign(
                     new Error('AI analysis requires a Partner subscription'),
                     { statusCode: 400 },
@@ -109,6 +115,7 @@ export class CallService {
             scheduled_at: call.scheduled_at,
             agenda: call.agenda,
             recording_enabled: call.recording_enabled,
+            transcription_enabled: call.transcription_enabled,
             ai_analysis_enabled: call.ai_analysis_enabled,
             entity_links: entityLinks.map((l) => ({
                 entity_type: l.entity_type,

@@ -17,6 +17,7 @@ BEGIN;
 -- Add per-call recording control flags to calls table
 ALTER TABLE calls
     ADD COLUMN recording_enabled BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN transcription_enabled BOOLEAN NOT NULL DEFAULT false,
     ADD COLUMN ai_analysis_enabled BOOLEAN NOT NULL DEFAULT false;
 
 -- Remove call_type-driven behavior columns (replaced by per-call flags above)
