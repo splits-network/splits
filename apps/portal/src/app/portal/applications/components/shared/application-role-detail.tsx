@@ -8,7 +8,6 @@ import { MarkdownRenderer } from "@splits-network/shared-ui";
 import { BaselCalculator } from "@/components/basel/pricing/basel-calculator";
 import type { Job } from "@/app/portal/roles/types";
 import { formatCommuteTypes, formatJobLevel } from "@/app/portal/roles/types";
-import { statusColor } from "@/app/portal/roles/components/shared/status-color";
 import {
     salaryDisplay,
     formatEmploymentType,
