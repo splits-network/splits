@@ -387,8 +387,8 @@ jobs:
                   export LIVEKIT_API_KEY="${{ secrets.LIVEKIT_API_KEY }}"
                   export LIVEKIT_API_SECRET="${{ secrets.LIVEKIT_API_SECRET }}"
                   export LIVEKIT_TURN_DOMAIN="video.splits.network"
-                  export LIVEKIT_EXTERNAL_IP="${{ secrets.LIVEKIT_EXTERNAL_IP }}"
-                  export LIVEKIT_LB_RESOURCE_GROUP="${{ secrets.LIVEKIT_LB_RESOURCE_GROUP }}"
+                  export LIVEKIT_EXTERNAL_IP="TODO_PROD_IP"
+                  export LIVEKIT_LB_RESOURCE_GROUP="TODO_PROD_MC_RESOURCE_GROUP"
 
                   # Normalize legacy replica placeholders to envsubst-compatible format
                   find infra/k8s -name deployment.yaml -exec sed -i 's/\${REPLICAS:-2}/\${REPLICAS}/g' {} +
