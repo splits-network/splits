@@ -43,6 +43,16 @@ export class CallPipelineService {
 
     /**
      * Full pipeline: download -> transcribe -> summarize -> store.
+     * Respects per-call flags (recording_enabled, transcription_enabled, ai_analysis_enabled)
+     * and the creator's current subscription tier before processing.
+     *
+     * Decision tree:
+     *   if (!recording_enabled) return
+     *   if (tier === 'starter') return
+     *   if (transcription_enabled) transcribe()
+     *   if (tier === 'partner' && ai_analysis_enabled && transcription_enabled) summarize()
+     *   complete()
+     *
      * On failure, sets status to 'failed' and does NOT rethrow.
      */
     async processRecording(event: CallRecordingEvent): Promise<void> {
@@ -50,13 +60,49 @@ export class CallPipelineService {
         const startTime = Date.now();
 
         try {
+            // Step 0: Check call flags before doing any work
+            const flags = await this.repository.getCallFlags(call_id);
+
+            if (!flags) {
+                this.logger.warn({ call_id }, 'Call not found, skipping pipeline');
+                return;
+            }
+
+            if (!flags.recording_enabled) {
+                this.logger.info({ call_id }, 'Recording not enabled for call, skipping pipeline');
+                return;
+            }
+
+            // Step 0b: Check creator tier — graceful skip on billing DB failure
+            let tier: 'starter' | 'pro' | 'partner';
+            try {
+                tier = await this.repository.getCreatorTier(flags.created_by);
+            } catch (tierErr) {
+                this.logger.error(
+                    { tierErr, call_id, user_id: flags.created_by },
+                    'Failed to check creator tier, skipping for retry',
+                );
+                return;
+            }
+
+            if (tier === 'starter') {
+                this.logger.info({ call_id, tier }, 'Starter tier — skipping transcription and summarization');
+                return;
+            }
+
             // Step 1: Set initial status
             await this.repository.updatePipelineStatus(call_id, 'transcribing');
 
             // Step 2: Get call context for prompt injection
             const context = await this.repository.getCallWithContext(call_id);
 
-            // Step 3: Download and transcribe
+            // Step 3: Transcription (gated on transcription_enabled)
+            if (!flags.transcription_enabled) {
+                this.logger.info({ call_id }, 'Transcription not enabled for call, skipping');
+                await this.repository.updatePipelineStatus(call_id, 'complete');
+                return;
+            }
+
             const signedUrl = await this.repository.getRecordingSignedUrl(call_id);
             const audioBuffer = await this.downloadRecording(signedUrl);
 
@@ -95,44 +141,65 @@ export class CallPipelineService {
                 processingTimeMs,
             });
 
-            // Step 5: Summarize
-            await this.repository.updatePipelineStatus(call_id, 'summarizing');
+            // Step 5: Summarization (gated on Partner tier + ai_analysis_enabled)
+            let hasSummary = false;
 
-            const { systemPrompt, userPrompt } = getPromptForCallType(
-                context.callType,
-                context,
-                whisperResult.text,
-            );
+            if (tier === 'partner' && flags.ai_analysis_enabled) {
+                await this.repository.updatePipelineStatus(call_id, 'summarizing');
 
-            const summaryText = await this.callOpenAI(systemPrompt, userPrompt);
+                const { systemPrompt, userPrompt } = getPromptForCallType(
+                    context.callType,
+                    context,
+                    whisperResult.text,
+                );
 
-            // Step 6: Build and save structured summary
-            const summaryData = {
-                tldr: this.extractTldr(summaryText),
-                content: summaryText,
-                call_type: context.callType,
-                prompt_version: PROMPT_VERSIONS[context.callType] || 'unknown',
-                model: this.model,
-                action_items: this.extractActionItems(summaryText),
-                entity_context: this.buildEntityContextSnapshot(context),
-            };
+                const summaryText = await this.callOpenAI(systemPrompt, userPrompt);
 
-            await this.repository.saveSummary(call_id, summaryData, this.model);
-
-            // Step 7: Complete
-            await this.repository.updatePipelineStatus(call_id, 'complete');
-
-            this.logger.info(
-                {
-                    call_id,
+                // Step 6: Build and save structured summary
+                const summaryData = {
+                    tldr: this.extractTldr(summaryText),
+                    content: summaryText,
                     call_type: context.callType,
-                    processing_time_ms: Date.now() - startTime,
-                    transcript_length: whisperResult.text.length,
-                    segments_count: segments.length,
-                    has_action_items: !!summaryData.action_items?.length,
-                },
-                'Call pipeline completed',
-            );
+                    prompt_version: PROMPT_VERSIONS[context.callType] || 'unknown',
+                    model: this.model,
+                    action_items: this.extractActionItems(summaryText),
+                    entity_context: this.buildEntityContextSnapshot(context),
+                };
+
+                await this.repository.saveSummary(call_id, summaryData, this.model);
+                hasSummary = true;
+
+                this.logger.info(
+                    {
+                        call_id,
+                        call_type: context.callType,
+                        processing_time_ms: Date.now() - startTime,
+                        transcript_length: whisperResult.text.length,
+                        segments_count: segments.length,
+                        has_action_items: !!summaryData.action_items?.length,
+                    },
+                    'Call pipeline completed with summarization',
+                );
+            } else {
+                this.logger.info(
+                    { call_id, tier, ai_analysis_enabled: flags.ai_analysis_enabled },
+                    `Skipping AI summarization (tier=${tier}, ai_analysis_enabled=${flags.ai_analysis_enabled})`,
+                );
+
+                this.logger.info(
+                    {
+                        call_id,
+                        call_type: context.callType,
+                        processing_time_ms: Date.now() - startTime,
+                        transcript_length: whisperResult.text.length,
+                        segments_count: segments.length,
+                    },
+                    'Call pipeline completed with transcription only',
+                );
+            }
+
+            // Step 7: Complete (always fires after transcription, with or without summary)
+            await this.repository.updatePipelineStatus(call_id, 'complete');
 
             // Step 8: Publish event (non-critical)
             if (this.eventPublisher) {
@@ -140,7 +207,7 @@ export class CallPipelineService {
                     await this.eventPublisher.publish('call.summary_ready', {
                         call_id,
                         call_type: context.callType,
-                        has_action_items: !!summaryData.action_items?.length,
+                        has_action_items: hasSummary,
                     });
                 } catch {
                     // Event publish failure is non-critical
