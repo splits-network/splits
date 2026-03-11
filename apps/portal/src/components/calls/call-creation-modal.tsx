@@ -4,10 +4,13 @@ import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { ModalPortal } from '@splits-network/shared-ui';
 import { useCreateCall } from '@/hooks/use-create-call';
+import { useUserProfile } from '@/contexts/user-profile-context';
 import { ParticipantPicker, type Participant } from './participant-picker';
 import { EntityLinker, type LinkedEntity, type LinkableEntityType } from './entity-linker';
 import { SchedulingPanel, type ScheduleSelection } from './scheduling-panel';
 import { TagPicker } from './tag-picker';
+import { CallTypeSelector, inferCallType } from './call-type-selector';
+import { RecordingControls } from './recording-controls';
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -49,6 +52,7 @@ export function CallCreationModal({
 }: CallCreationModalProps) {
     const { user } = useUser();
     const { createCall, startCall, generateToken, createCalendarEvents, isLoading, error } = useCreateCall();
+    const { planTier } = useUserProfile();
 
     /* ── State ── */
     const [mode, setMode] = useState<CallMode>(defaultMode);
@@ -75,6 +79,10 @@ export function CallCreationModal({
     const [schedule, setSchedule] = useState<ScheduleSelection | null>(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const [callType, setCallType] = useState('recruiting_call');
+    const [recordingEnabled, setRecordingEnabled] = useState(false);
+    const [transcriptionEnabled, setTranscriptionEnabled] = useState(false);
+    const [aiAnalysisEnabled, setAiAnalysisEnabled] = useState(false);
 
     /* ── Sync defaults when modal opens ── */
     useEffect(() => {
@@ -101,8 +109,15 @@ export function CallCreationModal({
         setEntities([]);
         setShowConfirm(false);
         setSubmitError(null);
+        const inferLinks = entities.length > 0
+            ? entities.map((e) => ({ entity_type: e.entity_type }))
+            : defaultEntityType ? [{ entity_type: defaultEntityType }] : [];
+        setCallType(inferCallType(inferLinks));
+        setRecordingEnabled(false);
+        setTranscriptionEnabled(false);
+        setAiAnalysisEnabled(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, defaultParticipants, defaultMode]);
+    }, [isOpen, defaultParticipants, defaultMode, defaultEntityType]);
 
     /* ── Derived ── */
     const otherParticipants = participants.filter((p) => p.user_id !== user?.id);
@@ -117,13 +132,16 @@ export function CallCreationModal({
         setSubmitError(null);
 
         const payload = {
-            call_type: 'recruiting_call',
+            call_type: callType,
             title: title || undefined,
             scheduled_at: mode === 'scheduled' && schedule ? schedule.dateTime : undefined,
             agenda: mode === 'scheduled' ? agenda || undefined : undefined,
             duration_minutes_planned: mode === 'scheduled' ? duration : undefined,
             pre_call_notes: preCallNotes || undefined,
             tags: selectedTags.length > 0 ? selectedTags : undefined,
+            recording_enabled: recordingEnabled,
+            transcription_enabled: transcriptionEnabled,
+            ai_analysis_enabled: aiAnalysisEnabled,
             entity_links: entities.map((e) => ({
                 entity_type: e.entity_type,
                 entity_id: e.entity_id,
@@ -165,7 +183,7 @@ export function CallCreationModal({
         } catch (err: any) {
             setSubmitError(err.message || 'Failed to create call');
         }
-    }, [mode, title, agenda, duration, preCallNotes, selectedTags, entities, participants, schedule, createCall, generateToken, onSuccess, onClose]);
+    }, [mode, title, agenda, duration, preCallNotes, selectedTags, entities, participants, schedule, callType, recordingEnabled, transcriptionEnabled, aiAnalysisEnabled, createCall, generateToken, onSuccess, onClose]);
 
     const handleInstantClick = () => {
         if (!hasParticipants) return;
@@ -224,6 +242,13 @@ export function CallCreationModal({
                     )}
 
                     <div className="space-y-6">
+                        {/* Call Type */}
+                        <CallTypeSelector
+                            value={callType}
+                            onChange={setCallType}
+                            entityLinks={entities.map((e) => ({ entity_type: e.entity_type }))}
+                        />
+
                         {/* Participants */}
                         <ParticipantPicker
                             participants={participants}
@@ -322,6 +347,17 @@ export function CallCreationModal({
                         <TagPicker
                             selectedTags={selectedTags}
                             onChange={setSelectedTags}
+                        />
+
+                        {/* Recording & AI controls */}
+                        <RecordingControls
+                            recordingEnabled={recordingEnabled}
+                            onRecordingChange={setRecordingEnabled}
+                            transcriptionEnabled={transcriptionEnabled}
+                            onTranscriptionChange={setTranscriptionEnabled}
+                            aiAnalysisEnabled={aiAnalysisEnabled}
+                            onAiAnalysisChange={setAiAnalysisEnabled}
+                            planTier={planTier}
                         />
                     </div>
 
