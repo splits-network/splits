@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-08)
 
 **Core value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
-**Current focus:** v11.0 Candidate Call Experience (complete)
+**Current focus:** v12.0 Per-Call Recording & AI Controls
 
 ## Current Position
 
-Phase: 52 (1 of 1 in v11.0) — Candidate Call Experience
-Plan: 3 of 3
-Status: Phase complete
-Last activity: 2026-03-09 — Completed 52-03-PLAN.md
+Phase: 53 (1 of 1 in v12.0) — Per-Call Recording & AI Controls
+Plan: 1 of 4
+Status: In progress
+Last activity: 2026-03-10 — Completed 53-01-PLAN.md
 
-Progress: [████████████████████████████████████████] 3/3 plans
+Progress: [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 1/4 plans
 
 ## Performance Metrics
 
@@ -128,10 +128,14 @@ Recent decisions affecting current work:
 - [50-02]: All remaining portal "interview" references confirmed as legitimate domain concepts (application pipeline stage)
 - [52-03]: isCandidate() added to DataLookupHelper for centralized candidate detection by user_id
 - [52-03]: Candidate call detail URLs point to /portal/dashboard (no call detail page in candidate app)
+- [53-01]: recording_enabled replaces call_types.requires_recording_consent — per-call flag decouples consent from type categorization
+- [53-01]: ai_analysis_enabled returns 400 for non-Partner users (not silent strip) — explicit error prevents user confusion
+- [53-01]: getCreatorTier queries subscriptions + plans directly in call-service repository (no HTTP to billing-service)
 
 ### Roadmap Evolution
 
 - Phase 52 added: Candidate Call Experience — upcoming calls on dashboard/application detail, join flow via video.applicant.network, call notifications
+- Phase 53 added: Per-Call Recording & AI Controls — recording_enabled/ai_analysis_enabled flags, tier gating, call creation UI, ai-service pipeline enforcement, post-call tab gating
 
 ### Pending Todos
 
@@ -145,10 +149,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-09
-Stopped at: Completed 52-03-PLAN.md — Phase 52 complete
+Last session: 2026-03-10
+Stopped at: Completed 53-01-PLAN.md — backend recording flags and tier gating
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-09 (52-03 completed — call notification URL routing for candidates)*
+*Last updated: 2026-03-10 (53-01 completed — recording_enabled/ai_analysis_enabled migration and call-service tier gating)*
