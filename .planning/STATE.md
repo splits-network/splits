@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-08)
 ## Current Position
 
 Phase: 53 (1 of 1 in v12.0) — Per-Call Recording & AI Controls
-Plan: 3 of 4
-Status: In progress
-Last activity: 2026-03-11 — Completed 53-03-PLAN.md
+Plan: 4 of 4
+Status: Phase complete
+Last activity: 2026-03-11 — Completed 53-04-PLAN.md
 
-Progress: [██████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 3/4 plans
+Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 4/4 plans
 
 ## Performance Metrics
 
@@ -134,6 +134,9 @@ Recent decisions affecting current work:
 - [53-02]: getCreatorTier throws on DB error (not silent starter default) so caller can distinguish no-subscription from DB-down for retry
 - [53-02]: Pipeline skipping transcription also skips summarization — AI analysis always requires transcript as input
 - [53-02]: updatePipelineStatus(complete) fires for transcription-only completions (transcript ready is a valid completion state)
+- [53-04]: Show locked tabs with lock icon (not hidden) — upsell visibility maximized
+- [53-04]: Storage blob deletion before DB row deletion; skip DB delete on blob failure — prevents orphaned DB records
+- [53-04]: any type for supabase in deleteExpiredRecordings helper — complex nested join return type inference too strict
 
 ### Roadmap Evolution
 
@@ -153,9 +156,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-11
-Stopped at: Completed 53-03-PLAN.md — call creation UI with recording & AI controls
+Stopped at: Completed 53-04-PLAN.md — call detail tab gating and recording retention cleanup
 Resume file: None
 
 ---
 *Created: 2026-02-12*
-*Last updated: 2026-03-11 (53-03 completed — CallTypeSelector, RecordingControls components and call-creation-modal integration)*
+*Last updated: 2026-03-11 (53-04 completed — Phase 53 complete: LockedTabUpgrade component, tab gating, recording expiry cleanup job)*
