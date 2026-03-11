@@ -78,6 +78,7 @@ echo "Creating resend-secrets..."
 kubectl create secret generic resend-secrets \
   --from-literal=resend-api-key="$RESEND_API_KEY" \
   --from-literal=resend-from-email="$RESEND_FROM_EMAIL" \
+  --from-literal=resend-candidate-from-email="$RESEND_CANDIDATE_FROM_EMAIL" \
   --namespace="$NAMESPACE" \
   --dry-run=client -o yaml | kubectl apply -f -
 

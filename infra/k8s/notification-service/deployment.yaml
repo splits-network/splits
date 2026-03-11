@@ -59,6 +59,8 @@ spec:
                                 key: resend-api-key
                       - name: RESEND_FROM_EMAIL
                         value: "noreply@updates.splits.network"
+                      - name: RESEND_CANDIDATE_FROM_EMAIL
+                        value: "noreply@updates.applicant.network"
                       - name: PORTAL_URL
                         value: "${PORTAL_URL}"
                   resources:

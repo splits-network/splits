@@ -69,6 +69,8 @@ spec:
                                         key: resend-api-key
                               - name: FROM_EMAIL
                                 value: "Applicant Network <notifications@applicant.network>"
+                              - name: RESEND_CANDIDATE_FROM_EMAIL
+                                value: "notifications@updates.applicant.network"
                               - name: PORTAL_URL
                                 value: "${PORTAL_URL}"
                               - name: NODE_ENV
