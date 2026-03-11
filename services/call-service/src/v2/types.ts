@@ -19,8 +19,6 @@ export interface CallType {
     slug: string;
     label: string;
     default_duration_minutes: number;
-    requires_recording_consent: boolean;
-    supports_ai_summary: boolean;
     created_at: string;
 }
 
@@ -42,6 +40,8 @@ export interface Call {
     needs_follow_up: boolean;
     cancelled_by: string | null;
     cancel_reason: string | null;
+    recording_enabled: boolean;
+    ai_analysis_enabled: boolean;
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
@@ -168,7 +168,6 @@ export interface CallWithParticipants extends Call {
 }
 
 export interface CallDetail extends CallWithParticipants {
-    recording_consent_required?: boolean;
     recordings?: CallRecording[];
     transcript?: CallTranscript | null;
     summary?: CallSummary | null;
@@ -190,6 +189,8 @@ export interface CreateCallInput {
     tags?: string[];
     entity_links: { entity_type: CallEntityType; entity_id: string }[];
     participants: { user_id: string; role: CallParticipantRole }[];
+    recording_enabled?: boolean;
+    ai_analysis_enabled?: boolean;
 }
 
 export interface UpdateCallInput {

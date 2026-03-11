@@ -127,6 +127,8 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
                     tags: body.tags,
                     entity_links: body.entity_links || [],
                     participants: body.participants || [],
+                    recording_enabled: body.recording_enabled,
+                    ai_analysis_enabled: body.ai_analysis_enabled,
                 },
                 clerkUserId,
             );

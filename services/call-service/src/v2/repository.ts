@@ -119,18 +119,10 @@ export class CallRepository {
             this.artifacts.getCallEntityLinks(id),
         ]);
 
-        // Look up call_type metadata for recording consent
-        const { data: callTypeRow } = await this.supabase
-            .from('call_types')
-            .select('requires_recording_consent')
-            .eq('slug', call.call_type)
-            .maybeSingle();
-
         const detail: CallDetail = {
             ...call,
             participants,
             entity_links: entityLinks,
-            recording_consent_required: callTypeRow?.requires_recording_consent ?? true,
         };
 
         if (!include || include.length === 0) return detail;
@@ -184,6 +176,8 @@ export class CallRepository {
                 duration_minutes_planned: input.duration_minutes_planned || null,
                 pre_call_notes: input.pre_call_notes || null,
                 created_by: createdBy,
+                recording_enabled: input.recording_enabled ?? false,
+                ai_analysis_enabled: input.ai_analysis_enabled ?? false,
             })
             .select()
             .single();
@@ -254,6 +248,18 @@ export class CallRepository {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
+
+    async getCreatorTier(userId: string): Promise<'starter' | 'pro' | 'partner'> {
+        const { data: sub } = await this.supabase
+            .from('subscriptions')
+            .select('plan:plans(tier)')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        return (sub?.plan as any)?.tier || 'starter';
+    }
 
     async resolveUserId(userId: string): Promise<string | null> {
         // Accept both internal UUID and Clerk user ID (user_XXXXX)

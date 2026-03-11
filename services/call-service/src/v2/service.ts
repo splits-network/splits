@@ -46,6 +46,17 @@ export class CallService {
             }
         }
 
+        // Validate subscription tier for AI analysis
+        if (input.ai_analysis_enabled) {
+            const tier = await this.repository.getCreatorTier(resolvedUserId);
+            if (tier !== 'partner') {
+                throw Object.assign(
+                    new Error('AI analysis requires a Partner subscription'),
+                    { statusCode: 400 },
+                );
+            }
+        }
+
         // Create call record (includes agenda, duration_minutes_planned, pre_call_notes)
         const call = await this.repository.createCall(input, resolvedUserId);
 
@@ -97,6 +108,8 @@ export class CallService {
             created_by: resolvedUserId,
             scheduled_at: call.scheduled_at,
             agenda: call.agenda,
+            recording_enabled: call.recording_enabled,
+            ai_analysis_enabled: call.ai_analysis_enabled,
             entity_links: entityLinks.map((l) => ({
                 entity_type: l.entity_type,
                 entity_id: l.entity_id,
