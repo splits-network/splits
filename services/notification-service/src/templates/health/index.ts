@@ -25,24 +25,24 @@ export function serviceUnhealthyEmail(data: ServiceAlertData): string {
 ${heading({ level: 1, text: `Service Alert: ${data.serviceDisplayName}` })}
 
 ${alert({
-    type: alertType as 'error' | 'warning',
-    title: `${data.serviceDisplayName} is ${severityLabel}`,
-    message: `The health monitor has detected that ${data.serviceDisplayName} is currently experiencing issues. A user-facing notification has been posted.`,
-})}
+        type: alertType as 'error' | 'warning',
+        title: `${data.serviceDisplayName} is ${severityLabel}`,
+        message: `The health monitor has detected that ${data.serviceDisplayName} is currently experiencing issues. A user-facing notification has been posted.`,
+    })}
 
 ${infoCard({
-    title: 'Incident Details',
-    items: [
-        { label: 'Service', value: data.serviceDisplayName, highlight: true },
-        { label: 'Status', value: severityLabel },
-        { label: 'Environment', value: (data.environment || 'unknown').toUpperCase() },
-        { label: 'Internal Name', value: data.serviceName },
-        { label: 'Detected At', value: new Date(data.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'long' }) },
-        ...(data.error ? [{ label: 'Error', value: data.error }] : []),
-    ],
-})}
+        title: 'Incident Details',
+        items: [
+            { label: 'Service', value: data.serviceDisplayName, highlight: true },
+            { label: 'Status', value: severityLabel },
+            { label: 'Environment', value: (data.environment || 'unknown').toUpperCase() },
+            { label: 'Internal Name', value: data.serviceName },
+            { label: 'Detected At', value: new Date(data.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'long' }) },
+            ...(data.error ? [{ label: 'Error', value: data.error }] : []),
+        ],
+    })}
 
-${paragraph('This alert was triggered after the sliding window threshold was met (3 failures in the last 5 checks). A site-wide degradation banner is now visible to users.')}
+${paragraph('This alert was triggered after 5 consecutive health check failures (checks run every 15 seconds, ~75 seconds of sustained failure). A site-wide degradation banner is now visible to users.')}
 
 ${divider()}
 
@@ -61,21 +61,21 @@ export function serviceRecoveredEmail(data: ServiceAlertData): string {
 ${heading({ level: 1, text: `Resolved: ${data.serviceDisplayName}` })}
 
 ${alert({
-    type: 'success',
-    title: `${data.serviceDisplayName} has recovered`,
-    message: `The health monitor has confirmed that ${data.serviceDisplayName} is healthy again. The user-facing degradation banner has been removed.`,
-})}
+        type: 'success',
+        title: `${data.serviceDisplayName} has recovered`,
+        message: `The health monitor has confirmed that ${data.serviceDisplayName} is healthy again. The user-facing degradation banner has been removed.`,
+    })}
 
 ${infoCard({
-    title: 'Recovery Details',
-    items: [
-        { label: 'Service', value: data.serviceDisplayName, highlight: true },
-        { label: 'Status', value: 'Healthy' },
-        { label: 'Environment', value: (data.environment || 'unknown').toUpperCase() },
-        { label: 'Internal Name', value: data.serviceName },
-        { label: 'Resolved At', value: new Date(data.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'long' }) },
-    ],
-})}
+        title: 'Recovery Details',
+        items: [
+            { label: 'Service', value: data.serviceDisplayName, highlight: true },
+            { label: 'Status', value: 'Healthy' },
+            { label: 'Environment', value: (data.environment || 'unknown').toUpperCase() },
+            { label: 'Internal Name', value: data.serviceName },
+            { label: 'Resolved At', value: new Date(data.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'long' }) },
+        ],
+    })}
 
 ${paragraph('The sliding window now shows the service passing consistently. No further action is needed.')}
 
