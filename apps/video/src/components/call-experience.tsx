@@ -75,12 +75,22 @@ export function CallExperience({ livekitToken, call }: CallExperienceProps) {
 
     const shouldConnect = callState === 'connecting' || callState === 'in-call';
 
+    // Derive initial audio/video from lobby choices so they carry over to the call
+    const audio = localChoices
+        ? (localChoices.audioEnabled ? { deviceId: localChoices.audioDeviceId } : false)
+        : undefined;
+    const video = localChoices
+        ? (localChoices.videoEnabled ? { deviceId: localChoices.videoDeviceId } : false)
+        : undefined;
+
     return (
         <LiveKitRoom
             serverUrl={livekitUrl}
             token={livekitToken}
             connect={shouldConnect}
             options={defaultRoomOptions}
+            audio={audio}
+            video={video}
             onDisconnected={handleDisconnected}
         >
             <CallStateRouter
