@@ -1,7 +1,6 @@
 "use client";
 
-import type { Company, CompanyRelationship } from "../../types";
-import { formatSalary } from "../shared/helpers";
+import type { Company } from "../../types";
 
 const iconStyles = [
     "bg-primary text-primary-content",
@@ -40,13 +39,8 @@ function StatCell({
     );
 }
 
-export function MarketplaceStats({ company }: { company: Company }) {
+export function CompanyStats({ company }: { company: Company }) {
     const stats = [
-        {
-            label: "Roles",
-            value: String(company.open_roles_count ?? 0),
-            icon: "fa-duotone fa-regular fa-briefcase",
-        },
         {
             label: "Size",
             value: company.company_size || "N/A",
@@ -58,48 +52,19 @@ export function MarketplaceStats({ company }: { company: Company }) {
             icon: "fa-duotone fa-regular fa-rocket",
         },
         {
-            label: "Avg Salary",
-            value: formatSalary(company.avg_salary),
-            icon: "fa-duotone fa-regular fa-dollar-sign",
+            label: "Founded",
+            value: company.founded_year ? String(company.founded_year) : "N/A",
+            icon: "fa-duotone fa-regular fa-calendar",
+        },
+        {
+            label: "Roles",
+            value: company.open_roles_count != null ? String(company.open_roles_count) : "N/A",
+            icon: "fa-duotone fa-regular fa-briefcase",
         },
     ];
 
     return (
         <div className="grid grid-cols-2 divide-x divide-y divide-base-300">
-            {stats.map((stat, i) => (
-                <StatCell
-                    key={stat.label}
-                    icon={stat.icon}
-                    value={stat.value}
-                    label={stat.label}
-                    styleIndex={i}
-                />
-            ))}
-        </div>
-    );
-}
-
-export function RelationshipStats({
-    relationship,
-}: {
-    relationship: CompanyRelationship;
-}) {
-    const stats = [
-        {
-            label: "Role",
-            value: relationship.relationship_type
-                ? relationship.relationship_type.charAt(0).toUpperCase() +
-                  relationship.relationship_type.slice(1)
-                : "---",
-            icon: "fa-duotone fa-regular fa-user-tie",
-        },
-    ];
-
-    return (
-        <div
-            className="grid divide-x divide-base-300"
-            style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
-        >
             {stats.map((stat, i) => (
                 <StatCell
                     key={stat.label}

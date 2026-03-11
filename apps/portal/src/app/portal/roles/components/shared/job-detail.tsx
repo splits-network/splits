@@ -16,14 +16,40 @@ import { JobHeroHeader } from "./job-detail-header";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
-type TabKey = "brief" | "candidate" | "financials" | "company" | "matches" | "calls";
+type TabKey =
+    | "brief"
+    | "candidate"
+    | "financials"
+    | "company"
+    | "matches"
+    | "calls";
 
 const TABS = [
-    { value: "brief", label: "Recruiter Brief", icon: "fa-duotone fa-regular fa-file-lines" },
-    { value: "candidate", label: "Candidate", icon: "fa-duotone fa-regular fa-user" },
-    { value: "financials", label: "Financials", icon: "fa-duotone fa-regular fa-calculator" },
-    { value: "company", label: "Company", icon: "fa-duotone fa-regular fa-building" },
-    { value: "matches", label: "Matches", icon: "fa-duotone fa-regular fa-bullseye" },
+    {
+        value: "brief",
+        label: "Recruiter Brief",
+        icon: "fa-duotone fa-regular fa-file-lines",
+    },
+    {
+        value: "candidate",
+        label: "Candidate",
+        icon: "fa-duotone fa-regular fa-user",
+    },
+    {
+        value: "financials",
+        label: "Financials",
+        icon: "fa-duotone fa-regular fa-calculator",
+    },
+    {
+        value: "company",
+        label: "Company",
+        icon: "fa-duotone fa-regular fa-building",
+    },
+    {
+        value: "matches",
+        label: "Matches",
+        icon: "fa-duotone fa-regular fa-bullseye",
+    },
     { value: "calls", label: "Calls", icon: "fa-duotone fa-regular fa-video" },
 ];
 
@@ -47,7 +73,7 @@ export function JobDetail({
     const { planTier, isRecruiter } = useUserProfile();
 
     return (
-        <div>
+        <div className="w-full">
             <JobHeroHeader
                 job={job}
                 onClose={onClose}
@@ -65,11 +91,17 @@ export function JobDetail({
             {/* Tab Content */}
             <div className="p-6">
                 {activeTab === "brief" && <RecruiterBriefTab job={job} />}
-                {activeTab === "candidate" && <CandidateDescriptionTab job={job} />}
+                {activeTab === "candidate" && (
+                    <CandidateDescriptionTab job={job} />
+                )}
                 {activeTab === "financials" && <FinancialsTab job={job} />}
                 {activeTab === "company" && <CompanyTab job={job} />}
                 {activeTab === "matches" && (
-                    <JobMatchesTab job={job} isPartner={planTier === "partner"} isRecruiter={isRecruiter} />
+                    <JobMatchesTab
+                        job={job}
+                        isPartner={planTier === "partner"}
+                        isRecruiter={isRecruiter}
+                    />
                 )}
                 {activeTab === "calls" && (
                     <JobCallsTab jobId={job.id} jobTitle={job.title} />

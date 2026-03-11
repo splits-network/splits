@@ -2,7 +2,9 @@
 
 import { Fragment } from "react";
 import type { Job } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusBadgeColor } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
+import { employmentBadge, commuteBadges, thirdPartyBadge } from "../shared/role-badges";
 import {
     salaryDisplay,
     formatStatus,
@@ -33,6 +35,10 @@ export function TableRow({
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
         : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
+
+    const emp = employmentBadge(job.employment_type);
+    const commutes = commuteBadges(job.commute_types);
+    const thirdParty = thirdPartyBadge(job);
 
     return (
         <Fragment>
@@ -73,6 +79,30 @@ export function TableRow({
                     {job.location || "—"}
                 </td>
 
+                {/* Info: status + employment type + commute + 3rd party */}
+                <td className="px-4 py-3">
+                    <div className="flex flex-wrap items-center gap-1">
+                        <BaselBadge color={statusBadgeColor(job.status)} size="xs" variant="soft">
+                            {formatStatus(job.status)}
+                        </BaselBadge>
+                        {emp && (
+                            <BaselBadge color={emp.color} size="xs">
+                                {emp.label}
+                            </BaselBadge>
+                        )}
+                        {commutes.map((c) => (
+                            <BaselBadge key={c.label} color={c.color} size="xs" variant="outline">
+                                {c.label}
+                            </BaselBadge>
+                        ))}
+                        {thirdParty && (
+                            <BaselBadge color={thirdParty.color} size="xs" variant="soft">
+                                {thirdParty.label}
+                            </BaselBadge>
+                        )}
+                    </div>
+                </td>
+
                 {/* Salary */}
                 <td className="px-4 py-3 text-sm font-bold text-base-content">
                     {salaryDisplay(job) || "—"}
@@ -81,15 +111,6 @@ export function TableRow({
                 {/* Fee % */}
                 <td className="px-4 py-3 text-sm font-bold text-primary">
                     {job.fee_percentage}%
-                </td>
-
-                {/* Status */}
-                <td className="px-4 py-3">
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(job.status)}`}
-                    >
-                        {formatStatus(job.status)}
-                    </span>
                 </td>
 
                 {/* Apps */}
@@ -107,7 +128,7 @@ export function TableRow({
                     className="px-4 py-3 relative"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap0">
+                    <div className="absolute inset-y-0 right-4 flex items-center flex-nowrap">
                         <RoleActionsToolbar
                             job={job}
                             variant="icon-only"

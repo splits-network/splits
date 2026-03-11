@@ -14,7 +14,6 @@ import { ParticipantTile } from './participant-tile';
 import { SelfViewPip } from './self-view-pip';
 import { VideoControls } from './video-controls';
 import { WaitingIndicator } from './waiting-indicator';
-import { ParticipantSidebar } from './participant-sidebar';
 import { ScreenShareTile } from './screen-share-tile';
 
 interface VideoRoomProps {
@@ -140,7 +139,7 @@ export function VideoRoom({
     )?.name ?? 'other participants';
 
     return (
-        <div className="relative h-screen bg-base-200 flex">
+        <div className="relative h-full bg-base-200 flex">
             {/* Main content area */}
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Video area */}
@@ -192,13 +191,6 @@ export function VideoRoom({
 
             {/* Notes panel (right side, shrinks video area when open) */}
             {notesPanel}
-
-            {/* Participant sidebar */}
-            <ParticipantSidebar
-                participants={remoteParticipants}
-                callContext={callContext}
-                localName={localName}
-            />
 
             {/* Remote audio rendering -- CRITICAL for hearing remote participant */}
             <RoomAudioRenderer />

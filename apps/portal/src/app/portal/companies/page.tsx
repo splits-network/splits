@@ -15,7 +15,7 @@ import type {
     CompanyTab,
 } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
-import { companyId as getCompanyId } from "./components/shared/helpers";
+import { rowId as getRowId } from "./components/shared/helpers";
 import { CompaniesAnimator } from "./companies-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -115,8 +115,8 @@ export default function CompaniesBaselPage() {
 
     const handleSelect = useCallback(
         (item: Company | CompanyRelationship) => {
-            const cId = getCompanyId(item, isMarketplace);
-            setSelectedCompanyId((prev) => (prev === cId ? null : cId));
+            const rId = getRowId(item, isMarketplace);
+            setSelectedCompanyId((prev) => (prev === rId ? null : rId));
         },
         [isMarketplace],
     );

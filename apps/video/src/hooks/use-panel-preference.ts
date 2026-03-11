@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 
-type PanelTab = 'context' | 'chat' | 'history';
+export type PanelTab = 'participants' | 'context' | 'chat' | 'history';
 
 interface PanelPreference {
     activeTab: PanelTab;
@@ -17,7 +17,7 @@ function getStorageKey(callId: string): string {
 
 function loadPreference(callId: string, defaultOpen: boolean): PanelPreference {
     if (typeof window === 'undefined') {
-        return { activeTab: 'context', isOpen: defaultOpen };
+        return { activeTab: 'participants', isOpen: defaultOpen };
     }
 
     try {
@@ -25,7 +25,7 @@ function loadPreference(callId: string, defaultOpen: boolean): PanelPreference {
         if (stored) {
             const parsed = JSON.parse(stored) as Partial<PanelPreference>;
             return {
-                activeTab: parsed.activeTab || 'context',
+                activeTab: parsed.activeTab || 'participants',
                 isOpen: parsed.isOpen ?? defaultOpen,
             };
         }
@@ -33,7 +33,7 @@ function loadPreference(callId: string, defaultOpen: boolean): PanelPreference {
         // Ignore parse errors
     }
 
-    return { activeTab: 'context', isOpen: defaultOpen };
+    return { activeTab: 'participants', isOpen: defaultOpen };
 }
 
 /**
@@ -65,11 +65,25 @@ export function usePanelPreference(callId: string, defaultOpen: boolean) {
         setPreference((prev) => ({ ...prev, isOpen: open }));
     }, []);
 
+    /**
+     * Select a tab — if clicking the already-active tab, toggle the panel.
+     * If clicking a different tab, switch to it and ensure panel is open.
+     */
+    const selectTab = useCallback((tab: PanelTab) => {
+        setPreference((prev) => {
+            if (prev.activeTab === tab && prev.isOpen) {
+                return { ...prev, isOpen: false };
+            }
+            return { activeTab: tab, isOpen: true };
+        });
+    }, []);
+
     return {
         activeTab: preference.activeTab,
         isOpen: preference.isOpen,
         setActiveTab,
         toggleOpen,
         setOpen,
+        selectTab,
     };
 }

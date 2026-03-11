@@ -37,7 +37,12 @@ export class RecruiterCompanyRepository {
                     industry,
                     headquarters_location,
                     description,
-                    website
+                    website,
+                    company_size,
+                    stage,
+                    logo_url,
+                    founded_year,
+                    tagline
                 )
             `, { count: 'exact' });
 
@@ -102,8 +107,33 @@ export class RecruiterCompanyRepository {
         const { data, error, count } = await query;
         if (error) throw error;
 
+        // Enrich with open_roles_count from jobs table
+        const companyIds = (data || []).map((r: any) => r.company?.id).filter(Boolean);
+        let enrichedData = data || [];
+
+        if (companyIds.length > 0) {
+            const { data: jobRows } = await this.supabase
+                .from('jobs')
+                .select('company_id, status')
+                .in('company_id', companyIds)
+                .eq('status', 'active');
+
+            const roleCountMap: Record<string, number> = {};
+            for (const job of (jobRows || [])) {
+                roleCountMap[job.company_id] = (roleCountMap[job.company_id] || 0) + 1;
+            }
+
+            enrichedData = (data || []).map((r: any) => ({
+                ...r,
+                company: r.company ? {
+                    ...r.company,
+                    open_roles_count: roleCountMap[r.company.id] ?? 0,
+                } : r.company,
+            }));
+        }
+
         return {
-            data: data || [],
+            data: enrichedData,
             pagination: {
                 total: count || 0,
                 page,
@@ -135,7 +165,12 @@ export class RecruiterCompanyRepository {
                     industry,
                     headquarters_location,
                     description,
-                    website
+                    website,
+                    company_size,
+                    stage,
+                    logo_url,
+                    founded_year,
+                    tagline
                 )
             `)
             .eq('id', id);
@@ -160,8 +195,23 @@ export class RecruiterCompanyRepository {
 
         const { data, error } = await query.maybeSingle();
         if (error) throw error;
-        
-        return data;
+
+        if (!data?.company?.id) return data;
+
+        // Enrich with open_roles_count
+        const { data: jobRows } = await this.supabase
+            .from('jobs')
+            .select('id')
+            .eq('company_id', data.company.id)
+            .eq('status', 'active');
+
+        return {
+            ...data,
+            company: {
+                ...data.company,
+                open_roles_count: jobRows?.length ?? 0,
+            },
+        };
     }
 
     async create(
@@ -215,7 +265,12 @@ export class RecruiterCompanyRepository {
                     industry,
                     headquarters_location,
                     description,
-                    website
+                    website,
+                    company_size,
+                    stage,
+                    logo_url,
+                    founded_year,
+                    tagline
                 )
             `)
             .single();
@@ -264,7 +319,12 @@ export class RecruiterCompanyRepository {
                     industry,
                     headquarters_location,
                     description,
-                    website
+                    website,
+                    company_size,
+                    stage,
+                    logo_url,
+                    founded_year,
+                    tagline
                 )
             `)
             .single();
@@ -351,7 +411,12 @@ export class RecruiterCompanyRepository {
                     industry,
                     headquarters_location,
                     description,
-                    website
+                    website,
+                    company_size,
+                    stage,
+                    logo_url,
+                    founded_year,
+                    tagline
                 )
             `)
             .single();

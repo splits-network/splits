@@ -213,15 +213,17 @@ function CallStateRouter({
                 );
             }
             return (
-                <div className="h-screen relative bg-base-100">
-                    <VideoRoom
-                        callContext={callContext}
-                        localName={localName}
-                        localAvatarUrl={localAvatarUrl}
-                        onDisconnect={() => setCallState('post-call')}
-                    />
-                    <ReconnectingOverlay />
-                    <CallSidePanel call={call} />
+                <div className="h-dvh relative bg-base-100 overflow-hidden flex">
+                    <div className="flex-1 min-w-0 relative">
+                        <VideoRoom
+                            callContext={callContext}
+                            localName={localName}
+                            localAvatarUrl={localAvatarUrl}
+                            onDisconnect={() => setCallState('post-call')}
+                        />
+                        <ReconnectingOverlay />
+                    </div>
+                    <CallSidePanel call={call} localName={localName} />
                 </div>
             );
 

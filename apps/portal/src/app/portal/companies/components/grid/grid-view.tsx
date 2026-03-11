@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
 import { CompanyDetailLoader } from "../shared/company-detail";
-import { companyId } from "../shared/helpers";
+import { companyId, rowId } from "../shared/helpers";
 import { GridCard } from "./grid-card";
 
 type TagMap = Record<
@@ -31,15 +31,15 @@ export function GridView({
     const [tagMap, setTagMap] = useState<TagMap>({});
 
     const selectedItem = items.find(
-        (item) => companyId(item, isMarketplace) === selectedId,
+        (item) => rowId(item, isMarketplace) === selectedId,
     );
 
     useEffect(() => {
-        if (!isMarketplace || items.length === 0) return;
+        if (items.length === 0) return;
 
-        const companyIds = items
-            .map((item) => companyId(item, true))
-            .filter(Boolean);
+        const companyIds = [...new Set(
+            items.map((item) => companyId(item, isMarketplace)).filter(Boolean),
+        )];
 
         if (companyIds.length === 0) return;
 
@@ -107,19 +107,16 @@ export function GridView({
             />
             <div className="drawer-content">
                 {/* Grid */}
-                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
                     {items.map((item) => {
+                        const rId = rowId(item, isMarketplace);
                         const cId = companyId(item, isMarketplace);
                         return (
                             <GridCard
-                                key={
-                                    isMarketplace
-                                        ? (item as Company).id
-                                        : (item as CompanyRelationship).id
-                                }
+                                key={rId}
                                 item={item}
                                 activeTab={activeTab}
-                                isSelected={selectedId === cId}
+                                isSelected={selectedId === rId}
                                 onSelect={() => onSelectAction(item)}
                                 onRefresh={onRefreshAction}
                                 techStack={tagMap[cId]?.skills ?? []}
@@ -139,7 +136,7 @@ export function GridView({
                 <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
                     {selectedItem && selectedId && (
                         <CompanyDetailLoader
-                            companyId={selectedId}
+                            companyId={companyId(selectedItem, isMarketplace)}
                             onClose={() => onSelectAction(selectedItem)}
                             onRefresh={onRefreshAction}
                         />

@@ -20,10 +20,15 @@ export function GridView({
 
     return (
         <div className="drawer drawer-end">
-            <input type="checkbox" className="drawer-toggle" checked={!!selectedCandidate} readOnly />
+            <input
+                type="checkbox"
+                className="drawer-toggle"
+                checked={!!selectedCandidate}
+                readOnly
+            />
             <div className="drawer-content">
                 {/* Grid */}
-                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
                     {candidates.map((candidate) => (
                         <GridCard
                             key={candidate.id}
@@ -36,7 +41,13 @@ export function GridView({
                 </div>
             </div>
             <div className="drawer-side z-50">
-                <div className="drawer-overlay" onClick={() => selectedCandidate && onSelect(selectedCandidate)} aria-label="close drawer" />
+                <div
+                    className="drawer-overlay"
+                    onClick={() =>
+                        selectedCandidate && onSelect(selectedCandidate)
+                    }
+                    aria-label="close drawer"
+                />
                 <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
                     {selectedCandidate && (
                         <DetailLoader

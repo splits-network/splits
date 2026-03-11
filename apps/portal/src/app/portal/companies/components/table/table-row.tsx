@@ -2,7 +2,13 @@
 
 import { Fragment } from "react";
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
+import {
+    relationshipStatusBadge,
+    relationshipTypeBadge,
+    sizeBadge,
+    stageBadge,
+} from "../shared/company-badges";
 import {
     companyName,
     companyId,
@@ -11,7 +17,6 @@ import {
     addedAgo,
     extractCompany,
     extractRelationship,
-    formatStatus,
 } from "../shared/helpers";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { CompanyDetailLoader } from "../shared/company-detail";
@@ -23,7 +28,6 @@ export function TableRow({
     idx,
     isSelected,
     colSpan,
-    selectedCompanyId,
     onSelect,
     onRefresh,
 }: {
@@ -32,7 +36,6 @@ export function TableRow({
     idx: number;
     isSelected: boolean;
     colSpan: number;
-    selectedCompanyId: string | null;
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
@@ -44,6 +47,11 @@ export function TableRow({
     const relationship = extractRelationship(item, isMarketplace);
     const { getLevel } = useGamification();
     const level = getLevel(companyId(item, isMarketplace));
+
+    const size = sizeBadge((item as Company).company_size ?? (company as Company).company_size);
+    const stage = stageBadge((item as Company).stage ?? (company as Company).stage);
+    const relStatus = relationshipStatusBadge(relationship?.status);
+    const relType = relationshipTypeBadge(relationship?.relationship_type);
 
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
@@ -80,25 +88,31 @@ export function TableRow({
                     {location || "---"}
                 </td>
 
-                {/* Marketplace: Size | My Companies: Status + Type */}
-                {isMarketplace ? (
-                    <td className="px-4 py-3 text-sm font-bold text-base-content">
-                        {(item as Company).company_size || "---"}
-                    </td>
-                ) : (
-                    <>
-                        <td className="px-4 py-3">
-                            <span
-                                className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(relationship?.status)}`}
-                            >
-                                {formatStatus(relationship?.status)}
-                            </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm font-bold text-secondary capitalize">
-                            {relationship?.relationship_type || "---"}
-                        </td>
-                    </>
-                )}
+                {/* Info: badges */}
+                <td className="px-4 py-3">
+                    <div className="flex flex-wrap items-center gap-1">
+                        {relStatus && (
+                            <BaselBadge color={relStatus.color} size="xs" variant="soft">
+                                {relStatus.label}
+                            </BaselBadge>
+                        )}
+                        {relType && (
+                            <BaselBadge color={relType.color} size="xs" variant="outline">
+                                {relType.label}
+                            </BaselBadge>
+                        )}
+                        {size && (
+                            <BaselBadge color={size.color} size="xs">
+                                {size.label}
+                            </BaselBadge>
+                        )}
+                        {stage && (
+                            <BaselBadge color={stage.color} size="xs" variant="outline">
+                                {stage.label}
+                            </BaselBadge>
+                        )}
+                    </div>
+                </td>
 
                 {/* Added */}
                 <td className="px-4 py-3 text-sm text-base-content/50">
@@ -123,14 +137,14 @@ export function TableRow({
             </tr>
 
             {/* Expanded detail row */}
-            {isSelected && selectedCompanyId && (
+            {isSelected && (
                 <tr>
                     <td
                         colSpan={colSpan}
                         className="p-0 bg-base-100 border-t-2 border-b-2 border-primary"
                     >
                         <CompanyDetailLoader
-                            companyId={selectedCompanyId}
+                            companyId={companyId(item, isMarketplace)}
                             onClose={onSelect}
                             onRefresh={onRefresh}
                         />

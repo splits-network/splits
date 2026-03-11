@@ -2,7 +2,7 @@
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
 import { CompanyDetailLoader } from "../shared/company-detail";
-import { companyId } from "../shared/helpers";
+import { companyId, rowId } from "../shared/helpers";
 import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
 
@@ -21,7 +21,7 @@ export function SplitView({
 }) {
     const isMarketplace = activeTab === "marketplace";
     const selectedItem = items.find(
-        (item) => companyId(item, isMarketplace) === selectedId,
+        (item) => rowId(item, isMarketplace) === selectedId,
     );
 
     return (
@@ -37,15 +37,11 @@ export function SplitView({
             >
                 {items.map((item) => (
                     <SplitItem
-                        key={
-                            isMarketplace
-                                ? (item as Company).id
-                                : (item as CompanyRelationship).id
-                        }
+                        key={rowId(item, isMarketplace)}
                         item={item}
                         activeTab={activeTab}
                         isSelected={
-                            selectedId === companyId(item, isMarketplace)
+                            selectedId === rowId(item, isMarketplace)
                         }
                         onSelect={() => onSelect(item)}
                     />
@@ -59,7 +55,7 @@ export function SplitView({
             >
                 {selectedItem && selectedId ? (
                     <CompanyDetailLoader
-                        companyId={selectedId}
+                        companyId={companyId(selectedItem, isMarketplace)}
                         onClose={() => onSelect(selectedItem)}
                         onRefresh={onRefresh}
                     />

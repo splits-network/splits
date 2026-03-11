@@ -57,6 +57,14 @@ export interface CompanyRelationship {
         name: string;
         industry?: string;
         headquarters_location?: string;
+        description?: string;
+        website?: string;
+        company_size?: string;
+        stage?: string;
+        logo_url?: string;
+        founded_year?: number;
+        tagline?: string;
+        open_roles_count?: number;
     };
 }
 

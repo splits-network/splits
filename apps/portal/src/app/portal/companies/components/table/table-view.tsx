@@ -1,7 +1,7 @@
 "use client";
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { companyId } from "../shared/helpers";
+import { rowId } from "../shared/helpers";
 import { TableRow } from "./table-row";
 
 export function TableView({
@@ -19,26 +19,15 @@ export function TableView({
 }) {
     const isMarketplace = activeTab === "marketplace";
 
-    const marketplaceColumns = [
+    const columns = [
         "",
         "Company",
         "Industry",
         "Location",
-        "Size",
+        "Info",
         "Added",
         "",
     ];
-    const myCompaniesColumns = [
-        "",
-        "Company",
-        "Industry",
-        "Location",
-        "Status",
-        "Type",
-        "Added",
-        "",
-    ];
-    const columns = isMarketplace ? marketplaceColumns : myCompaniesColumns;
 
     return (
         <div className="overflow-x-auto border-2 border-base-300">
@@ -57,22 +46,15 @@ export function TableView({
                 </thead>
                 <tbody>
                     {items.map((item, idx) => {
-                        const cId = companyId(item, isMarketplace);
+                        const rId = rowId(item, isMarketplace);
                         return (
                             <TableRow
-                                key={
-                                    isMarketplace
-                                        ? (item as Company).id
-                                        : (item as CompanyRelationship).id
-                                }
+                                key={rId}
                                 item={item}
                                 activeTab={activeTab}
                                 idx={idx}
-                                isSelected={selectedId === cId}
+                                isSelected={selectedId === rId}
                                 colSpan={columns.length}
-                                selectedCompanyId={
-                                    selectedId === cId ? cId : null
-                                }
                                 onSelect={() => onSelect(item)}
                                 onRefresh={onRefresh}
                             />
