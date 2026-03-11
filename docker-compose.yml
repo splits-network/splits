@@ -224,8 +224,8 @@ services:
       IDENTITY_SERVICE_URL: http://identity-service:3001
       ATS_SERVICE_URL: http://ats-service:3002
       NETWORK_SERVICE_URL: http://network-service:3003
-      CANDIDATE_WEBSITE_URL: http://candidate:3101
-      PORTAL_URL: http://portal:3100
+      CANDIDATE_WEBSITE_URL: http://localhost:3101
+      PORTAL_URL: http://localhost:3100
       STATUS_CONTACT_RECIPIENTS: ${STATUS_CONTACT_RECIPIENTS:-help@applicant.network,help@splits.network,help@employment-networks.com}
     volumes:
       - ./services/notification-service/src:/app/services/notification-service/src

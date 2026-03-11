@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { BaselFormField } from '@splits-network/basel-ui';
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -26,6 +27,8 @@ interface SchedulingPanelProps {
     participantUserIds: string[];
     onScheduleSelect: (selection: ScheduleSelection | null) => void;
     selection: ScheduleSelection | null;
+    /** Optional slot rendered beside the date field (e.g. duration select) */
+    sideSlot?: React.ReactNode;
 }
 
 /* ─── Component ────────────────────────────────────────────────────── */
@@ -34,6 +37,7 @@ export function SchedulingPanel({
     participantUserIds,
     onScheduleSelect,
     selection,
+    sideSlot,
 }: SchedulingPanelProps) {
     const { getToken } = useAuth();
     const [date, setDate] = useState(selection?.date || '');
@@ -147,112 +151,107 @@ export function SchedulingPanel({
 
     return (
         <div className="space-y-4">
-            <label className="text-sm font-bold uppercase tracking-wider text-base-content/50">
-                Schedule
-            </label>
+            {/* Row 1: Date + Duration (or sideSlot) — always 2-col on sm+ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <BaselFormField label="Date">
+                    <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => handleDateChange(e.target.value)}
+                        min={minDate}
+                        className="input w-full"
+                    />
+                </BaselFormField>
+                {sideSlot}
+            </div>
 
-            {/* Date picker */}
-            <fieldset>
-                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                    Date
-                </legend>
-                <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => handleDateChange(e.target.value)}
-                    min={minDate}
-                    className="input w-full"
-                />
-            </fieldset>
+            {/* Row 2: Manual time — only when no calendar slots */}
+            {date && !loadingAvailability && !hasCalendars && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <BaselFormField label="Time">
+                        <input
+                            type="time"
+                            value={time}
+                            onChange={(e) => handleTimeChange(e.target.value)}
+                            className="input w-full"
+                        />
+                    </BaselFormField>
+                </div>
+            )}
 
-            {/* Time selection */}
+            {/* Loading state */}
+            {date && loadingAvailability && (
+                <div className="flex items-center gap-2 py-3">
+                    <span className="loading loading-spinner loading-sm" />
+                    <span className="text-sm text-base-content/50">
+                        Checking availability...
+                    </span>
+                </div>
+            )}
+
+            {/* Calendar not connected notice */}
+            {date && !loadingAvailability && !hasCalendars && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-base-200 border-l-4 border-warning">
+                    <i className="fa-duotone fa-regular fa-calendar-xmark text-warning" />
+                    <span className="text-sm text-base-content/60">
+                        Calendar not connected — select a time manually.
+                    </span>
+                </div>
+            )}
+
+            {/* Calendar availability slots */}
+            {date && !loadingAvailability && hasCalendars && availability.length > 0 && (
+                <div className="space-y-3">
+                    <p className="text-sm text-base-content/50">
+                        <i className="fa-duotone fa-regular fa-calendar-check text-success mr-1" />
+                        Green slots are free for all participants.
+                    </p>
+                    <div className="grid grid-cols-4 gap-1.5">
+                        {generateSlots().map((slot) => (
+                            <button
+                                key={slot.time}
+                                type="button"
+                                className={`btn btn-sm ${
+                                    time === slot.time
+                                        ? 'btn-primary'
+                                        : slot.available
+                                            ? 'btn-outline btn-success'
+                                            : 'btn-ghost opacity-40'
+                                }`}
+                                onClick={() => slot.available && selectSlot(slot.time)}
+                                disabled={!slot.available}
+                            >
+                                {slot.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Timezone + Selection summary */}
             {date && (
-                <>
-                    {loadingAvailability && (
-                        <div className="flex items-center gap-2 py-3">
-                            <span className="loading loading-spinner loading-sm" />
-                            <span className="text-sm text-base-content/50">
-                                Checking availability...
-                            </span>
-                        </div>
-                    )}
-
-                    {!loadingAvailability && hasCalendars && availability.length > 0 && (
-                        <div className="space-y-2">
-                            <p className="text-sm text-base-content/50">
-                                <i className="fa-duotone fa-regular fa-calendar-check text-success mr-1" />
-                                Calendar availability loaded. Green slots are free for all participants.
-                            </p>
-                            <div className="grid grid-cols-4 gap-1.5">
-                                {generateSlots().map((slot) => (
-                                    <button
-                                        key={slot.time}
-                                        type="button"
-                                        className={`btn btn-sm ${
-                                            time === slot.time
-                                                ? 'btn-primary'
-                                                : slot.available
-                                                    ? 'btn-outline btn-success'
-                                                    : 'btn-ghost opacity-40'
-                                        }`}
-                                        onClick={() => slot.available && selectSlot(slot.time)}
-                                        disabled={!slot.available}
-                                    >
-                                        {slot.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {!loadingAvailability && !hasCalendars && (
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2 px-3 py-2 bg-base-200 border border-base-300">
-                                <i className="fa-duotone fa-regular fa-calendar-xmark text-warning" />
-                                <span className="text-sm text-base-content/60">
-                                    Calendar not connected for all participants. Select a time manually.
-                                </span>
-                            </div>
-                            <fieldset>
-                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                    Time
-                                </legend>
-                                <input
-                                    type="time"
-                                    value={time}
-                                    onChange={(e) => handleTimeChange(e.target.value)}
-                                    className="input w-full"
-                                />
-                            </fieldset>
-                        </div>
-                    )}
-
-                    {/* Timezone display */}
+                <div className="flex items-center justify-between">
                     <p className="text-sm text-base-content/40">
                         <i className="fa-duotone fa-regular fa-globe mr-1" />
                         {timeZone}
                     </p>
-
-                    {/* Selection summary */}
                     {selection && (
-                        <div className="flex items-center gap-2 px-4 py-3 bg-primary/5 border border-primary/20">
-                            <i className="fa-duotone fa-regular fa-calendar-check text-primary" />
-                            <span className="text-sm font-bold">
-                                {new Date(`${selection.date}T00:00:00`).toLocaleDateString('en-US', {
-                                    weekday: 'long',
-                                    month: 'long',
-                                    day: 'numeric',
-                                })}
-                                {' at '}
-                                {new Date(`${selection.date}T${selection.time}:00`).toLocaleTimeString('en-US', {
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    hour12: true,
-                                })}
-                            </span>
-                        </div>
+                        <p className="text-sm font-bold text-primary">
+                            <i className="fa-duotone fa-regular fa-calendar-check mr-1" />
+                            {new Date(`${selection.date}T00:00:00`).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                            })}
+                            {' at '}
+                            {new Date(`${selection.date}T${selection.time}:00`).toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true,
+                            })}
+                        </p>
                     )}
-                </>
+                </div>
             )}
         </div>
     );

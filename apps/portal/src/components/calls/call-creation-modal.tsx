@@ -2,7 +2,14 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { ModalPortal } from '@splits-network/shared-ui';
+import {
+    BaselModal,
+    BaselModalHeader,
+    BaselModalBody,
+    BaselModalFooter,
+    BaselConfirmModal,
+    BaselFormField,
+} from '@splits-network/basel-ui';
 import { useCreateCall } from '@/hooks/use-create-call';
 import { useUserProfile } from '@/contexts/user-profile-context';
 import { ParticipantPicker, type Participant } from './participant-picker';
@@ -52,7 +59,7 @@ export function CallCreationModal({
 }: CallCreationModalProps) {
     const { user } = useUser();
     const { createCall, startCall, generateToken, createCalendarEvents, isLoading, error } = useCreateCall();
-    const { planTier } = useUserProfile();
+    const { planTier, isCompanyUser } = useUserProfile();
 
     /* ── State ── */
     const [mode, setMode] = useState<CallMode>(defaultMode);
@@ -193,46 +200,46 @@ export function CallCreationModal({
     if (!isOpen) return null;
 
     return (
-        <ModalPortal>
-            <dialog className="modal modal-open">
-                <div className="modal-box max-w-2xl max-h-[90vh] overflow-y-auto">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary/10 flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-phone text-primary" />
-                            </div>
-                            <h3 className="text-lg font-bold">New Call</h3>
-                        </div>
+        <>
+            <BaselModal isOpen={isOpen && !showConfirm} onClose={onClose} maxWidth="max-w-2xl">
+                <BaselModalHeader
+                    title="New Call"
+                    subtitle={mode === 'instant' ? 'Start an instant call' : 'Schedule a future call'}
+                    icon="fa-phone"
+                    iconColor="primary"
+                    onClose={onClose}
+                    closeDisabled={isLoading}
+                >
+                    {/* Mode toggle — editorial segmented control */}
+                    <div className="grid grid-cols-2 mt-5 -mx-6 -mb-5 border-t border-neutral-content/10">
                         <button
                             type="button"
-                            className="btn btn-ghost btn-sm btn-circle"
-                            onClick={onClose}
-                        >
-                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
-                        </button>
-                    </div>
-
-                    {/* Mode toggle */}
-                    <div className="tabs tabs-boxed mb-6">
-                        <button
-                            type="button"
-                            className={`tab flex-1 ${mode === 'instant' ? 'tab-active' : ''}`}
+                            className={`flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-widest transition-colors ${
+                                mode === 'instant'
+                                    ? 'bg-primary text-primary-content'
+                                    : 'text-neutral-content/50 hover:text-neutral-content/80'
+                            }`}
                             onClick={() => setMode('instant')}
                         >
-                            <i className="fa-duotone fa-regular fa-phone mr-2" />
+                            <i className="fa-duotone fa-regular fa-phone" />
                             Call Now
                         </button>
                         <button
                             type="button"
-                            className={`tab flex-1 ${mode === 'scheduled' ? 'tab-active' : ''}`}
+                            className={`flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-widest transition-colors ${
+                                mode === 'scheduled'
+                                    ? 'bg-primary text-primary-content'
+                                    : 'text-neutral-content/50 hover:text-neutral-content/80'
+                            }`}
                             onClick={() => setMode('scheduled')}
                         >
-                            <i className="fa-duotone fa-regular fa-calendar-clock mr-2" />
+                            <i className="fa-duotone fa-regular fa-calendar-clock" />
                             Schedule
                         </button>
                     </div>
+                </BaselModalHeader>
 
+                <BaselModalBody>
                     {/* Error */}
                     {(submitError || error) && (
                         <div className="alert alert-error mb-4">
@@ -266,13 +273,7 @@ export function CallCreationModal({
                         />
 
                         {/* Title (optional) */}
-                        <fieldset>
-                            <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                Title
-                                <span className="text-sm font-normal normal-case tracking-normal text-base-content/40 ml-2">
-                                    optional, auto-generated if empty
-                                </span>
-                            </legend>
+                        <BaselFormField label="Title" hint="Optional — auto-generated if empty">
                             <input
                                 type="text"
                                 value={title}
@@ -280,7 +281,7 @@ export function CallCreationModal({
                                 placeholder="Call with..."
                                 className="input w-full"
                             />
-                        </fieldset>
+                        </BaselFormField>
 
                         {/* Schedule mode fields */}
                         {mode === 'scheduled' && (
@@ -289,32 +290,24 @@ export function CallCreationModal({
                                     participantUserIds={participants.map((p) => p.user_id).filter((id) => !id.startsWith('email:'))}
                                     onScheduleSelect={setSchedule}
                                     selection={schedule}
+                                    sideSlot={
+                                        <BaselFormField label="Duration">
+                                            <select
+                                                value={duration}
+                                                onChange={(e) => setDuration(Number(e.target.value))}
+                                                className="select w-full"
+                                            >
+                                                {DURATION_OPTIONS.map((opt) => (
+                                                    <option key={opt.value} value={opt.value}>
+                                                        {opt.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </BaselFormField>
+                                    }
                                 />
 
-                                <fieldset>
-                                    <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                        Duration
-                                    </legend>
-                                    <select
-                                        value={duration}
-                                        onChange={(e) => setDuration(Number(e.target.value))}
-                                        className="select w-full"
-                                    >
-                                        {DURATION_OPTIONS.map((opt) => (
-                                            <option key={opt.value} value={opt.value}>
-                                                {opt.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </fieldset>
-
-                                <fieldset>
-                                    <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                        Agenda
-                                        <span className="text-sm font-normal normal-case tracking-normal text-base-content/40 ml-2">
-                                            optional, included in calendar invite
-                                        </span>
-                                    </legend>
+                                <BaselFormField label="Agenda" hint="Optional — included in calendar invite">
                                     <textarea
                                         value={agenda}
                                         onChange={(e) => setAgenda(e.target.value)}
@@ -322,18 +315,12 @@ export function CallCreationModal({
                                         rows={3}
                                         className="textarea w-full"
                                     />
-                                </fieldset>
+                                </BaselFormField>
                             </>
                         )}
 
                         {/* Pre-call notes (private) */}
-                        <fieldset>
-                            <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                                Pre-call Notes
-                                <span className="text-sm font-normal normal-case tracking-normal text-base-content/40 ml-2">
-                                    private, only visible to you
-                                </span>
-                            </legend>
+                        <BaselFormField label="Pre-call Notes" hint="Private — only visible to you">
                             <textarea
                                 value={preCallNotes}
                                 onChange={(e) => setPreCallNotes(e.target.value)}
@@ -341,7 +328,7 @@ export function CallCreationModal({
                                 rows={2}
                                 className="textarea w-full"
                             />
-                        </fieldset>
+                        </BaselFormField>
 
                         {/* Tags */}
                         <TagPicker
@@ -358,113 +345,84 @@ export function CallCreationModal({
                             aiAnalysisEnabled={aiAnalysisEnabled}
                             onAiAnalysisChange={setAiAnalysisEnabled}
                             planTier={planTier}
+                            isCompanyUser={isCompanyUser}
                         />
                     </div>
+                </BaselModalBody>
 
-                    {/* Actions */}
-                    <div className="modal-action">
+                <BaselModalFooter>
+                    <button
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={onClose}
+                        disabled={isLoading}
+                    >
+                        Cancel
+                    </button>
+
+                    {mode === 'instant' ? (
                         <button
                             type="button"
-                            className="btn"
-                            onClick={onClose}
-                            disabled={isLoading}
+                            className="btn btn-primary"
+                            onClick={handleInstantClick}
+                            disabled={!canSubmitInstant || isLoading}
                         >
-                            Cancel
+                            {isLoading ? (
+                                <span className="loading loading-spinner loading-sm" />
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-phone" />
+                            )}
+                            Call Now
                         </button>
-
-                        {mode === 'instant' ? (
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={handleInstantClick}
-                                disabled={!canSubmitInstant || isLoading}
-                            >
-                                {isLoading ? (
-                                    <span className="loading loading-spinner loading-sm" />
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-phone" />
-                                )}
-                                Call Now
-                            </button>
-                        ) : (
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={handleSubmit}
-                                disabled={!canSubmitScheduled || isLoading}
-                            >
-                                {isLoading ? (
-                                    <span className="loading loading-spinner loading-sm" />
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-calendar-check" />
-                                )}
-                                Schedule Call
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Backdrop */}
-                <form method="dialog" className="modal-backdrop" onClick={onClose}>
-                    <button type="button">close</button>
-                </form>
-            </dialog>
+                    ) : (
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={handleSubmit}
+                            disabled={!canSubmitScheduled || isLoading}
+                        >
+                            {isLoading ? (
+                                <span className="loading loading-spinner loading-sm" />
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-calendar-check" />
+                            )}
+                            Schedule Call
+                        </button>
+                    )}
+                </BaselModalFooter>
+            </BaselModal>
 
             {/* Instant call confirmation dialog */}
-            {showConfirm && (
-                <dialog className="modal modal-open" style={{ zIndex: 1000 }}>
-                    <div className="modal-box max-w-sm">
-                        <div className="text-center py-4">
-                            <div className="w-16 h-16 bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                                <i className="fa-duotone fa-regular fa-phone-arrow-up-right text-2xl text-primary" />
-                            </div>
-                            <h3 className="font-bold text-lg mb-2">Start Call?</h3>
-                            <p className="text-sm text-base-content/60">
-                                {otherParticipants.length === 1 ? (
-                                    <>
-                                        Call <span className="font-bold">{primaryRecipient?.first_name} {primaryRecipient?.last_name}</span>?
-                                        They will be notified.
-                                    </>
-                                ) : (
-                                    <>
-                                        Start a call with <span className="font-bold">{otherParticipants.length} participants</span>?
-                                        They will be notified.
-                                    </>
-                                )}
-                            </p>
-                        </div>
-                        <div className="modal-action justify-center gap-3">
-                            <button
-                                type="button"
-                                className="btn"
-                                onClick={() => setShowConfirm(false)}
-                                disabled={isLoading}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={() => {
-                                    setShowConfirm(false);
-                                    handleSubmit();
-                                }}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? (
-                                    <span className="loading loading-spinner loading-sm" />
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-phone" />
-                                )}
-                                Call
-                            </button>
-                        </div>
-                    </div>
-                    <form method="dialog" className="modal-backdrop" onClick={() => setShowConfirm(false)}>
-                        <button type="button">close</button>
-                    </form>
-                </dialog>
-            )}
-        </ModalPortal>
+            <BaselConfirmModal
+                isOpen={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={() => {
+                    setShowConfirm(false);
+                    handleSubmit();
+                }}
+                title="Start Call?"
+                subtitle="Confirm Action"
+                icon="fa-phone-arrow-up-right"
+                confirmLabel="Call"
+                confirmColor="btn-primary"
+                confirming={isLoading}
+                confirmingLabel="Connecting..."
+                maxWidth="max-w-sm"
+            >
+                <p className="text-sm text-base-content/60">
+                    {otherParticipants.length === 1 ? (
+                        <>
+                            Call <span className="font-bold">{primaryRecipient?.first_name} {primaryRecipient?.last_name}</span>?
+                            They will be notified.
+                        </>
+                    ) : (
+                        <>
+                            Start a call with <span className="font-bold">{otherParticipants.length} participants</span>?
+                            They will be notified.
+                        </>
+                    )}
+                </p>
+            </BaselConfirmModal>
+        </>
     );
 }

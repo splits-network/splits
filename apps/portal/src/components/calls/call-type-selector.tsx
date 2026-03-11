@@ -1,5 +1,7 @@
 'use client';
 
+import { BaselFormField } from '@splits-network/basel-ui';
+
 /* ─── Types ────────────────────────────────────────────────────────── */
 
 interface EntityLink {
@@ -32,10 +34,7 @@ export function inferCallType(entityLinks?: EntityLink[]): string {
 
 export function CallTypeSelector({ value, onChange }: CallTypeSelectorProps) {
     return (
-        <fieldset>
-            <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
-                Call Type
-            </legend>
+        <BaselFormField label="Call Type">
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -47,6 +46,6 @@ export function CallTypeSelector({ value, onChange }: CallTypeSelectorProps) {
                     </option>
                 ))}
             </select>
-        </fieldset>
+        </BaselFormField>
     );
 }

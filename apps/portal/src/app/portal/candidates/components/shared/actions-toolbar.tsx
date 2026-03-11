@@ -22,6 +22,8 @@ import TerminateCandidateModal from "../modals/terminate-candidate-modal";
 import RequestToRepresentModal from "../modals/request-to-represent-modal";
 import VerificationModal from "../modals/verification-modal";
 import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
+import { CallCreationModal } from "@/components/calls/call-creation-modal";
+import type { Participant } from "@/components/calls/participant-picker";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -35,6 +37,7 @@ export interface CandidateActionsToolbarProps {
         message?: boolean;
         sendJobOpportunity?: boolean;
         sendEmail?: boolean;
+        scheduleCall?: boolean;
         verify?: boolean;
         endRepresentation?: boolean;
         requestRepresentation?: boolean;
@@ -76,6 +79,7 @@ export default function CandidateActionsToolbar({
     const [showTerminateModal, setShowTerminateModal] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
+    const [showCallModal, setShowCallModal] = useState(false);
     const [showRTRModal, setShowRTRModal] = useState(false);
 
     /* ── Loading states ── */
@@ -109,6 +113,20 @@ export default function CandidateActionsToolbar({
         () => isRecruiter || isAdmin,
         [isRecruiter, isAdmin],
     );
+
+    /* ── Call pre-fill ── */
+    const callDefaultParticipants: Participant[] = useMemo(() => {
+        if (!candidate.user_id) return [];
+        const nameParts = (candidate.full_name || "").split(" ");
+        return [{
+            user_id: candidate.user_id,
+            first_name: nameParts[0] || "",
+            last_name: nameParts.slice(1).join(" ") || "",
+            email: candidate.email || "",
+            avatar_url: null,
+            role: "participant" as const,
+        }];
+    }, [candidate.user_id, candidate.full_name, candidate.email]);
 
     /* ── Action Handlers ── */
 
@@ -155,6 +173,8 @@ export default function CandidateActionsToolbar({
             showActions.sendJobOpportunity !== false && canSendJobOpportunity,
         sendEmail:
             showActions.sendEmail !== false && (isRecruiter || isCompanyUser || isAdmin),
+        scheduleCall:
+            showActions.scheduleCall !== false && canManageCandidate && canChat,
         verify: showActions.verify !== false && canVerifyCandidate,
         endRepresentation:
             showActions.endRepresentation !== false &&
@@ -237,6 +257,15 @@ export default function CandidateActionsToolbar({
                     }}
                 />
             )}
+            <CallCreationModal
+                isOpen={showCallModal}
+                onClose={() => setShowCallModal(false)}
+                defaultParticipants={callDefaultParticipants}
+                defaultEntityType="candidate"
+                defaultEntityId={candidate.id}
+                defaultEntityLabel={candidate.full_name || "Candidate"}
+                onSuccess={() => setShowCallModal(false)}
+            />
         </ModalPortal>
     );
 
@@ -261,6 +290,15 @@ export default function CandidateActionsToolbar({
                 label: "Send Email",
                 variant: "btn-secondary",
                 onClick: () => setShowEmailModal(true),
+            });
+        }
+        if (actions.scheduleCall) {
+            speedDialActions.push({
+                key: "schedule-call",
+                icon: "fa-duotone fa-regular fa-phone",
+                label: "Schedule Call",
+                variant: "btn-primary btn-outline",
+                onClick: () => setShowCallModal(true),
             });
         }
         if (actions.verify && candidate.verification_status !== "verified") {
@@ -357,6 +395,19 @@ export default function CandidateActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-envelope" />
                         <span className="hidden md:inline">Email</span>
+                    </button>
+                )}
+
+                {/* Schedule Call */}
+                {actions.scheduleCall && (
+                    <button
+                        onClick={() => setShowCallModal(true)}
+                        className={`btn ${getSizeClass()} btn-primary btn-outline gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title="Schedule Call"
+                    >
+                        <i className="fa-duotone fa-regular fa-phone" />
+                        <span className="hidden md:inline">Schedule Call</span>
                     </button>
                 )}
 

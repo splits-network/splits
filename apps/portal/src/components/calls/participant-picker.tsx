@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { usePresence } from '@/hooks/use-presence';
 import { Presence } from '@/components/presense';
+import { BaselFormField } from '@splits-network/basel-ui';
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -142,11 +143,7 @@ export function ParticipantPicker({
     }, []);
 
     return (
-        <div className="space-y-3">
-            <label className="text-sm font-bold uppercase tracking-wider text-base-content/50">
-                Participants
-            </label>
-
+        <BaselFormField label="Participants">
             {/* Selected participants */}
             {participants.length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -287,6 +284,6 @@ export function ParticipantPicker({
                     </button>
                 </div>
             )}
-        </div>
+        </BaselFormField>
     );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { BaselFormField } from '@splits-network/basel-ui';
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -51,27 +52,18 @@ export function TagPicker({ selectedTags, onChange }: TagPickerProps) {
 
     if (loading) {
         return (
-            <div className="space-y-2">
-                <label className="text-sm font-bold uppercase tracking-wider text-base-content/50">
-                    Tags
-                </label>
+            <BaselFormField label="Tags" hint="Optional">
                 <div className="flex gap-2">
                     <span className="loading loading-dots loading-sm" />
                 </div>
-            </div>
+            </BaselFormField>
         );
     }
 
     if (tags.length === 0) return null;
 
     return (
-        <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-wider text-base-content/50">
-                Tags
-                <span className="text-sm font-normal normal-case tracking-normal text-base-content/40 ml-2">
-                    optional
-                </span>
-            </label>
+        <BaselFormField label="Tags" hint="Optional">
             <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => {
                     const isSelected = selectedTags.includes(tag.slug);
@@ -91,6 +83,6 @@ export function TagPicker({ selectedTags, onChange }: TagPickerProps) {
                     );
                 })}
             </div>
-        </div>
+        </BaselFormField>
     );
 }

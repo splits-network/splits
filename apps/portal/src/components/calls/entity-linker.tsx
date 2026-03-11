@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { BaselFormField } from '@splits-network/basel-ui';
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -175,7 +176,7 @@ export function EntityLinker({
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <i className={`fa-duotone fa-regular fa-chevron-${isExpanded ? 'down' : 'right'} text-sm text-base-content/50`} />
-                <span className="text-sm font-bold uppercase tracking-wider text-base-content/50">
+                <span className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
                     Link to Entity
                 </span>
                 <span className="text-sm text-base-content/40">(optional)</span>
