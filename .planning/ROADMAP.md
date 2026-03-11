@@ -12,6 +12,7 @@
 - [x] **v9.0 Video Interviewing** - Phases 33-41 (shipped 2026-03-08)
 - [x] **v10.0 Video Platform & Recruiting Calls** - Phases 42-51 (shipped 2026-03-09)
 - [x] **v11.0 Candidate Call Experience** - Phase 52 (shipped 2026-03-09)
+- [ ] **v12.0 Call Recording & AI Controls** - Phase 53
 
 ## Phases
 
@@ -259,10 +260,23 @@ Plans:
 - [x] 52-02-PLAN.md — Application detail calls section and notification icon fix
 - [x] 52-03-PLAN.md — Notification URL routing for candidate participants
 
+### Phase 53: Per-Call Recording & AI Controls
+**Goal**: Recording and AI analysis are per-call opt-in toggles gated by the creator's subscription tier, replacing call_type-driven behavior with explicit user choice and tiered access
+**Depends on**: Phase 52
+**Requirements**: None (new feature)
+**Success Criteria** (what must be TRUE):
+  1. Call creation form has a "Record this call" toggle (off by default) available to all tiers, and an "AI Analysis" toggle available only to Partner-tier recruiters
+  2. Free plan users see a combined upgrade prompt for transcription + AI; Pro users see an upgrade prompt for AI only; Partner users see normal toggles
+  3. AI pipeline checks the creator's current subscription tier via billing-service before processing — Free gets recording only, Pro gets recording + transcription, Partner gets full pipeline
+  4. Free tier recordings auto-delete after 7 days with a 2-day email warning; paid tier retention is longer
+  5. Call type selector (Interview, Recruiting Call, Client Meeting, Internal Call) is visible with context-inferred defaults and drives AI summary prompt selection
+  6. Post-call detail page shows upgrade prompts on locked tabs (transcript for Free, summary for Pro)
+**Plans:** TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 52
+Phases execute in numeric order: 53
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -297,3 +311,4 @@ Phases execute in numeric order: 52
 | 50. Post-Migration Text & Metadata Cleanup | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 51. Recording Consent & Calendar Auto-Creation | v10.0 | 2/2 | Complete | 2026-03-09 |
 | 52. Candidate Call Experience | v11.0 | 3/3 | Complete | 2026-03-09 |
+| 53. Per-Call Recording & AI Controls | v12.0 | 0/? | Not started | — |
