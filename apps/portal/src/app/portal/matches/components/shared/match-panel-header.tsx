@@ -7,9 +7,13 @@ import {
     jobDisplayTitle,
     companyDisplayName,
     formatMatchStatus,
+    matchStatusBadgeColor,
+    tierBadgeColor,
+    tierLabel,
     timeAgoMatch,
 } from "../../types";
 import { MatchScoreBadge } from "@/components/matches/match-score-badge";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 interface MatchPanelHeaderProps {
     match: EnrichedMatch;
@@ -18,12 +22,6 @@ interface MatchPanelHeaderProps {
     onDismiss?: (id: string) => void;
     dismissing?: boolean;
 }
-
-const STATUS_BADGE: Record<string, string> = {
-    active: "badge-success",
-    dismissed: "badge-error",
-    applied: "badge-info",
-};
 
 const ICON_STYLES = [
     "bg-primary text-primary-content",
@@ -64,12 +62,12 @@ export function MatchPanelHeader({
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
                         <MatchScoreBadge score={match.match_score} size="sm" />
-                        <span className={`badge ${match.match_tier === "true" ? "badge-primary" : "badge-ghost"}`}>
-                            {match.match_tier === "true" ? "True Score" : "Standard"}
-                        </span>
-                        <span className={`badge ${STATUS_BADGE[match.status] ?? "badge-ghost"}`}>
+                        <BaselBadge color={tierBadgeColor(match.match_tier)} size="xs" variant="soft">
+                            {tierLabel(match.match_tier)}
+                        </BaselBadge>
+                        <BaselBadge color={matchStatusBadgeColor(match.status)} size="xs" variant="soft">
                             {formatMatchStatus(match.status)}
-                        </span>
+                        </BaselBadge>
                         {onClose && (
                             <button
                                 onClick={onClose}

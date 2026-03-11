@@ -1,9 +1,9 @@
 'use client';
 
 import {
-    TrackToggle,
     DisconnectButton,
     MediaDeviceSelect,
+    useTrackToggle,
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { RecordingIndicator } from './recording-indicator';
@@ -16,8 +16,43 @@ interface VideoControlsProps {
     notesOpen?: boolean;
 }
 
-const trackBtn = 'group btn btn-square btn-sm lg:btn-md rounded-none data-[lk-enabled=true]:btn-success data-[lk-enabled=false]:btn-error';
-const screenShareBtn = 'group btn btn-square btn-sm lg:btn-md rounded-none data-[lk-enabled=true]:btn-success';
+const baseBtn = 'btn btn-square btn-sm lg:btn-md rounded-none';
+
+function MicToggle() {
+    const { buttonProps, enabled } = useTrackToggle({ source: Track.Source.Microphone });
+    return (
+        <button
+            {...buttonProps}
+            className={`${baseBtn} ${enabled ? 'btn-success' : 'btn-error'}`}
+        >
+            <i className={`fa-duotone fa-regular ${enabled ? 'fa-microphone' : 'fa-microphone-slash'}`} />
+        </button>
+    );
+}
+
+function CameraToggle() {
+    const { buttonProps, enabled } = useTrackToggle({ source: Track.Source.Camera });
+    return (
+        <button
+            {...buttonProps}
+            className={`${baseBtn} ${enabled ? 'btn-success' : 'btn-error'}`}
+        >
+            <i className={`fa-duotone fa-regular ${enabled ? 'fa-video' : 'fa-video-slash'}`} />
+        </button>
+    );
+}
+
+function ScreenShareToggle() {
+    const { buttonProps, enabled } = useTrackToggle({ source: Track.Source.ScreenShare });
+    return (
+        <button
+            {...buttonProps}
+            className={`${baseBtn} ${enabled ? 'btn-success' : ''}`}
+        >
+            <i className="fa-duotone fa-regular fa-arrow-up-from-bracket" />
+        </button>
+    );
+}
 
 export function VideoControls({
     isRecording,
@@ -36,29 +71,16 @@ export function VideoControls({
                     canStop={!!canStopRecording}
                 />
 
-                {/* Microphone toggle */}
-                <TrackToggle source={Track.Source.Microphone} className={trackBtn} showIcon={false}>
-                    <i className="fa-duotone fa-regular fa-microphone group-data-[lk-enabled=false]:hidden" />
-                    <i className="fa-duotone fa-regular fa-microphone-slash hidden group-data-[lk-enabled=false]:inline" />
-                </TrackToggle>
-
-                {/* Camera toggle */}
-                <TrackToggle source={Track.Source.Camera} className={trackBtn} showIcon={false}>
-                    <i className="fa-duotone fa-regular fa-video group-data-[lk-enabled=false]:hidden" />
-                    <i className="fa-duotone fa-regular fa-video-slash hidden group-data-[lk-enabled=false]:inline" />
-                </TrackToggle>
-
-                {/* Screen share toggle */}
-                <TrackToggle source={Track.Source.ScreenShare} className={screenShareBtn} showIcon={false}>
-                    <i className="fa-duotone fa-regular fa-arrow-up-from-bracket" />
-                </TrackToggle>
+                <MicToggle />
+                <CameraToggle />
+                <ScreenShareToggle />
 
                 <div className="w-px h-6 bg-base-300 mx-1" />
 
                 {/* Notes toggle */}
                 {onNotesToggle && (
                     <button
-                        className={`btn btn-square btn-sm lg:btn-md rounded-none ${notesOpen ? 'btn-primary' : ''}`}
+                        className={`${baseBtn} ${notesOpen ? 'btn-primary' : ''}`}
                         onClick={onNotesToggle}
                         aria-label={notesOpen ? 'Close notes' : 'Open notes'}
                     >
@@ -68,7 +90,7 @@ export function VideoControls({
 
                 {/* Device settings dropdown */}
                 <div className="dropdown dropdown-top">
-                    <div tabIndex={0} role="button" className="btn btn-square btn-sm lg:btn-md rounded-none">
+                    <div tabIndex={0} role="button" className={baseBtn}>
                         <i className="fa-duotone fa-regular fa-gear" />
                     </div>
                     <div

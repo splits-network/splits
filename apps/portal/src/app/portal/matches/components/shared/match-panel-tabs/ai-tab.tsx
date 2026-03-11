@@ -1,5 +1,6 @@
 import type { EnrichedMatch } from "../../../types";
 import { TrueScoreUpsell } from "@/components/matches/true-score-upsell";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 interface AITabProps {
     match: EnrichedMatch;
@@ -23,8 +24,8 @@ export function AITab({ match, isPartner }: AITabProps) {
                     <span className="text-sm font-bold text-primary">
                         AI Score: {match.ai_score}
                     </span>
-                    <span className="badge badge-primary badge-sm ml-auto">
-                        True Score
+                    <span className="ml-auto">
+                        <BaselBadge color="primary" size="xs" variant="soft">True Score</BaselBadge>
                     </span>
                 </div>
                 {match.match_factors.ai_summary && (

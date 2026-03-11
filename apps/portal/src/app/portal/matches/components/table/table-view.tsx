@@ -7,13 +7,14 @@ import {
     jobDisplayTitle,
     companyDisplayName,
     formatMatchDate,
-    matchStatusColor,
+    matchStatusBadgeColor,
     formatMatchStatus,
-    tierBadgeClass,
+    tierBadgeColor,
     tierLabel,
     isNewMatch,
 } from "../../types";
 import { MatchScoreBadge } from "@/components/matches/match-score-badge";
+import { BaselBadge } from "@splits-network/basel-ui";
 import { MatchDetailLoader } from "../shared/match-detail-loader";
 
 const COLUMNS = [
@@ -109,20 +110,16 @@ export function TableView({
 
                                     {/* Tier */}
                                     <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${tierBadgeClass(match.match_tier)}`}
-                                        >
+                                        <BaselBadge color={tierBadgeColor(match.match_tier)} size="xs" variant="soft">
                                             {tierLabel(match.match_tier)}
-                                        </span>
+                                        </BaselBadge>
                                     </td>
 
                                     {/* Status */}
                                     <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${matchStatusColor(match.status)}`}
-                                        >
+                                        <BaselBadge color={matchStatusBadgeColor(match.status)} size="xs" variant="soft">
                                             {formatMatchStatus(match.status)}
-                                        </span>
+                                        </BaselBadge>
                                     </td>
 
                                     {/* Date */}

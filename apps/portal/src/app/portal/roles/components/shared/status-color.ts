@@ -7,29 +7,6 @@ import type { BaselSemanticColor } from "@splits-network/basel-ui";
 
 export type ViewMode = "table" | "grid" | "split";
 
-/** Status → DaisyUI semantic badge/text classes (legacy — for non-BaselBadge callers) */
-export function statusColor(status?: string): string {
-    switch (status) {
-        case "draft":
-            return "bg-base-content/10 text-base-content/40";
-        case "pending":
-        case "paused":
-            return "bg-warning/15 text-warning";
-        case "early":
-            return "bg-accent/15 text-accent";
-        case "active":
-            return "bg-success/15 text-success";
-        case "priority":
-            return "bg-primary/15 text-primary";
-        case "filled":
-            return "bg-info/15 text-info";
-        case "closed":
-            return "bg-base-content/15 text-base-content/50";
-        default:
-            return "bg-base-content/15 text-base-content/50";
-    }
-}
-
 /** Status → BaselSemanticColor for use with BaselBadge */
 export function statusBadgeColor(status?: string): BaselSemanticColor {
     switch (status) {

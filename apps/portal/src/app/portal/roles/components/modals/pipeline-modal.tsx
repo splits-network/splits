@@ -12,7 +12,9 @@ import {
     BaselModalBody,
     BaselTabBar,
     BaselEmptyState,
+    BaselBadge,
 } from "@splits-network/basel-ui";
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 import DocumentList from "@/components/document-list";
 import type { Application } from "@/app/portal/applications/types";
@@ -20,31 +22,15 @@ import type { ApplicationStage } from "@splits-network/shared-types";
 
 /* ─── Stage definitions ──────────────────────────────────────────────────── */
 
-const stages: Array<{ key: ApplicationStage; label: string; color: string }> = [
-    {
-        key: "recruiter_proposed",
-        label: "Proposed",
-        color: "bg-secondary/15 text-secondary",
-    },
-    { key: "screen", label: "Screen", color: "bg-info/15 text-info" },
-    {
-        key: "submitted",
-        label: "Submitted",
-        color: "bg-base-300 text-base-content",
-    },
-    {
-        key: "company_review",
-        label: "Company Review",
-        color: "bg-accent/15 text-accent",
-    },
-    {
-        key: "interview",
-        label: "Interview",
-        color: "bg-primary/15 text-primary",
-    },
-    { key: "offer", label: "Offer", color: "bg-warning/15 text-warning" },
-    { key: "hired", label: "Hired", color: "bg-success/15 text-success" },
-    { key: "rejected", label: "Rejected", color: "bg-error/15 text-error" },
+const stages: Array<{ key: ApplicationStage; label: string; color: BaselSemanticColor }> = [
+    { key: "recruiter_proposed", label: "Proposed", color: "secondary" },
+    { key: "screen", label: "Screen", color: "info" },
+    { key: "submitted", label: "Submitted", color: "neutral" },
+    { key: "company_review", label: "Company Review", color: "accent" },
+    { key: "interview", label: "Interview", color: "primary" },
+    { key: "offer", label: "Offer", color: "warning" },
+    { key: "hired", label: "Hired", color: "success" },
+    { key: "rejected", label: "Rejected", color: "error" },
 ];
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
@@ -313,12 +299,14 @@ export default function PipelineModal({
                                                             ))}
                                                         </select>
                                                     ) : (
-                                                        <span
-                                                            className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${stage?.color || "bg-base-200 text-base-content/50"}`}
+                                                        <BaselBadge
+                                                            color={stage?.color || "neutral"}
+                                                            size="xs"
+                                                            variant="soft"
                                                         >
                                                             {stage?.label ||
                                                                 application.stage}
-                                                        </span>
+                                                        </BaselBadge>
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-base-content/60">

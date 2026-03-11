@@ -1,6 +1,7 @@
 "use client";
 
 import type { EnrichedMatch } from "@splits-network/shared-types";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 interface Props {
     match: EnrichedMatch;
@@ -16,12 +17,12 @@ export function MatchRowActions({ match, onInvite, onDismiss, isInviting }: Prop
     return (
         <div className="flex items-center gap-1">
             {isInvited ? (
-                <span className="badge badge-info badge-sm gap-1">
-                    <i className="fa-duotone fa-regular fa-paper-plane text-[10px]" />
+                <BaselBadge color="info" size="xs" variant="soft">
+                    <i className="fa-duotone fa-regular fa-paper-plane text-sm" />
                     Invited
-                </span>
+                </BaselBadge>
             ) : isDenied ? (
-                <span className="badge badge-warning badge-sm gap-1">Declined</span>
+                <BaselBadge color="warning" size="xs" variant="soft">Declined</BaselBadge>
             ) : (
                 <button
                     className="btn btn-primary btn-xs"

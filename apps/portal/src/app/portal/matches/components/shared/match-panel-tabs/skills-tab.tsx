@@ -1,4 +1,5 @@
 import type { EnrichedMatch } from "../../../types";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 interface SkillsTabProps {
     match: EnrichedMatch;
@@ -25,9 +26,9 @@ export function SkillsTab({ match }: SkillsTabProps) {
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {matched.map((s) => (
-                            <span key={s} className="badge badge-success badge-outline">
+                            <BaselBadge key={s} color="success" size="xs" variant="outline">
                                 {s}
-                            </span>
+                            </BaselBadge>
                         ))}
                     </div>
                 </div>
@@ -40,9 +41,9 @@ export function SkillsTab({ match }: SkillsTabProps) {
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {missing.map((s) => (
-                            <span key={s} className="badge badge-error badge-outline">
+                            <BaselBadge key={s} color="error" size="xs" variant="outline">
                                 {s}
-                            </span>
+                            </BaselBadge>
                         ))}
                     </div>
                 </div>

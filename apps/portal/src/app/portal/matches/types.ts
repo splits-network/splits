@@ -8,6 +8,7 @@ import type {
     MatchStatus,
     MatchFactors,
 } from "@splits-network/shared-types";
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
 
 export type { EnrichedMatch, MatchTier, MatchStatus, MatchFactors };
 
@@ -72,16 +73,16 @@ export function timeAgoMatch(date: string | null | undefined): string {
 
 /* ── Status color helper ── */
 
-export function matchStatusColor(status?: string): string {
+export function matchStatusBadgeColor(status?: string): BaselSemanticColor {
     switch (status) {
         case "active":
-            return "bg-success/15 text-success";
+            return "success";
         case "dismissed":
-            return "bg-error/15 text-error";
+            return "error";
         case "applied":
-            return "bg-info/15 text-info";
+            return "info";
         default:
-            return "bg-base-content/15 text-base-content/50";
+            return "neutral";
     }
 }
 
@@ -92,15 +93,8 @@ export function formatMatchStatus(status?: string): string {
 
 /* ── Tier badge helper ── */
 
-export function tierBadgeClass(tier: MatchTier): string {
-    switch (tier) {
-        case "true":
-            return "bg-primary/15 text-primary";
-        case "standard":
-            return "bg-base-content/10 text-base-content/60";
-        default:
-            return "bg-base-content/10 text-base-content/60";
-    }
+export function tierBadgeColor(tier: MatchTier): BaselSemanticColor {
+    return tier === "true" ? "primary" : "neutral";
 }
 
 export function tierLabel(tier: MatchTier): string {
