@@ -387,7 +387,7 @@ jobs:
                   export STATUS_URL="https://staging.status.splits.network"
                   export LIVEKIT_API_KEY="${{ secrets.LIVEKIT_API_KEY }}"
                   export LIVEKIT_API_SECRET="${{ secrets.LIVEKIT_API_SECRET }}"
-                  export LIVEKIT_TURN_DOMAIN="video.staging.splits.network"
+                  export LIVEKIT_TURN_DOMAIN="turn.staging.splits.network"
                   export LIVEKIT_EXTERNAL_IP="172.182.197.128"
                   export LIVEKIT_LB_RESOURCE_GROUP="MC_rg-ww-platform-staging-wu3_aks-ww-platform-staging-wu3_westus3"
 

@@ -386,7 +386,7 @@ jobs:
                   export STATUS_URL="https://status.splits.network"
                   export LIVEKIT_API_KEY="${{ secrets.LIVEKIT_API_KEY }}"
                   export LIVEKIT_API_SECRET="${{ secrets.LIVEKIT_API_SECRET }}"
-                  export LIVEKIT_TURN_DOMAIN="video.splits.network"
+                  export LIVEKIT_TURN_DOMAIN="turn.splits.network"
                   export LIVEKIT_EXTERNAL_IP="TODO_PROD_IP"
                   export LIVEKIT_LB_RESOURCE_GROUP="TODO_PROD_MC_RESOURCE_GROUP"
 
