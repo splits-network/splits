@@ -8,6 +8,7 @@ export interface User {
     onboarding_step?: number;
     onboarding_completed_at?: Date;
     onboarding_metadata?: OnboardingMetadata; // New persistent state
+    last_active_at?: Date | null;
     created_at: Date;
     updated_at: Date;
 }

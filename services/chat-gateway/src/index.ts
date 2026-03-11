@@ -27,6 +27,10 @@ type ClientMessage =
 
 const MAX_CHANNELS_PER_SOCKET = 200;
 const PRESENCE_TTL_SECONDS = 90;
+const ACTIVITY_THROTTLE_MS = 5 * 60 * 1000; // 5 minutes
+
+// In-memory throttle map: identityUserId → last DB-write timestamp
+const lastActivityWrite = new Map<string, number>();
 
 async function main() {
     const baseConfig = loadBaseConfig("chat-gateway");
@@ -195,6 +199,7 @@ async function main() {
                         authContext,
                         socket,
                         chatServiceUrl,
+                        identityServiceUrl,
                         subscribeChannel,
                         () => {
                             subscribeDenied += 1;
@@ -295,11 +300,31 @@ async function setPresence(redisData: Redis, identityUserId: string, status: "on
     );
 }
 
+/**
+ * Persist last_active_at to DB via identity-service (throttled).
+ * Fire-and-forget — never blocks the presence ping response.
+ */
+function touchActivityThrottled(identityServiceUrl: string, identityUserId: string) {
+    const now = Date.now();
+    const last = lastActivityWrite.get(identityUserId) || 0;
+    if (now - last < ACTIVITY_THROTTLE_MS) return;
+    lastActivityWrite.set(identityUserId, now);
+
+    fetch(`${identityServiceUrl}/api/v2/users/activity`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: identityUserId }),
+    }).catch(() => {
+        // Non-fatal: DB write failed, will retry on next throttle window
+    });
+}
+
 async function handleClientMessage(
     message: ClientMessage,
     authContext: AuthContext,
     socket: WebSocket,
     chatServiceUrl: string,
+    identityServiceUrl: string,
     subscribeChannel: (channel: string, socket: WebSocket) => Promise<void>,
     onSubscribeDenied: () => void,
     logger: ReturnType<typeof createLogger>,
@@ -346,6 +371,7 @@ async function handleClientMessage(
     if (message.type === "presence.ping") {
         const status = message.status === "idle" ? "idle" : "online";
         await setPresence(redisData, authContext.identityUserId, status);
+        touchActivityThrottled(identityServiceUrl, authContext.identityUserId);
         return;
     }
 

@@ -70,8 +70,8 @@ spec:
                                         key: resend-api-key
                               - name: FROM_EMAIL
                                 value: "Splits Network <notifications@splits.network>"
-                              - name: NEXT_PUBLIC_PORTAL_URL
-                                value: "https://splits.network"
+                              - name: PORTAL_URL
+                                value: "${PORTAL_URL}"
                               - name: NODE_ENV
                                 value: "production"
                               - name: LOG_LEVEL

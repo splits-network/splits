@@ -1,7 +1,6 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { CandidatesEmailService } from '../../services/candidates/service';
-import { ServiceRegistry } from '../../clients';
 import { NotificationRepository } from '../../repository';
 import { DataLookupHelper } from '../../helpers/data-lookup';
 import { ContactLookupHelper } from '../../helpers/contact-lookup';
@@ -9,7 +8,6 @@ import { ContactLookupHelper } from '../../helpers/contact-lookup';
 export class CandidatesEventConsumer {
     constructor(
         private emailService: CandidatesEmailService,
-        private services: ServiceRegistry,
         private repository: NotificationRepository, // Repository with Supabase client
         private logger: Logger,
         private dataLookup: DataLookupHelper,

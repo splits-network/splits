@@ -9,7 +9,7 @@ import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupPr
 import { NotificationRepository } from './repository';
 import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
-import { ServiceRegistry } from './clients';
+import { PORTAL_URL, CANDIDATE_URL } from './helpers/urls';
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
@@ -35,12 +35,9 @@ async function main() {
         throw new Error('Missing Supabase key: set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
     }
 
-    // Load service URLs from environment
-    const identityServiceUrl = process.env.IDENTITY_SERVICE_URL || 'http://localhost:3001';
-    const atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://localhost:3002';
-    const networkServiceUrl = process.env.NETWORK_SERVICE_URL || 'http://localhost:3003';
-    const candidateWebsiteUrl = process.env.CANDIDATE_WEBSITE_URL || 'http://localhost:3101';
-    const portalUrl = process.env.PORTAL_URL || process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
+    // User-facing URLs — hardcoded per environment (see helpers/urls.ts)
+    const portalUrl = PORTAL_URL;
+    const candidateWebsiteUrl = CANDIDATE_URL;
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -61,10 +58,7 @@ async function main() {
         }),
     });
 
-    logger.info(
-        { identityServiceUrl, atsServiceUrl, networkServiceUrl, candidateWebsiteUrl },
-        'Service URLs configured'
-    );
+    logger.info({ portalUrl, candidateWebsiteUrl }, 'User-facing URLs configured');
 
     const app = await buildServer({
         logger,
@@ -102,18 +96,10 @@ async function main() {
         logger
     );
 
-    const services = new ServiceRegistry(
-        identityServiceUrl,
-        atsServiceUrl,
-        networkServiceUrl,
-        logger
-    );
-
     // Initialize domain event consumer with connection monitoring
     const consumer = new DomainEventConsumer(
         rabbitConfig.url,
         notificationService,
-        services,
         repository,
         logger,
         portalUrl,

@@ -99,7 +99,8 @@ export class CandidateRepository {
                         id,
                         email,
                         name,
-                        clerk_user_id
+                        clerk_user_id,
+                        last_active_at
                     )`;
             }
         }
@@ -220,6 +221,22 @@ export class CandidateRepository {
             undefined // Pass undefined to skip post-processing filter
         );
 
+        // Batch-fetch last_active_at from users table for candidates with user_id
+        const userIds = enrichedData.filter((c: any) => c.user_id).map((c: any) => c.user_id);
+        if (userIds.length > 0) {
+            const { data: users } = await this.supabase
+                .from('users')
+                .select('id, last_active_at')
+                .in('id', userIds);
+            const activityByUserId: Record<string, string | null> = {};
+            for (const u of users || []) {
+                activityByUserId[u.id] = u.last_active_at;
+            }
+            for (const c of enrichedData) {
+                c.last_active_at = c.user_id ? (activityByUserId[c.user_id] || null) : null;
+            }
+        }
+
         // Batch-fetch skills if requested via include param
         const includeList = params.include ? params.include.split(',').map(s => s.trim()) : [];
         if (includeList.includes('skills') && enrichedData.length > 0) {
@@ -272,6 +289,16 @@ export class CandidateRepository {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
             const enriched = await this.enrichWithRecruiterRelationships([data], accessContext.recruiterId ?? undefined);
             result = enriched[0];
+        }
+
+        // Fetch last_active_at from users table
+        if (result?.user_id) {
+            const { data: userData } = await this.supabase
+                .from('users')
+                .select('last_active_at')
+                .eq('id', result.user_id)
+                .single();
+            result.last_active_at = userData?.last_active_at || null;
         }
 
         // Fetch skills if requested via include param

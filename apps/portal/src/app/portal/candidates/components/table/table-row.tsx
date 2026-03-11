@@ -2,21 +2,23 @@
 
 import { Fragment } from "react";
 import type { Candidate } from "../../types";
-import { formatVerificationStatus, formatJobType } from "../../types";
-import { statusColor } from "../shared/status-color";
 import {
     candidateName,
     candidateTitle,
     salaryDisplay,
     isNew,
-    addedAgo,
+    lastSeenAgo,
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/candidate-detail";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
+import { relationshipBadge, jobTypeBadges, accountBadge } from "../shared/candidate-badges";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
+import { Presence } from "@/components/presense";
+import { usePresence } from "@/hooks/use-presence";
 
 export function TableRow({
     candidate,
@@ -35,6 +37,13 @@ export function TableRow({
 }) {
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
+    const candidateUserId = candidate.user_id;
+    const presence = usePresence([candidateUserId], {
+        enabled: Boolean(candidateUserId),
+    });
+    const presenceStatus = candidateUserId
+        ? presence[candidateUserId]?.status
+        : undefined;
 
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
@@ -67,6 +76,14 @@ export function TableRow({
                             {candidateName(candidate)}
                         </span>
                         {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
+                        {accountBadge(candidate) && (
+                            <span
+                                className="ml-1.5 inline-block align-middle text-error"
+                                title="No account — candidate is not a registered user"
+                            >
+                                <i className="fa-duotone fa-regular fa-user-slash text-xs" />
+                            </span>
+                        )}
                     </div>
                 </td>
 
@@ -80,20 +97,28 @@ export function TableRow({
                     {candidate.location || "\u2014"}
                 </td>
 
-                {/* Verification Status */}
+                {/* Info: relationship + presence + work type */}
                 <td className="px-4 py-3">
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(candidate.verification_status)}`}
-                    >
-                        {formatVerificationStatus(
-                            candidate.verification_status,
-                        )}
-                    </span>
-                </td>
-
-                {/* Job Type */}
-                <td className="px-4 py-3 text-sm text-base-content/60">
-                    {formatJobType(candidate.desired_job_type)}
+                    <div className="flex flex-wrap items-center gap-1">
+                        {(() => {
+                            const rel = relationshipBadge(candidate);
+                            return rel ? (
+                                <BaselBadge color={rel.color} size="xs" variant={rel.variant}>
+                                    {rel.label}
+                                </BaselBadge>
+                            ) : null;
+                        })()}
+                        <Presence
+                            variant="badge"
+                            size="xs"
+                            status={presenceStatus}
+                        />
+                        {jobTypeBadges(candidate.desired_job_type).map((jt) => (
+                            <BaselBadge key={jt.label} color={jt.color} size="xs" variant={jt.variant}>
+                                {jt.label}
+                            </BaselBadge>
+                        ))}
+                    </div>
                 </td>
 
                 {/* Salary */}
@@ -101,9 +126,12 @@ export function TableRow({
                     {salaryDisplay(candidate) || "\u2014"}
                 </td>
 
-                {/* Added */}
+                {/* Last Online */}
                 <td className="px-4 py-3 text-sm text-base-content/50">
-                    {addedAgo(candidate)}
+                    {lastSeenAgo(
+                        candidateUserId ? presence[candidateUserId]?.lastSeenAt : null,
+                        candidate.last_active_at,
+                    )}
                 </td>
 
                 {/* Actions */}

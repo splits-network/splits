@@ -40,6 +40,10 @@ export class WebhooksServiceV2 {
                     await this.handleUserCreatedOrUpdated(event.data, sourceApp);
                     break;
 
+                case 'session.created':
+                    await this.handleSessionCreated(event.data);
+                    break;
+
                 case 'user.deleted':
                     // User deletion is not currently supported - ignore the event
                     this.logger.info({ clerkUserId: event.data.id }, 'Ignoring user.deleted webhook event');
@@ -198,6 +202,27 @@ export class WebhooksServiceV2 {
                 userId,
                 error: error instanceof Error ? error.message : JSON.stringify(error)
             }, 'Failed to create candidate from webhook (non-fatal)');
+        }
+    }
+
+    /**
+     * Handle session.created webhook — update last_active_at
+     * Clerk session payload: { id: sessionId, user_id: clerkUserId, ... }
+     */
+    private async handleSessionCreated(data: any): Promise<void> {
+        const clerkUserId = data.user_id || data.id;
+        try {
+            const user = await this.repository.findUserByClerkId(clerkUserId);
+            if (user) {
+                const threshold = new Date(Date.now() - 5 * 60 * 1000);
+                const lastActive = user.last_active_at ? new Date(user.last_active_at) : null;
+                if (!lastActive || lastActive < threshold) {
+                    await this.repository.updateUser(user.id, { last_active_at: new Date() } as any);
+                }
+                this.logger.info({ userId: user.id, clerkUserId }, 'Updated last_active_at from session.created');
+            }
+        } catch (error) {
+            this.logger.error({ clerkUserId, error: error instanceof Error ? error.message : String(error) }, 'Failed to update last_active_at on session.created');
         }
     }
 

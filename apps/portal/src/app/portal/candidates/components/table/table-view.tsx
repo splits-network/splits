@@ -8,10 +8,9 @@ const COLUMNS = [
     "Name",
     "Title",
     "Location",
-    "Status",
-    "Job Type",
+    "Info",
     "Salary",
-    "Added",
+    "Last Online",
     "", // actions
 ] as const;
 

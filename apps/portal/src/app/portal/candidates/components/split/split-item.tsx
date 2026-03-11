@@ -1,20 +1,22 @@
 "use client";
 
 import type { Candidate } from "../../types";
-import { formatVerificationStatus, formatJobType } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { relationshipBadge, jobTypeBadges, accountBadge } from "../shared/candidate-badges";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     candidateName,
     candidateTitle,
     salaryDisplay,
     isNew,
-    addedAgo,
+    lastSeenAgo,
 } from "../shared/helpers";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
 import {
     LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
+import { Presence } from "@/components/presense";
+import { usePresence } from "@/hooks/use-presence";
 
 export function SplitItem({
     candidate,
@@ -30,6 +32,17 @@ export function SplitItem({
     const title = candidateTitle(candidate);
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
+    const candidateUserId = candidate.user_id;
+    const presence = usePresence([candidateUserId], {
+        enabled: Boolean(candidateUserId),
+    });
+    const presenceStatus = candidateUserId
+        ? presence[candidateUserId]?.status
+        : undefined;
+
+    const rel = relationshipBadge(candidate);
+    const acct = accountBadge(candidate);
+    const jobTypes = jobTypeBadges(candidate.desired_job_type);
 
     return (
         <div
@@ -40,7 +53,7 @@ export function SplitItem({
                     : "bg-base-100 border-transparent"
             }`}
         >
-            {/* Row 1: name + added time */}
+            {/* Row 1: name + last seen */}
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                     {isNew(candidate) && (
@@ -50,18 +63,20 @@ export function SplitItem({
                         {candidateName(candidate)}
                     </h4>
                     {level && <span className="ml-1 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
-                    <span
-                        className={`inline-flex items-center px-1.5 py-px text-sm font-semibold flex-shrink-0 ${statusColor(
-                            candidate.verification_status,
-                        )}`}
-                    >
-                        {formatVerificationStatus(
-                            candidate.verification_status,
-                        )}
-                    </span>
+                    {acct && (
+                        <span
+                            className="ml-1 inline-block align-middle text-error"
+                            title="No account — candidate is not a registered user"
+                        >
+                            <i className="fa-duotone fa-regular fa-user-slash text-xs" />
+                        </span>
+                    )}
                 </div>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
-                    {addedAgo(candidate)}
+                    {lastSeenAgo(
+                        candidateUserId ? presence[candidateUserId]?.lastSeenAt : null,
+                        candidate.last_active_at,
+                    )}
                 </span>
             </div>
 
@@ -78,19 +93,34 @@ export function SplitItem({
                 )}
             </div>
 
-            {/* Row 3: salary, job type, remote */}
+            {/* Row 3: salary */}
             <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-xs font-bold text-base-content/60">
                     {salaryDisplay(candidate) || "Not specified"}
                 </span>
-                <span className="text-sm font-bold text-accent uppercase tracking-wider">
-                    {formatJobType(candidate.desired_job_type)}
-                </span>
+            </div>
+
+            {/* Row 4: badge bar — relationship, presence, job type, remote */}
+            <div className="flex flex-wrap items-center gap-1 mt-1.5 pr-10">
+                {rel && (
+                    <BaselBadge color={rel.color} size="xs" variant={rel.variant}>
+                        {rel.label}
+                    </BaselBadge>
+                )}
+                <Presence
+                    variant="badge"
+                    size="xs"
+                    status={presenceStatus}
+                />
+                {jobTypes.map((jt) => (
+                    <BaselBadge key={jt.label} color={jt.color} size="xs" variant={jt.variant}>
+                        {jt.label}
+                    </BaselBadge>
+                ))}
                 {candidate.open_to_remote && (
-                    <span className="text-sm text-base-content/40">
-                        <i className="fa-duotone fa-regular fa-wifi mr-0.5" />
+                    <BaselBadge color="primary" size="xs" variant="outline">
                         Remote
-                    </span>
+                    </BaselBadge>
                 )}
             </div>
 

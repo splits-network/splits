@@ -23,6 +23,7 @@ export interface Candidate
     has_other_active_recruiters?: boolean;
     other_active_recruiters_count?: number;
     is_sourcer?: boolean;
+    last_active_at?: string | null;
 }
 
 export type RecruiterCandidate = RecruiterCandidateWithCandidate;

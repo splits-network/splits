@@ -6,14 +6,12 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { RecruiterSubmissionEmailService } from '../../services/recruiter-submission/service';
-import { ServiceRegistry } from '../../clients';
 import { DataLookupHelper } from '../../helpers/data-lookup';
 import { ContactLookupHelper } from '../../helpers/contact-lookup';
 
 export class RecruiterSubmissionEventConsumer {
     constructor(
         private emailService: RecruiterSubmissionEmailService,
-        private services: ServiceRegistry,
         private logger: Logger,
         private portalUrl: string,
         private dataLookup: DataLookupHelper,

@@ -1,7 +1,6 @@
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { ServiceRegistry } from './clients';
 import { NotificationService } from './service';
 import { NotificationRepository } from './repository';
 import { ApplicationsEventConsumer } from './consumers/applications/consumer';
@@ -70,7 +69,6 @@ export class DomainEventConsumer {
     constructor(
         private rabbitMqUrl: string,
         notificationService: NotificationService,
-        services: ServiceRegistry,
         private repository: NotificationRepository,
         private logger: Logger,
         portalUrl: string,
@@ -84,21 +82,18 @@ export class DomainEventConsumer {
 
         this.applicationsConsumer = new ApplicationsEventConsumer(
             notificationService.applications,
-            services,
             logger,
             dataLookup,
             contactLookup
         );
         this.placementsConsumer = new PlacementsEventConsumer(
             notificationService.placements,
-            services,
             logger,
             dataLookup,
             contactLookup
         );
         this.candidatesConsumer = new CandidatesEventConsumer(
             notificationService.candidates,
-            services,
             this.repository,
             logger,
             dataLookup,
@@ -106,14 +101,12 @@ export class DomainEventConsumer {
         );
         this.collaborationConsumer = new CollaborationEventConsumer(
             notificationService.collaboration,
-            services,
             logger,
             dataLookup,
             contactLookup
         );
         this.invitationsConsumer = new InvitationsConsumer(
             notificationService,
-            services,
             logger,
             portalUrl,
             candidateWebsiteUrl,
@@ -143,7 +136,6 @@ export class DomainEventConsumer {
         );
         this.recruiterSubmissionConsumer = new RecruiterSubmissionEventConsumer(
             notificationService.recruiterSubmission,
-            services,
             logger,
             portalUrl,
             dataLookup,

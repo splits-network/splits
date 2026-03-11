@@ -22,7 +22,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Applicant Network <notifications@applicant.network>';
-const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
+const { PORTAL_URL } = require('../helpers/urls');
 const MAX_MATCHES_PER_CANDIDATE = 5;
 
 if (!SUPABASE_URL || !SUPABASE_KEY || !RESEND_API_KEY) {

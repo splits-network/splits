@@ -213,6 +213,9 @@ export function CandidateDetail({
         ...(isNew(candidate)
             ? [{ label: "New", className: "badge-warning badge-soft badge-outline" }]
             : []),
+        ...(!candidate.user_id
+            ? [{ label: "No Account", className: "badge-error" }]
+            : []),
     ];
 
     /* Build meta items */
@@ -535,6 +538,22 @@ function OverviewTab({
                                 candidate.verification_status,
                             )}
                         </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Platform Account
+                        </p>
+                        {candidate.user_id ? (
+                            <p className="font-bold text-sm text-success flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-user-check" />
+                                Registered
+                            </p>
+                        ) : (
+                            <p className="font-bold text-sm text-error flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-user-slash" />
+                                No Account
+                            </p>
+                        )}
                     </div>
                     <div className="bg-base-100 p-4">
                         <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">

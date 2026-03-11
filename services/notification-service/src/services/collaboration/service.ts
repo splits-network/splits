@@ -3,6 +3,8 @@ import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
 import { collaboratorAddedEmail } from '../../templates/candidates';
 
+const { PORTAL_URL: _PORTAL_URL } = require('../../helpers/urls');
+
 export class CollaborationEmailService {
     constructor(
         private resend: Resend,
@@ -166,7 +168,7 @@ export class CollaborationEmailService {
         }
     ): Promise<void> {
         const subject = `Added to Placement Team: ${data.candidateName}`;
-        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements`;
+        const placementUrl = `${_PORTAL_URL}/portal/placements`;
         const actionUrl = data.roleId ? `/portal/roles?roleId=${data.roleId}` : '/portal/roles';
 
         const html = collaboratorAddedEmail({

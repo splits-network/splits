@@ -7,6 +7,7 @@ import {
     formatAvailability,
 } from "../../types";
 import { statusColorName } from "../shared/status-color";
+import { relationshipBadge, accountBadge } from "../shared/candidate-badges";
 import { BaselBadge } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
@@ -16,7 +17,7 @@ import {
     candidateCompany,
     salaryDisplay,
     isNew,
-    addedAgo,
+    lastSeenAgo,
     skillsList,
 } from "../shared/helpers";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
@@ -53,7 +54,6 @@ export function GridCard({
     const company = candidateCompany(candidate);
     const salary = salaryDisplay(candidate);
     const skills = skillsList(candidate);
-    const posted = addedAgo(candidate);
     const candidateUserId = candidate.user_id;
     const presence = usePresence([candidateUserId], {
         enabled: Boolean(candidateUserId),
@@ -62,6 +62,10 @@ export function GridCard({
     const presenceStatus = candidateUserId
         ? presence[candidateUserId]?.status
         : undefined;
+    const lastSeen = lastSeenAgo(
+        candidateUserId ? presence[candidateUserId]?.lastSeenAt : null,
+        candidate.last_active_at,
+    );
 
     const stats = [
         {
@@ -123,6 +127,22 @@ export function GridCard({
                                 New
                             </BaselBadge>
                         )}
+                        {(() => {
+                            const acct = accountBadge(candidate);
+                            return acct ? (
+                                <BaselBadge color={acct.color} size="sm" icon={acct.icon}>
+                                    {acct.label}
+                                </BaselBadge>
+                            ) : null;
+                        })()}
+                        {(() => {
+                            const rel = relationshipBadge(candidate);
+                            return rel ? (
+                                <BaselBadge color={rel.color} size="sm" icon={rel.icon} variant={rel.variant}>
+                                    {rel.label}
+                                </BaselBadge>
+                            ) : null;
+                        })()}
                         <Presence
                             variant="badge"
                             size="sm"
@@ -168,12 +188,12 @@ export function GridCard({
                         <i className="fa-duotone fa-regular fa-location-dot text-xs" />
                         {candidate.location || "Location not specified"}
                     </span>
-                    {posted && (
+                    {lastSeen && (
                         <>
                             <span className="text-base-content/20">|</span>
                             <span className="flex items-center gap-1.5 shrink-0">
                                 <i className="fa-duotone fa-regular fa-calendar text-xs" />
-                                {posted}
+                                {lastSeen}
                             </span>
                         </>
                     )}

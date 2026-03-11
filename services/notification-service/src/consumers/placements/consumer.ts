@@ -1,14 +1,12 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { PlacementsEmailService } from '../../services/placements/service';
-import { ServiceRegistry } from '../../clients';
 import { DataLookupHelper } from '../../helpers/data-lookup';
 import { ContactLookupHelper } from '../../helpers/contact-lookup';
 
 export class PlacementsEventConsumer {
     constructor(
         private emailService: PlacementsEmailService,
-        private services: ServiceRegistry,
         private logger: Logger,
         private dataLookup: DataLookupHelper,
         private contactLookup: ContactLookupHelper

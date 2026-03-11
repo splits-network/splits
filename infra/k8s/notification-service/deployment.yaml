@@ -59,22 +59,8 @@ spec:
                                 key: resend-api-key
                       - name: RESEND_FROM_EMAIL
                         value: "noreply@updates.splits.network"
-                      - name: IDENTITY_SERVICE_URL
-                        value: "http://identity-service:3001"
-                      - name: ATS_SERVICE_URL
-                        value: "http://ats-service:3002"
-                      - name: NETWORK_SERVICE_URL
-                        value: "http://network-service:3003"
                       - name: PORTAL_URL
                         value: "${PORTAL_URL}"
-                      - name: CANDIDATE_WEBSITE_URL
-                        value: "${CANDIDATE_URL}"
-                      - name: NEXT_PUBLIC_PORTAL_URL
-                        value: "${PORTAL_URL}"
-                      - name: NEXT_PUBLIC_CANDIDATE_URL
-                        value: "${CANDIDATE_URL}"
-                      - name: NEXT_PUBLIC_CORPORATE_URL
-                        value: "${CORPORATE_URL}"
                   resources:
                       requests:
                           cpu: 100m
