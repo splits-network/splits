@@ -70,7 +70,7 @@ export function ParticipantPicker({
                 data: UserSearchResult[];
             };
             const filtered = (res.data || []).filter(
-                (u) => !participants.some((p) => p.user_id === u.clerk_user_id),
+                (u) => !participants.some((p) => p.user_id === u.id),
             );
             setResults(filtered);
         } catch {
@@ -91,7 +91,7 @@ export function ParticipantPicker({
     /* ── Add participant from search ── */
     const addParticipant = (user: UserSearchResult) => {
         const newParticipant: Participant = {
-            user_id: user.clerk_user_id,
+            user_id: user.id,
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,

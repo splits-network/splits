@@ -255,11 +255,15 @@ export class CallRepository {
 
     // ── Helpers ───────────────────────────────────────────────────────────
 
-    async resolveUserId(clerkUserId: string): Promise<string | null> {
+    async resolveUserId(userId: string): Promise<string | null> {
+        // Accept both internal UUID and Clerk user ID (user_XXXXX)
+        const isClerkId = userId.startsWith('user_');
+        const column = isClerkId ? 'clerk_user_id' : 'id';
+
         const { data, error } = await this.supabase
             .from('users')
             .select('id')
-            .eq('clerk_user_id', clerkUserId)
+            .eq(column, userId)
             .maybeSingle();
 
         if (error) throw error;
