@@ -1,7 +1,8 @@
 "use client";
 
 import type { Placement } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     candidateName,
     jobTitle,
@@ -54,11 +55,9 @@ export function SplitItem({
                     <i className="fa-duotone fa-regular fa-briefcase mr-1" />
                     {jobTitle(placement)}
                 </div>
-                <span
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(state)}`}
-                >
+                <BaselBadge color={statusColorName(state)} size="xs" variant="soft">
                     {formatStatus(state)}
-                </span>
+                </BaselBadge>
             </div>
 
             {/* Row 4: salary + your share */}

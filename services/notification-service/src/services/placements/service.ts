@@ -9,6 +9,7 @@ import {
     guaranteeExpiringEmail,
     firstPlacementEmail,
 } from '../../templates/placements';
+import type { EmailSource } from '../../templates/base';
 
 const { PORTAL_URL: _PORTAL_URL } = require('../../helpers/urls');
 
@@ -17,6 +18,7 @@ export class PlacementsEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -31,6 +33,7 @@ export class PlacementsEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
@@ -50,7 +53,7 @@ export class PlacementsEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -141,6 +144,7 @@ export class PlacementsEmailService {
             actionLabel?: string;
             priority?: 'low' | 'normal' | 'high';
             category?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         await this.sendEmail(to, subject, html, options);

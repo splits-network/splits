@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import { fraudAlertEmail, FraudAlertData, securityReplayAlertEmail, SecurityReplayAlertData } from '../../templates/security';
 
 export class SecurityEmailService {
@@ -8,6 +9,7 @@ export class SecurityEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -24,6 +26,7 @@ export class SecurityEmailService {
             category?: string;
             actionUrl?: string;
             actionLabel?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
@@ -45,7 +48,7 @@ export class SecurityEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,

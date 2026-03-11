@@ -60,15 +60,6 @@ export interface CallHistoryEntry {
     duration_minutes: number | null;
 }
 
-/** Chat message for the in-call chat */
-export interface ChatMessage {
-    id: string;
-    sender_name: string;
-    sender_id: string;
-    body: string;
-    created_at: string;
-}
-
 /** Response from the token exchange endpoint */
 export interface ExchangeResult {
     livekit_token: string;

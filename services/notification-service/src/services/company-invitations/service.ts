@@ -10,12 +10,14 @@ import {
     companyPlatformInvitationEmail,
     companyInvitationAcceptedEmail
 } from '../../templates/company-invitations';
+import type { EmailSource } from '../../templates/base';
 
 export class CompanyInvitationsEmailService {
     constructor(
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -29,6 +31,7 @@ export class CompanyInvitationsEmailService {
         options: {
             eventType: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
@@ -47,7 +50,7 @@ export class CompanyInvitationsEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,

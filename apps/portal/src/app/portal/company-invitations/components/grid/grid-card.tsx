@@ -8,7 +8,8 @@ import {
     getCounterpartySubtext,
     getInitials,
 } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import { isNew, postedAgo } from "../shared/helpers";
 import ConnectionActionsToolbar from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
@@ -48,17 +49,14 @@ export function GridCard({
         >
             {/* Top row: status pill + NEW badge */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <span
-                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
-                >
+                <BaselBadge color={statusColorName(invitation.status)} size="sm" variant="soft">
                     {getStatusLabel(invitation.status)}
-                </span>
+                </BaselBadge>
 
                 {isNew(invitation) && invitation.status === "pending" && (
-                    <span className="text-sm uppercase tracking-wider bg-warning/15 text-warning px-2 py-1">
-                        <i className="fa-duotone fa-regular fa-sparkles mr-1" />
+                    <BaselBadge color="warning" size="sm" variant="soft" icon="fa-sparkles">
                         New
-                    </span>
+                    </BaselBadge>
                 )}
             </div>
 

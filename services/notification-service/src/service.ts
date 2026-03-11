@@ -57,32 +57,33 @@ export class NotificationService {
         repository: NotificationRepository,
         resendApiKey: string,
         fromEmail: string,
+        candidateFromEmail: string,
         logger: Logger
     ) {
         const resend = new Resend(resendApiKey);
 
-        this.applications = new ApplicationsEmailService(resend, repository, fromEmail, logger);
-        this.placements = new PlacementsEmailService(resend, repository, fromEmail, logger);
-        this.candidates = new CandidatesEmailService(resend, repository, fromEmail, logger);
-        this.collaboration = new CollaborationEmailService(resend, repository, fromEmail, logger);
-        this.invitations = new InvitationsEmailService(resend, repository, fromEmail, logger);
-        this.companyInvitations = new CompanyInvitationsEmailService(resend, repository, fromEmail, logger);
-        this.recruiterCompanyInvitations = new RecruiterCompanyInvitationsEmailService(resend, repository, fromEmail, logger);
-        this.recruiterSubmission = new RecruiterSubmissionEmailService(resend, repository, fromEmail, logger);
-        this.support = new SupportEmailService(resend, repository, fromEmail, logger);
-        this.chat = new ChatEmailService(resend, repository, fromEmail, logger);
-        this.billing = new BillingEmailService(resend, repository, fromEmail, logger);
-        this.reputation = new ReputationEmailService(resend, repository, fromEmail, logger);
-        this.health = new HealthEmailService(resend, repository, fromEmail, logger);
-        this.onboarding = new OnboardingEmailService(resend, repository, fromEmail, logger);
-        this.jobs = new JobsEmailService(resend, repository, fromEmail, logger);
-        this.relationships = new RelationshipsEmailService(resend, repository, fromEmail, logger);
-        this.security = new SecurityEmailService(resend, repository, fromEmail, logger);
-        this.recruiterCodes = new RecruiterCodesEmailService(resend, repository, fromEmail, logger);
-        this.documents = new DocumentsEmailService(resend, repository, fromEmail, logger);
-        this.engagement = new EngagementEmailService(resend, repository, fromEmail, logger);
-        this.matches = new MatchesEmailService(resend, repository, fromEmail, logger);
-        this.calls = new CallsEmailService(resend, repository, fromEmail, logger);
+        this.applications = new ApplicationsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.placements = new PlacementsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.candidates = new CandidatesEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.collaboration = new CollaborationEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.invitations = new InvitationsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.companyInvitations = new CompanyInvitationsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.recruiterCompanyInvitations = new RecruiterCompanyInvitationsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.recruiterSubmission = new RecruiterSubmissionEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.support = new SupportEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.chat = new ChatEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.billing = new BillingEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.reputation = new ReputationEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.health = new HealthEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.onboarding = new OnboardingEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.jobs = new JobsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.relationships = new RelationshipsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.security = new SecurityEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.recruiterCodes = new RecruiterCodesEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.documents = new DocumentsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.engagement = new EngagementEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.matches = new MatchesEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
+        this.calls = new CallsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
     }
 
     // Legacy compatibility methods - delegate to domain services

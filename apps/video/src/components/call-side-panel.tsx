@@ -108,7 +108,7 @@ export function CallSidePanel({ call, localName, accessToken = null }: CallSideP
                                 />
                             )}
                             {currentTab === 'chat' && (
-                                <ChatTab call={call} />
+                                <ChatTab />
                             )}
                             {currentTab === 'history' && (
                                 <HistoryTab

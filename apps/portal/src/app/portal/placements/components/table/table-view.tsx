@@ -2,7 +2,8 @@
 
 import { Fragment } from "react";
 import type { Placement } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     candidateName,
     jobTitle,
@@ -111,11 +112,9 @@ export function TableView({
 
                                     {/* Status */}
                                     <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(state)}`}
-                                        >
+                                        <BaselBadge color={statusColorName(state)} size="xs" variant="soft">
                                             {formatStatus(state)}
-                                        </span>
+                                        </BaselBadge>
                                     </td>
 
                                     {/* Hired date */}

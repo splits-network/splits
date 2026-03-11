@@ -2,7 +2,8 @@
 
 import type { Invitation } from "../../types";
 import { getDisplayStatus } from "../../types";
-import { statusBadgeClass, statusBorder } from "../shared/status-color";
+import { statusColorName, statusBorder } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     formatDateShort,
     timeAgo,
@@ -53,17 +54,15 @@ export function GridCard({
                         Candidate Invitation
                     </p>
                     <div className="flex items-center gap-1.5 shrink-0">
-                        <span className={`badge ${statusBadgeClass(invitation)}`}>
-                            <i className={`fa-duotone fa-regular ${status.icon} mr-1`} />
+                        <BaselBadge color={statusColorName(invitation)} size="sm" variant="soft" icon={status.icon}>
                             {status.label}
-                        </span>
+                        </BaselBadge>
                         {isRecentInvitation(invitation) &&
                             !invitation.consent_given &&
                             !invitation.declined_at && (
-                                <span className="badge badge-warning badge-outline">
-                                    <i className="fa-duotone fa-regular fa-sparkles mr-1" />
+                                <BaselBadge color="warning" size="sm" variant="soft" icon="fa-sparkles">
                                     New
-                                </span>
+                                </BaselBadge>
                             )}
                     </div>
                 </div>
@@ -147,16 +146,14 @@ export function GridCard({
             <div className="px-5 py-3 border-b border-base-300">
                 <div className="flex flex-wrap gap-1.5">
                     {candidate?.location && (
-                        <span className="badge badge-outline badge-sm">
-                            <i className="fa-duotone fa-regular fa-location-dot mr-1" />
+                        <BaselBadge color="neutral" size="xs" variant="outline" icon="fa-location-dot">
                             {candidate.location}
-                        </span>
+                        </BaselBadge>
                     )}
                     {isExpiringSoon && (
-                        <span className="badge badge-error badge-outline badge-sm">
-                            <i className="fa-duotone fa-regular fa-clock mr-1" />
+                        <BaselBadge color="error" size="xs" variant="outline" icon="fa-clock">
                             Expiring
-                        </span>
+                        </BaselBadge>
                     )}
                     {!candidate?.location && !isExpiringSoon && (
                         <span className="text-sm text-base-content/20 italic">

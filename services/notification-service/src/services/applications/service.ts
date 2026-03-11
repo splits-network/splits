@@ -51,6 +51,7 @@ import {
     companyApplicationExpiredEmail,
     companyExpirationWarningEmail,
 } from '../../templates/applications/company-emails';
+import type { EmailSource } from '../../templates/base';
 
 // Centralized URL imports — never read NEXT_PUBLIC_* env vars for user-facing links
 const { PORTAL_URL: _PORTAL_URL, CANDIDATE_URL: _CANDIDATE_URL } = require('../../helpers/urls');
@@ -60,6 +61,7 @@ export class ApplicationsEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -74,6 +76,7 @@ export class ApplicationsEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
@@ -97,7 +100,7 @@ export class ApplicationsEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -187,6 +190,7 @@ export class ApplicationsEmailService {
             actionLabel?: string;
             priority?: 'low' | 'normal' | 'high' | 'urgent';
             category?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         // Send email first (primary channel)
@@ -194,6 +198,7 @@ export class ApplicationsEmailService {
             eventType: options.eventType,
             userId: options.userId,
             payload: options.payload,
+            source: options.source,
         });
 
         // Create in-app notification if we have a userId
@@ -275,6 +280,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -546,6 +552,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Review',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -627,6 +634,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Update Application',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -661,6 +669,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Job Details',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -774,6 +783,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track Application',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -805,6 +815,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -840,6 +851,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'high',
             category: 'interview',
+            source: 'candidate',
         });
     }
 
@@ -875,6 +887,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Offer',
             priority: 'urgent',
             category: 'offer',
+            source: 'candidate',
         });
     }
 
@@ -907,6 +920,7 @@ export class ApplicationsEmailService {
             payload: data,
             priority: 'urgent',
             category: 'success',
+            source: 'candidate',
         });
     }
 
@@ -939,6 +953,7 @@ export class ApplicationsEmailService {
             payload: data,
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -974,6 +989,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Review Opportunity',
             priority: 'high',
             category: 'proposal',
+            source: 'candidate',
         });
     }
 
@@ -1007,6 +1023,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track AI Review',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1040,6 +1057,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1075,6 +1093,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track Review Status',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1110,6 +1129,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Feedback',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1143,6 +1163,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track Proposal',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1180,6 +1201,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View AI Results',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1213,6 +1235,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track Review',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1248,6 +1271,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View History',
             priority: 'low',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1556,6 +1580,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1661,6 +1686,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Respond Now',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 

@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import {
     welcomeEmail,
     WelcomeEmailData,
@@ -15,6 +16,7 @@ export class OnboardingEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -31,6 +33,7 @@ export class OnboardingEmailService {
             category?: string;
             actionUrl?: string;
             actionLabel?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
@@ -52,7 +55,7 @@ export class OnboardingEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,

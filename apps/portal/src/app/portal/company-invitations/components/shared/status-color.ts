@@ -3,21 +3,23 @@
  * Uses DaisyUI semantic tokens only — no Memphis named colors.
  */
 
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
+
 export type ViewMode = "table" | "grid" | "split";
 
-/** Status -> DaisyUI semantic badge/text classes */
-export function statusColor(status?: string): string {
+/** Status -> BaselSemanticColor for use with BaselBadge */
+export function statusColorName(status?: string): BaselSemanticColor {
     switch (status) {
         case "active":
-            return "bg-success/15 text-success";
+            return "success";
         case "pending":
-            return "bg-warning/15 text-warning";
+            return "warning";
         case "declined":
-            return "bg-error/15 text-error";
+            return "error";
         case "terminated":
-            return "bg-base-content/15 text-base-content/50";
+            return "neutral";
         default:
-            return "bg-base-content/15 text-base-content/50";
+            return "neutral";
     }
 }
 

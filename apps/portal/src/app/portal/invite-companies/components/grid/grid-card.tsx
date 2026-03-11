@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { CompanyInvitation } from "../../types";
-import { statusBadgeClass, statusBorder, statusIcon } from "../shared/status-color";
+import { statusColorName, statusBorder, statusIcon } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     formatStatus,
     getDaysUntilExpiry,
@@ -53,10 +54,9 @@ export function GridCard({
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate">
                         Company Invitation
                     </p>
-                    <span className={`badge ${statusBadgeClass(invitation.status)} shrink-0`}>
-                        <i className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`} />
+                    <BaselBadge color={statusColorName(invitation.status)} size="sm" variant="soft" icon={statusIcon(invitation.status)}>
                         {formatStatus(invitation.status)}
-                    </span>
+                    </BaselBadge>
                 </div>
 
                 {/* Avatar + Name */}
@@ -123,22 +123,19 @@ export function GridCard({
             <div className="px-5 py-3 border-b border-base-300">
                 <div className="flex flex-wrap gap-1.5">
                     {invitation.email_sent_at && (
-                        <span className="badge badge-success badge-outline badge-sm">
-                            <i className="fa-duotone fa-regular fa-envelope-circle-check mr-1" />
+                        <BaselBadge color="success" size="xs" variant="outline" icon="fa-envelope-circle-check">
                             Sent
-                        </span>
+                        </BaselBadge>
                     )}
                     {invitation.personal_message && (
-                        <span className="badge badge-info badge-outline badge-sm">
-                            <i className="fa-duotone fa-regular fa-message mr-1" />
+                        <BaselBadge color="info" size="xs" variant="outline" icon="fa-message">
                             Message
-                        </span>
+                        </BaselBadge>
                     )}
                     {isExpiringSoon(invitation) && (
-                        <span className="badge badge-error badge-outline badge-sm">
-                            <i className="fa-duotone fa-regular fa-clock mr-1" />
+                        <BaselBadge color="error" size="xs" variant="outline" icon="fa-clock">
                             Expiring
-                        </span>
+                        </BaselBadge>
                     )}
                     {!invitation.email_sent_at &&
                         !invitation.personal_message &&

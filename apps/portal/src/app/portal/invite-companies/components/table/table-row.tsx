@@ -2,7 +2,8 @@
 
 import { Fragment } from "react";
 import type { CompanyInvitation } from "../../types";
-import { statusColor, statusBorder, statusIcon } from "../shared/status-color";
+import { statusColorName, statusBorder, statusIcon } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     formatStatus,
     createdAgo,
@@ -64,14 +65,9 @@ export function TableRow({
                     {invitation.invite_code}
                 </td>
                 <td className="px-4 py-3">
-                    <span
-                        className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
-                    >
-                        <i
-                            className={`fa-duotone fa-regular ${statusIcon(invitation.status)} mr-1`}
-                        />
+                    <BaselBadge color={statusColorName(invitation.status)} size="xs" variant="soft" icon={statusIcon(invitation.status)}>
                         {formatStatus(invitation.status)}
-                    </span>
+                    </BaselBadge>
                 </td>
                 <td className="px-4 py-3 text-sm text-base-content/50">
                     {createdAgo(invitation)}

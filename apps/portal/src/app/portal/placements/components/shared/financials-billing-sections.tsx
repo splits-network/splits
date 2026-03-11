@@ -10,41 +10,42 @@ import type {
     ScheduleStatus,
     EscrowHoldStatus,
 } from "../../billing-types";
+import { BaselBadge, type BaselSemanticColor } from "@splits-network/basel-ui";
 import { formatCurrency, formatDate } from "./helpers";
 
-/* ─── Status Badge Helpers ─────────────────────────────────────────────── */
+/* ─── Status Color Helpers ─────────────────────────────────────────────── */
 
-const INVOICE_BADGE: Record<InvoiceStatus, string> = {
-    paid: "badge-success",
-    open: "badge-info badge-soft",
-    draft: "badge-ghost",
-    void: "badge-error badge-soft",
-    uncollectible: "badge-error",
+const INVOICE_COLOR: Record<InvoiceStatus, BaselSemanticColor> = {
+    paid: "success",
+    open: "info",
+    draft: "neutral",
+    void: "error",
+    uncollectible: "error",
 };
 
-const TX_BADGE: Record<TransactionStatus, string> = {
-    paid: "badge-success",
-    pending: "badge-warning badge-soft badge-outline",
-    processing: "badge-info badge-soft",
-    failed: "badge-error",
-    reversed: "badge-error badge-soft",
-    on_hold: "badge-warning",
+const TX_COLOR: Record<TransactionStatus, BaselSemanticColor> = {
+    paid: "success",
+    pending: "warning",
+    processing: "info",
+    failed: "error",
+    reversed: "error",
+    on_hold: "warning",
 };
 
-const SCHEDULE_BADGE: Record<ScheduleStatus, string> = {
-    scheduled: "badge-info badge-soft",
-    triggered: "badge-primary",
-    cancelled: "badge-ghost",
-    pending: "badge-warning badge-soft badge-outline",
-    processing: "badge-info badge-soft",
-    processed: "badge-success",
-    failed: "badge-error",
+const SCHEDULE_COLOR: Record<ScheduleStatus, BaselSemanticColor> = {
+    scheduled: "info",
+    triggered: "primary",
+    cancelled: "neutral",
+    pending: "warning",
+    processing: "info",
+    processed: "success",
+    failed: "error",
 };
 
-const ESCROW_BADGE: Record<EscrowHoldStatus, string> = {
-    active: "badge-warning",
-    released: "badge-success",
-    cancelled: "badge-ghost",
+const ESCROW_COLOR: Record<EscrowHoldStatus, BaselSemanticColor> = {
+    active: "warning",
+    released: "success",
+    cancelled: "neutral",
 };
 
 function formatLabel(s: string): string {
@@ -83,9 +84,9 @@ export function InvoiceSection({ invoice }: { invoice: PlacementInvoice | null }
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30">
                     Invoice
                 </p>
-                <span className={`badge ${INVOICE_BADGE[invoice.invoice_status]}`}>
+                <BaselBadge color={INVOICE_COLOR[invoice.invoice_status]} size="sm" variant="soft">
                     {formatLabel(invoice.invoice_status)}
-                </span>
+                </BaselBadge>
             </div>
 
             <div className="bg-base-200 border border-base-300 divide-y divide-base-300">
@@ -172,9 +173,9 @@ export function PayoutTransactionsSection({
                         className="flex items-center justify-between border-b border-base-200 pb-2"
                     >
                         <div className="flex items-center gap-2 min-w-0">
-                            <span className={`badge badge-sm ${TX_BADGE[tx.status]}`}>
+                            <BaselBadge color={TX_COLOR[tx.status]} size="xs" variant="soft">
                                 {formatLabel(tx.status)}
-                            </span>
+                            </BaselBadge>
                             <span className="text-sm font-semibold truncate">
                                 {tx.recruiter_name || "Unknown"}
                             </span>
@@ -238,9 +239,9 @@ export function PayoutScheduleSection({
                             <span className="text-sm font-semibold">
                                 {formatDate(s.scheduled_date)}
                             </span>
-                            <span className={`badge badge-sm ${SCHEDULE_BADGE[s.status]}`}>
+                            <BaselBadge color={SCHEDULE_COLOR[s.status]} size="xs" variant="soft">
                                 {formatLabel(s.status)}
-                            </span>
+                            </BaselBadge>
                         </div>
                         <div className="flex flex-wrap gap-x-4 text-sm text-base-content/40">
                             <span>Trigger: {formatLabel(s.trigger_event)}</span>
@@ -277,9 +278,9 @@ export function EscrowHoldsSection({ holds }: { holds: EscrowHold[] }) {
                             <span className="text-sm font-bold">
                                 {formatCurrency(h.hold_amount)}
                             </span>
-                            <span className={`badge badge-sm ${ESCROW_BADGE[h.status]}`}>
+                            <BaselBadge color={ESCROW_COLOR[h.status]} size="xs" variant="soft">
                                 {formatLabel(h.status)}
-                            </span>
+                            </BaselBadge>
                         </div>
                         <p className="text-sm text-base-content/50 mb-1">{h.hold_reason}</p>
                         <div className="flex flex-wrap gap-x-4 text-sm text-base-content/40">

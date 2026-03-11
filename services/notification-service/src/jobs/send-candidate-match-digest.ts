@@ -22,6 +22,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Applicant Network <notifications@applicant.network>';
+const CANDIDATE_FROM_EMAIL = process.env.RESEND_CANDIDATE_FROM_EMAIL || 'notifications@updates.applicant.network';
 const { PORTAL_URL } = require('../helpers/urls');
 const MAX_MATCHES_PER_CANDIDATE = 5;
 
@@ -46,7 +47,7 @@ async function main() {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_KEY!);
     const repository = new NotificationRepository(SUPABASE_URL!, SUPABASE_KEY!);
     const resend = new Resend(RESEND_API_KEY!);
-    const emailService = new EngagementEmailService(resend, repository, FROM_EMAIL, logger);
+    const emailService = new EngagementEmailService(resend, repository, FROM_EMAIL, CANDIDATE_FROM_EMAIL, logger);
 
     const now = new Date();
     const weekEnd = new Date(now);

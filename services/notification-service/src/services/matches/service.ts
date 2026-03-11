@@ -6,6 +6,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import {
     recruiterInviteEmail,
     candidateRepresentedInviteEmail,
@@ -22,6 +23,7 @@ export class MatchesEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) {}
 
@@ -36,6 +38,7 @@ export class MatchesEmailService {
             actionUrl?: string;
             actionLabel?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
         // Create in-app notification
@@ -59,7 +62,7 @@ export class MatchesEmailService {
         // Send email
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -110,6 +113,7 @@ export class MatchesEmailService {
                 eventType: 'match.invited',
                 userId: data.userId,
                 category: 'matches',
+                source: 'candidate',
                 payload: {
                     jobTitle: data.jobTitle,
                     companyName: data.companyName,
@@ -131,6 +135,7 @@ export class MatchesEmailService {
                 eventType: 'match.invited',
                 userId: data.userId,
                 category: 'matches',
+                source: 'candidate',
                 actionUrl: data.applyUrl,
                 actionLabel: 'View & Apply',
                 payload: {

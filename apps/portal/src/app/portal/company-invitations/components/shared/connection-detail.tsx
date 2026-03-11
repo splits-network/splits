@@ -9,7 +9,8 @@ import {
     getCounterpartySubtext,
     getInitials,
 } from "../../types";
-import { statusColor } from "./status-color";
+import { statusColorName } from "./status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import { formatStatus } from "./helpers";
 import ConnectionActionsToolbar from "./actions-toolbar";
 
@@ -39,14 +40,14 @@ export function ConnectionDetail({
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                            <span
-                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(invitation.status)}`}
+                            <BaselBadge
+                                color={statusColorName(invitation.status)}
+                                size="sm"
+                                variant="soft"
+                                icon={invitation.status === "pending" ? "fa-clock" : invitation.status === "active" ? "fa-check-circle" : invitation.status === "declined" ? "fa-times-circle" : "fa-ban"}
                             >
-                                <i
-                                    className={`fa-duotone fa-regular ${invitation.status === "pending" ? "fa-clock" : invitation.status === "active" ? "fa-check-circle" : invitation.status === "declined" ? "fa-times-circle" : "fa-ban"} mr-1`}
-                                />
                                 {getStatusLabel(invitation.status)}
-                            </span>
+                            </BaselBadge>
                         </div>
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-2">
                             {invitation.relationship_type}

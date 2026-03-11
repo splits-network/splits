@@ -93,6 +93,7 @@ async function main() {
         repository,
         resendConfig.apiKey,
         resendConfig.fromEmail,
+        resendConfig.candidateFromEmail,
         logger
     );
 

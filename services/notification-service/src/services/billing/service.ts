@@ -23,12 +23,14 @@ import {
     subscriptionCancelledEmail,
     SubscriptionCancelledData,
 } from '../../templates/billing';
+import type { EmailSource } from '../../templates/base';
 
 export class BillingEmailService {
     constructor(
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -45,6 +47,7 @@ export class BillingEmailService {
             category?: string;
             actionUrl?: string;
             actionLabel?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
@@ -66,7 +69,7 @@ export class BillingEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,

@@ -8,7 +8,8 @@ import {
     getCounterpartyName,
     getCounterpartySubtext,
 } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import { isNew, postedAgo } from "../shared/helpers";
 import { ConnectionDetail } from "../shared/connection-detail";
 import ConnectionActionsToolbar from "../shared/actions-toolbar";
@@ -81,11 +82,9 @@ export function TableRow({
 
                 {/* Status */}
                 <td className="px-4 py-3">
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(invitation.status)}`}
-                    >
+                    <BaselBadge color={statusColorName(invitation.status)} size="xs" variant="soft">
                         {getStatusLabel(invitation.status)}
-                    </span>
+                    </BaselBadge>
                 </td>
 
                 {/* Received */}
