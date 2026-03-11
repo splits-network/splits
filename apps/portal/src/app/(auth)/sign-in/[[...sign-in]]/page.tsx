@@ -277,7 +277,7 @@ export default function SignInPage() {
                         Continue with GitHub
                     </span>
                 </button> */}
-                <button
+                {/* <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
                     onClick={() => signInWithOAuth("oauth_microsoft")}
@@ -285,6 +285,16 @@ export default function SignInPage() {
                     <i className="fa-brands fa-microsoft text-lg" />
                     <span className="text-sm font-semibold">
                         Continue with Microsoft
+                    </span>
+                </button> */}
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    disabled
+                >
+                    <i className="fa-brands fa-microsoft text-lg" />
+                    <span className="text-sm font-semibold">
+                        Microsoft Coming Soon
                     </span>
                 </button>
             </div>
@@ -306,7 +316,9 @@ export default function SignInPage() {
                     <label className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-2 block">
                         Email Address
                     </label>
-                    <label className={`input input-bordered w-full ${errorType === "account_not_found" ? "input-error" : ""}`}>
+                    <label
+                        className={`input input-bordered w-full ${errorType === "account_not_found" ? "input-error" : ""}`}
+                    >
                         <i className="fa-duotone fa-regular fa-envelope opacity-50" />
                         <input
                             type="email"
@@ -334,7 +346,9 @@ export default function SignInPage() {
                             Forgot?
                         </Link>
                     </div>
-                    <label className={`input input-bordered w-full ${errorType === "incorrect_password" ? "input-error" : ""}`}>
+                    <label
+                        className={`input input-bordered w-full ${errorType === "incorrect_password" ? "input-error" : ""}`}
+                    >
                         <i className="fa-duotone fa-regular fa-lock opacity-50" />
                         <input
                             type={showPassword ? "text" : "password"}

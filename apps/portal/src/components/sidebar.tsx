@@ -205,6 +205,7 @@ const navItems: NavItemData[] = [
         icon: "fa-duotone fa-regular fa-video",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "management",
+        isNew: true,
     },
     {
         href: "/portal/placements",
@@ -223,7 +224,12 @@ const navItems: NavItemData[] = [
         href: "/portal/leaderboard",
         label: "Leaderboard",
         icon: "fa-duotone fa-regular fa-ranking-star",
-        roles: ["recruiter", "company_admin", "hiring_manager", "platform_admin"],
+        roles: [
+            "recruiter",
+            "company_admin",
+            "hiring_manager",
+            "platform_admin",
+        ],
         section: "management",
     },
     {

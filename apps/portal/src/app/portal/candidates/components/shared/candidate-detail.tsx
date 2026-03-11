@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { BaselTabBar, PanelHeader, type PanelStat } from "@splits-network/basel-ui";
+import {
+    BaselTabBar,
+    PanelHeader,
+    type PanelStat,
+} from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState } from "@splits-network/shared-ui";
@@ -36,10 +40,26 @@ import {
 type TabType = "overview" | "resume" | "applications" | "documents";
 
 const TABS = [
-    { value: "overview", label: "Overview", icon: "fa-duotone fa-regular fa-user" },
-    { value: "resume", label: "Resume", icon: "fa-duotone fa-regular fa-file-user" },
-    { value: "applications", label: "Applications", icon: "fa-duotone fa-regular fa-briefcase" },
-    { value: "documents", label: "Documents", icon: "fa-duotone fa-regular fa-file-lines" },
+    {
+        value: "overview",
+        label: "Overview",
+        icon: "fa-duotone fa-regular fa-user",
+    },
+    {
+        value: "resume",
+        label: "Resume",
+        icon: "fa-duotone fa-regular fa-file-user",
+    },
+    {
+        value: "applications",
+        label: "Applications",
+        icon: "fa-duotone fa-regular fa-briefcase",
+    },
+    {
+        value: "documents",
+        label: "Documents",
+        icon: "fa-duotone fa-regular fa-file-lines",
+    },
 ];
 
 /* ─── Badge class mapping ──────────────────────────────────────────────── */
@@ -208,10 +228,16 @@ export function CandidateDetail({
     const headerBadges = [
         {
             label: formatVerificationStatus(candidate.verification_status),
-            className: VERIFICATION_BADGE_CLASS[verificationColor] || "badge-ghost",
+            className:
+                VERIFICATION_BADGE_CLASS[verificationColor] || "badge-ghost",
         },
         ...(isNew(candidate)
-            ? [{ label: "New", className: "badge-warning badge-soft badge-outline" }]
+            ? [
+                  {
+                      label: "New",
+                      className: "badge-warning badge-soft badge-outline",
+                  },
+              ]
             : []),
         ...(!candidate.user_id
             ? [{ label: "No Account", className: "badge-error" }]
@@ -238,7 +264,13 @@ export function CandidateDetail({
     /* Build stats (available data only) */
     const stats: PanelStat[] = [
         ...(skills.length > 0
-            ? [{ label: "Skills", value: String(skills.length), icon: "fa-duotone fa-regular fa-code" }]
+            ? [
+                  {
+                      label: "Skills",
+                      value: String(skills.length),
+                      icon: "fa-duotone fa-regular fa-code",
+                  },
+              ]
             : []),
     ];
 
@@ -262,7 +294,7 @@ export function CandidateDetail({
     ].filter(Boolean) as { href: string; icon: string; label: string }[];
 
     return (
-        <div className="flex flex-col h-full min-h-0 bg-base-100">
+        <div className="flex flex-col h-full w-full min-h-0 bg-base-100">
             {/* Dark header */}
             <PanelHeader
                 kicker={company || ""}
