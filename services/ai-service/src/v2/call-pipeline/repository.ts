@@ -53,6 +53,50 @@ export class CallPipelineRepository {
     ) {}
 
     /**
+     * Get per-call recording and AI flags, plus the call creator's user ID.
+     * Returns null if the call is not found.
+     */
+    async getCallFlags(callId: string): Promise<{
+        recording_enabled: boolean;
+        transcription_enabled: boolean;
+        ai_analysis_enabled: boolean;
+        created_by: string;
+    } | null> {
+        const { data, error } = await this.supabase
+            .from('calls')
+            .select('recording_enabled, transcription_enabled, ai_analysis_enabled, created_by')
+            .eq('id', callId)
+            .maybeSingle();
+
+        if (error) {
+            throw new Error(`Failed to fetch call flags for ${callId}: ${error.message}`);
+        }
+
+        return data ?? null;
+    }
+
+    /**
+     * Get the current subscription tier for a user.
+     * Defaults to 'starter' if no active subscription is found.
+     */
+    async getCreatorTier(userId: string): Promise<'starter' | 'pro' | 'partner'> {
+        const { data: sub, error } = await this.supabase
+            .from('subscriptions')
+            .select('plan:plans(tier)')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) {
+            throw new Error(`Failed to fetch creator tier for user ${userId}: ${error.message}`);
+        }
+
+        return (sub?.plan as any)?.tier || 'starter';
+    }
+
+    /**
      * Fetch call with full context for prompt injection:
      * participants, entity links, and entity details.
      */
