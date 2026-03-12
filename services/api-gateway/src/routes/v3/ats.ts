@@ -28,6 +28,9 @@ const atsV3Routes: V3RouteConfig[] = [
   { path: '/jobs/:id/view/candidate-detail', method: 'GET', auth: 'optional' },
   { path: '/jobs/:id/view/editor', method: 'GET', auth: 'required' },
 
+  // ── Jobs Activity Timeline ────────────────────────────────────
+  { path: '/jobs/:id/activity', method: 'GET', auth: 'required' },
+
   // ── Jobs Actions ───────────────────────────────────────────────
   { path: '/jobs/actions/process-termination', method: 'POST', auth: 'required' },
 

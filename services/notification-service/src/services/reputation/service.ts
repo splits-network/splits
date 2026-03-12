@@ -38,7 +38,7 @@ export class ReputationEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
-        const effectiveChannel = await this.repository.resolveChannel(options.userId, 'email');
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', null);
         if (!effectiveChannel) return;
 
         const log = await this.repository.createNotificationLog({

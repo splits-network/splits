@@ -163,6 +163,48 @@ export class DataLookupHelper {
     }
 
     /**
+     * Get recruiters with active (non-rejected, non-withdrawn) candidates on a job.
+     * Returns contacts for notification delivery.
+     */
+    async getActiveRecruitersForJob(jobId: string): Promise<Array<{ email: string; name: string; user_id: string | null }>> {
+        const { data: applications, error } = await this.supabase
+            .from('applications')
+            .select('candidate_recruiter_id')
+            .eq('job_id', jobId)
+            .not('candidate_recruiter_id', 'is', null)
+            .not('status', 'in', '(rejected,withdrawn)')
+            .limit(100);
+
+        if (error || !applications || applications.length === 0) return [];
+
+        const recruiterIds = [...new Set(applications.map((a: any) => a.candidate_recruiter_id).filter(Boolean))];
+        if (recruiterIds.length === 0) return [];
+
+        const { data: recruiters } = await this.supabase
+            .from('recruiters')
+            .select('id, user_id')
+            .in('id', recruiterIds);
+
+        if (!recruiters || recruiters.length === 0) return [];
+
+        const userIds = recruiters.map((r: any) => r.user_id).filter(Boolean);
+        if (userIds.length === 0) return [];
+
+        const { data: users } = await this.supabase
+            .from('users')
+            .select('id, first_name, last_name, email')
+            .in('id', userIds);
+
+        if (!users) return [];
+
+        return users.map((u: any) => ({
+            email: u.email,
+            name: [u.first_name, u.last_name].filter(Boolean).join(' '),
+            user_id: u.id,
+        }));
+    }
+
+    /**
      * Get candidate by ID
      */
     async getCandidate(candidateId: string): Promise<CandidateData | null> {

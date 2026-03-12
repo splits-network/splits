@@ -7,6 +7,9 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { JobRepository } from './repository';
 import { JobService } from './service';
+import { JobActivityRepository } from './activity/repository';
+import { JobActivityService } from './activity/service';
+import { registerActivityRoute } from './activity/route';
 import { CreateJobInput, UpdateJobInput, JobListParams,
   idParamSchema, listQuerySchema, createJobSchema, updateJobSchema } from './types';
 import { registerRecruiterBoardView } from './views/recruiter-board.route';
@@ -26,7 +29,9 @@ export function registerJobRoutes(
   eventPublisher?: IEventPublisher
 ) {
   const repository = new JobRepository(supabase);
-  const service = new JobService(repository, supabase, eventPublisher);
+  const activityRepository = new JobActivityRepository(supabase);
+  const activityService = new JobActivityService(activityRepository, supabase);
+  const service = new JobService(repository, supabase, eventPublisher, activityService);
 
   // Register views (before :id routes to avoid collision)
   registerRecruiterBoardView(app, supabase);
@@ -40,6 +45,9 @@ export function registerJobRoutes(
   registerCompanyDetailView(app, supabase);
   registerCandidateDetailView(app, supabase);
   registerEditorView(app, supabase);
+
+  // Register activity timeline
+  registerActivityRoute(app, activityService);
 
   // Register actions
   registerProcessTerminationAction(app, supabase, eventPublisher);

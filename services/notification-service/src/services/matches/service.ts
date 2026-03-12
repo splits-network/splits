@@ -41,7 +41,7 @@ export class MatchesEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
-        const effectiveChannel = await this.repository.resolveChannel(options.userId, 'both');
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'both', options.category);
         if (!effectiveChannel) return;
 
         // Create notification log (may be downgraded to in_app)

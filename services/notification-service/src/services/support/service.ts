@@ -63,7 +63,7 @@ export class SupportEmailService {
     async sendStatusContactEmail(data: StatusContactEmailData): Promise<void> {
         const subject = `[Status Contact] ${data.topic} (${data.source})`;
 
-        const effectiveChannel = await this.repository.resolveChannel(null, 'email');
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(null, 'email', null);
         if (!effectiveChannel) return;
 
         const log = await this.repository.createNotificationLog({
@@ -151,7 +151,7 @@ ${paragraph('If you need further assistance, simply reply to this email or visit
 
         const fromAddress = data.sourceApp === 'candidate' ? this.candidateFromEmail : this.fromEmail;
 
-        const effectiveChannel = await this.repository.resolveChannel(data.userId, 'email');
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(data.userId, 'email', 'support');
         if (!effectiveChannel) return;
 
         const log = await this.repository.createNotificationLog({

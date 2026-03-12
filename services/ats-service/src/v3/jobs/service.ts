@@ -10,6 +10,8 @@ import { AccessContextResolver, EntitlementChecker } from '@splits-network/share
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../v2/shared/events';
 import { JobRepository } from './repository';
+import { JobAuthorizationHelper } from './authorization';
+import { JobActivityService } from './activity/service';
 import { CreateJobInput, UpdateJobInput, JobListParams } from './types';
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
@@ -24,47 +26,40 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 export class JobService {
   private accessResolver: AccessContextResolver;
   private entitlementChecker: EntitlementChecker;
+  private auth: JobAuthorizationHelper;
 
   constructor(
     private repository: JobRepository,
     private supabase: SupabaseClient,
-    private eventPublisher?: IEventPublisher
+    private eventPublisher?: IEventPublisher,
+    private activityService?: JobActivityService
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
     this.entitlementChecker = new EntitlementChecker(supabase);
+    this.auth = new JobAuthorizationHelper(supabase);
   }
 
   async getAll(params: JobListParams, clerkUserId: string) {
     const context = await this.accessResolver.resolve(clerkUserId);
-
-    // Scope query based on role
     const scopedParams = { ...params };
 
     if (context.isPlatformAdmin) {
-      // Admins see everything (including drafts) — no extra filters
+      // Admins see everything
     } else if (context.recruiterId && context.roles.includes('recruiter')) {
-      // Recruiters see active jobs, plus their own drafts/pending
-      // Gate early access and priority roles by entitlement
       if (!scopedParams.status) {
         scopedParams.visible_statuses = ['active'];
         scopedParams.owner_recruiter_id = context.recruiterId;
-
         const hasEarlyAccess = await this.entitlementChecker.hasEntitlementByClerkId(clerkUserId, 'early_access_roles');
-        if (!hasEarlyAccess) {
-          scopedParams.exclude_early_access = true;
-        }
+        if (!hasEarlyAccess) scopedParams.exclude_early_access = true;
       }
     } else if (context.organizationIds.length > 0) {
-      // Company users see their own org's jobs (all statuses)
-      const companyIds = await this.resolveCompanyIds(context.organizationIds);
+      const companyIds = await this.auth.resolveCompanyIds(context.organizationIds);
       if (companyIds.length > 0) {
         scopedParams.scoped_company_ids = companyIds;
       } else {
-        // No companies found for this org — return empty
         return { data: [], pagination: { total: 0, page: 1, limit: Math.min(params.limit || 25, 100), total_pages: 0 } };
       }
     } else {
-      // Unrecognized role — only active/published jobs (exclude early access)
       if (!scopedParams.status) {
         scopedParams.visible_statuses = ['active'];
         scopedParams.exclude_early_access = true;
@@ -74,10 +69,7 @@ export class JobService {
     const { data, total } = await this.repository.findAll(scopedParams);
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
-    return {
-      data,
-      pagination: { total, page, limit, total_pages: Math.ceil(total / limit) },
-    };
+    return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
   }
 
   async getById(id: string) {
@@ -94,39 +86,30 @@ export class JobService {
     }
 
     const isOffPlatform = !!input.source_firm_id && !input.company_id;
-
-    // Off-platform fee validation
     if (isOffPlatform && (!input.fee_percentage || input.fee_percentage < 5)) {
       throw new BadRequestError('Off-platform jobs require a minimum 5% fee');
     }
 
-    // Early access validation
     const status = input.status || 'draft';
     if (input.is_early_access && !input.activates_at) {
       throw new BadRequestError('activates_at is required when enabling early access');
     }
 
-    // Authorization
     let creatorRecruiterId: string | null = null;
-
     if (!context.isPlatformAdmin) {
       if (context.recruiterId && context.roles.includes('recruiter')) {
-        creatorRecruiterId = await this.authorizeRecruiterCreate(context, input, isOffPlatform);
+        creatorRecruiterId = await this.auth.authorizeRecruiterCreate(context, input, isOffPlatform);
       } else if (context.organizationIds.length > 0) {
         if (isOffPlatform) throw new ForbiddenError('Company users cannot create off-platform jobs');
-        await this.authorizeCompanyCreate(context, input.company_id!);
+        await this.auth.authorizeCompanyCreate(context, input.company_id!);
       } else {
         throw new ForbiddenError('Insufficient permissions to create job');
       }
     }
 
-    // Set ownership fields
     const jobData: Record<string, any> = {
-      ...input,
-      job_owner_id: context.identityUserId,
-      status,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      ...input, job_owner_id: context.identityUserId, status,
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     };
 
     if (creatorRecruiterId) {
@@ -142,11 +125,10 @@ export class JobService {
     const job = await this.repository.create(jobData);
 
     await this.eventPublisher?.publish('job.created', {
-      jobId: job.id,
-      companyId: job.company_id,
-      status: job.status,
-      createdBy: context.identityUserId,
+      jobId: job.id, companyId: job.company_id, status: job.status, createdBy: context.identityUserId,
     }, 'ats-service');
+
+    await this.activityService?.logJobCreated(job, context.identityUserId);
 
     return job;
   }
@@ -157,51 +139,47 @@ export class JobService {
 
     const context = await this.accessResolver.resolve(clerkUserId);
 
-    // Authorization
     if (!context.isPlatformAdmin) {
       if (context.recruiterId && context.roles.includes('recruiter')) {
-        await this.authorizeRecruiterMutate(context, currentJob);
+        await this.auth.authorizeRecruiterMutate(context, currentJob);
       } else if (context.organizationIds.length > 0) {
-        await this.authorizeCompanyMutate(context, currentJob);
+        await this.auth.authorizeCompanyMutate(context, currentJob);
       } else {
         throw new ForbiddenError('Insufficient permissions to update job');
       }
     }
 
-    // Status transition validation
     if (input.status && input.status !== currentJob.status) {
       if (!ALLOWED_TRANSITIONS[currentJob.status]?.includes(input.status)) {
         throw new BadRequestError(`Invalid status transition: ${currentJob.status} -> ${input.status}`);
       }
     }
 
-    // Early access validation (on toggle or status change)
     if (input.is_early_access === true) {
       const activatesAt = input.activates_at ?? currentJob.activates_at;
       if (!activatesAt) throw new BadRequestError('activates_at is required when enabling early access');
     }
 
-    // Salary validation
     this.validateSalaryRange(input, currentJob);
 
     const updated = await this.repository.update(id, input);
     if (!updated) throw new NotFoundError('Job', id);
 
-    // Events
     if (input.status && input.status !== currentJob.status) {
       await this.eventPublisher?.publish('job.status_changed', {
-        jobId: id,
-        previousStatus: currentJob.status,
-        newStatus: input.status,
-        changedBy: context.identityUserId,
+        jobId: id, previousStatus: currentJob.status, newStatus: input.status, changedBy: context.identityUserId,
       }, 'ats-service');
     }
 
     await this.eventPublisher?.publish('job.updated', {
-      jobId: id,
-      updatedFields: Object.keys(input),
-      updatedBy: context.identityUserId,
+      jobId: id, updatedFields: Object.keys(input), updatedBy: context.identityUserId,
     }, 'ats-service');
+
+    // Activity logging
+    if (input.status && input.status !== currentJob.status) {
+      await this.activityService?.logStatusChange(id, currentJob.status, input.status, context.identityUserId);
+    }
+    await this.activityService?.logFieldsUpdated(id, currentJob, input, context.identityUserId);
 
     return updated;
   }
@@ -214,9 +192,9 @@ export class JobService {
 
     if (!context.isPlatformAdmin) {
       if (context.recruiterId && context.roles.includes('recruiter')) {
-        await this.authorizeRecruiterMutate(context, job);
+        await this.auth.authorizeRecruiterMutate(context, job);
       } else if (context.organizationIds.length > 0) {
-        await this.authorizeCompanyMutate(context, job);
+        await this.auth.authorizeCompanyMutate(context, job);
       } else {
         throw new ForbiddenError('Insufficient permissions to delete job');
       }
@@ -225,102 +203,10 @@ export class JobService {
     await this.repository.softDelete(id);
 
     await this.eventPublisher?.publish('job.deleted', {
-      jobId: id,
-      deletedBy: context.identityUserId,
+      jobId: id, deletedBy: context.identityUserId,
     }, 'ats-service');
-  }
 
-  // ── Private Helpers ──────────────────────────────────────────────
-
-  private async resolveCompanyIds(organizationIds: string[]): Promise<string[]> {
-    const { data } = await this.supabase
-      .from('companies')
-      .select('id')
-      .in('identity_organization_id', organizationIds);
-    return data?.map((c: any) => c.id) || [];
-  }
-
-  // ── Private Authorization Helpers ──────────────────────────────
-
-  private async authorizeRecruiterCreate(
-    context: any, input: CreateJobInput, isOffPlatform: boolean
-  ): Promise<string> {
-    if (isOffPlatform) {
-      const { data: firmMember } = await this.supabase
-        .from('firm_members')
-        .select('id')
-        .eq('firm_id', input.source_firm_id!)
-        .eq('recruiter_id', context.recruiterId)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      if (!firmMember) throw new ForbiddenError('You must be an active member of the firm to create off-platform jobs');
-    } else {
-      const { data: rel } = await this.supabase
-        .from('recruiter_companies')
-        .select('permissions')
-        .eq('recruiter_id', context.recruiterId)
-        .eq('company_id', input.company_id!)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      if (!rel?.permissions?.can_create_jobs) {
-        throw new ForbiddenError('No active relationship with permission to create jobs for this company');
-      }
-    }
-    return context.recruiterId;
-  }
-
-  private async authorizeCompanyCreate(context: any, companyId: string) {
-    const { data: company } = await this.supabase
-      .from('companies')
-      .select('identity_organization_id')
-      .eq('id', companyId)
-      .single();
-
-    if (!company || !context.organizationIds.includes(company.identity_organization_id)) {
-      throw new ForbiddenError('Cannot create jobs for companies outside your organization');
-    }
-  }
-
-  private async authorizeRecruiterMutate(context: any, job: any) {
-    const isOffPlatform = job.source_firm_id && !job.company_id;
-
-    if (isOffPlatform) {
-      const { data: firmMember } = await this.supabase
-        .from('firm_members')
-        .select('id')
-        .eq('firm_id', job.source_firm_id)
-        .eq('recruiter_id', context.recruiterId)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      if (!firmMember) throw new ForbiddenError('You must be an active firm member to manage this off-platform job');
-    } else {
-      const { data: rel } = await this.supabase
-        .from('recruiter_companies')
-        .select('permissions')
-        .eq('recruiter_id', context.recruiterId)
-        .eq('company_id', job.company_id)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      if (!rel?.permissions?.can_edit_jobs) {
-        throw new ForbiddenError('No active relationship with permission to manage jobs for this company');
-      }
-    }
-  }
-
-  private async authorizeCompanyMutate(context: any, job: any) {
-    const { data: companies } = await this.supabase
-      .from('companies')
-      .select('id')
-      .in('identity_organization_id', context.organizationIds);
-
-    const allowedIds = companies?.map((c: any) => c.id) || [];
-    if (!allowedIds.includes(job.company_id)) {
-      throw new ForbiddenError('Cannot manage jobs outside your organization');
-    }
+    await this.activityService?.logJobDeleted(id, job.status, context.identityUserId);
   }
 
   private validateSalaryRange(input: UpdateJobInput, current: any) {

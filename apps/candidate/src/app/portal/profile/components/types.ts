@@ -107,4 +107,5 @@ export type ProfileSection =
     | "skills"
     | "privacy"
     | "connections"
+    | "notifications"
     | "achievements";

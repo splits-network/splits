@@ -16,6 +16,7 @@ import { SectionCareer } from "./section-career";
 import { SectionPrivacy } from "./section-privacy";
 import { SectionConnections } from "./section-connections";
 import SectionSkills from "./section-skills";
+import { SectionNotifications } from "./section-notifications";
 import { CandidateSettings, ProfileSection } from "./types";
 
 const NAV_ITEMS: { id: ProfileSection; label: string; icon: string }[] = [
@@ -49,6 +50,11 @@ const NAV_ITEMS: { id: ProfileSection; label: string; icon: string }[] = [
         id: "connections",
         label: "Connections",
         icon: "fa-duotone fa-regular fa-plug",
+    },
+    {
+        id: "notifications",
+        label: "Notifications",
+        icon: "fa-duotone fa-regular fa-bell",
     },
     {
         id: "achievements",
@@ -344,6 +350,9 @@ export function ProfileSettingsShell() {
                                 )}
                                 {activeSection === "connections" && (
                                     <SectionConnections />
+                                )}
+                                {activeSection === "notifications" && (
+                                    <SectionNotifications />
                                 )}
                                 {activeSection === "achievements" &&
                                     candidateId && (

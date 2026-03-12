@@ -34,7 +34,7 @@ export class CompanyInvitationsEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
-        const effectiveChannel = await this.repository.resolveChannel(null, 'email');
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(null, 'email', null);
         if (!effectiveChannel) return;
 
         const log = await this.repository.createNotificationLog({

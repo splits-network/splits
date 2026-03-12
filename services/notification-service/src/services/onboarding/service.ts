@@ -37,7 +37,7 @@ export class OnboardingEmailService {
         }
     ): Promise<void> {
         const requestedChannel = options.channel || 'email';
-        const effectiveChannel = await this.repository.resolveChannel(options.userId, requestedChannel);
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, requestedChannel, options.category || null);
         if (!effectiveChannel) return;
 
         const log = await this.repository.createNotificationLog({

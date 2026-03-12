@@ -19,6 +19,7 @@ import { BioSection } from "@/components/basel/profile/bio-section";
 import { PrivacySection } from "@/components/basel/profile/privacy-section";
 import { SubscriptionTab } from "@/components/basel/profile/subscription-tab";
 import { PayoutsTab } from "@/components/basel/profile/payouts-tab";
+import { NotificationsSection } from "@/components/basel/profile/notifications-section";
 import {
     MarketplaceSettingsProvider,
     useMarketplaceSettings,
@@ -51,7 +52,7 @@ interface NavGroup {
     items: NavItem[];
 }
 
-const COMING_SOON: Section[] = ["notifications", "admin"];
+const COMING_SOON: Section[] = ["admin"];
 
 const MARKETPLACE_SECTIONS: Section[] = [
     "marketplace",
@@ -61,7 +62,6 @@ const MARKETPLACE_SECTIONS: Section[] = [
 ];
 
 const COMING_SOON_DESCRIPTIONS: Record<string, string> = {
-    notifications: "Configure email and in-app notification preferences",
     admin: "Platform-wide settings, user management, and analytics",
 };
 
@@ -329,6 +329,9 @@ export default function ProfileBaselPage() {
                             createClient={createAuthenticatedClient}
                         />
                     )}
+
+                {/* Notifications */}
+                {active === "notifications" && <NotificationsSection />}
 
                 {/* Coming soon sections */}
                 {isComingSoon && (

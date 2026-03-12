@@ -33,7 +33,7 @@ export class RecruiterCompanyInvitationsEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
-        const effectiveChannel = await this.repository.resolveChannel(options.recipientUserId, 'email');
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.recipientUserId, 'email', null);
         if (!effectiveChannel) return;
 
         const log = await this.repository.createNotificationLog({

@@ -11,6 +11,10 @@ import {
     JobExpiredData,
     firstJobPostedEmail,
     FirstJobPostedData,
+    jobFieldsUpdatedEmail,
+    JobFieldsUpdatedData,
+    jobDeletedEmail,
+    JobDeletedData,
 } from '../../templates/jobs';
 
 export class JobsEmailService {
@@ -39,7 +43,7 @@ export class JobsEmailService {
         }
     ): Promise<void> {
         const requestedChannel = options.channel || 'email';
-        const effectiveChannel = await this.repository.resolveChannel(options.userId, requestedChannel);
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, requestedChannel, options.category || null);
         if (!effectiveChannel) return;
 
         const log = await this.repository.createNotificationLog({
@@ -144,6 +148,39 @@ export class JobsEmailService {
             category: 'milestone',
             actionUrl: data.jobUrl,
             actionLabel: 'View Job Listing',
+        });
+    }
+
+    async sendJobFieldsUpdated(
+        email: string,
+        data: JobFieldsUpdatedData & { userId?: string }
+    ): Promise<void> {
+        const html = jobFieldsUpdatedEmail(data);
+
+        await this.sendEmail(email, `Job updated: ${data.jobTitle}`, html, {
+            eventType: 'job.updated',
+            userId: data.userId,
+            payload: { jobTitle: data.jobTitle, updatedFields: data.updatedFields },
+            channel: 'in_app',
+            category: 'jobs',
+            actionUrl: data.jobUrl,
+            actionLabel: 'View Job Details',
+        });
+    }
+
+    async sendJobDeleted(
+        email: string,
+        data: JobDeletedData & { userId?: string }
+    ): Promise<void> {
+        const html = jobDeletedEmail(data);
+
+        await this.sendEmail(email, `Job deleted: ${data.jobTitle}`, html, {
+            eventType: 'job.deleted',
+            userId: data.userId,
+            payload: { jobTitle: data.jobTitle, companyName: data.companyName },
+            priority: 'high',
+            channel: 'both',
+            category: 'jobs',
         });
     }
 
