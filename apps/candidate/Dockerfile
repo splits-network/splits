@@ -69,8 +69,8 @@ RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-api-client build
 RUN pnpm --filter @splits-network/shared-ui build
-RUN pnpm --filter @splits-network/shared-hooks build
 RUN pnpm --filter @splits-network/basel-ui build
+RUN pnpm --filter @splits-network/shared-hooks build
 RUN pnpm --filter @splits-network/chat-ui build
 RUN pnpm --filter @splits-network/shared-gamification build
 RUN pnpm --filter @splits-network/shared-video build
