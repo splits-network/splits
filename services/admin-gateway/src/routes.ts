@@ -26,6 +26,7 @@ export async function registerAdminRoutes(
         content: services.content,
         integration: services.integration,
         matching: services.matching,
+        support: services.support,
     };
 
     for (const [serviceName, serviceUrl] of Object.entries(serviceMap)) {

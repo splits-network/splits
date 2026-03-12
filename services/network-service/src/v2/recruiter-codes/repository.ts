@@ -143,9 +143,33 @@ export class RecruiterCodeRepository {
         return data;
     }
 
+    async findDefaultByRecruiterId(recruiterId: string): Promise<RecruiterCode | null> {
+        const { data, error } = await this.supabase
+            .from('recruiter_codes')
+            .select('*')
+            .eq('recruiter_id', recruiterId)
+            .eq('is_default', true)
+            .is('deleted_at', null)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async clearDefault(recruiterId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('recruiter_codes')
+            .update({ is_default: false, updated_at: new Date().toISOString() })
+            .eq('recruiter_id', recruiterId)
+            .eq('is_default', true)
+            .is('deleted_at', null);
+
+        if (error) throw error;
+    }
+
     async create(
         recruiterId: string,
-        data: { label?: string; expiry_date?: string; max_uses?: number; uses_remaining?: number }
+        data: { label?: string; is_default?: boolean; expiry_date?: string; max_uses?: number; uses_remaining?: number }
     ): Promise<RecruiterCode> {
         // Generate unique code
         let code = generateCode();
@@ -163,11 +187,17 @@ export class RecruiterCodeRepository {
             throw new Error('Failed to generate unique referral code');
         }
 
+        // If setting as default, clear existing default first
+        if (data.is_default) {
+            await this.clearDefault(recruiterId);
+        }
+
         const insertData = {
             recruiter_id: recruiterId,
             code,
             label: data.label || null,
             status: 'active' as const,
+            is_default: data.is_default ?? false,
             expiry_date: data.expiry_date ?? null,
             max_uses: data.max_uses ?? null,
             uses_remaining: data.uses_remaining ?? null,

@@ -60,6 +60,13 @@ spec:
                             name: chat-gateway
                             port:
                                 number: 80
+                  - path: /ws/support
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: support-gateway
+                            port:
+                                number: 80
                   - path: /ws/analytics
                     pathType: Prefix
                     backend:

@@ -18,6 +18,7 @@ import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
 import { GamificationWrapper } from "@/providers/gamification-wrapper";
+import { SupportWidgetWrapper } from "@/components/support-widget-wrapper";
 
 export const metadata: Metadata = {
     metadataBase: new URL(
@@ -188,6 +189,7 @@ export default async function RootLayout({
                         <UserProfileProvider initialProfile={initialProfile}>
                             <GamificationWrapper>
                                 <ToastProvider>
+                                    <SupportWidgetWrapper>
                                     <CandidateChatSidebar>
                                         <Header navItems={headerNav?.items} />
                                         <main className="flex-1">
@@ -195,6 +197,7 @@ export default async function RootLayout({
                                         </main>
                                         <Footer footerNav={footerNav} />
                                     </CandidateChatSidebar>
+                                    </SupportWidgetWrapper>
                                     <CookieConsent />
                                 </ToastProvider>
                             </GamificationWrapper>

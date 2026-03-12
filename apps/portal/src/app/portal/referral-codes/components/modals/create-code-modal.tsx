@@ -25,6 +25,7 @@ export function CreateCodeModal({
 }: CreateCodeModalProps) {
     const { getToken } = useAuth();
     const [label, setLabel] = useState("");
+    const [isDefault, setIsDefault] = useState(false);
     const [creating, setCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -38,9 +39,11 @@ export function CreateCodeModal({
             const client = createAuthenticatedClient(token);
             await client.post("/recruiter-codes", {
                 label: label.trim() || undefined,
+                is_default: isDefault || undefined,
             });
 
             setLabel("");
+            setIsDefault(false);
             onSuccess();
         } catch (err: any) {
             setError(err.message || "Failed to create referral code");
@@ -48,11 +51,12 @@ export function CreateCodeModal({
             setCreating(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [label, onSuccess]);
+    }, [label, isDefault, onSuccess]);
 
     const handleClose = useCallback(() => {
         if (creating) return;
         setLabel("");
+        setIsDefault(false);
         setError(null);
         onClose();
     }, [creating, onClose]);
@@ -84,6 +88,21 @@ export function CreateCodeModal({
                         maxLength={255}
                         disabled={creating}
                     />
+                </BaselFormField>
+
+                <BaselFormField label="Default Code" className="mt-4">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-primary"
+                            checked={isDefault}
+                            onChange={(e) => setIsDefault(e.target.checked)}
+                            disabled={creating}
+                        />
+                        <span className="text-sm text-base-content/70">
+                            Auto-attach this code when sharing jobs
+                        </span>
+                    </label>
                 </BaselFormField>
 
                 {error && (

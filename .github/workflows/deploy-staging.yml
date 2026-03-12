@@ -71,6 +71,14 @@ jobs:
                       }
                     - { name: video-service, path: services/video-service }
                     - { name: call-service, path: services/call-service }
+                    - {
+                          name: support-service,
+                          path: services/support-service,
+                      }
+                    - {
+                          name: support-gateway,
+                          path: services/support-gateway,
+                      }
                     - { name: video, path: apps/video }
                     - { name: portal, path: apps/portal }
                     - { name: candidate, path: apps/candidate }
@@ -106,6 +114,8 @@ jobs:
                       --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network/api \
                       --build-arg NEXT_PUBLIC_CHAT_GATEWAY_URL=wss://api.staging.splits.network/ws/chat \
                       --build-arg NEXT_PUBLIC_ANALYTICS_GATEWAY_URL=wss://api.staging.splits.network/ws/analytics \
+                      --build-arg NEXT_PUBLIC_SUPPORT_GATEWAY_URL=wss://api.staging.splits.network/ws/support \
+                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.staging.splits.network \
                       --build-arg NEXT_PUBLIC_CANDIDATE_APP_URL=https://staging.applicant.network \
                       --build-arg NEXT_PUBLIC_VIDEO_APP_URL=https://video.staging.splits.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
@@ -124,6 +134,7 @@ jobs:
                       --build-arg NEXT_PUBLIC_ANALYTICS_GATEWAY_URL=wss://api.staging.splits.network/ws/analytics \
                       --build-arg NEXT_PUBLIC_APP_URL=https://staging.applicant.network \
                       --build-arg NEXT_PUBLIC_VIDEO_APP_URL=https://video.staging.applicant.network \
+                      --build-arg NEXT_PUBLIC_SUPPORT_GATEWAY_URL=wss://api.staging.splits.network/ws/support \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
@@ -134,6 +145,8 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_APP_URL=https://staging.employment-networks.com \
+                      --build-arg NEXT_PUBLIC_SUPPORT_GATEWAY_URL=wss://api.staging.splits.network/ws/support \
+                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.staging.splits.network \
                       .
                   elif [ "${{ matrix.service.name }}" = "status" ]; then
                     docker build \
@@ -443,7 +456,7 @@ jobs:
 
             - name: Deploy backend services
               run: |
-                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service matching-service analytics-service chat-gateway analytics-gateway chat-service gpt-service content-service integration-service health-monitor gamification-service video-service call-service admin-gateway"
+                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service matching-service analytics-service chat-gateway analytics-gateway chat-service support-service support-gateway gpt-service content-service integration-service health-monitor gamification-service video-service call-service admin-gateway"
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl annotate deployment "$svc" kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
@@ -473,6 +486,8 @@ jobs:
                   kubectl rollout status deployment/chat-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/analytics-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/chat-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/support-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/support-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/health-monitor --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/gpt-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/content-service --timeout=180s --namespace=${{ env.NAMESPACE }}

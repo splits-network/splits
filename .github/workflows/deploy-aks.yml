@@ -71,6 +71,14 @@ jobs:
                       }
                     - { name: video-service, path: services/video-service }
                     - { name: call-service, path: services/call-service }
+                    - {
+                          name: support-service,
+                          path: services/support-service,
+                      }
+                    - {
+                          name: support-gateway,
+                          path: services/support-gateway,
+                      }
                     - { name: video, path: apps/video }
                     - { name: portal, path: apps/portal }
                     - { name: candidate, path: apps/candidate }
@@ -106,6 +114,8 @@ jobs:
                       --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network/api \
                       --build-arg NEXT_PUBLIC_CHAT_GATEWAY_URL=wss://api.splits.network/ws/chat \
                       --build-arg NEXT_PUBLIC_ANALYTICS_GATEWAY_URL=wss://api.splits.network/ws/analytics \
+                      --build-arg NEXT_PUBLIC_SUPPORT_GATEWAY_URL=wss://api.splits.network/ws/support \
+                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.splits.network \
                       --build-arg NEXT_PUBLIC_CANDIDATE_APP_URL=https://applicant.network \
                       --build-arg NEXT_PUBLIC_VIDEO_APP_URL=https://video.splits.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
@@ -124,6 +134,7 @@ jobs:
                       --build-arg NEXT_PUBLIC_ANALYTICS_GATEWAY_URL=wss://api.splits.network/ws/analytics \
                       --build-arg NEXT_PUBLIC_APP_URL=https://applicant.network \
                       --build-arg NEXT_PUBLIC_VIDEO_APP_URL=https://video.applicant.network \
+                      --build-arg NEXT_PUBLIC_SUPPORT_GATEWAY_URL=wss://api.splits.network/ws/support \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
@@ -134,6 +145,8 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_APP_URL=https://employment-networks.com \
+                      --build-arg NEXT_PUBLIC_SUPPORT_GATEWAY_URL=wss://api.splits.network/ws/support \
+                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.splits.network \
                       .
                   elif [ "${{ matrix.service.name }}" = "status" ]; then
                     docker build \
@@ -457,6 +470,8 @@ jobs:
                   kubectl apply -f infra/k8s/chat-gateway/ --namespace=splits-network
                   kubectl apply -f infra/k8s/analytics-gateway/ --namespace=splits-network
                   kubectl apply -f infra/k8s/chat-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/support-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/support-gateway/ --namespace=splits-network
                   kubectl apply -f infra/k8s/health-monitor/ --namespace=splits-network
                   kubectl apply -f infra/k8s/gpt-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/gpt-service/cronjobs/ --namespace=splits-network
@@ -484,6 +499,8 @@ jobs:
                   kubectl rollout status deployment/chat-gateway --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/analytics-gateway --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/chat-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/support-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/support-gateway --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/health-monitor --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/gpt-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/content-service --timeout=180s --namespace=splits-network

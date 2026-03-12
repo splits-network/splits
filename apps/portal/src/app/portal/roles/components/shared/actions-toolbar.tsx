@@ -144,7 +144,26 @@ export default function RoleActionsToolbar({
         const candidateAppUrl =
             process.env.NEXT_PUBLIC_CANDIDATE_APP_URL ||
             "https://staging.applicant.network";
-        const shareUrl = `${candidateAppUrl}/jobs/${job.id}`;
+
+        // Fetch default referral code to attach attribution
+        let recCodeParam = "";
+        if (isRecruiter) {
+            try {
+                const token = await getToken();
+                if (token) {
+                    const client = createAuthenticatedClient(token);
+                    const res = await client.get("/recruiter-codes/default");
+                    const defaultCode = res?.data?.code;
+                    if (defaultCode) {
+                        recCodeParam = `?rec_code=${defaultCode}`;
+                    }
+                }
+            } catch {
+                // Share without rec_code if fetch fails
+            }
+        }
+
+        const shareUrl = `${candidateAppUrl}/jobs/${job.id}${recCodeParam}`;
         const shareText = `Check out this job: ${job.title || "Job Opportunity"} at ${job.company?.name || "Company"}`;
         const clipboardText = `${shareText}\n${shareUrl}`;
         try {

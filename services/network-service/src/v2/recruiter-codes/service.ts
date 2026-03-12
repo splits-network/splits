@@ -53,6 +53,19 @@ export class RecruiterCodeServiceV2 {
     /**
      * Create a new referral code (recruiters only)
      */
+    /**
+     * Get the default referral code for a recruiter
+     */
+    async getDefault(clerkUserId: string): Promise<RecruiterCode | null> {
+        const accessContext = await this.accessResolver.resolve(clerkUserId);
+
+        if (!accessContext.recruiterId) {
+            return null;
+        }
+
+        return await this.repository.findDefaultByRecruiterId(accessContext.recruiterId);
+    }
+
     async create(
         request: CreateRecruiterCodeRequest,
         clerkUserId: string
@@ -65,6 +78,7 @@ export class RecruiterCodeServiceV2 {
 
         const code = await this.repository.create(accessContext.recruiterId, {
             label: request.label,
+            is_default: request.is_default,
             expiry_date: request.expiry_date,
             max_uses: request.max_uses,
             uses_remaining: request.uses_remaining,
@@ -91,6 +105,11 @@ export class RecruiterCodeServiceV2 {
         const existing = await this.repository.findById(id, clerkUserId);
         if (!existing) {
             throw new Error('Referral code not found');
+        }
+
+        // If setting as default, clear existing default first
+        if (updates.is_default) {
+            await this.repository.clearDefault(existing.recruiter_id);
         }
 
         return await this.repository.update(id, updates);

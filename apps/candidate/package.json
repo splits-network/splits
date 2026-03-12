@@ -17,6 +17,7 @@
         "@sentry/nextjs": "^10.32.1",
         "@splits-network/basel-ui": "workspace:*",
         "@splits-network/chat-ui": "workspace:*",
+        "@splits-network/support-widget": "workspace:*",
         "@splits-network/shared-api-client": "workspace:*",
         "@splits-network/shared-gamification": "workspace:*",
         "@splits-network/shared-types": "workspace:*",

@@ -1114,6 +1114,62 @@ services:
       - api-gateway
     command: pnpm --filter @splits-network/video dev
 
+  support-service:
+    build:
+      context: .
+      dockerfile: services/support-service/Dockerfile
+      target: development
+    container_name: splits-support-service
+    ports:
+      - "3021:3021"
+    environment:
+      NODE_ENV: development
+      PORT: 3021
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - ./services/support-service/src:/app/services/support-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  support-gateway:
+    build:
+      context: .
+      dockerfile: services/support-gateway/Dockerfile
+      target: development
+    container_name: splits-support-gateway
+    ports:
+      - "3022:3022"
+    environment:
+      NODE_ENV: development
+      PORT: 3022
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
+      SPLITS_CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
+      APP_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
+      APP_CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
+    volumes:
+      - ./services/support-gateway/src:/app/services/support-gateway/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+
 networks:
   splits-network:
     driver: bridge

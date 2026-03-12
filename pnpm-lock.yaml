@@ -120,9 +120,6 @@ importers:
       '@splits-network/chat-ui':
         specifier: workspace:*
         version: link:../../packages/chat-ui
-      '@splits-network/memphis-ui':
-        specifier: workspace:*
-        version: link:../../packages/memphis-ui
       '@splits-network/shared-api-client':
         specifier: workspace:*
         version: link:../../packages/shared-api-client
@@ -138,6 +135,9 @@ importers:
       '@splits-network/shared-video':
         specifier: workspace:*
         version: link:../../packages/shared-video
+      '@splits-network/support-widget':
+        specifier: workspace:*
+        version: link:../../packages/support-widget
       '@uiw/react-markdown-preview':
         specifier: ^5.1.5
         version: 5.1.5(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -202,15 +202,15 @@ importers:
       '@splits-network/basel-ui':
         specifier: workspace:*
         version: link:../../packages/basel-ui
-      '@splits-network/memphis-ui':
-        specifier: workspace:*
-        version: link:../../packages/memphis-ui
       '@splits-network/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
       '@splits-network/shared-ui':
         specifier: workspace:*
         version: link:../../packages/shared-ui
+      '@splits-network/support-widget':
+        specifier: workspace:*
+        version: link:../../packages/support-widget
       next:
         specifier: ^16.1.0
         version: 16.1.0(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -278,9 +278,6 @@ importers:
       '@splits-network/chat-ui':
         specifier: workspace:*
         version: link:../../packages/chat-ui
-      '@splits-network/memphis-ui':
-        specifier: workspace:*
-        version: link:../../packages/memphis-ui
       '@splits-network/shared-api-client':
         specifier: workspace:*
         version: link:../../packages/shared-api-client
@@ -302,6 +299,9 @@ importers:
       '@splits-network/shared-video':
         specifier: workspace:*
         version: link:../../packages/shared-video
+      '@splits-network/support-widget':
+        specifier: workspace:*
+        version: link:../../packages/support-widget
       '@stripe/react-stripe-js':
         specifier: ^5.5.0
         version: 5.5.0(@stripe/stripe-js@8.6.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -538,34 +538,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.2
         version: 19.2.3(@types/react@19.2.7)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-
-  packages/memphis-ui:
-    dependencies:
-      react:
-        specifier: ^19.0.0
-        version: 19.2.1
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.1(react@19.2.1)
-      tailwindcss:
-        specifier: ^4.0.0
-        version: 4.1.17
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.1
-        version: 19.2.7
-      '@types/react-dom':
-        specifier: ^19.0.2
-        version: 19.2.3(@types/react@19.2.7)
-      postcss:
-        specifier: ^8.4.32
-        version: 8.5.6
-      postcss-js:
-        specifier: ^4.0.1
-        version: 4.1.0(postcss@8.5.6)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -844,6 +816,28 @@ importers:
       livekit-client:
         specifier: ^2.17.2
         version: 2.17.2(@types/dom-mediacapture-record@1.0.22)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.1
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.1(react@19.2.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.1
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.0.2
+        version: 19.2.3(@types/react@19.2.7)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/support-widget:
+    dependencies:
+      next:
+        specifier: ^16.0.0
+        version: 16.1.0(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react:
         specifier: ^19.0.0
         version: 19.2.1
@@ -2194,6 +2188,98 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.19.1)(lightningcss@1.30.2)(terser@5.44.1)
+
+  services/support-gateway:
+    dependencies:
+      '@clerk/backend':
+        specifier: ^2.14.0
+        version: 2.29.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@splits-network/shared-config':
+        specifier: workspace:*
+        version: link:../../packages/shared-config
+      '@splits-network/shared-logging':
+        specifier: workspace:*
+        version: link:../../packages/shared-logging
+      ioredis:
+        specifier: ^5.7.0
+        version: 5.8.2
+      ws:
+        specifier: ^8.18.3
+        version: 8.18.3
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  services/support-service:
+    dependencies:
+      '@fastify/swagger':
+        specifier: ^9.5.0
+        version: 9.6.1
+      '@fastify/swagger-ui':
+        specifier: ^5.2.3
+        version: 5.2.3
+      '@sentry/node':
+        specifier: ^10.32.1
+        version: 10.32.1
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
+      '@splits-network/shared-config':
+        specifier: workspace:*
+        version: link:../../packages/shared-config
+      '@splits-network/shared-fastify':
+        specifier: workspace:*
+        version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
+      '@splits-network/shared-logging':
+        specifier: workspace:*
+        version: link:../../packages/shared-logging
+      '@splits-network/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      '@supabase/supabase-js':
+        specifier: ^2.86.2
+        version: 2.86.2
+      amqplib:
+        specifier: ^0.10.9
+        version: 0.10.9
+      fastify:
+        specifier: ^5.6.2
+        version: 5.6.2
+      ioredis:
+        specifier: ^5.7.0
+        version: 5.8.2
+    devDependencies:
+      '@types/amqplib':
+        specifier: ^0.10.5
+        version: 0.10.8
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      '@vitest/coverage-v8':
+        specifier: ^3.0.0
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1))
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1)
 
   services/video-service:
     dependencies:
@@ -4309,10 +4395,6 @@ packages:
     resolution: {integrity: sha512-+ys997U96po4Kx/ABpBCqhA9EuxJaQWDQg7295H4hBphv3IZg0boBKuwYpt4YXp6MZ5AmZQnU/tyMTlRpaSejg==}
     engines: {node: '>= 0.4'}
 
-  camelcase-css@2.0.1:
-    resolution: {integrity: sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==}
-    engines: {node: '>= 6'}
-
   camelcase-keys@9.1.3:
     resolution: {integrity: sha512-Rircqi9ch8AnZscQcsA1C47NFdaO3wukpmIRzYcDOrmvgt78hM/sj5pZhZNec2NM12uk5vTwRHZ4anGcrC4ZTg==}
     engines: {node: '>=16'}
@@ -6014,12 +6096,6 @@ packages:
 
   pkg-types@1.3.1:
     resolution: {integrity: sha512-/Jm5M4RvtBFVkKWRu2BLUTNP8/M2a+UwuAX+ae4770q1qVGtfjG+WTCupoZixokjmHiry8uI+dlY8KXYV5HVVQ==}
-
-  postcss-js@4.1.0:
-    resolution: {integrity: sha512-oIAOTqgIo7q2EOwbhb8UalYePMvYoIeRY2YKntdpFQXNosSu3vLrniGgmH9OKs/qAkfoj5oB3le/7mINW1LCfw==}
-    engines: {node: ^12 || ^14 || >= 16}
-    peerDependencies:
-      postcss: ^8.4.21
 
   postcss-load-config@6.0.1:
     resolution: {integrity: sha512-oPtTM4oerL+UXmx+93ytZVN82RrlY/wPUV8IeDxFrzIjXOLF1pN+EmKPLbubvKHT2HC20xXsCAH2Z+CKV6Oz/g==}
@@ -9354,8 +9430,6 @@ snapshots:
       call-bind-apply-helpers: 1.0.2
       get-intrinsic: 1.3.0
 
-  camelcase-css@2.0.1: {}
-
   camelcase-keys@9.1.3:
     dependencies:
       camelcase: 8.0.0
@@ -11517,11 +11591,6 @@ snapshots:
       confbox: 0.1.8
       mlly: 1.8.0
       pathe: 2.0.3
-
-  postcss-js@4.1.0(postcss@8.5.6):
-    dependencies:
-      camelcase-css: 2.0.1
-      postcss: 8.5.6
 
   postcss-load-config@6.0.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:

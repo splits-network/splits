@@ -15,6 +15,7 @@ export interface RecruiterCode {
     code: string;
     label?: string;
     status: "active" | "inactive";
+    is_default: boolean;
     created_at: string;
     updated_at: string;
     usage_count?: number;
