@@ -77,6 +77,9 @@ export function TableRow({
                         <span className="font-bold text-sm text-base-content">
                             {candidateName(candidate)}
                         </span>
+                        {candidate.is_saved && (
+                            <i className="fa-solid fa-bookmark text-warning text-sm ml-1.5 inline-block align-middle" title="Saved" />
+                        )}
                         {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                         {accountBadge(candidate) && (
                             <span

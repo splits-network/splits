@@ -64,6 +64,9 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {candidateName(candidate)}
                     </h4>
+                    {candidate.is_saved && (
+                        <i className="fa-solid fa-bookmark text-warning text-sm flex-shrink-0" title="Saved" />
+                    )}
                     {level && <span className="ml-1 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                     {acct && (
                         <span

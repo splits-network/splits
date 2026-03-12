@@ -171,6 +171,9 @@ export function GridCard({
                         </p>
                         <h3 className="text-xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
+                            {candidate.is_saved && (
+                                <i className="fa-solid fa-bookmark text-warning text-sm ml-2 align-middle" title="Saved" />
+                            )}
                         </h3>
                     </div>
                 </div>

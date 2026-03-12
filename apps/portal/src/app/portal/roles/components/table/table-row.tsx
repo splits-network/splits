@@ -66,6 +66,9 @@ export function TableRow({
                         <span className="font-bold text-sm text-base-content">
                             {job.title}
                         </span>
+                        {job.is_saved && (
+                            <i className="fa-solid fa-bookmark text-warning text-sm" title="Saved" />
+                        )}
                     </div>
                 </td>
 

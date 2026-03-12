@@ -46,6 +46,9 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {job.title}
                     </h4>
+                    {job.is_saved && (
+                        <i className="fa-solid fa-bookmark text-warning text-sm flex-shrink-0" title="Saved" />
+                    )}
                 </div>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {postedAgo(job)}
