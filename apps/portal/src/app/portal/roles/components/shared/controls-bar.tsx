@@ -81,7 +81,7 @@ export function ControlsBar({
 }: ControlsBarProps) {
     const [expanded, setExpanded] = useState(false);
 
-    const hasExpandedFilters = !!(filters.commute_type || filters.job_level || filters.company_id || filters.open_to_relocation || filters.is_remote || filters.job_source || filters.salary_range || filters.fee_range || filters.guarantee_range || filters.has_applications);
+    const hasExpandedFilters = !!(filters.commute_type || filters.job_level || filters.company_id || filters.open_to_relocation || filters.is_remote || filters.is_early_access || filters.is_priority || filters.job_source || filters.salary_range || filters.fee_range || filters.guarantee_range || filters.has_applications);
 
     return (
         <BaselControlsBarShell
@@ -182,6 +182,24 @@ export function ControlsBar({
                             onChange={(v) => onFilterChange("is_remote", v)}
                             options={REMOTE_OPTIONS}
                             placeholder="Remote"
+                        />
+                        <BaselFilterSelect
+                            value={filters.is_early_access}
+                            onChange={(v) => onFilterChange("is_early_access", v)}
+                            options={[
+                                { value: "true", label: "Early Access" },
+                                { value: "false", label: "Not Early Access" },
+                            ]}
+                            placeholder="Early Access"
+                        />
+                        <BaselFilterSelect
+                            value={filters.is_priority}
+                            onChange={(v) => onFilterChange("is_priority", v)}
+                            options={[
+                                { value: "true", label: "Priority" },
+                                { value: "false", label: "Not Priority" },
+                            ]}
+                            placeholder="Priority"
                         />
                         <BaselFilterSelect
                             value={filters.job_source}

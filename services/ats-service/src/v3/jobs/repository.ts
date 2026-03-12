@@ -17,6 +17,7 @@ const SELECTABLE_FIELDS = [
   'commute_types', 'job_level', 'open_to_relocation', 'show_salary_range',
   'company_id', 'source_firm_id', 'job_owner_id', 'job_owner_recruiter_id',
   'company_recruiter_id', 'pre_screen_questions',
+  'is_early_access', 'is_priority',
   'activates_at', 'closes_at', 'created_at', 'updated_at',
 ];
 
@@ -54,6 +55,11 @@ export class JobRepository {
       } else {
         query = query.in('status', params.visible_statuses);
       }
+    }
+
+    // Exclude early access for non-partner tier (set by service layer)
+    if (params.exclude_early_access) {
+      query = query.eq('is_early_access', false);
     }
 
     // Filters

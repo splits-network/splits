@@ -70,7 +70,8 @@ export default function RoleActionsToolbar({
     const [isSaving, setIsSaving] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
-    const [pendingStatus, setPendingStatus] = useState<"draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed" | null>(null);
+    const [pendingStatus, setPendingStatus] = useState<"draft" | "pending" | "active" | "paused" | "filled" | "closed" | null>(null);
+    const [pendingEarlyAccess, setPendingEarlyAccess] = useState(false);
     const [activatesAtInput, setActivatesAtInput] = useState("");
 
     /* ── Permissions ── */
@@ -98,21 +99,14 @@ export default function RoleActionsToolbar({
     /* ── Status Change ── */
 
     const handleStatusChange = (
-        newStatus: "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed",
+        newStatus: "draft" | "pending" | "active" | "paused" | "filled" | "closed",
     ) => {
-        if (newStatus === "early") setActivatesAtInput("");
         setPendingStatus(newStatus);
     };
 
     const confirmStatusChange = async () => {
         if (!pendingStatus) return;
         const newStatus = pendingStatus;
-
-        // Validate activates_at for early status
-        if (newStatus === "early" && !activatesAtInput) {
-            toast.error("Activation date required for Early Access.");
-            return;
-        }
 
         setPendingStatus(null);
         setUpdatingStatus(true);
@@ -121,17 +115,82 @@ export default function RoleActionsToolbar({
             const token = await getToken();
             if (!token) throw new Error("No auth token");
             const client = createAuthenticatedClient(token);
-            const payload: Record<string, any> = { status: newStatus };
-            if (newStatus === "early" && activatesAtInput) {
-                payload.activates_at = new Date(activatesAtInput).toISOString();
-            }
-            await client.patch(`/jobs/${job.id}`, payload);
+            await client.patch(`/jobs/${job.id}`, { status: newStatus });
             toast.success(`Role status updated to ${newStatus}.`);
             onUpdateItem?.(job.id, { status: newStatus });
             refresh();
         } catch (error: any) {
             console.error("Failed to update status:", error);
             toast.error(`Failed to update status: ${error.message}`);
+        } finally {
+            setUpdatingStatus(false);
+            setStatusAction(null);
+        }
+    };
+
+    /* ── Toggle Early Access ── */
+
+    const handleToggleEarlyAccess = () => {
+        if (job.is_early_access) {
+            // Turn off — no confirmation needed
+            doToggleEarlyAccess(false, null);
+        } else {
+            // Turn on — need activation date
+            setActivatesAtInput("");
+            setPendingEarlyAccess(true);
+        }
+    };
+
+    const confirmEarlyAccess = async () => {
+        if (!activatesAtInput) {
+            toast.error("Activation date required for Early Access.");
+            return;
+        }
+        setPendingEarlyAccess(false);
+        await doToggleEarlyAccess(true, activatesAtInput);
+    };
+
+    const doToggleEarlyAccess = async (enable: boolean, activatesAt: string | null) => {
+        setUpdatingStatus(true);
+        setStatusAction("early_access");
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const client = createAuthenticatedClient(token);
+            const payload: Record<string, any> = { is_early_access: enable };
+            if (enable && activatesAt) {
+                payload.activates_at = new Date(activatesAt).toISOString();
+            }
+            await client.patch(`/jobs/${job.id}`, payload);
+            toast.success(enable ? "Early access enabled." : "Early access disabled.");
+            onUpdateItem?.(job.id, { is_early_access: enable });
+            refresh();
+        } catch (error: any) {
+            console.error("Failed to toggle early access:", error);
+            toast.error(`Failed to toggle early access: ${error.message}`);
+        } finally {
+            setUpdatingStatus(false);
+            setStatusAction(null);
+        }
+    };
+
+    /* ── Toggle Priority ── */
+
+    const handleTogglePriority = async () => {
+        const newValue = !job.is_priority;
+        setUpdatingStatus(true);
+        setStatusAction("priority");
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const client = createAuthenticatedClient(token);
+            await client.patch(`/jobs/${job.id}`, { is_priority: newValue });
+            toast.success(newValue ? "Priority enabled." : "Priority disabled.");
+            onUpdateItem?.(job.id, { is_priority: newValue });
+            refresh();
+        } catch (error: any) {
+            console.error("Failed to toggle priority:", error);
+            toast.error(`Failed to toggle priority: ${error.message}`);
         } finally {
             setUpdatingStatus(false);
             setStatusAction(null);
@@ -253,7 +312,7 @@ export default function RoleActionsToolbar({
 
     /* ── Quick Status Button (icon-only) ── */
 
-    const isLiveStatus = ["early", "active", "priority"].includes(job.status);
+    const isLiveStatus = job.status === "active";
 
     const renderQuickStatusButton = () => {
         if (variant !== "icon-only" || !actions.statusActions) return null;
@@ -318,17 +377,17 @@ export default function RoleActionsToolbar({
 
     type StatusItem = {
         key: string;
-        status: "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed";
+        status?: "draft" | "pending" | "active" | "paused" | "filled" | "closed";
         label: string;
         icon: string;
         btnClass: string;
+        action?: () => void;
     };
 
     const statusItems = useMemo(() => {
         const items: StatusItem[] = [];
 
         if (job.status === "draft") {
-            items.push({ key: "early", status: "early", label: "Publish (Early Access)", icon: "fa-duotone fa-regular fa-lock-open", btnClass: "text-accent" });
             items.push({ key: "active", status: "active", label: "Publish Live", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
             items.push({ key: "pending", status: "pending", label: "Submit for Approval", icon: "fa-duotone fa-regular fa-paper-plane", btnClass: "text-warning" });
         }
@@ -336,25 +395,32 @@ export default function RoleActionsToolbar({
             items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
             items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
         }
-        if (job.status === "early") {
-            items.push({ key: "active", status: "active", label: "Go Live", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
-            items.push({ key: "priority", status: "priority", label: "Promote", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
-            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
-        }
         if (job.status === "active") {
-            items.push({ key: "priority", status: "priority", label: "Promote to Priority", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
-            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
-        }
-        if (job.status === "priority") {
-            items.push({ key: "active", status: "active", label: "Demote to Active", icon: "fa-duotone fa-regular fa-arrow-down", btnClass: "text-success" });
             items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
         }
         if (job.status === "paused") {
             items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
-            items.push({ key: "priority", status: "priority", label: "Promote", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
         }
         if (job.status === "filled" || job.status === "closed") {
             items.push({ key: "active", status: "active", label: "Reopen", icon: "fa-duotone fa-regular fa-rotate-left", btnClass: "text-success" });
+        }
+
+        // Toggle modifiers (only for active/paused jobs)
+        if (["active", "paused"].includes(job.status)) {
+            items.push({
+                key: "early_access",
+                label: job.is_early_access ? "Disable Early Access" : "Enable Early Access",
+                icon: job.is_early_access ? "fa-duotone fa-regular fa-lock" : "fa-duotone fa-regular fa-lock-open",
+                btnClass: job.is_early_access ? "text-base-content/60" : "text-accent",
+                action: handleToggleEarlyAccess,
+            });
+            items.push({
+                key: "priority",
+                label: job.is_priority ? "Remove Priority" : "Set Priority",
+                icon: job.is_priority ? "fa-duotone fa-regular fa-star" : "fa-regular fa-star",
+                btnClass: job.is_priority ? "text-base-content/60" : "text-primary",
+                action: handleTogglePriority,
+            });
         }
 
         // Terminal options — always available unless already in that state
@@ -366,7 +432,8 @@ export default function RoleActionsToolbar({
         }
 
         return items;
-    }, [job.status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [job.status, job.is_early_access, job.is_priority]);
 
     const renderStatusDropdown = () => {
         if (!actions.statusActions || statusItems.length === 0) return null;
@@ -395,13 +462,17 @@ export default function RoleActionsToolbar({
                                     statusDropdownRef.current?.removeAttribute(
                                         "open",
                                     );
-                                    handleStatusChange(item.status);
+                                    if (item.action) {
+                                        item.action();
+                                    } else if (item.status) {
+                                        handleStatusChange(item.status);
+                                    }
                                 }}
                                 className={`${item.btnClass} font-bold`}
                                 disabled={updatingStatus}
                             >
                                 {updatingStatus &&
-                                statusAction === item.status ? (
+                                statusAction === (item.status || item.key) ? (
                                     <span className="loading loading-spinner loading-xs" />
                                 ) : (
                                     <i className={item.icon} />
@@ -428,22 +499,30 @@ export default function RoleActionsToolbar({
                 confirmColor={pendingStatus === "closed" ? "btn-error" : pendingStatus === "paused" ? "btn-warning" : "btn-primary"}
             >
                 <p>Are you sure you want to change the status to {pendingStatus}?</p>
-                {pendingStatus === "early" && (
-                    <fieldset className="fieldset mt-4">
-                        <legend className="fieldset-legend">Activation Date</legend>
-                        <input
-                            type="datetime-local"
-                            className="input input-bordered w-full"
-                            value={activatesAtInput}
-                            onChange={(e) => setActivatesAtInput(e.target.value)}
-                            min={new Date().toISOString().slice(0, 16)}
-                            required
-                        />
-                        <p className="label text-sm text-base-content/60">
-                            The role will automatically go live on this date.
-                        </p>
-                    </fieldset>
-                )}
+            </BaselConfirmModal>
+            <BaselConfirmModal
+                isOpen={pendingEarlyAccess}
+                onClose={() => setPendingEarlyAccess(false)}
+                onConfirm={confirmEarlyAccess}
+                title="Enable Early Access"
+                icon="fa-lock-open"
+                confirmColor="btn-accent"
+            >
+                <p>Only partner-tier recruiters will see this role until the activation date.</p>
+                <fieldset className="fieldset mt-4">
+                    <legend className="fieldset-legend">Activation Date *</legend>
+                    <input
+                        type="datetime-local"
+                        className="input w-full"
+                        value={activatesAtInput}
+                        onChange={(e) => setActivatesAtInput(e.target.value)}
+                        min={new Date().toISOString().slice(0, 16)}
+                        required
+                    />
+                    <p className="label text-sm text-base-content/60">
+                        The role will become visible to all recruiters on this date.
+                    </p>
+                </fieldset>
             </BaselConfirmModal>
             <ModalPortal>
                 {showEditModal && (

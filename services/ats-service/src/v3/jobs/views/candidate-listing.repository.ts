@@ -26,7 +26,8 @@ export class CandidateListingRepository {
         company:companies(id, name, logo_url, industry, headquarters_location)
       `, { count: 'exact' })
       .is('deleted_at', null)
-      .in('status', ['active', 'priority']);
+      .eq('status', 'active')
+      .eq('is_early_access', false);
 
     if (params.employment_type) query = query.eq('employment_type', params.employment_type);
     if (params.job_level) query = query.eq('job_level', params.job_level);

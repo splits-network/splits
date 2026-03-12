@@ -175,7 +175,7 @@ export interface Company {
     updated_at: Date;
 }
 
-export type JobStatus = 'draft' | 'pending' | 'early' | 'active' | 'priority' | 'paused' | 'filled' | 'closed';
+export type JobStatus = 'draft' | 'pending' | 'active' | 'paused' | 'filled' | 'closed';
 
 export type EmploymentType = 'full_time' | 'contract' | 'temporary';
 
@@ -209,6 +209,8 @@ export interface Job {
     job_owner_recruiter_id?: string; // Job owner (Specs Owner role) - recruiter who posted job (recruiter-only, external postings only)
     source_firm_id?: string | null; // Recruiting firm that owns this job (firm jobs have no company_id)
     status: JobStatus;
+    is_early_access: boolean;
+    is_priority: boolean;
     activates_at?: string | null;
     closes_at?: string | null;
     created_at: Date;

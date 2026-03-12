@@ -20,7 +20,8 @@ export class CandidateDetailRepository {
       `)
       .eq('id', id)
       .is('deleted_at', null)
-      .in('status', ['active', 'priority'])
+      .eq('status', 'active')
+      .eq('is_early_access', false)
       .maybeSingle();
 
     if (error) throw error;

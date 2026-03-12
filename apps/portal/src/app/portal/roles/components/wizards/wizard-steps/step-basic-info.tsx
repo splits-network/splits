@@ -5,9 +5,7 @@ import type { FormData, Company } from "./types";
 const STATUS_OPTIONS = [
     { value: "draft", label: "Draft" },
     { value: "pending", label: "Pending" },
-    { value: "early", label: "Early Access" },
     { value: "active", label: "Active" },
-    { value: "priority", label: "Priority" },
     { value: "paused", label: "Paused" },
     { value: "filled", label: "Filled" },
     { value: "closed", label: "Closed" },
@@ -192,7 +190,7 @@ export function StepBasicInfo({
 
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
-                        Activation Date{formData.status === "early" ? " *" : ""}
+                        Activation Date{formData.is_early_access ? " *" : ""}
                     </legend>
                     <input
                         type="datetime-local"
@@ -200,10 +198,12 @@ export function StepBasicInfo({
                         value={formData.activates_at}
                         onChange={(e) => onChange({ activates_at: e.target.value })}
                         min={new Date().toISOString().slice(0, 16)}
-                        required={formData.status === "early"}
+                        required={formData.is_early_access}
                     />
                     <p className="text-sm text-base-content/50 mt-1">
-                        The role will automatically go live on this date.
+                        {formData.is_early_access
+                            ? "Required. The role will go live to all recruiters on this date."
+                            : "Optional. The role will automatically go live on this date."}
                     </p>
                 </fieldset>
 
@@ -221,6 +221,43 @@ export function StepBasicInfo({
                     <p className="text-sm text-base-content/50 mt-1">
                         Optional. The role will automatically close on this date.
                     </p>
+                </fieldset>
+            </div>
+
+            {/* Visibility modifiers */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <fieldset className="fieldset">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-accent toggle-sm"
+                            checked={formData.is_early_access}
+                            onChange={(e) => onChange({ is_early_access: e.target.checked })}
+                        />
+                        <div>
+                            <span className="text-sm font-bold">Early Access</span>
+                            <p className="text-sm text-base-content/50">
+                                Only partner-tier recruiters can see this role until the activation date.
+                            </p>
+                        </div>
+                    </label>
+                </fieldset>
+
+                <fieldset className="fieldset">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-primary toggle-sm"
+                            checked={formData.is_priority}
+                            onChange={(e) => onChange({ is_priority: e.target.checked })}
+                        />
+                        <div>
+                            <span className="text-sm font-bold">Priority</span>
+                            <p className="text-sm text-base-content/50">
+                                Boost this role with featured placement and higher visibility.
+                            </p>
+                        </div>
+                    </label>
                 </fieldset>
             </div>
         </div>

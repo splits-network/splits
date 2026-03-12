@@ -14,7 +14,7 @@ export class RecruiterBoardRepository {
   async findForBoard(
     params: JobListParams,
     recruiterId: string,
-    visibleStatuses: string[],
+    excludeEarlyAccess: boolean,
     involvedJobIds?: string[],
     savedJobIds?: string[]
   ): Promise<{ data: any[]; total: number }> {
@@ -25,7 +25,8 @@ export class RecruiterBoardRepository {
     let query = this.supabase
       .from('jobs')
       .select(`
-        id, title, status, fee_percentage, guarantee_days,
+        id, title, status, is_early_access, is_priority,
+        fee_percentage, guarantee_days,
         location, department, employment_type, commute_types, job_level,
         salary_min, salary_max, source_firm_id, company_id,
         activates_at, closes_at, created_at, updated_at,
@@ -33,7 +34,12 @@ export class RecruiterBoardRepository {
         company:companies(id, name, logo_url, industry, headquarters_location)
       `, { count: 'exact' })
       .is('deleted_at', null)
-      .in('status', visibleStatuses);
+      .eq('status', 'active');
+
+    // Exclude early access jobs for non-partner tier
+    if (excludeEarlyAccess) {
+      query = query.eq('is_early_access', false);
+    }
 
     // Assigned filter
     if (params.job_owner_filter === 'assigned' && involvedJobIds) {

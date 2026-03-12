@@ -18,7 +18,9 @@ import { AdminPageHeader, useAdminConfirm } from '../components';
 interface Job {
     id: string;
     title: string;
-    status: 'draft' | 'pending' | 'early' | 'active' | 'priority' | 'paused' | 'filled' | 'closed';
+    status: 'draft' | 'pending' | 'active' | 'paused' | 'filled' | 'closed';
+    is_early_access?: boolean;
+    is_priority?: boolean;
     location?: string;
     salary_min?: number;
     salary_max?: number;
@@ -196,9 +198,7 @@ export default function JobsAdminPage() {
                     <option value="">All Status</option>
                     <option value="draft">Draft</option>
                     <option value="pending">Pending</option>
-                    <option value="early">Early Access</option>
                     <option value="active">Active</option>
-                    <option value="priority">Priority</option>
                     <option value="paused">Paused</option>
                     <option value="filled">Filled</option>
                     <option value="closed">Closed</option>
@@ -272,7 +272,7 @@ export default function JobsAdminPage() {
                                             </td>
                                             <td>
                                                 <div className="flex gap-1">
-                                                    {['early', 'active', 'priority'].includes(job.status) && (
+                                                    {job.status === 'active' && (
                                                         <>
                                                             <button
                                                                 onClick={() => updateJobStatus(job.id, 'paused')}

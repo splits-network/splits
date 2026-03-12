@@ -7,7 +7,7 @@ import {
 import type { BaselSortOption } from "@splits-network/basel-ui";
 
 // Local type definitions (these exist in shared-types/models but aren't exported from index)
-export type JobStatus = "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed";
+export type JobStatus = "draft" | "pending" | "active" | "paused" | "filled" | "closed";
 export type EmploymentType = "full_time" | "part_time" | "contract" | "temporary";
 
 /**
@@ -50,8 +50,10 @@ export interface Job {
     company_recruiter_id?: string;
     job_owner_recruiter_id?: string;
 
-    // Status
+    // Status & visibility modifiers
     status: JobStatus | string;
+    is_early_access?: boolean;
+    is_priority?: boolean;
 
     // Timestamps
     activates_at?: string | null;
@@ -83,9 +85,7 @@ export interface Job {
 export const JOB_STATUS_LABELS: Record<string, string> = {
     draft: "Draft",
     pending: "Pending",
-    early: "Early Access",
     active: "Active",
-    priority: "Priority",
     paused: "Paused",
     filled: "Filled",
     closed: "Closed",
@@ -199,6 +199,8 @@ export interface UnifiedJobFilters {
     commute_type?: string;
     job_level?: string;
     company_id?: string;
+    is_early_access?: string;
+    is_priority?: string;
     open_to_relocation?: string;
     is_remote?: string;
     job_source?: string;

@@ -23,6 +23,8 @@ export interface CreateJobInput {
   commute_types?: string[];
   job_level?: string;
   status?: string;
+  is_early_access?: boolean;
+  is_priority?: boolean;
   pre_screen_questions?: any[];
   activates_at?: string | null;
   closes_at?: string | null;
@@ -45,6 +47,8 @@ export interface UpdateJobInput {
   commute_types?: string[];
   job_level?: string;
   status?: string;
+  is_early_access?: boolean;
+  is_priority?: boolean;
   pre_screen_questions?: any[];
   activates_at?: string | null;
   closes_at?: string | null;
@@ -64,8 +68,11 @@ export interface JobListParams {
   job_level?: string;
   company_id?: string;
   job_owner_filter?: 'all' | 'assigned' | 'saved';
+  is_early_access?: boolean;
+  is_priority?: boolean;
   // Internal scoping fields (set by service, not from query params)
   visible_statuses?: string[];
+  exclude_early_access?: boolean;
   owner_recruiter_id?: string;
   scoped_company_ids?: string[];
 }
@@ -122,7 +129,9 @@ export const createJobSchema = {
       items: { type: 'string', enum: ['remote', 'hybrid_1', 'hybrid_2', 'hybrid_3', 'hybrid_4', 'in_office'] },
     },
     job_level: { type: 'string', enum: ['entry', 'mid', 'senior', 'lead', 'manager', 'director', 'vp', 'c_suite'] },
-    status: { type: 'string', enum: ['draft', 'pending', 'early', 'active', 'priority'] },
+    status: { type: 'string', enum: ['draft', 'pending', 'active'] },
+    is_early_access: { type: 'boolean' },
+    is_priority: { type: 'boolean' },
     pre_screen_questions: { type: 'array' },
     activates_at: { type: ['string', 'null'], format: 'date-time' },
     closes_at: { type: ['string', 'null'], format: 'date-time' },
@@ -151,7 +160,9 @@ export const updateJobSchema = {
       items: { type: 'string', enum: ['remote', 'hybrid_1', 'hybrid_2', 'hybrid_3', 'hybrid_4', 'in_office'] },
     },
     job_level: { type: 'string', enum: ['entry', 'mid', 'senior', 'lead', 'manager', 'director', 'vp', 'c_suite'] },
-    status: { type: 'string', enum: ['draft', 'pending', 'early', 'active', 'priority', 'paused', 'filled', 'closed'] },
+    status: { type: 'string', enum: ['draft', 'pending', 'active', 'paused', 'filled', 'closed'] },
+    is_early_access: { type: 'boolean' },
+    is_priority: { type: 'boolean' },
     pre_screen_questions: { type: 'array' },
     activates_at: { type: ['string', 'null'], format: 'date-time' },
     closes_at: { type: ['string', 'null'], format: 'date-time' },

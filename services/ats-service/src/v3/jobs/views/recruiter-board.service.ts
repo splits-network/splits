@@ -29,11 +29,9 @@ export class RecruiterBoardService {
       throw new ForbiddenError('Recruiter role required for this view');
     }
 
-    // Determine visible statuses based on subscription tier
+    // Determine early access visibility based on subscription tier
     const tier = await this.repository.getRecruiterTier(context.recruiterId);
-    const visibleStatuses = tier === 'partner'
-      ? ['active', 'priority', 'early']
-      : ['active', 'priority'];
+    const excludeEarlyAccess = tier !== 'partner';
 
     // Get involved job IDs for assigned filter
     let involvedJobIds: string[] | undefined;
@@ -56,7 +54,7 @@ export class RecruiterBoardService {
     }
 
     const { data: jobs, total } = await this.repository.findForBoard(
-      params, context.recruiterId, visibleStatuses, involvedJobIds, savedJobIds
+      params, context.recruiterId, excludeEarlyAccess, involvedJobIds, savedJobIds
     );
 
     // Batch-fetch enrichments

@@ -39,6 +39,8 @@ export interface JobUpdate {
     salary_max?: number;
     salary_currency?: string;
     status?: string;
+    is_early_access?: boolean;
+    is_priority?: boolean;
     activates_at?: string | null;
     closes_at?: string | null;
     closed_reason?: string;

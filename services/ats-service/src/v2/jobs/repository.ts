@@ -79,11 +79,12 @@ export class JobRepository {
                     .maybeSingle();
 
                 const tier = (sub?.plan as any)?.tier ?? 'starter';
-                const visibleStatuses = tier === 'partner'
-                    ? ['active', 'priority', 'early']
-                    : ['active', 'priority'];
 
-                query = query.in('status', visibleStatuses);
+                query = query.eq('status', 'active');
+                // Non-partner tier recruiters cannot see early access jobs
+                if (tier !== 'partner') {
+                    query = query.eq('is_early_access', false);
+                }
                 if (filters.job_owner_filter === 'assigned') {
                     // Filter to jobs where recruiter has:
                     // 1. Is the job_owner_recruiter_id or company_recruiter_id (they created/own the job)
@@ -141,15 +142,15 @@ export class JobRepository {
                     query = query.eq('job_owner_id', accessContext.identityUserId);
                 }
             } else if (accessContext.candidateId) {
-                // Candidates see active and priority jobs
-                query = query.in('status', ['active', 'priority']);
+                // Candidates see active jobs (not early access)
+                query = query.eq('status', 'active').eq('is_early_access', false);
             } else {
                 // No role found - return empty
                 return { data: [], total: 0 };
             }
         } else {
-            // Unauthenticated - show active and priority jobs
-            query = query.in('status', ['active', 'priority']);
+            // Unauthenticated - show active jobs (not early access)
+            query = query.eq('status', 'active').eq('is_early_access', false);
         }
 
         // Apply full-text search
@@ -326,7 +327,7 @@ export class JobRepository {
             .eq('id', id);
 
         if (!clerkUserId) {
-            query = query.in('status', ['active', 'priority']);
+            query = query.eq('status', 'active').eq('is_early_access', false);
         }
 
         const { data, error } = await query.single();
@@ -622,7 +623,7 @@ export class JobRepository {
             `)
             .eq('company_id', companyId)
             .or(`job_owner_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`)
-            .in('status', ['active', 'early', 'priority', 'paused'])
+            .in('status', ['active', 'paused'])
             .order('created_at', { ascending: false });
 
         if (error) throw error;

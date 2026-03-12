@@ -89,6 +89,18 @@ export function GridCard({
                             {formatStatus(job.status)}
                         </BaselBadge>
 
+                        {job.is_early_access && (
+                            <BaselBadge color="accent" variant="soft" size="sm" icon="fa-lock-open">
+                                Early Access
+                            </BaselBadge>
+                        )}
+
+                        {job.is_priority && (
+                            <BaselBadge color="primary" variant="soft" size="sm" icon="fa-star">
+                                Priority
+                            </BaselBadge>
+                        )}
+
                         {isNew(job) && (
                             <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
                                 New

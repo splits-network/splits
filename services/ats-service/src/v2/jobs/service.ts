@@ -100,9 +100,9 @@ export class JobServiceV2 {
 
         const status = data.status || 'draft';
 
-        // Early status requires an activates_at date
-        if (status === 'early' && !data.activates_at) {
-            throw new Error('activates_at is required when setting status to early');
+        // Early access requires an activates_at date
+        if (data.is_early_access && !data.activates_at) {
+            throw new Error('activates_at is required when enabling early access');
         }
 
         const job = await this.repository.createJob({
@@ -157,11 +157,11 @@ export class JobServiceV2 {
                 userRole
             );
 
-            // Early status requires an activates_at date
-            if (updates.status === 'early') {
+            // Early access requires an activates_at date
+            if (updates.is_early_access === true) {
                 const activatesAt = updates.activates_at ?? currentJob.activates_at;
                 if (!activatesAt) {
-                    throw new Error('activates_at is required when setting status to early');
+                    throw new Error('activates_at is required when enabling early access');
                 }
             }
         }
@@ -273,14 +273,12 @@ export class JobServiceV2 {
     ): Promise<void> {
         // Define allowed transitions
         const allowedTransitions: Record<string, string[]> = {
-            draft:    ['early', 'pending', 'active', 'closed'],
-            pending:  ['active', 'paused', 'closed'],
-            early:    ['active', 'priority', 'paused', 'closed'],
-            active:   ['priority', 'early', 'paused', 'filled', 'closed'],
-            priority: ['active', 'paused', 'filled', 'closed'],
-            paused:   ['active', 'early', 'priority', 'filled', 'closed'],
-            filled:   ['active', 'closed'],
-            closed:   ['active', 'draft'],
+            draft:   ['pending', 'active', 'closed'],
+            pending: ['active', 'paused', 'closed'],
+            active:  ['paused', 'filled', 'closed'],
+            paused:  ['active', 'filled', 'closed'],
+            filled:  ['active', 'closed'],
+            closed:  ['active', 'draft'],
         };
 
         if (!allowedTransitions[fromStatus]?.includes(toStatus)) {

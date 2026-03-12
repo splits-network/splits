@@ -31,6 +31,8 @@ const INITIAL_FORM: FormData = {
     location: "",
     department: "",
     status: "draft",
+    is_early_access: false,
+    is_priority: false,
     activates_at: "",
     closes_at: "",
     salary_min: "",
@@ -108,6 +110,7 @@ export default function RoleWizardModal({
                 setFormData({
                     title: job.title || "", company_id: job.company_id || "", location: job.location || "",
                     department: job.department || "", status: job.status || "draft",
+                    is_early_access: job.is_early_access || false, is_priority: job.is_priority || false,
                     activates_at: job.activates_at ? new Date(job.activates_at).toISOString().slice(0, 16) : "",
                     closes_at: job.closes_at ? new Date(job.closes_at).toISOString().slice(0, 16) : "",
                     salary_min: job.salary_min?.toString() || "", salary_max: job.salary_max?.toString() || "",
@@ -250,7 +253,7 @@ export default function RoleWizardModal({
             if (!formData.title.trim()) { setError("A job title is required to continue."); return; }
             if (!formData.company_id && !isOffPlatform) { setError("Select a company to continue."); return; }
             if (isOffPlatform && !formData.source_firm_id) { setError("Select a firm to continue."); return; }
-            if (formData.status === "early" && !formData.activates_at) { setError("An activation date is required for Early Access status."); return; }
+            if (formData.is_early_access && !formData.activates_at) { setError("An activation date is required when Early Access is enabled."); return; }
         }
         setError(null);
         setCurrentStep((prev) => Math.min(prev + 1, WIZARD_STEPS.length - 1));
@@ -300,7 +303,8 @@ export default function RoleWizardModal({
             if (formData.activates_at) payload.activates_at = new Date(formData.activates_at).toISOString();
             if (formData.closes_at) payload.closes_at = new Date(formData.closes_at).toISOString();
             Object.assign(payload, {
-                status: formData.status, employment_type: formData.employment_type,
+                status: formData.status, is_early_access: formData.is_early_access, is_priority: formData.is_priority,
+                employment_type: formData.employment_type,
                 open_to_relocation: formData.open_to_relocation, show_salary_range: formData.show_salary_range,
                 guarantee_days: formData.guarantee_days,
                 pre_screen_questions: formData.pre_screen_questions.filter((q) => q.question.trim()).map((q) => ({

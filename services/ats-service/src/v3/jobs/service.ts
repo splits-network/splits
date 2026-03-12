@@ -13,14 +13,12 @@ import { JobRepository } from './repository';
 import { CreateJobInput, UpdateJobInput, JobListParams } from './types';
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-  draft:    ['early', 'pending', 'active', 'closed'],
-  pending:  ['active', 'paused', 'closed'],
-  early:    ['active', 'priority', 'paused', 'closed'],
-  active:   ['priority', 'early', 'paused', 'filled', 'closed'],
-  priority: ['active', 'paused', 'filled', 'closed'],
-  paused:   ['active', 'early', 'priority', 'filled', 'closed'],
-  filled:   ['active', 'closed'],
-  closed:   ['active', 'draft'],
+  draft:   ['pending', 'active', 'closed'],
+  pending: ['active', 'paused', 'closed'],
+  active:  ['paused', 'filled', 'closed'],
+  paused:  ['active', 'filled', 'closed'],
+  filled:  ['active', 'closed'],
+  closed:  ['active', 'draft'],
 };
 
 export class JobService {
@@ -43,10 +41,24 @@ export class JobService {
     if (context.isPlatformAdmin) {
       // Admins see everything (including drafts) — no extra filters
     } else if (context.recruiterId && context.roles.includes('recruiter')) {
-      // Recruiters see active/early/priority jobs, plus their own drafts/pending
+      // Recruiters see active jobs, plus their own drafts/pending
+      // Non-partner tier recruiters are excluded from early access jobs
       if (!scopedParams.status) {
-        scopedParams.visible_statuses = ['active', 'early', 'priority'];
+        scopedParams.visible_statuses = ['active'];
         scopedParams.owner_recruiter_id = context.recruiterId;
+
+        // Check subscription tier for early access gating
+        const { data: sub } = await this.supabase
+          .from('subscriptions')
+          .select('plan:plans(tier)')
+          .eq('recruiter_id', context.recruiterId)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        const tier = (sub?.plan as any)?.tier ?? 'starter';
+        if (tier !== 'partner') {
+          scopedParams.exclude_early_access = true;
+        }
       }
     } else if (context.organizationIds.length > 0) {
       // Company users see their own org's jobs (all statuses)
@@ -58,9 +70,10 @@ export class JobService {
         return { data: [], pagination: { total: 0, page: 1, limit: Math.min(params.limit || 25, 100), total_pages: 0 } };
       }
     } else {
-      // Unrecognized role — only active/published jobs
+      // Unrecognized role — only active/published jobs (exclude early access)
       if (!scopedParams.status) {
-        scopedParams.visible_statuses = ['active', 'early', 'priority'];
+        scopedParams.visible_statuses = ['active'];
+        scopedParams.exclude_early_access = true;
       }
     }
 
@@ -93,10 +106,10 @@ export class JobService {
       throw new BadRequestError('Off-platform jobs require a minimum 5% fee');
     }
 
-    // Status/early validation
+    // Early access validation
     const status = input.status || 'draft';
-    if (status === 'early' && !input.activates_at) {
-      throw new BadRequestError('activates_at is required when setting status to early');
+    if (input.is_early_access && !input.activates_at) {
+      throw new BadRequestError('activates_at is required when enabling early access');
     }
 
     // Authorization
@@ -166,10 +179,12 @@ export class JobService {
       if (!ALLOWED_TRANSITIONS[currentJob.status]?.includes(input.status)) {
         throw new BadRequestError(`Invalid status transition: ${currentJob.status} -> ${input.status}`);
       }
-      if (input.status === 'early') {
-        const activatesAt = input.activates_at ?? currentJob.activates_at;
-        if (!activatesAt) throw new BadRequestError('activates_at is required when setting status to early');
-      }
+    }
+
+    // Early access validation (on toggle or status change)
+    if (input.is_early_access === true) {
+      const activatesAt = input.activates_at ?? currentJob.activates_at;
+      if (!activatesAt) throw new BadRequestError('activates_at is required when enabling early access');
     }
 
     // Salary validation

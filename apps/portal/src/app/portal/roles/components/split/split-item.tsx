@@ -75,6 +75,16 @@ export function SplitItem({
                 <BaselBadge color={statusBadgeColor(job.status)} size="xs" variant="soft">
                     {formatStatus(job.status)}
                 </BaselBadge>
+                {job.is_early_access && (
+                    <BaselBadge color="accent" size="xs" variant="soft">
+                        Early
+                    </BaselBadge>
+                )}
+                {job.is_priority && (
+                    <BaselBadge color="primary" size="xs" variant="soft">
+                        Priority
+                    </BaselBadge>
+                )}
                 {emp && (
                     <BaselBadge color={emp.color} size="xs">
                         {emp.label}
