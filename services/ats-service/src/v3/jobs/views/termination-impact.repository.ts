@@ -15,7 +15,6 @@ export class TerminationImpactRepository {
       .eq('company_id', companyId)
       .or(`job_owner_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`)
       .in('status', ['active', 'paused'])
-      .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
     if (error) throw error;

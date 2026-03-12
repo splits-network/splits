@@ -91,7 +91,7 @@ export function PanelHeader({
                         {onClose && (
                             <button
                                 onClick={onClose}
-                                className="btn btn-sm btn-square btn-ghost text-neutral-content/60 hover:text-neutral-content"
+                                className="btn btn-sm btn-square btn-primary"
                             >
                                 <i className="fa-duotone fa-regular fa-xmark text-lg" />
                             </button>

@@ -21,7 +21,6 @@ export class CompanyDetailRepository {
         company:companies(id, name, logo_url, industry, headquarters_location, description, website)
       `)
       .eq('id', id)
-      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;

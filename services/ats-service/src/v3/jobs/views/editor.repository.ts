@@ -24,7 +24,6 @@ export class EditorRepository {
         created_at, updated_at
       `)
       .eq('id', id)
-      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;

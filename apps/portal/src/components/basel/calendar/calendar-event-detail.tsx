@@ -135,7 +135,7 @@ export default function CalendarEventDetail() {
                     <div className="flex-1 min-w-0">
                         <button
                             onClick={closeEvent}
-                            className={`lg:hidden btn btn-ghost btn-sm ${interview ? "text-accent-content/60" : "text-neutral-content/60"} mb-2`}
+                            className="lg:hidden btn btn-primary btn-sm mb-2"
                         >
                             <i className="fa-duotone fa-regular fa-arrow-left" />
                             Back
@@ -167,7 +167,7 @@ export default function CalendarEventDetail() {
                     </div>
                     <button
                         onClick={closeEvent}
-                        className={`hidden lg:flex btn btn-ghost btn-sm btn-square ${interview ? "text-accent-content/60" : "text-neutral-content/60"}`}
+                        className="hidden lg:flex btn btn-primary btn-sm btn-square"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>

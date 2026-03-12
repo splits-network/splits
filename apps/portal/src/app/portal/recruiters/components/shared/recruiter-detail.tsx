@@ -102,7 +102,7 @@ function HeroHeader({
                 {onClose && (
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 btn btn-sm btn-square btn-ghost text-neutral-content/60 hover:text-neutral-content"
+                        className="absolute top-4 right-4 btn btn-sm btn-square btn-primary"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
@@ -192,7 +192,7 @@ function HeroHeader({
                     <div className="w-px self-stretch bg-neutral-content/20" />
                     <Link
                         href={`/recruiters/${recruiter.slug || recruiter.id}`}
-                        className="btn btn-sm btn-link gap-2"
+                        className="btn btn-sm btn-link btn-accent gap-2"
                     >
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                         <span className="hidden md:inline">View Profile</span>

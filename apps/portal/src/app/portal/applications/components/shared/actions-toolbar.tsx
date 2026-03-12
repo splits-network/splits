@@ -752,7 +752,7 @@ export default function ActionsToolbar({
                 {actions.addNote && (
                     <button
                         onClick={() => setShowNoteModal(true)}
-                        className={`btn ${sizeClass} btn-info btn-outline gap-2`}
+                        className={`btn ${sizeClass} btn-info gap-2`}
                         disabled={actionLoading}
                     >
                         <i className="fa-duotone fa-regular fa-note-sticky" />
@@ -772,7 +772,7 @@ export default function ActionsToolbar({
                 {actions.scheduleCall && (
                     <button
                         onClick={() => setShowCallModal(true)}
-                        className={`btn ${sizeClass} btn-primary btn-outline gap-2`}
+                        className={`btn ${sizeClass} btn-primary gap-2`}
                     >
                         <i className="fa-duotone fa-regular fa-phone" />
                         Schedule Call
@@ -791,7 +791,7 @@ export default function ActionsToolbar({
                 {actions.requestChanges && (
                     <button
                         onClick={() => setShowRequestChangesModal(true)}
-                        className={`btn ${sizeClass} btn-warning btn-outline gap-2`}
+                        className={`btn ${sizeClass} btn-warning gap-2`}
                         disabled={actionLoading}
                     >
                         <i className="fa-duotone fa-regular fa-comment-edit" />
@@ -816,7 +816,7 @@ export default function ActionsToolbar({
                                 </button>
                                 <button
                                     onClick={() => handleApprove(true)}
-                                    className={`btn ${sizeClass} btn-success btn-outline gap-2`}
+                                    className={`btn ${sizeClass} btn-success gap-2`}
                                     disabled={actionLoading}
                                 >
                                     {actionLoading && moveToOffer ? (
@@ -857,7 +857,7 @@ export default function ActionsToolbar({
                     <span title={chatDisabledReason || undefined}>
                         <button
                             onClick={handleStartChat}
-                            className={`btn ${sizeClass} btn-ghost rounded-full gap-2`}
+                            className={`btn ${sizeClass} btn-primary rounded-full gap-2`}
                             disabled={!canChat || startingChat}
                         >
                             <Presence status={presenceStatus} />

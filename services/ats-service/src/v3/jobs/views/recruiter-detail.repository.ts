@@ -17,7 +17,6 @@ export class RecruiterDetailRepository {
         firm:firms(id, name)
       `)
       .eq('id', id)
-      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;

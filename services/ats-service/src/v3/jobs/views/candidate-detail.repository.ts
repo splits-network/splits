@@ -19,7 +19,6 @@ export class CandidateDetailRepository {
         company:companies(id, name, logo_url, industry, headquarters_location, description, website)
       `)
       .eq('id', id)
-      .is('deleted_at', null)
       .eq('status', 'active')
       .eq('is_early_access', false)
       .maybeSingle();

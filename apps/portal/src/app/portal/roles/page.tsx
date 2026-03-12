@@ -76,6 +76,13 @@ export default function RolesPage() {
         getCompanyIdsWithPermission,
     } = useUserProfile();
     const { getToken } = useAuth();
+
+    /* ── Role-based endpoint selection ── */
+    const boardEndpoint = isAdmin
+        ? "/api/v3/jobs/views/admin-board"
+        : isCompanyUser
+            ? "/api/v3/jobs/views/company-board"
+            : "/api/v3/jobs/views/recruiter-board";
     const [isFirmMember, setIsFirmMember] = useState(false);
 
     useEffect(() => {
@@ -127,8 +134,8 @@ export default function RolesPage() {
         setSortBy,
         setSortOrder,
     } = useStandardList<Job, UnifiedJobFilters>({
-        endpoint: "/api/v3/jobs/views/recruiter-board",
-        defaultFilters: { status: undefined, job_owner_filter: "assigned" },
+        endpoint: boardEndpoint,
+        defaultFilters: { status: undefined, job_owner_filter: isRecruiter ? "assigned" : undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
         defaultLimit: 24,

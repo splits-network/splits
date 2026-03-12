@@ -174,7 +174,7 @@ export default function RecruiterActionsToolbar({
                 key: "endRelationship",
                 icon: "fa-duotone fa-regular fa-link-slash",
                 label: "End Relationship",
-                variant: "btn-ghost",
+                variant: "btn-error",
                 onClick: () => setShowTerminateModal(true),
                 title: "End Relationship",
             });
@@ -184,7 +184,7 @@ export default function RecruiterActionsToolbar({
                 key: "message",
                 icon: "fa-duotone fa-regular fa-messages",
                 label: "Message Recruiter",
-                variant: "btn-ghost",
+                variant: "btn-primary",
                 onClick: handleStartChat,
                 disabled: !canChat || startingChat,
                 loading: startingChat,
@@ -237,7 +237,7 @@ export default function RecruiterActionsToolbar({
                 {actions.endRelationship && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
-                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
+                        className={`btn btn-${size} btn-error gap-2`}
                         style={{ borderRadius: 0 }}
                         title="End Relationship"
                     >
@@ -248,14 +248,14 @@ export default function RecruiterActionsToolbar({
 
                 {actions.message &&
                     (actions.inviteToCompany || actions.endRelationship) && (
-                        <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                     )}
 
                 {actions.message && (
                     <span title={chatDisabledReason || undefined}>
                         <button
                             onClick={handleStartChat}
-                            className={`btn btn-${size} btn-ghost gap-2 relative`}
+                            className={`btn btn-${size} btn-primary gap-2 relative`}
                             style={{ borderRadius: 0 }}
                             disabled={!canChat || startingChat}
                         >
@@ -272,10 +272,10 @@ export default function RecruiterActionsToolbar({
 
                 {actions.viewDetails && onViewDetails && (
                     <>
-                        <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                         <button
                             onClick={handleViewDetails}
-                            className={`btn btn-${size} btn-ghost gap-2`}
+                            className={`btn btn-${size} btn-primary gap-2`}
                             style={{ borderRadius: 0 }}
                             title="View Details"
                         >

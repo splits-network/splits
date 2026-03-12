@@ -25,7 +25,6 @@ export class CandidateListingRepository {
         salary_min, salary_max, status, created_at, updated_at,
         company:companies(id, name, logo_url, industry, headquarters_location)
       `, { count: 'exact' })
-      .is('deleted_at', null)
       .eq('status', 'active')
       .eq('is_early_access', false);
 

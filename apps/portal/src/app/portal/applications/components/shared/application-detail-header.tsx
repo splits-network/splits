@@ -106,7 +106,7 @@ export function ApplicationDetailHeader({
             {/* Close button */}
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 btn btn-sm btn-square btn-ghost text-neutral-content/60 hover:text-neutral-content"
+                className="absolute top-4 right-4 btn btn-sm btn-square btn-primary"
             >
                 <i className="fa-duotone fa-regular fa-xmark" />
             </button>

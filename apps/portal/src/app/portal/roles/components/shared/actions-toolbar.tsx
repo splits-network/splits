@@ -444,7 +444,7 @@ export default function RoleActionsToolbar({
         return (
             <details ref={statusDropdownRef} className="dropdown dropdown-end">
                 <summary
-                    className={`btn ${getSizeClass()} btn-ghost gap-2 list-none`}
+                    className={`btn ${getSizeClass()} btn-primary gap-2 list-none`}
                     style={{ borderRadius: 0 }}
                     title="Change Status"
                 >
@@ -700,7 +700,7 @@ export default function RoleActionsToolbar({
                 {actions.edit && (
                     <button
                         onClick={() => setShowEditModal(true)}
-                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        className={`btn ${getSizeClass()} btn-secondary gap-2`}
                         style={{ borderRadius: 0 }}
                         title="Edit Role"
                     >
@@ -711,7 +711,7 @@ export default function RoleActionsToolbar({
                 {actions.save && (
                     <button
                         onClick={handleToggleSave}
-                        className={`btn ${getSizeClass()} ${job.is_saved ? "btn-warning" : "btn-ghost"} gap-2`}
+                        className={`btn ${getSizeClass()} ${job.is_saved ? "btn-warning" : "btn-primary"} gap-2`}
                         style={{ borderRadius: 0 }}
                         title={job.is_saved ? "Unsave Role" : "Save Role"}
                         disabled={isSaving}
@@ -727,7 +727,7 @@ export default function RoleActionsToolbar({
                 {actions.share && (
                     <button
                         onClick={handleShare}
-                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        className={`btn ${getSizeClass()} btn-primary gap-2`}
                         style={{ borderRadius: 0 }}
                         title="Share Job"
                         disabled={isSharing}
@@ -746,12 +746,12 @@ export default function RoleActionsToolbar({
                         actions.edit ||
                         actions.share ||
                         actions.statusActions) && (
-                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                     )}
                 {actions.viewPipeline && (
                     <button
                         onClick={handleViewPipeline}
-                        className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        className={`btn ${getSizeClass()} btn-accent gap-2`}
                         style={{ borderRadius: 0 }}
                         title="View Pipeline"
                     >
@@ -761,11 +761,11 @@ export default function RoleActionsToolbar({
                 )}
                 {actions.viewDetails && (
                     <>
-                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                         {onViewDetails ? (
                             <button
                                 onClick={handleViewDetails}
-                                className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                className={`btn ${getSizeClass()} btn-primary gap-2`}
                                 style={{ borderRadius: 0 }}
                                 title="View Details"
                             >
@@ -777,7 +777,7 @@ export default function RoleActionsToolbar({
                         ) : (
                             <Link
                                 href={`/portal/roles?roleId=${job.id}`}
-                                className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                className={`btn ${getSizeClass()} btn-primary gap-2`}
                                 style={{ borderRadius: 0 }}
                                 title="View Details"
                             >

@@ -83,7 +83,7 @@ export function FirmDetail({
                             {onClose && (
                                 <button
                                     onClick={onClose}
-                                    className="btn btn-sm btn-square btn-ghost text-neutral-content/60"
+                                    className="btn btn-sm btn-square btn-primary"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark text-lg" />
                                 </button>

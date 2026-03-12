@@ -28,7 +28,6 @@ export class CompanyBoardRepository {
         job_owner_id, activates_at, closes_at, created_at,
         company:companies(id, name, logo_url)
       `, { count: 'exact' })
-      .is('deleted_at', null)
       .in('company_id', companyIds);
 
     if (params.job_owner_filter === 'assigned' && identityUserId) {
