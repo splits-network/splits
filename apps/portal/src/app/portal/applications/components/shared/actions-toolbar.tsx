@@ -149,10 +149,16 @@ export default function ActionsToolbar({
         );
 
         // Gate recruiter stage advancement by can_advance_candidates permission
+        // Skip for recruiter-owned stages where the recruiter should always have control
+        const recruiterOwnedStages = ['recruiter_review', 'recruiter_request', 'company_feedback'];
+        const isRecruiterOwnedStage = recruiterOwnedStages.includes(application.stage as string)
+            && !!application.candidate_recruiter_id;
+
         if (
             isRecruiter &&
             !isAdmin &&
             !isFirmJob &&
+            !isRecruiterOwnedStage &&
             application.job?.company_id &&
             !hasPermissionForCompany(
                 application.job.company_id,

@@ -41,7 +41,7 @@ export function getStageDisplay(stage: string | null | undefined): StageDisplay 
         case "recruiter_proposed":
             return { label: "Proposed", icon: "fa-user-tie", color: "secondary" };
         case "recruiter_review":
-            return { label: "In Review", icon: "fa-user-check", color: "secondary" };
+            return { label: "Recruiter Review", icon: "fa-user-check", color: "secondary" };
         case "screen":
             return { label: "Screening", icon: "fa-filter", color: "info" };
         case "submitted":
