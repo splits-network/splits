@@ -262,11 +262,11 @@ export default function RoleActionsToolbar({
             const client = createAuthenticatedClient(token);
 
             if (job.is_saved && job.saved_record_id) {
-                await client.delete(`/v3/recruiter-saved-jobs/${job.saved_record_id}`);
+                await client.delete(`/api/v3/recruiter-saved-jobs/${job.saved_record_id}`);
                 onUpdateItem?.(job.id, { is_saved: false, saved_record_id: null });
                 toast.info("Role removed from saved.");
             } else {
-                const res = await client.post("/v3/recruiter-saved-jobs", { job_id: job.id });
+                const res = await client.post("/api/v3/recruiter-saved-jobs", { job_id: job.id });
                 onUpdateItem?.(job.id, { is_saved: true, saved_record_id: res?.data?.id });
                 toast.success("Role saved.");
             }
