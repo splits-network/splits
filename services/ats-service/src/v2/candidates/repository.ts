@@ -133,7 +133,80 @@ export class CandidateRepository {
         // Extract special filters that are NOT database columns
         // scope can come from either filters object or direct query parameter
         const scope = filters.scope || (params as any).scope || 'all';
-        const { scope: _scope, ...columnFilters } = filters;
+        const {
+            scope: _scope,
+            has_account: hasAccountFilter,
+            has_resume: hasResumeFilter,
+            activity: activityFilter,
+            ...columnFilters
+        } = filters;
+
+        // Apply computed filters (not direct column matches)
+        if (hasAccountFilter === 'yes') {
+            query = query.not('user_id', 'is', null);
+        } else if (hasAccountFilter === 'no') {
+            query = query.is('user_id', null);
+        }
+
+        if (hasResumeFilter === 'yes') {
+            query = query.not('resume_metadata', 'is', null);
+        } else if (hasResumeFilter === 'no') {
+            query = query.or('resume_metadata.is.null');
+        }
+
+        // Activity filter: uses users.last_active_at via subquery
+        if (activityFilter) {
+            const now = new Date();
+            let activityQuery = this.supabase.from('users').select('id');
+
+            if (activityFilter === 'online') {
+                // Active within last 15 minutes
+                const threshold = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+                activityQuery = activityQuery.gte('last_active_at', threshold);
+            } else if (activityFilter === 'recent') {
+                // Active within last 7 days but not online
+                const onlineThreshold = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+                const recentThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+                activityQuery = activityQuery.gte('last_active_at', recentThreshold).lt('last_active_at', onlineThreshold);
+            } else if (activityFilter === 'inactive') {
+                // Not active in 7+ days or never active
+                const recentThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+                activityQuery = activityQuery.lt('last_active_at', recentThreshold);
+            }
+
+            const { data: activityUsers } = await activityQuery;
+            const activeUserIds = (activityUsers || []).map((u: any) => u.id);
+
+            if (activityFilter === 'inactive') {
+                // Inactive includes candidates with no account OR inactive users
+                // We can't easily do OR with user_id IS NULL in supabase, so handle via ID list
+                // First get candidates with no user_id
+                const { data: noAccountCandidates } = await this.supabase
+                    .from('candidates')
+                    .select('id')
+                    .is('user_id', null);
+                const noAccountIds = (noAccountCandidates || []).map((c: any) => c.id);
+
+                // Get candidates whose user_id is in inactive users list
+                const { data: inactiveUserCandidates } = await this.supabase
+                    .from('candidates')
+                    .select('id')
+                    .in('user_id', activeUserIds.length > 0 ? activeUserIds : ['__none__']);
+                const inactiveIds = (inactiveUserCandidates || []).map((c: any) => c.id);
+
+                const allInactiveIds = [...new Set([...noAccountIds, ...inactiveIds])];
+                if (allInactiveIds.length > 0) {
+                    query = query.in('id', allInactiveIds);
+                } else {
+                    return { data: [], pagination: { page, limit, total: 0, total_pages: 0 } };
+                }
+            } else if (activeUserIds.length > 0) {
+                query = query.in('user_id', activeUserIds);
+            } else {
+                // No users match activity criteria
+                return { data: [], pagination: { page, limit, total: 0, total_pages: 0 } };
+            }
+        }
 
         // Apply role-based access control FIRST
         // Candidates can ONLY see their own candidate record

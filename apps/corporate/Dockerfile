@@ -10,6 +10,7 @@ COPY tsconfig.base.json ./
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-ui/package.json ./packages/shared-ui/
 COPY packages/basel-ui/package.json ./packages/basel-ui/
+COPY packages/support-widget/package.json ./packages/support-widget/
 COPY apps/corporate/package.json ./apps/corporate/
 RUN pnpm install --frozen-lockfile
 
@@ -24,16 +25,22 @@ CMD ["pnpm", "--filter", "@splits-network/corporate", "dev"]
 # Build stage
 FROM base AS build
 ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_SUPPORT_GATEWAY_URL
+ARG NEXT_PUBLIC_API_GATEWAY_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_SUPPORT_GATEWAY_URL=$NEXT_PUBLIC_SUPPORT_GATEWAY_URL
+ENV NEXT_PUBLIC_API_GATEWAY_URL=$NEXT_PUBLIC_API_GATEWAY_URL
 COPY --from=dependencies /app ./
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/basel-ui ./packages/basel-ui
+COPY packages/support-widget ./packages/support-widget
 COPY apps/corporate ./apps/corporate
 # Build shared packages first
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-ui build
 RUN pnpm --filter @splits-network/basel-ui build
+RUN pnpm --filter @splits-network/support-widget build
 # Build corporate site
 RUN pnpm --filter @splits-network/corporate build
 # Prune to production dependencies (uses local store, no network)
@@ -58,6 +65,8 @@ COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
 COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
 COPY --from=build /app/packages/basel-ui/package.json ./packages/basel-ui/
 COPY --from=build /app/packages/basel-ui/dist ./packages/basel-ui/dist
+COPY --from=build /app/packages/support-widget/package.json ./packages/support-widget/
+COPY --from=build /app/packages/support-widget/dist ./packages/support-widget/dist
 
 # App package.json for pnpm filter
 COPY --from=build /app/apps/corporate/package.json ./apps/corporate/

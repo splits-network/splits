@@ -17,6 +17,7 @@ COPY packages/basel-ui/package.json ./packages/basel-ui/
 COPY packages/chat-ui/package.json ./packages/chat-ui/
 COPY packages/shared-gamification/package.json ./packages/shared-gamification/
 COPY packages/shared-video/package.json ./packages/shared-video/
+COPY packages/support-widget/package.json ./packages/support-widget/
 COPY apps/portal/package.json ./apps/portal/
 RUN pnpm install --frozen-lockfile
 
@@ -39,6 +40,8 @@ ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 ARG SUPABASE_URL
 ARG SUPABASE_ANON_KEY
 ARG SUPABASE_SERVICE_ROLE_KEY
+ARG NEXT_PUBLIC_SUPPORT_GATEWAY_URL
+ARG NEXT_PUBLIC_API_GATEWAY_URL
 ARG SENTRY_AUTH_TOKEN
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_CHAT_GATEWAY_URL=$NEXT_PUBLIC_CHAT_GATEWAY_URL
@@ -49,6 +52,8 @@ ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 ENV SUPABASE_URL=$SUPABASE_URL
 ENV SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 ENV SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
+ENV NEXT_PUBLIC_SUPPORT_GATEWAY_URL=$NEXT_PUBLIC_SUPPORT_GATEWAY_URL
+ENV NEXT_PUBLIC_API_GATEWAY_URL=$NEXT_PUBLIC_API_GATEWAY_URL
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 # Clerk redirect URLs - static values inlined at build time for client-side SDK
 ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/portal/dashboard
@@ -66,6 +71,7 @@ COPY packages/basel-ui ./packages/basel-ui
 COPY packages/chat-ui ./packages/chat-ui
 COPY packages/shared-gamification ./packages/shared-gamification
 COPY packages/shared-video ./packages/shared-video
+COPY packages/support-widget ./packages/support-widget
 COPY apps/portal ./apps/portal
 # Copy press content (MDX articles read at runtime by server components)
 COPY content ./content
@@ -79,6 +85,7 @@ RUN pnpm --filter @splits-network/shared-hooks build
 RUN pnpm --filter @splits-network/chat-ui build
 RUN pnpm --filter @splits-network/shared-gamification build
 RUN pnpm --filter @splits-network/shared-video build
+RUN pnpm --filter @splits-network/support-widget build
 # Then build portal (will transpile packages from source)
 RUN pnpm --filter @splits-network/portal build
 # Prune to production dependencies (uses local store, no network)
@@ -115,6 +122,8 @@ COPY --from=build /app/packages/shared-gamification/package.json ./packages/shar
 COPY --from=build /app/packages/shared-gamification/dist ./packages/shared-gamification/dist
 COPY --from=build /app/packages/shared-video/package.json ./packages/shared-video/
 COPY --from=build /app/packages/shared-video/dist ./packages/shared-video/dist
+COPY --from=build /app/packages/support-widget/package.json ./packages/support-widget/
+COPY --from=build /app/packages/support-widget/dist ./packages/support-widget/dist
 
 # App package.json for pnpm filter
 COPY --from=build /app/apps/portal/package.json ./apps/portal/

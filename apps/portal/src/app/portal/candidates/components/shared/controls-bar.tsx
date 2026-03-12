@@ -20,6 +20,9 @@ import {
     REMOTE_LABELS,
     RELOCATION_LABELS,
     AVAILABILITY_LABELS,
+    ACCOUNT_STATUS_LABELS,
+    RESUME_STATUS_LABELS,
+    ACTIVITY_STATUS_LABELS,
     CANDIDATE_SORT_OPTIONS,
 } from "../../types";
 
@@ -28,6 +31,9 @@ const JOB_TYPE_OPTIONS = Object.entries(JOB_TYPE_LABELS).map(([value, label]) =>
 const REMOTE_OPTIONS = Object.entries(REMOTE_LABELS).map(([value, label]) => ({ value, label }));
 const RELOCATION_OPTIONS = Object.entries(RELOCATION_LABELS).map(([value, label]) => ({ value, label }));
 const AVAILABILITY_OPTIONS = Object.entries(AVAILABILITY_LABELS).map(([value, label]) => ({ value, label }));
+const ACCOUNT_OPTIONS = Object.entries(ACCOUNT_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const RESUME_OPTIONS = Object.entries(RESUME_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const ACTIVITY_OPTIONS = Object.entries(ACTIVITY_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -71,7 +77,7 @@ export function ControlsBar({
 }: ControlsBarProps) {
     const [expanded, setExpanded] = useState(false);
 
-    const hasExpandedFilters = !!(filters.open_to_remote || filters.open_to_relocation || filters.availability);
+    const hasExpandedFilters = !!(filters.open_to_remote || filters.open_to_relocation || filters.availability || filters.has_account || filters.has_resume || filters.activity);
 
     return (
         <BaselControlsBarShell
@@ -160,6 +166,24 @@ export function ControlsBar({
                             onChange={(v) => onFilterChange("open_to_relocation", v)}
                             options={RELOCATION_OPTIONS}
                             placeholder="Relocation"
+                        />
+                        <BaselFilterSelect
+                            value={filters.has_account}
+                            onChange={(v) => onFilterChange("has_account", v)}
+                            options={ACCOUNT_OPTIONS}
+                            placeholder="Account Status"
+                        />
+                        <BaselFilterSelect
+                            value={filters.has_resume}
+                            onChange={(v) => onFilterChange("has_resume", v)}
+                            options={RESUME_OPTIONS}
+                            placeholder="Resume Status"
+                        />
+                        <BaselFilterSelect
+                            value={filters.activity}
+                            onChange={(v) => onFilterChange("activity", v)}
+                            options={ACTIVITY_OPTIONS}
+                            placeholder="Activity"
                         />
                     </>
                 ) : undefined

@@ -36,6 +36,9 @@ export interface CandidateFilters {
     open_to_remote?: string;
     open_to_relocation?: string;
     availability?: string;
+    has_account?: string;
+    has_resume?: string;
+    activity?: string;
 }
 
 // ===== LABEL MAPS =====
@@ -70,6 +73,22 @@ export const RELOCATION_LABELS: Record<string, string> = {
 export const REMOTE_LABELS: Record<string, string> = {
     yes: "Open to Remote",
     no: "Not Remote",
+};
+
+export const ACCOUNT_STATUS_LABELS: Record<string, string> = {
+    yes: "Has Account",
+    no: "No Account",
+};
+
+export const RESUME_STATUS_LABELS: Record<string, string> = {
+    yes: "Has Resume",
+    no: "No Resume",
+};
+
+export const ACTIVITY_STATUS_LABELS: Record<string, string> = {
+    online: "Online Now",
+    recent: "Recently Active",
+    inactive: "Inactive",
 };
 
 export const CANDIDATE_SORT_OPTIONS: BaselSortOption[] = [
