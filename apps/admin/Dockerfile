@@ -49,9 +49,9 @@ RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-api-client build
 RUN pnpm --filter @splits-network/shared-ui build
-RUN pnpm --filter @splits-network/shared-hooks build
 RUN pnpm --filter @splits-network/shared-charts build
 RUN pnpm --filter @splits-network/basel-ui build
+RUN pnpm --filter @splits-network/shared-hooks build
 # Then build admin app
 RUN pnpm --filter @splits-network/admin build
 # Prune to production dependencies (uses local store, no network)
