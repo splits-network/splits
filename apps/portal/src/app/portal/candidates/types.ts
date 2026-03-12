@@ -34,6 +34,8 @@ export interface CandidateFilters {
     verification_status?: string;
     desired_job_type?: string;
     open_to_remote?: string;
+    open_to_relocation?: string;
+    availability?: string;
 }
 
 // ===== LABEL MAPS =====
@@ -58,6 +60,11 @@ export const AVAILABILITY_LABELS: Record<string, string> = {
     one_month: "1 Month",
     three_months: "3 Months",
     not_looking: "Not Looking",
+};
+
+export const RELOCATION_LABELS: Record<string, string> = {
+    true: "Open to Relocation",
+    false: "Not Relocating",
 };
 
 export const REMOTE_LABELS: Record<string, string> = {

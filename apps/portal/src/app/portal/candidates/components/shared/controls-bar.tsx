@@ -18,12 +18,16 @@ import {
     VERIFICATION_STATUS_LABELS,
     JOB_TYPE_LABELS,
     REMOTE_LABELS,
+    RELOCATION_LABELS,
+    AVAILABILITY_LABELS,
     CANDIDATE_SORT_OPTIONS,
 } from "../../types";
 
 const VERIFICATION_OPTIONS = Object.entries(VERIFICATION_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 const JOB_TYPE_OPTIONS = Object.entries(JOB_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 const REMOTE_OPTIONS = Object.entries(REMOTE_LABELS).map(([value, label]) => ({ value, label }));
+const RELOCATION_OPTIONS = Object.entries(RELOCATION_LABELS).map(([value, label]) => ({ value, label }));
+const AVAILABILITY_OPTIONS = Object.entries(AVAILABILITY_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -67,7 +71,7 @@ export function ControlsBar({
 }: ControlsBarProps) {
     const [expanded, setExpanded] = useState(false);
 
-    const hasExpandedFilters = !!filters.open_to_remote;
+    const hasExpandedFilters = !!(filters.open_to_remote || filters.open_to_relocation || filters.availability);
 
     return (
         <BaselControlsBarShell
@@ -138,12 +142,26 @@ export function ControlsBar({
             }
             expandedFilters={
                 (expanded || hasExpandedFilters) ? (
-                    <BaselFilterSelect
-                        value={filters.open_to_remote}
-                        onChange={(v) => onFilterChange("open_to_remote", v)}
-                        options={REMOTE_OPTIONS}
-                        placeholder="Remote Preference"
-                    />
+                    <>
+                        <BaselFilterSelect
+                            value={filters.availability}
+                            onChange={(v) => onFilterChange("availability", v)}
+                            options={AVAILABILITY_OPTIONS}
+                            placeholder="All Availability"
+                        />
+                        <BaselFilterSelect
+                            value={filters.open_to_remote}
+                            onChange={(v) => onFilterChange("open_to_remote", v)}
+                            options={REMOTE_OPTIONS}
+                            placeholder="Remote Preference"
+                        />
+                        <BaselFilterSelect
+                            value={filters.open_to_relocation}
+                            onChange={(v) => onFilterChange("open_to_relocation", v)}
+                            options={RELOCATION_OPTIONS}
+                            placeholder="Relocation"
+                        />
+                    </>
                 ) : undefined
             }
         />

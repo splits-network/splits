@@ -10,7 +10,6 @@ COPY tsconfig.base.json ./
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-ui/package.json ./packages/shared-ui/
 COPY packages/basel-ui/package.json ./packages/basel-ui/
-COPY packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY apps/corporate/package.json ./apps/corporate/
 RUN pnpm install --frozen-lockfile
 
@@ -30,7 +29,6 @@ COPY --from=dependencies /app ./
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/basel-ui ./packages/basel-ui
-COPY packages/memphis-ui ./packages/memphis-ui
 COPY apps/corporate ./apps/corporate
 # Build shared packages first
 RUN pnpm --filter @splits-network/shared-types build

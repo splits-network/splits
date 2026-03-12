@@ -13,7 +13,6 @@ COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-ui/package.json ./packages/shared-ui/
 COPY packages/basel-ui/package.json ./packages/basel-ui/
 COPY packages/chat-ui/package.json ./packages/chat-ui/
-COPY packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY packages/shared-gamification/package.json ./packages/shared-gamification/
 COPY packages/shared-video/package.json ./packages/shared-video/
 COPY apps/candidate/package.json ./apps/candidate/
@@ -56,7 +55,6 @@ COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/basel-ui ./packages/basel-ui
 COPY packages/chat-ui ./packages/chat-ui
-COPY packages/memphis-ui ./packages/memphis-ui
 COPY packages/shared-gamification ./packages/shared-gamification
 COPY packages/shared-video ./packages/shared-video
 COPY apps/candidate ./apps/candidate
