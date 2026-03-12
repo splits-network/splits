@@ -242,6 +242,7 @@ export default function RolesPage() {
                                         onSelect={handleSelect}
                                         selectedId={selectedJobId}
                                         onRefresh={refresh}
+                                        onUpdateItem={updateItem}
                                     />
                                 )}
                                 {viewMode === "grid" && (
@@ -250,6 +251,7 @@ export default function RolesPage() {
                                         onSelectAction={handleSelect}
                                         selectedId={selectedJobId}
                                         onRefreshAction={refresh}
+                                        onUpdateItemAction={updateItem}
                                     />
                                 )}
                                 {viewMode === "split" && (
@@ -258,6 +260,7 @@ export default function RolesPage() {
                                         onSelect={handleSelect}
                                         selectedId={selectedJobId}
                                         onRefresh={refresh}
+                                        onUpdateItem={updateItem}
                                     />
                                 )}
                             </>
