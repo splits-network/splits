@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { SearchInput } from "@/components/standard-lists";
 import {
     BaselControlsBarShell,
@@ -7,11 +8,21 @@ import {
     BaselRefreshButton,
     BaselFilterSelect,
     BaselSortSelect,
+    BaselExpandToggle,
 } from "@splits-network/basel-ui";
 import type { ReferralCodeFilters } from "../../types";
-import { CODE_STATUS_LABELS, REFERRAL_CODE_SORT_OPTIONS } from "../../types";
+import {
+    CODE_STATUS_LABELS,
+    REFERRAL_CODE_SORT_OPTIONS,
+    IS_DEFAULT_LABELS,
+    EXPIRY_STATUS_LABELS,
+    HAS_USAGE_LIMIT_LABELS,
+} from "../../types";
 
 const STATUS_OPTIONS = Object.entries(CODE_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const IS_DEFAULT_OPTIONS = Object.entries(IS_DEFAULT_LABELS).map(([value, label]) => ({ value, label }));
+const EXPIRY_STATUS_OPTIONS = Object.entries(EXPIRY_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const HAS_USAGE_LIMIT_OPTIONS = Object.entries(HAS_USAGE_LIMIT_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -45,6 +56,8 @@ export function ControlsBar({
     sortOrder,
     onSortChange,
 }: ControlsBarProps) {
+    const [expanded, setExpanded] = useState(false);
+
     return (
         <BaselControlsBarShell
             action={
@@ -65,12 +78,39 @@ export function ControlsBar({
                 />
             }
             filters={
-                <BaselFilterSelect
-                    value={filters.status}
-                    onChange={(v) => onFilterChange("status", v)}
-                    options={STATUS_OPTIONS}
-                    placeholder="All Status"
-                />
+                <>
+                    <BaselFilterSelect
+                        value={filters.status}
+                        onChange={(v) => onFilterChange("status", v)}
+                        options={STATUS_OPTIONS}
+                        placeholder="All Status"
+                    />
+                    <BaselExpandToggle expanded={expanded} onToggle={() => setExpanded(!expanded)} />
+                </>
+            }
+            expandedFilters={
+                expanded ? (
+                    <>
+                        <BaselFilterSelect
+                            value={filters.is_default}
+                            onChange={(v) => onFilterChange("is_default", v)}
+                            options={IS_DEFAULT_OPTIONS}
+                            placeholder="Default Status"
+                        />
+                        <BaselFilterSelect
+                            value={filters.expiry_status}
+                            onChange={(v) => onFilterChange("expiry_status", v)}
+                            options={EXPIRY_STATUS_OPTIONS}
+                            placeholder="Expiry Status"
+                        />
+                        <BaselFilterSelect
+                            value={filters.has_usage_limit}
+                            onChange={(v) => onFilterChange("has_usage_limit", v)}
+                            options={HAS_USAGE_LIMIT_OPTIONS}
+                            placeholder="Usage Limit"
+                        />
+                    </>
+                ) : null
             }
             statusLeft={
                 <BaselResultsCount count={codeCount} total={totalCount} label="codes" />

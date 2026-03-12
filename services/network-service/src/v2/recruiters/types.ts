@@ -13,6 +13,11 @@ export interface RecruiterFilters extends PaginationParams, SortParams {
         company_ids?: string[];
     };
     include?: string;
+    is_candidate_recruiter?: string;
+    is_company_recruiter?: string;
+    is_marketplace_enabled?: string;
+    reputation_tier?: string;
+    hire_rate_tier?: string;
 }
 
 export interface RecruiterUpdate {

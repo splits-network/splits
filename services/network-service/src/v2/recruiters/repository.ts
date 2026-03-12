@@ -79,6 +79,89 @@ export class RecruiterRepository {
             query = query.eq('marketplace_enabled', params.filters?.marketplace_enabled);
         }
 
+        // Recruiter type filters
+        if (params.is_candidate_recruiter === 'yes') {
+            query = query.eq('candidate_recruiter', true);
+        } else if (params.is_candidate_recruiter === 'no') {
+            query = query.eq('candidate_recruiter', false);
+        }
+        if (params.is_company_recruiter === 'yes') {
+            query = query.eq('company_recruiter', true);
+        } else if (params.is_company_recruiter === 'no') {
+            query = query.eq('company_recruiter', false);
+        }
+
+        // Marketplace enabled (flat string version)
+        if (params.is_marketplace_enabled === 'yes') {
+            query = query.eq('marketplace_enabled', true);
+        } else if (params.is_marketplace_enabled === 'no') {
+            query = query.eq('marketplace_enabled', false);
+        }
+
+        // Reputation tier — subquery on recruiter_reputation
+        if (params.reputation_tier) {
+            const { data: repRows } = await this.supabase
+                .from('recruiter_reputation')
+                .select('recruiter_id, reputation_score');
+            const repMap = new Map((repRows || []).map((r: any) => [r.recruiter_id, r.reputation_score]));
+            const allRecruiterIds = (repRows || []).map((r: any) => r.recruiter_id);
+
+            switch (params.reputation_tier) {
+                case 'high': {
+                    const ids = (repRows || []).filter((r: any) => r.reputation_score >= 80).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'medium': {
+                    const ids = (repRows || []).filter((r: any) => r.reputation_score >= 50 && r.reputation_score < 80).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'low': {
+                    const ids = (repRows || []).filter((r: any) => r.reputation_score < 50).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'no_score': {
+                    if (allRecruiterIds.length > 0) {
+                        query = query.not('id', 'in', `(${allRecruiterIds.join(',')})`);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Hire rate tier — subquery on recruiter_reputation
+        if (params.hire_rate_tier) {
+            const { data: repRows } = await this.supabase
+                .from('recruiter_reputation')
+                .select('recruiter_id, hire_rate');
+
+            switch (params.hire_rate_tier) {
+                case 'high': {
+                    const ids = (repRows || []).filter((r: any) => r.hire_rate >= 20).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'medium': {
+                    const ids = (repRows || []).filter((r: any) => r.hire_rate >= 10 && r.hire_rate < 20).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'low': {
+                    const ids = (repRows || []).filter((r: any) => r.hire_rate < 10).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+            }
+        }
+
         // Filter by company relationship (for "My Recruiters" toggle)
         if (params.filters?.company_ids?.length) {
             const { data: rels } = await this.supabase

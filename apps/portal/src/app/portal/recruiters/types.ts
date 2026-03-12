@@ -12,6 +12,34 @@ export const RECRUITER_SORT_OPTIONS: BaselSortOption[] = [
     { value: "name", label: "Name" },
 ];
 
+export const CANDIDATE_RECRUITER_LABELS: Record<string, string> = {
+    yes: "Candidate Recruiter",
+    no: "Not Candidate Recruiter",
+};
+
+export const COMPANY_RECRUITER_LABELS: Record<string, string> = {
+    yes: "Company Recruiter",
+    no: "Not Company Recruiter",
+};
+
+export const MARKETPLACE_ENABLED_LABELS: Record<string, string> = {
+    yes: "Marketplace Enabled",
+    no: "Not on Marketplace",
+};
+
+export const REPUTATION_TIER_LABELS: Record<string, string> = {
+    high: "High (80+)",
+    medium: "Medium (50-79)",
+    low: "Low (< 50)",
+    no_score: "No Score",
+};
+
+export const HIRE_RATE_TIER_LABELS: Record<string, string> = {
+    high: "High (20%+)",
+    medium: "Medium (10-19%)",
+    low: "Low (< 10%)",
+};
+
 export interface RecruiterActivity {
     id: string;
     activity_type: string;
@@ -46,6 +74,11 @@ export interface MarketplaceFilters {
     status?: string;
     marketplace_enabled?: boolean;
     company_ids?: string[];
+    is_candidate_recruiter?: string;
+    is_company_recruiter?: string;
+    is_marketplace_enabled?: string;
+    reputation_tier?: string;
+    hire_rate_tier?: string;
 }
 
 /**

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { SearchInput } from "@/components/standard-lists";
 import {
     BaselControlsBarShell,
@@ -8,15 +9,20 @@ import {
     BaselRefreshButton,
     BaselFilterSelect,
     BaselSortSelect,
+    BaselExpandToggle,
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { InvitationFilters } from "../../types";
 import {
     INVITATION_STATUS_LABELS,
     INVITATION_SORT_OPTIONS,
+    CONSENT_STATUS_LABELS,
+    INVITATION_EXPIRY_LABELS,
 } from "../../types";
 
 const STATUS_OPTIONS = Object.entries(INVITATION_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const CONSENT_OPTIONS = Object.entries(CONSENT_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const EXPIRY_OPTIONS = Object.entries(INVITATION_EXPIRY_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -54,6 +60,8 @@ export function ControlsBar({
     sortOrder,
     onSortChange,
 }: ControlsBarProps) {
+    const [expanded, setExpanded] = useState(false);
+
     return (
         <BaselControlsBarShell
             action={
@@ -74,12 +82,33 @@ export function ControlsBar({
                 />
             }
             filters={
-                <BaselFilterSelect
-                    value={filters.status}
-                    onChange={(v) => onFilterChange("status", v)}
-                    options={STATUS_OPTIONS}
-                    placeholder="All Status"
-                />
+                <>
+                    <BaselFilterSelect
+                        value={filters.status}
+                        onChange={(v) => onFilterChange("status", v)}
+                        options={STATUS_OPTIONS}
+                        placeholder="All Status"
+                    />
+                    <BaselExpandToggle expanded={expanded} onToggle={() => setExpanded(!expanded)} />
+                </>
+            }
+            expandedFilters={
+                expanded ? (
+                    <>
+                        <BaselFilterSelect
+                            value={filters.consent_status}
+                            onChange={(v) => onFilterChange("consent_status", v)}
+                            options={CONSENT_OPTIONS}
+                            placeholder="Consent Status"
+                        />
+                        <BaselFilterSelect
+                            value={filters.expiry_status}
+                            onChange={(v) => onFilterChange("expiry_status", v)}
+                            options={EXPIRY_OPTIONS}
+                            placeholder="Expiry Status"
+                        />
+                    </>
+                ) : null
             }
             statusLeft={
                 <BaselResultsCount count={invitationCount} total={totalCount} />

@@ -99,7 +99,7 @@ export default function SupportChatPage() {
                 />
 
                 {/* Thread */}
-                <div className="flex-1 flex flex-col min-w-0">
+                <div className="flex-1 flex flex-col min-w-0 min-h-0">
                     {activeConversation ? (
                         <SupportThread
                             conversation={activeConversation}

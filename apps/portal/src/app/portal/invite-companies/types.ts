@@ -27,7 +27,19 @@ export interface CompanyInvitation {
 
 export interface InvitationFilters {
     status?: string;
+    has_email?: string;
+    expiry_status?: string;
 }
+
+export const HAS_EMAIL_LABELS: Record<string, string> = {
+    yes: "Email Sent",
+    no: "No Email",
+};
+
+export const INVITE_EXPIRY_LABELS: Record<string, string> = {
+    active: "Not Expired",
+    expired: "Expired",
+};
 
 export const INVITE_STATUS_LABELS: Record<string, string> = {
     pending: "Pending",

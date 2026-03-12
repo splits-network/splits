@@ -55,7 +55,7 @@ export function SupportQueue({
     onStatusFilterChange,
 }: SupportQueueProps) {
     return (
-        <div className="w-80 border-r border-base-300 flex flex-col bg-base-100">
+        <div className="w-80 border-r border-base-300 flex flex-col bg-base-100 min-h-0">
             {/* Filter */}
             <div className="p-3 border-b border-base-300">
                 <select

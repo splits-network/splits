@@ -34,6 +34,9 @@ export interface RecruiterCodeFilters {
     recruiter_id?: string;
     status?: 'active' | 'inactive';
     search?: string;
+    is_default?: string;
+    expiry_status?: string;
+    has_usage_limit?: string;
     page?: number;
     limit?: number;
     sort_by?: string;

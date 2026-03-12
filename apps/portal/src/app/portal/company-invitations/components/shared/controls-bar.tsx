@@ -11,9 +11,14 @@ import {
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { ConnectionFilters } from "../../types";
-import { CONNECTION_STATUS_LABELS, CONNECTION_SORT_OPTIONS } from "../../types";
+import {
+    CONNECTION_STATUS_LABELS,
+    CONNECTION_SORT_OPTIONS,
+    RELATIONSHIP_TYPE_LABELS,
+} from "../../types";
 
 const STATUS_OPTIONS = Object.entries(CONNECTION_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const RELATIONSHIP_TYPE_OPTIONS = Object.entries(RELATIONSHIP_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -60,12 +65,20 @@ export function ControlsBar({
                 />
             }
             filters={
-                <BaselFilterSelect
-                    value={filters.status}
-                    onChange={(v) => onFilterChange("status", v)}
-                    options={STATUS_OPTIONS}
-                    placeholder="All Status"
-                />
+                <>
+                    <BaselFilterSelect
+                        value={filters.status}
+                        onChange={(v) => onFilterChange("status", v)}
+                        options={STATUS_OPTIONS}
+                        placeholder="All Status"
+                    />
+                    <BaselFilterSelect
+                        value={filters.relationship_type}
+                        onChange={(v) => onFilterChange("relationship_type", v)}
+                        options={RELATIONSHIP_TYPE_OPTIONS}
+                        placeholder="All Roles"
+                    />
+                </>
             }
             statusLeft={
                 <BaselResultsCount count={invitationCount} total={totalCount} />

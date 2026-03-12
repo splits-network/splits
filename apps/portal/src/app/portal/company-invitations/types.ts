@@ -28,7 +28,13 @@ export interface RecruiterCompanyRelationship {
 
 export interface ConnectionFilters {
     status?: string;
+    relationship_type?: string;
 }
+
+export const RELATIONSHIP_TYPE_LABELS: Record<string, string> = {
+    sourcer: "Sourcer",
+    recruiter: "Recruiter",
+};
 
 export function getStatusLabel(status: string): string {
     switch (status) {

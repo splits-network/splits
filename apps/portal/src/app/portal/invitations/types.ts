@@ -5,7 +5,21 @@ export type Invitation = RecruiterCandidateWithCandidate;
 
 export interface InvitationFilters {
     status?: string;
+    consent_status?: string;
+    expiry_status?: string;
 }
+
+export const CONSENT_STATUS_LABELS: Record<string, string> = {
+    given: "Representing",
+    pending: "Awaiting Consent",
+    declined: "Declined",
+};
+
+export const INVITATION_EXPIRY_LABELS: Record<string, string> = {
+    active: "Not Expired",
+    expired: "Expired",
+    no_expiry: "No Expiry Set",
+};
 
 export const INVITATION_STATUS_LABELS: Record<string, string> = {
     pending: "Pending",

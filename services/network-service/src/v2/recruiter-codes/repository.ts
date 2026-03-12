@@ -65,7 +65,26 @@ export class RecruiterCodeRepository {
         }
         if (params.search) {
             query = query.or(`
-                code.ilike.%${params.search}%,
+                code.ilike.%${params.search}
+
+        if (params.is_default === 'yes') {
+            query = query.eq('is_default', true);
+        } else if (params.is_default === 'no') {
+            query = query.eq('is_default', false);
+        }
+        if (params.expiry_status === 'active') {
+            query = query.gte('expiry_date', new Date().toISOString());
+        } else if (params.expiry_status === 'expired') {
+            query = query.lt('expiry_date', new Date().toISOString()).not('expiry_date', 'is', null);
+        } else if (params.expiry_status === 'no_expiry') {
+            query = query.is('expiry_date', null);
+        }
+        if (params.has_usage_limit === 'yes') {
+            query = query.not('max_uses', 'is', null);
+        } else if (params.has_usage_limit === 'no') {
+            query = query.is('max_uses', null);
+        }
+%,
                 label.ilike.%${params.search}%
             `);
         }

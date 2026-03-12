@@ -72,6 +72,16 @@ export class CompanyInvitationRepository {
                 invite_code.ilike.%${params.search}%
             `);
         }
+        if (params.has_email === 'yes') {
+            query = query.not('email_sent_at', 'is', null);
+        } else if (params.has_email === 'no') {
+            query = query.is('email_sent_at', null);
+        }
+        if (params.expiry_status === 'active') {
+            query = query.gte('expires_at', new Date().toISOString());
+        } else if (params.expiry_status === 'expired') {
+            query = query.lt('expires_at', new Date().toISOString());
+        }
 
         // Sorting
         const sortBy = params.sort_by || 'created_at';

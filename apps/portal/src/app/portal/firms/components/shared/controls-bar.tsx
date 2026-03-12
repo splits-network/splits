@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { SearchInput } from "@/components/standard-lists";
 import {
     BaselControlsBarShell,
@@ -8,15 +9,28 @@ import {
     BaselRefreshButton,
     BaselFilterSelect,
     BaselSortSelect,
+    BaselExpandToggle,
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { FirmFilters } from "../../types";
-import { FIRM_SORT_OPTIONS } from "../../types";
+import {
+    FIRM_SORT_OPTIONS,
+    TEAM_SIZE_LABELS,
+    PLACEMENT_TYPE_LABELS,
+    CANDIDATE_FIRM_LABELS,
+    COMPANY_FIRM_LABELS,
+    MARKETPLACE_VISIBLE_LABELS,
+} from "../../types";
 
 const FIRM_STATUS_OPTIONS = [
     { value: "active", label: "Active" },
     { value: "suspended", label: "Suspended" },
 ];
+const TEAM_SIZE_OPTIONS = Object.entries(TEAM_SIZE_LABELS).map(([value, label]) => ({ value, label }));
+const PLACEMENT_TYPE_OPTIONS = Object.entries(PLACEMENT_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+const CANDIDATE_FIRM_OPTIONS = Object.entries(CANDIDATE_FIRM_LABELS).map(([value, label]) => ({ value, label }));
+const COMPANY_FIRM_OPTIONS = Object.entries(COMPANY_FIRM_LABELS).map(([value, label]) => ({ value, label }));
+const MARKETPLACE_OPTIONS = Object.entries(MARKETPLACE_VISIBLE_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -58,6 +72,10 @@ export function ControlsBar({
     sortOrder,
     onSortChange,
 }: ControlsBarProps) {
+    const [expanded, setExpanded] = useState(false);
+
+    const hasExpandedFilters = !!(filters.team_size_range || filters.is_candidate_firm || filters.is_company_firm || filters.is_marketplace_visible || filters.placement_type);
+
     return (
         <BaselControlsBarShell
             action={
@@ -113,7 +131,47 @@ export function ControlsBar({
                         viewMode={viewMode}
                         onViewModeChange={onViewModeChange}
                     />
+                    <BaselExpandToggle
+                        expanded={expanded || hasExpandedFilters}
+                        onToggle={() => setExpanded((prev) => !prev)}
+                    />
                 </>
+            }
+            expandedFilters={
+                (expanded || hasExpandedFilters) ? (
+                    <>
+                        <BaselFilterSelect
+                            value={filters.team_size_range}
+                            onChange={(v) => onFilterChange("team_size_range", v)}
+                            options={TEAM_SIZE_OPTIONS}
+                            placeholder="Team Size"
+                        />
+                        <BaselFilterSelect
+                            value={filters.placement_type}
+                            onChange={(v) => onFilterChange("placement_type", v)}
+                            options={PLACEMENT_TYPE_OPTIONS}
+                            placeholder="Placement Type"
+                        />
+                        <BaselFilterSelect
+                            value={filters.is_candidate_firm}
+                            onChange={(v) => onFilterChange("is_candidate_firm", v)}
+                            options={CANDIDATE_FIRM_OPTIONS}
+                            placeholder="Candidate Firm"
+                        />
+                        <BaselFilterSelect
+                            value={filters.is_company_firm}
+                            onChange={(v) => onFilterChange("is_company_firm", v)}
+                            options={COMPANY_FIRM_OPTIONS}
+                            placeholder="Company Firm"
+                        />
+                        <BaselFilterSelect
+                            value={filters.is_marketplace_visible}
+                            onChange={(v) => onFilterChange("is_marketplace_visible", v)}
+                            options={MARKETPLACE_OPTIONS}
+                            placeholder="Marketplace"
+                        />
+                    </>
+                ) : undefined
             }
         />
     );

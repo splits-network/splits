@@ -26,4 +26,23 @@ export interface RecruiterCode {
 
 export interface ReferralCodeFilters {
     status?: string;
+    is_default?: string;
+    expiry_status?: string;
+    has_usage_limit?: string;
 }
+
+export const IS_DEFAULT_LABELS: Record<string, string> = {
+    yes: "Default Code",
+    no: "Non-Default",
+};
+
+export const EXPIRY_STATUS_LABELS: Record<string, string> = {
+    active: "Not Expired",
+    expired: "Expired",
+    no_expiry: "No Expiry Set",
+};
+
+export const HAS_USAGE_LIMIT_LABELS: Record<string, string> = {
+    yes: "Has Limit",
+    no: "Unlimited",
+};

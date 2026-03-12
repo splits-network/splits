@@ -76,6 +76,24 @@ export class RecruiterCandidateRepository {
             query = query.eq('status', filters.status);
         }
 
+        // Consent status filter
+        if (filters.consent_status === 'given') {
+            query = query.eq('consent_given', true);
+        } else if (filters.consent_status === 'pending') {
+            query = query.eq('consent_given', false).is('declined_at', null);
+        } else if (filters.consent_status === 'declined') {
+            query = query.not('declined_at', 'is', null);
+        }
+        // Expiry status filter
+        if (filters.expiry_status === 'active') {
+            query = query.gte('invitation_expires_at', new Date().toISOString());
+        } else if (filters.expiry_status === 'expired') {
+            query = query.lt('invitation_expires_at', new Date().toISOString()).not('invitation_expires_at', 'is', null);
+        } else if (filters.expiry_status === 'no_expiry') {
+            query = query.is('invitation_expires_at', null);
+        }
+
+
         // Apply full-text search across all indexed fields
         // Searches: name, email, location, status with intelligent ranking
         // Example: "brandon active engineer" matches any Brandon who is active or has engineering keywords

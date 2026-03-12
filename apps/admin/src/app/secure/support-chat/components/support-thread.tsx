@@ -132,7 +132,7 @@ export function SupportThread({ conversation, onConversationUpdate }: SupportThr
     };
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col flex-1 min-h-0">
             {/* Header */}
             <div className="flex items-center justify-between gap-3 p-3 border-b border-base-300 bg-base-100">
                 <div className="min-w-0">
