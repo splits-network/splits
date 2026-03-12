@@ -20,6 +20,7 @@ interface UrgencyInput {
     unreadNotifications: number;
     profileCompletion: number;
     hasResume: boolean;
+    hasPrimaryResume: boolean;
 }
 
 const MAX_ITEMS = 3;
@@ -31,6 +32,7 @@ export function useUrgencyItems({
     unreadNotifications,
     profileCompletion,
     hasResume,
+    hasPrimaryResume,
 }: UrgencyInput): UrgencyItem[] {
     return useMemo(() => {
         const items: UrgencyItem[] = [];
@@ -129,9 +131,21 @@ export function useUrgencyItems({
             });
         }
 
+        // P2 (info): Has resumes but none marked as primary
+        if (hasResume && !hasPrimaryResume) {
+            items.push({
+                id: 'no-primary-resume',
+                priority: 2,
+                level: 'info',
+                icon: 'fa-star',
+                message: 'Set a primary resume so it auto-attaches to applications and powers better job matches',
+                href: '/portal/documents',
+            });
+        }
+
         // Sort by priority, take top N
         return items
             .sort((a, b) => a.priority - b.priority)
             .slice(0, MAX_ITEMS);
-    }, [applications, activeRecruiters, unreadMessages, unreadNotifications, profileCompletion, hasResume]);
+    }, [applications, activeRecruiters, unreadMessages, unreadNotifications, profileCompletion, hasResume, hasPrimaryResume]);
 }

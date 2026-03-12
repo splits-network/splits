@@ -48,6 +48,7 @@ export default function CandidateDashboard({
     const {
         profileCompletion,
         hasResume,
+        hasPrimaryResume,
         loading: profileLoading,
     } = useProfileCompletion();
 
@@ -220,6 +221,7 @@ export default function CandidateDashboard({
                     unreadNotifications={unreadNotifications}
                     profileCompletion={profileCompletion?.percentage || 100}
                     hasResume={hasResume}
+                    hasPrimaryResume={hasPrimaryResume}
                 />
             )}
 

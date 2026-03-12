@@ -351,6 +351,29 @@ function DocumentsContent() {
                     </div>
                 )}
 
+                {/* ── PRIMARY RESUME PROMPT ── */}
+                {!loading &&
+                    documents.some((d) => d.document_type === "resume") &&
+                    !documents.some((d) => isPrimaryResume(d)) && (
+                        <div className="border-l-4 border-warning bg-warning/5 p-5 sm:p-6 mb-8 flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="w-10 h-10 bg-warning/10 flex items-center justify-center shrink-0">
+                                <i className="fa-duotone fa-regular fa-star text-warning text-lg" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-base-content mb-1">
+                                    Set a primary resume
+                                </p>
+                                <p className="text-sm text-base-content/60 leading-relaxed">
+                                    Your primary resume auto-attaches to new
+                                    applications, powers smarter job matching, and
+                                    gives recruiters immediate access to your
+                                    qualifications. Click &ldquo;Set
+                                    Primary&rdquo; on your strongest resume below.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
                     {/* LEFT COLUMN — Upload + Tabs + Cards */}
                     <div>
