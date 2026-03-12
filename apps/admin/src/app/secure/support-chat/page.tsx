@@ -81,7 +81,7 @@ export default function SupportChatPage() {
     const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
 
     return (
-        <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+        <div className="flex flex-col h-full overflow-hidden">
             <AdminPageHeader
                 title="Support Chat"
                 subtitle="Live visitor support conversations"
