@@ -39,7 +39,7 @@ export default function InviteRecruiterModal({
         e.preventDefault();
 
         if (!selectedCompanyId) {
-            toast.error("Please select a company");
+            toast.error("Select a company to continue.");
             return;
         }
 
@@ -48,7 +48,7 @@ export default function InviteRecruiterModal({
 
             const token = await getToken();
             if (!token) {
-                toast.error("Not authenticated");
+                toast.error("Sign in to continue.");
                 return;
             }
 

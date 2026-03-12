@@ -224,7 +224,7 @@ function AdminTakeRateSection({
                 admin_take_rate: takeRate,
             });
 
-            toast.success("Admin take rate updated");
+            toast.success("Take rate updated.");
             onSaved();
         } catch (err: any) {
             const message =

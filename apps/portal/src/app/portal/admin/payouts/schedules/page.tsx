@@ -132,7 +132,7 @@ export default function PayoutSchedulesPage() {
                 if (!token) throw new Error('No auth token');
                 const apiClient = createAuthenticatedClient(token);
                 await apiClient.post(`/payout-schedules/${scheduleId}/trigger`);
-                toast.success('Schedule triggered successfully');
+                toast.success('Schedule triggered.');
                 refresh();
             } catch (error: any) {
                 console.error('Failed to trigger schedule:', error);
@@ -148,11 +148,11 @@ export default function PayoutSchedulesPage() {
                 if (!token) throw new Error('No auth token');
                 const apiClient = createAuthenticatedClient(token);
                 await apiClient.delete(`/payout-schedules/${scheduleId}`);
-                toast.success('Schedule cancelled successfully');
+                toast.success('Schedule cancelled.');
                 refresh();
             } catch (error) {
                 console.error('Failed to cancel schedule:', error);
-                toast.error('Failed to cancel schedule');
+                toast.error("Schedule couldn't be cancelled. Try again.");
             }
         } else if (type === 'retry') {
             setProcessingId(scheduleId);
@@ -164,7 +164,7 @@ export default function PayoutSchedulesPage() {
                     status: 'pending',
                     retry_count: 0,
                 });
-                toast.success('Schedule reset to pending');
+                toast.success('Schedule reset to pending.');
                 refresh();
             } catch (error: any) {
                 console.error('Failed to retry schedule:', error);

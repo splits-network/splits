@@ -84,10 +84,10 @@ export function ActionsToolbar({
             const client = createAuthenticatedClient(token);
             if (isMuted) {
                 await client.delete(`/chat/conversations/${convoId}/mute`);
-                toast.success("Conversation unmuted");
+                toast.success("Conversation unmuted.");
             } else {
                 await client.post(`/chat/conversations/${convoId}/mute`);
-                toast.success("Conversation muted");
+                toast.success("Conversation muted.");
             }
             refresh();
         } catch (err: any) {
@@ -105,10 +105,10 @@ export function ActionsToolbar({
             const client = createAuthenticatedClient(token);
             if (isArchived) {
                 await client.delete(`/chat/conversations/${convoId}/archive`);
-                toast.success("Conversation unarchived");
+                toast.success("Conversation unarchived.");
             } else {
                 await client.post(`/chat/conversations/${convoId}/archive`);
-                toast.success("Conversation archived");
+                toast.success("Conversation archived.");
             }
             refresh();
         } catch (err: any) {
@@ -129,7 +129,7 @@ export function ActionsToolbar({
             await client.post(`/chat/blocks`, {
                 blockedUserId: otherUserId,
             });
-            toast.success("User blocked");
+            toast.success("User blocked.");
             refresh();
         } catch (err: any) {
             toast.error(err?.message || "Failed to block user");
@@ -151,7 +151,7 @@ export function ActionsToolbar({
                 category: reportCategory,
                 description: reportDescription || undefined,
             });
-            toast.success("Report submitted");
+            toast.success("Report submitted.");
             setShowReportModal(false);
             setReportCategory("spam");
             setReportDescription("");

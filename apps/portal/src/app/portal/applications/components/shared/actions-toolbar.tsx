@@ -207,7 +207,7 @@ export default function ActionsToolbar({
             }
         } catch (err: any) {
             console.error("Failed to start chat:", err);
-            toast.error(err?.message || "Failed to start chat");
+            toast.error(err?.message || "Couldn't start conversation. Try again.");
         } finally {
             setStartingChat(false);
         }
@@ -282,10 +282,10 @@ export default function ActionsToolbar({
 
             if (isAcceptingApplication) {
                 toast.success(
-                    "Application accepted and moved to company review",
+                    "Application accepted. Moved to company review.",
                 );
             } else {
-                toast.success("Application moved to next stage successfully");
+                toast.success("Application advanced.");
             }
 
             setShowApproveModal(false);
@@ -326,7 +326,7 @@ export default function ActionsToolbar({
                 }
             }
 
-            toast.success("Application rejected");
+            toast.success("Application rejected.");
             setShowDenyModal(false);
             refresh();
         } catch (error: any) {
@@ -352,7 +352,7 @@ export default function ActionsToolbar({
                 in_response_to_id: data.in_response_to_id,
             });
 
-            toast.success("Note added successfully");
+            toast.success("Note added.");
             setShowNoteModal(false);
             refresh();
         } catch (error: any) {
@@ -391,7 +391,7 @@ export default function ActionsToolbar({
             }
 
             toast.success(
-                "Changes requested successfully. The candidate will be notified.",
+                "Changes requested. Candidate notified.",
             );
             setShowRequestChangesModal(false);
             refresh();
@@ -465,7 +465,7 @@ export default function ActionsToolbar({
                         onClose={() => setShowPreScreenModal(false)}
                         onSuccess={() => {
                             setShowPreScreenModal(false);
-                            toast.success("Pre-screen requested successfully!");
+                            toast.success("Pre-screen requested.");
                             refresh();
                         }}
                     />

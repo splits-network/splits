@@ -290,7 +290,7 @@ export function ApplicationDetail({
                                             );
                                             router.push(`/portal/messages?conversationId=${conversationId}`);
                                         } catch (err: any) {
-                                            toast.error(err?.message || "Failed to start chat");
+                                            toast.error(err?.message || "Couldn't start conversation. Try again.");
                                         } finally {
                                             setStartingChat(false);
                                         }

@@ -59,11 +59,11 @@ export default function InviteRecruiterModal({
 
     const handleSubmit = async () => {
         if (!selectedCompanyId) {
-            toast.error("Please select a company");
+            toast.error("Select a company to continue.");
             return;
         }
         if (!agreeTerms) {
-            toast.error("Please acknowledge the agreement");
+            toast.error("Acknowledge the agreement to continue.");
             return;
         }
 
@@ -71,7 +71,7 @@ export default function InviteRecruiterModal({
             setIsSubmitting(true);
             const token = await getToken();
             if (!token) {
-                toast.error("Not authenticated");
+                toast.error("Sign in to continue.");
                 return;
             }
 
@@ -100,7 +100,7 @@ export default function InviteRecruiterModal({
 
     const handleNext = () => {
         if (currentStep === 1 && !selectedCompanyId) {
-            toast.error("Please select a company before continuing");
+            toast.error("Select a company to continue.");
             return;
         }
         setCurrentStep((s) => Math.min(s + 1, 3));

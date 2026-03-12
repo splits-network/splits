@@ -116,11 +116,11 @@ export default function EscrowHoldsPage() {
             await apiClient.post(`/escrow-holds/${holdToRelease.id}/release`, {
                 notes: notes || undefined,
             });
-            toast.success('Escrow hold released successfully');
+            toast.success('Escrow hold released.');
             refresh();
         } catch (error) {
             console.error('Failed to release hold:', error);
-            toast.error('Failed to release hold');
+            toast.error("Hold couldn't be released. Try again.");
             throw error; // Propagate to modal
         } finally {
             setReleasingId(null);
@@ -149,11 +149,11 @@ export default function EscrowHoldsPage() {
             if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
             await apiClient.post(`/escrow-holds/${holdId}/cancel`);
-            toast.success('Escrow hold cancelled successfully');
+            toast.success('Escrow hold cancelled.');
             refresh();
         } catch (error) {
             console.error('Failed to cancel hold:', error);
-            toast.error('Failed to cancel hold');
+            toast.error("Hold couldn't be cancelled. Try again.");
         }
     }
 

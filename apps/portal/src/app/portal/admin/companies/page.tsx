@@ -106,7 +106,7 @@ export default function CompaniesAdminPage() {
             await apiClient.patch(`/companies/${companyId}`, {
                 status: newStatus,
             });
-            toast.success(`Company ${action}d successfully`);
+            toast.success(`Company ${action}d.`);
             refresh();
         } catch (err) {
             console.error(`Failed to ${action} company:`, err);

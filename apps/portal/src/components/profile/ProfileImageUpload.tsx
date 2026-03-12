@@ -33,12 +33,12 @@ export default function ProfileImageUpload({
         if (!file) return;
 
         if (!file.type.startsWith("image/")) {
-            toast.error("Please select an image file");
+            toast.error("Select an image file to upload.");
             return;
         }
 
         if (file.size > 5 * 1024 * 1024) {
-            toast.error("Image must be less than 5MB");
+            toast.error("File too large. Maximum size is 5MB.");
             return;
         }
 
@@ -74,7 +74,7 @@ export default function ProfileImageUpload({
                 const newImageUrl = updateResponse.data.profile_image_url;
                 setImageUrl(newImageUrl);
                 onImageUpdate(newImageUrl);
-                toast.success("Profile photo updated");
+                toast.success("Profile photo updated.");
             } else {
                 throw new Error("Failed to update profile image");
             }
@@ -106,10 +106,10 @@ export default function ProfileImageUpload({
 
             setImageUrl(undefined);
             onImageUpdate(null);
-            toast.success("Profile photo removed");
+            toast.success("Profile photo removed.");
         } catch (error) {
             console.error("Error deleting profile image:", error);
-            toast.error("Failed to remove profile photo");
+            toast.error("Photo couldn't be removed. Try again.");
         } finally {
             setDeleting(false);
         }

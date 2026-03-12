@@ -43,7 +43,7 @@ export default function ProfileForm({
             onSave?.();
         } catch (error) {
             console.error("Error saving profile:", error);
-            toast.error("Failed to save profile. Please try again.");
+            toast.error("Profile couldn't be saved. Check the required fields.");
         } finally {
             setSaving(false);
         }

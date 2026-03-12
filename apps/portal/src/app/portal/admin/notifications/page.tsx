@@ -219,17 +219,17 @@ export default function NotificationsAdminPage() {
                     `/site-notifications/${editingNotification.id}`,
                     body,
                 );
-                toast.success("Notification updated");
+                toast.success("Notification updated.");
             } else {
                 await apiClient.post("/site-notifications", body);
-                toast.success("Notification created");
+                toast.success("Notification created.");
             }
 
             setShowModal(false);
             refresh();
         } catch (err) {
             console.error("Failed to save notification:", err);
-            toast.error("Failed to save notification");
+            toast.error("Notification couldn't be saved. Try again.");
         } finally {
             setSubmitting(false);
         }
@@ -248,7 +248,7 @@ export default function NotificationsAdminPage() {
             await apiClient.patch(`/site-notifications/${notification.id}`, {
                 is_active: newActive,
             });
-            toast.success(`Notification ${action}d`);
+            toast.success(`Notification ${action}d.`);
             refresh();
         } catch (err) {
             console.error(`Failed to ${action} notification:`, err);
@@ -274,7 +274,7 @@ export default function NotificationsAdminPage() {
             const apiClient = createAuthenticatedClient(token);
 
             await apiClient.delete(`/site-notifications/${notification.id}`);
-            toast.success("Notification deleted");
+            toast.success("Notification deleted.");
             setSelectedIds((prev) => {
                 const next = new Set(prev);
                 next.delete(notification.id);
@@ -283,7 +283,7 @@ export default function NotificationsAdminPage() {
             refresh();
         } catch (err) {
             console.error("Failed to delete notification:", err);
-            toast.error("Failed to delete notification");
+            toast.error("Notification couldn't be deleted. Try again.");
         } finally {
             setUpdatingId(null);
         }
@@ -326,12 +326,12 @@ export default function NotificationsAdminPage() {
             await apiClient.post("/site-notifications/bulk-delete", {
                 ids: Array.from(selectedIds),
             });
-            toast.success(`${selectedIds.size} notification${selectedIds.size > 1 ? "s" : ""} deleted`);
+            toast.success(`${selectedIds.size} notification${selectedIds.size > 1 ? "s" : ""} deleted.`);
             setSelectedIds(new Set());
             refresh();
         } catch (err) {
             console.error("Failed to bulk delete notifications:", err);
-            toast.error("Failed to delete notifications");
+            toast.error("Notifications couldn't be deleted. Try again.");
         } finally {
             setBulkDeleting(false);
         }

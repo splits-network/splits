@@ -60,11 +60,11 @@ export default function FraudSignalsPage() {
                 reviewed_by: "admin",
                 is_false_positive: isFalsePositive,
             });
-            toast.success("Signal resolved");
+            toast.success("Signal resolved.");
             loadSignals();
         } catch (error) {
             console.error("Failed to resolve signal:", error);
-            toast.error("Failed to resolve signal");
+            toast.error("Signal couldn't be resolved. Try again.");
         }
     };
 

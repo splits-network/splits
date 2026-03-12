@@ -105,7 +105,7 @@ export default function PipelineModal({
             await fetchApplications();
         } catch (error) {
             console.error("Failed to update stage:", error);
-            toast.error("Failed to update stage");
+            toast.error("Stage couldn't be updated. Try again.");
         }
     };
 

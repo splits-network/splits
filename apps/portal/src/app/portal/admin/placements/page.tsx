@@ -117,7 +117,7 @@ export default function PlacementAdminPage() {
             const apiClient = createAuthenticatedClient(token);
             const response = await apiClient.post(`/placements/${placementId}/invoices`, {});
             setInvoiceCache(prev => ({ ...prev, [placementId]: response.data }));
-            toast.success('Invoice created successfully');
+            toast.success('Invoice created.');
         } catch (err: any) {
             toast.error(err.message || 'Failed to create invoice');
         } finally {

@@ -116,7 +116,7 @@ export default function ConnectionActionsToolbar({
         } catch (e: any) {
             toast.error(
                 e?.response?.data?.error?.message ||
-                    "Failed to revoke invitation",
+                    "Invitation couldn't be revoked. Try again.",
             );
         } finally {
             setRevoking(false);

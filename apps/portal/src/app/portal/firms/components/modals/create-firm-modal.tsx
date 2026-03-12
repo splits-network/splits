@@ -45,7 +45,7 @@ export default function CreateFirmModal({
             const client = createAuthenticatedClient(token);
             await client.post("/firms", { name: name.trim() });
 
-            toast.success("Firm created successfully!");
+            toast.success("Firm created.");
             onSuccess();
         } catch (err: any) {
             setError(err.message || "Failed to create firm");

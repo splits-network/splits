@@ -97,7 +97,7 @@ export function SectionConnections() {
             }
         } catch (err) {
             console.error("Failed to revoke GPT session:", err);
-            toast.error("Failed to revoke session");
+            toast.error("Session couldn't be revoked. Try again.");
         } finally {
             setRevokingSessionId(null);
         }

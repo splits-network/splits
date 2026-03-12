@@ -127,7 +127,7 @@ export function useOfferWizard(applicationId: string) {
                 });
             }
 
-            toast.success("Offer extended successfully");
+            toast.success("Offer extended.");
             setCompleted(true);
         } catch (err: any) {
             console.error("Failed to extend offer:", err);

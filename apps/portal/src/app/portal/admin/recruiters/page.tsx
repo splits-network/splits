@@ -90,7 +90,7 @@ export default function RecruiterManagementPage() {
             refresh();
         } catch (error) {
             console.error('Failed to update recruiter status:', error);
-            toast.error('Failed to update recruiter status');
+            toast.error("Recruiter status couldn't be updated. Try again.");
         } finally {
             setUpdatingId(null);
         }

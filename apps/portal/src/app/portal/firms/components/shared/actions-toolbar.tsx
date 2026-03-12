@@ -74,7 +74,7 @@ export function FirmActionsToolbar({
             if (!token) throw new Error("No auth token");
             const client = createAuthenticatedClient(token);
             await client.patch(`/firms/${firm.id}`, { status: newStatus });
-            toast.success(`Firm status updated to ${newStatus}!`);
+            toast.success(`Firm status updated to ${newStatus}.`);
             refresh();
         } catch (error: any) {
             console.error("Failed to update status:", error);

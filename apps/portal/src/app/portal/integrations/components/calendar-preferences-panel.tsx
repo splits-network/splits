@@ -145,10 +145,10 @@ export default function CalendarPreferencesPanel({
             const client = createAuthenticatedClient(token);
             await client.put("/interviews/calendar-preferences", prefs);
 
-            toast.success("Scheduling preferences saved");
+            toast.success("Preferences saved.");
         } catch (err: any) {
             console.error("Failed to save calendar preferences:", err);
-            toast.error("Failed to save preferences");
+            toast.error("Preferences couldn't be saved. Try again.");
         } finally {
             setSaving(false);
         }

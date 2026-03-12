@@ -114,14 +114,14 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
         try {
             const token = await getToken();
             if (!token) {
-                toast.error("Authentication required");
+                toast.error("Sign in to continue.");
                 setInviting(false);
                 return;
             }
 
             const { userId } = auth;
             if (!userId) {
-                toast.error("User ID not found");
+                toast.error("Sign in to continue.");
                 setInviting(false);
                 return;
             }
@@ -169,7 +169,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                     fetchInvitations();
                 } catch (error: any) {
                     console.error("Failed to revoke invitation:", error);
-                    toast.error(error.message || "Failed to revoke invitation");
+                    toast.error(error.message || "Invitation couldn't be revoked. Try again.");
                 } finally {
                     setConfirmModal(null);
                 }

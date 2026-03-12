@@ -422,7 +422,7 @@ export default function UniversalSubmitCandidateWizard({
                 document_ids: documentIds,
             });
 
-            toast.success("Candidate submitted successfully!");
+            toast.success("Candidate submitted.");
             onSuccess?.();
             onClose();
         } catch (err: any) {

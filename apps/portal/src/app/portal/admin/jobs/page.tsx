@@ -105,7 +105,7 @@ export default function JobsAdminPage() {
             const apiClient = createAuthenticatedClient(token);
 
             await apiClient.patch(`/jobs/${jobId}`, { status: newStatus });
-            toast.success(`Job ${action}d successfully`);
+            toast.success(`Job ${action}d.`);
             refresh();
         } catch (err) {
             console.error(`Failed to ${action} job:`, err);

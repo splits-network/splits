@@ -108,7 +108,7 @@ export default function RoleActionsToolbar({
 
         // Validate activates_at for early status
         if (newStatus === "early" && !activatesAtInput) {
-            toast.error("An activation date is required for Early Access status");
+            toast.error("Activation date required for Early Access.");
             return;
         }
 
@@ -124,7 +124,7 @@ export default function RoleActionsToolbar({
                 payload.activates_at = new Date(activatesAtInput).toISOString();
             }
             await client.patch(`/jobs/${job.id}`, payload);
-            toast.success(`Role status updated to ${newStatus}!`);
+            toast.success(`Role status updated to ${newStatus}.`);
             onUpdateItem?.(job.id, { status: newStatus });
             refresh();
         } catch (error: any) {
@@ -156,15 +156,15 @@ export default function RoleActionsToolbar({
                 });
             } else {
                 await navigator.clipboard.writeText(clipboardText);
-                toast.success("Job link copied to clipboard!");
+                toast.info("Link copied to clipboard.");
             }
         } catch (error: any) {
             if (error.name !== "AbortError") {
                 try {
                     await navigator.clipboard.writeText(clipboardText);
-                    toast.success("Job link copied to clipboard!");
+                    toast.info("Link copied to clipboard.");
                 } catch {
-                    toast.error("Failed to share job link");
+                    toast.error("Link couldn't be copied. Try again.");
                 }
             }
         } finally {

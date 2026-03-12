@@ -191,7 +191,7 @@ export default function ApplicationsAdminPage() {
                 `/applications/${applicationId}/trigger-ai-review`,
                 {},
             );
-            toast.success("AI review retriggered successfully");
+            toast.success("AI review retriggered.");
             refresh();
         } catch (err: any) {
             toast.error(

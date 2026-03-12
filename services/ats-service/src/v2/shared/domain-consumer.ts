@@ -66,6 +66,9 @@ export class DomainEventConsumer {
             // Bind to resume metadata extraction events from AI service
             await this.channel.bindQueue(this.queue, this.exchange, 'resume.metadata.extracted');
 
+            // Bind to primary resume change events from document service
+            await this.channel.bindQueue(this.queue, this.exchange, 'resume.primary.changed');
+
             this.logger.info('V2 ATS domain consumer connected to RabbitMQ');
 
             // Start consuming
@@ -122,6 +125,10 @@ export class DomainEventConsumer {
 
                 case 'resume.metadata.extracted':
                     await this.handleResumeMetadataExtracted(event);
+                    break;
+
+                case 'resume.primary.changed':
+                    await this.handleResumePrimaryChanged(event);
                     break;
 
                 default:
@@ -563,6 +570,28 @@ export class DomainEventConsumer {
                 'Failed to sync resume metadata'
             );
             // Don't rethrow - this is a non-critical sync operation
+        }
+    }
+
+    /**
+     * Handle resume.primary.changed event from document service
+     * When an existing document is marked as primary, sync its structured_metadata to the candidate
+     */
+    private async handleResumePrimaryChanged(event: DomainEvent): Promise<void> {
+        const { document_id, entity_type, entity_id } = event.payload;
+
+        if (entity_type !== 'candidate') {
+            this.logger.debug({ document_id, entity_type }, 'Primary resume change not for candidate, skipping');
+            return;
+        }
+
+        try {
+            await this.syncResumeDataToCandidate(document_id, entity_id);
+        } catch (error: any) {
+            this.logger.error(
+                { err: error, document_id, entity_id, error_message: error.message },
+                'Failed to sync resume metadata after primary change'
+            );
         }
     }
 

@@ -112,10 +112,10 @@ export default function NavigationAdminPage() {
 
             setServerConfig(draftConfig);
             setIsDirty(false);
-            toast.success("Navigation saved");
+            toast.success("Navigation saved.");
         } catch (err) {
             console.error("Failed to save navigation:", err);
-            toast.error("Failed to save navigation");
+            toast.error("Navigation couldn't be saved. Try again.");
         } finally {
             setSaving(false);
         }
@@ -139,7 +139,7 @@ export default function NavigationAdminPage() {
         setDraftConfig(config);
         setIsDirty(true);
         setShowImportModal(false);
-        toast.success("Config imported — review and save when ready");
+        toast.success("Config imported. Review and save when ready.");
     }
 
     function handleExportConfig() {

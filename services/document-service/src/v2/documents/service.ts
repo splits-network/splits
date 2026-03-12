@@ -188,14 +188,18 @@ export class DocumentServiceV2 {
         clerkUserId: string,
     ) {
         // Handle primary resume logic
+        let markedAsPrimary = false;
+        let documentForPrimary: any = null;
+
         if (updates.metadata?.is_primary_for_candidate === true) {
             // Get the document to check if it's a resume
-            const document = await this.repository.findDocument(
+            documentForPrimary = await this.repository.findDocument(
                 id,
                 clerkUserId,
             );
-            if (document && document.document_type === "resume") {
+            if (documentForPrimary && documentForPrimary.document_type === "resume") {
                 await this.clearOtherPrimaryResumes(id, clerkUserId);
+                markedAsPrimary = true;
             }
         }
 
@@ -210,6 +214,16 @@ export class DocumentServiceV2 {
                 document_id: id,
                 updates,
             });
+
+            // When an existing resume is marked as primary, notify ATS service
+            // so it can sync structured_metadata to candidates.resume_metadata
+            if (markedAsPrimary && documentForPrimary) {
+                await this.eventPublisher.publish("resume.primary.changed", {
+                    document_id: id,
+                    entity_type: documentForPrimary.entity_type,
+                    entity_id: documentForPrimary.entity_id,
+                });
+            }
         }
 
         return updated;

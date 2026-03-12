@@ -150,11 +150,11 @@ export default function PayoutsAdminPage() {
             if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
             await apiClient.post(`/payout-transactions/${transactionId}/process`);
-            toast.success('Payout transaction processed successfully');
+            toast.success('Payout processed.');
             refresh();
         } catch (error) {
             console.error('Failed to process payout transaction:', error);
-            toast.error('Failed to process payout transaction');
+            toast.error("Payout couldn't be processed. Try again.");
         } finally {
             setProcessingId(null);
         }

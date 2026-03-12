@@ -219,7 +219,7 @@ export default function ThreadPanel({
         if (!token) return;
         const client = createAuthenticatedClient(token);
         await client.post(`/chat/conversations/${conversationId}/decline`);
-        toast.success("Conversation declined");
+        toast.success("Conversation declined.");
         await fetchResync();
         requestChatRefresh();
     };
@@ -256,7 +256,7 @@ export default function ThreadPanel({
         if (!token) return;
         const client = createAuthenticatedClient(token);
         await client.post(`/chat/blocks`, { blockedUserId: otherUserId });
-        toast.success("User blocked");
+        toast.success("User blocked.");
         await fetchResync();
         requestChatRefresh();
     };
@@ -282,7 +282,7 @@ export default function ThreadPanel({
             category: reportCategory,
             description: description || undefined,
         });
-        toast.success("Report submitted");
+        toast.success("Report submitted.");
         setReportCategory("");
     };
 

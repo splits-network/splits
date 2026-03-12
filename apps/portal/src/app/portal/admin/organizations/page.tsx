@@ -100,7 +100,7 @@ export default function OrganizationsAdminPage() {
             await apiClient.patch(`/organizations/${orgId}`, {
                 status: newStatus,
             });
-            toast.success(`Organization ${action}d successfully`);
+            toast.success(`Organization ${action}d.`);
             refresh();
         } catch (err) {
             console.error(`Failed to ${action} organization:`, err);

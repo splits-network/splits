@@ -93,7 +93,7 @@ export default function AutomationControlsPage() {
             await loadData();
         } catch (error) {
             console.error("Failed to update rule status:", error);
-            toast.error("Failed to update rule status");
+            toast.error("Rule status couldn't be updated. Try again.");
         }
     };
 
@@ -117,7 +117,7 @@ export default function AutomationControlsPage() {
             await loadData();
         } catch (error) {
             console.error("Failed to approve execution:", error);
-            toast.error("Failed to approve execution");
+            toast.error("Execution couldn't be approved. Try again.");
         }
     };
 
@@ -142,7 +142,7 @@ export default function AutomationControlsPage() {
             await loadData();
         } catch (error) {
             console.error("Failed to reject execution:", error);
-            toast.error("Failed to reject execution");
+            toast.error("Execution couldn't be rejected. Try again.");
         }
     };
 

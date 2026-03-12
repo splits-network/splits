@@ -189,10 +189,10 @@ export function ProfileSettingsShell() {
             const changesToSave = { ...pendingChangesRef.current };
             pendingChangesRef.current = {};
             await client.patch(`/candidates/${candidateId}`, changesToSave);
-            toast.success("Profile updated!");
+            toast.success("Profile updated.");
         } catch (err) {
             console.error("Failed to save:", err);
-            toast.error("Failed to save changes");
+            toast.error("Changes couldn't be saved. Try again.");
         } finally {
             setSaving(false);
         }

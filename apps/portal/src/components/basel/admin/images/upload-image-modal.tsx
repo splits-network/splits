@@ -64,7 +64,7 @@ export function UploadImageModal({
 
     async function handleUpload() {
         if (!file) {
-            toast.error("Please select an image file");
+            toast.error("Select an image file to upload.");
             return;
         }
 
@@ -81,7 +81,7 @@ export function UploadImageModal({
             const apiClient = createAuthenticatedClient(token);
             await apiClient.post("/content-images", formData);
 
-            toast.success("Image uploaded");
+            toast.success("Image uploaded.");
             resetForm();
             onUploaded();
         } catch (err: any) {
