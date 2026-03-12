@@ -127,7 +127,7 @@ export default function RolesPage() {
         setSortBy,
         setSortOrder,
     } = useStandardList<Job, UnifiedJobFilters>({
-        endpoint: "/jobs",
+        endpoint: "/api/v3/jobs/views/recruiter-board",
         defaultFilters: { status: undefined, job_owner_filter: "assigned" },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",

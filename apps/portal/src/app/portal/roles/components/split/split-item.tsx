@@ -12,17 +12,20 @@ import {
     companyName,
 } from "../shared/helpers";
 import RoleActionsToolbar from "../shared/actions-toolbar";
+import { SaveBookmark } from "@/components/save-bookmark";
 
 export function SplitItem({
     job,
     isSelected,
     onSelect,
     onRefresh,
+    onUpdateItem,
 }: {
     job: Job;
     isSelected: boolean;
     onSelect: () => void;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     const emp = employmentBadge(job.employment_type);
     const commutes = commuteBadges(job.commute_types);
@@ -46,9 +49,14 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {job.title}
                     </h4>
-                    {job.is_saved && (
-                        <i className="fa-solid fa-bookmark text-warning text-sm flex-shrink-0" title="Saved" />
-                    )}
+                    <SaveBookmark
+                        entityType="job"
+                        entityId={job.id}
+                        isSaved={!!job.is_saved}
+                        savedRecordId={job.saved_record_id ?? null}
+                        size="xs"
+                        onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
+                    />
                 </div>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {postedAgo(job)}

@@ -14,6 +14,7 @@ import {
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/job-detail";
 import RoleActionsToolbar from "../shared/actions-toolbar";
+import { SaveBookmark } from "@/components/save-bookmark";
 
 export function TableRow({
     job,
@@ -66,9 +67,14 @@ export function TableRow({
                         <span className="font-bold text-sm text-base-content">
                             {job.title}
                         </span>
-                        {job.is_saved && (
-                            <i className="fa-solid fa-bookmark text-warning text-sm" title="Saved" />
-                        )}
+                        <SaveBookmark
+                            entityType="job"
+                            entityId={job.id}
+                            isSaved={!!job.is_saved}
+                            savedRecordId={job.saved_record_id ?? null}
+                            size="xs"
+                            onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
                     </div>
                 </td>
 

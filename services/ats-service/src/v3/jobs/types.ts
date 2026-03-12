@@ -102,7 +102,7 @@ export const listQuerySchema = {
     company_id: { type: 'string', format: 'uuid' },
     job_owner_filter: { type: 'string', enum: ['all', 'assigned', 'saved'] },
   },
-  additionalProperties: false,
+  additionalProperties: true,
 };
 
 export const createJobSchema = {

@@ -11,6 +11,7 @@ import {
     lastSeenAgo,
 } from "../shared/helpers";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
+import { SaveBookmark } from "@/components/save-bookmark";
 import {
     LevelBadge,
     useGamification,
@@ -64,9 +65,14 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {candidateName(candidate)}
                     </h4>
-                    {candidate.is_saved && (
-                        <i className="fa-solid fa-bookmark text-warning text-sm flex-shrink-0" title="Saved" />
-                    )}
+                    <SaveBookmark
+                        entityType="candidate"
+                        entityId={candidate.id}
+                        isSaved={!!candidate.is_saved}
+                        savedRecordId={candidate.saved_record_id ?? null}
+                        size="xs"
+                        onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
+                    />
                     {level && <span className="ml-1 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                     {acct && (
                         <span

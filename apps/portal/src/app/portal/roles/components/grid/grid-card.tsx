@@ -17,6 +17,7 @@ import {
     requiredSkillNames,
 } from "../shared/helpers";
 import RoleActionsToolbar from "../shared/actions-toolbar";
+import { SaveBookmark } from "@/components/save-bookmark";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 export function GridCard({

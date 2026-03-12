@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
@@ -35,6 +35,12 @@ export function SaveBookmark({
 
     const { endpoint, bodyKey, label } = CONFIG[entityType];
 
+    // Use refs to avoid stale closure — props change via optimistic updates
+    const isSavedRef = useRef(isSaved);
+    const savedRecordIdRef = useRef(savedRecordId);
+    isSavedRef.current = isSaved;
+    savedRecordIdRef.current = savedRecordId;
+
     const handleClick = useCallback(
         async (e: React.MouseEvent) => {
             e.stopPropagation();
@@ -44,8 +50,8 @@ export function SaveBookmark({
                 if (!token) throw new Error("No auth token");
                 const client = createAuthenticatedClient(token);
 
-                if (isSaved && savedRecordId) {
-                    await client.delete(`${endpoint}/${savedRecordId}`);
+                if (isSavedRef.current && savedRecordIdRef.current) {
+                    await client.delete(`${endpoint}/${savedRecordIdRef.current}`);
                     onToggle?.(false, null);
                     toast.info(`${label} removed from saved.`);
                 } else {
@@ -64,7 +70,8 @@ export function SaveBookmark({
                 setSaving(false);
             }
         },
-        [entityId, isSaved, savedRecordId, getToken, onToggle, toast, endpoint, bodyKey, label]
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [entityId, getToken, onToggle, toast, endpoint, bodyKey, label]
     );
 
     const sizeClass = size === "xs" ? "text-xs" : size === "sm" ? "text-sm" : "text-base";

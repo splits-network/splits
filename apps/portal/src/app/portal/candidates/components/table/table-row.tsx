@@ -11,6 +11,7 @@ import {
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/candidate-detail";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
+import { SaveBookmark } from "@/components/save-bookmark";
 import { relationshipBadge, jobTypeBadges, accountBadge } from "../shared/candidate-badges";
 import { BaselBadge } from "@splits-network/basel-ui";
 import {
@@ -77,9 +78,14 @@ export function TableRow({
                         <span className="font-bold text-sm text-base-content">
                             {candidateName(candidate)}
                         </span>
-                        {candidate.is_saved && (
-                            <i className="fa-solid fa-bookmark text-warning text-sm ml-1.5 inline-block align-middle" title="Saved" />
-                        )}
+                        <SaveBookmark
+                            entityType="candidate"
+                            entityId={candidate.id}
+                            isSaved={!!candidate.is_saved}
+                            savedRecordId={candidate.saved_record_id ?? null}
+                            size="xs"
+                            onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
                         {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                         {accountBadge(candidate) && (
                             <span

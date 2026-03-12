@@ -33,7 +33,6 @@ export class RecruiterBoardRepository {
         job_owner_recruiter_id, company_recruiter_id,
         company:companies(id, name, logo_url, industry, headquarters_location)
       `, { count: 'exact' })
-      .is('deleted_at', null)
       .eq('status', 'active');
 
     // Exclude early access jobs for non-partner tier

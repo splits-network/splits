@@ -37,6 +37,7 @@ export function SplitView({
                         job={job}
                         isSelected={selectedId === job.id}
                         onSelect={() => onSelect(job)}
+                        onUpdateItem={onUpdateItem}
                     />
                 ))}
             </div>

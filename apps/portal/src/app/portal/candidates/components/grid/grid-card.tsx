@@ -21,6 +21,7 @@ import {
     skillsList,
 } from "../shared/helpers";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
+import { SaveBookmark } from "@/components/save-bookmark";
 import {
     LevelBadge,
     useGamification,
@@ -150,6 +151,14 @@ export function GridCard({
                             size="sm"
                             status={presenceStatus}
                         />
+                        <SaveBookmark
+                            entityType="candidate"
+                            entityId={candidate.id}
+                            isSaved={!!candidate.is_saved}
+                            savedRecordId={candidate.saved_record_id ?? null}
+                            size="sm"
+                            onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
                     </div>
                 </div>
 
@@ -171,9 +180,6 @@ export function GridCard({
                         </p>
                         <h3 className="text-xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
-                            {candidate.is_saved && (
-                                <i className="fa-solid fa-bookmark text-warning text-sm ml-2 align-middle" title="Saved" />
-                            )}
                         </h3>
                     </div>
                 </div>
