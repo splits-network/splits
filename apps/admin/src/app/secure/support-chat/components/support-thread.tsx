@@ -211,7 +211,7 @@ export function SupportThread({ conversation, onConversationUpdate }: SupportThr
                                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </time>
                                 </div>
-                                <div className={`chat-bubble ${isAdmin ? 'chat-bubble-primary' : ''}`}>
+                                <div className={`chat-bubble ${isAdmin ? 'chat-bubble-primary' : 'chat-bubble-secondary'}`}>
                                     {msg.body}
                                 </div>
                             </div>

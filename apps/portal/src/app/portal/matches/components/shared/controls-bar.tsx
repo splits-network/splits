@@ -18,11 +18,23 @@ import {
     MATCH_STATUS_LABELS,
     MATCH_SCORE_LABELS,
     MATCH_SORT_OPTIONS,
+    SALARY_OVERLAP_LABELS,
+    LOCATION_COMPATIBLE_LABELS,
+    EMPLOYMENT_TYPE_MATCH_LABELS,
+    JOB_LEVEL_MATCH_LABELS,
+    AVAILABILITY_COMPATIBLE_LABELS,
+    INVITE_STATUS_LABELS,
 } from "../../types";
 
 const TIER_OPTIONS = Object.entries(MATCH_TIER_LABELS).map(([value, label]) => ({ value, label }));
 const STATUS_OPTIONS = Object.entries(MATCH_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 const SCORE_OPTIONS = Object.entries(MATCH_SCORE_LABELS).map(([value, label]) => ({ value, label }));
+const SALARY_OVERLAP_OPTIONS = Object.entries(SALARY_OVERLAP_LABELS).map(([value, label]) => ({ value, label }));
+const LOCATION_OPTIONS = Object.entries(LOCATION_COMPATIBLE_LABELS).map(([value, label]) => ({ value, label }));
+const EMPLOYMENT_TYPE_OPTIONS = Object.entries(EMPLOYMENT_TYPE_MATCH_LABELS).map(([value, label]) => ({ value, label }));
+const JOB_LEVEL_OPTIONS = Object.entries(JOB_LEVEL_MATCH_LABELS).map(([value, label]) => ({ value, label }));
+const AVAILABILITY_OPTIONS = Object.entries(AVAILABILITY_COMPATIBLE_LABELS).map(([value, label]) => ({ value, label }));
+const INVITE_STATUS_OPTIONS = Object.entries(INVITE_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -60,7 +72,7 @@ export function ControlsBar({
 }: ControlsBarProps) {
     const [expanded, setExpanded] = useState(false);
 
-    const hasExpandedFilters = filters.min_score !== undefined;
+    const hasExpandedFilters = !!(filters.min_score !== undefined || filters.salary_overlap || filters.location_compatible || filters.employment_type_match || filters.job_level_match || filters.availability_compatible || filters.invite_status);
 
     return (
         <BaselControlsBarShell
@@ -112,12 +124,50 @@ export function ControlsBar({
             }
             expandedFilters={
                 (expanded || hasExpandedFilters) ? (
-                    <BaselFilterSelect
-                        value={filters.min_score?.toString()}
-                        onChange={(v) => onFilterChange("min_score", v ? Number(v) : undefined)}
-                        options={SCORE_OPTIONS}
-                        placeholder="Any Score"
-                    />
+                    <>
+                        <BaselFilterSelect
+                            value={filters.min_score?.toString()}
+                            onChange={(v) => onFilterChange("min_score", v ? Number(v) : undefined)}
+                            options={SCORE_OPTIONS}
+                            placeholder="Any Score"
+                        />
+                        <BaselFilterSelect
+                            value={filters.salary_overlap}
+                            onChange={(v) => onFilterChange("salary_overlap", v || undefined)}
+                            options={SALARY_OVERLAP_OPTIONS}
+                            placeholder="Salary Fit"
+                        />
+                        <BaselFilterSelect
+                            value={filters.location_compatible}
+                            onChange={(v) => onFilterChange("location_compatible", v || undefined)}
+                            options={LOCATION_OPTIONS}
+                            placeholder="Location"
+                        />
+                        <BaselFilterSelect
+                            value={filters.employment_type_match}
+                            onChange={(v) => onFilterChange("employment_type_match", v || undefined)}
+                            options={EMPLOYMENT_TYPE_OPTIONS}
+                            placeholder="Employment Type"
+                        />
+                        <BaselFilterSelect
+                            value={filters.job_level_match}
+                            onChange={(v) => onFilterChange("job_level_match", v || undefined)}
+                            options={JOB_LEVEL_OPTIONS}
+                            placeholder="Job Level"
+                        />
+                        <BaselFilterSelect
+                            value={filters.availability_compatible}
+                            onChange={(v) => onFilterChange("availability_compatible", v || undefined)}
+                            options={AVAILABILITY_OPTIONS}
+                            placeholder="Availability"
+                        />
+                        <BaselFilterSelect
+                            value={filters.invite_status}
+                            onChange={(v) => onFilterChange("invite_status", v || undefined)}
+                            options={INVITE_STATUS_OPTIONS}
+                            placeholder="Invite Status"
+                        />
+                    </>
                 ) : undefined
             }
         />

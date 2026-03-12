@@ -19,11 +19,19 @@ import {
     RELATIONSHIP_STATUS_LABELS,
     COMPANY_SIZE_LABELS,
     COMPANY_SORT_OPTIONS,
+    STAGE_LABELS,
+    FOUNDED_YEAR_RANGE_LABELS,
+    HAS_OPEN_ROLES_LABELS,
+    RELATIONSHIP_TYPE_LABELS,
 } from "../../types";
 
 const INDUSTRY_OPTIONS = Object.entries(INDUSTRY_LABELS).map(([value, label]) => ({ value, label }));
 const STATUS_OPTIONS = Object.entries(RELATIONSHIP_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 const SIZE_OPTIONS = Object.entries(COMPANY_SIZE_LABELS).map(([value, label]) => ({ value, label }));
+const STAGE_OPTIONS = Object.entries(STAGE_LABELS).map(([value, label]) => ({ value, label }));
+const FOUNDED_YEAR_OPTIONS = Object.entries(FOUNDED_YEAR_RANGE_LABELS).map(([value, label]) => ({ value, label }));
+const HAS_OPEN_ROLES_OPTIONS = Object.entries(HAS_OPEN_ROLES_LABELS).map(([value, label]) => ({ value, label }));
+const RELATIONSHIP_TYPE_OPTIONS = Object.entries(RELATIONSHIP_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -67,7 +75,7 @@ export function ControlsBar({
     const [expanded, setExpanded] = useState(false);
 
     const isMyCompanies = activeTab === "my-companies";
-    const hasExpandedFilters = !!(filters.status || filters.company_size);
+    const hasExpandedFilters = !!(filters.status || filters.company_size || filters.stage || filters.founded_year_range || filters.has_open_roles || filters.relationship_type);
 
     return (
         <BaselControlsBarShell
@@ -136,6 +144,32 @@ export function ControlsBar({
                             options={SIZE_OPTIONS}
                             placeholder="All Sizes"
                         />
+                        <BaselFilterSelect
+                            value={filters.stage}
+                            onChange={(v) => onFilterChange("stage", v)}
+                            options={STAGE_OPTIONS}
+                            placeholder="All Stages"
+                        />
+                        <BaselFilterSelect
+                            value={filters.founded_year_range}
+                            onChange={(v) => onFilterChange("founded_year_range", v)}
+                            options={FOUNDED_YEAR_OPTIONS}
+                            placeholder="Founded"
+                        />
+                        <BaselFilterSelect
+                            value={filters.has_open_roles}
+                            onChange={(v) => onFilterChange("has_open_roles", v)}
+                            options={HAS_OPEN_ROLES_OPTIONS}
+                            placeholder="Open Roles"
+                        />
+                        {isMyCompanies && (
+                            <BaselFilterSelect
+                                value={filters.relationship_type}
+                                onChange={(v) => onFilterChange("relationship_type", v)}
+                                options={RELATIONSHIP_TYPE_OPTIONS}
+                                placeholder="Role Type"
+                            />
+                        )}
                     </>
                 ) : undefined
             }

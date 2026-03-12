@@ -16,12 +16,27 @@ export class SupportRepository {
         conversation: SupportConversation;
         message: SupportMessage;
     }> {
-        // Resolve user_id if authenticated
+        // Resolve user_id and auto-populate name/email if authenticated
         let userId: string | null = null;
+        let visitorName = input.visitorName || null;
+        let visitorEmail = input.visitorEmail || null;
+
         if (input.clerkUserId) {
             try {
                 const ctx = await resolveAccessContext(this.supabase, input.clerkUserId);
                 userId = ctx.identityUserId || null;
+
+                if (userId && (!visitorName || !visitorEmail)) {
+                    const { data: user } = await this.supabase
+                        .from('users')
+                        .select('name, email')
+                        .eq('id', userId)
+                        .single();
+                    if (user) {
+                        visitorName = visitorName || user.name || null;
+                        visitorEmail = visitorEmail || user.email || null;
+                    }
+                }
             } catch {
                 // Anonymous fallback — user_id stays null
             }
@@ -33,8 +48,8 @@ export class SupportRepository {
                 visitor_session_id: input.sessionId,
                 clerk_user_id: input.clerkUserId || null,
                 user_id: userId,
-                visitor_name: input.visitorName || null,
-                visitor_email: input.visitorEmail || null,
+                visitor_name: visitorName,
+                visitor_email: visitorEmail,
                 source_app: input.sourceApp,
                 category: input.category || null,
                 subject: input.subject || null,
@@ -152,12 +167,29 @@ export class SupportRepository {
     async linkSessionToUser(sessionId: string, clerkUserId: string): Promise<void> {
         try {
             const ctx = await resolveAccessContext(this.supabase, clerkUserId);
+            const userId = ctx.identityUserId || null;
+
+            const updates: Record<string, any> = {
+                clerk_user_id: clerkUserId,
+                user_id: userId,
+            };
+
+            // Auto-populate name/email from users table
+            if (userId) {
+                const { data: user } = await this.supabase
+                    .from('users')
+                    .select('name, email')
+                    .eq('id', userId)
+                    .single();
+                if (user) {
+                    if (user.name) updates.visitor_name = user.name;
+                    if (user.email) updates.visitor_email = user.email;
+                }
+            }
+
             await this.supabase
                 .from('support_conversations')
-                .update({
-                    clerk_user_id: clerkUserId,
-                    user_id: ctx.identityUserId || null,
-                })
+                .update(updates)
                 .eq('visitor_session_id', sessionId)
                 .is('clerk_user_id', null);
         } catch {

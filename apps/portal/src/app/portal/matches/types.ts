@@ -18,6 +18,12 @@ export interface MatchFilters {
     match_tier?: MatchTier;
     status?: MatchStatus;
     min_score?: number;
+    salary_overlap?: string;
+    location_compatible?: string;
+    employment_type_match?: string;
+    job_level_match?: string;
+    availability_compatible?: string;
+    invite_status?: string;
 }
 
 export const MATCH_TIER_LABELS: Record<string, string> = {
@@ -36,6 +42,38 @@ export const MATCH_SCORE_LABELS: Record<string, string> = {
     "55": "55+ Promising",
     "70": "70+ Strong",
     "85": "85+ Excellent",
+};
+
+export const SALARY_OVERLAP_LABELS: Record<string, string> = {
+    yes: "Salary Aligned",
+    no: "Salary Mismatch",
+};
+
+export const LOCATION_COMPATIBLE_LABELS: Record<string, string> = {
+    yes: "Location Compatible",
+    no: "Location Mismatch",
+};
+
+export const EMPLOYMENT_TYPE_MATCH_LABELS: Record<string, string> = {
+    yes: "Type Match",
+    no: "Type Mismatch",
+};
+
+export const JOB_LEVEL_MATCH_LABELS: Record<string, string> = {
+    yes: "Level Match",
+    no: "Level Mismatch",
+};
+
+export const AVAILABILITY_COMPATIBLE_LABELS: Record<string, string> = {
+    yes: "Available",
+    no: "Unavailable",
+};
+
+export const INVITE_STATUS_LABELS: Record<string, string> = {
+    sent: "Invited",
+    denied: "Denied",
+    applied: "Applied",
+    not_invited: "Not Invited",
 };
 
 export const MATCH_SORT_OPTIONS: BaselSortOption[] = [

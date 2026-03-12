@@ -63,12 +63,12 @@ export function SupportQueue({
                     value={statusFilter}
                     onChange={(e) => onStatusFilterChange(e.target.value)}
                 >
+                    <option value="">All</option>
                     <option value="open">Open</option>
                     <option value="waiting_on_admin">Waiting on Admin</option>
                     <option value="waiting_on_visitor">Waiting on Visitor</option>
                     <option value="resolved">Resolved</option>
                     <option value="closed">Closed</option>
-                    <option value="">All</option>
                 </select>
             </div>
 

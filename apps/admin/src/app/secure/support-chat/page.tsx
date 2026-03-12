@@ -44,7 +44,7 @@ export default function SupportChatPage() {
     const [conversations, setConversations] = useState<SupportConversation[]>([]);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState<string>('open');
+    const [statusFilter, setStatusFilter] = useState<string>('');
 
     // Keep admin presence alive while on this page
     useSupportPresence();
