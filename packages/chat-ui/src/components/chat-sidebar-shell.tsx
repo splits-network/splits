@@ -49,7 +49,7 @@ export function ChatSidebarShell({
 
     return (
         <div
-            className={`fixed bottom-0 right-0 shadow-md overflow-y-auto
+            className={`fixed bottom-0 right-0 z-50 shadow-md overflow-y-auto
                 max-h-[80vh] ${isMinimized ? "h-12" : "h-auto"} transition-[width,opacity] duration-300 ease-in-out
                 `}
             style={{
