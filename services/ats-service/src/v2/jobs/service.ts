@@ -12,15 +12,18 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 const VALID_COMMUTE_TYPES = ['remote', 'hybrid_1', 'hybrid_2', 'hybrid_3', 'hybrid_4', 'in_office'];
 const VALID_JOB_LEVELS = ['entry', 'mid', 'senior', 'lead', 'manager', 'director', 'vp', 'c_suite'];
+const NON_DRAFT_STATUSES = ['pending', 'active', 'paused', 'filled', 'closed'];
 
 export class JobServiceV2 {
     private accessResolver: AccessContextResolver;
+    private supabase: SupabaseClient;
 
     constructor(
         private repository: JobRepository,
         supabase: SupabaseClient,
         private eventPublisher?: IEventPublisher
     ) {
+        this.supabase = supabase;
         this.accessResolver = new AccessContextResolver(supabase);
     }
 
@@ -105,6 +108,9 @@ export class JobServiceV2 {
             throw new Error('activates_at is required when enabling early access');
         }
 
+        // Billing readiness gate — non-draft jobs require billing to be configured
+        await this.enforceBillingReadiness(status, data.company_id, data.source_firm_id);
+
         const job = await this.repository.createJob({
             ...data,
             job_owner_id: userContext.identityUserId,
@@ -155,6 +161,13 @@ export class JobServiceV2 {
                 currentJob.status,
                 updates.status,
                 userRole
+            );
+
+            // Billing readiness gate — block activation if billing not configured
+            await this.enforceBillingReadiness(
+                updates.status,
+                currentJob.company_id,
+                currentJob.source_firm_id
             );
 
             // Early access requires an activates_at date
@@ -260,6 +273,54 @@ export class JobServiceV2 {
                 // Log the error but don't prevent job deletion
                 console.error('Failed to publish job.deleted event:', error);
             }
+        }
+    }
+
+    /**
+     * Check billing readiness for a company or firm.
+     * Queries billing profile tables directly (no cross-service HTTP calls).
+     * Returns true if billing is ready (has profile, stripe customer, and payment method).
+     */
+    private async checkBillingReady(companyId?: string, firmId?: string): Promise<boolean> {
+        if (companyId) {
+            const { data } = await this.supabase
+                .from('company_billing_profiles')
+                .select('billing_email, stripe_customer_id, stripe_default_payment_method_id')
+                .eq('company_id', companyId)
+                .maybeSingle();
+
+            return !!(data?.billing_email && data?.stripe_customer_id && data?.stripe_default_payment_method_id);
+        }
+
+        if (firmId) {
+            const { data } = await this.supabase
+                .from('firm_billing_profiles')
+                .select('billing_email, stripe_customer_id, stripe_default_payment_method_id')
+                .eq('firm_id', firmId)
+                .maybeSingle();
+
+            return !!(data?.billing_email && data?.stripe_customer_id && data?.stripe_default_payment_method_id);
+        }
+
+        return false;
+    }
+
+    /**
+     * Enforce billing readiness for non-draft job statuses.
+     * Throws a descriptive error if billing is not configured.
+     */
+    private async enforceBillingReadiness(status: string, companyId?: string, firmId?: string): Promise<void> {
+        if (status === 'draft') return;
+
+        const isReady = await this.checkBillingReady(companyId, firmId);
+        if (!isReady) {
+            const entity = companyId ? 'company' : 'firm';
+            throw new Error(
+                `Billing setup is required before activating a role. ` +
+                `Please complete your payment setup in ${entity} settings. ` +
+                `Splits Network is commission-based — you are only charged when a recruiter successfully fills your role. ` +
+                `You can save this role as a draft and activate it after billing is configured.`
+            );
         }
     }
 

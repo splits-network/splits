@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Firm, FirmMember } from "../../types";
+import { BaselAlertBox } from "@splits-network/basel-ui";
 import { ReadinessChecklist, OrientationStrip } from "./billing-orientation";
 import { BillingSendColumn } from "./billing-send-column";
 import { BillingReceiveColumn } from "./billing-receive-column";
@@ -120,11 +121,29 @@ export function BillingSection({ firm, members }: BillingSectionProps) {
     }
 
     const billingConfigured = !!billingProfile;
+    const paymentMethodConfigured = !!billingProfile?.stripe_default_payment_method_id;
     const payoutConfigured = !!connectStatus?.onboarded;
     const bothConfigured = billingConfigured && payoutConfigured;
+    const billingReady = billingConfigured && paymentMethodConfigured;
 
     return (
         <div className="space-y-4">
+            {/* Contextual explanation — always visible */}
+            <BaselAlertBox variant="info" title="How firm billing works">
+                Splits Network is commission-based — your firm only pays when a recruiter successfully
+                fills a role you posted for an off-platform company. There are no upfront fees or subscriptions.
+                Your billing profile and payment method are used to process placement invoices when a hire is confirmed.
+            </BaselAlertBox>
+
+            {/* Action-required warning — shown when billing is incomplete */}
+            {!billingReady && (
+                <BaselAlertBox variant="warning" title="Billing setup required to post live roles">
+                    Your firm&apos;s roles cannot go live until billing setup is complete.
+                    Configure your billing profile and payment method below to start posting
+                    roles for your off-platform clients.
+                </BaselAlertBox>
+            )}
+
             <ReadinessChecklist
                 billingConfigured={billingConfigured}
                 payoutConfigured={payoutConfigured}

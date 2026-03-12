@@ -6,6 +6,8 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { useToast } from "@/lib/toast-context";
 import { BaselWizardModal, BaselAlertBox } from "@splits-network/basel-ui";
+import { useCompanyBillingStatus } from "@/hooks/use-company-billing-status";
+import { useFirmBillingStatus } from "@/hooks/use-firm-billing-status";
 import { StepBasicInfo } from "@/app/portal/roles/components/wizards/wizard-steps/step-basic-info";
 import { StepCompensation } from "@/app/portal/roles/components/wizards/wizard-steps/step-compensation";
 import { StepDescriptions } from "@/app/portal/roles/components/wizards/wizard-steps/step-descriptions";
@@ -89,11 +91,23 @@ export default function RoleWizardModal({
         status: "draft",
     });
 
+    // Billing readiness checks
+    const selectedCompanyId = roleSource === "company" ? (formData.company_id || null) : null;
+    const selectedFirmId = roleSource === "firm" ? (formData.source_firm_id || null) : null;
+    const { status: companyBillingStatus, loading: companyBillingLoading } = useCompanyBillingStatus(selectedCompanyId);
+    const { status: firmBillingStatus, loading: firmBillingLoading } = useFirmBillingStatus(selectedFirmId);
+
     // Derived state
     const hasFirms = userFirms.length > 0;
     const hasBothOptions = isRecruiterWithCompanyAccess && hasFirms;
     const isOffPlatform = isRecruiter && hasFirms && roleSource === "firm";
     const showCompanySelect = isAdmin || (isRecruiterWithCompanyAccess && companies.length > 1);
+
+    // Billing is ready if the selected entity has completed billing setup
+    const billingReady = isOffPlatform
+        ? firmBillingStatus === "ready"
+        : !selectedCompanyId || companyBillingStatus === "ready";
+    const billingLoading = isOffPlatform ? firmBillingLoading : companyBillingLoading;
 
     // ── Load existing job data (edit mode) ──
 
@@ -303,7 +317,7 @@ export default function RoleWizardModal({
             if (formData.activates_at) payload.activates_at = new Date(formData.activates_at).toISOString();
             if (formData.closes_at) payload.closes_at = new Date(formData.closes_at).toISOString();
             Object.assign(payload, {
-                status: formData.status, is_early_access: formData.is_early_access, is_priority: formData.is_priority,
+                status: billingReady ? formData.status : "draft", is_early_access: formData.is_early_access, is_priority: formData.is_priority,
                 employment_type: formData.employment_type,
                 open_to_relocation: formData.open_to_relocation, show_salary_range: formData.show_salary_range,
                 guarantee_days: formData.guarantee_days,
@@ -417,19 +431,47 @@ export default function RoleWizardModal({
             ) : (
                 <>
                     {currentStep === 0 && (
-                        <StepBasicInfo
-                            formData={formData}
-                            onChange={handleChange}
-                            companies={companies}
-                            userFirms={userFirms}
-                            roleSource={roleSource}
-                            onRoleSourceChange={setRoleSource}
-                            isOffPlatform={isOffPlatform}
-                            hasBothOptions={hasBothOptions}
-                            showCompanySelect={showCompanySelect}
-                            mode={mode}
-                            isRecruiter={!!isRecruiter}
-                        />
+                        <>
+                            {!billingReady && !billingLoading && (selectedCompanyId || selectedFirmId) && (
+                                <BaselAlertBox variant="warning" title="Payment Setup Required" className="mb-5">
+                                    <p className="mb-2">
+                                        Your {isOffPlatform ? "firm" : "company"} has not completed payment setup.
+                                        Splits Network is commission-based — you are only charged a placement fee when a recruiter
+                                        successfully fills your role. There are no upfront costs or subscriptions.
+                                    </p>
+                                    <p className="mb-3">
+                                        To post live roles, you need to configure your billing profile and payment method.
+                                        You can still save this role as a <strong>draft</strong> and activate it later.
+                                    </p>
+                                    <a
+                                        href={isOffPlatform
+                                            ? `/portal/firms/${selectedFirmId}?tab=billing`
+                                            : "/portal/company/settings?tab=billing"
+                                        }
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-warning btn-sm"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-credit-card mr-1" />
+                                        Set Up Billing
+                                    </a>
+                                </BaselAlertBox>
+                            )}
+                            <StepBasicInfo
+                                formData={formData}
+                                onChange={handleChange}
+                                companies={companies}
+                                userFirms={userFirms}
+                                roleSource={roleSource}
+                                onRoleSourceChange={setRoleSource}
+                                isOffPlatform={isOffPlatform}
+                                hasBothOptions={hasBothOptions}
+                                showCompanySelect={showCompanySelect}
+                                mode={mode}
+                                isRecruiter={!!isRecruiter}
+                                billingReady={billingReady}
+                            />
+                        </>
                     )}
                     {currentStep === 1 && <StepCompensation formData={formData} onChange={handleChange} mode={mode} />}
                     {currentStep === 2 && <StepDescriptions formData={formData} onChange={handleChange} />}

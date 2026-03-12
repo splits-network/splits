@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import RoleWizardModal from "@/app/portal/roles/components/modals/role-wizard-modal";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import { useCompanyStats } from "@/app/portal/dashboard/hooks/use-company-stats";
 import { useHiringPipeline } from "@/app/portal/dashboard/hooks/use-hiring-pipeline";
 import { useCompanyHealth } from "@/app/portal/dashboard/hooks/use-company-health";
@@ -22,7 +23,9 @@ import {
     BaselSectionHeading,
     BaselSidebarCard,
     BaselStatusPill,
+    BaselAlertBox,
 } from "@splits-network/basel-ui";
+import { useCompanyBillingStatus } from "@/hooks/use-company-billing-status";
 import { ChartLoadingState } from "@splits-network/shared-ui";
 import { PeriodSelector } from "@/components/basel/dashboard/shared/period-selector";
 import { KpiGrid } from "@/components/basel/dashboard/shared/kpi-grid";
@@ -119,10 +122,35 @@ const STATUS_COLORS: Record<string, "success" | "warning" | "error" | "info"> =
 /* ── Component ─────────────────────────────────────────────────────────────── */
 
 export default function CompanyView() {
-    const { userId } = useAuth();
+    const { userId, getToken } = useAuth();
     const { profile } = useUserProfile();
     const [trendPeriod, setTrendPeriod] = useState(6);
     const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+
+    /* Resolve company ID from organization */
+    const [companyId, setCompanyId] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function resolveCompany() {
+            const orgId = profile?.organization_ids?.[0];
+            if (!orgId) return;
+            try {
+                const token = await getToken();
+                if (!token) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Array<{ id: string; identity_organization_id: string }> }>("/companies");
+                const match = (res.data || []).find((c) => c.identity_organization_id === orgId);
+                if (match) setCompanyId(match.id);
+            } catch {
+                // Company resolution failed — billing banner won't show
+            }
+        }
+        resolveCompany();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profile?.organization_ids]);
+
+    /* Billing readiness */
+    const { status: billingStatus, loading: billingLoading } = useCompanyBillingStatus(companyId);
 
     /* Data hooks */
     const {
@@ -195,6 +223,29 @@ export default function CompanyView() {
                         </div>
                     </div>
                 </section>
+
+                {/* ── Billing Setup Banner ── */}
+                {!billingLoading && companyId && billingStatus !== "ready" && (
+                    <section className="px-4 lg:px-6 pb-2">
+                        <BaselAlertBox variant="warning" title="Complete Your Payment Setup">
+                            <p className="mb-2">
+                                Your company&apos;s billing profile is not yet configured.
+                                You&apos;ll need to set up your payment method before any roles can go live.
+                            </p>
+                            <p className="mb-3">
+                                Splits Network only charges placement fees when a recruiter
+                                successfully fills your role — there are no upfront costs or subscriptions.
+                            </p>
+                            <a
+                                href="/portal/company/settings?tab=billing"
+                                className="btn btn-warning btn-sm"
+                            >
+                                <i className="fa-duotone fa-regular fa-credit-card mr-1" />
+                                Complete Billing Setup
+                            </a>
+                        </BaselAlertBox>
+                    </section>
+                )}
 
                 {/* ── SECTION 2: KPIs ── */}
                 <section className="bg-base-200 py-4 lg:py-6 px-4 lg:px-6">

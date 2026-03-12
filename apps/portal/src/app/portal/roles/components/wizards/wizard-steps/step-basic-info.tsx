@@ -23,6 +23,7 @@ interface StepBasicInfoProps {
     showCompanySelect: boolean;
     mode: "create" | "edit";
     isRecruiter: boolean;
+    billingReady?: boolean;
 }
 
 export function StepBasicInfo({
@@ -37,6 +38,7 @@ export function StepBasicInfo({
     showCompanySelect,
     mode,
     isRecruiter,
+    billingReady = true,
 }: StepBasicInfoProps) {
     return (
         <div className="space-y-4">
@@ -176,16 +178,24 @@ export function StepBasicInfo({
                     </legend>
                     <select
                         className="select w-full"
-                        value={formData.status}
+                        value={!billingReady ? "draft" : formData.status}
                         onChange={(e) => onChange({ status: e.target.value as FormData["status"] })}
+                        disabled={!billingReady}
                     >
-                        {(isRecruiter && roleSource === "company"
-                            ? STATUS_OPTIONS.filter((opt) => opt.value === "draft" || opt.value === "pending")
-                            : STATUS_OPTIONS
+                        {(!billingReady
+                            ? STATUS_OPTIONS.filter((opt) => opt.value === "draft")
+                            : isRecruiter && roleSource === "company"
+                                ? STATUS_OPTIONS.filter((opt) => opt.value === "draft" || opt.value === "pending")
+                                : STATUS_OPTIONS
                         ).map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
+                    {!billingReady && (
+                        <p className="text-sm text-warning mt-1">
+                            Billing setup required to change status. This role will be saved as a draft.
+                        </p>
+                    )}
                 </fieldset>
 
                 <fieldset className="fieldset">
