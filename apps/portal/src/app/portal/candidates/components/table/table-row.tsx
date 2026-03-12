@@ -27,6 +27,7 @@ export function TableRow({
     colSpan,
     onSelect,
     onRefresh,
+    onUpdateItem,
 }: {
     candidate: Candidate;
     idx: number;
@@ -34,6 +35,7 @@ export function TableRow({
     colSpan: number;
     onSelect: () => void;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Candidate>) => void;
 }) {
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
@@ -145,6 +147,7 @@ export function TableRow({
                             variant="icon-only"
                             size="xs"
                             onRefresh={onRefresh}
+                            onUpdateItem={onUpdateItem}
                             showActions={{
                                 viewDetails: false,
                             }}

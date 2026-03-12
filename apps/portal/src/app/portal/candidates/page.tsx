@@ -49,7 +49,7 @@ export default function CandidatesPage() {
             const savedScope = localStorage.getItem(
                 SCOPE_KEY,
             ) as CandidateScope | null;
-            if (savedScope === "mine" || savedScope === "all") {
+            if (savedScope === "mine" || savedScope === "saved" || savedScope === "all") {
                 setScopeState(savedScope);
             }
             setScopeLoaded(true);
@@ -115,6 +115,7 @@ export default function CandidatesPage() {
         sortOrder,
         setSortBy,
         setSortOrder,
+        updateItem,
     } = useStandardList<Candidate, CandidateFilters>({
         endpoint: "/candidates",
         defaultFilters: { scope: scopeLoaded ? scope : "mine" },
@@ -220,24 +221,27 @@ export default function CandidatesPage() {
                             </div>
                         ) : candidates.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
-                                <i className="fa-duotone fa-regular fa-magnifying-glass text-5xl text-base-content/15 mb-6 block" />
+                                <i className={`fa-duotone fa-regular ${scope === "saved" ? "fa-bookmark" : "fa-magnifying-glass"} text-5xl text-base-content/15 mb-6 block`} />
                                 <h3 className="text-2xl font-black tracking-tight mb-2">
-                                    No candidates found
+                                    {scope === "saved" ? "No saved candidates yet" : "No candidates found"}
                                 </h3>
                                 <p className="text-base-content/50 mb-6">
-                                    No candidates match your current filters.
-                                    Clear them to see your full pipeline.
+                                    {scope === "saved"
+                                        ? "Browse candidates and use the bookmark icon to save them for quick access."
+                                        : "No candidates match your current filters. Clear them to see your full pipeline."}
                                 </p>
-                                <button
-                                    onClick={() => {
-                                        clearSearch();
-                                        clearFilters();
-                                    }}
-                                    className="btn btn-outline btn-sm"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    Clear Filters
-                                </button>
+                                {scope !== "saved" && (
+                                    <button
+                                        onClick={() => {
+                                            clearSearch();
+                                            clearFilters();
+                                        }}
+                                        className="btn btn-outline btn-sm"
+                                        style={{ borderRadius: 0 }}
+                                    >
+                                        Clear Filters
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <>
@@ -247,6 +251,7 @@ export default function CandidatesPage() {
                                         onSelect={handleSelect}
                                         selectedId={selectedCandidateId}
                                         onRefresh={refresh}
+                                        onUpdateItem={updateItem}
                                     />
                                 )}
                                 {viewMode === "grid" && (
@@ -255,6 +260,7 @@ export default function CandidatesPage() {
                                         onSelect={handleSelect}
                                         selectedId={selectedCandidateId}
                                         onRefresh={refresh}
+                                        onUpdateItem={updateItem}
                                     />
                                 )}
                                 {viewMode === "split" && (
@@ -263,6 +269,7 @@ export default function CandidatesPage() {
                                         onSelect={handleSelect}
                                         selectedId={selectedCandidateId}
                                         onRefresh={refresh}
+                                        onUpdateItem={updateItem}
                                     />
                                 )}
                             </>

@@ -19,11 +19,13 @@ export function TableView({
     onSelect,
     selectedId,
     onRefresh,
+    onUpdateItem,
 }: {
     candidates: Candidate[];
     onSelect: (c: Candidate) => void;
     selectedId: string | null;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Candidate>) => void;
 }) {
     return (
         <div className="overflow-x-auto border-2 border-base-300">
@@ -50,6 +52,7 @@ export function TableView({
                             colSpan={COLUMNS.length}
                             onSelect={() => onSelect(candidate)}
                             onRefresh={onRefresh}
+                            onUpdateItem={onUpdateItem}
                         />
                     ))}
                 </tbody>

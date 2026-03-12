@@ -261,6 +261,29 @@ export class CandidateRepository {
             query = query.in('id', candidateIds);
         }
 
+        // For recruiters with scope="saved": filter to candidates they have saved
+        if (accessContext.recruiterId && scope === 'saved') {
+            const { data: savedRows, error: savedError } = await this.supabase
+                .from('recruiter_saved_candidates')
+                .select('candidate_id')
+                .eq('recruiter_id', accessContext.recruiterId);
+
+            if (savedError) {
+                console.error('Error fetching saved candidates for filtering:', savedError);
+                throw savedError;
+            }
+
+            const savedIds = (savedRows || []).map((r: any) => r.candidate_id);
+            if (savedIds.length === 0) {
+                return {
+                    data: [],
+                    pagination: { page, limit, total: 0, total_pages: 0 },
+                };
+            }
+
+            query = query.in('id', savedIds);
+        }
+
         // Apply full-text search across all candidate fields
         if (search) {
             // Normalize special chars (email @._- , URL /:) to spaces to match indexing,
@@ -307,6 +330,25 @@ export class CandidateRepository {
             }
             for (const c of enrichedData) {
                 c.last_active_at = c.user_id ? (activityByUserId[c.user_id] || null) : null;
+            }
+        }
+
+        // Batch-fetch saved status for recruiter
+        if (accessContext.recruiterId && enrichedData.length > 0) {
+            const candidateIds = enrichedData.map((c: any) => c.id);
+            const { data: savedRows } = await this.supabase
+                .from('recruiter_saved_candidates')
+                .select('id, candidate_id')
+                .eq('recruiter_id', accessContext.recruiterId)
+                .in('candidate_id', candidateIds);
+
+            const savedMap = new Map<string, string>();
+            for (const r of savedRows || []) {
+                savedMap.set(r.candidate_id, r.id);
+            }
+            for (const c of enrichedData) {
+                c.is_saved = savedMap.has(c.id);
+                c.saved_record_id = savedMap.get(c.id) || null;
             }
         }
 

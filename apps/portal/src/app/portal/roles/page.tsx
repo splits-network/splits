@@ -212,24 +212,27 @@ export default function RolesPage() {
                             </div>
                         ) : jobs.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
-                                <i className="fa-duotone fa-regular fa-magnifying-glass text-5xl text-base-content/15 mb-6 block" />
+                                <i className={`fa-duotone fa-regular ${filters.job_owner_filter === "saved" ? "fa-bookmark" : "fa-magnifying-glass"} text-5xl text-base-content/15 mb-6 block`} />
                                 <h3 className="text-2xl font-black tracking-tight mb-2">
-                                    No matching roles
+                                    {filters.job_owner_filter === "saved" ? "No saved roles yet" : "No matching roles"}
                                 </h3>
                                 <p className="text-base-content/50 mb-6">
-                                    Adjust your search or clear filters to see
-                                    available positions.
+                                    {filters.job_owner_filter === "saved"
+                                        ? "Browse roles and use the bookmark icon to save them for quick access."
+                                        : "Adjust your search or clear filters to see available positions."}
                                 </p>
-                                <button
-                                    onClick={() => {
-                                        clearSearch();
-                                        clearFilters();
-                                    }}
-                                    className="btn btn-outline btn-sm"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    Reset Filters
-                                </button>
+                                {filters.job_owner_filter !== "saved" && (
+                                    <button
+                                        onClick={() => {
+                                            clearSearch();
+                                            clearFilters();
+                                        }}
+                                        className="btn btn-outline btn-sm"
+                                        style={{ borderRadius: 0 }}
+                                    >
+                                        Reset Filters
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <>

@@ -7,16 +7,19 @@ import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { RecruiterBoardRepository } from './recruiter-board.repository';
+import { RecruiterSavedJobRepository } from '../../recruiter-saved-jobs/repository';
 import { JobListParams } from '../types';
 
 export class RecruiterBoardService {
   private accessResolver: AccessContextResolver;
+  private savedJobRepo: RecruiterSavedJobRepository;
 
   constructor(
     private repository: RecruiterBoardRepository,
     supabase: SupabaseClient
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
+    this.savedJobRepo = new RecruiterSavedJobRepository(supabase);
   }
 
   async getBoard(params: JobListParams, clerkUserId: string) {
@@ -38,21 +41,38 @@ export class RecruiterBoardService {
       involvedJobIds = await this.repository.getInvolvedJobIds(context.recruiterId);
     }
 
+    // Get saved job IDs for saved filter
+    let savedJobIds: string[] | undefined;
+    if (params.job_owner_filter === 'saved') {
+      savedJobIds = await this.savedJobRepo.findJobIdsByRecruiter(context.recruiterId);
+      if (savedJobIds.length === 0) {
+        const page = params.page || 1;
+        const limit = Math.min(params.limit || 25, 100);
+        return {
+          data: [],
+          pagination: { total: 0, page, limit, total_pages: 0 },
+        };
+      }
+    }
+
     const { data: jobs, total } = await this.repository.findForBoard(
-      params, context.recruiterId, visibleStatuses, involvedJobIds
+      params, context.recruiterId, visibleStatuses, involvedJobIds, savedJobIds
     );
 
     // Batch-fetch enrichments
     const jobIds = jobs.map((j: any) => j.id);
-    const [skillsMap, appCounts] = await Promise.all([
+    const [skillsMap, appCounts, savedMap] = await Promise.all([
       this.repository.batchFetchSkills(jobIds),
       this.repository.batchFetchApplicationCounts(jobIds),
+      this.savedJobRepo.findSavedMapForJobs(context.recruiterId, jobIds),
     ]);
 
     const enriched = jobs.map((job: any) => ({
       ...job,
       skills: skillsMap[job.id] || [],
       application_count: appCounts[job.id] || 0,
+      is_saved: savedMap.has(job.id),
+      saved_record_id: savedMap.get(job.id) || null,
     }));
 
     const page = params.page || 1;

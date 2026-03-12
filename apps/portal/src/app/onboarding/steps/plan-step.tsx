@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { PricingCardGrid } from "@/components/pricing";
+import { BaselPricingCardGrid } from "@/components/basel/pricing/basel-pricing-card-grid";
 import { StripeProvider, PaymentForm } from "@/components/stripe";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ButtonLoading } from "@splits-network/shared-ui";
@@ -218,12 +218,11 @@ export function PlanStep({ state, actions }: PlanStepProps) {
                     )}
                 </div>
 
-                <PricingCardGrid
+                <BaselPricingCardGrid
                     plans={plans}
                     loading={plansLoading}
                     selectedPlanId={state.selectedPlan?.id || null}
                     onSelectPlan={handlePlanSelect}
-                    variant="default"
                     isAnnual={isAnnual}
                 />
 

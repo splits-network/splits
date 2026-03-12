@@ -72,6 +72,10 @@ export interface Job {
 
     // Computed/aggregated fields
     application_count?: number;
+
+    // Saved state (enriched by backend)
+    is_saved?: boolean;
+    saved_record_id?: string | null;
 }
 
 // ===== LABEL MAPS =====
@@ -185,7 +189,7 @@ export const ROLE_SORT_OPTIONS: BaselSortOption[] = [
  */
 export interface UnifiedJobFilters {
     // Scope
-    job_owner_filter?: "all" | "assigned";
+    job_owner_filter?: "all" | "assigned" | "saved";
 
     // Inline filters (Row 1)
     status?: string;

@@ -126,9 +126,10 @@ export function ControlsBar({
                 <>
                     <BaselScopeToggle
                         value={filters.job_owner_filter || "assigned"}
-                        onChange={(v) => onFilterChange("job_owner_filter", v as "all" | "assigned")}
+                        onChange={(v) => onFilterChange("job_owner_filter", v as "all" | "assigned" | "saved")}
                         options={[
                             { value: "assigned", label: "My Roles" },
+                            { value: "saved", label: "Saved" },
                             { value: "all", label: "All Roles" },
                         ]}
                     />

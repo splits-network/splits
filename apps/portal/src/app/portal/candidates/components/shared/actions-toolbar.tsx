@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
@@ -41,8 +42,10 @@ export interface CandidateActionsToolbarProps {
         verify?: boolean;
         endRepresentation?: boolean;
         requestRepresentation?: boolean;
+        save?: boolean;
     };
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Candidate>) => void;
     onViewDetails?: (candidateId: string) => void;
     onVerify?: (candidate: Candidate) => void;
     onMessage?: (
@@ -63,6 +66,7 @@ export default function CandidateActionsToolbar({
     size = "sm",
     showActions = {},
     onRefresh,
+    onUpdateItem,
     onViewDetails,
     onVerify,
     onMessage,
@@ -84,6 +88,7 @@ export default function CandidateActionsToolbar({
 
     /* ── Loading states ── */
     const [startingChat, setStartingChat] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     /* ── Chat presence ── */
     const canChat = Boolean(candidate.user_id);
@@ -164,6 +169,30 @@ export default function CandidateActionsToolbar({
         if (onViewDetails) onViewDetails(candidate.id);
     };
 
+    const handleToggleSave = useCallback(async () => {
+        setIsSaving(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const client = createAuthenticatedClient(token);
+
+            if (candidate.is_saved && candidate.saved_record_id) {
+                await client.delete(`/v3/recruiter-saved-candidates/${candidate.saved_record_id}`);
+                onUpdateItem?.(candidate.id, { is_saved: false, saved_record_id: null });
+                toast.info("Candidate removed from saved.");
+            } else {
+                const res = await client.post("/v3/recruiter-saved-candidates", { candidate_id: candidate.id });
+                onUpdateItem?.(candidate.id, { is_saved: true, saved_record_id: res?.data?.id });
+                toast.success("Candidate saved.");
+            }
+        } catch (error: any) {
+            console.error("Failed to toggle save:", error);
+            toast.error("Failed to update saved status.");
+        } finally {
+            setIsSaving(false);
+        }
+    }, [candidate.id, candidate.is_saved, candidate.saved_record_id, getToken, onUpdateItem, toast]);
+
     /* ── Action Visibility ── */
 
     const actions = {
@@ -186,6 +215,7 @@ export default function CandidateActionsToolbar({
             !candidate.has_active_relationship &&
             !candidate.has_pending_invitation &&
             Boolean(candidate.email),
+        save: showActions.save !== false && isRecruiter,
     };
 
     const getSizeClass = () => `btn-${size}`;
@@ -328,6 +358,17 @@ export default function CandidateActionsToolbar({
                 onClick: () => setShowTerminateModal(true),
             });
         }
+        if (actions.save) {
+            speedDialActions.push({
+                key: "save",
+                icon: candidate.is_saved ? "fa-solid fa-bookmark" : "fa-regular fa-bookmark",
+                label: candidate.is_saved ? "Unsave Candidate" : "Save Candidate",
+                variant: candidate.is_saved ? "btn-warning" : "btn-ghost",
+                disabled: isSaving,
+                loading: isSaving,
+                onClick: handleToggleSave,
+            });
+        }
         if (actions.message) {
             speedDialActions.push({
                 key: "message",
@@ -455,11 +496,32 @@ export default function CandidateActionsToolbar({
                     </button>
                 )}
 
+                {/* Save/Bookmark */}
+                {actions.save && (
+                    <button
+                        onClick={handleToggleSave}
+                        className={`btn ${getSizeClass()} ${candidate.is_saved ? "btn-warning" : "btn-ghost"} gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title={candidate.is_saved ? "Unsave Candidate" : "Save Candidate"}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className={candidate.is_saved ? "fa-solid fa-bookmark" : "fa-regular fa-bookmark"} />
+                        )}
+                        <span className="hidden md:inline">
+                            {candidate.is_saved ? "Saved" : "Save"}
+                        </span>
+                    </button>
+                )}
+
                 {/* Divider before Message */}
                 {actions.message &&
                     (actions.sendJobOpportunity ||
                         actions.verify ||
-                        actions.endRepresentation) && (
+                        actions.endRepresentation ||
+                        actions.save) && (
                         <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
                     )}
 

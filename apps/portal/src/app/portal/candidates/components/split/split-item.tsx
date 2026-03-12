@@ -23,11 +23,13 @@ export function SplitItem({
     isSelected,
     onSelect,
     onRefresh,
+    onUpdateItem,
 }: {
     candidate: Candidate;
     isSelected: boolean;
     onSelect: () => void;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Candidate>) => void;
 }) {
     const title = candidateTitle(candidate);
     const { getLevel } = useGamification();
@@ -135,6 +137,7 @@ export function SplitItem({
                     size="xs"
                     showActions={{ viewDetails: false }}
                     onRefresh={onRefresh}
+                    onUpdateItem={onUpdateItem}
                 />
             </div>
         </div>

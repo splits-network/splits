@@ -15,7 +15,8 @@ export class RecruiterBoardRepository {
     params: JobListParams,
     recruiterId: string,
     visibleStatuses: string[],
-    involvedJobIds?: string[]
+    involvedJobIds?: string[],
+    savedJobIds?: string[]
   ): Promise<{ data: any[]; total: number }> {
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
@@ -44,6 +45,11 @@ export class RecruiterBoardRepository {
         orConditions.push(`id.in.(${involvedJobIds.join(',')})`);
       }
       query = query.or(orConditions.join(','));
+    }
+
+    // Saved filter
+    if (params.job_owner_filter === 'saved' && savedJobIds) {
+      query = query.in('id', savedJobIds);
     }
 
     // Filters

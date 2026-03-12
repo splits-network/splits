@@ -121,6 +121,7 @@ export function ControlsBar({
                         onChange={(v) => onScopeChange(v as CandidateScope)}
                         options={[
                             { value: "mine", label: "My Candidates" },
+                            { value: "saved", label: "Saved" },
                             { value: "all", label: "All Candidates" },
                         ]}
                     />

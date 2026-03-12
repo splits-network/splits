@@ -32,6 +32,7 @@ export interface RoleActionsToolbarProps {
         edit?: boolean;
         statusActions?: boolean;
         share?: boolean;
+        save?: boolean;
     };
     onRefresh?: () => void;
     /** Synchronously patches the item in the React Query cache so every view
@@ -66,6 +67,7 @@ export default function RoleActionsToolbar({
     const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [showPipelineModal, setShowPipelineModal] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [statusAction, setStatusAction] = useState<string | null>(null);
     const [pendingStatus, setPendingStatus] = useState<"draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed" | null>(null);
@@ -191,6 +193,32 @@ export default function RoleActionsToolbar({
         }
     };
 
+    /* ── Save/Bookmark ── */
+
+    const handleToggleSave = async () => {
+        setIsSaving(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const client = createAuthenticatedClient(token);
+
+            if (job.is_saved && job.saved_record_id) {
+                await client.delete(`/v3/recruiter-saved-jobs/${job.saved_record_id}`);
+                onUpdateItem?.(job.id, { is_saved: false, saved_record_id: null });
+                toast.info("Role removed from saved.");
+            } else {
+                const res = await client.post("/v3/recruiter-saved-jobs", { job_id: job.id });
+                onUpdateItem?.(job.id, { is_saved: true, saved_record_id: res?.data?.id });
+                toast.success("Role saved.");
+            }
+        } catch (error: any) {
+            console.error("Failed to toggle save:", error);
+            toast.error("Failed to update saved status.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     /* ── Handlers ── */
 
     const handleViewDetails = () => onViewDetails?.(job.id);
@@ -216,6 +244,7 @@ export default function RoleActionsToolbar({
         edit: showActions.edit !== false && canManageRole,
         statusActions: showActions.statusActions !== false && canManageRole,
         share: showActions.share !== false,
+        save: showActions.save !== false && isRecruiter,
     };
 
     const getSizeClass = () => `btn-${size}`;
@@ -477,6 +506,17 @@ export default function RoleActionsToolbar({
                 onClick: () => setShowEditModal(true),
             });
         }
+        if (actions.save) {
+            speedDialActions.push({
+                key: "save",
+                icon: job.is_saved ? "fa-solid fa-bookmark" : "fa-regular fa-bookmark",
+                label: job.is_saved ? "Unsave Role" : "Save Role",
+                variant: job.is_saved ? "btn-warning" : "btn-ghost",
+                loading: isSaving,
+                disabled: isSaving,
+                onClick: handleToggleSave,
+            });
+        }
         if (actions.share) {
             speedDialActions.push({
                 key: "share",
@@ -583,6 +623,22 @@ export default function RoleActionsToolbar({
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square" />
                         <span className="hidden md:inline">Edit</span>
+                    </button>
+                )}
+                {actions.save && (
+                    <button
+                        onClick={handleToggleSave}
+                        className={`btn ${getSizeClass()} ${job.is_saved ? "btn-warning" : "btn-ghost"} gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title={job.is_saved ? "Unsave Role" : "Save Role"}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className={job.is_saved ? "fa-solid fa-bookmark" : "fa-regular fa-bookmark"} />
+                        )}
+                        <span className="hidden md:inline">{job.is_saved ? "Saved" : "Save"}</span>
                     </button>
                 )}
                 {actions.share && (

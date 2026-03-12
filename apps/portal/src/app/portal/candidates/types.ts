@@ -8,7 +8,7 @@ import type { BaselSortOption } from "@splits-network/basel-ui";
 
 export type { MarketplaceProfile, ResumeMetadata, RecruiterCandidateWithCandidate };
 
-export type CandidateScope = "mine" | "all";
+export type CandidateScope = "mine" | "saved" | "all";
 
 export interface Candidate
     extends Omit<BaseCandidate, "created_at" | "updated_at" | "marketplace_profile"> {
@@ -25,6 +25,10 @@ export interface Candidate
     other_active_recruiters_count?: number;
     is_sourcer?: boolean;
     last_active_at?: string | null;
+
+    // Saved state (enriched by backend)
+    is_saved?: boolean;
+    saved_record_id?: string | null;
 }
 
 export type RecruiterCandidate = RecruiterCandidateWithCandidate;

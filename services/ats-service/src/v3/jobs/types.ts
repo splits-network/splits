@@ -63,7 +63,7 @@ export interface JobListParams {
   commute_type?: string | string[];
   job_level?: string;
   company_id?: string;
-  job_owner_filter?: 'all' | 'assigned';
+  job_owner_filter?: 'all' | 'assigned' | 'saved';
   // Internal scoping fields (set by service, not from query params)
   visible_statuses?: string[];
   owner_recruiter_id?: string;
@@ -93,7 +93,7 @@ export const listQuerySchema = {
     commute_type: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
     job_level: { type: 'string' },
     company_id: { type: 'string', format: 'uuid' },
-    job_owner_filter: { type: 'string', enum: ['all', 'assigned'] },
+    job_owner_filter: { type: 'string', enum: ['all', 'assigned', 'saved'] },
   },
   additionalProperties: false,
 };

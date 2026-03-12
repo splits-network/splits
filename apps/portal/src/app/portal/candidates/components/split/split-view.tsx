@@ -10,11 +10,13 @@ export function SplitView({
     onSelect,
     selectedId,
     onRefresh,
+    onUpdateItem,
 }: {
     candidates: Candidate[];
     onSelect: (c: Candidate) => void;
     selectedId: string | null;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Candidate>) => void;
 }) {
     const selectedCandidate = candidates.find((c) => c.id === selectedId) ?? null;
 
@@ -32,6 +34,7 @@ export function SplitView({
                         candidate={candidate}
                         isSelected={selectedId === candidate.id}
                         onSelect={() => onSelect(candidate)}
+                        onUpdateItem={onUpdateItem}
                     />
                 ))}
             </div>
