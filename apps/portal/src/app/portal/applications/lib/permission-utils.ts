@@ -114,8 +114,8 @@ function getPermissionsByStage(
                 canApprove: isRecruiter || isCompanyUser || isPlatformAdmin,
                 canReject: isRecruiter || isCompanyUser || isPlatformAdmin,
                 canRequestChanges: isRecruiter || isPlatformAdmin,
-                approveButtonText: 'Approve for Company Review',
-                rejectButtonText: 'Reject Application',
+                approveButtonText: 'Send to Company',
+                rejectButtonText: 'Reject',
                 waitingMessage: 'Application is being screened.',
             };
 
@@ -125,8 +125,8 @@ function getPermissionsByStage(
                 canApprove: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canRequestPrescreen: !candidateRecruiterId && (isCompanyUser || isPlatformAdmin),
-                approveButtonText: 'Accept for Company Review',
-                rejectButtonText: 'Reject Application',
+                approveButtonText: 'Send to Company',
+                rejectButtonText: 'Reject',
                 waitingMessage: 'Application is awaiting company acceptance.',
             };
 
@@ -137,7 +137,7 @@ function getPermissionsByStage(
                 canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canMoveToOffer: true, // Special: can skip interview
                 approveButtonText: 'Move to Interview',
-                rejectButtonText: 'Reject Application',
+                rejectButtonText: 'Reject',
                 waitingMessage: 'Application is under company review.',
             };
 
@@ -174,7 +174,7 @@ function getPermissionsByStage(
                 canApprove: canAct,
                 canReject: canAct,
                 approveButtonText: 'Approve & Continue',
-                rejectButtonText: 'Reject Application',
+                rejectButtonText: 'Reject',
                 waitingMessage: candidateRecruiterId
                     ? 'Waiting for recruiter to review company feedback.'
                     : 'Application is pending further review.',
@@ -186,7 +186,7 @@ function getPermissionsByStage(
                 canApprove: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 approveButtonText: 'Extend Offer',
-                rejectButtonText: 'Reject Application',
+                rejectButtonText: 'Reject',
                 waitingMessage: 'Application is in the interview stage.',
             };
 
@@ -196,7 +196,7 @@ function getPermissionsByStage(
                 canApprove: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 approveButtonText: 'Mark as Hired',
-                rejectButtonText: 'Reject Application',
+                rejectButtonText: 'Reject',
                 waitingMessage: 'Application is in the offer stage.',
             };
 

@@ -775,7 +775,7 @@ export default function ActionsToolbar({
                         className={`btn ${sizeClass} btn-primary gap-2`}
                     >
                         <i className="fa-duotone fa-regular fa-phone" />
-                        Schedule Call
+                        Call
                     </button>
                 )}
                 {actions.sendEmail && (
