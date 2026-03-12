@@ -10,8 +10,8 @@ export interface V3RouteConfig {
   resource?: string;
   /** Single route path for views/actions (e.g., '/jobs/views/recruiter-board') */
   path?: string;
-  /** HTTP method — required when path is set. GET for views, POST for actions */
-  method?: 'GET' | 'POST';
+  /** HTTP method — required when path is set */
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   /** Authentication level */
   auth: AuthLevel;
 }
@@ -156,24 +156,35 @@ function registerSingleProxy(
   const preHandler = getPreHandler(route.auth);
   const routeOpts = preHandler ? { preHandler } : {};
 
-  if (route.method === 'GET') {
-    app.get(gatewayPath, routeOpts, async (request, reply) => {
-      // Replace :id param in service path if present
-      const params = request.params as Record<string, string>;
-      let resolvedPath = servicePath;
-      for (const [key, value] of Object.entries(params)) {
-        resolvedPath = resolvedPath.replace(`:${key}`, value);
-      }
-      return proxyGet(client, resolvedPath, request, reply);
-    });
-  } else {
-    app.post(gatewayPath, routeOpts, async (request, reply) => {
-      const params = request.params as Record<string, string>;
-      let resolvedPath = servicePath;
-      for (const [key, value] of Object.entries(params)) {
-        resolvedPath = resolvedPath.replace(`:${key}`, value);
-      }
-      return proxyMutate(client, 'post', resolvedPath, request, reply);
-    });
+  const resolveParams = (request: FastifyRequest) => {
+    const params = request.params as Record<string, string>;
+    let resolvedPath = servicePath;
+    for (const [key, value] of Object.entries(params)) {
+      resolvedPath = resolvedPath.replace(`:${key}`, value);
+    }
+    return resolvedPath;
+  };
+
+  switch (route.method) {
+    case 'GET':
+      app.get(gatewayPath, routeOpts, async (request, reply) => {
+        return proxyGet(client, resolveParams(request), request, reply);
+      });
+      break;
+    case 'POST':
+      app.post(gatewayPath, routeOpts, async (request, reply) => {
+        return proxyMutate(client, 'post', resolveParams(request), request, reply);
+      });
+      break;
+    case 'PATCH':
+      app.patch(gatewayPath, routeOpts, async (request, reply) => {
+        return proxyMutate(client, 'patch', resolveParams(request), request, reply);
+      });
+      break;
+    case 'DELETE':
+      app.delete(gatewayPath, routeOpts, async (request, reply) => {
+        return proxyMutate(client, 'delete', resolveParams(request), request, reply);
+      });
+      break;
   }
 }

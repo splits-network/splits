@@ -48,6 +48,8 @@ export class JobNoteService {
     if (!text || text.length === 0) throw new BadRequestError('message_text is required');
     if (text.length > 10000) throw new BadRequestError('message_text must be 10000 characters or fewer');
 
+    if (!context.identityUserId) throw new ForbiddenError('Could not resolve user identity');
+
     const note = await this.repository.create({
       ...data,
       created_by_type: creatorType,
