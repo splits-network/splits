@@ -51,6 +51,12 @@ const atsV3Routes: V3RouteConfig[] = [
 
   // ── Saved Jobs Views ───────────────────────────────────────────
   { path: '/saved-jobs/views/enriched', method: 'GET', auth: 'required' },
+
+  // ── Recruiter Saved Jobs Core CRUD ───────────────────────────
+  { resource: 'recruiter-saved-jobs', auth: 'required' },
+
+  // ── Recruiter Saved Candidates Core CRUD ─────────────────────
+  { resource: 'recruiter-saved-candidates', auth: 'required' },
 ];
 
 export function registerAtsV3Routes(app: FastifyInstance, services: ServiceRegistry) {

@@ -48,4 +48,34 @@ export class SupportEventConsumer {
             });
         }
     }
+
+    async handleTicketReplied(event: DomainEvent): Promise<void> {
+        const payload = event.payload || {};
+        const ticket = payload.ticket as Record<string, any> | undefined;
+        const reply = payload.reply as Record<string, any> | undefined;
+
+        if (!ticket || !reply) {
+            this.logger.warn({ payload }, 'support_ticket.replied event missing ticket or reply');
+            return;
+        }
+
+        const visitorEmail = ticket.visitor_email as string;
+        if (!visitorEmail) {
+            this.logger.info({ ticketId: ticket.id }, 'No visitor email on ticket; skipping reply notification');
+            return;
+        }
+
+        const sourceApp = (ticket.source_app as string) || 'portal';
+
+        await this.supportService.sendTicketReplyEmail({
+            recipientEmail: visitorEmail,
+            visitorName: (ticket.visitor_name as string) || undefined,
+            ticketSubject: (ticket.subject as string) || undefined,
+            ticketBody: (ticket.body as string) || '',
+            replyBody: (reply.body as string) || '',
+            ticketId: ticket.id as string,
+            sourceApp: sourceApp as 'portal' | 'candidate' | 'corporate',
+            userId: (ticket.user_id as string) || undefined,
+        });
+    }
 }

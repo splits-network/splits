@@ -11,7 +11,7 @@ const CATEGORIES = [
 ] as const;
 
 export function SupportOfflineForm() {
-    const { startConversation } = useSupportChat();
+    const { submitTicket } = useSupportChat();
     const [category, setCategory] = useState<string>('question');
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');
@@ -26,7 +26,7 @@ export function SupportOfflineForm() {
 
         setSending(true);
         try {
-            await startConversation({
+            await submitTicket({
                 body: body.trim(),
                 category,
                 subject: subject.trim() || undefined,
@@ -45,9 +45,9 @@ export function SupportOfflineForm() {
         return (
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                 <i className="fa-duotone fa-regular fa-circle-check text-success text-3xl mb-3" />
-                <p className="font-semibold text-base-content">Message sent!</p>
+                <p className="font-semibold text-base-content">Support ticket created!</p>
                 <p className="text-sm text-base-content/60 mt-1">
-                    We'll get back to you as soon as possible.
+                    We've received your message and will respond via email as soon as possible.
                 </p>
             </div>
         );
@@ -135,8 +135,8 @@ export function SupportOfflineForm() {
                     <span className="loading loading-spinner loading-sm" />
                 ) : (
                     <>
-                        <i className="fa-solid fa-paper-plane-top" />
-                        Send Message
+                        <i className="fa-solid fa-ticket" />
+                        Submit Ticket
                     </>
                 )}
             </button>

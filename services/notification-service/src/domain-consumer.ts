@@ -375,6 +375,9 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
             await this.channel.bindQueue(this.queue, this.exchange, 'chat.message.created');
 
+            // Support ticket events
+            await this.channel.bindQueue(this.queue, this.exchange, 'support_ticket.replied');
+
             // Onboarding events
             await this.channel.bindQueue(this.queue, this.exchange, 'user.registered');
             await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.created');
@@ -707,6 +710,9 @@ export class DomainEventConsumer {
 
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
+                break;
+            case 'support_ticket.replied':
+                await this.supportConsumer.handleTicketReplied(event);
                 break;
             case 'chat.message.created':
                 await this.chatConsumer.handleMessageCreated(event.payload as any);

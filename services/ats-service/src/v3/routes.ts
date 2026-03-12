@@ -12,6 +12,8 @@ import { registerJobRoutes } from './jobs/routes';
 import { registerJobRequirementRoutes } from './job-requirements/routes';
 import { registerJobSkillRoutes } from './job-skills/routes';
 import { registerSavedJobRoutes } from './saved-jobs/routes';
+import { registerRecruiterSavedJobRoutes } from './recruiter-saved-jobs/routes';
+import { registerRecruiterSavedCandidateRoutes } from './recruiter-saved-candidates/routes';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;
@@ -23,4 +25,6 @@ export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config)
   registerJobRequirementRoutes(app, config.supabase);
   registerJobSkillRoutes(app, config.supabase);
   registerSavedJobRoutes(app, config.supabase, config.eventPublisher);
+  registerRecruiterSavedJobRoutes(app, config.supabase, config.eventPublisher);
+  registerRecruiterSavedCandidateRoutes(app, config.supabase, config.eventPublisher);
 }

@@ -2,6 +2,7 @@ import {
     loadBaseConfig,
     loadDatabaseConfig,
     loadRedisConfig,
+    loadRabbitMQConfig,
 } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
@@ -23,6 +24,7 @@ async function main() {
     const baseConfig = loadBaseConfig('support-service');
     const dbConfig = loadDatabaseConfig();
     const redisConfig = loadRedisConfig();
+    const rabbitConfig = loadRabbitMQConfig();
     const supabaseKey = dbConfig.supabaseServiceRoleKey ?? dbConfig.supabaseAnonKey;
 
     if (!supabaseKey) {
@@ -83,6 +85,7 @@ async function main() {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
         redisConfig,
+        rabbitMqUrl: rabbitConfig.url,
     });
 
     app.get('/health', async (_request, reply) => {

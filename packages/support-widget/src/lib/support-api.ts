@@ -107,6 +107,50 @@ export async function getMyConversations(
     return json.data || [];
 }
 
+export interface SupportTicket {
+    id: string;
+    status: string;
+    category: string;
+    subject: string | null;
+    body: string;
+    created_at: string;
+}
+
+export async function createTicket(
+    config: SupportApiConfig,
+    input: {
+        body: string;
+        category?: string;
+        subject?: string;
+        visitorName?: string;
+        visitorEmail?: string;
+        sourceApp: string;
+        pageUrl?: string;
+        userAgent?: string;
+    },
+): Promise<SupportTicket> {
+    const headers = await buildHeaders(config);
+    const res = await fetch(`${config.baseUrl}/api/v2/support/tickets`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ sessionId: config.sessionId, ...input }),
+    });
+
+    if (!res.ok) throw new Error('Failed to create ticket');
+    const json = await res.json();
+    return json.data;
+}
+
+export async function linkSession(config: SupportApiConfig): Promise<void> {
+    const headers = await buildHeaders(config);
+    await fetch(`${config.baseUrl}/api/v2/support/conversations/link-session`, {
+        method: 'POST',
+        headers,
+    }).catch(() => {
+        // Best-effort linking
+    });
+}
+
 export async function getMessages(
     config: SupportApiConfig,
     conversationId: string,

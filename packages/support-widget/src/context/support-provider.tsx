@@ -24,6 +24,13 @@ interface SupportContextValue {
         visitorName?: string;
         visitorEmail?: string;
     }) => Promise<void>;
+    submitTicket: (input: {
+        body: string;
+        category?: string;
+        subject?: string;
+        visitorName?: string;
+        visitorEmail?: string;
+    }) => Promise<void>;
     sourceApp: string;
     subscribe: (channels: string[]) => void;
     sendTyping: (conversationId: string, started: boolean) => void;
@@ -97,6 +104,12 @@ export function SupportProvider({
         onEvent: handleEvent,
     });
 
+    // Link anonymous session to authenticated user when token becomes available
+    useEffect(() => {
+        if (!sessionId || !getToken) return;
+        api.linkSession(apiConfig.current);
+    }, [sessionId, getToken]);
+
     // Load existing conversations on mount
     useEffect(() => {
         if (!sessionId) return;
@@ -153,6 +166,21 @@ export function SupportProvider({
         subscribe([`conv:${result.conversation.id}`]);
     }, [sourceApp, subscribe]);
 
+    const submitTicket = useCallback(async (input: {
+        body: string;
+        category?: string;
+        subject?: string;
+        visitorName?: string;
+        visitorEmail?: string;
+    }) => {
+        await api.createTicket(apiConfig.current, {
+            ...input,
+            sourceApp,
+            pageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+        });
+    }, [sourceApp]);
+
     const value: SupportContextValue = {
         isOpen,
         toggle,
@@ -166,6 +194,7 @@ export function SupportProvider({
         unreadCount,
         sendMessage,
         startConversation,
+        submitTicket,
         sourceApp,
         subscribe,
         sendTyping,
