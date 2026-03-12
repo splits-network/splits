@@ -832,6 +832,7 @@ services:
       INTEGRATION_SERVICE_URL: http://integration-service:3016
       MATCHING_SERVICE_URL: http://matching-service:3017
       GAMIFICATION_SERVICE_URL: http://gamification-service:3018
+      SUPPORT_SERVICE_URL: http://support-service:3021
       ADMIN_CLERK_SECRET_KEY: ${ADMIN_CLERK_SECRET_KEY}
       CORS_ORIGIN: http://localhost:3200
     volumes:

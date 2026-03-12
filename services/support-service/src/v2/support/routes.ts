@@ -172,6 +172,22 @@ export async function registerSupportRoutes(
         }
     });
 
+    app.get('/admin/support/conversations/:id/messages', async (request, reply) => {
+        try {
+            requireAdminContext(request);
+            const { id } = request.params as { id: string };
+            const query = request.query as any;
+            const limit = Math.min(parseInt(query.limit || '50', 10), 100);
+            const before = query.before as string | undefined;
+            const messages = await service.listMessages(id, limit, before);
+            return reply.send({ data: messages });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
     app.post('/admin/support/conversations/:id/messages', async (request, reply) => {
         try {
             const { clerkUserId } = requireAdminContext(request);
