@@ -30,8 +30,12 @@ export class SupportEventPublisher {
 
     /** Publish to visitor-facing channel (support-gateway fans out) */
     async publishToConversation(conversationId: string, payload: SupportEventPayload): Promise<void> {
-        const channel = `support:conv:${conversationId}`;
-        await this.publish(channel, payload);
+        const visitorChannel = `support:conv:${conversationId}`;
+        const adminChannel = `admin:support:conv:${conversationId}`;
+        await Promise.all([
+            this.publish(visitorChannel, payload),
+            this.publish(adminChannel, payload),
+        ]);
     }
 
     /** Publish to admin queue channel (admin-gateway fans out) */

@@ -121,6 +121,13 @@ export class SupportServiceV2 {
             data: { message },
         });
 
+        await this.eventPublisher.publishToAdminQueue({
+            type: 'support.message.new',
+            eventVersion: 1,
+            serverTime: new Date().toISOString(),
+            data: { conversationId, message },
+        });
+
         return message;
     }
 
