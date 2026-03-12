@@ -108,6 +108,122 @@ export class PlacementRepository {
             query = query.eq('candidate_id', filters.candidate_id);
         }
 
+        // Salary range buckets
+        if (filters.salary_range) {
+            switch (filters.salary_range) {
+                case 'under_50k': query = query.lt('salary', 50000); break;
+                case '50k_100k': query = query.gte('salary', 50000).lt('salary', 100000); break;
+                case '100k_150k': query = query.gte('salary', 100000).lt('salary', 150000); break;
+                case '150k_200k': query = query.gte('salary', 150000).lt('salary', 200000); break;
+                case 'over_200k': query = query.gte('salary', 200000); break;
+            }
+        }
+
+        // Fee percentage range buckets
+        if (filters.fee_range) {
+            switch (filters.fee_range) {
+                case 'under_15': query = query.lt('fee_percentage', 15); break;
+                case '15_20': query = query.gte('fee_percentage', 15).lt('fee_percentage', 20); break;
+                case '20_25': query = query.gte('fee_percentage', 20).lt('fee_percentage', 25); break;
+                case 'over_25': query = query.gte('fee_percentage', 25); break;
+            }
+        }
+
+        // Placement fee amount buckets
+        if (filters.fee_amount_range) {
+            switch (filters.fee_amount_range) {
+                case 'under_10k': query = query.lt('placement_fee', 10000); break;
+                case '10k_25k': query = query.gte('placement_fee', 10000).lt('placement_fee', 25000); break;
+                case '25k_50k': query = query.gte('placement_fee', 25000).lt('placement_fee', 50000); break;
+                case 'over_50k': query = query.gte('placement_fee', 50000); break;
+            }
+        }
+
+        // Guarantee status
+        if (filters.guarantee_status) {
+            const now = new Date().toISOString();
+            const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            switch (filters.guarantee_status) {
+                case 'in_guarantee':
+                    query = query.gte('guarantee_expires_at', now);
+                    break;
+                case 'expiring_soon':
+                    query = query.gte('guarantee_expires_at', now).lte('guarantee_expires_at', thirtyDaysFromNow);
+                    break;
+                case 'expired':
+                    query = query.lt('guarantee_expires_at', now);
+                    break;
+                case 'no_guarantee':
+                    query = query.is('guarantee_expires_at', null);
+                    break;
+            }
+        }
+
+        // Is replacement placement
+        if (filters.is_replacement === 'yes') {
+            query = query.not('replacement_placement_id', 'is', null);
+        } else if (filters.is_replacement === 'no') {
+            query = query.is('replacement_placement_id', null);
+        }
+
+        // Has started (start_date <= today)
+        if (filters.has_started) {
+            const today = new Date().toISOString().split('T')[0];
+            if (filters.has_started === 'yes') {
+                query = query.lte('start_date', today);
+            } else if (filters.has_started === 'no') {
+                query = query.or(`start_date.gt.${today},start_date.is.null`);
+            }
+        }
+
+        // Invoice status (subquery on placement_invoices)
+        if (filters.invoice_status) {
+            if (filters.invoice_status === 'no_invoice') {
+                const { data: invoicedPlacements } = await this.supabase
+                    .from('placement_invoices')
+                    .select('placement_id');
+                const invoicedIds = [...new Set((invoicedPlacements || []).map((i: any) => i.placement_id))];
+                if (invoicedIds.length > 0) {
+                    query = query.not('id', 'in', `(${invoicedIds.join(',')})`);
+                }
+            } else {
+                const { data: matchingInvoices } = await this.supabase
+                    .from('placement_invoices')
+                    .select('placement_id')
+                    .eq('invoice_status', filters.invoice_status);
+                const matchingIds = [...new Set((matchingInvoices || []).map((i: any) => i.placement_id))];
+                if (matchingIds.length > 0) {
+                    query = query.in('id', matchingIds);
+                } else {
+                    return { data: [], total: 0 };
+                }
+            }
+        }
+
+        // Payout status (subquery on placement_payout_transactions)
+        if (filters.payout_status) {
+            if (filters.payout_status === 'no_payouts') {
+                const { data: paidPlacements } = await this.supabase
+                    .from('placement_payout_transactions')
+                    .select('placement_id');
+                const paidIds = [...new Set((paidPlacements || []).map((p: any) => p.placement_id))];
+                if (paidIds.length > 0) {
+                    query = query.not('id', 'in', `(${paidIds.join(',')})`);
+                }
+            } else {
+                const { data: matchingPayouts } = await this.supabase
+                    .from('placement_payout_transactions')
+                    .select('placement_id')
+                    .eq('status', filters.payout_status);
+                const matchingIds = [...new Set((matchingPayouts || []).map((p: any) => p.placement_id))];
+                if (matchingIds.length > 0) {
+                    query = query.in('id', matchingIds);
+                } else {
+                    return { data: [], total: 0 };
+                }
+            }
+        }
+
         // Apply sorting
         const sortBy = filters.sort_by || 'created_at';
         const sortOrder = filters.sort_order?.toLowerCase() === 'asc' ? true : false;

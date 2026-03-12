@@ -9,6 +9,13 @@ export interface ApplicationFilters extends PaginationParams, SortParams {
     stage?: string;
     job_id?: string;
     candidate_id?: string;
+    application_source?: string;
+    ai_reviewed?: string;
+    company_accepted?: string;
+    candidate_accepted?: string;
+    has_cover_letter?: string;
+    has_pre_screen?: string;
+    ai_score_filter?: string;
     include?: string;
 }
 

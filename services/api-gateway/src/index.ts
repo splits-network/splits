@@ -486,6 +486,18 @@ async function main() {
             return;
         }
 
+        // Skip auth for support endpoints (anonymous visitors allowed)
+        // Support uses session-based auth (x-support-session-id header), not Clerk JWT
+        if (request.url.startsWith('/api/v2/support')) {
+            // Try to authenticate if token is present, but don't fail if missing
+            try {
+                await authMiddleware.createMiddleware()(request, reply);
+            } catch (error) {
+                request.log.debug('No valid auth token for support endpoint, continuing as anonymous');
+            }
+            return;
+        }
+
         // Skip auth for public gamification endpoints (badges, XP, leaderboards)
         // These use optionalAuth() at the route level — try auth if present, don't fail if missing
         if (request.method === 'GET' && (
@@ -529,6 +541,7 @@ async function main() {
     services.register('gamification', process.env.GAMIFICATION_SERVICE_URL || 'http://localhost:3018');
     services.register('video', process.env.VIDEO_SERVICE_URL || 'http://localhost:3019');
     services.register('call', process.env.CALL_SERVICE_URL || 'http://localhost:3020');
+    services.register('support', process.env.SUPPORT_SERVICE_URL || 'http://localhost:3021');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

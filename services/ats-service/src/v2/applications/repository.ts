@@ -183,6 +183,92 @@ export class ApplicationRepository {
             query = query.eq('candidate_id', filters.candidate_id);
         }
 
+        // Application source filter (direct vs recruiter)
+        if (filters.application_source) {
+            query = query.eq('application_source', filters.application_source);
+        }
+
+        // AI reviewed filter (boolean column)
+        if (filters.ai_reviewed === 'yes') {
+            query = query.eq('ai_reviewed', true);
+        } else if (filters.ai_reviewed === 'no') {
+            query = query.eq('ai_reviewed', false);
+        }
+
+        // Company accepted filter (boolean + null for pending)
+        if (filters.company_accepted === 'yes') {
+            query = query.eq('accepted_by_company', true);
+        } else if (filters.company_accepted === 'no') {
+            query = query.eq('accepted_by_company', false);
+        } else if (filters.company_accepted === 'pending') {
+            query = query.is('accepted_by_company', null);
+        }
+
+        // Candidate accepted filter (boolean + null for pending)
+        if (filters.candidate_accepted === 'yes') {
+            query = query.eq('accepted_by_candidate', true);
+        } else if (filters.candidate_accepted === 'no') {
+            query = query.eq('accepted_by_candidate', false);
+        } else if (filters.candidate_accepted === 'pending') {
+            query = query.is('accepted_by_candidate', null);
+        }
+
+        // Has cover letter filter
+        if (filters.has_cover_letter === 'yes') {
+            query = query.not('cover_letter', 'is', null);
+        } else if (filters.has_cover_letter === 'no') {
+            query = query.is('cover_letter', null);
+        }
+
+        // Has pre-screen answers filter
+        if (filters.has_pre_screen === 'yes') {
+            query = query.not('pre_screen_answers', 'is', null);
+        } else if (filters.has_pre_screen === 'no') {
+            query = query.is('pre_screen_answers', null);
+        }
+
+        // AI score filter (subquery on ai_reviews table)
+        if (filters.ai_score_filter) {
+            const scoreQuery = this.supabase.from('ai_reviews').select('application_id, fit_score');
+
+            if (filters.ai_score_filter === 'not_reviewed') {
+                // Get application IDs that have NO ai_review
+                const { data: reviewedApps } = await this.supabase
+                    .from('ai_reviews')
+                    .select('application_id');
+                const reviewedIds = [...new Set((reviewedApps || []).map((r: any) => r.application_id))];
+                if (reviewedIds.length > 0) {
+                    query = query.not('id', 'in', `(${reviewedIds.join(',')})`);
+                }
+            } else {
+                let minScore = 0;
+                let maxScore = 100;
+                if (filters.ai_score_filter === 'high') {
+                    minScore = 80;
+                } else if (filters.ai_score_filter === 'medium') {
+                    minScore = 50; maxScore = 79;
+                } else if (filters.ai_score_filter === 'low') {
+                    maxScore = 49;
+                }
+
+                const { data: matchingReviews } = await this.supabase
+                    .from('ai_reviews')
+                    .select('application_id')
+                    .gte('fit_score', minScore)
+                    .lte('fit_score', maxScore);
+
+                const matchingIds = [...new Set((matchingReviews || []).map((r: any) => r.application_id))];
+                if (matchingIds.length > 0) {
+                    query = query.in('id', matchingIds);
+                } else {
+                    return {
+                        data: [],
+                        pagination: { page, limit, total: 0, total_pages: Math.ceil(0 / limit) }
+                    };
+                }
+            }
+        }
+
         // Apply sorting
         const sortBy = filters.sort_by || 'created_at';
         const sortOrder = filters.sort_order?.toLowerCase() === 'asc' ? true : false;

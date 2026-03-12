@@ -64,7 +64,7 @@ export function SupportProvider({
     const [unreadCount, setUnreadCount] = useState(0);
 
     const resolvedGatewayUrl = gatewayUrl || process.env.NEXT_PUBLIC_SUPPORT_GATEWAY_URL || '';
-    const resolvedApiBaseUrl = apiBaseUrl || process.env.NEXT_PUBLIC_API_GATEWAY_URL || '';
+    const resolvedApiBaseUrl = apiBaseUrl || process.env.NEXT_PUBLIC_API_GATEWAY_URL || process.env.NEXT_PUBLIC_API_URL || '';
 
     const apiConfig = useRef<api.SupportApiConfig>({
         baseUrl: resolvedApiBaseUrl,
