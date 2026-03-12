@@ -5,7 +5,7 @@ import { useSupportChat } from '../context/support-provider';
 import { SupportMessageBubble } from './support-message-bubble';
 
 export function SupportChatView() {
-    const { messages, sendMessage, activeConversation, sendTyping } = useSupportChat();
+    const { messages, sendMessage, startConversation, activeConversation, sendTyping } = useSupportChat();
     const [input, setInput] = useState('');
     const [sending, setSending] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -24,7 +24,12 @@ export function SupportChatView() {
         setSending(true);
         setInput('');
         try {
-            await sendMessage(text);
+            if (activeConversation) {
+                await sendMessage(text);
+            } else {
+                // First message — create the conversation
+                await startConversation({ body: text });
+            }
         } catch {
             setInput(text); // Restore on failure
         } finally {
@@ -39,23 +44,21 @@ export function SupportChatView() {
         }
     };
 
-    if (!activeConversation) {
-        return (
-            <div className="flex-1 flex items-center justify-center p-6">
-                <p className="text-sm text-base-content/50 text-center">
-                    Start a conversation by sending a message below.
-                </p>
-            </div>
-        );
-    }
-
     return (
         <div className="flex flex-col flex-1 min-h-0">
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-1">
-                {messages.map((msg) => (
-                    <SupportMessageBubble key={msg.id} message={msg} />
-                ))}
+                {messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                        <p className="text-sm text-base-content/50 text-center">
+                            Start a conversation by sending a message below.
+                        </p>
+                    </div>
+                ) : (
+                    messages.map((msg) => (
+                        <SupportMessageBubble key={msg.id} message={msg} />
+                    ))
+                )}
             </div>
 
             {/* Input */}

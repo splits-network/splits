@@ -108,11 +108,21 @@ export function GridCard({
                         )}
                     </div>
 
-                    {!job.company_id && job.source_firm_id && (
-                        <BaselBadge color="warning" variant="soft" size="sm">
-                            3rd Party
-                        </BaselBadge>
-                    )}
+                    <div className="flex items-center gap-1">
+                        {!job.company_id && job.source_firm_id && (
+                            <BaselBadge color="warning" variant="soft" size="sm">
+                                3rd Party
+                            </BaselBadge>
+                        )}
+                        <SaveBookmark
+                            entityType="job"
+                            entityId={job.id}
+                            isSaved={!!job.is_saved}
+                            savedRecordId={job.saved_record_id ?? null}
+                            size="sm"
+                            onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
+                    </div>
                 </div>
 
                 {/* Avatar + Title block */}
@@ -141,9 +151,6 @@ export function GridCard({
                         </p>
                         <h3 className="text-xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {job.title}
-                            {job.is_saved && (
-                                <i className="fa-solid fa-bookmark text-warning text-sm ml-2 align-middle" title="Saved" />
-                            )}
                         </h3>
                     </div>
                 </div>
