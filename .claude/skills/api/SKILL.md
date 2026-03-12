@@ -83,3 +83,13 @@ Study `services/ats-service/src/v2/jobs/` as the V2 pattern reference (for under
 5. Update parent `v3/routes.ts` — Register the new domain
 6. Add gateway proxy — declarative config in `services/api-gateway/src/routes/v3/<service>.ts`
 7. Add views/actions as needed (each is a separate three-file set + gateway entry)
+
+## Frontend Migration
+
+After backend migration and validation, migrate frontend consumers using `/api-frontend:*`:
+
+```
+/api-frontend:scan → /api-frontend:migrate → /api-frontend:validate → /api-frontend:cleanup
+```
+
+Frontend migration must complete before running `/api:deprecate`. See `.claude/skills/api-frontend/SKILL.md` for details.

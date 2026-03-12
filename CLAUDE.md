@@ -69,19 +69,28 @@ Design standards: in the root /showcase directory
 
 ## Skills (On-Demand Patterns)
 
-| Skill             | Purpose                       |
-| ----------------- | ----------------------------- |
-| `/api:scaffold`   | Scaffold V2 backend resource  |
-| `/api:audit`      | Audit service V2 compliance   |
-| `/migration`      | Create database migration     |
-| `/test:scaffold`  | Scaffold Vitest tests         |
-| `/event:scaffold` | Scaffold RabbitMQ event flow  |
-| `/auth`           | Clerk auth patterns & gotchas |
-| `/ui`             | DaisyUI component patterns    |
-| `/email:scaffold` | Create email template         |
-| `/basel`          | Basel design system migration |
-| `/seo`            | SEO audit & optimization      |
-| `/aio`            | AI optimization audit         |
+| Skill                    | Purpose                          |
+| ------------------------ | -------------------------------- |
+| `/api:scaffold`          | Scaffold V3 backend resource     |
+| `/api:audit`             | Audit service V2 compliance      |
+| `/api:plan`              | Plan V2 to V3 backend migration  |
+| `/api:migrate`           | Migrate V2 resource to V3        |
+| `/api:validate`          | Validate V3 resource compliance  |
+| `/api:deprecate`         | Deprecate V2 resource            |
+| `/api:remove`            | Remove deprecated V2 resource    |
+| `/api-frontend:scan`     | Scan frontend V3 migration scope |
+| `/api-frontend:migrate`  | Migrate frontend to V3 APIs      |
+| `/api-frontend:validate` | Validate frontend V3 migration   |
+| `/api-frontend:cleanup`  | Clean up V2 frontend artifacts   |
+| `/migration`             | Create database migration        |
+| `/test:scaffold`         | Scaffold Vitest tests            |
+| `/event:scaffold`        | Scaffold RabbitMQ event flow     |
+| `/auth`                  | Clerk auth patterns & gotchas    |
+| `/ui`                    | DaisyUI component patterns       |
+| `/email:scaffold`        | Create email template            |
+| `/basel`                 | Basel design system migration    |
+| `/seo`                   | SEO audit & optimization         |
+| `/aio`                   | AI optimization audit            |
 
 ## Guidance Documents
 

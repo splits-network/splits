@@ -75,8 +75,13 @@ export function JobDetail({
     /** @deprecated Basel ignores this prop. Kept for backward compatibility with Memphis consumers. */
     accent?: unknown;
 }) {
+    const { isRecruiter, isCompanyUser } = useUserProfile();
+
+    const visibleTabs = isCompanyUser
+        ? TABS
+        : TABS.filter((t) => t.value !== "notes");
+
     const [activeTab, setActiveTab] = useState<TabKey>("brief");
-    const { isRecruiter } = useUserProfile();
 
     return (
         <div className="w-full z-10">
@@ -88,7 +93,7 @@ export function JobDetail({
             />
 
             <BaselTabBar
-                tabs={TABS}
+                tabs={visibleTabs}
                 active={activeTab}
                 onChange={(v) => setActiveTab(v as TabKey)}
                 className="bg-base-100 border-b border-base-300"

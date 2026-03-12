@@ -17,6 +17,7 @@
 
 - V3 replacement must exist and be registered
 - `/api:validate <service> <resource>` should have passed on the V3 version
+- Frontend consumers should be migrated first — run `/api-frontend:validate <resource>` to confirm
 
 ## Examples
 
