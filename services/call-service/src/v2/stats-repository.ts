@@ -4,7 +4,7 @@ import { CallStats } from './types';
 export class StatsRepository {
     constructor(private supabase: SupabaseClient) {}
 
-    async getCallStats(userId: string): Promise<CallStats> {
+    async getCallStats(userId: string, entityType?: string, entityId?: string): Promise<CallStats> {
         const now = new Date();
 
         // Calculate week boundaries (Monday-based)
@@ -17,16 +17,31 @@ export class StatsRepository {
         // Calculate month boundaries
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        // Get all call IDs where user is a participant
-        const { data: participantLinks, error: pError } = await this.supabase
-            .from('call_participants')
-            .select('call_id')
-            .eq('user_id', userId);
+        // Determine the set of call IDs to scope stats to
+        let callIds: string[];
 
-        if (pError) throw pError;
-        const callIds = (participantLinks || []).map(
-            (p: { call_id: string }) => p.call_id,
-        );
+        if (entityType && entityId) {
+            // Entity-scoped: get call IDs from entity links
+            const { data: entityLinks, error: eError } = await this.supabase
+                .from('call_entity_links')
+                .select('call_id')
+                .eq('entity_type', entityType)
+                .eq('entity_id', entityId);
+
+            if (eError) throw eError;
+            callIds = (entityLinks || []).map((l: { call_id: string }) => l.call_id);
+        } else {
+            // Global: get all call IDs where user is a participant
+            const { data: participantLinks, error: pError } = await this.supabase
+                .from('call_participants')
+                .select('call_id')
+                .eq('user_id', userId);
+
+            if (pError) throw pError;
+            callIds = (participantLinks || []).map(
+                (p: { call_id: string }) => p.call_id,
+            );
+        }
 
         if (callIds.length === 0) {
             return {

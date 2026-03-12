@@ -31,6 +31,12 @@ const atsV3Routes: V3RouteConfig[] = [
   // ── Jobs Activity Timeline ────────────────────────────────────
   { path: '/jobs/:id/activity', method: 'GET', auth: 'required' },
 
+  // ── Job Notes ────────────────────────────────────────────────
+  { path: '/jobs/:id/notes', method: 'GET', auth: 'required' },
+  { path: '/jobs/:id/notes', method: 'POST', auth: 'required' },
+  { path: '/jobs/:id/notes/:noteId', method: 'PATCH', auth: 'required' },
+  { path: '/jobs/:id/notes/:noteId', method: 'DELETE', auth: 'required' },
+
   // ── Jobs Actions ───────────────────────────────────────────────
   { path: '/jobs/actions/process-termination', method: 'POST', auth: 'required' },
 

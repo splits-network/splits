@@ -248,12 +248,12 @@ export class CallService {
 
     // ── Stats & Tags ──────────────────────────────────────────────────────
 
-    async getStats(clerkUserId: string): Promise<CallStats> {
+    async getStats(clerkUserId: string, entityType?: string, entityId?: string): Promise<CallStats> {
         const resolvedUserId = await this.repository.resolveUserId(clerkUserId);
         if (!resolvedUserId) {
             throw Object.assign(new Error('Could not resolve user'), { statusCode: 400 });
         }
-        return this.repository.stats.getCallStats(resolvedUserId);
+        return this.repository.stats.getCallStats(resolvedUserId, entityType, entityId);
     }
 
     async listTags(): Promise<CallTag[]> {

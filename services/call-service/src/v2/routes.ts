@@ -42,7 +42,25 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
     app.get('/api/v2/calls/stats', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
-            const stats = await service.getStats(clerkUserId);
+            const query = request.query as Record<string, string>;
+
+            // Support entity filtering for scoped stats (job/application calls tabs)
+            let entityType: string | undefined = query.entity_type || undefined;
+            let entityId: string | undefined = query.entity_id || undefined;
+
+            if (query.filters) {
+                try {
+                    const parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                    if (!entityType && parsedFilters.entity_type) entityType = parsedFilters.entity_type;
+                    if (!entityId && parsedFilters.entity_id) entityId = parsedFilters.entity_id;
+                } catch {
+                    // Invalid JSON, ignore
+                }
+            }
+
+            const stats = await service.getStats(clerkUserId, entityType, entityId);
             return reply.send({ data: stats });
         } catch (error: any) {
             return reply.code(error.statusCode || 400).send({ error: error.message });
@@ -84,6 +102,18 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
                 needs_follow_up: query.needs_follow_up === 'true' || undefined,
                 search: query.search || undefined,
             };
+
+            // Parse JSON-encoded filters from useStandardList (e.g. ?filters={"entity_type":"job","entity_id":"..."})
+            if (query.filters) {
+                try {
+                    const parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                    Object.assign(filters, parsedFilters);
+                } catch {
+                    // Invalid JSON, ignore
+                }
+            }
 
             const result = await service.listCalls(params, filters);
             return reply.send({ data: result.data, pagination: result.pagination });

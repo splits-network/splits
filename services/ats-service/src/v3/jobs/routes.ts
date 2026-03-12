@@ -22,6 +22,9 @@ import { registerCompanyDetailView } from './views/company-detail.route';
 import { registerCandidateDetailView } from './views/candidate-detail.route';
 import { registerEditorView } from './views/editor.route';
 import { registerProcessTerminationAction } from './actions/process-termination.route';
+import { JobNoteRepository } from './notes/repository';
+import { JobNoteService } from './notes/service';
+import { registerJobNoteRoutes } from './notes/routes';
 
 export function registerJobRoutes(
   app: FastifyInstance,
@@ -32,6 +35,8 @@ export function registerJobRoutes(
   const activityRepository = new JobActivityRepository(supabase);
   const activityService = new JobActivityService(activityRepository, supabase);
   const service = new JobService(repository, supabase, eventPublisher, activityService);
+  const noteRepository = new JobNoteRepository(supabase);
+  const noteService = new JobNoteService(noteRepository, supabase, eventPublisher);
 
   // Register views (before :id routes to avoid collision)
   registerRecruiterBoardView(app, supabase);
@@ -48,6 +53,9 @@ export function registerJobRoutes(
 
   // Register activity timeline
   registerActivityRoute(app, activityService);
+
+  // Register job notes
+  registerJobNoteRoutes(app, noteService);
 
   // Register actions
   registerProcessTerminationAction(app, supabase, eventPublisher);

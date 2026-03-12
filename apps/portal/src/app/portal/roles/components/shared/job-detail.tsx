@@ -13,6 +13,7 @@ import { CompanyTab } from "./job-detail-company-tab";
 import { JobMatchesTab } from "./job-matches-tab";
 import { JobCallsTab } from "./job-calls-tab";
 import { JobTimelineTab } from "./job-timeline-tab";
+import { JobNotesTab } from "./job-notes-tab";
 import { JobHeroHeader } from "./job-detail-header";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -24,6 +25,7 @@ type TabKey =
     | "company"
     | "matches"
     | "calls"
+    | "notes"
     | "timeline";
 
 const TABS = [
@@ -53,6 +55,7 @@ const TABS = [
         icon: "fa-duotone fa-regular fa-bullseye",
     },
     { value: "calls", label: "Calls", icon: "fa-duotone fa-regular fa-video" },
+    { value: "notes", label: "Notes", icon: "fa-duotone fa-regular fa-notes" },
     { value: "timeline", label: "Timeline", icon: "fa-duotone fa-regular fa-clock-rotate-left" },
 ];
 
@@ -107,6 +110,9 @@ export function JobDetail({
                 )}
                 {activeTab === "calls" && (
                     <JobCallsTab jobId={job.id} jobTitle={job.title} />
+                )}
+                {activeTab === "notes" && (
+                    <JobNotesTab jobId={job.id} />
                 )}
                 {activeTab === "timeline" && (
                     <JobTimelineTab jobId={job.id} />
