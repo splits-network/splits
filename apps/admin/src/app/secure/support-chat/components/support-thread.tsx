@@ -24,7 +24,7 @@ export function SupportThread({ conversation, onConversationUpdate }: SupportThr
         try {
             const token = await getToken().catch(() => null);
             const res = await fetch(
-                `${GATEWAY_URL}/support/conversations/${conversation.id}/messages?limit=100`,
+                `${GATEWAY_URL}/api/v2/support/admin/support/conversations/${conversation.id}/messages?limit=100`,
                 { headers: { Authorization: `Bearer ${token}` } },
             );
             if (!res.ok) return;
@@ -67,7 +67,7 @@ export function SupportThread({ conversation, onConversationUpdate }: SupportThr
         try {
             const token = await getToken().catch(() => null);
             const res = await fetch(
-                `${GATEWAY_URL}/support/conversations/${conversation.id}/messages`,
+                `${GATEWAY_URL}/api/v2/support/admin/support/conversations/${conversation.id}/messages`,
                 {
                     method: 'POST',
                     headers: {
@@ -99,7 +99,7 @@ export function SupportThread({ conversation, onConversationUpdate }: SupportThr
         try {
             const token = await getToken().catch(() => null);
             await fetch(
-                `${GATEWAY_URL}/support/conversations/${conversation.id}`,
+                `${GATEWAY_URL}/api/v2/support/admin/support/conversations/${conversation.id}`,
                 {
                     method: 'PATCH',
                     headers: {
@@ -119,7 +119,7 @@ export function SupportThread({ conversation, onConversationUpdate }: SupportThr
         try {
             const token = await getToken().catch(() => null);
             await fetch(
-                `${GATEWAY_URL}/support/conversations/${conversation.id}/claim`,
+                `${GATEWAY_URL}/api/v2/support/admin/support/conversations/${conversation.id}/claim`,
                 {
                     method: 'POST',
                     headers: { Authorization: `Bearer ${token}` },

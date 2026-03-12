@@ -1047,7 +1047,8 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3200
-      NEXT_PUBLIC_ADMIN_GATEWAY_URL: http://admin-gateway:3030
+      NEXT_PUBLIC_ADMIN_GATEWAY_URL: http://localhost:3030
+      ADMIN_GATEWAY_INTERNAL_URL: http://admin-gateway:3030
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${ADMIN_CLERK_PUBLISHABLE_KEY}
       CLERK_SECRET_KEY: ${ADMIN_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in

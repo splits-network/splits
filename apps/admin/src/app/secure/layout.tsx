@@ -25,6 +25,7 @@ export default async function SecureLayout({
     let isAdmin = false;
     try {
         const gatewayUrl =
+            process.env.ADMIN_GATEWAY_INTERNAL_URL ||
             process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ||
             "http://admin-gateway:3030";
         const response = await fetch(

@@ -56,7 +56,7 @@ export default function SupportChatPage() {
             if (statusFilter) params.set('status', statusFilter);
             params.set('limit', '50');
             const res = await fetch(
-                `${GATEWAY_URL}/support/conversations?${params}`,
+                `${GATEWAY_URL}/api/v2/support/admin/support/conversations?${params}`,
                 { headers: { Authorization: `Bearer ${token}` } },
             );
             if (!res.ok) return;
