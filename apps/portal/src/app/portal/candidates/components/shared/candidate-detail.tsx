@@ -26,6 +26,7 @@ import {
     skillsList,
 } from "./helpers";
 import CandidateActionsToolbar from "./actions-toolbar";
+import { ResumeTab } from "./resume-tab";
 import RequestToRepresentModal from "../modals/request-to-represent-modal";
 import { useUserProfile } from "@/contexts";
 import { ModalPortal } from "@splits-network/shared-ui";
@@ -37,7 +38,7 @@ import {
 
 /* ─── Tab Types ─────────────────────────────────────────────────────────── */
 
-type TabType = "overview" | "resume" | "applications" | "documents";
+type TabType = "overview" | "resume" | "applications";
 
 const TABS = [
     {
@@ -54,11 +55,6 @@ const TABS = [
         value: "applications",
         label: "Applications",
         icon: "fa-duotone fa-regular fa-briefcase",
-    },
-    {
-        value: "documents",
-        label: "Documents",
-        icon: "fa-duotone fa-regular fa-file-lines",
     },
 ];
 
@@ -367,14 +363,13 @@ export function CandidateDetail({
                         }
                     />
                 )}
-                {activeTab === "resume" && <ResumeTab />}
+                {activeTab === "resume" && <ResumeTab candidate={candidate} />}
                 {activeTab === "applications" && (
                     <ApplicationsTab
                         applications={applications}
                         loading={appsLoading}
                     />
                 )}
-                {activeTab === "documents" && <DocumentsTab />}
             </div>
 
             {/* RTR Modal */}
@@ -634,25 +629,6 @@ function OverviewTab({
     );
 }
 
-/* ─── Resume Tab ────────────────────────────────────────────────────────── */
-
-function ResumeTab() {
-    return (
-        <div className="h-full flex items-center justify-center p-12">
-            <div className="text-center">
-                <i className="fa-duotone fa-regular fa-file-user text-3xl text-base-content/20 mb-4 block" />
-                <h3 className="text-lg font-black tracking-tight mb-2">
-                    No Resume on File
-                </h3>
-                <p className="text-sm text-base-content/40">
-                    Resume parsing is not yet available. Upload documents in the
-                    Documents tab.
-                </p>
-            </div>
-        </div>
-    );
-}
-
 /* ─── Applications Tab ──────────────────────────────────────────────────── */
 
 function ApplicationsTab({
@@ -710,21 +686,3 @@ function ApplicationsTab({
     );
 }
 
-/* ─── Documents Tab ─────────────────────────────────────────────────────── */
-
-function DocumentsTab() {
-    return (
-        <div className="h-full flex items-center justify-center p-12">
-            <div className="text-center">
-                <i className="fa-duotone fa-regular fa-file-lines text-3xl text-base-content/20 mb-4 block" />
-                <h3 className="text-lg font-black tracking-tight mb-2">
-                    No Documents
-                </h3>
-                <p className="text-sm text-base-content/40">
-                    No files have been uploaded for this candidate. Document
-                    management is coming soon.
-                </p>
-            </div>
-        </div>
-    );
-}
