@@ -209,7 +209,7 @@ export default function AddCandidateModal({
                                                     <p className="font-black text-base-content uppercase tracking-wider text-xs mb-1">
                                                         Invitation sent
                                                     </p>
-                                                    <p className="text-base-content/70 font-medium leading-relaxed">
+                                                    <p className="text-base-content/70 font-medium leading-relaxed break-all">
                                                         An invitation has been
                                                         sent to{" "}
                                                         <strong>

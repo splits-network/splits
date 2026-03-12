@@ -20,7 +20,22 @@ export default function SignUpPage() {
 
     const redirectUrl = searchParams.get("redirect_url");
     const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
-    const recCode = searchParams.get("rec_code") || getRecCodeFromCookie();
+    const isFromJoinLink =
+        redirectUrl?.includes("/join") &&
+        redirectUrl?.includes("code=SPLITS-");
+
+    // Clear stale referral cookie when arriving via recruiter invitation/join link
+    // so it doesn't pre-populate over the invitation context
+    const recCode = (() => {
+        if (isFromInvitation || isFromJoinLink) {
+            if (typeof document !== "undefined") {
+                document.cookie =
+                    "rec_code=; path=/; max-age=0; samesite=lax";
+            }
+            return null;
+        }
+        return searchParams.get("rec_code") || getRecCodeFromCookie();
+    })();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
