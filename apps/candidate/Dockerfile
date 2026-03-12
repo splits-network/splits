@@ -67,7 +67,6 @@ RUN pnpm --filter @splits-network/shared-api-client build
 RUN pnpm --filter @splits-network/shared-ui build
 RUN pnpm --filter @splits-network/basel-ui build
 RUN pnpm --filter @splits-network/chat-ui build
-RUN pnpm --filter @splits-network/memphis-ui build
 RUN pnpm --filter @splits-network/shared-gamification build
 RUN pnpm --filter @splits-network/shared-video build
 # Then build candidate (will transpile packages from source)
@@ -100,8 +99,6 @@ COPY --from=build /app/packages/basel-ui/package.json ./packages/basel-ui/
 COPY --from=build /app/packages/basel-ui/dist ./packages/basel-ui/dist
 COPY --from=build /app/packages/chat-ui/package.json ./packages/chat-ui/
 COPY --from=build /app/packages/chat-ui/dist ./packages/chat-ui/dist
-COPY --from=build /app/packages/memphis-ui/package.json ./packages/memphis-ui/
-COPY --from=build /app/packages/memphis-ui/dist ./packages/memphis-ui/dist
 COPY --from=build /app/packages/shared-gamification/package.json ./packages/shared-gamification/
 COPY --from=build /app/packages/shared-gamification/dist ./packages/shared-gamification/dist
 COPY --from=build /app/packages/shared-video/package.json ./packages/shared-video/

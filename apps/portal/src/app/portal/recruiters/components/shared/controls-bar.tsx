@@ -6,9 +6,15 @@ import {
     BaselViewModeSelector,
     BaselResultsCount,
     BaselRefreshButton,
+    BaselScopeToggle,
+    BaselFilterSelect,
+    BaselSortSelect,
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { MarketplaceFilters } from "../../types";
+import { RECRUITER_STATUS_LABELS, RECRUITER_SORT_OPTIONS } from "../../types";
+
+const STATUS_OPTIONS = Object.entries(RECRUITER_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -27,6 +33,9 @@ interface ControlsBarProps {
     totalCount: number;
     loading: boolean;
     refresh: () => void;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (field: string, order: "asc" | "desc") => void;
 }
 
 export function ControlsBar({
@@ -43,67 +52,64 @@ export function ControlsBar({
     totalCount,
     loading,
     refresh,
+    sortBy,
+    sortOrder,
+    onSortChange,
 }: ControlsBarProps) {
     const showingMyRecruiters = !!filters.company_ids?.length;
 
     return (
         <BaselControlsBarShell
-            filters={
-                <>
-                    {canInvite && (
-                        <div className="join">
-                            <button
-                                className={`join-item btn btn-sm rounded-none ${!showingMyRecruiters ? "btn-active" : ""}`}
-                                onClick={() => onFilterChange("company_ids", undefined)}
-                            >
-                                All Recruiters
-                            </button>
-                            <button
-                                className={`join-item btn btn-sm rounded-none ${showingMyRecruiters ? "btn-active" : ""}`}
-                                onClick={() => onFilterChange("company_ids", companyIds)}
-                            >
-                                My Recruiters
-                            </button>
-                        </div>
-                    )}
-
-                    <SearchInput
-                        value={searchInput}
-                        onChange={onSearchChange}
-                        placeholder="Search recruiters, specialties, industries..."
-                        className="flex-1 min-w-[200px] max-w-md"
-                    />
-
-                    <select
-                        value={filters.status || ""}
-                        onChange={(e) =>
-                            onFilterChange("status", e.target.value || undefined)
-                        }
-                        className="select uppercase rounded-none"
+            action={
+                canInvite ? (
+                    <button
+                        onClick={onInvite}
+                        className="btn btn-primary btn-sm gap-2 rounded-none"
                     >
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="pending">Pending</option>
-                        <option value="suspended">Suspended</option>
-                    </select>
-
-                    {canInvite && (
-                        <button
-                            onClick={onInvite}
-                            className="btn btn-primary gap-2 rounded-none"
-                        >
-                            <i className="fa-duotone fa-regular fa-paper-plane" />
-                            <span className="hidden sm:inline">Invite Recruiter</span>
-                        </button>
-                    )}
-
-                </>
+                        <i className="fa-duotone fa-regular fa-paper-plane" />
+                        <span className="hidden sm:inline">Invite Recruiter</span>
+                    </button>
+                ) : undefined
+            }
+            search={
+                <SearchInput
+                    value={searchInput}
+                    onChange={onSearchChange}
+                    placeholder="Search recruiters, specialties, industries..."
+                    className="input-sm"
+                />
+            }
+            filters={
+                <BaselFilterSelect
+                    value={filters.status}
+                    onChange={(v) => onFilterChange("status", v)}
+                    options={STATUS_OPTIONS}
+                    placeholder="All Status"
+                />
             }
             statusLeft={
-                <BaselResultsCount count={recruiterCount} total={totalCount} />
+                <>
+                    {canInvite && (
+                        <BaselScopeToggle
+                            value={showingMyRecruiters ? "my" : "all"}
+                            onChange={(v) => onFilterChange("company_ids", v === "my" ? companyIds : undefined)}
+                            options={[
+                                { value: "all", label: "All Recruiters" },
+                                { value: "my", label: "My Recruiters" },
+                            ]}
+                        />
+                    )}
+                    <BaselResultsCount count={recruiterCount} total={totalCount} />
+                </>
             }
             statusRight={
                 <>
+                    <BaselSortSelect
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={onSortChange}
+                        options={RECRUITER_SORT_OPTIONS}
+                    />
                     <BaselRefreshButton onClick={refresh} loading={loading} />
                     <BaselViewModeSelector
                         viewMode={viewMode}

@@ -4,10 +4,11 @@ import {
     JobPreScreenQuestion,
     JobSkill,
 } from "@splits-network/shared-types";
+import type { BaselSortOption } from "@splits-network/basel-ui";
 
 // Local type definitions (these exist in shared-types/models but aren't exported from index)
 export type JobStatus = "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed";
-export type EmploymentType = "full_time" | "contract" | "temporary";
+export type EmploymentType = "full_time" | "part_time" | "contract" | "temporary";
 
 /**
  * Unified Job type for all roles views (grid, table, browse)
@@ -73,10 +74,25 @@ export interface Job {
     application_count?: number;
 }
 
-/**
- * Unified filter interface for all view modes (browse, grid, table)
- */
 // ===== LABEL MAPS =====
+
+export const JOB_STATUS_LABELS: Record<string, string> = {
+    draft: "Draft",
+    pending: "Pending",
+    early: "Early Access",
+    active: "Active",
+    priority: "Priority",
+    paused: "Paused",
+    filled: "Filled",
+    closed: "Closed",
+};
+
+export const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
+    full_time: "Full Time",
+    part_time: "Part Time",
+    contract: "Contract",
+    temporary: "Temporary",
+};
 
 export const COMMUTE_TYPE_LABELS: Record<string, string> = {
     remote: "Remote",
@@ -108,17 +124,31 @@ export function formatJobLevel(level?: string | null): string | null {
     return JOB_LEVEL_LABELS[level] || level;
 }
 
+// ===== SORT OPTIONS =====
+
+export const ROLE_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "updated_at", label: "Last Updated" },
+    { value: "title", label: "Title" },
+    { value: "status", label: "Status" },
+    { value: "salary_min", label: "Salary" },
+];
+
+// ===== FILTERS =====
+
 /**
  * Unified filter interface for all view modes (browse, grid, table)
+ * Includes all filterable fields from the jobs data model
  */
 export interface UnifiedJobFilters {
-    // Common filters
-    status?: string;
+    // Scope
     job_owner_filter?: "all" | "assigned";
 
-    // Additional filters
+    // Inline filters (Row 1)
+    status?: string;
     employment_type?: string;
-    is_remote?: boolean;
+
+    // Expanded filters (Row 3)
     commute_type?: string;
     job_level?: string;
     company_id?: string;

@@ -4,6 +4,7 @@ import type {
     ResumeMetadata,
     RecruiterCandidateWithCandidate,
 } from "@splits-network/shared-types";
+import type { BaselSortOption } from "@splits-network/basel-ui";
 
 export type { MarketplaceProfile, ResumeMetadata, RecruiterCandidateWithCandidate };
 
@@ -58,6 +59,17 @@ export const AVAILABILITY_LABELS: Record<string, string> = {
     three_months: "3 Months",
     not_looking: "Not Looking",
 };
+
+export const REMOTE_LABELS: Record<string, string> = {
+    yes: "Open to Remote",
+    no: "Not Remote",
+};
+
+export const CANDIDATE_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "updated_at", label: "Last Updated" },
+    { value: "full_name", label: "Name" },
+];
 
 export function formatVerificationStatus(status?: string | null): string {
     if (!status) return "Unverified";

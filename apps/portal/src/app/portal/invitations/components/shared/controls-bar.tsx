@@ -6,9 +6,17 @@ import {
     BaselViewModeSelector,
     BaselResultsCount,
     BaselRefreshButton,
+    BaselFilterSelect,
+    BaselSortSelect,
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { InvitationFilters } from "../../types";
+import {
+    INVITATION_STATUS_LABELS,
+    INVITATION_SORT_OPTIONS,
+} from "../../types";
+
+const STATUS_OPTIONS = Object.entries(INVITATION_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -25,6 +33,9 @@ interface ControlsBarProps {
     totalCount: number;
     loading: boolean;
     refresh: () => void;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (field: string, order: "asc" | "desc") => void;
 }
 
 export function ControlsBar({
@@ -39,49 +50,48 @@ export function ControlsBar({
     totalCount,
     loading,
     refresh,
+    sortBy,
+    sortOrder,
+    onSortChange,
 }: ControlsBarProps) {
     return (
         <BaselControlsBarShell
+            action={
+                <button
+                    onClick={onInviteCandidate}
+                    className="btn btn-primary btn-sm gap-2 rounded-none"
+                >
+                    <i className="fa-duotone fa-regular fa-plus" />
+                    <span className="hidden sm:inline">Invite Candidate</span>
+                </button>
+            }
+            search={
+                <SearchInput
+                    value={searchInput}
+                    onChange={onSearchChange}
+                    placeholder="Search invitations..."
+                    className="input-sm"
+                />
+            }
             filters={
-                <>
-                    <SearchInput
-                        value={searchInput}
-                        onChange={onSearchChange}
-                        placeholder="Search invitations..."
-                        className="flex-1 min-w-[200px] max-w-md"
-                    />
-
-                    <select
-                        value={filters.status || ""}
-                        onChange={(e) =>
-                            onFilterChange("status", e.target.value || undefined)
-                        }
-                        className="select uppercase rounded-none"
-                    >
-                        <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="accepted">Accepted</option>
-                        <option value="declined">Declined</option>
-                        <option value="expired">Expired</option>
-                        <option value="terminated">Terminated</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-
-                    <button
-                        onClick={onInviteCandidate}
-                        className="btn btn-primary gap-2 rounded-none"
-                    >
-                        <i className="fa-duotone fa-regular fa-plus" />
-                        <span className="hidden sm:inline">Invite Candidate</span>
-                    </button>
-
-                </>
+                <BaselFilterSelect
+                    value={filters.status}
+                    onChange={(v) => onFilterChange("status", v)}
+                    options={STATUS_OPTIONS}
+                    placeholder="All Status"
+                />
             }
             statusLeft={
                 <BaselResultsCount count={invitationCount} total={totalCount} />
             }
             statusRight={
                 <>
+                    <BaselSortSelect
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={onSortChange}
+                        options={INVITATION_SORT_OPTIONS}
+                    />
                     <BaselRefreshButton onClick={refresh} loading={loading} />
                     <BaselViewModeSelector
                         viewMode={viewMode}

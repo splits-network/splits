@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useDrawer } from "@/contexts";
 import type { Candidate } from "../../types";
 import { DetailLoader } from "../shared/candidate-detail";
 import { GridCard } from "./grid-card";
@@ -17,47 +19,34 @@ export function GridView({
 }) {
     const selectedCandidate =
         candidates.find((c) => c.id === selectedId) ?? null;
+    const { open, close } = useDrawer();
+
+    useEffect(() => {
+        if (selectedCandidate) {
+            open(
+                <DetailLoader
+                    candidateId={selectedCandidate.id}
+                    onClose={() => onSelect(selectedCandidate)}
+                    onRefresh={onRefresh}
+                />,
+            );
+        } else {
+            close();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedCandidate?.id]);
 
     return (
-        <div className="drawer drawer-end">
-            <input
-                type="checkbox"
-                className="drawer-toggle"
-                checked={!!selectedCandidate}
-                readOnly
-            />
-            <div className="drawer-content">
-                {/* Grid */}
-                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
-                    {candidates.map((candidate) => (
-                        <GridCard
-                            key={candidate.id}
-                            candidate={candidate}
-                            isSelected={selectedId === candidate.id}
-                            onSelect={() => onSelect(candidate)}
-                            onRefresh={onRefresh}
-                        />
-                    ))}
-                </div>
-            </div>
-            <div className="drawer-side z-50">
-                <div
-                    className="drawer-overlay"
-                    onClick={() =>
-                        selectedCandidate && onSelect(selectedCandidate)
-                    }
-                    aria-label="close drawer"
+        <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
+            {candidates.map((candidate) => (
+                <GridCard
+                    key={candidate.id}
+                    candidate={candidate}
+                    isSelected={selectedId === candidate.id}
+                    onSelect={() => onSelect(candidate)}
+                    onRefresh={onRefresh}
                 />
-                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
-                    {selectedCandidate && (
-                        <DetailLoader
-                            candidateId={selectedCandidate.id}
-                            onClose={() => onSelect(selectedCandidate)}
-                            onRefresh={onRefresh}
-                        />
-                    )}
-                </div>
-            </div>
+            ))}
         </div>
     );
 }

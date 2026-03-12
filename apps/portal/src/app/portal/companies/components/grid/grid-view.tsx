@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { useDrawer } from "@/contexts";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
 import { CompanyDetailLoader } from "../shared/company-detail";
@@ -29,6 +30,7 @@ export function GridView({
     const isMarketplace = activeTab === "marketplace";
     const { getToken } = useAuth();
     const [tagMap, setTagMap] = useState<TagMap>({});
+    const { open, close } = useDrawer();
 
     const selectedItem = items.find(
         (item) => rowId(item, isMarketplace) === selectedId,
@@ -97,52 +99,40 @@ export function GridView({
         };
     }, [items, isMarketplace]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    useEffect(() => {
+        if (selectedItem && selectedId) {
+            open(
+                <CompanyDetailLoader
+                    companyId={companyId(selectedItem, isMarketplace)}
+                    onClose={() => onSelectAction(selectedItem)}
+                    onRefresh={onRefreshAction}
+                />,
+            );
+        } else {
+            close();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedId]);
+
     return (
-        <div className="drawer drawer-end">
-            <input
-                type="checkbox"
-                className="drawer-toggle"
-                checked={!!(selectedItem && selectedId)}
-                readOnly
-            />
-            <div className="drawer-content">
-                {/* Grid */}
-                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
-                    {items.map((item) => {
-                        const rId = rowId(item, isMarketplace);
-                        const cId = companyId(item, isMarketplace);
-                        return (
-                            <GridCard
-                                key={rId}
-                                item={item}
-                                activeTab={activeTab}
-                                isSelected={selectedId === rId}
-                                onSelect={() => onSelectAction(item)}
-                                onRefresh={onRefreshAction}
-                                techStack={tagMap[cId]?.skills ?? []}
-                                perks={tagMap[cId]?.perks ?? []}
-                                cultureTags={tagMap[cId]?.cultureTags ?? []}
-                            />
-                        );
-                    })}
-                </div>
-            </div>
-            <div className="drawer-side z-50">
-                <div
-                    className="drawer-overlay"
-                    onClick={() => selectedItem && onSelectAction(selectedItem)}
-                    aria-label="close drawer"
-                />
-                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
-                    {selectedItem && selectedId && (
-                        <CompanyDetailLoader
-                            companyId={companyId(selectedItem, isMarketplace)}
-                            onClose={() => onSelectAction(selectedItem)}
-                            onRefresh={onRefreshAction}
-                        />
-                    )}
-                </div>
-            </div>
+        <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
+            {items.map((item) => {
+                const rId = rowId(item, isMarketplace);
+                const cId = companyId(item, isMarketplace);
+                return (
+                    <GridCard
+                        key={rId}
+                        item={item}
+                        activeTab={activeTab}
+                        isSelected={selectedId === rId}
+                        onSelect={() => onSelectAction(item)}
+                        onRefresh={onRefreshAction}
+                        techStack={tagMap[cId]?.skills ?? []}
+                        perks={tagMap[cId]?.perks ?? []}
+                        cultureTags={tagMap[cId]?.cultureTags ?? []}
+                    />
+                );
+            })}
         </div>
     );
 }

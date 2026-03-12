@@ -90,6 +90,10 @@ export default function MatchesPage() {
         totalPages,
         refresh,
         updateItem,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<EnrichedMatch, MatchFilters>({
         endpoint: "/matches",
         include: "candidate,job,company",
@@ -122,6 +126,14 @@ export default function MatchesPage() {
     const handleViewModeChange = useCallback((mode: ViewMode) => {
         setViewMode(mode);
     }, []);
+
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            setSortBy(field);
+            setSortOrder(order);
+        },
+        [setSortBy, setSortOrder],
+    );
 
     const handleDismiss = useCallback(
         async (id: string) => {
@@ -184,6 +196,9 @@ export default function MatchesPage() {
                 totalCount={pagination?.total ?? matches.length}
                 loading={loading}
                 refresh={refresh}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
             />
 
             {/* Content Area */}

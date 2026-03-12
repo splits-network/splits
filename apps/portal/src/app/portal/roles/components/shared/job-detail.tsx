@@ -73,7 +73,7 @@ export function JobDetail({
     const { planTier, isRecruiter } = useUserProfile();
 
     return (
-        <div className="w-full">
+        <div className="w-full z-10">
             <JobHeroHeader
                 job={job}
                 onClose={onClose}

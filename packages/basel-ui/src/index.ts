@@ -170,7 +170,7 @@ export {
     type ConsentPreferences,
 } from './consent';
 
-// List components (controls-bar, view mode, results count)
+// List components (controls-bar, view mode, results count, filters)
 export {
     type BaselViewMode,
     BaselControlsBarShell,
@@ -181,6 +181,15 @@ export {
     type BaselResultsCountProps,
     BaselRefreshButton,
     type BaselRefreshButtonProps,
+    BaselScopeToggle,
+    type BaselScopeToggleProps,
+    BaselFilterSelect,
+    type BaselFilterSelectProps,
+    BaselSortSelect,
+    type BaselSortSelectProps,
+    type BaselSortOption,
+    BaselExpandToggle,
+    type BaselExpandToggleProps,
 } from './lists';
 
 // Panel components (detail panel header, tabs)

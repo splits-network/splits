@@ -194,6 +194,24 @@
 }
 
 /* ============================================================
+   STACKING CONTEXT — CONTROLS BAR vs CONTENT
+   Sticky controls bars must paint above animated content.
+   A single z-index on .controls-bar and .content-area avoids
+   per-element z-classes throughout the project.
+   ============================================================ */
+
+.controls-bar {
+    position: sticky;
+    z-index: 10;
+}
+
+.content-area {
+    position: relative;
+    isolation: isolate;
+}
+
+
+/* ============================================================
    CSS PARALLAX
    Pure CSS parallax via perspective + translateZ.
    No JavaScript required.

@@ -139,3 +139,17 @@ export function timeAgo(dateString: string): string {
     if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
     return `${Math.floor(diffDays / 365)}y ago`;
 }
+
+import type { BaselSortOption } from "@splits-network/basel-ui";
+
+export const CONNECTION_STATUS_LABELS: Record<string, string> = {
+    pending: "Pending",
+    active: "Active",
+    declined: "Declined",
+    terminated: "Terminated",
+};
+
+export const CONNECTION_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "status", label: "Status" },
+];

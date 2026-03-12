@@ -5,8 +5,13 @@ import {
     BaselControlsBarShell,
     BaselResultsCount,
     BaselRefreshButton,
+    BaselFilterSelect,
+    BaselSortSelect,
 } from "@splits-network/basel-ui";
 import type { ReferralCodeFilters } from "../../types";
+import { CODE_STATUS_LABELS, REFERRAL_CODE_SORT_OPTIONS } from "../../types";
+
+const STATUS_OPTIONS = Object.entries(CODE_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -21,6 +26,9 @@ interface ControlsBarProps {
     totalCount: number;
     loading: boolean;
     refresh: () => void;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (field: string, order: "asc" | "desc") => void;
 }
 
 export function ControlsBar({
@@ -33,45 +41,50 @@ export function ControlsBar({
     totalCount,
     loading,
     refresh,
+    sortBy,
+    sortOrder,
+    onSortChange,
 }: ControlsBarProps) {
     return (
         <BaselControlsBarShell
+            action={
+                <button
+                    onClick={onCreateCode}
+                    className="btn btn-primary btn-sm gap-2 rounded-none"
+                >
+                    <i className="fa-duotone fa-regular fa-plus" />
+                    <span className="hidden sm:inline">New Code</span>
+                </button>
+            }
+            search={
+                <SearchInput
+                    value={searchInput}
+                    onChange={onSearchChange}
+                    placeholder="Search by code or label..."
+                    className="input-sm"
+                />
+            }
             filters={
-                <>
-                    <SearchInput
-                        value={searchInput}
-                        onChange={onSearchChange}
-                        placeholder="Search by code or label..."
-                        className="flex-1 min-w-[200px] max-w-md"
-                    />
-
-                    <select
-                        value={filters.status || ""}
-                        onChange={(e) =>
-                            onFilterChange("status", e.target.value || undefined)
-                        }
-                        className="select uppercase rounded-none"
-                    >
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-
-                    <button
-                        onClick={onCreateCode}
-                        className="btn btn-primary gap-2 rounded-none"
-                    >
-                        <i className="fa-duotone fa-regular fa-plus" />
-                        <span className="hidden sm:inline">New Code</span>
-                    </button>
-
-                </>
+                <BaselFilterSelect
+                    value={filters.status}
+                    onChange={(v) => onFilterChange("status", v)}
+                    options={STATUS_OPTIONS}
+                    placeholder="All Status"
+                />
             }
             statusLeft={
                 <BaselResultsCount count={codeCount} total={totalCount} label="codes" />
             }
             statusRight={
-                <BaselRefreshButton onClick={refresh} loading={loading} />
+                <>
+                    <BaselSortSelect
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={onSortChange}
+                        options={REFERRAL_CODE_SORT_OPTIONS}
+                    />
+                    <BaselRefreshButton onClick={refresh} loading={loading} />
+                </>
             }
         />
     );

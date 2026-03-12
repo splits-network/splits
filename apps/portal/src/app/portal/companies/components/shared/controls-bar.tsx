@@ -1,14 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { SearchInput } from "@/components/standard-lists";
 import {
     BaselControlsBarShell,
     BaselViewModeSelector,
     BaselResultsCount,
     BaselRefreshButton,
+    BaselScopeToggle,
+    BaselFilterSelect,
+    BaselSortSelect,
+    BaselExpandToggle,
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { CompanyTab, CompanyFilters } from "../../types";
+import {
+    INDUSTRY_LABELS,
+    RELATIONSHIP_STATUS_LABELS,
+    COMPANY_SIZE_LABELS,
+    COMPANY_SORT_OPTIONS,
+} from "../../types";
+
+const INDUSTRY_OPTIONS = Object.entries(INDUSTRY_LABELS).map(([value, label]) => ({ value, label }));
+const STATUS_OPTIONS = Object.entries(RELATIONSHIP_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const SIZE_OPTIONS = Object.entries(COMPANY_SIZE_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -27,6 +42,9 @@ interface ControlsBarProps {
     totalCount: number;
     loading: boolean;
     refresh: () => void;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (field: string, order: "asc" | "desc") => void;
 }
 
 export function ControlsBar({
@@ -38,91 +56,88 @@ export function ControlsBar({
     onFilterChange,
     viewMode,
     onViewModeChange,
-    isMyCompanies,
     companyCount,
     totalCount,
     loading,
     refresh,
+    sortBy,
+    sortOrder,
+    onSortChange,
 }: ControlsBarProps) {
+    const [expanded, setExpanded] = useState(false);
+
+    const isMyCompanies = activeTab === "my-companies";
+    const hasExpandedFilters = !!(filters.status || filters.company_size);
+
     return (
         <BaselControlsBarShell
+            search={
+                <SearchInput
+                    value={searchInput}
+                    onChange={onSearchChange}
+                    placeholder="Search companies..."
+                    className="input-sm"
+                />
+            }
             filters={
-                <>
-                    <SearchInput
-                        value={searchInput}
-                        onChange={onSearchChange}
-                        placeholder="Search companies..."
-                        className="flex-1 min-w-[200px] max-w-md"
-                    />
-
-                    {/* Tab Toggle */}
-                    <div className="join">
-                        <button
-                            onClick={() => onTabChange("marketplace")}
-                            className={`join-item btn btn-sm rounded-none ${
-                                activeTab === "marketplace" ? "btn-active" : ""
-                            }`}
-                        >
-                            <i className="fa-duotone fa-regular fa-store" />
-                            <span className="hidden sm:inline">Marketplace</span>
-                        </button>
-                        <button
-                            onClick={() => onTabChange("my-companies")}
-                            className={`join-item btn btn-sm rounded-none ${
-                                activeTab === "my-companies" ? "btn-active" : ""
-                            }`}
-                        >
-                            <i className="fa-duotone fa-regular fa-handshake" />
-                            <span className="hidden sm:inline">My Companies</span>
-                        </button>
-                    </div>
-
-                    <select
-                        value={filters.industry || ""}
-                        onChange={(e) =>
-                            onFilterChange("industry", e.target.value || undefined)
-                        }
-                        className="select uppercase rounded-none"
-                    >
-                        <option value="">All Industries</option>
-                        <option value="Technology">Technology</option>
-                        <option value="Healthcare">Healthcare</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Education">Education</option>
-                        <option value="Manufacturing">Manufacturing</option>
-                        <option value="Retail">Retail</option>
-                        <option value="Consulting">Consulting</option>
-                    </select>
-
-                    {isMyCompanies && (
-                        <select
-                            value={filters.status || ""}
-                            onChange={(e) =>
-                                onFilterChange("status", e.target.value || undefined)
-                            }
-                            className="select uppercase rounded-none"
-                        >
-                            <option value="">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="pending">Pending</option>
-                            <option value="declined">Declined</option>
-                            <option value="terminated">Terminated</option>
-                        </select>
-                    )}
-
-                </>
+                <BaselFilterSelect
+                    value={filters.industry}
+                    onChange={(v) => onFilterChange("industry", v)}
+                    options={INDUSTRY_OPTIONS}
+                    placeholder="All Industries"
+                />
             }
             statusLeft={
-                <BaselResultsCount count={companyCount} total={totalCount} />
+                <>
+                    <BaselScopeToggle
+                        value={activeTab}
+                        onChange={(v) => onTabChange(v as CompanyTab)}
+                        options={[
+                            { value: "marketplace", label: "Marketplace" },
+                            { value: "my-companies", label: "My Companies" },
+                        ]}
+                    />
+                    <BaselResultsCount count={companyCount} total={totalCount} />
+                </>
             }
             statusRight={
                 <>
+                    <BaselSortSelect
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={onSortChange}
+                        options={COMPANY_SORT_OPTIONS}
+                    />
                     <BaselRefreshButton onClick={refresh} loading={loading} />
                     <BaselViewModeSelector
                         viewMode={viewMode}
                         onViewModeChange={onViewModeChange}
                     />
+                    <BaselExpandToggle
+                        expanded={expanded || hasExpandedFilters}
+                        onToggle={() => setExpanded((prev) => !prev)}
+                    />
                 </>
+            }
+            expandedFilters={
+                (expanded || hasExpandedFilters) ? (
+                    <>
+                        {isMyCompanies && (
+                            <BaselFilterSelect
+                                value={filters.status}
+                                onChange={(v) => onFilterChange("status", v)}
+                                options={STATUS_OPTIONS}
+                                placeholder="All Status"
+                            />
+                        )}
+                        <BaselFilterSelect
+                            value={filters.company_size}
+                            onChange={(v) => onFilterChange("company_size", v)}
+                            options={SIZE_OPTIONS}
+                            placeholder="All Sizes"
+                        />
+                    </>
+                ) : undefined
             }
         />
     );

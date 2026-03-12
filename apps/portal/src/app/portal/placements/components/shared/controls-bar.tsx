@@ -6,9 +6,17 @@ import {
     BaselViewModeSelector,
     BaselResultsCount,
     BaselRefreshButton,
+    BaselFilterSelect,
+    BaselSortSelect,
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { PlacementFilters } from "../../types";
+import {
+    PLACEMENT_STATUS_LABELS,
+    PLACEMENT_SORT_OPTIONS,
+} from "../../types";
+
+const STATUS_OPTIONS = Object.entries(PLACEMENT_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -24,6 +32,9 @@ interface ControlsBarProps {
     totalCount: number;
     loading: boolean;
     refresh: () => void;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (field: string, order: "asc" | "desc") => void;
 }
 
 export function ControlsBar({
@@ -37,39 +48,39 @@ export function ControlsBar({
     totalCount,
     loading,
     refresh,
+    sortBy,
+    sortOrder,
+    onSortChange,
 }: ControlsBarProps) {
     return (
         <BaselControlsBarShell
+            search={
+                <SearchInput
+                    value={searchInput}
+                    onChange={onSearchChange}
+                    placeholder="Search placements, candidates, companies..."
+                    className="input-sm"
+                />
+            }
             filters={
-                <>
-                    <SearchInput
-                        value={searchInput}
-                        onChange={onSearchChange}
-                        placeholder="Search placements, candidates, companies..."
-                        className="flex-1 min-w-[200px] max-w-md"
-                    />
-
-                    <select
-                        value={filters.status || ""}
-                        onChange={(e) =>
-                            onFilterChange("status", e.target.value || undefined)
-                        }
-                        className="select uppercase rounded-none"
-                    >
-                        <option value="">All Status</option>
-                        <option value="hired">Hired</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
-                        <option value="failed">Failed</option>
-                    </select>
-
-                </>
+                <BaselFilterSelect
+                    value={filters.status}
+                    onChange={(v) => onFilterChange("status", v)}
+                    options={STATUS_OPTIONS}
+                    placeholder="All Status"
+                />
             }
             statusLeft={
                 <BaselResultsCount count={placementCount} total={totalCount} />
             }
             statusRight={
                 <>
+                    <BaselSortSelect
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={onSortChange}
+                        options={PLACEMENT_SORT_OPTIONS}
+                    />
                     <BaselRefreshButton onClick={refresh} loading={loading} />
                     <BaselViewModeSelector
                         viewMode={viewMode}

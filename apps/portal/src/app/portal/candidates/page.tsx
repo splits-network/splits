@@ -111,6 +111,10 @@ export default function CandidatesPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Candidate, CandidateFilters>({
         endpoint: "/candidates",
         defaultFilters: { scope: scopeLoaded ? scope : "mine" },
@@ -144,6 +148,14 @@ export default function CandidatesPage() {
             setScope(newScope);
         },
         [setScope],
+    );
+
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            setSortBy(field);
+            setSortOrder(order);
+        },
+        [setSortBy, setSortOrder],
     );
 
     // Register candidate IDs with gamification context for batch fetching
@@ -191,6 +203,9 @@ export default function CandidatesPage() {
                     totalCount={pagination?.total ?? candidates.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
                 />
 
                 {/* Content Area */}

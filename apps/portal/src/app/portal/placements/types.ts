@@ -4,6 +4,7 @@
  * with API-enriched fields.
  */
 import type { Placement as BasePlacement } from "@splits-network/shared-types";
+import type { BaselSortOption } from "@splits-network/basel-ui";
 
 export interface PlacementSplit {
     id: string;
@@ -50,3 +51,16 @@ export interface Placement extends Omit<BasePlacement, "hired_at" | "created_at"
 export interface PlacementFilters {
     status?: string;
 }
+
+export const PLACEMENT_STATUS_LABELS: Record<string, string> = {
+    hired: "Hired",
+    active: "Active",
+    completed: "Completed",
+    failed: "Failed",
+};
+
+export const PLACEMENT_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "hired_at", label: "Hire Date" },
+    { value: "status", label: "Status" },
+];

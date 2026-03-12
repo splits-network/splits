@@ -96,6 +96,10 @@ function RecruitersContent() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<RecruiterWithUser, MarketplaceFilters>({
         endpoint: "/recruiters",
         defaultFilters: { status: "active", marketplace_enabled: true },
@@ -113,6 +117,11 @@ function RecruitersContent() {
             registerEntities("recruiter", recruiters.map(r => r.id));
         }
     }, [recruiters, registerEntities]);
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     const handleSelect = useCallback((recruiter: RecruiterWithUser) => {
         setSelectedRecruiterId((prev) =>
@@ -173,6 +182,9 @@ function RecruitersContent() {
                 totalCount={pagination?.total ?? recruiters.length}
                 loading={loading}
                 refresh={refresh}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
             />
 
             <section className="min-h-screen">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
 import type {
     IntegrationProvider,
     OAuthConnectionPublic,
@@ -64,7 +65,7 @@ export default function CalendarPreferencesPanel({
     });
     const [saving, setSaving] = useState(false);
     const [loaded, setLoaded] = useState(false);
-    const [toastMessage, setToastMessage] = useState("");
+    const toast = useToast();
 
     // Find active calendar connections
     const calendarConnections = useMemo(() => {
@@ -144,12 +145,10 @@ export default function CalendarPreferencesPanel({
             const client = createAuthenticatedClient(token);
             await client.put("/interviews/calendar-preferences", prefs);
 
-            setToastMessage("Scheduling preferences saved");
-            setTimeout(() => setToastMessage(""), 3000);
+            toast.success("Scheduling preferences saved");
         } catch (err: any) {
             console.error("Failed to save calendar preferences:", err);
-            setToastMessage("Failed to save preferences");
-            setTimeout(() => setToastMessage(""), 3000);
+            toast.error("Failed to save preferences");
         } finally {
             setSaving(false);
         }
@@ -416,15 +415,6 @@ export default function CalendarPreferencesPanel({
                     </button>
                 </div>
             </section>
-
-            {/* Toast */}
-            {toastMessage && (
-                <div className="toast toast-end">
-                    <div className="alert alert-success">
-                        <span className="text-sm">{toastMessage}</span>
-                    </div>
-                </div>
-            )}
         </>
     );
 }

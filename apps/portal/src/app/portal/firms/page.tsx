@@ -88,6 +88,10 @@ export default function FirmsPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Firm, FirmFilters>({
         endpoint: "/firms",
         defaultFilters: { status: undefined },
@@ -105,6 +109,14 @@ export default function FirmsPage() {
             registerEntities("firm", [...new Set(firmIds)]);
         }
     }, [firms, registerEntities]);
+
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            setSortBy(field);
+            setSortOrder(order);
+        },
+        [setSortBy, setSortOrder],
+    );
 
     const handleSelect = useCallback((firm: Firm) => {
         setSelectedFirmId((prev) => (prev === firm.id ? null : firm.id));
@@ -153,6 +165,9 @@ export default function FirmsPage() {
                     totalCount={pagination?.total ?? firms.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
                 />
 
                 {/* Content Area */}

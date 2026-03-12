@@ -36,7 +36,6 @@ COPY apps/corporate ./apps/corporate
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-ui build
 RUN pnpm --filter @splits-network/basel-ui build
-RUN pnpm --filter @splits-network/memphis-ui build
 # Build corporate site
 RUN pnpm --filter @splits-network/corporate build
 # Prune to production dependencies (uses local store, no network)
@@ -61,8 +60,6 @@ COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
 COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
 COPY --from=build /app/packages/basel-ui/package.json ./packages/basel-ui/
 COPY --from=build /app/packages/basel-ui/dist ./packages/basel-ui/dist
-COPY --from=build /app/packages/memphis-ui/package.json ./packages/memphis-ui/
-COPY --from=build /app/packages/memphis-ui/dist ./packages/memphis-ui/dist
 
 # App package.json for pnpm filter
 COPY --from=build /app/apps/corporate/package.json ./apps/corporate/

@@ -113,6 +113,15 @@ export default function CompaniesBaselPage() {
 
     const active = isMarketplace ? marketplace : myCompanies;
 
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            active.setSortBy(field);
+            active.setSortOrder(order);
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [active.setSortBy, active.setSortOrder],
+    );
+
     const handleSelect = useCallback(
         (item: Company | CompanyRelationship) => {
             const rId = getRowId(item, isMarketplace);
@@ -173,6 +182,9 @@ export default function CompaniesBaselPage() {
                 totalCount={active.pagination?.total ?? active.data.length}
                 loading={marketplace.loading || myCompanies.loading}
                 refresh={handleRefresh}
+                sortBy={active.sortBy}
+                sortOrder={active.sortOrder}
+                onSortChange={handleSortChange}
             />
 
             {/* Content Area */}

@@ -122,6 +122,10 @@ export default function RolesPage() {
         totalPages,
         refresh,
         updateItem,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Job, UnifiedJobFilters>({
         endpoint: "/jobs",
         defaultFilters: { status: undefined, job_owner_filter: "assigned" },
@@ -150,6 +154,11 @@ export default function RolesPage() {
     const handleViewModeChange = useCallback((mode: ViewMode) => {
         setViewMode(mode);
     }, []);
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     const stats = useMemo(
         () => ({
@@ -186,6 +195,9 @@ export default function RolesPage() {
                     totalCount={pagination?.total ?? jobs.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
                 />
 
                 {/* Content Area */}

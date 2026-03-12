@@ -6,9 +6,17 @@ import {
     BaselViewModeSelector,
     BaselResultsCount,
     BaselRefreshButton,
+    BaselFilterSelect,
+    BaselSortSelect,
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { FirmFilters } from "../../types";
+import { FIRM_SORT_OPTIONS } from "../../types";
+
+const FIRM_STATUS_OPTIONS = [
+    { value: "active", label: "Active" },
+    { value: "suspended", label: "Suspended" },
+];
 
 interface ControlsBarProps {
     searchInput: string;
@@ -27,6 +35,9 @@ interface ControlsBarProps {
     totalCount: number;
     loading: boolean;
     refresh: () => void;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (field: string, order: "asc" | "desc") => void;
 }
 
 export function ControlsBar({
@@ -43,61 +54,60 @@ export function ControlsBar({
     totalCount,
     loading,
     refresh,
+    sortBy,
+    sortOrder,
+    onSortChange,
 }: ControlsBarProps) {
     return (
         <BaselControlsBarShell
-            filters={
-                <>
-                    <SearchInput
-                        value={searchInput}
-                        onChange={onSearchChange}
-                        placeholder="Search firms..."
-                        className="flex-1 min-w-[200px] max-w-md"
-                    />
-
-                    <select
-                        value={filters.status || ""}
-                        onChange={(e) =>
-                            onFilterChange(
-                                "status",
-                                e.target.value || undefined,
-                            )
-                        }
-                        className="select uppercase rounded-none"
+            action={
+                canCreateFirm ? (
+                    <button
+                        onClick={onAddFirm}
+                        className="btn btn-primary btn-sm gap-2 rounded-none"
                     >
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="suspended">Suspended</option>
-                    </select>
-
-                    {canCreateFirm && (
-                        <button
-                            onClick={onAddFirm}
-                            className="btn btn-primary gap-2 rounded-none"
-                        >
-                            <i className="fa-duotone fa-regular fa-plus" />
-                            <span className="hidden sm:inline">Create Firm</span>
-                        </button>
-                    )}
-                    {showUpgradeHint && (
-                        <a
-                            href="/portal/profile?tab=subscription"
-                            className="btn btn-outline btn-warning gap-2 rounded-none"
-                        >
-                            <i className="fa-duotone fa-regular fa-crown" />
-                            <span className="hidden sm:inline">
-                                Upgrade to Partner to create a firm
-                            </span>
-                        </a>
-                    )}
-
-                </>
+                        <i className="fa-duotone fa-regular fa-plus" />
+                        <span className="hidden sm:inline">Create Firm</span>
+                    </button>
+                ) : showUpgradeHint ? (
+                    <a
+                        href="/portal/profile?tab=subscription"
+                        className="btn btn-outline btn-warning btn-sm gap-2 rounded-none"
+                    >
+                        <i className="fa-duotone fa-regular fa-crown" />
+                        <span className="hidden sm:inline">
+                            Upgrade to Partner to create a firm
+                        </span>
+                    </a>
+                ) : undefined
+            }
+            search={
+                <SearchInput
+                    value={searchInput}
+                    onChange={onSearchChange}
+                    placeholder="Search firms..."
+                    className="input-sm"
+                />
+            }
+            filters={
+                <BaselFilterSelect
+                    value={filters.status}
+                    onChange={(v) => onFilterChange("status", v)}
+                    options={FIRM_STATUS_OPTIONS}
+                    placeholder="All Status"
+                />
             }
             statusLeft={
                 <BaselResultsCount count={firmCount} total={totalCount} />
             }
             statusRight={
                 <>
+                    <BaselSortSelect
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={onSortChange}
+                        options={FIRM_SORT_OPTIONS}
+                    />
                     <BaselRefreshButton onClick={refresh} loading={loading} />
                     <BaselViewModeSelector
                         viewMode={viewMode}

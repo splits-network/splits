@@ -140,6 +140,10 @@ export default function CompanyInvitationsBaselPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<RecruiterCompanyRelationship, ConnectionFilters>({
         endpoint: "/recruiter-companies",
         defaultFilters: { status: undefined },
@@ -157,6 +161,14 @@ export default function CompanyInvitationsBaselPage() {
             registerEntities("company", [...new Set(companyIds)]);
         }
     }, [invitations, registerEntities]);
+
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            setSortBy(field);
+            setSortOrder(order);
+        },
+        [setSortBy, setSortOrder],
+    );
 
     const handleSelect = useCallback((inv: RecruiterCompanyRelationship) => {
         setSelectedId((prev) => (prev === inv.id ? null : inv.id));
@@ -185,6 +197,9 @@ export default function CompanyInvitationsBaselPage() {
                 totalCount={pagination?.total ?? invitations.length}
                 loading={loading}
                 refresh={refresh}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
             />
 
             {/* Content Area */}

@@ -1,33 +1,63 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 export interface BaselControlsBarShellProps {
-    /** Top row: search, filters, action buttons */
+    /** Row 1 left: action button (Add Role, Invite, etc.) */
+    action?: ReactNode;
+    /** Row 1: search input — fills remaining space */
+    search?: ReactNode;
+    /** Row 1 right: inline filter dropdowns */
     filters?: ReactNode;
-    /** Bottom-left: results count */
+    /** Row 2 left: scope toggle (Mine/All) + results count */
     statusLeft?: ReactNode;
-    /** Bottom-right: refresh button + view mode toggle */
+    /** Row 2 right: sort, refresh, view mode, expand toggle */
     statusRight?: ReactNode;
+    /** Row 3: expanded filters panel (hidden by default) */
+    expandedFilters?: ReactNode;
     className?: string;
 }
 
-export function BaselControlsBarShell({ filters, statusLeft, statusRight, className }: BaselControlsBarShellProps) {
+export function BaselControlsBarShell({
+    action,
+    search,
+    filters,
+    statusLeft,
+    statusRight,
+    expandedFilters,
+    className,
+}: BaselControlsBarShellProps) {
     return (
-        <section className={`controls-bar scroll-reveal fade-in sticky top-0 bg-base-100 border-b-2 border-base-300 ${className ?? ''}`}>
+        <section
+            className={`controls-bar scroll-reveal fade-in sticky top-0 bg-base-100 border-b-2 border-base-300 ${className ?? ""}`}
+        >
             <div className="container mx-auto px-6 lg:px-12 py-4">
                 <div className="flex flex-col gap-3">
-                    {/* Row 1: Search + Filters + Actions */}
-                    {filters && (
-                        <div className="flex flex-wrap gap-3 items-center">
-                            {filters}
-                        </div>
-                    )}
-                    {/* Row 2: Results count (left) + Refresh & View toggle (right) */}
+                    {/* Row 1: Action + Search + Inline Filters */}
+                    <div className="flex flex-wrap gap-3 items-center">
+                        {action}
+                        {search && (
+                            <div className="flex-1 min-w-[200px] [&>*]:w-full">
+                                {search}
+                            </div>
+                        )}
+                        {filters}
+                    </div>
+
+                    {/* Row 2: Scope/Count (left) + Sort/Refresh/View/Expand (right) */}
                     {(statusLeft || statusRight) && (
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>{statusLeft}</div>
+                            <div className="flex items-center gap-3">
+                                {statusLeft}
+                            </div>
                             <div className="flex items-center gap-2">
                                 {statusRight}
                             </div>
+                        </div>
+                    )}
+
+                    {/* Row 3: Expanded filters panel */}
+                    {expandedFilters && (
+                        <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-base-300">
+                            {expandedFilters}
                         </div>
                     )}
                 </div>

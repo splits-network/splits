@@ -8,7 +8,7 @@ import type {
     MatchStatus,
     MatchFactors,
 } from "@splits-network/shared-types";
-import type { BaselSemanticColor } from "@splits-network/basel-ui";
+import type { BaselSemanticColor, BaselSortOption } from "@splits-network/basel-ui";
 
 export type { EnrichedMatch, MatchTier, MatchStatus, MatchFactors };
 
@@ -19,6 +19,30 @@ export interface MatchFilters {
     status?: MatchStatus;
     min_score?: number;
 }
+
+export const MATCH_TIER_LABELS: Record<string, string> = {
+    standard: "Standard",
+    true: "True Score",
+};
+
+export const MATCH_STATUS_LABELS: Record<string, string> = {
+    active: "Active",
+    dismissed: "Dismissed",
+    applied: "Applied",
+};
+
+export const MATCH_SCORE_LABELS: Record<string, string> = {
+    "40": "40+ Worth Reviewing",
+    "55": "55+ Promising",
+    "70": "70+ Strong",
+    "85": "85+ Excellent",
+};
+
+export const MATCH_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "overall_score", label: "Match Score" },
+    { value: "created_at", label: "Date Created" },
+    { value: "generated_at", label: "Generated Date" },
+];
 
 /* ── Display helpers ── */
 

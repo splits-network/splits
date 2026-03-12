@@ -138,6 +138,10 @@ export default function ReferralCodesBaselPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<RecruiterCode, ReferralCodeFilters>({
         endpoint: "/recruiter-codes",
         defaultFilters,
@@ -146,6 +150,11 @@ export default function ReferralCodesBaselPage() {
         defaultLimit: 50,
         syncToUrl: true,
     });
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     const handleCreateSuccess = () => {
         setShowCreateModal(false);
@@ -223,6 +232,9 @@ export default function ReferralCodesBaselPage() {
                     totalCount={pagination?.total ?? codes.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
                 />
 
                 {/* Content Area */}

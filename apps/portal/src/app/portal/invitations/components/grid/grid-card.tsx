@@ -40,7 +40,7 @@ export function GridCard({
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer bg-base-100 border border-base-300 border-l-4 transition-all",
+                "group cursor-pointer bg-base-100 border border-base-300 border-l-4 transition-all z-0",
                 isSelected
                     ? `${borderClass} shadow-md`
                     : "border-l-base-300 hover:border-l-primary/50 hover:shadow-md",
@@ -54,13 +54,23 @@ export function GridCard({
                         Candidate Invitation
                     </p>
                     <div className="flex items-center gap-1.5 shrink-0">
-                        <BaselBadge color={statusColorName(invitation)} size="sm" variant="soft" icon={status.icon}>
+                        <BaselBadge
+                            color={statusColorName(invitation)}
+                            size="sm"
+                            variant="soft"
+                            icon={status.icon}
+                        >
                             {status.label}
                         </BaselBadge>
                         {isRecentInvitation(invitation) &&
                             !invitation.consent_given &&
                             !invitation.declined_at && (
-                                <BaselBadge color="warning" size="sm" variant="soft" icon="fa-sparkles">
+                                <BaselBadge
+                                    color="warning"
+                                    size="sm"
+                                    variant="soft"
+                                    icon="fa-sparkles"
+                                >
                                     New
                                 </BaselBadge>
                             )}
@@ -116,7 +126,9 @@ export function GridCard({
                     </p>
                     <p className="text-sm font-semibold text-base-content/70">
                         {candidate.current_title}
-                        {candidate.current_title && candidate.current_company && " at "}
+                        {candidate.current_title &&
+                            candidate.current_company &&
+                            " at "}
                         {candidate.current_company}
                     </p>
                 </div>
@@ -136,8 +148,11 @@ export function GridCard({
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-0.5">
                         Expires
                     </p>
-                    <p className={`text-sm font-bold ${isExpiringSoon ? "text-error" : "text-base-content"}`}>
-                        {formatDateShort(invitation.invitation_expires_at) || "N/A"}
+                    <p
+                        className={`text-sm font-bold ${isExpiringSoon ? "text-error" : "text-base-content"}`}
+                    >
+                        {formatDateShort(invitation.invitation_expires_at) ||
+                            "N/A"}
                     </p>
                 </div>
             </div>
@@ -146,12 +161,22 @@ export function GridCard({
             <div className="px-5 py-3 border-b border-base-300">
                 <div className="flex flex-wrap gap-1.5">
                     {candidate?.location && (
-                        <BaselBadge color="neutral" size="xs" variant="outline" icon="fa-location-dot">
+                        <BaselBadge
+                            color="neutral"
+                            size="xs"
+                            variant="outline"
+                            icon="fa-location-dot"
+                        >
                             {candidate.location}
                         </BaselBadge>
                     )}
                     {isExpiringSoon && (
-                        <BaselBadge color="error" size="xs" variant="outline" icon="fa-clock">
+                        <BaselBadge
+                            color="error"
+                            size="xs"
+                            variant="outline"
+                            icon="fa-clock"
+                        >
                             Expiring
                         </BaselBadge>
                     )}

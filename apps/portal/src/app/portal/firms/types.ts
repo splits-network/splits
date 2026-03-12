@@ -154,3 +154,11 @@ export const PLACEMENT_TYPE_LABELS: Record<PlacementType, string> = {
     contract_to_hire: 'Contract-to-Hire',
     executive_search: 'Executive Search',
 };
+
+import type { BaselSortOption } from "@splits-network/basel-ui";
+
+export const FIRM_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "name", label: "Firm Name" },
+    { value: "member_count", label: "Team Size" },
+];

@@ -1,10 +1,25 @@
 import type { RecruiterCandidateWithCandidate } from "@splits-network/shared-types";
+import type { BaselSortOption } from "@splits-network/basel-ui";
 
 export type Invitation = RecruiterCandidateWithCandidate;
 
 export interface InvitationFilters {
     status?: string;
 }
+
+export const INVITATION_STATUS_LABELS: Record<string, string> = {
+    pending: "Pending",
+    accepted: "Accepted",
+    declined: "Declined",
+    expired: "Expired",
+    terminated: "Terminated",
+    cancelled: "Cancelled",
+};
+
+export const INVITATION_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "status", label: "Status" },
+];
 
 export interface InvitationStatusDisplay {
     label: string;

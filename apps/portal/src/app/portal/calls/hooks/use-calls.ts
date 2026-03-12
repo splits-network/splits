@@ -32,6 +32,10 @@ export function useCalls() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<CallListItem, CallFilters>({
         endpoint: "/calls",
         defaultFilters: {},
@@ -104,5 +108,9 @@ export function useCalls() {
         tags,
         viewMode,
         setViewMode,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     };
 }

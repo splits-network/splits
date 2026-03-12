@@ -170,6 +170,10 @@ export default function InvitationsBaselPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Invitation, InvitationFilters>({
         endpoint: "/recruiter-candidates",
         include: "candidate",
@@ -187,6 +191,11 @@ export default function InvitationsBaselPage() {
     const handleViewModeChange = useCallback((mode: ViewMode) => {
         setViewMode(mode);
     }, []);
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     if (error) {
         return <ErrorState message={error} onRetry={refresh} />;
@@ -209,6 +218,9 @@ export default function InvitationsBaselPage() {
                     totalCount={pagination?.total ?? invitations.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
                 />
 
                 {/* Content Area */}

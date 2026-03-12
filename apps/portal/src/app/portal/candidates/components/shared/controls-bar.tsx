@@ -1,14 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { SearchInput } from "@/components/standard-lists";
 import {
     BaselControlsBarShell,
     BaselViewModeSelector,
     BaselResultsCount,
     BaselRefreshButton,
+    BaselScopeToggle,
+    BaselFilterSelect,
+    BaselSortSelect,
+    BaselExpandToggle,
     type BaselViewMode,
 } from "@splits-network/basel-ui";
 import type { CandidateFilters, CandidateScope } from "../../types";
+import {
+    VERIFICATION_STATUS_LABELS,
+    JOB_TYPE_LABELS,
+    REMOTE_LABELS,
+    CANDIDATE_SORT_OPTIONS,
+} from "../../types";
+
+const VERIFICATION_OPTIONS = Object.entries(VERIFICATION_STATUS_LABELS).map(([value, label]) => ({ value, label }));
+const JOB_TYPE_OPTIONS = Object.entries(JOB_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+const REMOTE_OPTIONS = Object.entries(REMOTE_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -27,6 +42,9 @@ interface ControlsBarProps {
     totalCount: number;
     loading: boolean;
     refresh: () => void;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (field: string, order: "asc" | "desc") => void;
 }
 
 export function ControlsBar({
@@ -43,92 +61,90 @@ export function ControlsBar({
     totalCount,
     loading,
     refresh,
+    sortBy,
+    sortOrder,
+    onSortChange,
 }: ControlsBarProps) {
+    const [expanded, setExpanded] = useState(false);
+
+    const hasExpandedFilters = !!filters.open_to_remote;
+
     return (
         <BaselControlsBarShell
+            action={
+                <button
+                    onClick={onAddCandidate}
+                    className="btn btn-primary btn-sm gap-2 rounded-none"
+                >
+                    <i className="fa-duotone fa-regular fa-plus" />
+                    <span className="hidden sm:inline">Add Candidate</span>
+                </button>
+            }
+            search={
+                <SearchInput
+                    value={searchInput}
+                    onChange={onSearchChange}
+                    placeholder="Search by name, skill, or title..."
+                    className="input-sm"
+                />
+            }
             filters={
                 <>
-                    <div className="join">
-                        {(
-                            [
-                                { value: "mine", label: "My Candidates" },
-                                { value: "all", label: "All Candidates" },
-                            ] as const
-                        ).map(({ value, label }) => (
-                            <button
-                                key={value}
-                                onClick={() => onScopeChange(value)}
-                                className={`join-item btn btn-sm rounded-none ${
-                                    scope === value ? "btn-active" : ""
-                                }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-
-                    <SearchInput
-                        value={searchInput}
-                        onChange={onSearchChange}
-                        placeholder="Search by name, skill, or title..."
-                        className="flex-1 min-w-[200px] max-w-md"
+                    <BaselFilterSelect
+                        value={filters.verification_status}
+                        onChange={(v) => onFilterChange("verification_status", v)}
+                        options={VERIFICATION_OPTIONS}
+                        placeholder="All Status"
                     />
-
-                    <select
-                        value={filters.verification_status || ""}
-                        onChange={(e) =>
-                            onFilterChange(
-                                "verification_status",
-                                e.target.value || undefined,
-                            )
-                        }
-                        className="select uppercase rounded-none"
-                    >
-                        <option value="">All Status</option>
-                        <option value="verified">Verified</option>
-                        <option value="pending">Pending</option>
-                        <option value="unverified">Unverified</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-
-                    <select
-                        value={filters.desired_job_type || ""}
-                        onChange={(e) =>
-                            onFilterChange(
-                                "desired_job_type",
-                                e.target.value || undefined,
-                            )
-                        }
-                        className="select uppercase rounded-none"
-                    >
-                        <option value="">All Types</option>
-                        <option value="full_time">Full Time</option>
-                        <option value="contract">Contract</option>
-                        <option value="freelance">Freelance</option>
-                        <option value="part_time">Part Time</option>
-                    </select>
-
-                    <button
-                        onClick={onAddCandidate}
-                        className="btn btn-primary gap-2 rounded-none"
-                    >
-                        <i className="fa-duotone fa-regular fa-plus" />
-                        <span className="hidden sm:inline">Add Candidate</span>
-                    </button>
-
+                    <BaselFilterSelect
+                        value={filters.desired_job_type}
+                        onChange={(v) => onFilterChange("desired_job_type", v)}
+                        options={JOB_TYPE_OPTIONS}
+                        placeholder="All Types"
+                    />
                 </>
             }
             statusLeft={
-                <BaselResultsCount count={candidateCount} total={totalCount} />
+                <>
+                    <BaselScopeToggle
+                        value={scope}
+                        onChange={(v) => onScopeChange(v as CandidateScope)}
+                        options={[
+                            { value: "mine", label: "My Candidates" },
+                            { value: "all", label: "All Candidates" },
+                        ]}
+                    />
+                    <BaselResultsCount count={candidateCount} total={totalCount} />
+                </>
             }
             statusRight={
                 <>
+                    <BaselSortSelect
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={onSortChange}
+                        options={CANDIDATE_SORT_OPTIONS}
+                    />
                     <BaselRefreshButton onClick={refresh} loading={loading} />
                     <BaselViewModeSelector
                         viewMode={viewMode}
                         onViewModeChange={onViewModeChange}
                     />
+                    <BaselExpandToggle
+                        expanded={expanded || hasExpandedFilters}
+                        onToggle={() => setExpanded((prev) => !prev)}
+                    />
                 </>
+            }
+            expandedFilters={
+                (expanded || hasExpandedFilters) ? (
+                    <BaselFilterSelect
+                        value={filters.open_to_remote}
+                        onChange={(v) => onFilterChange("open_to_remote", v)}
+                        options={REMOTE_OPTIONS}
+                        placeholder="Remote Preference"
+                    />
+                ) : undefined
             }
         />
     );

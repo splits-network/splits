@@ -10,7 +10,6 @@
     },
     "dependencies": {
         "@splits-network/basel-ui": "workspace:*",
-        "@splits-network/memphis-ui": "workspace:*",
         "@splits-network/shared-types": "workspace:*",
         "@splits-network/shared-ui": "workspace:*",
         "next": "^16.1.0",

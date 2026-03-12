@@ -124,3 +124,27 @@ export function getCompanySizeLabel(size?: string): string {
     if (!size) return "Unknown";
     return size;
 }
+
+import type { BaselSortOption } from "@splits-network/basel-ui";
+
+export const INDUSTRY_LABELS: Record<string, string> = {
+    Technology: "Technology",
+    Healthcare: "Healthcare",
+    Finance: "Finance",
+    Education: "Education",
+    Manufacturing: "Manufacturing",
+    Retail: "Retail",
+    Consulting: "Consulting",
+};
+
+export const RELATIONSHIP_STATUS_LABELS: Record<string, string> = {
+    active: "Active",
+    pending: "Pending",
+    declined: "Declined",
+    terminated: "Terminated",
+};
+
+export const COMPANY_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Added" },
+    { value: "name", label: "Company Name" },
+];

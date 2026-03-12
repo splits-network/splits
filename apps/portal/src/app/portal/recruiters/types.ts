@@ -1,4 +1,16 @@
 import { MarketplaceRecruiterDTO } from "@splits-network/shared-types";
+import type { BaselSortOption } from "@splits-network/basel-ui";
+
+export const RECRUITER_STATUS_LABELS: Record<string, string> = {
+    active: "Active",
+    pending: "Pending",
+    suspended: "Suspended",
+};
+
+export const RECRUITER_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Joined" },
+    { value: "name", label: "Name" },
+];
 
 export interface RecruiterActivity {
     id: string;

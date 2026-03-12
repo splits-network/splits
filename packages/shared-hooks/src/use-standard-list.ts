@@ -128,6 +128,8 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
     // Sorting
     sortBy: string;
     sortOrder: 'asc' | 'desc';
+    setSortBy: (field: string) => void;
+    setSortOrder: (order: 'asc' | 'desc') => void;
     handleSort: (field: string) => void;
     getSortIcon: (field: string) => string;
 
@@ -607,6 +609,8 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         // Sorting
         sortBy,
         sortOrder,
+        setSortBy,
+        setSortOrder,
         handleSort,
         getSortIcon,
 

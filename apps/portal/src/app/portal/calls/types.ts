@@ -2,6 +2,14 @@
  * Call list types — mirrors call-service v2 API response types.
  */
 
+import type { BaselSortOption } from "@splits-network/basel-ui";
+
+export const CALL_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "scheduled_at", label: "Scheduled Date" },
+    { value: "created_at", label: "Date Created" },
+    { value: "duration_minutes", label: "Duration" },
+];
+
 export type CallStatus = "scheduled" | "active" | "completed" | "cancelled" | "missed" | "no_show";
 export type CallEntityType = "application" | "job" | "company" | "firm" | "candidate";
 export type CallParticipantRole = "host" | "participant" | "observer";

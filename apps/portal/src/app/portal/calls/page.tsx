@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { useCalls } from "./hooks/use-calls";
 import {
     PaginationControls,
@@ -33,7 +34,16 @@ export default function CallsPage() {
         tags,
         viewMode,
         setViewMode,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useCalls();
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     if (error) {
         return <ErrorState message={error} onRetry={refresh} />;
@@ -57,6 +67,9 @@ export default function CallsPage() {
                 loading={loading}
                 refresh={refresh}
                 tags={tags}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
             />
 
             {/* Content Area */}
