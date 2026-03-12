@@ -10,6 +10,7 @@ export const RECRUITER_STATUS_LABELS: Record<string, string> = {
 export const RECRUITER_SORT_OPTIONS: BaselSortOption[] = [
     { value: "created_at", label: "Date Joined" },
     { value: "name", label: "Name" },
+    { value: "plan_tier", label: "Subscription Tier" },
 ];
 
 export const CANDIDATE_RECRUITER_LABELS: Record<string, string> = {

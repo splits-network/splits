@@ -34,6 +34,9 @@ export class CompanyInvitationsEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannel(null, 'email');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: null,
@@ -41,7 +44,7 @@ export class CompanyInvitationsEmailService {
             subject,
             template: 'company_invitation',
             payload: options.payload ?? null,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,

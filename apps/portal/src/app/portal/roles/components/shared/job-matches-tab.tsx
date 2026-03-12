@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { startChatConversation, sendChatMessage } from "@/lib/chat-start";
-import { TrueScoreUpsell } from "@/components/matches/true-score-upsell";
+import { UpgradePrompt } from "@/components/entitlements/upgrade-prompt";
+import { useUserProfile } from "@/contexts/user-profile-context";
 import { MatchCard } from "./match-card";
 import { useMatchActions } from "../../hooks/use-match-actions";
 import type { EnrichedMatch } from "@splits-network/shared-types";
@@ -36,14 +37,13 @@ function buildInviteMessage(match: EnrichedMatch, job: Job): string {
 
 export function JobMatchesTab({
     job,
-    isPartner,
     isRecruiter,
 }: {
     job: Job;
-    isPartner: boolean;
     isRecruiter: boolean;
 }) {
     const { getToken } = useAuth();
+    const { hasEntitlement } = useUserProfile();
     const { inviteCandidate, dismissMatch } = useMatchActions();
     const [matches, setMatches] = useState<EnrichedMatch[]>([]);
     const [loading, setLoading] = useState(true);
@@ -152,7 +152,7 @@ export function JobMatchesTab({
 
     return (
         <div className="space-y-6">
-            {isRecruiter && !isPartner && <TrueScoreUpsell />}
+            {isRecruiter && !hasEntitlement("ai_match_scoring") && <UpgradePrompt entitlement="ai_match_scoring" variant="card" />}
 
             {matches.length === 0 ? (
                 <div className="text-center py-12 text-base-content/40">

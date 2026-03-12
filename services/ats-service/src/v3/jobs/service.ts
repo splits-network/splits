@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { AccessContextResolver, EntitlementChecker } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../v2/shared/events';
 import { JobRepository } from './repository';
@@ -23,6 +23,7 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 
 export class JobService {
   private accessResolver: AccessContextResolver;
+  private entitlementChecker: EntitlementChecker;
 
   constructor(
     private repository: JobRepository,
@@ -30,6 +31,7 @@ export class JobService {
     private eventPublisher?: IEventPublisher
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
+    this.entitlementChecker = new EntitlementChecker(supabase);
   }
 
   async getAll(params: JobListParams, clerkUserId: string) {
@@ -42,21 +44,13 @@ export class JobService {
       // Admins see everything (including drafts) — no extra filters
     } else if (context.recruiterId && context.roles.includes('recruiter')) {
       // Recruiters see active jobs, plus their own drafts/pending
-      // Non-partner tier recruiters are excluded from early access jobs
+      // Gate early access and priority roles by entitlement
       if (!scopedParams.status) {
         scopedParams.visible_statuses = ['active'];
         scopedParams.owner_recruiter_id = context.recruiterId;
 
-        // Check subscription tier for early access gating
-        const { data: sub } = await this.supabase
-          .from('subscriptions')
-          .select('plan:plans(tier)')
-          .eq('recruiter_id', context.recruiterId)
-          .eq('status', 'active')
-          .maybeSingle();
-
-        const tier = (sub?.plan as any)?.tier ?? 'starter';
-        if (tier !== 'partner') {
+        const hasEarlyAccess = await this.entitlementChecker.hasEntitlementByClerkId(clerkUserId, 'early_access_roles');
+        if (!hasEarlyAccess) {
           scopedParams.exclude_early_access = true;
         }
       }

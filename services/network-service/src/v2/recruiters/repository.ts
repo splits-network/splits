@@ -188,7 +188,13 @@ export class RecruiterRepository {
             'avg_time_to_hire_days', 'avg_response_time_hours',
         ]);
 
-        if (reputationColumns.has(sortBy)) {
+        // Columns sorted in the service layer after enrichment (not DB columns)
+        const serviceSortedColumns = new Set(['plan_tier']);
+
+        if (serviceSortedColumns.has(sortBy)) {
+            // Default DB ordering; actual sort applied in service after enrichment
+            query = query.order('created_at', { ascending: false });
+        } else if (reputationColumns.has(sortBy)) {
             query = query.order(sortBy, { ascending: sortOrder, referencedTable: 'recruiter_reputation' });
         } else {
             query = query.order(sortBy, { ascending: sortOrder });
@@ -354,6 +360,29 @@ export class RecruiterRepository {
         return selectParts.join(', ');
     }
 
+
+    /**
+     * Batch-fetch plan tiers for a list of recruiter IDs.
+     * Joins subscriptions → plans to get the tier for each recruiter.
+     * Returns a map of recruiter_id → tier slug (defaults to 'starter' if no active subscription).
+     */
+    async batchGetPlanTiers(recruiterIds: string[]): Promise<Map<string, string>> {
+        const tierMap = new Map<string, string>();
+        if (recruiterIds.length === 0) return tierMap;
+
+        const { data } = await this.supabase
+            .from('subscriptions')
+            .select('recruiter_id, plan:plans(tier)')
+            .in('recruiter_id', recruiterIds)
+            .in('status', ['active', 'trialing']);
+
+        for (const row of data || []) {
+            const tier = (row.plan as any)?.tier ?? 'starter';
+            tierMap.set(row.recruiter_id, tier);
+        }
+
+        return tierMap;
+    }
 
     async findRecruiterBySlug(slug: string, include?: string): Promise<any | null> {
         const selectClause = this.buildSelectClause(include);

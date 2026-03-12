@@ -27,13 +27,16 @@ export class HealthEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannel(null, 'email');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_email: to,
             subject,
             template: 'health-alert',
             payload: options.payload,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,

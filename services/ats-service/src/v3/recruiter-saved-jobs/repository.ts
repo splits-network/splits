@@ -79,6 +79,17 @@ export class RecruiterSavedJobRepository {
     return data;
   }
 
+  /** Count total saved jobs for a recruiter — used for entitlement limit checks */
+  async countByRecruiterId(recruiterId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('recruiter_saved_jobs')
+      .select('*', { count: 'exact', head: true })
+      .eq('recruiter_id', recruiterId);
+
+    if (error) throw error;
+    return count || 0;
+  }
+
   /** Returns saved job IDs for a recruiter — used for list filtering */
   async findJobIdsByRecruiter(recruiterId: string): Promise<string[]> {
     const { data, error } = await this.supabase

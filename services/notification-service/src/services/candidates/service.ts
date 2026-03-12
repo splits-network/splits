@@ -57,6 +57,9 @@ export class CandidatesEmailService {
             html_length: html?.length
         }, 'Creating notification log and sending email');
 
+        const effectiveChannel = await this.repository.resolveChannel(options.userId, 'email');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId ?? null,
@@ -64,7 +67,7 @@ export class CandidatesEmailService {
             subject,
             template: 'custom',
             payload: options.payload ?? null,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,

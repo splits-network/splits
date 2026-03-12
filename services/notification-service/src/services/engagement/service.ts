@@ -44,6 +44,9 @@ export class EngagementEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannel(options.userId, 'email');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId,
@@ -52,7 +55,7 @@ export class EngagementEmailService {
             template: 'custom',
             payload: options.payload,
             status: 'pending',
-            channel: 'email',
+            channel: effectiveChannel,
             read: false,
             dismissed: false,
             priority: 'low',

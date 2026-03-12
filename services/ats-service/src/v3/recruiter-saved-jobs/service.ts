@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { AccessContextResolver, EntitlementChecker } from '@splits-network/shared-access-context';
 import { BadRequestError, ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../v2/shared/events';
 import { RecruiterSavedJobRepository } from './repository';
@@ -12,6 +12,7 @@ import { CreateRecruiterSavedJobInput, RecruiterSavedJobListParams } from './typ
 
 export class RecruiterSavedJobService {
   private accessResolver: AccessContextResolver;
+  private entitlementChecker: EntitlementChecker;
 
   constructor(
     private repository: RecruiterSavedJobRepository,
@@ -19,6 +20,7 @@ export class RecruiterSavedJobService {
     private eventPublisher?: IEventPublisher
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
+    this.entitlementChecker = new EntitlementChecker(supabase);
   }
 
   async getAll(params: RecruiterSavedJobListParams, clerkUserId: string) {
@@ -41,11 +43,21 @@ export class RecruiterSavedJobService {
 
   async create(input: CreateRecruiterSavedJobInput, clerkUserId: string) {
     if (!input.job_id) throw new BadRequestError('job_id is required');
-    const recruiterId = await this.resolveRecruiterId(clerkUserId);
+    const { recruiterId, identityUserId } = await this.resolveRecruiterContext(clerkUserId);
 
     // Idempotent — return existing if already saved
     const existing = await this.repository.findByJobId(recruiterId, input.job_id);
     if (existing) return existing;
+
+    // Entitlement limit check
+    const currentCount = await this.repository.countByRecruiterId(recruiterId);
+    const withinLimit = await this.entitlementChecker.checkLimit(identityUserId, 'max_saved_jobs', currentCount);
+    if (!withinLimit) {
+      const entitlements = await this.entitlementChecker.resolve(identityUserId);
+      throw new ForbiddenError(
+        `Saved jobs limit reached (${currentCount}/${entitlements.max_saved_jobs}). Upgrade your plan for more.`
+      );
+    }
 
     const saved = await this.repository.create(recruiterId, input.job_id);
 
@@ -74,10 +86,18 @@ export class RecruiterSavedJobService {
   }
 
   private async resolveRecruiterId(clerkUserId: string): Promise<string> {
+    const { recruiterId } = await this.resolveRecruiterContext(clerkUserId);
+    return recruiterId;
+  }
+
+  private async resolveRecruiterContext(clerkUserId: string): Promise<{ recruiterId: string; identityUserId: string }> {
     const context = await this.accessResolver.resolve(clerkUserId);
     if (!context.recruiterId) {
       throw new ForbiddenError('Recruiter profile not found for user');
     }
-    return context.recruiterId;
+    if (!context.identityUserId) {
+      throw new ForbiddenError('Identity user not found');
+    }
+    return { recruiterId: context.recruiterId, identityUserId: context.identityUserId };
   }
 }

@@ -13,6 +13,8 @@ import {
 } from "../shared/helpers";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { PlanBadge } from "@/components/entitlements/plan-badge";
+import type { PlanTier } from "@/contexts/user-profile-context";
 
 export function SplitItem({
     recruiter,
@@ -62,6 +64,7 @@ export function SplitItem({
                             <h4 className="font-bold text-sm tracking-tight truncate">
                                 {name}
                                 {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
+                                {recruiter.plan_tier && <span className="ml-1.5 inline-block align-middle"><PlanBadge tier={recruiter.plan_tier as PlanTier} /></span>}
                             </h4>
                         </div>
                         {recruiter.tagline && (

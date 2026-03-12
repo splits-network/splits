@@ -42,6 +42,9 @@ export class ChatEmailService {
     async sendNewMessageEmail(data: ChatMessageEmailData): Promise<void> {
         const subject = `New message from ${data.senderName}`;
 
+        const effectiveChannel = await this.repository.resolveChannel(data.recipientUserId, 'email');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: 'chat.message.created',
             recipient_user_id: data.recipientUserId,
@@ -53,7 +56,7 @@ export class ChatEmailService {
                 preview: data.preview,
                 url: data.conversationUrl,
             },
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,

@@ -73,7 +73,7 @@ export function MatchDetailPanel({
             )}
             {activeTab === "skills" && <SkillsTab match={match} />}
             {activeTab === "ai" && (
-                <AITab match={match} isPartner={isPartner} />
+                <AITab match={match} />
             )}
             {activeTab === "details" && <DetailsTab match={match} />}
         </div>

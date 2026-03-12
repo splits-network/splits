@@ -1,13 +1,30 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NotificationLog, NotificationLogInsert } from '@splits-network/shared-types';
+import { Logger } from '@splits-network/shared-logging';
+import { EmailEntitlementGate, type NotificationChannel } from './helpers/email-entitlement-gate';
 
 export class NotificationRepository {
     private supabase: SupabaseClient;
+    private _emailGate: EmailEntitlementGate | null = null;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey, {
             db: { schema: 'public' }
         });
+    }
+
+    /** Initialize the email entitlement gate (called once at startup) */
+    initEmailGate(logger: Logger): void {
+        this._emailGate = new EmailEntitlementGate(this.supabase, logger);
+    }
+
+    /** Check whether email is allowed for a user and resolve the effective channel */
+    async resolveChannel(
+        recipientUserId: string | null | undefined,
+        requestedChannel: NotificationChannel,
+    ): Promise<NotificationChannel | null> {
+        if (!this._emailGate) return requestedChannel;
+        return this._emailGate.resolveChannel(recipientUserId, requestedChannel);
     }
 
     // Expose Supabase client for cross-schema queries

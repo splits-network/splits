@@ -169,6 +169,12 @@ export async function recruiterCodeRoutes(
                         error: { code: 'FORBIDDEN', message: error.message },
                     });
                 }
+                if (error.message.includes('maximum number of referral codes')) {
+                    return reply.code(403).send({
+                        error: { code: 'ENTITLEMENT_LIMIT', message: error.message },
+                        entitlement: 'max_referral_codes',
+                    });
+                }
             }
             throw error;
         }

@@ -46,7 +46,12 @@ export function CreateCodeModal({
             setIsDefault(false);
             onSuccess();
         } catch (err: any) {
-            setError(err.message || "Failed to create referral code");
+            if (err?.response?.status === 403 && err?.response?.data?.entitlement) {
+                const limit = err.response.data.limit;
+                setError(`You've reached your limit of ${limit} referral code${limit === 1 ? '' : 's'}. Upgrade your plan to create more.`);
+            } else {
+                setError(err.message || "Failed to create referral code");
+            }
         } finally {
             setCreating(false);
         }

@@ -41,7 +41,10 @@ export class MatchesEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
-        // Create in-app notification
+        const effectiveChannel = await this.repository.resolveChannel(options.userId, 'both');
+        if (!effectiveChannel) return;
+
+        // Create notification log (may be downgraded to in_app)
         await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId ?? null,
@@ -49,8 +52,8 @@ export class MatchesEmailService {
             subject,
             template: 'custom',
             payload: options.payload ?? null,
-            channel: 'both',
-            status: 'pending',
+            channel: effectiveChannel,
+            status: effectiveChannel === 'in_app' ? 'sent' : 'pending',
             read: false,
             dismissed: false,
             priority: 'high',
@@ -58,6 +61,9 @@ export class MatchesEmailService {
             action_url: options.actionUrl ?? null,
             action_label: options.actionLabel ?? null,
         });
+
+        // Skip actual email send if downgraded to in-app only
+        if (effectiveChannel === 'in_app') return;
 
         // Send email
         try {

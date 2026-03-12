@@ -187,7 +187,11 @@ export default function CandidateActionsToolbar({
             }
         } catch (error: any) {
             console.error("Failed to toggle save:", error);
-            toast.error("Failed to update saved status.");
+            if (error?.response?.status === 403 && error?.response?.data?.entitlement) {
+                toast.error(`You've reached your saved candidates limit. Upgrade your plan for more.`);
+            } else {
+                toast.error("Failed to update saved status.");
+            }
         } finally {
             setIsSaving(false);
         }

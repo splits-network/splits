@@ -90,3 +90,6 @@ export * from './ats-integrations';
 
 // Matching types and utilities
 export * from './matching';
+
+// Subscription entitlements (feature gating)
+export * from './entitlements';

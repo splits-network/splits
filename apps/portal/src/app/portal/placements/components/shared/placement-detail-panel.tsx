@@ -31,6 +31,7 @@ import {
     copyToClipboard,
     downloadCsv,
 } from "./financials-export";
+import { FeatureGate } from "@/components/entitlements/feature-gate";
 
 /* ─── Badge class mapping ──────────────────────────────────────────────── */
 
@@ -216,26 +217,28 @@ function FinancialsTab({
     return (
         <div className="flex-1 min-h-0 overflow-y-auto space-y-8 p-6">
             {/* Export toolbar */}
-            <div className="flex items-center gap-2 justify-end">
-                <button
-                    onClick={handleCopy}
-                    className="btn btn-sm btn-ghost text-base-content/50"
-                    title="Copy to clipboard (Excel-friendly)"
-                >
-                    <i
-                        className={`fa-duotone fa-regular ${copied ? "fa-check" : "fa-clipboard"} mr-1`}
-                    />
-                    {copied ? "Copied!" : "Copy"}
-                </button>
-                <button
-                    onClick={handleDownload}
-                    className="btn btn-sm btn-ghost text-base-content/50"
-                    title="Download CSV"
-                >
-                    <i className="fa-duotone fa-regular fa-file-csv mr-1" />
-                    CSV
-                </button>
-            </div>
+            <FeatureGate entitlement="data_export" variant="inline">
+                <div className="flex items-center gap-2 justify-end">
+                    <button
+                        onClick={handleCopy}
+                        className="btn btn-sm btn-ghost text-base-content/50"
+                        title="Copy to clipboard (Excel-friendly)"
+                    >
+                        <i
+                            className={`fa-duotone fa-regular ${copied ? "fa-check" : "fa-clipboard"} mr-1`}
+                        />
+                        {copied ? "Copied!" : "Copy"}
+                    </button>
+                    <button
+                        onClick={handleDownload}
+                        className="btn btn-sm btn-ghost text-base-content/50"
+                        title="Download CSV"
+                    >
+                        <i className="fa-duotone fa-regular fa-file-csv mr-1" />
+                        CSV
+                    </button>
+                </div>
+            </FeatureGate>
 
             {/* Financial stats grid */}
             <div className="grid grid-cols-3 gap-[2px] bg-base-300">

@@ -70,7 +70,7 @@ export function JobDetail({
     accent?: unknown;
 }) {
     const [activeTab, setActiveTab] = useState<TabKey>("brief");
-    const { planTier, isRecruiter } = useUserProfile();
+    const { isRecruiter } = useUserProfile();
 
     return (
         <div className="w-full z-10">
@@ -99,7 +99,6 @@ export function JobDetail({
                 {activeTab === "matches" && (
                     <JobMatchesTab
                         job={job}
-                        isPartner={planTier === "partner"}
                         isRecruiter={isRecruiter}
                     />
                 )}

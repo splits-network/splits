@@ -370,6 +370,17 @@ export class RecruiterCodeRepository {
         if (error) throw error;
     }
 
+    async countActiveByRecruiterId(recruiterId: string): Promise<number> {
+        const { count, error } = await this.supabase
+            .from('recruiter_codes')
+            .select('*', { count: 'exact', head: true })
+            .eq('recruiter_id', recruiterId)
+            .is('deleted_at', null);
+
+        if (error) throw error;
+        return count || 0;
+    }
+
     async getUsageCount(recruiterCodeId: string): Promise<number> {
         const { count, error } = await this.supabase
             .from('recruiter_codes_log')

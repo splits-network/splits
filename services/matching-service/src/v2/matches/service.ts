@@ -7,6 +7,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext, AccessContext } from '../shared/access';
+import { EntitlementChecker } from '@splits-network/shared-access-context';
 import { IEventPublisher } from '../shared/events';
 import { buildPaginationResponse } from '../shared/helpers';
 import { MatchRepository } from './repository';
@@ -15,12 +16,16 @@ import { MatchingOrchestrator } from './matching-orchestrator';
 import { findCandidateRecruiter, verifyInvitePermission } from './invite-helpers';
 
 export class MatchService {
+    private entitlementChecker: EntitlementChecker;
+
     constructor(
         private repository: MatchRepository,
         private supabase: SupabaseClient,
         private orchestrator: MatchingOrchestrator,
         private eventPublisher?: IEventPublisher,
-    ) {}
+    ) {
+        this.entitlementChecker = new EntitlementChecker(supabase);
+    }
 
     private async requireAuth(clerkUserId: string): Promise<AccessContext> {
         const access = await resolveAccessContext(this.supabase, clerkUserId);
@@ -38,8 +43,8 @@ export class MatchService {
         if (access.isPlatformAdmin) {
             result = await this.repository.findMatches(filters);
         } else if (access.recruiterId) {
-            const [isPartner, recruiterJobIds, recruiterCandidateIds] = await Promise.all([
-                this.isRecruiterPartner(access.recruiterId),
+            const [hasAiScoring, recruiterJobIds, recruiterCandidateIds] = await Promise.all([
+                this.entitlementChecker.hasEntitlementByClerkId(clerkUserId, 'ai_match_scoring'),
                 this.getRecruiterJobIds(access.recruiterId),
                 this.getRecruiterCandidateIds(access.recruiterId),
             ]);
@@ -47,7 +52,7 @@ export class MatchService {
                 recruiterJobIds,
                 recruiterCandidateIds,
                 filters,
-                isPartner ? undefined : 'standard',
+                hasAiScoring ? undefined : 'standard',
             );
         } else if (access.candidateId) {
             result = await this.repository.findMatchesForCandidate(access.candidateId, filters);
@@ -268,14 +273,4 @@ export class MatchService {
         return [...new Set(allIds)];
     }
 
-    private async isRecruiterPartner(recruiterId: string): Promise<boolean> {
-        const { data } = await this.supabase
-            .from('subscriptions')
-            .select('plans!inner(tier)')
-            .eq('recruiter_id', recruiterId)
-            .eq('status', 'active')
-            .maybeSingle();
-
-        return (data as any)?.plans?.tier === 'partner';
-    }
 }

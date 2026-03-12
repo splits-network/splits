@@ -8,6 +8,8 @@ import type {
     BadgeAward,
     EntityLevelInfo,
 } from "@splits-network/shared-gamification";
+import { PlanBadge } from "@/components/entitlements/plan-badge";
+import type { PlanTier } from "@/contexts/user-profile-context";
 import { formatRelativeTime } from "@/lib/utils";
 import type { RecruiterWithUser } from "../types";
 import { getDisplayName, getInitials } from "../types";
@@ -201,6 +203,9 @@ export default function RecruiterProfileClient({
                             )}
                         </div>
                         <div className="flex items-center gap-4">
+                            {recruiter.plan_tier && (
+                                <PlanBadge tier={recruiter.plan_tier as PlanTier} />
+                            )}
                             <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary">
                                 <i className="fa-duotone fa-regular fa-badge-check text-sm" />
                                 Verified

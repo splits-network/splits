@@ -16,6 +16,8 @@ import {
 import { DetailLoader } from "../shared/recruiter-detail";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { PlanBadge } from "@/components/entitlements/plan-badge";
+import type { PlanTier } from "@/contexts/user-profile-context";
 
 export function TableRow({
     recruiter,
@@ -72,6 +74,7 @@ export function TableRow({
                             )}
                             <span className="font-bold text-sm">{name}</span>
                             {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
+                            {recruiter.plan_tier && <PlanBadge tier={recruiter.plan_tier as PlanTier} />}
                         </div>
                     </div>
                 </td>

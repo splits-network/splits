@@ -37,6 +37,36 @@ const BILLING_RESOURCES: ResourceDefinition[] = [
     },
 ];
 
+function registerEntitlementsMeRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/entitlements/me',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().get(
+                    '/api/v2/entitlements/me',
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch entitlements');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: 'Failed to resolve entitlements' } });
+            }
+        }
+    );
+}
+
 function registerSubscriptionMeRoute(app: FastifyInstance, services: ServiceRegistry) {
     const billingService = () => services.get('billing');
 
@@ -1456,6 +1486,7 @@ export function registerBillingRoutes(app: FastifyInstance, services: ServiceReg
     registerPublicSplitsRatesRoute(app, services);
 
     // Register specific auth-required routes (including /stats sub-routes that must come before generic :id routes)
+    registerEntitlementsMeRoute(app, services);
     registerSubscriptionMeRoute(app, services);
     registerSubscriptionSetupIntentRoute(app, services);
     registerSubscriptionActivateRoute(app, services);

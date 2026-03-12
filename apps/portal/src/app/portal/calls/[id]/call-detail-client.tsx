@@ -12,7 +12,7 @@ import { CallContextPanel } from "./components/call-context-panel";
 import { CallNotesSection } from "./components/call-notes-section";
 import { CallParticipantsSection } from "./components/call-participants-section";
 import { RelatedCallsSection } from "./components/related-calls-section";
-import { LockedTabUpgrade } from "./components/locked-tab-upgrade";
+import { UpgradePrompt } from "@/components/entitlements/upgrade-prompt";
 
 type TabKey = "recording" | "transcript" | "summary";
 
@@ -33,7 +33,7 @@ export function CallDetailClient({ callId }: { callId: string }) {
         currentTimestamp,
         setCurrentTimestamp,
     } = useCallDetail(callId);
-    const { planTier } = useUserProfile();
+    const { hasEntitlement } = useUserProfile();
     const [activeTab, setActiveTab] = useState<TabKey>("recording");
 
     if (isLoading) {
@@ -70,8 +70,8 @@ export function CallDetailClient({ callId }: { callId: string }) {
 
     const { recording_enabled, transcription_enabled, ai_analysis_enabled } = call;
 
-    const isTranscriptLocked = planTier === "starter";
-    const isSummaryLocked = planTier === "starter" || planTier === "pro";
+    const isTranscriptLocked = !hasEntitlement("call_transcription");
+    const isSummaryLocked = !hasEntitlement("ai_call_summary");
 
     function renderTabContent() {
         if (activeTab === "recording") {
@@ -88,11 +88,9 @@ export function CallDetailClient({ callId }: { callId: string }) {
         if (activeTab === "transcript") {
             if (isTranscriptLocked) {
                 return (
-                    <LockedTabUpgrade
-                        icon="fa-file-lines"
-                        title="Transcription"
-                        description="Automatic transcription is available on Pro and Partner plans. Partner also includes AI-powered summaries and analysis."
-                        upgradeTier="Pro"
+                    <UpgradePrompt
+                        entitlement="call_transcription"
+                        variant="card"
                     />
                 );
             }
@@ -117,23 +115,11 @@ export function CallDetailClient({ callId }: { callId: string }) {
         }
 
         if (activeTab === "summary") {
-            if (planTier === "starter") {
+            if (isSummaryLocked) {
                 return (
-                    <LockedTabUpgrade
-                        icon="fa-sparkles"
-                        title="AI Summary"
-                        description="AI-powered call summaries are available on the Partner plan. Partner includes both automatic transcription and AI analysis."
-                        upgradeTier="Partner"
-                    />
-                );
-            }
-            if (planTier === "pro") {
-                return (
-                    <LockedTabUpgrade
-                        icon="fa-sparkles"
-                        title="AI Summary"
-                        description="AI-powered call summaries are available on the Partner plan. You already have transcription — upgrade to unlock AI analysis too."
-                        upgradeTier="Partner"
+                    <UpgradePrompt
+                        entitlement="ai_call_summary"
+                        variant="card"
                     />
                 );
             }

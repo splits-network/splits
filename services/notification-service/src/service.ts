@@ -62,6 +62,9 @@ export class NotificationService {
     ) {
         const resend = new Resend(resendApiKey);
 
+        // Initialize email entitlement gate for plan-based email gating
+        repository.initEmailGate(logger);
+
         this.applications = new ApplicationsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
         this.placements = new PlacementsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);
         this.candidates = new CandidatesEmailService(resend, repository, fromEmail, candidateFromEmail, logger);

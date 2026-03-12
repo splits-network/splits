@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingState, ErrorState } from "@/hooks/use-standard-list";
-import { useUserProfile } from "@/contexts/user-profile-context";
 import { AdminPageHeader } from "../../components";
 import { MatchOverviewCard } from "./components/match-overview-card";
 import { FactorCard } from "./components/factor-card";
 import { SkillsBreakdown } from "./components/skills-breakdown";
-import { TrueScoreUpsell } from "@/components/matches/true-score-upsell";
+import { FeatureGate } from "@/components/entitlements/feature-gate";
+import { UpgradePrompt } from "@/components/entitlements/upgrade-prompt";
 import type { EnrichedMatch } from "@splits-network/shared-types";
 
 interface MatchDetailClientProps {
@@ -19,9 +19,7 @@ interface MatchDetailClientProps {
 
 export default function MatchDetailClient({ matchId }: MatchDetailClientProps) {
     const { getToken } = useAuth();
-    const { planTier } = useUserProfile();
     const router = useRouter();
-    const isPartner = planTier === "partner";
 
     const [match, setMatch] = useState<EnrichedMatch | null>(null);
     const [loading, setLoading] = useState(true);
@@ -152,21 +150,21 @@ export default function MatchDetailClient({ matchId }: MatchDetailClientProps) {
                     </div>
 
                     {/* AI Summary */}
-                    {isPartner && match.ai_score !== null && factors.ai_summary ? (
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <h3 className="font-semibold mb-2">
-                                    <i className="fa-duotone fa-regular fa-brain mr-2"></i>
-                                    True Score analysis
-                                </h3>
-                                <p className="text-sm text-base-content/80 leading-relaxed">
-                                    {factors.ai_summary}
-                                </p>
+                    <FeatureGate entitlement="ai_match_scoring">
+                        {match.ai_score !== null && factors.ai_summary ? (
+                            <div className="card bg-base-100 shadow">
+                                <div className="card-body">
+                                    <h3 className="font-semibold mb-2">
+                                        <i className="fa-duotone fa-regular fa-brain mr-2"></i>
+                                        True Score analysis
+                                    </h3>
+                                    <p className="text-sm text-base-content/80 leading-relaxed">
+                                        {factors.ai_summary}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    ) : !isPartner ? (
-                        <TrueScoreUpsell />
-                    ) : null}
+                        ) : null}
+                    </FeatureGate>
                 </div>
             </div>
         </div>

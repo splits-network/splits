@@ -63,6 +63,9 @@ export class SupportEmailService {
     async sendStatusContactEmail(data: StatusContactEmailData): Promise<void> {
         const subject = `[Status Contact] ${data.topic} (${data.source})`;
 
+        const effectiveChannel = await this.repository.resolveChannel(null, 'email');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: 'status.contact_submitted',
             recipient_email: data.recipient,
@@ -78,7 +81,7 @@ export class SupportEmailService {
                 ip_address: data.ipAddress,
                 user_agent: data.userAgent,
             },
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,
@@ -148,6 +151,9 @@ ${paragraph('If you need further assistance, simply reply to this email or visit
 
         const fromAddress = data.sourceApp === 'candidate' ? this.candidateFromEmail : this.fromEmail;
 
+        const effectiveChannel = await this.repository.resolveChannel(data.userId, 'email');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: 'support_ticket.replied',
             recipient_user_id: data.userId || undefined,
@@ -159,7 +165,7 @@ ${paragraph('If you need further assistance, simply reply to this email or visit
                 reply_body: data.replyBody,
                 source_app: data.sourceApp,
             },
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,

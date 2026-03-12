@@ -7,6 +7,7 @@ import { useToast } from "@/lib/toast-context";
 import { AdminPageHeader } from "../../components";
 import { BaselTabBar, BaselConfirmModal } from "@splits-network/basel-ui";
 import { ButtonLoading, LoadingState } from "@splits-network/shared-ui";
+import { FeatureGate } from "@/components/entitlements/feature-gate";
 import type {
     ContentNavigation,
     HeaderNavConfig,
@@ -199,15 +200,17 @@ export default function NavigationAdminPage() {
                             <i className="fa-duotone fa-regular fa-file-arrow-down"></i>
                             Schema
                         </a>
-                        <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={handleExportConfig}
-                            disabled={loading}
-                            title="Export current config as JSON"
-                        >
-                            <i className="fa-duotone fa-regular fa-download"></i>
-                            Export
-                        </button>
+                        <FeatureGate entitlement="data_export" variant="inline">
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={handleExportConfig}
+                                disabled={loading}
+                                title="Export current config as JSON"
+                            >
+                                <i className="fa-duotone fa-regular fa-download"></i>
+                                Export
+                            </button>
+                        </FeatureGate>
                         <button
                             className="btn btn-ghost btn-sm"
                             onClick={() => setShowImportModal(true)}

@@ -33,6 +33,9 @@ export class RecruiterCompanyInvitationsEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannel(options.recipientUserId, 'email');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.recipientUserId ?? null,
@@ -40,7 +43,7 @@ export class RecruiterCompanyInvitationsEmailService {
             subject,
             template: 'recruiter_company_invitation',
             payload: options.payload ?? null,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,

@@ -38,6 +38,10 @@ export class JobsEmailService {
             source?: EmailSource;
         }
     ): Promise<void> {
+        const requestedChannel = options.channel || 'email';
+        const effectiveChannel = await this.repository.resolveChannel(options.userId, requestedChannel);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId,
@@ -45,8 +49,8 @@ export class JobsEmailService {
             subject,
             template: 'custom',
             payload: options.payload,
-            status: 'pending',
-            channel: options.channel || 'email',
+            status: effectiveChannel === 'in_app' ? 'sent' : 'pending',
+            channel: effectiveChannel,
             read: false,
             dismissed: false,
             priority: options.priority || 'normal',
@@ -54,6 +58,9 @@ export class JobsEmailService {
             action_url: options.actionUrl,
             action_label: options.actionLabel,
         });
+
+        // Skip actual email send if downgraded to in-app only
+        if (effectiveChannel === 'in_app') return;
 
         try {
             const { data, error } = await this.resend.emails.send({

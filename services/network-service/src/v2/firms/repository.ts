@@ -185,33 +185,6 @@ export class FirmRepository {
         return accessContext.identityUserId;
     }
 
-    async hasPartnerSubscription(clerkUserId: string): Promise<boolean> {
-        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        if (!accessContext.identityUserId) return false;
-
-        const { data } = await this.supabase
-            .from('subscriptions')
-            .select('id, plan:plans(tier)')
-            .eq('user_id', accessContext.identityUserId)
-            .eq('status', 'active')
-            .limit(1)
-            .maybeSingle();
-
-        return (data as any)?.plan?.tier === 'partner';
-    }
-
-    async hasPartnerSubscriptionByUserId(internalUserId: string): Promise<boolean> {
-        const { data } = await this.supabase
-            .from('subscriptions')
-            .select('id, plan:plans(tier)')
-            .eq('user_id', internalUserId)
-            .eq('status', 'active')
-            .limit(1)
-            .maybeSingle();
-
-        return (data as any)?.plan?.tier === 'partner';
-    }
-
     async getRecruiterUserId(recruiterId: string): Promise<string | null> {
         const { data } = await this.supabase
             .from('recruiters')

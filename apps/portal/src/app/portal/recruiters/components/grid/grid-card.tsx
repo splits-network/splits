@@ -22,6 +22,8 @@ import {
     LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
+import { PlanBadge } from "@/components/entitlements/plan-badge";
+import type { PlanTier } from "@/contexts/user-profile-context";
 
 export function GridCard({
     recruiter,
@@ -95,6 +97,9 @@ export function GridCard({
                         {recruiter.firm_name || "Independent"}
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
+                        {recruiter.plan_tier && (
+                            <PlanBadge tier={recruiter.plan_tier as PlanTier} />
+                        )}
                         {presenceStatus === "online" && (
                             <Presence status={presenceStatus} variant="badge" />
                         )}

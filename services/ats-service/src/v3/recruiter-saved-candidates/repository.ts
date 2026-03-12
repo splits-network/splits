@@ -90,6 +90,17 @@ export class RecruiterSavedCandidateRepository {
     return (data || []).map((r: any) => r.candidate_id);
   }
 
+  /** Count total saved candidates for a recruiter — used for entitlement limit checks */
+  async countByRecruiterId(recruiterId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('recruiter_saved_candidates')
+      .select('*', { count: 'exact', head: true })
+      .eq('recruiter_id', recruiterId);
+
+    if (error) throw error;
+    return count || 0;
+  }
+
   /** Batch check which candidate IDs are saved — used for is_saved enrichment */
   async findSavedMapForCandidates(recruiterId: string, candidateIds: string[]): Promise<Map<string, string>> {
     if (candidateIds.length === 0) return new Map();
