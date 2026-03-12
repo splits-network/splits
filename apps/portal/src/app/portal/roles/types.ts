@@ -124,6 +124,49 @@ export function formatJobLevel(level?: string | null): string | null {
     return JOB_LEVEL_LABELS[level] || level;
 }
 
+
+export const RELOCATION_LABELS: Record<string, string> = {
+    true: "Open to Relocation",
+    false: "Not Relocating",
+};
+
+export const REMOTE_LABELS: Record<string, string> = {
+    true: "Remote",
+    false: "Not Remote",
+};
+
+export const JOB_SOURCE_LABELS: Record<string, string> = {
+    company: "Company Jobs",
+    firm: "Firm Jobs",
+};
+
+export const SALARY_RANGE_LABELS: Record<string, string> = {
+    under_50k: "Under $50k",
+    "50k_100k": "$50k – $100k",
+    "100k_150k": "$100k – $150k",
+    "150k_200k": "$150k – $200k",
+    over_200k: "$200k+",
+};
+
+export const FEE_RANGE_LABELS: Record<string, string> = {
+    under_15: "Under 15%",
+    "15_20": "15% – 20%",
+    "20_25": "20% – 25%",
+    over_25: "25%+",
+};
+
+export const GUARANTEE_RANGE_LABELS: Record<string, string> = {
+    "30": "30 Days or Less",
+    "60": "31 – 60 Days",
+    "90": "61 – 90 Days",
+    over_90: "90+ Days",
+};
+
+export const HAS_APPLICATIONS_LABELS: Record<string, string> = {
+    yes: "Has Applications",
+    no: "No Applications",
+};
+
 // ===== SORT OPTIONS =====
 
 export const ROLE_SORT_OPTIONS: BaselSortOption[] = [
@@ -152,4 +195,11 @@ export interface UnifiedJobFilters {
     commute_type?: string;
     job_level?: string;
     company_id?: string;
+    open_to_relocation?: string;
+    is_remote?: string;
+    job_source?: string;
+    salary_range?: string;
+    fee_range?: string;
+    guarantee_range?: string;
+    has_applications?: string;
 }

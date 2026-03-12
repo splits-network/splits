@@ -19,6 +19,13 @@ import {
     EMPLOYMENT_TYPE_LABELS,
     COMMUTE_TYPE_LABELS,
     JOB_LEVEL_LABELS,
+    RELOCATION_LABELS,
+    REMOTE_LABELS,
+    JOB_SOURCE_LABELS,
+    SALARY_RANGE_LABELS,
+    FEE_RANGE_LABELS,
+    GUARANTEE_RANGE_LABELS,
+    HAS_APPLICATIONS_LABELS,
     ROLE_SORT_OPTIONS,
 } from "../../types";
 
@@ -26,6 +33,13 @@ const STATUS_OPTIONS = Object.entries(JOB_STATUS_LABELS).map(([value, label]) =>
 const EMPLOYMENT_OPTIONS = Object.entries(EMPLOYMENT_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 const COMMUTE_OPTIONS = Object.entries(COMMUTE_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 const JOB_LEVEL_OPTIONS = Object.entries(JOB_LEVEL_LABELS).map(([value, label]) => ({ value, label }));
+const RELOCATION_OPTIONS = Object.entries(RELOCATION_LABELS).map(([value, label]) => ({ value, label }));
+const REMOTE_OPTIONS = Object.entries(REMOTE_LABELS).map(([value, label]) => ({ value, label }));
+const JOB_SOURCE_OPTIONS = Object.entries(JOB_SOURCE_LABELS).map(([value, label]) => ({ value, label }));
+const SALARY_RANGE_OPTIONS = Object.entries(SALARY_RANGE_LABELS).map(([value, label]) => ({ value, label }));
+const FEE_RANGE_OPTIONS = Object.entries(FEE_RANGE_LABELS).map(([value, label]) => ({ value, label }));
+const GUARANTEE_OPTIONS = Object.entries(GUARANTEE_RANGE_LABELS).map(([value, label]) => ({ value, label }));
+const HAS_APPLICATIONS_OPTIONS = Object.entries(HAS_APPLICATIONS_LABELS).map(([value, label]) => ({ value, label }));
 
 interface ControlsBarProps {
     searchInput: string;
@@ -67,7 +81,7 @@ export function ControlsBar({
 }: ControlsBarProps) {
     const [expanded, setExpanded] = useState(false);
 
-    const hasExpandedFilters = !!(filters.commute_type || filters.job_level || filters.company_id);
+    const hasExpandedFilters = !!(filters.commute_type || filters.job_level || filters.company_id || filters.open_to_relocation || filters.is_remote || filters.job_source || filters.salary_range || filters.fee_range || filters.guarantee_range || filters.has_applications);
 
     return (
         <BaselControlsBarShell
@@ -155,6 +169,48 @@ export function ControlsBar({
                             onChange={(v) => onFilterChange("job_level", v)}
                             options={JOB_LEVEL_OPTIONS}
                             placeholder="All Levels"
+                        />
+                        <BaselFilterSelect
+                            value={filters.open_to_relocation}
+                            onChange={(v) => onFilterChange("open_to_relocation", v)}
+                            options={RELOCATION_OPTIONS}
+                            placeholder="Relocation"
+                        />
+                        <BaselFilterSelect
+                            value={filters.is_remote}
+                            onChange={(v) => onFilterChange("is_remote", v)}
+                            options={REMOTE_OPTIONS}
+                            placeholder="Remote"
+                        />
+                        <BaselFilterSelect
+                            value={filters.job_source}
+                            onChange={(v) => onFilterChange("job_source", v)}
+                            options={JOB_SOURCE_OPTIONS}
+                            placeholder="Job Source"
+                        />
+                        <BaselFilterSelect
+                            value={filters.salary_range}
+                            onChange={(v) => onFilterChange("salary_range", v)}
+                            options={SALARY_RANGE_OPTIONS}
+                            placeholder="Salary Range"
+                        />
+                        <BaselFilterSelect
+                            value={filters.fee_range}
+                            onChange={(v) => onFilterChange("fee_range", v)}
+                            options={FEE_RANGE_OPTIONS}
+                            placeholder="Fee %"
+                        />
+                        <BaselFilterSelect
+                            value={filters.guarantee_range}
+                            onChange={(v) => onFilterChange("guarantee_range", v)}
+                            options={GUARANTEE_OPTIONS}
+                            placeholder="Guarantee"
+                        />
+                        <BaselFilterSelect
+                            value={filters.has_applications}
+                            onChange={(v) => onFilterChange("has_applications", v)}
+                            options={HAS_APPLICATIONS_OPTIONS}
+                            placeholder="Applications"
                         />
                     </>
                 ) : undefined

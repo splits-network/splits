@@ -194,6 +194,79 @@ export class JobRepository {
             query = query.eq('job_level', jobLevelFilter);
         }
 
+        // Open to relocation (boolean column, comes as string from query params)
+        if (filters.open_to_relocation === 'true') {
+            query = query.eq('open_to_relocation', true);
+        } else if (filters.open_to_relocation === 'false') {
+            query = query.eq('open_to_relocation', false);
+        }
+
+        // Remote filter (boolean column)
+        if (filters.is_remote === 'true') {
+            query = query.eq('is_remote', true);
+        } else if (filters.is_remote === 'false') {
+            query = query.eq('is_remote', false);
+        }
+
+        // Job source: company vs firm
+        if (filters.job_source === 'company') {
+            query = query.not('company_id', 'is', null).is('source_firm_id', null);
+        } else if (filters.job_source === 'firm') {
+            query = query.not('source_firm_id', 'is', null);
+        }
+
+        // Salary range buckets (based on salary_min)
+        if (filters.salary_range) {
+            switch (filters.salary_range) {
+                case 'under_50k': query = query.lt('salary_min', 50000); break;
+                case '50k_100k': query = query.gte('salary_min', 50000).lt('salary_min', 100000); break;
+                case '100k_150k': query = query.gte('salary_min', 100000).lt('salary_min', 150000); break;
+                case '150k_200k': query = query.gte('salary_min', 150000).lt('salary_min', 200000); break;
+                case 'over_200k': query = query.gte('salary_min', 200000); break;
+            }
+        }
+
+        // Fee percentage range buckets
+        if (filters.fee_range) {
+            switch (filters.fee_range) {
+                case 'under_15': query = query.lt('fee_percentage', 15); break;
+                case '15_20': query = query.gte('fee_percentage', 15).lt('fee_percentage', 20); break;
+                case '20_25': query = query.gte('fee_percentage', 20).lt('fee_percentage', 25); break;
+                case 'over_25': query = query.gte('fee_percentage', 25); break;
+            }
+        }
+
+        // Guarantee days buckets
+        if (filters.guarantee_range) {
+            switch (filters.guarantee_range) {
+                case '30': query = query.lte('guarantee_days', 30); break;
+                case '60': query = query.gt('guarantee_days', 30).lte('guarantee_days', 60); break;
+                case '90': query = query.gt('guarantee_days', 60).lte('guarantee_days', 90); break;
+                case 'over_90': query = query.gt('guarantee_days', 90); break;
+            }
+        }
+
+        // Has applications filter (subquery)
+        if (filters.has_applications) {
+            const { data: jobsWithApps } = await this.supabase
+                .from('applications')
+                .select('job_id');
+            const jobIdsWithApps = [...new Set((jobsWithApps || []).map((a: any) => a.job_id))];
+
+            if (filters.has_applications === 'yes') {
+                if (jobIdsWithApps.length > 0) {
+                    query = query.in('id', jobIdsWithApps);
+                } else {
+                    return { data: [], total: 0 };
+                }
+            } else if (filters.has_applications === 'no') {
+                if (jobIdsWithApps.length > 0) {
+                    query = query.not('id', 'in', `(${jobIdsWithApps.join(',')})`);
+                }
+                // If no applications exist at all, no filtering needed — all jobs have no apps
+            }
+        }
+
         // Apply sorting - relevance-based when searching, otherwise by sort_by parameter
         if (useRelevanceSort) {
             // For now, sort by created_at desc as proxy for relevance
