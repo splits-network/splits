@@ -65,7 +65,17 @@ export async function createConversation(
     const res = await fetch(`${config.baseUrl}/api/v3/support/conversations`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ sessionId: config.sessionId, ...input }),
+        body: JSON.stringify({
+            session_id: config.sessionId,
+            body: input.body,
+            category: input.category,
+            subject: input.subject,
+            visitor_name: input.visitorName,
+            visitor_email: input.visitorEmail,
+            source_app: input.sourceApp,
+            page_url: input.pageUrl,
+            user_agent: input.userAgent,
+        }),
     });
 
     if (!res.ok) throw new Error('Failed to create conversation');
@@ -133,7 +143,17 @@ export async function createTicket(
     const res = await fetch(`${config.baseUrl}/api/v3/tickets`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ sessionId: config.sessionId, ...input }),
+        body: JSON.stringify({
+            session_id: config.sessionId,
+            body: input.body,
+            category: input.category,
+            subject: input.subject,
+            visitor_name: input.visitorName,
+            visitor_email: input.visitorEmail,
+            source_app: input.sourceApp,
+            page_url: input.pageUrl,
+            user_agent: input.userAgent,
+        }),
     });
 
     if (!res.ok) throw new Error('Failed to create ticket');

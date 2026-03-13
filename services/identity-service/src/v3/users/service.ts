@@ -149,12 +149,39 @@ export class UserService {
     const updated = await this.repository.update(id, input);
     if (!updated) throw new NotFoundError('User', id);
 
+    // Sync name changes to Clerk (non-blocking, best-effort)
+    if (input.name !== undefined) {
+      this.syncUserNameToClerk(existing.clerk_user_id, input.name).catch(() => {});
+    }
+
     await this.eventPublisher?.publish('user.updated', {
       user_id: id,
       changes: input,
     }, 'identity-service');
 
     return updated;
+  }
+
+  private async syncUserNameToClerk(clerkUserId: string, fullName: string): Promise<void> {
+    const secretKey = process.env.APP_CLERK_SECRET_KEY;
+    if (!secretKey) {
+      console.warn('APP_CLERK_SECRET_KEY not configured, skipping user name sync to Clerk');
+      return;
+    }
+
+    try {
+      const { createClerkClient } = await import('@clerk/backend');
+      const clerkClient = createClerkClient({ secretKey });
+
+      const nameParts = (fullName || '').trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      await clerkClient.users.updateUser(clerkUserId, { firstName, lastName });
+      console.info(`User name synced to Clerk: ${clerkUserId} -> ${firstName} ${lastName}`);
+    } catch (error) {
+      console.error('Failed to sync user name to Clerk:', error);
+    }
   }
 
   async updateMe(clerkUserId: string, input: UpdateUserInput) {
