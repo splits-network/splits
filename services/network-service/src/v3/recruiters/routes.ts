@@ -1,5 +1,7 @@
 /**
- * Recruiters V3 Routes — CRUD + me + by-slug
+ * Recruiters V3 Routes — Core CRUD + /me
+ *
+ * Views (marketplace-listing, by-slug) are in views/ directory.
  */
 
 import { FastifyInstance } from 'fastify';
@@ -9,9 +11,11 @@ import { RecruiterRepository } from './repository';
 import { RecruiterService } from './service';
 import { RecruiterActivityRepository } from '../recruiter-activity/repository';
 import { RecruiterActivityService } from '../recruiter-activity/service';
+import { registerMarketplaceListingView } from './views/marketplace-listing.route';
+import { registerRecruiterProfileView } from './views/profile.route';
 import {
   RecruiterListParams, RecruiterUpdate, CreateRecruiterInput,
-  listQuerySchema, createSchema, updateSchema, idParamSchema, slugParamSchema,
+  listQuerySchema, createSchema, updateSchema, idParamSchema,
 } from './types';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
@@ -30,7 +34,9 @@ export function registerRecruiterRoutes(
   const activityService = new RecruiterActivityService(activityRepo);
   const service = new RecruiterService(repository, supabase, eventPublisher, activityService);
 
-  // --- Non-parameterized routes FIRST ---
+  // --- Views (registered before :id to avoid param collision) ---
+  registerMarketplaceListingView(app, supabase);
+  registerRecruiterProfileView(app, supabase);
 
   // GET /api/v3/recruiters/me
   app.get('/api/v3/recruiters/me', async (request, reply) => {
@@ -40,43 +46,22 @@ export function registerRecruiterRoutes(
     return reply.send({ data });
   });
 
-  // GET /api/v3/recruiters/by-slug/:slug
-  app.get('/api/v3/recruiters/by-slug/:slug', {
-    schema: { params: slugParamSchema },
-  }, async (request, reply) => {
-    const { slug } = request.params as { slug: string };
-    const query = request.query as { include?: string };
-    const data = await service.getBySlug(slug, query.include);
-    return reply.send({ data });
-  });
-
   // --- Core CRUD ---
 
-  // GET /api/v3/recruiters — list
+  // GET /api/v3/recruiters — list (flat, no joins)
   app.get('/api/v3/recruiters', {
     schema: { querystring: listQuerySchema },
   }, async (request, reply) => {
-    const clerkUserId = getClerkUserId(request);
-    const query = request.query as any;
-    let parsedFilters: Record<string, any> = {};
-    if (query.filters) {
-      try {
-        parsedFilters = typeof query.filters === 'string' ? JSON.parse(query.filters) : query.filters;
-      } catch { /* ignore */ }
-    }
-    const params: RecruiterListParams = { ...query, filters: parsedFilters };
-    const result = await service.getAll(params, clerkUserId || undefined);
+    const result = await service.getAll(request.query as RecruiterListParams);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
 
-  // GET /api/v3/recruiters/:id
+  // GET /api/v3/recruiters/:id (flat, no joins)
   app.get('/api/v3/recruiters/:id', {
     schema: { params: idParamSchema },
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
-    const query = request.query as { include?: string };
-    const clerkUserId = getClerkUserId(request);
-    const data = await service.getById(id, clerkUserId || undefined, query.include);
+    const data = await service.getById(id);
     return reply.send({ data });
   });
 

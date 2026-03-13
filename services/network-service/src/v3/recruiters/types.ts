@@ -8,7 +8,6 @@ export interface RecruiterListParams {
   search?: string;
   status?: string;
   specialization?: string;
-  include?: string;
   is_candidate_recruiter?: string;
   is_company_recruiter?: string;
   is_marketplace_enabled?: string;
@@ -54,7 +53,6 @@ export const listQuerySchema = {
     search: { type: 'string' },
     status: { type: 'string' },
     specialization: { type: 'string' },
-    include: { type: 'string' },
     is_candidate_recruiter: { type: 'string' },
     is_company_recruiter: { type: 'string' },
     is_marketplace_enabled: { type: 'string' },

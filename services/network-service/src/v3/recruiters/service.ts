@@ -1,5 +1,8 @@
 /**
- * Recruiters V3 Service — Business Logic
+ * Recruiters V3 Service — Core CRUD Business Logic
+ *
+ * NO joins, NO enrichment, NO plan tier lookups.
+ * Views handle all enriched data (marketplace-listing, by-slug, etc.)
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -22,41 +25,17 @@ export class RecruiterService {
     this.accessResolver = new AccessContextResolver(supabase);
   }
 
-  async getAll(params: RecruiterListParams, clerkUserId?: string) {
+  async getAll(params: RecruiterListParams) {
     const { data, total } = await this.repository.findAll(params);
-    const flattenedData = data.map(r => this.flattenRecruiterData(r));
-
-    const recruiterIds = flattenedData.map((r: any) => r.id).filter(Boolean);
-    const tierMap = await this.repository.batchGetPlanTiers(recruiterIds);
-    for (const recruiter of flattenedData) {
-      recruiter.plan_tier = tierMap.get(recruiter.id) || 'starter';
-    }
-
-    if (params.sort_by === 'plan_tier') {
-      const tierPriority: Record<string, number> = { partner: 0, pro: 1, starter: 2 };
-      const ascending = params.sort_order === 'asc';
-      flattenedData.sort((a: any, b: any) => {
-        const aP = tierPriority[a.plan_tier] ?? 3;
-        const bP = tierPriority[b.plan_tier] ?? 3;
-        return ascending ? aP - bP : bP - aP;
-      });
-    }
-
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
-    return { data: flattenedData, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
+    return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
   }
 
-  async getById(id: string, clerkUserId?: string, include?: string) {
-    const recruiter = await this.repository.findById(id, include);
+  async getById(id: string) {
+    const recruiter = await this.repository.findById(id);
     if (!recruiter) throw new NotFoundError('Recruiter', id);
-    return this.flattenRecruiterData(recruiter);
-  }
-
-  async getBySlug(slug: string, include?: string) {
-    const recruiter = await this.repository.findBySlug(slug, include);
-    if (!recruiter) throw new NotFoundError('Recruiter', slug);
-    return this.flattenRecruiterData(recruiter);
+    return recruiter;
   }
 
   async getByClerkId(clerkUserId: string) {
@@ -140,28 +119,6 @@ export class RecruiterService {
     if (!existing) throw new NotFoundError('Recruiter', id);
     await this.repository.delete(id);
     await this.eventPublisher?.publish('recruiter.deleted', { recruiterId: id }, 'network-service');
-  }
-
-  private flattenRecruiterData(recruiter: any): any {
-    if (!recruiter) return recruiter;
-    const { recruiter_reputation, firm_members, recruiter_activity_recent, ...rest } = recruiter;
-    if (recruiter_activity_recent && Array.isArray(recruiter_activity_recent)) rest.recent_activity = recruiter_activity_recent;
-    if (firm_members && Array.isArray(firm_members) && firm_members.length > 0) {
-      const m = firm_members[0];
-      rest.firm_name = m.firms?.name || null;
-      rest.firm_slug = m.firms?.slug || null;
-      rest.firm_role = m.role || null;
-    }
-    const flattenRep = (rep: any) => ({
-      ...rest, reputation_score: rep.reputation_score, total_submissions: rep.total_submissions,
-      total_hires: rep.total_hires, hire_rate: rep.hire_rate, completion_rate: rep.completion_rate,
-      total_placements: rep.total_placements, completed_placements: rep.completed_placements,
-      failed_placements: rep.failed_placements, total_collaborations: rep.total_collaborations,
-      collaboration_rate: rep.collaboration_rate, avg_response_time_hours: rep.avg_response_time_hours,
-    });
-    if (recruiter_reputation && Array.isArray(recruiter_reputation) && recruiter_reputation.length > 0) return flattenRep(recruiter_reputation[0]);
-    if (recruiter_reputation && !Array.isArray(recruiter_reputation)) return flattenRep(recruiter_reputation);
-    return rest;
   }
 
   private async generateUniqueSlug(name: string): Promise<string> {

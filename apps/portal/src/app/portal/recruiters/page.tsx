@@ -97,13 +97,12 @@ function RecruitersContent() {
         setSortBy,
         setSortOrder,
     } = useStandardList<RecruiterWithUser, MarketplaceFilters>({
-        endpoint: "/recruiters",
+        endpoint: "/recruiters/views/marketplace-listing",
         defaultFilters: { status: "active", marketplace_enabled: true },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
         defaultLimit: 24,
         syncToUrl: true,
-        include: "user,reputation,firm",
     });
 
     // Register recruiter IDs with gamification context for batch fetching

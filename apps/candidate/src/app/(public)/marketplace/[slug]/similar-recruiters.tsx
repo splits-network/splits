@@ -37,13 +37,12 @@ export default function SimilarRecruiters({
                 const response = await apiClient.get<{
                     data: SimilarRecruiter[];
                     pagination?: unknown;
-                }>("/recruiters", {
+                }>("/recruiters/views/marketplace-listing", {
                     params: {
                         page: 1,
                         limit: 4,
                         sort_by: "reputation_score",
                         sort_order: "desc",
-                        include: "user",
                     },
                 });
 

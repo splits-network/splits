@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     try {
         const response = await apiClient.get<{ data: Recruiter }>(
             `/public/recruiters/${slug}`,
-            { params: { include: "user,reputation,firm,activity,response_metrics" } },
+            {},
         );
         const recruiter = response.data;
         const name =
@@ -84,7 +84,7 @@ export default async function RecruiterProfilePage({ params }: Props) {
     try {
         const response = await apiClient.get<{ data: Recruiter }>(
             `/public/recruiters/${slug}`,
-            { params: { include: "user,reputation,firm,activity,response_metrics" } },
+            {},
         );
         recruiter = response.data;
     } catch {

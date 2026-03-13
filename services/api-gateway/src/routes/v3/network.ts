@@ -13,10 +13,12 @@ import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 const networkV3Routes: V3RouteConfig[] = [
   // ── Recruiters Views (registered before :id to avoid param collision) ──
+  { path: '/recruiters/views/marketplace-listing', method: 'GET', auth: 'none' },
   { path: '/recruiters/me', method: 'GET', auth: 'required' },
-  { path: '/recruiters/by-slug/:slug', method: 'GET', auth: 'optional' },
+  { path: '/recruiters/by-slug/:slug', method: 'GET', auth: 'none' },
+  { path: '/recruiters/:id/view/profile', method: 'GET', auth: 'none' },
 
-  // ── Recruiters Core CRUD (list/get are public for marketplace) ──
+  // ── Recruiters Core CRUD ──
   { path: '/recruiters', method: 'GET', auth: 'optional' },
   { path: '/recruiters/:id', method: 'GET', auth: 'optional' },
   { path: '/recruiters', method: 'POST', auth: 'required' },

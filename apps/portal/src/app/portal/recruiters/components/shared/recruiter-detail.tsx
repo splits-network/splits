@@ -483,10 +483,7 @@ export function DetailLoader({
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: RecruiterWithUser }>(
-                    `/recruiters/${id}`,
-                    {
-                        params: { include: "user,reputation" },
-                    },
+                    `/recruiters/${id}/view/profile`,
                 );
                 if (!signal?.cancelled) setRecruiter(res.data);
             } catch (err) {
