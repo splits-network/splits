@@ -509,10 +509,7 @@ async function main() {
         if (request.method === 'GET' && (
             request.url.startsWith('/api/v2/badges/') ||
             request.url.startsWith('/api/v2/xp/') ||
-            request.url.startsWith('/api/v2/leaderboards') ||
-            request.url.startsWith('/api/v3/badges/') ||
-            request.url.startsWith('/api/v3/xp/') ||
-            request.url.startsWith('/api/v3/leaderboards')
+            request.url.startsWith('/api/v2/leaderboards')
         )) {
             try {
                 await authMiddleware.createMiddleware()(request, reply);
@@ -522,8 +519,37 @@ async function main() {
             return;
         }
 
-        // Skip auth for all V3 public routes (auth: 'none' in route config)
-        if (request.url.startsWith('/api/v3/public/')) {
+        // V3 public routes (auth: 'none') — skip auth entirely
+        if (request.url.startsWith('/api/v3/public/') ||
+            request.url.startsWith('/api/v3/webhooks/') ||
+            request.url.startsWith('/api/v3/billing-webhooks/') ||
+            (request.method === 'GET' && request.url.startsWith('/api/v3/recruiter-candidates/invitations/')) ||
+            (request.method === 'POST' && request.url.startsWith('/api/v3/recruiter-candidates/invitations/')) ||
+            (request.method === 'GET' && request.url.startsWith('/api/v3/company-invitations/lookup')) ||
+            (request.method === 'GET' && request.url.startsWith('/api/v3/recruiter-codes/lookup')) ||
+            (request.method === 'GET' && request.url.startsWith('/api/v3/firm-invitations/')) ||
+            (request.method === 'GET' && request.url.startsWith('/api/v3/invitations/') && request.url.includes('/preview')) ||
+            (request.method === 'POST' && request.url.startsWith('/api/v3/invitations/') && request.url.includes('/accept')) ||
+            (request.method === 'GET' && request.url.startsWith('/api/v3/pages/views/by-slug/'))
+        ) {
+            return;
+        }
+
+        // V3 optional-auth routes — try auth if present, don't fail if missing
+        if (request.method === 'GET' && (
+            request.url.startsWith('/api/v3/recruiters/views/marketplace-listing') ||
+            request.url.startsWith('/api/v3/recruiters/by-slug/') ||
+            request.url.match(/^\/api\/v3\/recruiters\/[^/?]+\/view\/profile/) ||
+            request.url.startsWith('/api/v3/badges/') ||
+            request.url.startsWith('/api/v3/xp/') ||
+            request.url.startsWith('/api/v3/leaderboards') ||
+            request.url.startsWith('/api/v3/support/')
+        )) {
+            try {
+                await authMiddleware.createMiddleware()(request, reply);
+            } catch (error) {
+                request.log.debug('No valid auth token for V3 optional-auth route, continuing as anonymous');
+            }
             return;
         }
 
