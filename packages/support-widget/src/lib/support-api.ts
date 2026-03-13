@@ -130,7 +130,7 @@ export async function createTicket(
     },
 ): Promise<SupportTicket> {
     const headers = await buildHeaders(config);
-    const res = await fetch(`${config.baseUrl}/api/v3/support/tickets`, {
+    const res = await fetch(`${config.baseUrl}/api/v3/tickets`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ sessionId: config.sessionId, ...input }),

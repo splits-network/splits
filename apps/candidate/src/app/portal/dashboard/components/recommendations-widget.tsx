@@ -28,7 +28,7 @@ export default function RecommendationsWidget() {
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get("/v3/job-recommendations/mine");
+            const response: any = await client.get("/job-recommendations/mine");
             setRecommendations(response.data || []);
         } catch {
             setRecommendations([]);

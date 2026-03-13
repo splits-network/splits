@@ -536,15 +536,19 @@ async function main() {
         }
 
         // V3 optional-auth routes — try auth if present, don't fail if missing
-        if (request.method === 'GET' && (
-            request.url.startsWith('/api/v3/recruiters/views/marketplace-listing') ||
-            request.url.startsWith('/api/v3/recruiters/by-slug/') ||
-            request.url.match(/^\/api\/v3\/recruiters\/[^/?]+\/view\/profile/) ||
-            request.url.startsWith('/api/v3/badges/') ||
-            request.url.startsWith('/api/v3/xp/') ||
-            request.url.startsWith('/api/v3/leaderboards') ||
-            request.url.startsWith('/api/v3/support/')
-        )) {
+        if (
+            (request.method === 'GET' && (
+                request.url.startsWith('/api/v3/recruiters/views/marketplace-listing') ||
+                request.url.startsWith('/api/v3/recruiters/by-slug/') ||
+                request.url.match(/^\/api\/v3\/recruiters\/[^/?]+\/view\/profile/) ||
+                request.url.startsWith('/api/v3/badges/') ||
+                request.url.startsWith('/api/v3/xp/') ||
+                request.url.startsWith('/api/v3/leaderboards') ||
+                request.url.startsWith('/api/v3/support/')
+            )) ||
+            (request.url.startsWith('/api/v3/support/')) ||
+            (request.method === 'POST' && request.url.startsWith('/api/v3/tickets'))
+        ) {
             try {
                 await authMiddleware.createMiddleware()(request, reply);
             } catch (error) {

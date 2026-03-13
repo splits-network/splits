@@ -16,7 +16,7 @@ const supportV3Routes: V3RouteConfig[] = [
 
   // ── Tickets ────────────────────────────────────────────────────
   { path: '/tickets', method: 'GET', auth: 'required' },
-  { path: '/tickets', method: 'POST', auth: 'required' },
+  { path: '/tickets', method: 'POST', auth: 'optional' },
   { path: '/tickets/:id', method: 'GET', auth: 'required' },
   { path: '/tickets/:id', method: 'PATCH', auth: 'required' },
 
