@@ -111,26 +111,30 @@ export default function CalendarPreferencesPanel({
         }
     }, []);
 
-    // Load existing preferences on mount
+    // Load existing preferences on mount (only when calendar connections exist)
     const loadPreferences = useCallback(async () => {
+        if (calendarConnections.length === 0) {
+            setLoaded(true);
+            return;
+        }
         try {
             const token = await getToken();
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
             const res = (await client.get(
-                "/interviews/calendar-preferences",
+                "/calls/calendar-preferences",
             )) as { data: CalendarPreferences };
 
             if (res.data) {
                 setPrefs(res.data);
             }
         } catch (err) {
-            console.error("Failed to load calendar preferences:", err);
+            // Endpoint may not exist yet — use defaults silently
         } finally {
             setLoaded(true);
         }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [calendarConnections.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         loadPreferences();
@@ -143,7 +147,7 @@ export default function CalendarPreferencesPanel({
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.put("/interviews/calendar-preferences", prefs);
+            await client.put("/calls/calendar-preferences", prefs);
 
             toast.success("Preferences saved.");
         } catch (err: any) {

@@ -314,16 +314,19 @@ export default function ProfileBaselPage() {
 
                 {/* Achievements */}
                 {active === "achievements" &&
-                    (profile?.recruiter_id || profile?.candidate_id) && (
+                    (profile?.recruiter_id || profile?.candidate_id || (profile?.organization_ids && profile.organization_ids.length > 0)) && (
                         <AchievementsSection
                             entityId={
                                 (profile.recruiter_id ||
-                                    profile.candidate_id) as string
+                                    profile.candidate_id ||
+                                    profile.organization_ids?.[0]) as string
                             }
                             entityType={
                                 profile.recruiter_id
                                     ? "recruiter"
-                                    : "candidate"
+                                    : profile.candidate_id
+                                      ? "candidate"
+                                      : "company"
                             }
                             getToken={getToken}
                             createClient={createAuthenticatedClient}
