@@ -164,10 +164,7 @@ export class UserService {
 
   private async syncUserNameToClerk(clerkUserId: string, fullName: string): Promise<void> {
     const secretKey = process.env.APP_CLERK_SECRET_KEY;
-    if (!secretKey) {
-      console.warn('APP_CLERK_SECRET_KEY not configured, skipping user name sync to Clerk');
-      return;
-    }
+    if (!secretKey) return;
 
     try {
       const { createClerkClient } = await import('@clerk/backend');
@@ -178,9 +175,8 @@ export class UserService {
       const lastName = nameParts.slice(1).join(' ') || '';
 
       await clerkClient.users.updateUser(clerkUserId, { firstName, lastName });
-      console.info(`User name synced to Clerk: ${clerkUserId} -> ${firstName} ${lastName}`);
-    } catch (error) {
-      console.error('Failed to sync user name to Clerk:', error);
+    } catch {
+      // Best-effort — don't throw, we have the data locally
     }
   }
 
