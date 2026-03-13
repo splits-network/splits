@@ -645,11 +645,11 @@ export function DetailLoader({
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Application }>(
-                    `/applications/${id}`,
+                    `/applications/${id}/view/detail`,
                     {
                         params: {
                             include:
-                                "job,company,recruiter,ai_review,documents,audit_log,job_requirements",
+                                "recruiter,ai_review,documents,audit_log",
                         },
                     },
                 );

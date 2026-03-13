@@ -12,12 +12,16 @@ import { requireAuth, optionalAuth } from '../../middleware/auth';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 const networkV3Routes: V3RouteConfig[] = [
-  // ── Recruiters Core CRUD ────────────────────────────────────────
-  { resource: 'recruiters', auth: 'required' },
-
-  // ── Recruiters Views ────────────────────────────────────────────
+  // ── Recruiters Views (registered before :id to avoid param collision) ──
   { path: '/recruiters/me', method: 'GET', auth: 'required' },
-  { path: '/recruiters/by-slug/:slug', method: 'GET', auth: 'required' },
+  { path: '/recruiters/by-slug/:slug', method: 'GET', auth: 'optional' },
+
+  // ── Recruiters Core CRUD (list/get are public for marketplace) ──
+  { path: '/recruiters', method: 'GET', auth: 'optional' },
+  { path: '/recruiters/:id', method: 'GET', auth: 'optional' },
+  { path: '/recruiters', method: 'POST', auth: 'required' },
+  { path: '/recruiters/:id', method: 'PATCH', auth: 'required' },
+  { path: '/recruiters/:id', method: 'DELETE', auth: 'required' },
 
   // ── Recruiter Candidates Core CRUD ──────────────────────────────
   { resource: 'recruiter-candidates', auth: 'required' },

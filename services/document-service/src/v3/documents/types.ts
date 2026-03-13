@@ -2,8 +2,9 @@
  * Documents V3 Types & JSON Schemas
  *
  * Table: documents
- * Fields: entity_type, entity_id, document_type, file_name, file_path,
- *         file_size, mime_type, storage_bucket, uploaded_by, status
+ * DB columns: entity_type, entity_id, document_type, filename, storage_path,
+ *             file_size, content_type, bucket_name, uploaded_by_user_id,
+ *             deleted_at, processing_status, scan_status, metadata
  */
 
 export interface DocumentListParams {
@@ -12,12 +13,15 @@ export interface DocumentListParams {
   entity_type?: string;
   entity_id?: string;
   document_type?: string;
+  status?: 'active' | 'deleted' | 'all';
+  uploaded_by?: string;
   search?: string;
 }
 
 export interface UpdateDocumentInput {
   document_type?: string;
-  status?: string;
+  metadata?: Record<string, any>;
+  processing_status?: string;
 }
 
 // --- JSON Schemas ---
@@ -30,6 +34,8 @@ export const listQuerySchema = {
     entity_type: { type: 'string' },
     entity_id: { type: 'string', format: 'uuid' },
     document_type: { type: 'string' },
+    status: { type: 'string', enum: ['active', 'deleted', 'all'] },
+    uploaded_by: { type: 'string' },
     search: { type: 'string' },
   },
 };
@@ -38,7 +44,8 @@ export const updateSchema = {
   type: 'object',
   properties: {
     document_type: { type: 'string', maxLength: 100 },
-    status: { type: 'string', maxLength: 50 },
+    metadata: { type: 'object' },
+    processing_status: { type: 'string', maxLength: 50 },
   },
   additionalProperties: false,
 };

@@ -183,6 +183,61 @@ export function registerAtsV3Routes(app: FastifyInstance, services: ServiceRegis
 
   registerV3Routes(app, atsClient, atsV3Routes);
 
+  // ── Application Notes nested URL aliases ───────────────────────────────
+  // Frontend calls /applications/:id/notes — rewrite to flat /application-notes?application_id=:id
+  app.get('/api/v3/applications/:id/notes', {
+    preHandler: requireAuth(),
+  }, async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const query = { ...(request.query as Record<string, any>), application_id: id };
+      const qs = new URLSearchParams();
+      Object.entries(query).forEach(([k, v]) => { if (v != null) qs.append(k, String(v)); });
+      const path = `/api/v3/application-notes?${qs.toString()}`;
+      const data = await atsClient.get(path, undefined, (request as any).correlationId, buildAuthHeaders(request));
+      return reply.send(data);
+    } catch (error: any) {
+      return reply.status(error.statusCode || 500).send(error.jsonBody || { error: { code: 'PROXY_ERROR', message: error.message } });
+    }
+  });
+
+  app.post('/api/v3/applications/:id/notes', {
+    preHandler: requireAuth(),
+  }, async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const body = { ...(request.body as Record<string, any>), application_id: id };
+      const data = await atsClient.post('/api/v3/application-notes', body, (request as any).correlationId, buildAuthHeaders(request));
+      return reply.status(201).send(data);
+    } catch (error: any) {
+      return reply.status(error.statusCode || 500).send(error.jsonBody || { error: { code: 'PROXY_ERROR', message: error.message } });
+    }
+  });
+
+  app.patch('/api/v3/applications/:id/notes/:noteId', {
+    preHandler: requireAuth(),
+  }, async (request, reply) => {
+    try {
+      const { noteId } = request.params as { id: string; noteId: string };
+      const data = await atsClient.patch(`/api/v3/application-notes/${noteId}`, request.body, (request as any).correlationId, buildAuthHeaders(request));
+      return reply.send(data);
+    } catch (error: any) {
+      return reply.status(error.statusCode || 500).send(error.jsonBody || { error: { code: 'PROXY_ERROR', message: error.message } });
+    }
+  });
+
+  app.delete('/api/v3/applications/:id/notes/:noteId', {
+    preHandler: requireAuth(),
+  }, async (request, reply) => {
+    try {
+      const { noteId } = request.params as { id: string; noteId: string };
+      const data = await atsClient.delete(`/api/v3/application-notes/${noteId}`, (request as any).correlationId, buildAuthHeaders(request));
+      return reply.send(data);
+    } catch (error: any) {
+      return reply.status(error.statusCode || 500).send(error.jsonBody || { error: { code: 'PROXY_ERROR', message: error.message } });
+    }
+  });
+
   // Manual registration for composite-key DELETEs (not supported by V3RouteConfig resource helper)
   const compositeDeletes = [
     { path: '/api/v3/job-skills/:jobId/:skillId', params: ['jobId', 'skillId'] },

@@ -103,7 +103,7 @@ export default function ApplicationWizardModal({
                 const authClient = createAuthenticatedClient(token);
                 const [jobResponse, documentsResponse] =
                     await Promise.all([
-                        authClient.get<{ data: any }>(`/jobs/${jobId}`),
+                        authClient.get<{ data: any }>(`/jobs/${jobId}/view/candidate-detail`),
                         authClient.get<{ data: any[] }>("/documents"),
                     ]);
 

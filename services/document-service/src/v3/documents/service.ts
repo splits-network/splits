@@ -29,9 +29,22 @@ export class DocumentService {
       throw new BadRequestError('User identity not found');
     }
 
-    // Non-admins must filter by entity
+    // Auto-scope when entity params not provided (matches V2 behavior)
     if (!context.isPlatformAdmin && !params.entity_type && !params.entity_id) {
-      throw new BadRequestError('entity_type and entity_id are required for non-admin users');
+      if (context.candidateId) {
+        params.entity_type = 'candidate';
+        params.entity_id = context.candidateId;
+      } else if (context.organizationIds.length > 0) {
+        params.entity_type = 'company';
+        params.entity_id = context.organizationIds[0];
+      } else if (context.recruiterId) {
+        params.entity_type = 'recruiter';
+        params.entity_id = context.recruiterId;
+      } else {
+        const page = params.page || 1;
+        const limit = Math.min(params.limit || 25, 100);
+        return { data: [], pagination: { total: 0, page, limit, total_pages: 0 } };
+      }
     }
 
     const { data, total } = await this.repository.findAll(params);
