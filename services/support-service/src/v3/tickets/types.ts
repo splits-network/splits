@@ -43,6 +43,7 @@ export const listQuerySchema = {
     category: { type: 'string' },
     search: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

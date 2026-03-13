@@ -21,6 +21,7 @@ export const listQuerySchema = {
     sort_by: { type: 'string' },
     sort_order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
   },
+  additionalProperties: true,
 };
 
 export const companyIdParamSchema = {

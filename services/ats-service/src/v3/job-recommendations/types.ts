@@ -29,6 +29,7 @@ export const listQuerySchema = {
     job_id: { type: 'string', format: 'uuid' },
     status: { type: 'string', enum: ['pending', 'viewed', 'applied', 'dismissed'] },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

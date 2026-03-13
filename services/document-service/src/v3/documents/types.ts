@@ -38,6 +38,7 @@ export const listQuerySchema = {
     uploaded_by: { type: 'string' },
     search: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const updateSchema = {

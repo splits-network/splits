@@ -52,6 +52,7 @@ export const listQuerySchema = {
     sort_order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
     filters: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

@@ -42,6 +42,7 @@ export const listQuerySchema = {
     sort_by: { type: 'string', default: 'created_at' },
     sort_order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

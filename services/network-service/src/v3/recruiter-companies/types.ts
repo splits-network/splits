@@ -89,6 +89,7 @@ export const listQuerySchema = {
     relationship_type: { type: 'string', enum: ['sourcer', 'recruiter'] },
     sort_by: { type: 'string' }, sort_order: { type: 'string', enum: ['asc', 'desc'] },
   },
+  additionalProperties: true,
 };
 
 export const inviteSchema = {

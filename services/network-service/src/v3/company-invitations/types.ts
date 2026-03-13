@@ -38,6 +38,7 @@ export const listQuerySchema = {
     sort_order: { type: 'string', enum: ['asc', 'desc'] },
     status: { type: 'string', enum: ['pending', 'accepted', 'expired', 'revoked'] },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

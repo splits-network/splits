@@ -26,6 +26,7 @@ export const listQuerySchema = {
   properties: {
     candidate_id: { type: 'string', format: 'uuid' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

@@ -69,6 +69,7 @@ export const listQuerySchema = {
     tag: { type: 'string' },
     filters: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const createCallSchema = {

@@ -25,6 +25,7 @@ export const listQuerySchema = {
     sort_by: { type: 'string', enum: ['reputation_score', 'updated_at'] },
     sort_order: { type: 'string', enum: ['asc', 'desc'] },
   },
+  additionalProperties: true,
 };
 
 export function getTierFromScore(score: number): ReputationTier {

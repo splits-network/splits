@@ -26,6 +26,7 @@ export const listQuerySchema = {
     q: { type: 'string' },
     category: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

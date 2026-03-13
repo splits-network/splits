@@ -48,6 +48,7 @@ export const listQuerySchema = {
     search: { type: 'string' }, status: { type: 'string', enum: ['active', 'inactive'] },
     sort_by: { type: 'string' }, sort_order: { type: 'string', enum: ['asc', 'desc'] },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

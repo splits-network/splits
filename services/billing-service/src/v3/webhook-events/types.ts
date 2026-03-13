@@ -25,4 +25,5 @@ export const listQuerySchema = {
     status: { type: 'string', enum: ['pending', 'processing', 'succeeded', 'failed', 'skipped'] },
     event_type: { type: 'string' },
   },
+  additionalProperties: true,
 };

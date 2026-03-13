@@ -18,6 +18,7 @@ export const listQuerySchema = {
     page: { type: 'integer', minimum: 1, default: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
   },
+  additionalProperties: true,
 };
 
 export const idParamSchema = {

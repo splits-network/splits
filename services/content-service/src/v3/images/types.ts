@@ -29,6 +29,7 @@ export const listQuerySchema = {
     search: { type: 'string' },
     mime_type: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const updateSchema = {

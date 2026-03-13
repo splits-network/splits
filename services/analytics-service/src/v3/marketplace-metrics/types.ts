@@ -44,6 +44,7 @@ export const listQuerySchema = {
     date_from: { type: 'string' },
     date_to: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

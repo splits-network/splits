@@ -40,6 +40,7 @@ export const listQuerySchema = {
     visibility: { type: 'string', enum: ['shared', 'candidate_only', 'company_only'] },
     in_response_to_id: { type: 'string', format: 'uuid' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

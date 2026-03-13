@@ -25,4 +25,5 @@ export const listQuerySchema = {
     sort_by: { type: 'string', enum: ['created_at', 'points'] },
     sort_order: { type: 'string', enum: ['asc', 'desc'] },
   },
+  additionalProperties: true,
 };

@@ -28,6 +28,7 @@ export const listQuerySchema = {
     app: { type: 'string' },
     location: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const upsertSchema = {

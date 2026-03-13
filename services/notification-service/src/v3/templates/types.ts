@@ -44,6 +44,7 @@ export const listQuerySchema = {
     status: { type: 'string', enum: ['active', 'archived', 'draft'] },
     search: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

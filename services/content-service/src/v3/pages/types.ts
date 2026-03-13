@@ -55,6 +55,7 @@ export const listQuerySchema = {
     page_type: { type: 'string' },
     search: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

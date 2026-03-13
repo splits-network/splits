@@ -242,8 +242,18 @@ export class SplitsApiClient {
             const searchParams = new URLSearchParams();
             Object.entries(params).forEach(([key, value]) => {
                 if (value !== undefined && value !== null) {
-                    // JSON stringify objects (like filters) but keep primitives as strings
-                    if (typeof value === 'object' && value !== null) {
+                    // Flatten filters object as top-level query params (V3 expects flat params)
+                    if (key === 'filters' && typeof value === 'object' && !Array.isArray(value)) {
+                        Object.entries(value).forEach(([filterKey, filterValue]) => {
+                            if (filterValue !== undefined && filterValue !== null) {
+                                if (Array.isArray(filterValue)) {
+                                    searchParams.append(filterKey, JSON.stringify(filterValue));
+                                } else {
+                                    searchParams.append(filterKey, String(filterValue));
+                                }
+                            }
+                        });
+                    } else if (typeof value === 'object' && value !== null) {
                         searchParams.append(key, JSON.stringify(value));
                     } else {
                         searchParams.append(key, String(value));

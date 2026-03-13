@@ -30,6 +30,7 @@ export const listQuerySchema = {
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
     search: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {

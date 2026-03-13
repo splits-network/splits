@@ -43,6 +43,7 @@ export const listQuerySchema = {
     unread_only: { type: 'boolean' },
     search: { type: 'string' },
   },
+  additionalProperties: true,
 };
 
 export const updateSchema = {

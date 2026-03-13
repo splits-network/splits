@@ -49,6 +49,7 @@ export const listQuerySchema = {
     job_id: { type: 'string', format: 'uuid' },
     has_questions: { type: 'string', enum: ['yes', 'no'] },
   },
+  additionalProperties: true,
 };
 
 const questionSchema = {

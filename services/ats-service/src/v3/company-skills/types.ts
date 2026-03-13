@@ -25,6 +25,7 @@ export const listQuerySchema = {
   properties: {
     company_id: { type: 'string', format: 'uuid' },
   },
+  additionalProperties: true,
 };
 
 export const createSchema = {
