@@ -107,4 +107,39 @@ export function registerXpRoutes(
             return reply.code(error.statusCode || 500).send({ error: error.message });
         }
     });
+
+    app.get('/api/v3/xp/level', async (request, reply) => {
+        try {
+            const query = request.query as any;
+            if (!query.entity_type || !query.entity_id) {
+                return reply.code(400).send({ error: 'entity_type and entity_id are required' });
+            }
+            const data = await config.xpService.getLevel(
+                query.entity_type as BadgeEntityType,
+                query.entity_id
+            );
+            return reply.send({ data });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 500).send({ error: error.message });
+        }
+    });
+
+    app.get('/api/v3/xp/history', async (request, reply) => {
+        try {
+            const query = request.query as any;
+            if (!query.entity_type || !query.entity_id) {
+                return reply.code(400).send({ error: 'entity_type and entity_id are required' });
+            }
+            const pagination = validatePaginationParams(query.page, query.limit);
+            const result = await config.xpService.getHistory({
+                entity_type: query.entity_type as BadgeEntityType,
+                entity_id: query.entity_id,
+                source: query.source,
+                ...pagination,
+            });
+            return reply.send(result);
+        } catch (error: any) {
+            return reply.code(error.statusCode || 500).send({ error: error.message });
+        }
+    });
 }

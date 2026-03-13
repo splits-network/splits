@@ -10,13 +10,17 @@ import { ServiceRegistry } from '../../clients';
 import { registerV3Routes, V3RouteConfig } from './proxy';
 
 const gamificationV3Routes: V3RouteConfig[] = [
-  // ── Badges (batch view before CRUD to avoid :id collision) ─────
+  // ── Badges (views before CRUD to avoid :id collision) ──────────
   { path: '/badges/awards/batch', method: 'GET', auth: 'optional' },
+  { path: '/badges/awards', method: 'GET', auth: 'optional' },
+  { path: '/badges/progress', method: 'GET', auth: 'optional' },
   { path: '/badges', method: 'GET', auth: 'optional' },
   { path: '/badges/:id', method: 'GET', auth: 'optional' },
 
-  // ── XP (batch view before CRUD to avoid :id collision) ─────────
+  // ── XP (views before CRUD to avoid :id collision) ──────────────
   { path: '/xp/levels/batch', method: 'GET', auth: 'optional' },
+  { path: '/xp/level', method: 'GET', auth: 'optional' },
+  { path: '/xp/history', method: 'GET', auth: 'optional' },
   { path: '/xp', method: 'GET', auth: 'optional' },
   { path: '/xp/:id', method: 'GET', auth: 'optional' },
 

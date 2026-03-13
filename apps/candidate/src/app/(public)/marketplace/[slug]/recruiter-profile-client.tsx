@@ -360,7 +360,7 @@ export default function RecruiterProfileClient({
                         <div className="flex flex-wrap gap-2 pb-1 shrink-0">
                             {connected ? (
                                 <a
-                                    href="/chat"
+                                    href="/portal/messages"
                                     className="profile-action scroll-reveal fade-up btn btn-primary btn-sm font-bold uppercase tracking-wider"
                                 >
                                     <i className="fa-duotone fa-regular fa-comments" />{" "}
@@ -689,7 +689,7 @@ export default function RecruiterProfileClient({
                             <div className="px-6 pb-5 pt-4">
                                 {connected ? (
                                     <a
-                                        href="/chat"
+                                        href="/portal/messages"
                                         className="btn btn-primary btn-sm w-full font-bold uppercase tracking-wider"
                                     >
                                         <i className="fa-duotone fa-regular fa-comments" />

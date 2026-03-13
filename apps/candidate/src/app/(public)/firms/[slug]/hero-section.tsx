@@ -114,7 +114,7 @@ export default function HeroSection({ firm, connected, onConnect }: HeroSectionP
                     <div className="flex flex-wrap gap-2 pb-1 shrink-0">
                         {connected ? (
                             <a
-                                href="/chat"
+                                href="/portal/messages"
                                 className="scroll-reveal fade-up firm-action btn btn-primary btn-sm font-bold uppercase tracking-wider"
                             >
                                 <i className="fa-duotone fa-regular fa-comments" />
