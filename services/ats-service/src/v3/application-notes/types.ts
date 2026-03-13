@@ -8,7 +8,7 @@
 export interface CreateApplicationNoteInput {
   application_id: string;
   message_text: string;
-  note_type?: 'general' | 'interview' | 'feedback' | 'system';
+  note_type?: 'info_request' | 'info_response' | 'note' | 'improvement_request' | 'stage_transition' | 'interview_feedback' | 'general' | 'pitch';
   visibility?: 'shared' | 'candidate_only' | 'company_only';
   created_by_type?: 'candidate' | 'candidate_recruiter' | 'company_recruiter' | 'hiring_manager' | 'company_admin' | 'platform_admin';
   in_response_to_id?: string;
@@ -36,7 +36,7 @@ export const listQuerySchema = {
     page: { type: 'integer', minimum: 1, default: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
     application_id: { type: 'string', format: 'uuid' },
-    note_type: { type: 'string', enum: ['general', 'interview', 'feedback', 'system'] },
+    note_type: { type: 'string', enum: ['info_request', 'info_response', 'note', 'improvement_request', 'stage_transition', 'interview_feedback', 'general', 'pitch'] },
     visibility: { type: 'string', enum: ['shared', 'candidate_only', 'company_only'] },
     in_response_to_id: { type: 'string', format: 'uuid' },
   },
@@ -48,7 +48,7 @@ export const createSchema = {
   properties: {
     application_id: { type: 'string', format: 'uuid' },
     message_text: { type: 'string', minLength: 1, maxLength: 10000 },
-    note_type: { type: 'string', enum: ['general', 'interview', 'feedback', 'system'], default: 'general' },
+    note_type: { type: 'string', enum: ['info_request', 'info_response', 'note', 'improvement_request', 'stage_transition', 'interview_feedback', 'general', 'pitch'], default: 'general' },
     visibility: { type: 'string', enum: ['shared', 'candidate_only', 'company_only'], default: 'shared' },
     created_by_type: {
       type: 'string',
