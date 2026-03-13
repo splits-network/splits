@@ -15,6 +15,7 @@
         "@splits-network/shared-types": "workspace:*",
         "@splits-network/shared-config": "workspace:*",
         "@splits-network/shared-logging": "workspace:*",
+        "@splits-network/shared-fastify": "workspace:*",
         "@splits-network/shared-job-queue": "workspace:*",
         "@supabase/supabase-js": "^2.39.0",
         "fastify": "^4.24.3",

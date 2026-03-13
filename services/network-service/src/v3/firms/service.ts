@@ -28,9 +28,10 @@ export class FirmService {
 
   async getAll(params: FirmListParams, clerkUserId: string) {
     const scopeFilters = await this.buildScopeFilters(clerkUserId);
-    const { data, total } = await this.repository.findAll(params, scopeFilters);
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
+    if (scopeFilters === null) return { data: [], pagination: { total: 0, page, limit, total_pages: 0 } };
+    const { data, total } = await this.repository.findAll(params, scopeFilters);
     return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
   }
 
@@ -274,10 +275,10 @@ export class FirmService {
       const { data: memberFirmIds } = await this.supabase.from('firm_members').select('firm_id')
         .eq('recruiter_id', ctx.recruiterId).eq('status', 'active');
       const firmIds = (memberFirmIds || []).map((m: any) => m.firm_id);
-      return firmIds.length > 0 ? { firm_ids: firmIds } : { firm_ids: ['__none__'] };
+      return firmIds.length > 0 ? { firm_ids: firmIds } : null;
     }
     if (ctx.organizationIds.length > 0) return { billing_organization_ids: ctx.organizationIds };
-    return { firm_ids: ['__none__'] };
+    return null;
   }
 
   private async requireFirmAdmin(firmId: string, clerkUserId: string) {

@@ -27,9 +27,10 @@ export class RecruiterCompanyService {
 
   async getAll(params: RecruiterCompanyListParams, clerkUserId?: string) {
     const scopeFilters = clerkUserId ? await this.buildScopeFilters(clerkUserId) : undefined;
-    const { data, total } = await this.repository.findAll(params, scopeFilters);
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
+    if (scopeFilters === null) return { data: [], pagination: { total: 0, page, limit, total_pages: 0 } };
+    const { data, total } = await this.repository.findAll(params, scopeFilters);
     return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
   }
 
@@ -155,8 +156,8 @@ export class RecruiterCompanyService {
     if (ctx.organizationIds.length > 0) {
       const { data: companies } = await this.supabase.from('companies').select('id').in('identity_organization_id', ctx.organizationIds);
       const ids = companies?.map(c => c.id) || [];
-      return ids.length > 0 ? { company_ids: ids } : { company_ids: ['__none__'] };
+      return ids.length > 0 ? { company_ids: ids } : null;
     }
-    return { company_ids: ['__none__'] };
+    return null;
   }
 }

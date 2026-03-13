@@ -24,10 +24,11 @@ export class RecruiterCandidateService {
 
   async getAll(params: RecruiterCandidateListParams, clerkUserId?: string) {
     const scopeFilters = clerkUserId ? await this.buildScopeFilters(clerkUserId) : undefined;
-    const { data, total } = await this.repository.findAll(params, scopeFilters);
-    const enriched = data.map((row: any) => this.enrichRelationship(row));
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
+    if (scopeFilters === null) return { data: [], pagination: { total: 0, page, limit, total_pages: 0 } };
+    const { data, total } = await this.repository.findAll(params, scopeFilters);
+    const enriched = data.map((row: any) => this.enrichRelationship(row));
     return { data: enriched, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
   }
 
@@ -189,6 +190,6 @@ export class RecruiterCandidateService {
     const ctx = await this.accessResolver.resolve(clerkUserId);
     if (ctx.isPlatformAdmin) return {};
     if (ctx.recruiterId) return { recruiter_id: ctx.recruiterId };
-    return { recruiter_id: '__none__' };
+    return null;
   }
 }

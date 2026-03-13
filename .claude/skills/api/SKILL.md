@@ -60,7 +60,7 @@ services/<service>/src/v3/<resource>/
 
 - **All new resources are V3** — never create new V2 endpoints
 - **V2 is read-only** — use `/api:plan` → `/api:migrate` to move to V3
-- **Core 5 = flat data only** — `findById` uses `select('*')`, no joins, no access control. Enriched data with joins + role-based access control belongs in `views/detail.*`. Frontend calls `/view/detail` for enriched single-resource responses
+- **MANDATORY: Core 5 = flat data ONLY** — `findById` = `select('*')`, no joins, no access control, no enrichment, no public auth. If the frontend needs joins, enrichment, role scoping, or unauthenticated access, create a view. NEVER modify core CRUD to add these — views exist for this purpose
 - **Views are GET-only** — named by use case, not SQL joins (`/views/board` not `/views/with-stage`)
 - **Role-specific data = separate views** — `/views/recruiter-board` vs `/views/company-board`, never branch on role in repo
 - **Actions are POST-only** — state transitions, side effects, bulk operations

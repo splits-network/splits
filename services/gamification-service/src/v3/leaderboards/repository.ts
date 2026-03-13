@@ -36,4 +36,20 @@ export class LeaderboardRepository {
     if (error) throw error;
     return data;
   }
+
+  async findEntityRank(entityType: string, entityId: string, period: string, metric: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('leaderboard_entries')
+      .select('*')
+      .eq('entity_type', entityType)
+      .eq('entity_id', entityId)
+      .eq('period', period)
+      .eq('metric', metric)
+      .order('period_start', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
 }

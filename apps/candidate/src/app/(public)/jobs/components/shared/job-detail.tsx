@@ -595,10 +595,7 @@ export function JobDetailLoader({ jobId, onClose }: JobDetailLoaderProps) {
         (async () => {
             try {
                 const res = await apiClient.get<{ data: Job }>(
-                    `/jobs/${jobId}`,
-                    {
-                        params: { include: "company,requirements,skills" },
-                    },
+                    `/jobs/${jobId}/view/candidate-detail`,
                 );
                 if (!cancelled) setJob(res.data);
             } catch (err) {

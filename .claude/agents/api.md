@@ -531,19 +531,37 @@ async findAll(params: StandardListParams & { fields?: string }, context: AccessC
 
 ## Database Joins
 
-### Core 5: Flat data only
-Core CRUD `findById` uses `select('*')` — single table, no joins, no access control beyond basic auth.
-Core CRUD `getById` fetches the flat row and returns it. No `AccessContextResolver`, no role checks.
+### MANDATORY: Core 5 CRUD = flat data ONLY
 
-**If the frontend needs joined/enriched data or role-based access control for a single resource, create a detail view:**
+**Core CRUD routes MUST NOT contain:**
+- Joins (no `.select('*, related_table(...)')`)
+- Access control logic (no `AccessContextResolver`, no role checks)
+- Enrichment queries (no batch-fetching related data)
+- Public/optional auth (core CRUD always requires auth)
+
+Core CRUD `repository.findById()` = `select('*').eq('id', id).maybeSingle()` — one table, one row, nothing else.
+Core CRUD `service.getById()` = fetch the flat row, throw NotFound if missing, return it. That's all.
+Core CRUD `findAll()` = `select('*', { count: 'exact' })` with pagination. Filter params only, no joins.
+
+**If the frontend needs ANY of the following, it MUST use a view — NEVER modify core CRUD:**
+- Joined/enriched data (related tables, names, details)
+- Role-based access control or scoping
+- Public/unauthenticated access
+- Custom response shapes
+
+**Create the appropriate view:**
 ```
-views/detail.repository.ts  — joined select
+views/detail.repository.ts  — joined select for single resource
 views/detail.service.ts     — AccessContextResolver + role checks
 views/detail.route.ts       — GET /api/v3/:resource/:id/view/detail
-```
-The frontend calls `/view/detail` instead of the core `GET /:id`. Core `GET /:id` is for internal service use and simple lookups only.
 
-**Exception: Composite resources** (e.g., recruiter = `recruiters` + `users`) may join their own identity table in core `findById` — but only when the resource is incomplete without it. This is NOT a view join.
+views/listing.repository.ts — joined select for list
+views/listing.service.ts    — scoping, enrichment
+views/listing.route.ts      — GET /api/v3/:resource/views/listing-name
+```
+The frontend calls the view endpoint. Core CRUD is for internal service use and simple flat lookups only.
+
+**The ONLY exception:** Composite resources (e.g., recruiter = `recruiters` + `users`) may join their own identity table in core `findById` — but only when the resource row is incomplete without it. This is NOT a view join.
 
 ### Views: Focused joins
 Each view has a hardcoded `.select()` with the specific joins it needs:

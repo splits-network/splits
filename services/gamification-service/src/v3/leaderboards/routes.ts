@@ -1,5 +1,5 @@
 /**
- * Leaderboards V3 Routes — GET list, GET by id
+ * Leaderboards V3 Routes — GET list, GET rank, GET by id
  */
 
 import { FastifyInstance } from 'fastify';
@@ -17,6 +17,17 @@ export function registerLeaderboardRoutes(app: FastifyInstance, supabase: Supaba
     if (!clerkUserId) return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     const result = await service.getAll(request.query as LeaderboardListParams, clerkUserId);
     return reply.send({ data: result.data, pagination: result.pagination });
+  });
+
+  app.get('/api/v3/leaderboards/rank', async (request, reply) => {
+    const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    if (!clerkUserId) return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
+    const query = request.query as any;
+    if (!query.entity_type || !query.entity_id || !query.period || !query.metric) {
+      return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: 'entity_type, entity_id, period, and metric are required' } });
+    }
+    const data = await service.getEntityRank(query.entity_type, query.entity_id, query.period, query.metric, clerkUserId);
+    return reply.send({ data });
   });
 
   app.get('/api/v3/leaderboards/:id', { schema: { params: idParamSchema } }, async (request, reply) => {

@@ -56,6 +56,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-logging build
+RUN pnpm --filter @splits-network/shared-fastify build
 RUN pnpm --filter @splits-network/shared-access-context build
 
 # Then build the service

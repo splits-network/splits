@@ -188,11 +188,14 @@ export class CandidateRepository {
                 const noAccountIds = (noAccountCandidates || []).map((c: any) => c.id);
 
                 // Get candidates whose user_id is in inactive users list
-                const { data: inactiveUserCandidates } = await this.supabase
-                    .from('candidates')
-                    .select('id')
-                    .in('user_id', activeUserIds.length > 0 ? activeUserIds : ['__none__']);
-                const inactiveIds = (inactiveUserCandidates || []).map((c: any) => c.id);
+                let inactiveIds: string[] = [];
+                if (activeUserIds.length > 0) {
+                    const { data: inactiveUserCandidates } = await this.supabase
+                        .from('candidates')
+                        .select('id')
+                        .in('user_id', activeUserIds);
+                    inactiveIds = (inactiveUserCandidates || []).map((c: any) => c.id);
+                }
 
                 const allInactiveIds = [...new Set([...noAccountIds, ...inactiveIds])];
                 if (allInactiveIds.length > 0) {
