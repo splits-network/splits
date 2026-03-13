@@ -203,9 +203,6 @@ export interface Job {
     job_level?: JobLevel;
     show_salary_range: boolean;
     guarantee_days?: number; // Placement guarantee period in days (default 90)
-    job_owner_id?: string; // Splits Network or recruiting partner GUID
-    recruiter_id?: string; // Legacy: company recruiter (Client/Hiring Facilitator role) - use company_recruiter_id
-    company_recruiter_id?: string; // Company recruiter (Client/Hiring Facilitator role) - represents company
     job_owner_recruiter_id?: string; // Job owner (Specs Owner role) - recruiter who posted job (recruiter-only, external postings only)
     source_firm_id?: string | null; // Recruiting firm that owns this job (firm jobs have no company_id)
     status: JobStatus;

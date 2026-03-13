@@ -51,7 +51,7 @@ export default function BaselSubmitCandidateWizard({
 }: BaselSubmitCandidateWizardProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { isRecruiter } = useUserProfile();
+    const { isRecruiter, isCompanyUser, isAdmin, hasRole, hasPermissionForCompany } = useUserProfile();
 
     // Wizard state
     const [currentStep, setCurrentStep] = useState(0);
@@ -384,13 +384,25 @@ export default function BaselSubmitCandidateWizard({
                 document_ids: documentIds,
             });
 
-            // Create the recruiter pitch as an application note
+            // Create the pitch as an application note
             const applicationId = appResponse.data.id;
             if (pitch.trim()) {
+                // Determine created_by_type — this is a company-side action
+                let noteCreatorType: string;
+                if (isAdmin) {
+                    noteCreatorType = "platform_admin";
+                } else if (hasRole("hiring_manager")) {
+                    noteCreatorType = "hiring_manager";
+                } else if (hasRole("company_admin")) {
+                    noteCreatorType = "company_admin";
+                } else {
+                    noteCreatorType = "company_recruiter";
+                }
                 await client.post(
-                    `/applications/${applicationId}/notes`,
+                    `/application-notes`,
                     {
-                        created_by_type: "candidate_recruiter",
+                        application_id: applicationId,
+                        created_by_type: noteCreatorType,
                         note_type: "pitch",
                         visibility: "shared",
                         message_text: pitch.trim(),

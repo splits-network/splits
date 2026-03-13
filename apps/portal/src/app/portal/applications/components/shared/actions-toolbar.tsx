@@ -271,7 +271,8 @@ export default function ActionsToolbar({
             // Create a stage transition note if a note was provided
             if (note && note.trim()) {
                 try {
-                    await client.post(`/applications/${application.id}/notes`, {
+                    await client.post(`/application-notes`, {
+                        application_id: application.id,
                         created_by_type: getCreatorType(),
                         note_type: "stage_transition",
                         visibility: "shared",
@@ -320,7 +321,8 @@ export default function ActionsToolbar({
             // Create a stage transition note for the rejection reason
             if (reason && reason.trim()) {
                 try {
-                    await client.post(`/applications/${application.id}/notes`, {
+                    await client.post(`/application-notes`, {
+                        application_id: application.id,
                         created_by_type: getCreatorType(),
                         note_type: "stage_transition",
                         visibility: "shared",
@@ -350,7 +352,8 @@ export default function ActionsToolbar({
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/applications/${application.id}/notes`, {
+            await client.post(`/application-notes`, {
+                        application_id: application.id,
                 created_by_type: data.created_by_type,
                 note_type: data.note_type,
                 visibility: data.visibility,
@@ -382,7 +385,8 @@ export default function ActionsToolbar({
 
             // Create a stage transition note for the request
             try {
-                await client.post(`/applications/${application.id}/notes`, {
+                await client.post(`/application-notes`, {
+                        application_id: application.id,
                     created_by_type: getCreatorType(),
                     note_type: "stage_transition",
                     visibility: "shared",

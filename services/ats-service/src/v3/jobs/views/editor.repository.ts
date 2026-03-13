@@ -20,7 +20,7 @@ export class EditorRepository {
         pre_screen_questions,
         activates_at, closes_at,
         company_id, source_firm_id,
-        job_owner_id, job_owner_recruiter_id, company_recruiter_id,
+        job_owner_recruiter_id,
         created_at, updated_at
       `)
       .eq('id', id)

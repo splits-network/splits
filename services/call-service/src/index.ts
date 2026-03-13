@@ -8,6 +8,7 @@ import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-ne
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { CallScheduler } from "./v2/scheduler";
 import { SchedulerRepository } from "./v2/scheduler-repository";
@@ -135,6 +136,11 @@ async function main() {
         livekitApiKey,
         livekitApiSecret,
         livekitWsUrl,
+    });
+
+    registerV3Routes(app, {
+        supabase: supabaseClient,
+        eventPublisher: outboxPublisher,
     });
 
     // ── Scheduler ─────────────────────────────────────────────────────

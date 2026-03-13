@@ -182,6 +182,44 @@ export class JobsEventConsumer {
         return recipients;
     }
 
+    async handleJobRecommendationCreated(event: DomainEvent): Promise<void> {
+        try {
+            const { jobId, candidateId, message } = event.payload;
+
+            this.logger.info({ jobId, candidateId }, 'Handling job recommendation notification');
+
+            const job = await this.dataLookup.getJob(jobId);
+            if (!job) {
+                throw new Error(`Job not found: ${jobId}`);
+            }
+
+            const candidateContact = await this.contactLookup.getCandidateContact(candidateId);
+            if (!candidateContact) {
+                throw new Error(`Candidate contact not found: ${candidateId}`);
+            }
+
+            await this.emailService.sendJobRecommendation(candidateContact.email, {
+                candidateName: candidateContact.name,
+                jobTitle: job.title,
+                companyName: job.company?.name || 'a company',
+                message: message || undefined,
+                jobUrl: `${this.portalUrl}/portal/jobs/${jobId}`,
+                userId: candidateContact.user_id || undefined,
+            });
+
+            this.logger.info(
+                { jobId, candidateId, recipient: candidateContact.email },
+                'Job recommendation notification sent successfully'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send job recommendation notification'
+            );
+            throw error;
+        }
+    }
+
     async handleJobStatusChanged(event: DomainEvent): Promise<void> {
         try {
             const { jobId, previousStatus, newStatus } = event.payload;

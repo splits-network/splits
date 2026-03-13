@@ -117,7 +117,6 @@ export class JobNoteService {
         .from('jobs')
         .select('company_id')
         .eq('id', jobId)
-        .is('deleted_at', null)
         .maybeSingle();
 
       if (!job) throw new NotFoundError('Job', jobId);
@@ -135,18 +134,25 @@ export class JobNoteService {
     if (context.recruiterId) {
       const { data: job } = await this.supabase
         .from('jobs')
-        .select('company_id, company_recruiter_id, job_owner_recruiter_id')
+        .select('company_id, job_owner_recruiter_id')
         .eq('id', jobId)
-        .is('deleted_at', null)
         .maybeSingle();
 
       if (!job) throw new NotFoundError('Job', jobId);
 
-      // Recruiter is the company recruiter or job owner recruiter
-      if (job.company_recruiter_id === context.recruiterId ||
-          job.job_owner_recruiter_id === context.recruiterId) {
-        return;
-      }
+      // Recruiter is the job owner
+      if (job.job_owner_recruiter_id === context.recruiterId) return;
+
+      // Recruiter is a company recruiter on any application for this job
+      const { data: companyRecruiterApp } = await this.supabase
+        .from('applications')
+        .select('id')
+        .eq('job_id', jobId)
+        .eq('company_recruiter_id', context.recruiterId)
+        .limit(1)
+        .maybeSingle();
+
+      if (companyRecruiterApp) return;
     }
 
     throw new ForbiddenError('You do not have access to notes for this job');

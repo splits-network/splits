@@ -30,7 +30,7 @@ export class RecruiterBoardRepository {
         location, department, employment_type, commute_types, job_level,
         salary_min, salary_max, source_firm_id, company_id,
         activates_at, closes_at, created_at, updated_at,
-        job_owner_recruiter_id, company_recruiter_id,
+        job_owner_recruiter_id,
         company:companies(id, name, logo_url, industry, headquarters_location)
       `, { count: 'exact' })
       .eq('status', 'active');
@@ -44,7 +44,6 @@ export class RecruiterBoardRepository {
     if (params.job_owner_filter === 'assigned' && involvedJobIds) {
       const orConditions = [
         `job_owner_recruiter_id.eq.${recruiterId}`,
-        `company_recruiter_id.eq.${recruiterId}`,
       ];
       if (involvedJobIds.length > 0) {
         orConditions.push(`id.in.(${involvedJobIds.join(',')})`);
@@ -121,16 +120,17 @@ export class RecruiterBoardRepository {
   }
 
   async getInvolvedJobIds(recruiterId: string): Promise<string[]> {
+    // Applications where recruiter is candidate_recruiter or company_recruiter
     const { data: apps } = await this.supabase
       .from('applications')
       .select('job_id')
-      .eq('candidate_recruiter_id', recruiterId)
+      .or(`candidate_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`)
       .in('stage', ['recruiter_proposed', 'draft', 'recruiter_request', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
 
     const { data: placements } = await this.supabase
       .from('placements')
       .select('job_id')
-      .eq('candidate_recruiter_id', recruiterId);
+      .or(`candidate_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`);
 
     const appIds = apps?.map(a => a.job_id) || [];
     const placementIds = placements?.map(p => p.job_id) || [];

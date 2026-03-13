@@ -1,23 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-    AreaChart,
-    Area,
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import {
-    useBaselChartColors,
-    hexWithAlpha,
-    BaselTooltip,
-} from "@/components/basel/charts";
+import { AreaChart } from "@splits-network/shared-charts";
 
 interface Application {
     id: string;
@@ -49,8 +34,6 @@ export default function ApplicationTimelineChart({
     trendPeriod,
     compact,
 }: ApplicationTimelineChartProps) {
-    const colors = useBaselChartColors();
-
     const chartData = useMemo(() => {
         const months = trendPeriod;
         const labels = getLastNMonths(months);
@@ -82,12 +65,7 @@ export default function ApplicationTimelineChart({
             }
         });
 
-        return labels.map((label, i) => ({
-            name: label,
-            Total: totalApps[i],
-            Interviewing: interviewingApps[i],
-            Offers: offerApps[i],
-        }));
+        return { labels, totalApps, interviewingApps, offerApps };
     }, [applications, trendPeriod]);
 
     if (loading) {
@@ -105,124 +83,18 @@ export default function ApplicationTimelineChart({
         );
     }
 
-    // Limit ticks on compact mode
-    const tickInterval =
-        compact && trendPeriod > 6 ? Math.ceil(trendPeriod / 6) - 1 : 0;
-
     return (
-        <div className="space-y-3">
-            {/* Legend */}
-            <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1.5">
-                    <span
-                        className="w-2 h-2"
-                        style={{ backgroundColor: colors.primary }}
-                    />
-                    <span className="text-base-content/60">Total</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <span
-                        className="w-2 h-2"
-                        style={{ backgroundColor: colors.info }}
-                    />
-                    <span className="text-base-content/60">Interviewing</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <span
-                        className="w-2 h-2"
-                        style={{ backgroundColor: colors.warning }}
-                    />
-                    <span className="text-base-content/60">Offers</span>
-                </div>
-            </div>
-
-            {/* Chart */}
-            <div className={compact ? "h-[180px]" : "h-[200px]"}>
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                        data={chartData}
-                        margin={{
-                            top: 10,
-                            right: 10,
-                            left: -20,
-                            bottom: 0,
-                        }}
-                    >
-                        <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke={hexWithAlpha(colors.baseContent, 0.08)}
-                            vertical={false}
-                        />
-                        <XAxis
-                            dataKey="name"
-                            tick={{
-                                fontSize: 10,
-                                fill: hexWithAlpha(colors.baseContent, 0.6),
-                                fontWeight: 500,
-                            }}
-                            axisLine={{
-                                stroke: hexWithAlpha(colors.baseContent, 0.15),
-                            }}
-                            tickLine={false}
-                            interval={tickInterval}
-                        />
-                        <YAxis
-                            tick={{
-                                fontSize: 10,
-                                fill: hexWithAlpha(colors.baseContent, 0.6),
-                                fontWeight: 500,
-                            }}
-                            axisLine={false}
-                            tickLine={false}
-                            allowDecimals={false}
-                        />
-                        <Tooltip content={<BaselTooltip />} />
-                        <Area
-                            type="monotone"
-                            dataKey="Total"
-                            stroke={colors.primary}
-                            fill={colors.primary}
-                            fillOpacity={0.08}
-                            strokeWidth={2}
-                            dot={false}
-                            activeDot={{
-                                r: 4,
-                                strokeWidth: 2,
-                                fill: colors.base100,
-                                stroke: colors.primary,
-                            }}
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="Interviewing"
-                            stroke={colors.info}
-                            strokeWidth={2}
-                            strokeDasharray="6 3"
-                            dot={false}
-                            activeDot={{
-                                r: 3,
-                                strokeWidth: 2,
-                                fill: colors.base100,
-                                stroke: colors.info,
-                            }}
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="Offers"
-                            stroke={colors.warning}
-                            strokeWidth={2}
-                            strokeDasharray="6 3"
-                            dot={false}
-                            activeDot={{
-                                r: 3,
-                                strokeWidth: 2,
-                                fill: colors.base100,
-                                stroke: colors.warning,
-                            }}
-                        />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
+        <AreaChart
+            series={[
+                { name: "Total", data: chartData.totalApps },
+                { name: "Interviewing", data: chartData.interviewingApps },
+                { name: "Offers", data: chartData.offerApps },
+            ]}
+            xLabels={chartData.labels}
+            height={compact ? 200 : 240}
+            showLegend
+            smooth
+            gradient
+        />
     );
 }

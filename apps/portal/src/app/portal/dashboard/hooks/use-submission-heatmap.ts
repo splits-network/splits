@@ -9,7 +9,7 @@ export interface HeatmapDay {
     count: number;
 }
 
-export function useSubmissionHeatmap(trendPeriod: number = 6) {
+export function useSubmissionHeatmap(trendPeriod: number = 6, scope: 'recruiter' | 'company' = 'recruiter') {
     const { getToken } = useAuth();
     const [days, setDays] = useState<HeatmapDay[]>([]);
     const [loading, setLoading] = useState(true);
@@ -29,7 +29,7 @@ export function useSubmissionHeatmap(trendPeriod: number = 6) {
 
             const response: any = await api.get('/charts/submission-heatmap', {
                 params: {
-                    scope: 'recruiter',
+                    scope,
                     start_date: start.toISOString().split('T')[0],
                     end_date: now.toISOString().split('T')[0],
                 },
@@ -52,7 +52,7 @@ export function useSubmissionHeatmap(trendPeriod: number = 6) {
             setLoading(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [trendPeriod]);
+    }, [trendPeriod, scope]);
 
     useEffect(() => {
         refresh();

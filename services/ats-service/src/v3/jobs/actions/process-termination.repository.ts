@@ -21,20 +21,15 @@ export class ProcessTerminationRepository {
     if (decision.action === 'close') updates.status = 'closed';
     if (decision.action === 'pause') updates.status = 'paused';
 
-    // Check which recruiter fields to null out
+    // Check if recruiter is the job owner and null it out
     const { data: job } = await this.supabase
       .from('jobs')
-      .select('job_owner_recruiter_id, company_recruiter_id')
+      .select('job_owner_recruiter_id')
       .eq('id', decision.job_id)
       .single();
 
-    if (job) {
-      if (job.job_owner_recruiter_id === recruiterId) {
-        updates.job_owner_recruiter_id = null;
-      }
-      if (job.company_recruiter_id === recruiterId) {
-        updates.company_recruiter_id = null;
-      }
+    if (job && job.job_owner_recruiter_id === recruiterId) {
+      updates.job_owner_recruiter_id = null;
     }
 
     const { error } = await this.supabase

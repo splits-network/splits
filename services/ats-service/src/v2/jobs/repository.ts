@@ -87,32 +87,31 @@ export class JobRepository {
                 }
                 if (filters.job_owner_filter === 'assigned') {
                     // Filter to jobs where recruiter has:
-                    // 1. Is the job_owner_recruiter_id or company_recruiter_id (they created/own the job)
-                    // 2. OR has applications in active stages
+                    // 1. Is the job_owner_recruiter_id (they created/own the job)
+                    // 2. OR has applications as candidate_recruiter or company_recruiter
                     // 3. OR has placements (hired candidates)
 
-                    // Get job IDs from applications with active stages
+                    // Get job IDs from applications with active stages (as candidate or company recruiter)
                     const { data: applications } = await this.supabase
                         .from('applications')
                         .select('job_id')
-                        .eq('candidate_recruiter_id', accessContext.recruiterId)
+                        .or(`candidate_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId}`)
                         .in('stage', ['recruiter_proposed', 'draft', 'recruiter_request', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
 
                     // Get job IDs from placements
                     const { data: placements } = await this.supabase
                         .from('placements')
                         .select('job_id')
-                        .eq('candidate_recruiter_id', accessContext.recruiterId);
+                        .or(`candidate_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId}`);
 
                     // Combine unique job IDs from applications and placements
                     const applicationJobIds = applications?.map(a => a.job_id) || [];
                     const placementJobIds = placements?.map(p => p.job_id) || [];
                     const involvedJobIds = [...new Set([...applicationJobIds, ...placementJobIds])];
 
-                    // Build OR condition: job_owner_recruiter_id OR company_recruiter_id OR in involvedJobIds
+                    // Build OR condition: job_owner_recruiter_id OR in involvedJobIds
                     const orConditions = [
-                        `job_owner_recruiter_id.eq.${accessContext.recruiterId}`,
-                        `company_recruiter_id.eq.${accessContext.recruiterId}`
+                        `job_owner_recruiter_id.eq.${accessContext.recruiterId}`
                     ];
 
                     if (involvedJobIds.length > 0) {
@@ -137,10 +136,7 @@ export class JobRepository {
                 }
                 query = query.in('company_id', orgCompanyIds);
 
-                if (filters.job_owner_filter === 'assigned' && accessContext.identityUserId) {
-                    // Further filter to only jobs where this user is the job_owner_id
-                    query = query.eq('job_owner_id', accessContext.identityUserId);
-                }
+                // Note: job_owner_id removed from jobs table; company users see all org jobs
             } else if (accessContext.candidateId) {
                 // Candidates see active jobs (not early access)
                 query = query.eq('status', 'active').eq('is_early_access', false);
@@ -436,13 +432,11 @@ export class JobRepository {
         const jobData = { ...job };
         if (creatorRecruiterId) {
             if (isOffPlatform) {
-                // Off-platform: set company_recruiter (manages the job) but NOT job_owner (no commission)
-                jobData.company_recruiter_id = creatorRecruiterId;
+                // Off-platform: no job owner (no commission)
                 jobData.job_owner_recruiter_id = null;
             } else {
-                // Platform job: set both as before
+                // Platform job: set job owner
                 jobData.job_owner_recruiter_id = creatorRecruiterId;
-                jobData.company_recruiter_id = creatorRecruiterId;
             }
         }
 
@@ -606,7 +600,7 @@ export class JobRepository {
 
     /**
      * Find active jobs affected by a recruiter-company relationship termination.
-     * Returns jobs where the recruiter is job_owner_recruiter_id or company_recruiter_id
+     * Returns jobs where the recruiter is job_owner_recruiter_id
      * for the given company, with active/paused status.
      */
     async findAffectedByTermination(
@@ -622,7 +616,7 @@ export class JobRepository {
                 created_at
             `)
             .eq('company_id', companyId)
-            .or(`job_owner_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`)
+            .eq('job_owner_recruiter_id', recruiterId)
             .in('status', ['active', 'paused'])
             .order('created_at', { ascending: false });
 
@@ -678,21 +672,15 @@ export class JobRepository {
                 updates.status = 'paused';
             }
 
-            // For keep and pause, also unassign the recruiter
-            // Check which field the recruiter is on and null it out
+            // For keep and pause, also unassign the recruiter if they're the job owner
             const { data: job } = await this.supabase
                 .from('jobs')
-                .select('job_owner_recruiter_id, company_recruiter_id')
+                .select('job_owner_recruiter_id')
                 .eq('id', decision.job_id)
                 .single();
 
-            if (job) {
-                if (job.job_owner_recruiter_id === recruiterId) {
-                    updates.job_owner_recruiter_id = null;
-                }
-                if (job.company_recruiter_id === recruiterId) {
-                    updates.company_recruiter_id = null;
-                }
+            if (job && job.job_owner_recruiter_id === recruiterId) {
+                updates.job_owner_recruiter_id = null;
             }
 
             const { error } = await this.supabase

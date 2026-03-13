@@ -55,4 +55,26 @@ export function registerBadgeAwardRoutes(
             return reply.code(error.statusCode || 500).send({ error: error.message });
         }
     });
+
+    // ── V3 alias ──
+
+    app.get('/api/v3/badges/awards/batch', async (request, reply) => {
+        try {
+            const query = request.query as any;
+            if (!query.entity_type || !query.entity_ids) {
+                return reply.code(400).send({ error: 'entity_type and entity_ids are required' });
+            }
+            const entityIds = (query.entity_ids as string).split(',').filter(Boolean);
+            if (entityIds.length > 100) {
+                return reply.code(400).send({ error: 'Maximum 100 entity_ids per request' });
+            }
+            const data = await config.awardService.getByEntityIds(
+                query.entity_type as BadgeEntityType,
+                entityIds
+            );
+            return reply.send({ data });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 500).send({ error: error.message });
+        }
+    });
 }

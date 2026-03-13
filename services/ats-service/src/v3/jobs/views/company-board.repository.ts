@@ -25,14 +25,12 @@ export class CompanyBoardRepository {
       .select(`
         id, title, status, location, department, employment_type,
         salary_min, salary_max, fee_percentage, guarantee_days,
-        job_owner_id, activates_at, closes_at, created_at,
+        activates_at, closes_at, created_at,
         company:companies(id, name, logo_url)
       `, { count: 'exact' })
       .in('company_id', companyIds);
 
-    if (params.job_owner_filter === 'assigned' && identityUserId) {
-      query = query.eq('job_owner_id', identityUserId);
-    }
+    // job_owner_id removed — company users see all org jobs
 
     if (params.status) query = query.eq('status', params.status);
     if (params.employment_type) query = query.eq('employment_type', params.employment_type);

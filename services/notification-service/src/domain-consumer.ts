@@ -388,6 +388,7 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'job.status_changed');
             await this.channel.bindQueue(this.queue, this.exchange, 'job.updated');
             await this.channel.bindQueue(this.queue, this.exchange, 'job.deleted');
+            await this.channel.bindQueue(this.queue, this.exchange, 'job_recommendation.created');
 
             // Relationship management events
             await this.channel.bindQueue(this.queue, this.exchange, 'recruiter_company.connection_requested');
@@ -762,6 +763,9 @@ export class DomainEventConsumer {
                 break;
             case 'job.deleted':
                 await this.jobsConsumer.handleJobDeleted(event);
+                break;
+            case 'job_recommendation.created':
+                await this.jobsConsumer.handleJobRecommendationCreated(event);
                 break;
 
             // Relationships domain

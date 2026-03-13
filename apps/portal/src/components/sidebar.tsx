@@ -284,7 +284,7 @@ export function Sidebar() {
 
         try {
             const response: any = await client.get(
-                "/notifications/counts-by-category",
+                "/notifications/views/counts-by-category",
             );
             const counts = response?.data || {};
             setBadges((prev) => ({

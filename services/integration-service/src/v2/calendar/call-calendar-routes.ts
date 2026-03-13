@@ -25,8 +25,8 @@ export async function registerCallCalendarRoutes(app: FastifyInstance, config: R
         calendarService, callCalendarRepo, connectionRepo, tokenRefresh, config.logger,
     );
 
-    // GET /api/v2/integrations/calendar/availability — multi-user availability for call scheduling
-    app.get('/api/v2/integrations/calendar/availability', async (request, reply) => {
+    // GET /api/v3/integrations/calendar/availability — multi-user availability for call scheduling
+    app.get('/api/v3/integrations/calendar/availability', async (request, reply) => {
         const query = request.query as {
             user_ids?: string;
             date_from?: string;
@@ -57,8 +57,8 @@ export async function registerCallCalendarRoutes(app: FastifyInstance, config: R
         }
     });
 
-    // POST /api/v2/integrations/calendar/calls — create calendar events for a call
-    app.post('/api/v2/integrations/calendar/calls', async (request, reply) => {
+    // POST /api/v3/integrations/calendar/calls — create calendar events for a call
+    app.post('/api/v3/integrations/calendar/calls', async (request, reply) => {
         const body = request.body as {
             call_id: string;
             title: string;
@@ -100,8 +100,8 @@ export async function registerCallCalendarRoutes(app: FastifyInstance, config: R
         }
     });
 
-    // PATCH /api/v2/integrations/calendar/calls/:callId — update calendar events for a call
-    app.patch('/api/v2/integrations/calendar/calls/:callId', async (request, reply) => {
+    // PATCH /api/v3/integrations/calendar/calls/:callId — update calendar events for a call
+    app.patch('/api/v3/integrations/calendar/calls/:callId', async (request, reply) => {
         const { callId } = request.params as { callId: string };
         const body = request.body as {
             new_scheduled_at: string;
@@ -134,8 +134,8 @@ export async function registerCallCalendarRoutes(app: FastifyInstance, config: R
         }
     });
 
-    // DELETE /api/v2/integrations/calendar/calls/:callId — delete calendar events for a call
-    app.delete('/api/v2/integrations/calendar/calls/:callId', async (request, reply) => {
+    // DELETE /api/v3/integrations/calendar/calls/:callId — delete calendar events for a call
+    app.delete('/api/v3/integrations/calendar/calls/:callId', async (request, reply) => {
         const { callId } = request.params as { callId: string };
 
         try {

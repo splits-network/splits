@@ -45,9 +45,7 @@ export interface Job {
     is_remote?: boolean;
 
     // Ownership/Assignment
-    job_owner_id?: string;
     recruiter_id?: string;
-    company_recruiter_id?: string;
     job_owner_recruiter_id?: string;
 
     // Status & visibility modifiers

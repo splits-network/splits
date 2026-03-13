@@ -11,7 +11,7 @@ export interface V3RouteConfig {
   /** Single route path for views/actions (e.g., '/jobs/views/recruiter-board') */
   path?: string;
   /** HTTP method — required when path is set */
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   /** Authentication level */
   auth: AuthLevel;
 }
@@ -81,7 +81,7 @@ async function proxyGet(
 
 async function proxyMutate(
   client: ServiceClient,
-  method: 'post' | 'patch' | 'delete',
+  method: 'post' | 'put' | 'patch' | 'delete',
   servicePath: string,
   request: FastifyRequest,
   reply: FastifyReply,
@@ -174,6 +174,11 @@ function registerSingleProxy(
     case 'POST':
       app.post(gatewayPath, routeOpts, async (request, reply) => {
         return proxyMutate(client, 'post', resolveParams(request), request, reply);
+      });
+      break;
+    case 'PUT':
+      app.put(gatewayPath, routeOpts, async (request, reply) => {
+        return proxyMutate(client, 'put', resolveParams(request), request, reply);
       });
       break;
     case 'PATCH':

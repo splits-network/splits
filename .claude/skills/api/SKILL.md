@@ -44,7 +44,7 @@ Every resource has up to three namespaces:
 services/<service>/src/v3/<resource>/
   routes.ts              — Core 5 CRUD route registrations
   service.ts             — Core CRUD business logic
-  repository.ts          — Core CRUD queries (NO joins)
+  repository.ts          — Core CRUD queries (flat select('*'), no joins except composite identity)
   types.ts               — Shared types, filters, inputs, JSON schemas
   views/
     <name>.route.ts      — View route registration (GET only)
@@ -60,7 +60,7 @@ services/<service>/src/v3/<resource>/
 
 - **All new resources are V3** — never create new V2 endpoints
 - **V2 is read-only** — use `/api:plan` → `/api:migrate` to move to V3
-- **Core 5 = no joins** — flat data only. Need shaped data? Create a view
+- **Core 5 = flat data only** — `findById` uses `select('*')`, no joins, no access control. Enriched data with joins + role-based access control belongs in `views/detail.*`. Frontend calls `/view/detail` for enriched single-resource responses
 - **Views are GET-only** — named by use case, not SQL joins (`/views/board` not `/views/with-stage`)
 - **Role-specific data = separate views** — `/views/recruiter-board` vs `/views/company-board`, never branch on role in repo
 - **Actions are POST-only** — state transitions, side effects, bulk operations

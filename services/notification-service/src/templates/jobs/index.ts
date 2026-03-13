@@ -228,6 +228,46 @@ ${paragraph('If this was unexpected, please contact the job owner for more infor
     });
 }
 
+// ─── Job Recommendation ──────────────────────────────────────────────────────
+
+export interface JobRecommendationData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    message?: string;
+    jobUrl: string;
+    source?: EmailSource;
+}
+
+export function jobRecommendationEmail(data: JobRecommendationData): string {
+    const messageBlock = data.message
+        ? alert({ type: 'info', title: 'Message from the hiring team', message: data.message })
+        : '';
+
+    const content = [
+        heading({ level: 1, text: 'A job was recommended for you' }),
+        paragraph(`Hi <strong>${data.candidateName}</strong>,`),
+        paragraph(`The team at <strong>${data.companyName}</strong> thinks you'd be a great fit for <strong>${data.jobTitle}</strong>.`),
+        messageBlock,
+        infoCard({
+            title: 'Recommended Position',
+            items: [
+                { label: 'Position', value: data.jobTitle },
+                { label: 'Company', value: data.companyName },
+            ],
+        }),
+        button({ href: data.jobUrl, text: 'View Job Details', variant: 'primary' }),
+        divider(),
+        paragraph('This recommendation was sent because a member of the hiring team thought your profile was a strong match. You can view, apply, or dismiss it from your dashboard.'),
+    ].filter(Boolean).join('\n\n');
+
+    return baseEmailTemplate({
+        content,
+        preheader: `${data.companyName} recommended you for ${data.jobTitle}.`,
+        source: data.source || 'candidate',
+    });
+}
+
 // ─── Job Expired ─────────────────────────────────────────────────────────────
 
 export interface JobExpiredData {

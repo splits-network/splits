@@ -91,6 +91,7 @@ Design standards: in the root /showcase directory
 | `/basel`                 | Basel design system migration    |
 | `/seo`                   | SEO audit & optimization         |
 | `/aio`                   | AI optimization audit            |
+| `/dashboard`             | Dashboard design patterns (GA-quality) |
 
 ## Guidance Documents
 

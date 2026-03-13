@@ -13,7 +13,7 @@ export class TerminationImpactRepository {
       .from('jobs')
       .select('id, title, status, created_at')
       .eq('company_id', companyId)
-      .or(`job_owner_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`)
+      .eq('job_owner_recruiter_id', recruiterId)
       .in('status', ['active', 'paused'])
       .order('created_at', { ascending: false });
 

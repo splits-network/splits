@@ -54,7 +54,6 @@ export class JobActivityService {
       .from('jobs')
       .select('id')
       .eq('id', jobId)
-      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;

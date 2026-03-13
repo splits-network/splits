@@ -96,7 +96,13 @@ async function main() {
             try {
                 // Store raw body for webhook signature verification
                 (req as any).rawBody = body;
-                const json = JSON.parse(body.toString());
+                const str = (body as Buffer).toString();
+                // Handle empty body with Content-Type: application/json (e.g. bodyless POSTs)
+                if (!str || str.trim() === '') {
+                    done(null, undefined);
+                    return;
+                }
+                const json = JSON.parse(str);
                 done(null, json);
             } catch (err: any) {
                 err.statusCode = 400;
@@ -354,12 +360,14 @@ async function main() {
             return;
         }
 
-        // Skip auth for public V2 job endpoints (optional authentication)
-        // GET /api/v2/jobs - list all jobs (or filter by company if authenticated)
-        // GET /api/v2/jobs/:id - get job details
+        // Skip auth for public job endpoints (optional authentication)
+        // GET /api/v2/jobs, GET /api/v3/jobs - list all jobs (or filter by company if authenticated)
+        // GET /api/v2/jobs/:id, GET /api/v3/jobs/:id - get job details
         if (request.method === 'GET' && (
             request.url.startsWith('/api/v2/jobs') ||
-            request.url.match(/^\/api\/v2\/jobs\/[^/]+(\?|$)/)
+            request.url.match(/^\/api\/v2\/jobs\/[^/]+(\?|$)/) ||
+            request.url.startsWith('/api/v3/jobs') ||
+            request.url.match(/^\/api\/v3\/jobs\/[^/]+(\?|$)/)
         )) {
             // Try to authenticate if token is present, but don't fail if missing
             try {
@@ -371,14 +379,17 @@ async function main() {
             return;
         }
 
-        // Skip auth for public V2 recruiters endpoints (marketplace browsing)
-        // GET /api/v2/recruiters - list all recruiters for marketplace browsing
-        // GET /api/v2/recruiters/:id - view recruiter details for marketplace
+        // Skip auth for public recruiters endpoints (marketplace browsing)
+        // GET /api/v2/recruiters, GET /api/v3/recruiters - list all recruiters
+        // GET /api/v2/recruiters/:id, GET /api/v3/recruiters/:id - view recruiter details
         // Note: Other recruiter endpoints (POST, PATCH, DELETE) require authentication
         if (request.method === 'GET' && (
             request.url === '/api/v2/recruiters' ||
             request.url.startsWith('/api/v2/recruiters?') ||
-            request.url.match(/^\/api\/v2\/recruiters\/[^/?]+(?:\?.*)?$/)
+            request.url.match(/^\/api\/v2\/recruiters\/[^/?]+(?:\?.*)?$/) ||
+            request.url === '/api/v3/recruiters' ||
+            request.url.startsWith('/api/v3/recruiters?') ||
+            request.url.match(/^\/api\/v3\/recruiters\/[^/?]+(?:\?.*)?$/)
         )) {
             // Try to authenticate if token is present, but don't fail if missing
             try {
@@ -395,6 +406,7 @@ async function main() {
         }
 
         // Skip auth for public system health and site notification endpoints
+        // V3: these should use /api/v3/public/ prefix
         if (request.method === 'GET' && request.url.startsWith('/api/v2/system-health')) {
             return;
         }
@@ -406,89 +418,83 @@ async function main() {
         }
 
         // Skip auth for public V2 plans endpoint (pricing page)
-        // GET /api/v2/plans - list all plans for public pricing page
+        // V3: should use /api/v3/public/plans
         if (request.method === 'GET' && request.url.startsWith('/api/v2/plans')) {
             return;
         }
 
         // Skip auth for public V2 splits rates endpoint (pricing calculator)
-        // GET /api/v2/splits-rates - list all active commission rates
+        // V3: should use /api/v3/public/splits-rates
         if (request.method === 'GET' && request.url.startsWith('/api/v2/splits-rates')) {
             return;
         }
 
         // Skip auth for public company invitation lookup (join platform flow)
-        // GET /api/v2/company-invitations/lookup - lookup invitation by code or token
+        // V3: should use /api/v3/public/company-invitations/lookup
         if (request.method === 'GET' && request.url.startsWith('/api/v2/company-invitations/lookup')) {
             return;
         }
 
         // Skip auth for public content pages endpoints (CMS pages)
-        // GET /api/v2/pages - list published pages
-        // GET /api/v2/pages/by-slug/:slug - get page by slug
-        // GET /api/v2/pages/:id - get page by ID
+        // V3: should use /api/v3/public/pages
         if (request.method === 'GET' && request.url.startsWith('/api/v2/pages')) {
             return;
         }
 
         // Skip auth for public navigation endpoints (CMS navigation)
-        // GET /api/v2/navigation - get nav config by app + location
-        // GET /api/v2/navigation/:id - get nav config by ID
+        // V3: should use /api/v3/public/navigation
         if (request.method === 'GET' && request.url.startsWith('/api/v2/navigation')) {
             return;
         }
 
         // Skip auth for public candidate invitation endpoint (landing page)
-        // GET /api/v2/recruiter-candidates/invitations/:token - view invitation details
+        // V3: should use /api/v3/public/recruiter-candidates/invitations/
         if (request.method === 'GET' && request.url.startsWith('/api/v2/recruiter-candidates/invitations/')) {
             return;
         }
 
         // Skip auth for public firm endpoints (firm list and detail pages)
-        // GET /api/v2/public/firms - list marketplace-visible firms
-        // GET /api/v2/public/firms/:slug - firm profile by slug
-        // GET /api/v2/public/firms/:slug/members - firm public member list
         if (request.method === 'GET' && request.url.startsWith('/api/v2/public/firms')) {
             return;
         }
 
         // Skip auth for public recruiter endpoints (recruiter profile by slug)
-        // GET /api/v2/public/recruiters/:slug - recruiter profile by slug
         if (request.method === 'GET' && request.url.startsWith('/api/v2/public/recruiters')) {
             return;
         }
 
         // Skip auth for public invitation preview (accept-invitation page)
+        // V3: should use /api/v3/public/invitations/:id/preview
         if (request.method === 'GET' && request.url.startsWith('/api/v2/invitations/') && request.url.endsWith('/preview')) {
             return;
         }
 
         // Skip auth for public firm invitation preview
+        // V3: should use /api/v3/public/firm-invitations/:id/preview
         if (request.method === 'GET' && request.url.startsWith('/api/v2/firm-invitations/') && request.url.endsWith('/preview')) {
             return;
         }
 
         // Skip auth for public recruiter code lookup (signup referral flow)
-        // GET /api/v2/recruiter-codes/lookup - validate referral code during signup
+        // V3: should use /api/v3/public/recruiter-codes/lookup
         if (request.method === 'GET' && request.url.startsWith('/api/v2/recruiter-codes/lookup')) {
             return;
         }
 
         // Skip auth for call magic-link token exchange (video app uses magic links without Clerk auth)
-        // POST /api/v2/calls/exchange-token - token exchange for LiveKit room access
+        // V3: should use /api/v3/public/calls/exchange-token
         if (request.method === 'POST' && request.url.startsWith('/api/v2/calls/exchange-token')) {
             return;
         }
 
         // Skip auth for call recording webhook (signature verified by video-service)
-        // POST /api/v2/calls/recording/webhook
         if (request.method === 'POST' && request.url.startsWith('/api/v2/calls/recording/webhook')) {
             return;
         }
 
         // Skip auth for support endpoints (anonymous visitors allowed)
         // Support uses session-based auth (x-support-session-id header), not Clerk JWT
-        if (request.url.startsWith('/api/v2/support')) {
+        if (request.url.startsWith('/api/v2/support') || request.url.startsWith('/api/v3/support')) {
             // Try to authenticate if token is present, but don't fail if missing
             try {
                 await authMiddleware.createMiddleware()(request, reply);
@@ -503,13 +509,21 @@ async function main() {
         if (request.method === 'GET' && (
             request.url.startsWith('/api/v2/badges/') ||
             request.url.startsWith('/api/v2/xp/') ||
-            request.url.startsWith('/api/v2/leaderboards')
+            request.url.startsWith('/api/v2/leaderboards') ||
+            request.url.startsWith('/api/v3/badges/') ||
+            request.url.startsWith('/api/v3/xp/') ||
+            request.url.startsWith('/api/v3/leaderboards')
         )) {
             try {
                 await authMiddleware.createMiddleware()(request, reply);
             } catch (error) {
                 request.log.debug('No valid auth token for public gamification endpoint, continuing as anonymous');
             }
+            return;
+        }
+
+        // Skip auth for all V3 public routes (auth: 'none' in route config)
+        if (request.url.startsWith('/api/v3/public/')) {
             return;
         }
 

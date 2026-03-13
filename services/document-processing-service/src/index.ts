@@ -7,6 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import { DocumentRepositoryV2 } from "./v2/documents/repository";
 import { DocumentServiceV2 } from "./v2/documents/service";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { EventPublisher } from "@splits-network/shared-job-queue";
 
 // Processing imports (to be updated to use V2)
@@ -34,6 +35,8 @@ async function buildServer(): Promise<FastifyInstance> {
 
     // Register V2 routes
     await registerV2Routes(app, documentRepository, documentService);
+
+    registerV3Routes(app, { supabase });
 
     // Health check
     app.get("/health", async () => {

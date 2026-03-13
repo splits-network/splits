@@ -120,7 +120,8 @@ export function useOfferWizard(applicationId: string) {
             });
 
             if (notes.trim()) {
-                await client.post(`/applications/${applicationId}/notes`, {
+                await client.post(`/application-notes`, {
+                    application_id: applicationId,
                     note_type: "stage_transition",
                     message_text: notes.trim(),
                     visibility: "team",

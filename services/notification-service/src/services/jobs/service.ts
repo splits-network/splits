@@ -15,6 +15,8 @@ import {
     JobFieldsUpdatedData,
     jobDeletedEmail,
     JobDeletedData,
+    jobRecommendationEmail,
+    JobRecommendationData,
 } from '../../templates/jobs';
 
 export class JobsEmailService {
@@ -181,6 +183,25 @@ export class JobsEmailService {
             priority: 'high',
             channel: 'both',
             category: 'jobs',
+        });
+    }
+
+    async sendJobRecommendation(
+        email: string,
+        data: JobRecommendationData & { userId?: string }
+    ): Promise<void> {
+        const html = jobRecommendationEmail(data);
+
+        await this.sendEmail(email, `A job was recommended for you: ${data.jobTitle}`, html, {
+            eventType: 'job_recommendation.created',
+            userId: data.userId,
+            payload: { jobTitle: data.jobTitle, companyName: data.companyName },
+            priority: 'normal',
+            channel: 'both',
+            category: 'jobs',
+            actionUrl: data.jobUrl,
+            actionLabel: 'View Job',
+            source: 'candidate',
         });
     }
 

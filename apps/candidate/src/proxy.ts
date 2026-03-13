@@ -32,6 +32,7 @@ export default clerkMiddleware(async (auth, request) => {
     const isProtectedRoute = path.startsWith('/portal/') ||
         path.startsWith('/onboarding') ||
         path.startsWith('/api/v2/') ||
+        path.startsWith('/api/v3/') ||
         path.startsWith('/api/notifications/') ||
         path === '/api/healthcheck';
 

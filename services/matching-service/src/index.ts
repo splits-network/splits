@@ -19,6 +19,7 @@ import {
     OutboxWorker,
 } from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { DomainEventConsumer } from "./domain-consumer";
 import { MatchRepository } from "./v2/matches/repository";
 import { EmbeddingService } from "./v2/embeddings/service";
@@ -164,6 +165,11 @@ async function main() {
         eventPublisher: outboxPublisher || undefined,
         logger,
         orchestrator,
+    });
+
+    registerV3Routes(app, {
+        supabase: supabaseClient,
+        eventPublisher: outboxPublisher || undefined,
     });
 
     // Initialize domain event consumer

@@ -45,7 +45,7 @@ export function useCallContext(call: CallDetail, accessToken: string | null): Us
                 const entityPromises = call.entity_links.map(async (link) => {
                     try {
                         const res = await fetch(
-                            `${API_URL}/api/v2/calls/${call.id}/entities/${link.entity_type}/${link.entity_id}`,
+                            `${API_URL}/api/v3/calls/${call.id}/entities/${link.entity_type}/${link.entity_id}`,
                             { headers },
                         );
                         if (!res.ok) return buildFallbackEntity(link.entity_type, link.entity_id);
@@ -59,7 +59,7 @@ export function useCallContext(call: CallDetail, accessToken: string | null): Us
                 // Fetch call history for the first entity link
                 const primaryLink = call.entity_links[0];
                 const historyPromise = fetch(
-                    `${API_URL}/api/v2/calls?entity_type=${primaryLink.entity_type}&entity_id=${primaryLink.entity_id}&limit=10`,
+                    `${API_URL}/api/v3/calls?entity_type=${primaryLink.entity_type}&entity_id=${primaryLink.entity_id}&limit=10`,
                     { headers },
                 ).then(async (res) => {
                     if (!res.ok) return [];

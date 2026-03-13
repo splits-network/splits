@@ -32,7 +32,7 @@ export default function NotificationBell() {
 
             const client = createAuthenticatedClient(token);
             const response = await client.get<{ data: { count: number } }>(
-                "/notifications/unread-count",
+                "/notifications/views/unread-count",
             );
             const count = response.data.count;
             previousUnreadCount.current = count;
@@ -115,7 +115,7 @@ export default function NotificationBell() {
             const token = await getToken();
             if (token) {
                 const client = createAuthenticatedClient(token);
-                await client.post("/notifications/mark-all-read", {});
+                await client.post("/notifications/actions/mark-all-read", {});
                 setUnreadCount(0);
                 setNotifications((prev) =>
                     prev.map((n) => ({ ...n, read: true })),

@@ -47,7 +47,7 @@ export function useRealtimeCounts(): { counts: AdminCounts; loading: boolean } {
         if (!token) return;
 
         try {
-            const res = await fetch(`${GATEWAY_URL}/api/v2/identity/admin/counts`, {
+            const res = await fetch(`${GATEWAY_URL}/api/v3/identity/admin/counts`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) return;

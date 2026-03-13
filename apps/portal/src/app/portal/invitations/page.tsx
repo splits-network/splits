@@ -73,7 +73,7 @@ export default function InvitationsBaselPage() {
             try {
                 const client = createAuthenticatedClient(token);
                 const response = await client.get("/recruiter-candidates", {
-                    params: { limit: 1000 },
+                    params: { limit: 100 },
                 });
 
                 const invitations: StatsInvitation[] = response.data || [];

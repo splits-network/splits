@@ -112,7 +112,7 @@ function BaselToastContainer({
     if (toasts.length === 0) return null;
 
     return (
-        <div className="toast toast-top toast-end z-[100] gap-2">
+        <div className="toast toast-top toast-end z-[9999] gap-2">
             {toasts.map((toast) => (
                 <BaselToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
             ))}

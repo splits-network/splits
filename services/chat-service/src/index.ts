@@ -9,6 +9,7 @@ import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-ne
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import * as Sentry from "@sentry/node";
 
@@ -131,6 +132,12 @@ async function main() {
         supabaseKey,
         rabbitMqUrl: rabbitConfig.url,
         redisConfig,
+        eventPublisher: outboxPublisher,
+    });
+
+    // Register V3 routes (coexist with V2)
+    registerV3Routes(app, {
+        supabase: supabaseClient,
         eventPublisher: outboxPublisher,
     });
 

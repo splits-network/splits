@@ -12,9 +12,9 @@ const GATEWAY_URL = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://localho
 
 const SERVICES: { name: string; path: string }[] = [
     { name: 'Admin Gateway', path: '/health' },
-    { name: 'Identity', path: '/api/v2/identity/health' },
-    { name: 'ATS', path: '/api/v2/ats/health' },
-    { name: 'Billing', path: '/api/v2/billing/health' },
+    { name: 'Identity', path: '/api/v3/identity/health' },
+    { name: 'ATS', path: '/api/v3/ats/health' },
+    { name: 'Billing', path: '/api/v3/billing/health' },
 ];
 
 async function checkService(

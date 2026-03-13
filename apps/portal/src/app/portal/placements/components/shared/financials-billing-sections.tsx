@@ -48,11 +48,13 @@ const ESCROW_COLOR: Record<EscrowHoldStatus, BaselSemanticColor> = {
     cancelled: "neutral",
 };
 
-function formatLabel(s: string): string {
+function formatLabel(s: string | undefined | null): string {
+    if (!s) return "";
     return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function formatBillingTerms(terms: string): string {
+function formatBillingTerms(terms: string | undefined | null): string {
+    if (!terms) return "";
     switch (terms) {
         case "net_30": return "Net 30";
         case "net_60": return "Net 60";

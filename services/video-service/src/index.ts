@@ -8,6 +8,7 @@ import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-ne
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from './v3/routes';
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import * as Sentry from "@sentry/node";
 
@@ -149,6 +150,9 @@ async function main() {
         supabaseS3SecretKey,
         supabaseS3Bucket,
     });
+
+    // Register V3 routes
+    registerV3Routes(app, supabaseClient);
 
     app.get("/health", async (request, reply) => {
         return reply.status(200).send({

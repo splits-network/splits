@@ -18,15 +18,11 @@ import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
-import { CompanyProvider, useCompanyContext } from "./contexts/company-context";
+import { useCompanyContext } from "./contexts/company-context";
 import { useGamification } from "@splits-network/shared-gamification";
 
 export default function RecruitersBaselPage() {
-    return (
-        <CompanyProvider>
-            <RecruitersContent />
-        </CompanyProvider>
-    );
+    return <RecruitersContent />;
 }
 
 function RecruitersContent() {

@@ -27,7 +27,7 @@ export function ServiceStatusDebugger() {
                 const base = (process.env.NEXT_PUBLIC_API_URL || "")
                     .replace(/\/+$/, "")
                     .replace(/\/api(?:\/v[0-9]+)?$/, "");
-                const res = await fetch(`${base}/api/v2/site-notifications`, {
+                const res = await fetch(`${base}/api/v3/site-notifications`, {
                     cache: "no-store",
                 });
                 if (res.ok) {

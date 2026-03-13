@@ -152,7 +152,7 @@ export default function StatusClient({
         setFormFeedback(null);
 
         try {
-            const response = await fetch("/api/v2/status-contact", {
+            const response = await fetch("/api/v3/status-contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

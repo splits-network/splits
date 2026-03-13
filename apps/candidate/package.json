@@ -19,19 +19,17 @@
         "@splits-network/chat-ui": "workspace:*",
         "@splits-network/support-widget": "workspace:*",
         "@splits-network/shared-api-client": "workspace:*",
+        "@splits-network/shared-charts": "workspace:*",
         "@splits-network/shared-gamification": "workspace:*",
         "@splits-network/shared-types": "workspace:*",
         "@splits-network/shared-ui": "workspace:*",
         "@splits-network/shared-video": "workspace:*",
         "@uiw/react-markdown-preview": "^5.1.5",
         "@uiw/react-md-editor": "^4.0.0",
-        "chart.js": "^4.5.1",
         "livekit-client": "^2.17.2",
         "next": "^16.1.0",
         "react": "^19.2.1",
-        "react-chartjs-2": "^5.3.1",
-        "react-dom": "^19.2.1",
-        "recharts": "^3.7.0"
+        "react-dom": "^19.2.1"
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.1.17",

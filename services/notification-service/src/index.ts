@@ -11,6 +11,7 @@ import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
 import { PORTAL_URL, CANDIDATE_URL } from './helpers/urls';
 import { registerV2Routes } from './v2/routes';
+import { registerV3Routes } from './v3/routes';
 import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
 
@@ -142,10 +143,16 @@ async function main() {
     outboxWorker.start();
     logger.info('📤 Outbox worker started - events will be durably delivered');
 
-    // Register V2 HTTP routes only
+    // Register V2 HTTP routes
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
+        eventPublisher: outboxPublisher,
+    });
+
+    // Register V3 HTTP routes (coexist with V2)
+    registerV3Routes(app, {
+        supabase: supabaseClient,
         eventPublisher: outboxPublisher,
     });
 

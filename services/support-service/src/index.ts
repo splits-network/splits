@@ -9,6 +9,7 @@ import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-ne
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerV2Routes } from './v2/routes';
+import { registerV3Routes } from './v3/routes';
 import * as Sentry from '@sentry/node';
 
 if (process.env.SENTRY_DSN) {
@@ -86,6 +87,13 @@ async function main() {
         supabaseKey,
         redisConfig,
         rabbitMqUrl: rabbitConfig.url,
+    });
+
+    // Register V3 routes (coexist with V2)
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
+    registerV3Routes(app, {
+        supabase: supabaseClient,
     });
 
     app.get('/health', async (_request, reply) => {

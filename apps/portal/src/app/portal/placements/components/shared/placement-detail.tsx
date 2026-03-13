@@ -29,8 +29,7 @@ export function DetailLoader({
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Placement }>(
-                    `/placements/${id}`,
-                    { params: { include: "candidate,job,company,splits" } },
+                    `/placements/${id}/view/detail`,
                 );
                 if (!signal?.cancelled) setPlacement(res.data);
             } catch (err) {

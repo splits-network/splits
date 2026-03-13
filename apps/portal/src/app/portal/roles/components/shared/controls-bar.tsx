@@ -60,6 +60,8 @@ interface ControlsBarProps {
     sortBy: string;
     sortOrder: "asc" | "desc";
     onSortChange: (field: string, order: "asc" | "desc") => void;
+    /** Whether user is a recruiter — controls scope toggle options (e.g. "Saved") */
+    isRecruiter?: boolean;
 }
 
 export function ControlsBar({
@@ -78,6 +80,7 @@ export function ControlsBar({
     sortBy,
     sortOrder,
     onSortChange,
+    isRecruiter,
 }: ControlsBarProps) {
     const [expanded, setExpanded] = useState(false);
 
@@ -129,7 +132,7 @@ export function ControlsBar({
                         onChange={(v) => onFilterChange("job_owner_filter", v as "all" | "assigned" | "saved")}
                         options={[
                             { value: "assigned", label: "My Roles" },
-                            { value: "saved", label: "Saved" },
+                            ...(isRecruiter ? [{ value: "saved", label: "Saved" }] : []),
                             { value: "all", label: "All Roles" },
                         ]}
                     />

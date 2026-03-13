@@ -20,8 +20,8 @@ export async function registerLinkedInRoutes(app: FastifyInstance, config: Regis
     const tokenRefresh = new TokenRefreshService(connectionRepo, config.eventPublisher, config.logger, config.crypto);
     const service = new LinkedInService(connectionRepo, tokenRefresh, config.logger);
 
-    // GET /api/v2/integrations/linkedin/:connectionId/profile
-    app.get('/api/v2/integrations/linkedin/:connectionId/profile', async (request, reply) => {
+    // GET /api/v3/integrations/linkedin/:connectionId/profile
+    app.get('/api/v3/integrations/linkedin/:connectionId/profile', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
 
@@ -38,8 +38,8 @@ export async function registerLinkedInRoutes(app: FastifyInstance, config: Regis
         }
     });
 
-    // GET /api/v2/integrations/linkedin/:connectionId/verification
-    app.get('/api/v2/integrations/linkedin/:connectionId/verification', async (request, reply) => {
+    // GET /api/v3/integrations/linkedin/:connectionId/verification
+    app.get('/api/v3/integrations/linkedin/:connectionId/verification', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
 
@@ -56,8 +56,8 @@ export async function registerLinkedInRoutes(app: FastifyInstance, config: Regis
         }
     });
 
-    // POST /api/v2/integrations/linkedin/:connectionId/refresh-profile
-    app.post('/api/v2/integrations/linkedin/:connectionId/refresh-profile', async (request, reply) => {
+    // POST /api/v3/integrations/linkedin/:connectionId/refresh-profile
+    app.post('/api/v3/integrations/linkedin/:connectionId/refresh-profile', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
 

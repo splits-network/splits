@@ -658,8 +658,8 @@ export default function AIReviewPanel({
 
             {/* Experience & Location */}
             <div className="grid grid-cols-2 gap-4">
-                {aiReview.experience_analysis?.candidate_years !== null &&
-                    aiReview.experience_analysis?.required_years !== null && (
+                {aiReview.experience_analysis?.candidate_years != null &&
+                    aiReview.experience_analysis?.required_years != null && (
                         <div className="bg-base-100 border-t-4 border-warning p-5 shadow-sm text-center">
                             <h4 className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-3">
                                 Experience

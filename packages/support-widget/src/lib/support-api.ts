@@ -43,7 +43,7 @@ async function buildHeaders(config: SupportApiConfig): Promise<Record<string, st
 }
 
 export async function checkAdminStatus(baseUrl: string): Promise<boolean> {
-    const res = await fetch(`${baseUrl}/api/v2/support/admin-status`);
+    const res = await fetch(`${baseUrl}/api/v3/public/support/admin-status`);
     const json = await res.json();
     return json.data?.online ?? false;
 }
@@ -62,7 +62,7 @@ export async function createConversation(
     },
 ): Promise<{ conversation: SupportConversation; message: SupportMessage }> {
     const headers = await buildHeaders(config);
-    const res = await fetch(`${config.baseUrl}/api/v2/support/conversations`, {
+    const res = await fetch(`${config.baseUrl}/api/v3/support/conversations`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ sessionId: config.sessionId, ...input }),
@@ -80,7 +80,7 @@ export async function sendMessage(
 ): Promise<SupportMessage> {
     const headers = await buildHeaders(config);
     const res = await fetch(
-        `${config.baseUrl}/api/v2/support/conversations/${conversationId}/messages`,
+        `${config.baseUrl}/api/v3/support/conversations/${conversationId}/messages`,
         {
             method: 'POST',
             headers,
@@ -98,7 +98,7 @@ export async function getMyConversations(
 ): Promise<SupportConversation[]> {
     const headers = await buildHeaders(config);
     const res = await fetch(
-        `${config.baseUrl}/api/v2/support/conversations/mine?sessionId=${config.sessionId}`,
+        `${config.baseUrl}/api/v3/support/conversations/mine?sessionId=${config.sessionId}`,
         { headers },
     );
 
@@ -130,7 +130,7 @@ export async function createTicket(
     },
 ): Promise<SupportTicket> {
     const headers = await buildHeaders(config);
-    const res = await fetch(`${config.baseUrl}/api/v2/support/tickets`, {
+    const res = await fetch(`${config.baseUrl}/api/v3/support/tickets`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ sessionId: config.sessionId, ...input }),
@@ -143,9 +143,10 @@ export async function createTicket(
 
 export async function linkSession(config: SupportApiConfig): Promise<void> {
     const headers = await buildHeaders(config);
-    await fetch(`${config.baseUrl}/api/v2/support/conversations/link-session`, {
+    await fetch(`${config.baseUrl}/api/v3/support/conversations/link-session`, {
         method: 'POST',
         headers,
+        body: JSON.stringify({}),
     }).catch(() => {
         // Best-effort linking
     });
@@ -157,7 +158,7 @@ export async function getMessages(
 ): Promise<SupportMessage[]> {
     const headers = await buildHeaders(config);
     const res = await fetch(
-        `${config.baseUrl}/api/v2/support/conversations/${conversationId}/messages`,
+        `${config.baseUrl}/api/v3/support/conversations/${conversationId}/messages`,
         { headers },
     );
 

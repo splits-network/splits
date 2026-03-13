@@ -52,17 +52,7 @@ export default function RecruiterActionsToolbar({
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
 
-    let companies: any[] = [];
-    let recruiterRelationships: Map<string, any> = new Map();
-    let refreshRelationships = () => {};
-    try {
-        const companyCtx = useCompanyContext();
-        companies = companyCtx.companies;
-        recruiterRelationships = companyCtx.recruiterRelationships;
-        refreshRelationships = companyCtx.refreshRelationships;
-    } catch {
-        // CompanyProvider not available (e.g., on public pages) - use defaults
-    }
+    const { companies, recruiterRelationships, refreshRelationships } = useCompanyContext();
 
     const companyRelationship = recruiterRelationships.get(recruiter.id);
     const hasActiveRelationship = companyRelationship?.status === "active";

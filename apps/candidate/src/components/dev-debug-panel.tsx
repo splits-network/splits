@@ -53,7 +53,7 @@ function DevDebugPanelInner() {
             const token = await getToken();
             if (!token) return;
             const base = getGatewayBaseUrl();
-            const res = await fetch(`${base}/api/v2/users/me`, {
+            const res = await fetch(`${base}/api/v3/users/me`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) {

@@ -15,8 +15,8 @@ const SELECTABLE_FIELDS = [
   'salary_min', 'salary_max', 'fee_percentage', 'guarantee_days',
   'description', 'recruiter_description', 'candidate_description',
   'commute_types', 'job_level', 'open_to_relocation', 'show_salary_range',
-  'company_id', 'source_firm_id', 'job_owner_id', 'job_owner_recruiter_id',
-  'company_recruiter_id', 'pre_screen_questions',
+  'company_id', 'source_firm_id', 'job_owner_recruiter_id',
+  'pre_screen_questions',
   'is_early_access', 'is_priority',
   'activates_at', 'closes_at', 'created_at', 'updated_at',
 ];
@@ -39,8 +39,7 @@ export class JobRepository {
 
     let query = this.supabase
       .from('jobs')
-      .select(selectFields, { count: 'exact' })
-      .is('deleted_at', null);
+      .select(selectFields, { count: 'exact' });
 
     // Role-based scoping (set by service layer, not from query params)
     if (params.scoped_company_ids && params.scoped_company_ids.length > 0) {
@@ -50,7 +49,7 @@ export class JobRepository {
       if (params.owner_recruiter_id) {
         // Recruiters see public statuses OR their own jobs regardless of status
         query = query.or(
-          `status.in.(${params.visible_statuses.join(',')}),job_owner_recruiter_id.eq.${params.owner_recruiter_id},company_recruiter_id.eq.${params.owner_recruiter_id}`
+          `status.in.(${params.visible_statuses.join(',')}),job_owner_recruiter_id.eq.${params.owner_recruiter_id}`
         );
       } else {
         query = query.in('status', params.visible_statuses);
@@ -101,7 +100,6 @@ export class JobRepository {
       .from('jobs')
       .select('*')
       .eq('id', id)
-      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;
@@ -124,7 +122,6 @@ export class JobRepository {
       .from('jobs')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
-      .is('deleted_at', null)
       .select()
       .single();
 
@@ -138,9 +135,8 @@ export class JobRepository {
   async softDelete(id: string): Promise<void> {
     const { error } = await this.supabase
       .from('jobs')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id)
-      .is('deleted_at', null);
+      .update({ status: 'closed', updated_at: new Date().toISOString() })
+      .eq('id', id);
 
     if (error) throw error;
   }

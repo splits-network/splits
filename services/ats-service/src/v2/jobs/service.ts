@@ -113,7 +113,6 @@ export class JobServiceV2 {
 
         const job = await this.repository.createJob({
             ...data,
-            job_owner_id: userContext.identityUserId,
             status,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),

@@ -14,6 +14,7 @@ import swaggerUi from "@fastify/swagger-ui";
 import multipart from "@fastify/multipart";
 import { EventPublisher } from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import * as Sentry from "@sentry/node";
 
 if (process.env.SENTRY_DSN) {
@@ -129,6 +130,14 @@ async function main() {
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
+        eventPublisher,
+    });
+
+    // Register V3 routes (coexist with V2)
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
+    registerV3Routes(app, {
+        supabase: supabaseClient,
         eventPublisher,
     });
 

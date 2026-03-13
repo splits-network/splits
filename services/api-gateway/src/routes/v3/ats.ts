@@ -66,6 +66,116 @@ const atsV3Routes: V3RouteConfig[] = [
 
   // ── Recruiter Saved Candidates Core CRUD ─────────────────────
   { resource: 'recruiter-saved-candidates', auth: 'required' },
+
+  // ── Company Sourcers Core CRUD ──────────────────────────────
+  { resource: 'company-sourcers', auth: 'required' },
+
+  // ── Company Sourcers Views ──────────────────────────────────
+  { path: '/company-sourcers/check-protection/:companyId', method: 'GET', auth: 'required' },
+
+  // ── Job Recommendations Core CRUD ────────────────────────────
+  { resource: 'job-recommendations', auth: 'required' },
+
+  // ── Job Recommendations Views ────────────────────────────────
+  { path: '/job-recommendations/mine', method: 'GET', auth: 'required' },
+  { path: '/job-recommendations/:id/view/detail', method: 'GET', auth: 'required' },
+
+  // ── Candidates Core CRUD ──────────────────────────────────────
+  { resource: 'candidates', auth: 'required' },
+
+  // ── Candidates Views ──────────────────────────────────────────
+  { path: '/candidates/me', method: 'GET', auth: 'required' },
+  { path: '/candidates/:id/dashboard-stats', method: 'GET', auth: 'required' },
+  { path: '/candidates/:id/recent-applications', method: 'GET', auth: 'required' },
+  { path: '/candidates/:id/primary-resume', method: 'GET', auth: 'required' },
+
+  // ── Companies Core CRUD ───────────────────────────────────────
+  { resource: 'companies', auth: 'required' },
+
+  // ── Companies Views ───────────────────────────────────────────
+  { path: '/companies/:id/contacts', method: 'GET', auth: 'required' },
+
+  // ── Applications Core CRUD ────────────────────────────────────
+  { resource: 'applications', auth: 'required' },
+
+  // ── Applications Views ──────────────────────────────────────
+  { path: '/applications/:id/view/detail', method: 'GET', auth: 'required' },
+
+  // ── Applications Actions ──────────────────────────────────────
+  { path: '/applications/propose', method: 'POST', auth: 'required' },
+  { path: '/applications/affected-by-termination', method: 'GET', auth: 'required' },
+  { path: '/applications/termination-decisions', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/accept-proposal', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/decline-proposal', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/accept-offer', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/hire', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/trigger-ai-review', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/return-to-draft', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/submit', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/request-prescreen', method: 'POST', auth: 'required' },
+  { path: '/applications/:id/reactivate', method: 'POST', auth: 'required' },
+
+  // ── Placements Core CRUD ──────────────────────────────────────
+  { resource: 'placements', auth: 'required' },
+
+  // ── Placements Views ────────────────────────────────────────
+  { path: '/placements/:id/view/detail', method: 'GET', auth: 'required' },
+
+  // ── Candidate Sourcers Core CRUD ──────────────────────────────
+  { resource: 'candidate-sourcers', auth: 'required' },
+
+  // ── Application Notes Core CRUD ───────────────────────────────
+  { resource: 'application-notes', auth: 'required' },
+
+  // ── Pre-Screen ────────────────────────────────────────────────
+  { path: '/pre-screen', method: 'GET', auth: 'required' },
+  { path: '/pre-screen', method: 'POST', auth: 'required' },
+  { path: '/pre-screen/answers/:applicationId', method: 'GET', auth: 'required' },
+  { path: '/pre-screen/:jobId', method: 'GET', auth: 'required' },
+  { path: '/pre-screen/:jobId', method: 'PATCH', auth: 'required' },
+  { path: '/pre-screen/:jobId', method: 'DELETE', auth: 'required' },
+
+  // ── Skills (lookup table) ─────────────────────────────────────
+  { path: '/skills', method: 'GET', auth: 'required' },
+  { path: '/skills/:id', method: 'GET', auth: 'required' },
+  { path: '/skills', method: 'POST', auth: 'required' },
+  { path: '/skills/:id', method: 'DELETE', auth: 'required' },
+
+  // ── Candidate Skills (junction) ───────────────────────────────
+  { path: '/candidate-skills', method: 'GET', auth: 'required' },
+  { path: '/candidate-skills', method: 'POST', auth: 'required' },
+  { path: '/candidate-skills/candidate/:candidateId/bulk-replace', method: 'PUT', auth: 'required' },
+  // DELETE for composite key registered manually below
+
+  // ── Company Skills (junction) ─────────────────────────────────
+  { path: '/company-skills', method: 'GET', auth: 'required' },
+  { path: '/company-skills', method: 'POST', auth: 'required' },
+  { path: '/company-skills/company/:companyId/bulk-replace', method: 'PUT', auth: 'required' },
+  // DELETE for composite key registered manually below
+
+  // ── Perks (lookup table) ──────────────────────────────────────
+  { path: '/perks', method: 'GET', auth: 'required' },
+  { path: '/perks/:id', method: 'GET', auth: 'required' },
+  { path: '/perks', method: 'POST', auth: 'required' },
+  { path: '/perks/:id', method: 'DELETE', auth: 'required' },
+
+  // ── Company Perks (junction) ──────────────────────────────────
+  { path: '/company-perks', method: 'GET', auth: 'required' },
+  { path: '/company-perks', method: 'POST', auth: 'required' },
+  { path: '/company-perks/company/:companyId/bulk-replace', method: 'PUT', auth: 'required' },
+  // DELETE for composite key registered manually below
+
+  // ── Culture Tags (lookup table) ───────────────────────────────
+  { path: '/culture-tags', method: 'GET', auth: 'required' },
+  { path: '/culture-tags/:id', method: 'GET', auth: 'required' },
+  { path: '/culture-tags', method: 'POST', auth: 'required' },
+  { path: '/culture-tags/:id', method: 'DELETE', auth: 'required' },
+
+  // ── Company Culture Tags (junction) ───────────────────────────
+  { path: '/company-culture-tags', method: 'GET', auth: 'required' },
+  { path: '/company-culture-tags', method: 'POST', auth: 'required' },
+  { path: '/company-culture-tags/company/:companyId/bulk-replace', method: 'PUT', auth: 'required' },
+  // DELETE for composite key registered manually below
 ];
 
 export function registerAtsV3Routes(app: FastifyInstance, services: ServiceRegistry) {
@@ -73,24 +183,36 @@ export function registerAtsV3Routes(app: FastifyInstance, services: ServiceRegis
 
   registerV3Routes(app, atsClient, atsV3Routes);
 
-  // Manual registration for job-skills composite delete (DELETE not in V3RouteConfig)
-  app.delete('/api/v3/job-skills/:jobId/:skillId', {
-    preHandler: requireAuth(),
-  }, async (request, reply) => {
-    try {
-      const { jobId, skillId } = request.params as { jobId: string; skillId: string };
-      const correlationId = (request as any).correlationId;
-      const headers = buildAuthHeaders(request);
-      const data = await atsClient.delete(
-        `/api/v3/job-skills/${jobId}/${skillId}`,
-        correlationId,
-        headers
-      );
-      return reply.send(data);
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send(
-        error.jsonBody || { error: { code: 'PROXY_ERROR', message: error.message } }
-      );
-    }
-  });
+  // Manual registration for composite-key DELETEs (not supported by V3RouteConfig resource helper)
+  const compositeDeletes = [
+    { path: '/api/v3/job-skills/:jobId/:skillId', params: ['jobId', 'skillId'] },
+    { path: '/api/v3/candidate-skills/:candidateId/:skillId', params: ['candidateId', 'skillId'] },
+    { path: '/api/v3/company-skills/:companyId/:skillId', params: ['companyId', 'skillId'] },
+    { path: '/api/v3/company-perks/:companyId/:perkId', params: ['companyId', 'perkId'] },
+    { path: '/api/v3/company-culture-tags/:companyId/:cultureTagId', params: ['companyId', 'cultureTagId'] },
+  ];
+
+  for (const route of compositeDeletes) {
+    app.delete(route.path, {
+      preHandler: requireAuth(),
+    }, async (request, reply) => {
+      try {
+        const params = request.params as Record<string, string>;
+        const segments = route.params.map(p => params[p]).join('/');
+        const basePath = route.path.split('/:')[0];
+        const correlationId = (request as any).correlationId;
+        const headers = buildAuthHeaders(request);
+        const data = await atsClient.delete(
+          `${basePath}/${segments}`,
+          correlationId,
+          headers
+        );
+        return reply.send(data);
+      } catch (error: any) {
+        return reply.status(error.statusCode || 500).send(
+          error.jsonBody || { error: { code: 'PROXY_ERROR', message: error.message } }
+        );
+      }
+    });
+  }
 }

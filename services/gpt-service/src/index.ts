@@ -15,6 +15,7 @@ import formbody from "@fastify/formbody";
 import { EventPublisher } from "./v2/shared/events";
 import { AuditEventConsumer } from "./v2/shared/audit-consumer";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from './v3/routes';
 
 async function main() {
     const baseConfig = loadBaseConfig("gpt-service");
@@ -95,6 +96,11 @@ async function main() {
         eventPublisher,
         clerkWebhookSecret: process.env.GPT_CLERK_WEBHOOK_SECRET,
     });
+
+    // Register V3 routes
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
+    registerV3Routes(app, supabaseClient);
 
     // Register health check endpoint
     registerHealthCheck(app, {

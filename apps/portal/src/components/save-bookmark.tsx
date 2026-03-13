@@ -8,8 +8,8 @@ import { useToast } from "@/lib/toast-context";
 type EntityType = "job" | "candidate";
 
 const CONFIG: Record<EntityType, { endpoint: string; bodyKey: string; label: string }> = {
-    job: { endpoint: "/api/v3/recruiter-saved-jobs", bodyKey: "job_id", label: "Role" },
-    candidate: { endpoint: "/api/v3/recruiter-saved-candidates", bodyKey: "candidate_id", label: "Candidate" },
+    job: { endpoint: "/recruiter-saved-jobs", bodyKey: "job_id", label: "Role" },
+    candidate: { endpoint: "/recruiter-saved-candidates", bodyKey: "candidate_id", label: "Candidate" },
 };
 
 interface SaveBookmarkProps {

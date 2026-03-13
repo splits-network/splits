@@ -126,6 +126,79 @@ export async function registerSupportRoutes(
         }
     });
 
+    // ── V3 aliases — same handlers, V3 paths for frontend migration ──
+
+    app.get('/api/v3/public/support/admin-status', async (_request, reply) => {
+        const online = await service.checkAdminOnline();
+        return reply.send({ data: { online } });
+    });
+
+    app.get('/api/v3/support/conversations/mine', async (request, reply) => {
+        try {
+            const ctx = requireSupportIdentity(request);
+            const query = request.query as any;
+            const conversations = await service.getVisitorConversations(
+                ctx.sessionId || query.sessionId,
+                ctx.clerkUserId,
+            );
+            return reply.send({ data: conversations });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    app.get('/api/v3/support/conversations/:id/messages', async (request, reply) => {
+        try {
+            requireSupportIdentity(request);
+            const { id } = request.params as { id: string };
+            const query = request.query as any;
+            const limit = Math.min(parseInt(query.limit || '50', 10), 100);
+            const before = query.before as string | undefined;
+            const messages = await service.listMessages(id, limit, before);
+            return reply.send({ data: messages });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    app.post('/api/v3/support/conversations/:id/messages', async (request, reply) => {
+        try {
+            const ctx = requireSupportIdentity(request);
+            const { id } = request.params as { id: string };
+            const body = request.body as any;
+
+            const message = await service.sendVisitorMessage(
+                id,
+                null,
+                body.body,
+            );
+            return reply.code(201).send({ data: message });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
+    app.post('/api/v3/support/conversations/link-session', async (request, reply) => {
+        try {
+            const ctx = getSupportContext(request);
+            if (!ctx.clerkUserId || !ctx.sessionId) {
+                return reply.code(400).send({ error: 'Both clerkUserId and sessionId required' });
+            }
+            await service.linkSession(ctx.sessionId, ctx.clerkUserId);
+            return reply.send({ data: { status: 'ok' } });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 400)
+                .send({ error: error.message });
+        }
+    });
+
     // ── Admin endpoints (routed via admin-gateway) ──
 
     app.get('/admin/support/conversations', async (request, reply) => {

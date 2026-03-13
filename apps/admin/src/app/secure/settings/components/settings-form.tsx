@@ -64,7 +64,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         try {
             const token = await getToken();
             const gatewayUrl = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ?? 'http://admin-gateway:3030';
-            await fetch(`${gatewayUrl}/api/v2/identity/admin/settings`, {
+            await fetch(`${gatewayUrl}/api/v3/identity/admin/settings`, {
                 method: 'PATCH',
                 headers: {
                     Authorization: `Bearer ${token}`,

@@ -176,17 +176,19 @@ export function useFullSearch(): UseFullSearchReturn {
   const [pagination, setPagination] = useState<SearchPagination | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Saved + recent searches
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>(() =>
-    loadFromStorage(SAVED_SEARCHES_KEY, []),
-  );
-  const [recentSearches, setRecentSearches] = useState<string[]>(() =>
-    loadFromStorage(RECENT_SEARCHES_KEY, []),
-  );
+  // Saved + recent searches (initialize empty to avoid hydration mismatch with localStorage)
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   // Refs
   const debounceTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
+
+  // Hydrate saved/recent searches from localStorage after mount (avoids hydration mismatch)
+  useEffect(() => {
+    setSavedSearches(loadFromStorage(SAVED_SEARCHES_KEY, []));
+    setRecentSearches(loadFromStorage(RECENT_SEARCHES_KEY, []));
+  }, []);
 
   // Sorted results (client-side sort)
   const results = useMemo(() => sortResults(rawResults, sortBy), [rawResults, sortBy]);

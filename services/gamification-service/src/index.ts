@@ -5,6 +5,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { EventPublisherV2, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import { registerV2Routes } from './v2/routes';
+import { registerV3Routes } from './v3/routes';
 import * as Sentry from '@sentry/node';
 
 if (process.env.SENTRY_DSN) {
@@ -128,6 +129,8 @@ async function main() {
         await app.close();
         process.exit(0);
     });
+
+    registerV3Routes(app, { supabase: supabaseClient });
 
     // Health check
     registerHealthCheck(app, {

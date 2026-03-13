@@ -77,8 +77,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
             if (applicationId) {
                 try {
                     const response: any = await client.get(
-                        `/applications/${applicationId}`,
-                        { params: { include: "job,company" } },
+                        `/applications/${applicationId}/view/detail`,
                     );
                     const application = response?.data;
                     if (application?.job?.title) {

@@ -23,8 +23,8 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
     const webhookBaseUrl = process.env.INTEGRATION_WEBHOOK_URL ?? '';
     const webhookService = new CalendarWebhookService(connectionRepo, tokenRefresh, config.logger, webhookBaseUrl);
 
-    // GET /api/v2/integrations/calendar/:connectionId/calendars
-    app.get('/api/v2/integrations/calendar/:connectionId/calendars', async (request, reply) => {
+    // GET /api/v3/integrations/calendar/:connectionId/calendars
+    app.get('/api/v3/integrations/calendar/:connectionId/calendars', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
 
@@ -41,8 +41,8 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
         }
     });
 
-    // GET /api/v2/integrations/calendar/:connectionId/events
-    app.get('/api/v2/integrations/calendar/:connectionId/events', async (request, reply) => {
+    // GET /api/v3/integrations/calendar/:connectionId/events
+    app.get('/api/v3/integrations/calendar/:connectionId/events', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
         const query = request.query as {
@@ -72,8 +72,8 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
         }
     });
 
-    // POST /api/v2/integrations/calendar/:connectionId/availability
-    app.post('/api/v2/integrations/calendar/:connectionId/availability', async (request, reply) => {
+    // POST /api/v3/integrations/calendar/:connectionId/availability
+    app.post('/api/v3/integrations/calendar/:connectionId/availability', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
         const body = request.body as {
@@ -101,8 +101,8 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
         }
     });
 
-    // POST /api/v2/integrations/calendar/:connectionId/events
-    app.post('/api/v2/integrations/calendar/:connectionId/events', async (request, reply) => {
+    // POST /api/v3/integrations/calendar/:connectionId/events
+    app.post('/api/v3/integrations/calendar/:connectionId/events', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
         const body = request.body as {
@@ -144,8 +144,8 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
         }
     });
 
-    // PATCH /api/v2/integrations/calendar/:connectionId/events/:eventId
-    app.patch('/api/v2/integrations/calendar/:connectionId/events/:eventId', async (request, reply) => {
+    // PATCH /api/v3/integrations/calendar/:connectionId/events/:eventId
+    app.patch('/api/v3/integrations/calendar/:connectionId/events/:eventId', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId, eventId } = request.params as { connectionId: string; eventId: string };
         const body = request.body as {
@@ -185,8 +185,8 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
         }
     });
 
-    // DELETE /api/v2/integrations/calendar/:connectionId/events/:eventId
-    app.delete('/api/v2/integrations/calendar/:connectionId/events/:eventId', async (request, reply) => {
+    // DELETE /api/v3/integrations/calendar/:connectionId/events/:eventId
+    app.delete('/api/v3/integrations/calendar/:connectionId/events/:eventId', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId, eventId } = request.params as { connectionId: string; eventId: string };
         const query = request.query as { calendar_id?: string };
@@ -207,8 +207,8 @@ export async function registerCalendarRoutes(app: FastifyInstance, config: Regis
         }
     });
 
-    // POST /api/v2/integrations/calendar/:connectionId/webhooks/subscribe
-    app.post('/api/v2/integrations/calendar/:connectionId/webhooks/subscribe', async (request, reply) => {
+    // POST /api/v3/integrations/calendar/:connectionId/webhooks/subscribe
+    app.post('/api/v3/integrations/calendar/:connectionId/webhooks/subscribe', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
         const body = request.body as { calendar_id: string };

@@ -1,8 +1,8 @@
 /**
  * Unified API Client for Splits Network Frontend Applications
- * 
+ *
  * Key Features:
- * - V2 API only (no legacy V1 support)
+ * - V3 API (migrated from V2)
  * - Automatic response unwrapping ({ data } envelope)
  * - Consistent error handling
  * - Type-safe with shared types
@@ -64,7 +64,7 @@ export interface ApiClientConfig {
     authToken?: string;
     /** Base URL override (defaults to environment-based detection) */
     baseUrl?: string;
-    /** Path prefix prepended to all endpoints (defaults to '/api/v2') */
+    /** Path prefix prepended to all endpoints (defaults to '/api/v3') */
     pathPrefix?: string;
 }
 
@@ -135,7 +135,7 @@ export class SplitsApiClient {
 
     constructor(config: ApiClientConfig = {}) {
         this.baseUrl = config.baseUrl || getApiBaseUrl();
-        this.pathPrefix = config.pathPrefix ?? '/api/v2';
+        this.pathPrefix = config.pathPrefix ?? '/api/v3';
         this.authToken = config.authToken;
     }
 

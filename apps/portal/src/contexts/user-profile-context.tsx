@@ -129,6 +129,8 @@ interface UserProfileContextValue {
     isRecruiter: boolean;
     /** Whether the user is a company user (company_admin or hiring_manager) */
     isCompanyUser: boolean;
+    /** Whether the user is a hiring manager (not full company admin) */
+    isHiringManager: boolean;
     /** Whether the user is a candidate (has candidate_id) */
     isCandidate: boolean;
     /** Check if user has a specific role */
@@ -305,6 +307,7 @@ export function UserProfileProvider({
     const isCompanyUser = roles.some(
         (role) => role === "company_admin" || role === "hiring_manager",
     );
+    const isHiringManager = roles.includes("hiring_manager") && !roles.includes("company_admin");
     const isCandidate = Boolean(profile?.candidate_id);
 
     // Subscription derived values
@@ -395,6 +398,7 @@ export function UserProfileProvider({
         isAdmin,
         isRecruiter,
         isCompanyUser,
+        isHiringManager,
         isCandidate,
         hasRole,
         hasAnyRole,

@@ -22,6 +22,6 @@ src/components/       # Header, Footer, StatusAnimator
 - Fully public, no authentication
 - SSR with ISR (revalidate: 15s) + client-side 30s polling
 - Basel design system throughout (DaisyUI semantic tokens only)
-- Consumes GET /api/v2/system-health and /api/v2/system-health/incidents
-- Contact form POSTs to /api/v2/status-contact
+- Consumes GET /api/v3/system-health and /api/v3/system-health/incidents
+- Contact form POSTs to /api/v3/status-contact
 - API calls proxied via Next.js rewrites to avoid CORS

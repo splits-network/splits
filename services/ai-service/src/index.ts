@@ -15,6 +15,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { DomainEventConsumer } from "./domain-consumer";
 import { AIReviewRepository } from "./v2/reviews/repository";
 import { AIReviewServiceV2 } from "./v2/reviews/service";
@@ -165,6 +166,11 @@ async function main() {
         eventPublisher: outboxPublisher || undefined,
         logger,
         aiReviewService, // Pass the service instance so routes use the same one
+    });
+
+    registerV3Routes(app, {
+        supabase: supabaseClient,
+        eventPublisher: outboxPublisher || undefined,
     });
 
     // Initialize resume extraction service and repository

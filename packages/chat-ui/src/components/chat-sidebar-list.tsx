@@ -24,6 +24,7 @@ export function ChatSidebarList({ currentUserId }: ChatSidebarListProps) {
     // Filter by mailbox
     const mailboxFiltered = useMemo(() => {
         return conversations.filter((row) => {
+            if (!row.participant) return false;
             const isArchived = !!row.participant.archived_at;
             const isPending = row.participant.request_state === "pending";
 

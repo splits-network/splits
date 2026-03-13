@@ -336,9 +336,11 @@ export default function RoleWizardModal({
             if (formData.job_level) payload.job_level = formData.job_level;
 
             // On edit, don't send fee/guarantee — company controls those terms
+            // Don't send status on edit — status transitions use dedicated actions
             if (mode === "edit") {
                 delete payload.fee_percentage;
                 delete payload.guarantee_days;
+                delete payload.status;
             }
 
             let targetJobId: string;
@@ -358,7 +360,8 @@ export default function RoleWizardModal({
                 ...formData.preferred_requirements.filter((r) => r.trim()).map((description) => ({ type: "preferred" as const, description })),
             ];
             if (mode === "edit") {
-                await client.put(`/job-requirements/job/${targetJobId}/bulk-replace`, {
+                await client.post("/job-requirements/actions/bulk-replace", {
+                    job_id: targetJobId,
                     requirements: requirements.map((req, i) => ({ requirement_type: req.type, description: req.description, sort_order: i })),
                 });
             } else if (requirements.length > 0) {
@@ -373,7 +376,7 @@ export default function RoleWizardModal({
                 ...formData.preferred_skills.map(s => ({ skill_id: s.id, is_required: false })),
             ];
             if (allSkills.length > 0 || mode === "edit") {
-                await client.put(`/job-skills/job/${targetJobId}/bulk-replace`, { skills: allSkills });
+                await client.post("/job-skills/actions/bulk-replace", { job_id: targetJobId, skills: allSkills });
             }
 
             onClose();

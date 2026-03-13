@@ -531,8 +531,19 @@ async findAll(params: StandardListParams & { fields?: string }, context: AccessC
 
 ## Database Joins
 
-### Core 5: NO joins
-Core CRUD queries select from a single table only. No `.select('*, relation(*)')`.
+### Core 5: Flat data only
+Core CRUD `findById` uses `select('*')` — single table, no joins, no access control beyond basic auth.
+Core CRUD `getById` fetches the flat row and returns it. No `AccessContextResolver`, no role checks.
+
+**If the frontend needs joined/enriched data or role-based access control for a single resource, create a detail view:**
+```
+views/detail.repository.ts  — joined select
+views/detail.service.ts     — AccessContextResolver + role checks
+views/detail.route.ts       — GET /api/v3/:resource/:id/view/detail
+```
+The frontend calls `/view/detail` instead of the core `GET /:id`. Core `GET /:id` is for internal service use and simple lookups only.
+
+**Exception: Composite resources** (e.g., recruiter = `recruiters` + `users`) may join their own identity table in core `findById` — but only when the resource is incomplete without it. This is NOT a view join.
 
 ### Views: Focused joins
 Each view has a hardcoded `.select()` with the specific joins it needs:
@@ -573,10 +584,10 @@ async getProfile(id: string, clerkUserId: string) {
 Some resources span multiple tables — e.g., a recruiter's profile data lives in `recruiters` but their name and email live in `users`. These are **composite resources**.
 
 ### Reads: Supabase join in repository
-Core CRUD reads use Supabase's `.select()` join syntax to return the complete resource:
+Core CRUD reads may join their identity table to return the complete resource:
 
 ```typescript
-// repository.ts
+// repository.ts — composite resource exception ONLY
 async findById(id: string) {
   return this.supabase
     .from('recruiters')
@@ -586,7 +597,7 @@ async findById(id: string) {
 }
 ```
 
-This is NOT a "view join" — it's the base representation of the resource. The resource is incomplete without it.
+This is the ONLY acceptable join in core `findById`. Any other joins (related entities, child records, stats) belong in `views/detail.repository.ts`.
 
 ### Writes: Service splits, repository has separate methods
 The service layer splits the incoming payload by destination table. The repository has one method per table.

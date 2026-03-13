@@ -9,102 +9,129 @@ interface QuickActionsGridProps {
     hasResume?: boolean;
 }
 
-// Static class maps so Tailwind can detect them at build time
-const COLOR_CLASSES: Record<
-    string,
-    { bg: string; border: string; text: string }
-> = {
-    primary: {
-        bg: "bg-primary/10",
-        border: "border-primary",
-        text: "text-primary",
-    },
-    secondary: {
-        bg: "bg-secondary/10",
-        border: "border-secondary",
-        text: "text-secondary",
-    },
-    accent: {
-        bg: "bg-accent/10",
-        border: "border-accent",
-        text: "text-accent",
-    },
-    success: {
-        bg: "bg-success/10",
-        border: "border-success",
-        text: "text-success",
-    },
-    warning: {
-        bg: "bg-warning/10",
-        border: "border-warning",
-        text: "text-warning",
-    },
-    info: { bg: "bg-info/10", border: "border-info", text: "text-info" },
-};
+interface ActionItem {
+    href: string;
+    icon: string;
+    label: string;
+    color: "primary" | "secondary" | "accent" | "success" | "warning" | "info" | "error";
+    badgeKey?: "messages" | "profile" | "notifications" | "resume";
+    isPrimary?: boolean;
+}
 
-const ACTIONS = [
+const ACTIONS: ActionItem[] = [
     {
         href: "/jobs",
-        icon: "fa-search",
-        label: "Browse Jobs",
-        description: "Find opportunities",
+        icon: "fa-magnifying-glass",
+        label: "Find Jobs",
         color: "primary",
-        alwaysHighlight: true,
+        isPrimary: true,
     },
     {
         href: "/portal/messages",
-        icon: "fa-messages",
+        icon: "fa-envelope",
         label: "Messages",
-        description: "Chat with recruiters",
         color: "secondary",
-        badgeKey: "messages" as const,
+        badgeKey: "messages",
     },
     {
         href: "/portal/profile",
         icon: "fa-user",
         label: "Profile",
-        description: "Update details",
         color: "accent",
-        badgeKey: "profile" as const,
+        badgeKey: "profile",
+    },
+    {
+        href: "/portal/applications",
+        icon: "fa-paper-plane",
+        label: "Applications",
+        color: "success",
+    },
+    {
+        href: "/portal/documents",
+        icon: "fa-file-lines",
+        label: "Documents",
+        color: "warning",
+        badgeKey: "resume",
     },
     {
         href: "/portal/notifications",
         icon: "fa-bell",
-        label: "Notifications",
-        description: "View updates",
+        label: "Alerts",
         color: "info",
-        badgeKey: "notifications" as const,
-    },
-    {
-        href: "/portal/documents",
-        icon: "fa-upload",
-        label: "Documents",
-        description: "Manage files",
-        color: "warning",
-        badgeKey: "resume" as const,
-    },
-    {
-        href: "/portal/applications",
-        icon: "fa-list",
-        label: "Applications",
-        description: "Track progress",
-        color: "success",
+        badgeKey: "notifications",
     },
     {
         href: "/marketplace",
-        icon: "fa-store",
+        icon: "fa-grid-2",
         label: "Marketplace",
-        description: "Find recruiters",
         color: "secondary",
     },
     {
         href: "/portal/recruiters",
-        icon: "fa-user-tie",
+        icon: "fa-handshake",
         label: "Recruiters",
-        description: "Your connections",
         color: "primary",
     },
 ];
+
+const COLOR_CLASSES = {
+    primary: {
+        bg: "bg-primary/10",
+        text: "text-primary",
+        hoverBg: "hover:bg-primary/20",
+        solidBg: "bg-primary",
+        solidText: "text-primary-content",
+        solidHover: "hover:bg-primary/90",
+    },
+    secondary: {
+        bg: "bg-secondary/10",
+        text: "text-secondary",
+        hoverBg: "hover:bg-secondary/20",
+        solidBg: "bg-secondary",
+        solidText: "text-secondary-content",
+        solidHover: "hover:bg-secondary/90",
+    },
+    accent: {
+        bg: "bg-accent/10",
+        text: "text-accent",
+        hoverBg: "hover:bg-accent/20",
+        solidBg: "bg-accent",
+        solidText: "text-accent-content",
+        solidHover: "hover:bg-accent/90",
+    },
+    success: {
+        bg: "bg-success/10",
+        text: "text-success",
+        hoverBg: "hover:bg-success/20",
+        solidBg: "bg-success",
+        solidText: "text-success-content",
+        solidHover: "hover:bg-success/90",
+    },
+    warning: {
+        bg: "bg-warning/10",
+        text: "text-warning",
+        hoverBg: "hover:bg-warning/20",
+        solidBg: "bg-warning",
+        solidText: "text-warning-content",
+        solidHover: "hover:bg-warning/90",
+    },
+    info: {
+        bg: "bg-info/10",
+        text: "text-info",
+        hoverBg: "hover:bg-info/20",
+        solidBg: "bg-info",
+        solidText: "text-info-content",
+        solidHover: "hover:bg-info/90",
+    },
+    error: {
+        bg: "bg-error/10",
+        text: "text-error",
+        hoverBg: "hover:bg-error/20",
+        solidBg: "bg-error",
+        solidText: "text-error-content",
+        solidHover: "hover:bg-error/90",
+    },
+} as const;
 
 export default function QuickActionsGrid({
     profileCompletion = 100,
@@ -112,89 +139,71 @@ export default function QuickActionsGrid({
     notificationCount = 0,
     hasResume = false,
 }: QuickActionsGridProps) {
-    const needsProfileCompletion = profileCompletion < 50;
-    const needsResume = !hasResume;
-    const hasMessages = messageCount > 0;
-    const hasNotifications = notificationCount > 0;
-
-    function getBadge(
-        badgeKey?: string,
-    ): { value: string; show: boolean } | null {
+    function getBadge(badgeKey?: string): string | null {
         if (!badgeKey) return null;
         switch (badgeKey) {
             case "messages":
-                return hasMessages
-                    ? { value: messageCount.toString(), show: true }
-                    : null;
+                return messageCount > 0 ? messageCount.toString() : null;
             case "profile":
-                return needsProfileCompletion
-                    ? { value: `${profileCompletion}%`, show: true }
-                    : null;
+                return profileCompletion < 50 ? `${profileCompletion}%` : null;
             case "notifications":
-                return hasNotifications
-                    ? { value: notificationCount.toString(), show: true }
+                return notificationCount > 0
+                    ? notificationCount.toString()
                     : null;
             case "resume":
-                return needsResume ? { value: "!", show: true } : null;
+                return !hasResume ? "!" : null;
             default:
                 return null;
         }
     }
 
-    function isHighlighted(action: (typeof ACTIONS)[0]): boolean {
-        if (action.alwaysHighlight) return true;
-        const badge = getBadge(action.badgeKey);
-        return badge?.show || false;
-    }
-
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="flex items-stretch justify-center gap-2 overflow-x-auto scrollbar-none py-1">
             {ACTIONS.map((action) => {
                 const badge = getBadge(action.badgeKey);
-                const highlighted = isHighlighted(action);
-                const colors =
-                    COLOR_CLASSES[action.color] || COLOR_CLASSES.primary;
+                const colors = COLOR_CLASSES[action.color];
+
+                if (action.isPrimary) {
+                    return (
+                        <Link
+                            key={action.href}
+                            href={action.href}
+                            className={`relative flex items-center gap-2.5 px-5 py-2.5 shrink-0 ${colors.solidBg} ${colors.solidText} ${colors.solidHover} transition-all shadow-sm hover:shadow-md active:scale-[0.98]`}
+                            style={{ borderRadius: 0 }}
+                        >
+                            <i className={`fa-duotone fa-regular ${action.icon} text-base`} />
+                            <span className="text-sm font-bold whitespace-nowrap">
+                                {action.label}
+                            </span>
+                            <i className="fa-solid fa-arrow-right text-sm opacity-70" />
+                        </Link>
+                    );
+                }
 
                 return (
                     <Link
                         key={action.href}
                         href={action.href}
-                        className={`action-card relative p-4 flex flex-col items-start gap-1.5 transition-all duration-200 hover:-translate-y-0.5 scroll-reveal fade-up ${
-                            highlighted
-                                ? `${colors.bg} border-l-4 ${colors.border}`
-                                : "bg-base-100 border-l-4 border-transparent hover:border-base-content/10"
-                        }`}
+                        className={`relative flex items-center gap-2 px-3.5 py-2.5 shrink-0 bg-base-100 ${colors.hoverBg} border border-base-300/50 hover:border-base-300 transition-all hover:shadow-sm active:scale-[0.98] group`}
+                        style={{ borderRadius: 0 }}
                     >
-                        {badge?.show && (
-                            <span
-                                className="absolute top-2 right-2 badge badge-sm badge-error text-sm font-bold"
-                                style={{ borderRadius: 0 }}
-                            >
-                                {badge.value}
-                            </span>
-                        )}
-                        <i
-                            className={`fa-duotone fa-regular ${action.icon} text-lg ${
-                                highlighted
-                                    ? colors.text
-                                    : "text-base-content/50"
-                            }`}
-                        />
-                        <span className="text-xs font-bold uppercase tracking-wider text-base-content">
+                        <span
+                            className={`flex items-center justify-center w-7 h-7 shrink-0 ${colors.bg}`}
+                            style={{ borderRadius: 0 }}
+                        >
+                            <i className={`fa-duotone fa-regular ${action.icon} text-sm ${colors.text}`} />
+                        </span>
+                        <span className="text-sm font-medium text-base-content/80 group-hover:text-base-content whitespace-nowrap transition-colors">
                             {action.label}
                         </span>
-                        <span className="text-sm text-base-content/40">
-                            {badge?.show && action.badgeKey === "messages"
-                                ? `${messageCount} unread`
-                                : badge?.show && action.badgeKey === "profile"
-                                  ? "Complete profile"
-                                  : badge?.show && action.badgeKey === "resume"
-                                    ? "Upload resume"
-                                    : badge?.show &&
-                                        action.badgeKey === "notifications"
-                                      ? `${notificationCount} new`
-                                      : action.description}
-                        </span>
+                        {badge && (
+                            <span
+                                className="badge badge-sm badge-error font-bold ml-0.5"
+                                style={{ borderRadius: 0 }}
+                            >
+                                {badge}
+                            </span>
+                        )}
                     </Link>
                 );
             })}

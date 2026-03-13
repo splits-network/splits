@@ -16,7 +16,7 @@ export class CompanyDetailRepository {
         salary_min, salary_max, fee_percentage, guarantee_days,
         description, candidate_description,
         commute_types, job_level, open_to_relocation, show_salary_range,
-        job_owner_id, job_owner_recruiter_id, pre_screen_questions,
+        job_owner_recruiter_id, pre_screen_questions,
         activates_at, closes_at, created_at, updated_at,
         company:companies(id, name, logo_url, industry, headquarters_location, description, website)
       `)

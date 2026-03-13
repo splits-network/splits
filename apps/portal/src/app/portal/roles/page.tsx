@@ -79,10 +79,10 @@ export default function RolesPage() {
 
     /* ── Role-based endpoint selection ── */
     const boardEndpoint = isAdmin
-        ? "/api/v3/jobs/views/admin-board"
+        ? "/jobs/views/admin-board"
         : isCompanyUser
-            ? "/api/v3/jobs/views/company-board"
-            : "/api/v3/jobs/views/recruiter-board";
+            ? "/jobs/views/company-board"
+            : "/jobs/views/recruiter-board";
     const [isFirmMember, setIsFirmMember] = useState(false);
 
     useEffect(() => {
@@ -205,6 +205,7 @@ export default function RolesPage() {
                     sortBy={sortBy}
                     sortOrder={sortOrder}
                     onSortChange={handleSortChange}
+                    isRecruiter={isRecruiter}
                 />
 
                 {/* Content Area */}

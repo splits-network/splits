@@ -108,18 +108,19 @@ export class JobService {
     }
 
     const jobData: Record<string, any> = {
-      ...input, job_owner_id: context.identityUserId, status,
+      ...input, status,
       created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     };
 
     if (creatorRecruiterId) {
       if (isOffPlatform) {
-        jobData.company_recruiter_id = creatorRecruiterId;
+        // Off-platform (firm) jobs: no job_owner_recruiter_id
         jobData.job_owner_recruiter_id = null;
       } else {
+        // On-platform: recruiter who creates the job is the job owner
         jobData.job_owner_recruiter_id = creatorRecruiterId;
-        jobData.company_recruiter_id = creatorRecruiterId;
       }
+      // company_recruiter_id no longer set on jobs — it's per-application now
     }
 
     const job = await this.repository.create(jobData);

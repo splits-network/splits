@@ -18,6 +18,7 @@ import { Footer } from "@/components/footer";
 import { getHeaderNav, getFooterNav } from "@/lib/content";
 import { QueryProvider } from "@/providers/query-provider";
 import { PortalChatSidebar } from "@/components/portal-chat-sidebar";
+import { CompanyProvider } from "@/app/portal/recruiters/contexts/company-context";
 import { GamificationWrapper } from "@/providers/gamification-wrapper";
 import { SupportWidgetWrapper } from "@/components/support-widget-wrapper";
 
@@ -186,6 +187,7 @@ export default async function RootLayout({
                             <UserProfileProvider
                                 initialProfile={initialProfile}
                             >
+                                <CompanyProvider>
                                 <GamificationWrapper>
                                 <ToastProvider>
                                     <SupportWidgetWrapper>
@@ -198,6 +200,7 @@ export default async function RootLayout({
                                     <CookieConsent />
                                 </ToastProvider>
                                 </GamificationWrapper>
+                                </CompanyProvider>
                                 <DevDebugPanel />
                                 <PortalActivityTrackerWrapper />
                             </UserProfileProvider>

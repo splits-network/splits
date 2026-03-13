@@ -59,7 +59,7 @@ export default function RoleActionsToolbar({
 }: RoleActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isRecruiter, hasPermissionForCompany } =
+    const { profile, isAdmin, isRecruiter, isCompanyUser, hasPermissionForCompany } =
         useUserProfile();
     const refresh = onRefresh ?? (() => {});
 
@@ -91,10 +91,11 @@ export default function RoleActionsToolbar({
 
     const canSubmitCandidate = useMemo(() => {
         if (isAdmin) return true;
+        if (isCompanyUser) return true; // Company users can submit candidates to their own jobs
         if (!isRecruiter) return false;
         if (!job.company_id) return true; // Firm job — recruiter has full access
         return hasPermissionForCompany(job.company_id, "can_submit_candidates");
-    }, [isRecruiter, isAdmin, job.company_id, hasPermissionForCompany]);
+    }, [isRecruiter, isCompanyUser, isAdmin, job.company_id, hasPermissionForCompany]);
 
     /* ── Status Change ── */
 
@@ -262,11 +263,11 @@ export default function RoleActionsToolbar({
             const client = createAuthenticatedClient(token);
 
             if (job.is_saved && job.saved_record_id) {
-                await client.delete(`/api/v3/recruiter-saved-jobs/${job.saved_record_id}`);
+                await client.delete(`/recruiter-saved-jobs/${job.saved_record_id}`);
                 onUpdateItem?.(job.id, { is_saved: false, saved_record_id: null });
                 toast.info("Role removed from saved.");
             } else {
-                const res = await client.post("/api/v3/recruiter-saved-jobs", { job_id: job.id });
+                const res = await client.post("/recruiter-saved-jobs", { job_id: job.id });
                 onUpdateItem?.(job.id, { is_saved: true, saved_record_id: res?.data?.id });
                 toast.success("Role saved.");
             }

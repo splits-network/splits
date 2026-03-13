@@ -111,7 +111,7 @@ export function PortalChatSidebar({
                     if (entityContext.application_id) {
                         entityType = 'application';
                         entityId = entityContext.application_id;
-                        const res: any = await client.get(`/applications/${entityId}`);
+                        const res: any = await client.get(`/applications/${entityId}/view/detail`);
                         const app = res?.data;
                         entityLabel = app?.job?.title
                             ? `${app.job.title}${app.candidate?.full_name ? ` — ${app.candidate.full_name}` : ''}`

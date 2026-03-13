@@ -53,7 +53,7 @@ export default function InvitationCompanyClient({
                 if (!token) return;
 
                 const client = createAuthenticatedClient(token);
-                const res = await client.get(`/recruiter-companies/${relationshipId}`);
+                const res = await client.get(`/recruiter-companies/${relationshipId}/view/detail`);
                 const data = res.data;
 
                 if (data.status !== "pending") {

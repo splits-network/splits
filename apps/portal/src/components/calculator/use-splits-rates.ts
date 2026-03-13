@@ -51,7 +51,7 @@ export function useSplitsRates(): SplitsRatesData {
                 setError(null);
 
                 const client = createUnauthenticatedClient();
-                const result = await client.get<{ data: SplitsRateFromApi[] }>('/splits-rates');
+                const result = await client.get<{ data: SplitsRateFromApi[] }>('/public/splits-rates');
                 const data = result?.data || [];
 
                 if (data.length === 0) {

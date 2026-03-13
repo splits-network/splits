@@ -1,23 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    Cell,
-    LabelList,
-} from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
 import { BaselEmptyState } from "@splits-network/basel-ui";
-import {
-    useBaselChartColors,
-    hexWithAlpha,
-    BaselTooltip,
-} from "@/components/basel/charts";
 
 interface Application {
     id: string;
@@ -59,25 +44,19 @@ const PIPELINE_STAGES = [
     "Hired",
 ] as const;
 
-// Map stages to DaisyUI semantic color keys
-const STAGE_COLOR_KEYS: Record<
-    string,
-    keyof ReturnType<typeof useBaselChartColors>
-> = {
-    "In Review": "info",
-    Submitted: "primary",
-    Screen: "secondary",
-    Interview: "warning",
-    Offer: "accent",
-    Hired: "success",
+const STAGE_COLORS: Record<string, string> = {
+    "In Review": "bg-info",
+    Submitted: "bg-primary",
+    Screen: "bg-secondary",
+    Interview: "bg-warning",
+    Offer: "bg-accent",
+    Hired: "bg-success",
 };
 
 export default function CandidatePipelineChart({
     applications,
     loading,
 }: CandidatePipelineChartProps) {
-    const colors = useBaselChartColors();
-
     const stages = useMemo(() => {
         const counts: Record<string, number> = {};
         for (const stage of PIPELINE_STAGES) {
@@ -101,114 +80,74 @@ export default function CandidatePipelineChart({
         });
 
         return PIPELINE_STAGES.map((label) => ({
-            name: label,
+            label,
             count: counts[label],
-            color: colors[STAGE_COLOR_KEYS[label]],
         }));
-    }, [applications, colors]);
+    }, [applications]);
 
     const totalActive = stages.reduce((sum, s) => sum + s.count, 0);
 
     if (loading) {
-        return (
-            <div className="bg-base-200 p-8 h-full">
-                <ChartLoadingState height={280} />
-            </div>
-        );
+        return <ChartLoadingState height={200} />;
     }
 
     if (totalActive === 0) {
         return (
-            <div className="bg-base-200 p-8 h-full">
-                <h3 className="text-lg font-bold text-base-content mb-2">
-                    Application Pipeline
-                </h3>
-                <BaselEmptyState
-                    icon="fa-duotone fa-regular fa-filter"
-                    title="No active applications"
-                    description="Apply to jobs to see your application pipeline here."
-                    actions={[
-                        {
-                            label: "Browse Jobs",
-                            icon: "fa-duotone fa-regular fa-search",
-                            href: "/jobs",
-                            style: "btn-primary",
-                        },
-                    ]}
-                />
-            </div>
+            <BaselEmptyState
+                icon="fa-duotone fa-regular fa-filter"
+                title="No active applications"
+                description="Apply to jobs to see your pipeline here."
+                actions={[
+                    {
+                        label: "Browse Jobs",
+                        icon: "fa-duotone fa-regular fa-search",
+                        href: "/jobs",
+                        style: "btn-primary",
+                    },
+                ]}
+            />
         );
     }
 
-    return (
-        <div className="bg-base-200 p-8 h-full">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h3 className="text-lg font-bold text-base-content">
-                        Application Pipeline
-                    </h3>
-                    <p className="text-sm text-base-content/50">
-                        {totalActive} active &middot; conversion funnel
-                    </p>
-                </div>
-            </div>
+    const maxCount = Math.max(...stages.map((s) => s.count), 1);
 
-            <div className="h-[240px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                        data={stages}
-                        layout="vertical"
-                        margin={{
-                            top: 0,
-                            right: 40,
-                            left: 10,
-                            bottom: 0,
-                        }}
-                        barSize={28}
-                    >
-                        <XAxis type="number" hide />
-                        <YAxis
-                            type="category"
-                            dataKey="name"
-                            width={80}
-                            tick={{
-                                fontSize: 11,
-                                fontWeight: 600,
-                                fill: hexWithAlpha(colors.baseContent, 0.6),
-                            }}
-                            axisLine={false}
-                            tickLine={false}
-                        />
-                        <Tooltip
-                            content={
-                                <BaselTooltip
-                                    formatter={(value, name) =>
-                                        `${value} application${value !== 1 ? "s" : ""}`
-                                    }
+    return (
+        <div className="flex flex-col justify-evenly h-full" style={{ minHeight: 200 }}>
+            {stages.map((stage, i) => {
+                const pct = (stage.count / maxCount) * 100;
+                const colorClass = STAGE_COLORS[stage.label] || "bg-base-content/20";
+                const conversionRate =
+                    i > 0 && stages[i - 1].count > 0
+                        ? Math.round((stage.count / stages[i - 1].count) * 100)
+                        : null;
+
+                return (
+                    <div key={stage.label}>
+                        {conversionRate !== null && (
+                            <div className="flex items-center gap-1.5 pl-20 py-0.5">
+                                <i className="fa-solid fa-arrow-down text-[8px] text-base-content/30" />
+                                <span className="text-sm tabular-nums text-base-content/40 font-medium">
+                                    {conversionRate}%
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-base-content/60 w-18 text-right shrink-0 truncate">
+                                {stage.label}
+                            </span>
+                            <div className="flex-1 h-6 bg-base-300/50 rounded overflow-hidden relative">
+                                <div
+                                    className={`h-full ${colorClass} rounded transition-all duration-500 ease-out`}
+                                    style={{ width: `${Math.max(pct, 2)}%` }}
                                 />
-                            }
-                        />
-                        <Bar
-                            dataKey="count"
-                            radius={[0, 0, 0, 0]}
-                            strokeWidth={0}
-                        >
-                            {stages.map((entry, i) => (
-                                <Cell key={i} fill={entry.color} />
-                            ))}
-                            <LabelList
-                                dataKey="count"
-                                position="right"
-                                style={{
-                                    fontSize: 12,
-                                    fontWeight: 700,
-                                    fill: hexWithAlpha(colors.baseContent, 0.7),
-                                }}
-                            />
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
+                                <span className="absolute inset-y-0 left-2 flex items-center text-sm font-semibold tabular-nums text-base-content/80">
+                                    {stage.count.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
         </div>
     );
 }

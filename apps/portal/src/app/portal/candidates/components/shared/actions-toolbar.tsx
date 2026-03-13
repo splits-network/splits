@@ -177,11 +177,11 @@ export default function CandidateActionsToolbar({
             const client = createAuthenticatedClient(token);
 
             if (candidate.is_saved && candidate.saved_record_id) {
-                await client.delete(`/api/v3/recruiter-saved-candidates/${candidate.saved_record_id}`);
+                await client.delete(`/recruiter-saved-candidates/${candidate.saved_record_id}`);
                 onUpdateItem?.(candidate.id, { is_saved: false, saved_record_id: null });
                 toast.info("Candidate removed from saved.");
             } else {
-                const res = await client.post("/api/v3/recruiter-saved-candidates", { candidate_id: candidate.id });
+                const res = await client.post("/recruiter-saved-candidates", { candidate_id: candidate.id });
                 onUpdateItem?.(candidate.id, { is_saved: true, saved_record_id: res?.data?.id });
                 toast.success("Candidate saved.");
             }
