@@ -1559,6 +1559,9 @@ importers:
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
+      '@splits-network/shared-fastify':
+        specifier: workspace:*
+        version: link:../../packages/shared-fastify
       '@splits-network/shared-job-queue':
         specifier: workspace:*
         version: link:../../packages/shared-job-queue

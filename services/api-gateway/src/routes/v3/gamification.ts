@@ -25,9 +25,9 @@ const gamificationV3Routes: V3RouteConfig[] = [
   { path: '/streaks/:id', method: 'GET', auth: 'required' },
 
   // ── Leaderboards (rank before :id to avoid collision) ─────────
-  { path: '/leaderboards/rank', method: 'GET', auth: 'required' },
-  { path: '/leaderboards', method: 'GET', auth: 'required' },
-  { path: '/leaderboards/:id', method: 'GET', auth: 'required' },
+  { path: '/leaderboards/rank', method: 'GET', auth: 'optional' },
+  { path: '/leaderboards', method: 'GET', auth: 'optional' },
+  { path: '/leaderboards/:id', method: 'GET', auth: 'optional' },
 ];
 
 export function registerGamificationV3Routes(app: FastifyInstance, services: ServiceRegistry) {

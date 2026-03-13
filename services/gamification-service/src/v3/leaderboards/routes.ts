@@ -1,5 +1,8 @@
 /**
  * Leaderboards V3 Routes — GET list, GET rank, GET by id
+ *
+ * Leaderboards are public data (displayed on marketplace pages).
+ * Auth is optional — unauthenticated users see the same data.
  */
 
 import { FastifyInstance } from 'fastify';
@@ -13,15 +16,13 @@ export function registerLeaderboardRoutes(app: FastifyInstance, supabase: Supaba
   const service = new LeaderboardService(repository, supabase);
 
   app.get('/api/v3/leaderboards', { schema: { querystring: listQuerySchema } }, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
+    const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
     const result = await service.getAll(request.query as LeaderboardListParams, clerkUserId);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
 
   app.get('/api/v3/leaderboards/rank', async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
+    const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
     const query = request.query as any;
     if (!query.entity_type || !query.entity_id || !query.period || !query.metric) {
       return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: 'entity_type, entity_id, period, and metric are required' } });
@@ -31,8 +32,7 @@ export function registerLeaderboardRoutes(app: FastifyInstance, supabase: Supaba
   });
 
   app.get('/api/v3/leaderboards/:id', { schema: { params: idParamSchema } }, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
+    const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
     const data = await service.getById((request.params as { id: string }).id, clerkUserId);
     return reply.send({ data });
   });
