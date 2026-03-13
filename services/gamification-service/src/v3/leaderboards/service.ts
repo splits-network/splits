@@ -1,22 +1,18 @@
 /**
  * Leaderboards V3 Service — Read-only with entity enrichment
+ *
+ * Auth is optional — leaderboards are public data shown on marketplace.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError } from '@splits-network/shared-fastify';
 import { LeaderboardRepository } from './repository';
 import { LeaderboardListParams } from './types';
 
 export class LeaderboardService {
-  private accessResolver: AccessContextResolver;
+  constructor(private repository: LeaderboardRepository, private supabase: SupabaseClient) {}
 
-  constructor(private repository: LeaderboardRepository, private supabase: SupabaseClient) {
-    this.accessResolver = new AccessContextResolver(supabase);
-  }
-
-  async getAll(params: LeaderboardListParams, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async getAll(params: LeaderboardListParams, clerkUserId?: string) {
     const { data, total } = await this.repository.findAll(params);
     const enriched = await this.enrichEntries(data, params.entity_type);
     const page = params.page || 1;
@@ -24,15 +20,13 @@ export class LeaderboardService {
     return { data: enriched, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
   }
 
-  async getById(id: string, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async getById(id: string, clerkUserId?: string) {
     const entry = await this.repository.findById(id);
     if (!entry) throw new NotFoundError('LeaderboardEntry', id);
     return entry;
   }
 
-  async getEntityRank(entityType: string, entityId: string, period: string, metric: string, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async getEntityRank(entityType: string, entityId: string, period: string, metric: string, clerkUserId?: string) {
     const entry = await this.repository.findEntityRank(entityType, entityId, period, metric);
     if (!entry) return null;
     const [enriched] = await this.enrichEntries([entry], entityType);
