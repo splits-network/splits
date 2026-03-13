@@ -64,7 +64,19 @@ export class DocumentService {
 
     const document = await this.repository.findById(id);
     if (!document) throw new NotFoundError('Document', id);
-    return document;
+
+    // Generate signed download URL (matches V2 behavior)
+    let download_url: string | null = null;
+    if (document.storage_bucket && document.file_path) {
+      const { data } = await this.supabase.storage
+        .from(document.storage_bucket)
+        .createSignedUrl(document.file_path, 3600);
+      if (data?.signedUrl) {
+        download_url = data.signedUrl;
+      }
+    }
+
+    return { ...document, download_url };
   }
 
   async update(id: string, input: UpdateDocumentInput, clerkUserId: string) {
