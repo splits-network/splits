@@ -7,6 +7,7 @@ import { useAdminRealtime } from '@/hooks/use-admin-realtime';
 import { SupportQueue } from './components/support-queue';
 import { SupportThread } from './components/support-thread';
 import { useSupportPresence } from './components/use-support-presence';
+import { useUnreadTracking } from './components/use-unread-tracking';
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL || 'http://localhost:3030';
 
@@ -49,6 +50,9 @@ export default function SupportChatPage() {
     // Keep admin presence alive while on this page
     useSupportPresence();
 
+    // Track unread conversations
+    const { markRead, isUnread } = useUnreadTracking();
+
     const fetchConversations = useCallback(async () => {
         try {
             const token = await getToken().catch(() => null);
@@ -76,7 +80,17 @@ export default function SupportChatPage() {
     // Listen for new support events via admin-gateway WebSocket
     useAdminRealtime('admin:support:queue', () => {
         fetchConversations();
+        // If the admin is currently viewing a conversation, keep it marked as read
+        if (activeId) markRead(activeId);
     });
+
+    const handleSelect = useCallback(
+        (id: string) => {
+            setActiveId(id);
+            markRead(id);
+        },
+        [markRead],
+    );
 
     const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
 
@@ -92,10 +106,11 @@ export default function SupportChatPage() {
                 <SupportQueue
                     conversations={conversations}
                     activeId={activeId}
-                    onSelect={setActiveId}
+                    onSelect={handleSelect}
                     loading={loading}
                     statusFilter={statusFilter}
                     onStatusFilterChange={setStatusFilter}
+                    isUnread={isUnread}
                 />
 
                 {/* Thread */}

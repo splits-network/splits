@@ -56,9 +56,9 @@ export function TicketTable({ data, loading, sortField, sortDir, onSort }: Props
             render: (item) => (
                 <div className="max-w-xs">
                     <div className="font-medium text-sm truncate">
-                        {item.subject || item.body.substring(0, 60)}
+                        {item.subject || item.body?.substring(0, 60)}
                     </div>
-                    {item.subject && (
+                    {item.subject && item.body && (
                         <div className="text-sm text-base-content/50 truncate">
                             {item.body.substring(0, 80)}
                         </div>

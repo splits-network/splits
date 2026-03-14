@@ -123,7 +123,7 @@ async function main() {
             process.env.INTEGRATION_SERVICE_URL || "http://localhost:3016",
         matching: process.env.MATCHING_SERVICE_URL || "http://localhost:3017",
         support:
-            process.env.SUPPORT_SERVICE_URL || "http://support-service:3021",
+            process.env.SUPPORT_SERVICE_URL || "http://localhost:3021",
     };
 
     await registerAdminRoutes(app, services);

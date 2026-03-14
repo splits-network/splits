@@ -80,9 +80,15 @@ export default function TicketDetailPage() {
             if (!token) { setError('Not authenticated'); setLoading(false); return; }
             const client = createAuthenticatedClient(token);
             const res = await client.get(`/support/admin/support/tickets/${id}`);
-            setTicket((res as any).data || res);
-        } catch {
-            setError('Failed to load ticket');
+            console.log('[ticket-debug] raw response:', JSON.stringify(res));
+            const envelope = (res as any).data || res;
+            // API returns { ticket: {...}, replies: [...] }
+            const ticketData = envelope.ticket || envelope;
+            const replies = envelope.replies || [];
+            setTicket({ ...ticketData, replies });
+        } catch (err: any) {
+            console.error('[ticket-debug] fetch error:', err);
+            setError(err?.statusCode === 404 ? 'Ticket not found' : 'Failed to load ticket');
         } finally {
             setLoading(false);
         }
@@ -151,7 +157,7 @@ export default function TicketDetailPage() {
             </button>
 
             <AdminPageHeader
-                title={ticket.subject || `Ticket #${ticket.id.substring(0, 8)}`}
+                title={ticket.subject || `Ticket #${ticket.id?.substring(0, 8)}`}
                 subtitle={`Created ${formatDate(ticket.created_at)}`}
                 actions={
                     <div className="flex items-center gap-2">
@@ -259,7 +265,7 @@ export default function TicketDetailPage() {
                         <div className="card-body">
                             <h3 className="card-title text-base">Details</h3>
                             <div>
-                                <InfoRow label="Ticket ID" value={<span className="font-mono text-sm">{ticket.id.substring(0, 8)}</span>} />
+                                <InfoRow label="Ticket ID" value={<span className="font-mono text-sm">{ticket.id?.substring(0, 8)}</span>} />
                                 <InfoRow label="Category" value={<span className="badge badge-sm badge-ghost capitalize">{ticket.category}</span>} />
                                 <InfoRow label="Source" value={<span className="badge badge-sm badge-primary">{ticket.source_app}</span>} />
                                 <InfoRow label="Visitor" value={ticket.visitor_name || 'Anonymous'} />

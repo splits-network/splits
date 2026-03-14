@@ -9,6 +9,7 @@ type SupportQueueProps = {
     loading: boolean;
     statusFilter: string;
     onStatusFilterChange: (status: string) => void;
+    isUnread: (id: string, lastMessageAt: string | null, status: string) => boolean;
 };
 
 function formatTime(dateStr: string | null) {
@@ -53,6 +54,7 @@ export function SupportQueue({
     loading,
     statusFilter,
     onStatusFilterChange,
+    isUnread,
 }: SupportQueueProps) {
     return (
         <div className="w-80 border-r border-base-300 flex flex-col bg-base-100 min-h-0">
@@ -83,41 +85,47 @@ export function SupportQueue({
                         <p className="text-sm">No conversations</p>
                     </div>
                 ) : (
-                    conversations.map((conv) => (
-                        <button
-                            key={conv.id}
-                            type="button"
-                            onClick={() => onSelect(conv.id)}
-                            className={`w-full text-left p-3 border-b border-base-300 hover:bg-base-200 transition-colors ${
-                                activeId === conv.id ? 'bg-base-200' : ''
-                            }`}
-                        >
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <i className={`fa-duotone fa-regular ${categoryIcon(conv.category)} text-sm text-primary`} />
-                                        <span className="text-sm font-semibold truncate">
-                                            {conv.subject || conv.visitor_name || conv.visitor_email || `Session ${conv.visitor_session_id.slice(0, 8)}`}
-                                        </span>
+                    conversations.map((conv) => {
+                        const unread = isUnread(conv.id, conv.last_message_at, conv.status);
+                        return (
+                            <button
+                                key={conv.id}
+                                type="button"
+                                onClick={() => onSelect(conv.id)}
+                                className={`w-full text-left p-3 border-b border-base-300 hover:bg-base-200 transition-colors ${
+                                    activeId === conv.id ? 'bg-base-200' : ''
+                                } ${unread ? 'bg-primary/5' : ''}`}
+                            >
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {unread && (
+                                                <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                                            )}
+                                            <i className={`fa-duotone fa-regular ${categoryIcon(conv.category)} text-sm text-primary`} />
+                                            <span className={`text-sm truncate ${unread ? 'font-bold' : 'font-semibold'}`}>
+                                                {conv.subject || conv.visitor_name || conv.visitor_email || `Session ${conv.visitor_session_id.slice(0, 8)}`}
+                                            </span>
+                                        </div>
+                                        {conv.last_message_preview && (
+                                            <p className={`text-sm truncate ${unread ? 'text-base-content/70' : 'text-base-content/50'}`}>
+                                                {conv.last_message_preview}
+                                            </p>
+                                        )}
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className={`badge badge-sm ${statusBadge(conv.status)}`}>
+                                                {conv.status.replace(/_/g, ' ')}
+                                            </span>
+                                            <span className="text-sm text-base-content/30">{conv.source_app}</span>
+                                        </div>
                                     </div>
-                                    {conv.last_message_preview && (
-                                        <p className="text-sm text-base-content/50 truncate">
-                                            {conv.last_message_preview}
-                                        </p>
-                                    )}
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className={`badge badge-sm ${statusBadge(conv.status)}`}>
-                                            {conv.status.replace(/_/g, ' ')}
-                                        </span>
-                                        <span className="text-sm text-base-content/30">{conv.source_app}</span>
-                                    </div>
+                                    <span className={`text-sm flex-shrink-0 ${unread ? 'text-primary font-semibold' : 'text-base-content/30'}`}>
+                                        {formatTime(conv.last_message_at || conv.created_at)}
+                                    </span>
                                 </div>
-                                <span className="text-sm text-base-content/30 flex-shrink-0">
-                                    {formatTime(conv.last_message_at || conv.created_at)}
-                                </span>
-                            </div>
-                        </button>
-                    ))
+                            </button>
+                        );
+                    })
                 )}
             </div>
         </div>
