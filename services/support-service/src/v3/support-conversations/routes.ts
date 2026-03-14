@@ -3,30 +3,76 @@
  *
  * POST create is public (optional auth). List/get for visitors by session.
  * Admin routes use x-clerk-user-id auth.
+ * Visitor routes use requireSupportIdentity / getSupportContext from shared helpers.
  */
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
+import { SupportEventPublisher } from '../../v2/support/events';
+import { requireSupportIdentity, getSupportContext } from '../../v2/shared/helpers';
 import { SupportConversationRepository } from './repository';
 import { SupportConversationService } from './service';
 import {
   SupportConversationListParams,
   CreateSupportConversationInput,
   UpdateSupportConversationInput,
+  SendSupportMessageInput,
   listQuerySchema,
   createSchema,
   updateSchema,
   idParamSchema,
+  sendMessageSchema,
 } from './types';
 
 export function registerSupportConversationRoutes(
   app: FastifyInstance,
   supabase: SupabaseClient,
   eventPublisher?: IEventPublisher,
+  supportEventPublisher?: SupportEventPublisher,
 ) {
   const repository = new SupportConversationRepository(supabase);
-  const service = new SupportConversationService(repository, supabase, eventPublisher);
+  const service = new SupportConversationService(
+    repository,
+    supabase,
+    eventPublisher,
+    supportEventPublisher,
+  );
+
+  // ── Public: no auth required ──
+
+  // GET /api/v3/public/support/admin-status
+  app.get('/api/v3/public/support/admin-status', async (_request, reply) => {
+    const online = await service.checkAdminOnline();
+    return reply.send({ data: { online } });
+  });
+
+  // ── Non-parameterized routes (before :id) ──
+
+  // GET /api/v3/support/conversations/mine — visitor's conversations
+  app.get('/api/v3/support/conversations/mine', async (request, reply) => {
+    const ctx = requireSupportIdentity(request);
+    const query = request.query as any;
+    const data = await service.getVisitorConversations(
+      ctx.sessionId || query.sessionId,
+      ctx.clerkUserId,
+    );
+    return reply.send({ data });
+  });
+
+  // POST /api/v3/support/conversations/link-session
+  app.post('/api/v3/support/conversations/link-session', async (request, reply) => {
+    const ctx = getSupportContext(request);
+    if (!ctx.clerkUserId || !ctx.sessionId) {
+      return reply.status(400).send({
+        error: { code: 'BAD_REQUEST', message: 'Both clerkUserId and sessionId required' },
+      });
+    }
+    await service.linkSession(ctx.sessionId, ctx.clerkUserId);
+    return reply.send({ data: { status: 'ok' } });
+  });
+
+  // ── Core 5 CRUD routes ──
 
   // GET /api/v3/support/conversations — list (admin)
   app.get('/api/v3/support/conversations', {
@@ -85,5 +131,29 @@ export function registerSupportConversationRoutes(
     const { id } = request.params as { id: string };
     await service.close(id);
     return reply.send({ data: { message: 'Support conversation closed successfully' } });
+  });
+
+  // ── Parameterized sub-resource routes (after :id) ──
+
+  // GET /api/v3/support/conversations/:id/messages
+  app.get('/api/v3/support/conversations/:id/messages', {
+    schema: { params: idParamSchema },
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const query = request.query as any;
+    const limit = Math.min(parseInt(query.limit || '50', 10), 100);
+    const before = query.before as string | undefined;
+    const data = await service.listMessages(id, limit, before);
+    return reply.send({ data });
+  });
+
+  // POST /api/v3/support/conversations/:id/messages
+  app.post('/api/v3/support/conversations/:id/messages', {
+    schema: { params: idParamSchema, body: sendMessageSchema },
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = request.body as SendSupportMessageInput;
+    const message = await service.sendVisitorMessage(id, null, body.body);
+    return reply.code(201).send({ data: message });
   });
 }

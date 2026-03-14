@@ -336,11 +336,9 @@ export default function RoleWizardModal({
             if (formData.job_level) payload.job_level = formData.job_level;
 
             // On edit, don't send fee/guarantee — company controls those terms
-            // Don't send status on edit — status transitions use dedicated actions
             if (mode === "edit") {
                 delete payload.fee_percentage;
                 delete payload.guarantee_days;
-                delete payload.status;
             }
 
             let targetJobId: string;

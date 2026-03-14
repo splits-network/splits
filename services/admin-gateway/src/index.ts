@@ -97,7 +97,11 @@ async function main() {
 
     // Auth hook — enforces isPlatformAdmin on all routes except /health
     app.addHook("onRequest", async (request, reply) => {
-        if (request.url === "/health" || request.url.startsWith("/health?")) {
+        if (
+            request.url === "/health" ||
+            request.url.startsWith("/health?") ||
+            request.url.startsWith("/ws")
+        ) {
             return;
         }
         await authMiddleware.createMiddleware()(request, reply);

@@ -14,12 +14,14 @@ import {
     UpdateSupportConversationInput,
 } from "./types";
 import { IEventPublisher } from "../../v2/shared/events";
+import { SupportEventPublisher } from "../../v2/support/events";
 
 export class SupportConversationService {
     constructor(
         private repository: SupportConversationRepository,
         private supabase: SupabaseClient,
         private eventPublisher?: IEventPublisher,
+        private supportEventPublisher?: SupportEventPublisher,
     ) {}
 
     async getAll(params: SupportConversationListParams) {
@@ -64,6 +66,21 @@ export class SupportConversationService {
             "support-service",
         );
 
+        if (this.supportEventPublisher) {
+            await this.supportEventPublisher.publishToConversation(conversation.id, {
+                type: "conversation.created",
+                eventVersion: 1,
+                serverTime: new Date().toISOString(),
+                data: { conversation },
+            });
+            await this.supportEventPublisher.publishToAdminQueue({
+                type: "support.conversation.new",
+                eventVersion: 1,
+                serverTime: new Date().toISOString(),
+                data: { conversation },
+            });
+        }
+
         return conversation;
     }
 
@@ -81,5 +98,53 @@ export class SupportConversationService {
 
     async getBySession(sessionId: string) {
         return this.repository.findBySession(sessionId);
+    }
+
+    async checkAdminOnline(): Promise<boolean> {
+        if (!this.supportEventPublisher) return false;
+        return this.supportEventPublisher.isAnyAdminOnline();
+    }
+
+    async getVisitorConversations(sessionId?: string, clerkUserId?: string) {
+        return this.repository.findVisitorConversations(sessionId, clerkUserId);
+    }
+
+    async listMessages(conversationId: string, limit: number = 50, before?: string) {
+        return this.repository.listMessages(conversationId, limit, before);
+    }
+
+    async sendVisitorMessage(
+        conversationId: string,
+        senderId: string | null,
+        body: string,
+    ) {
+        const message = await this.repository.addMessage(
+            conversationId,
+            "visitor",
+            senderId,
+            body,
+        );
+        await this.repository.update(conversationId, { status: "waiting_on_admin" });
+
+        if (this.supportEventPublisher) {
+            await this.supportEventPublisher.publishToConversation(conversationId, {
+                type: "message.new",
+                eventVersion: 1,
+                serverTime: new Date().toISOString(),
+                data: { message },
+            });
+            await this.supportEventPublisher.publishToAdminQueue({
+                type: "support.message.new",
+                eventVersion: 1,
+                serverTime: new Date().toISOString(),
+                data: { conversationId, message },
+            });
+        }
+
+        return message;
+    }
+
+    async linkSession(sessionId: string, clerkUserId: string) {
+        await this.repository.linkSessionToUser(sessionId, clerkUserId);
     }
 }

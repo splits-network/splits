@@ -78,7 +78,7 @@ export default function SupportChatPage() {
     }, [fetchConversations]);
 
     // Listen for new support events via admin-gateway WebSocket
-    useAdminRealtime('admin:support:queue', () => {
+    useAdminRealtime('support:queue', () => {
         fetchConversations();
         // If the admin is currently viewing a conversation, keep it marked as read
         if (activeId) markRead(activeId);
