@@ -6,6 +6,16 @@ import { requiredSkillNames, preferredSkillNames } from "./helpers";
 import { BaselBadge } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 
+/* ─── Empty Placeholder ────────────────────────────────────────────────── */
+
+function EmptyPlaceholder({ label }: { label: string }) {
+    return (
+        <p className="text-sm text-base-content/30 italic">
+            No {label} specified
+        </p>
+    );
+}
+
 /* ─── Recruiter Brief Tab ───────────────────────────────────────────────── */
 
 export function RecruiterBriefTab({ job }: { job: Job }) {
@@ -20,93 +30,73 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
     const reqSkills = requiredSkillNames(job);
     const prefSkills = preferredSkillNames(job);
 
-    const hasBrief =
-        job.recruiter_description ||
-        mandatoryReqs.length > 0 ||
-        preferredReqs.length > 0 ||
-        reqSkills.length > 0;
-
-    if (!hasBrief) {
-        return (
-            <div className="text-center py-12 text-base-content/40">
-                <i className="fa-duotone fa-regular fa-file-lines text-3xl mb-3 block" />
-                <p className="text-sm font-semibold">
-                    No recruiter brief available
-                </p>
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-8">
             {/* Recruiter Description */}
-            {job.recruiter_description && (
-                <div className="border-l-4 border-l-primary pl-6">
-                    <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
-                        Recruiter Brief
-                    </h3>
+            <div className="border-l-4 border-l-primary pl-6">
+                <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    Recruiter Brief
+                </h3>
+                {job.recruiter_description ? (
                     <MarkdownRenderer
                         content={job.recruiter_description}
                         className="prose prose-sm max-w-none text-base-content/70"
                     />
-                </div>
-            )}
-
-            {/* Details grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                {commute && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
-                            Commute
-                        </p>
-                        <p className="font-bold text-sm">{commute}</p>
-                    </div>
-                )}
-                {job.department && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
-                            Department
-                        </p>
-                        <p className="font-bold text-sm">{job.department}</p>
-                    </div>
-                )}
-                {job.guarantee_days !== undefined &&
-                    job.guarantee_days !== null && (
-                        <div className="bg-base-100 p-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
-                                Guarantee
-                            </p>
-                            <p className="font-bold text-sm">
-                                {job.guarantee_days} days
-                            </p>
-                        </div>
-                    )}
-                {level && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
-                            Level
-                        </p>
-                        <p className="font-bold text-sm">{level}</p>
-                    </div>
-                )}
-                {job.open_to_relocation && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
-                            Relocation
-                        </p>
-                        <p className="font-bold text-sm text-secondary">
-                            Open to relocation
-                        </p>
-                    </div>
+                ) : (
+                    <EmptyPlaceholder label="recruiter brief" />
                 )}
             </div>
 
+            {/* Details grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
+                <div className="bg-base-100 p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        Commute
+                    </p>
+                    <p className={`font-bold text-sm ${!commute ? "text-base-content/30 italic font-normal" : ""}`}>
+                        {commute || "Not specified"}
+                    </p>
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        Department
+                    </p>
+                    <p className={`font-bold text-sm ${!job.department ? "text-base-content/30 italic font-normal" : ""}`}>
+                        {job.department || "Not specified"}
+                    </p>
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        Guarantee
+                    </p>
+                    <p className={`font-bold text-sm ${job.guarantee_days == null ? "text-base-content/30 italic font-normal" : ""}`}>
+                        {job.guarantee_days != null ? `${job.guarantee_days} days` : "Not specified"}
+                    </p>
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        Level
+                    </p>
+                    <p className={`font-bold text-sm ${!level ? "text-base-content/30 italic font-normal" : ""}`}>
+                        {level || "Not specified"}
+                    </p>
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        Relocation
+                    </p>
+                    <p className={`font-bold text-sm ${job.open_to_relocation ? "text-secondary" : "text-base-content/30 italic font-normal"}`}>
+                        {job.open_to_relocation ? "Open to relocation" : "Not specified"}
+                    </p>
+                </div>
+            </div>
+
             {/* Mandatory Requirements */}
-            {mandatoryReqs.length > 0 && (
-                <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
-                        Must Have
-                    </h3>
+            <div>
+                <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    Must Have
+                </h3>
+                {mandatoryReqs.length > 0 ? (
                     <ul className="space-y-2">
                         {mandatoryReqs.map((req) => (
                             <li
@@ -120,15 +110,17 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
                             </li>
                         ))}
                     </ul>
-                </div>
-            )}
+                ) : (
+                    <EmptyPlaceholder label="mandatory requirements" />
+                )}
+            </div>
 
             {/* Preferred Requirements */}
-            {preferredReqs.length > 0 && (
-                <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
-                        Preferred
-                    </h3>
+            <div>
+                <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    Preferred
+                </h3>
+                {preferredReqs.length > 0 ? (
                     <ul className="space-y-2">
                         {preferredReqs.map((req) => (
                             <li
@@ -142,15 +134,17 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
                             </li>
                         ))}
                     </ul>
-                </div>
-            )}
+                ) : (
+                    <EmptyPlaceholder label="preferred requirements" />
+                )}
+            </div>
 
             {/* Required Skills */}
-            {reqSkills.length > 0 && (
-                <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
-                        Required Skills
-                    </h3>
+            <div>
+                <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    Required Skills
+                </h3>
+                {reqSkills.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                         {reqSkills.map((skill) => (
                             <BaselBadge key={skill} color="primary" variant="soft" size="sm">
@@ -158,15 +152,17 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
                             </BaselBadge>
                         ))}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <EmptyPlaceholder label="required skills" />
+                )}
+            </div>
 
             {/* Preferred Skills */}
-            {prefSkills.length > 0 && (
-                <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
-                        Nice-to-Have Skills
-                    </h3>
+            <div>
+                <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    Nice-to-Have Skills
+                </h3>
+                {prefSkills.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                         {prefSkills.map((skill) => (
                             <BaselBadge key={skill} variant="outline" size="sm">
@@ -174,8 +170,10 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
                             </BaselBadge>
                         ))}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <EmptyPlaceholder label="preferred skills" />
+                )}
+            </div>
         </div>
     );
 }
