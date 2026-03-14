@@ -44,6 +44,7 @@ Design standards: in the root /showcase directory
 1. **Nano-service philosophy** — small, focused services; new purpose = new service
 1. **Technical Debt Paydown** — if you see something wrong, fix it immediately; no "I'll do it later"
 1. **Don't leave unused code** — if something is no longer needed, delete it; don't comment it out or leave it in limbo
+1. **MANDATORY: V3 CRUD routes must be pure** — Core CRUD (list, get, create, update, delete) must NEVER contain joins, access control, enrichment, computed fields, or includes. They are flat `select('*')` against a single table. ALWAYS `auth: 'required'` in the gateway. If a frontend page needs joined data, enrichment, role-based scoping, or public/optional auth — use a **view**. See `docs/guidance/v3-crud-vs-views.md`.
 
 ## Decision-Making Rules
 
@@ -97,6 +98,7 @@ Design standards: in the root /showcase directory
 
 Key standards in `docs/guidance/`:
 
+- `v3-crud-vs-views.md` — **MANDATORY**: CRUD is flat, views handle joins/public/enrichment
 - `api-response-format.md` — `{ data: <payload> }` envelope
 - `form-controls.md` — `fieldset` wrapper, no `-bordered` suffixes
 - `pagination.md` — StandardListParams/StandardListResponse

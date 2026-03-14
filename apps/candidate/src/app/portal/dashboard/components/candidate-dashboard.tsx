@@ -148,6 +148,9 @@ export default function CandidateDashboard({
                 </div>
             )}
 
+            {/* ── Job Recommendations Banner ── */}
+            <RecommendationsWidget variant="banner" />
+
             {/* ── Urgency Bar ── */}
             {!loading && !profileLoading && (
                 <CandidateUrgencyBar
@@ -222,18 +225,18 @@ export default function CandidateDashboard({
                 </div>
             </section>
 
+            {/* ── Job Recommendations List ── */}
+            <section className="bg-base-100 py-4 lg:py-6 px-6 sm:px-8 lg:px-12">
+                <div className="container mx-auto">
+                    <RecommendationsWidget variant="list" />
+                </div>
+            </section>
+
             {/* ── Match Preview ── */}
             <MatchPreviewWidget
                 matches={topMatches}
                 loading={loading}
             />
-
-            {/* ── Job Recommendations ── */}
-            <section className="bg-base-100 py-4 lg:py-6 px-6 sm:px-8 lg:px-12">
-                <div className="container mx-auto">
-                    <RecommendationsWidget />
-                </div>
-            </section>
 
             {/* ── Upcoming Calls ── */}
             {(calls.length > 0 || callsLoading) && (

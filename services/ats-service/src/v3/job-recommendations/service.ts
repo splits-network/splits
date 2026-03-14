@@ -63,6 +63,16 @@ export class JobRecommendationService {
       throw new ForbiddenError('Only company users or admins can create recommendations');
     }
 
+    // Resolve internal company IDs from Clerk organization IDs
+    let userCompanyIds: string[] = [];
+    if (!context.isPlatformAdmin && context.organizationIds?.length) {
+      const { data: companies } = await this.supabase
+        .from('companies')
+        .select('id')
+        .in('identity_organization_id', context.organizationIds);
+      userCompanyIds = (companies || []).map(c => c.id);
+    }
+
     // Validate job exists and belongs to user's company
     const { data: job, error: jobError } = await this.supabase
       .from('jobs')
@@ -72,7 +82,7 @@ export class JobRecommendationService {
 
     if (jobError || !job) throw new NotFoundError('Job', input.job_id);
 
-    if (!context.isPlatformAdmin && !context.organizationIds?.includes(job.company_id)) {
+    if (!context.isPlatformAdmin && !userCompanyIds.includes(job.company_id)) {
       throw new ForbiddenError('Job does not belong to your organization');
     }
 

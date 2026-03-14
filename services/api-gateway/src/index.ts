@@ -541,6 +541,8 @@ async function main() {
                 request.url.startsWith('/api/v3/recruiters/views/marketplace-listing') ||
                 request.url.startsWith('/api/v3/recruiters/by-slug/') ||
                 request.url.match(/^\/api\/v3\/recruiters\/[^/?]+\/view\/profile/) ||
+                request.url.match(/^\/api\/v3\/jobs\/[0-9a-f-]+(\?|$)/) ||
+                request.url.startsWith('/api/v3/jobs/views/candidate-listing') ||
                 request.url.startsWith('/api/v3/badges/') ||
                 request.url.startsWith('/api/v3/xp/') ||
                 request.url.startsWith('/api/v3/leaderboards') ||

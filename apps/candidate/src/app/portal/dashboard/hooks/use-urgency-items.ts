@@ -48,7 +48,9 @@ export function useUrgencyItems({
                 message: offers.length === 1
                     ? `You have an offer waiting from ${offers[0].job?.company?.name || 'a company'}`
                     : `You have ${offers.length} offers waiting for review`,
-                href: '/portal/applications',
+                href: offers.length === 1
+                    ? `/portal/applications?appId=${offers[0].id}`
+                    : '/portal/applications?filters=%7B%22stage%22%3A%22offer%22%7D',
                 count: offers.length,
             });
         }

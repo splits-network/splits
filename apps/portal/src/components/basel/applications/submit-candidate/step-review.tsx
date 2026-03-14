@@ -122,7 +122,7 @@ export default function StepReview({
                                     >
                                         <i className="fa-duotone fa-regular fa-file text-base-content/40" />
                                         <span className="font-medium">
-                                            {doc.filename}
+                                            {doc.file_name || doc.filename || "Document"}
                                         </span>
                                     </div>
                                 )

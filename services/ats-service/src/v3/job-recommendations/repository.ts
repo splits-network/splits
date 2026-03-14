@@ -93,7 +93,11 @@ export class JobRecommendationRepository {
   ): Promise<{ data: any[]; total: number }> {
     let query = this.supabase
       .from('job_recommendations')
-      .select('*', { count: 'exact' })
+      .select(`
+        *,
+        job:jobs(id, title, location, employment_type, company:companies(id, name, logo_url)),
+        recommender:users!job_recommendations_recommended_by_fkey(id, name)
+      `, { count: 'exact' })
       .eq('candidate_id', candidateId);
 
     if (statuses && statuses.length > 0) {

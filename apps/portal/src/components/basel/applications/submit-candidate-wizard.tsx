@@ -287,7 +287,8 @@ export default function BaselSubmitCandidateWizard({
     /* ── Load candidate documents ──────────────────────────────────────── */
 
     useEffect(() => {
-        if (currentStepId !== "build-case" || !selectedCandidate) return;
+        // Only recruiters load candidate documents — company users send recommendations
+        if (currentStepId !== "build-case" || !selectedCandidate || (isCompanyUser && !isRecruiter)) return;
 
         async function loadCandidateDocuments() {
             try {
@@ -329,7 +330,7 @@ export default function BaselSubmitCandidateWizard({
             setError("Please select a candidate to continue.");
             return;
         }
-        if (currentStepId === "build-case" && !pitch.trim()) {
+        if (currentStepId === "build-case" && !pitch.trim() && (isRecruiter || !isCompanyUser)) {
             setError("A pitch is required before proceeding to review.");
             return;
         }
@@ -344,8 +345,12 @@ export default function BaselSubmitCandidateWizard({
     /* ── Submit ────────────────────────────────────────────────────────── */
 
     const handleSubmit = useCallback(async () => {
-        if (!selectedJob || !selectedCandidate || !pitch.trim()) {
+        if (!selectedJob || !selectedCandidate) {
             setError("Please complete all required fields.");
+            return;
+        }
+        if (!pitch.trim() && (isRecruiter || !isCompanyUser)) {
+            setError("A pitch is required.");
             return;
         }
 
@@ -374,45 +379,59 @@ export default function BaselSubmitCandidateWizard({
                 resumeDocumentId = uploadResponse.data.id;
             }
 
-            const documentIds = resumeDocumentId
-                ? [resumeDocumentId, ...Array.from(selectedDocIds)]
-                : Array.from(selectedDocIds);
+            // Company users (non-recruiters) create a job recommendation, not an application.
+            // The candidate sees it on their dashboard and decides whether to apply.
+            if (isCompanyUser && !isRecruiter) {
+                await client.post("/job-recommendations", {
+                    job_id: selectedJob.id,
+                    candidate_id: selectedCandidate.id,
+                    message: pitch.trim() || undefined,
+                });
 
-            const appResponse = await client.post("/applications", {
-                candidate_id: selectedCandidate.id,
-                job_id: selectedJob.id,
-                document_ids: documentIds,
-            });
+                toast.success(
+                    `Role sent to ${selectedCandidate.full_name}. They'll see it on their dashboard.`,
+                );
+            } else {
+                // Recruiters create applications directly
+                const documentIds = resumeDocumentId
+                    ? [resumeDocumentId, ...Array.from(selectedDocIds)]
+                    : Array.from(selectedDocIds);
 
-            // Create the pitch as an application note
-            const applicationId = appResponse.data.id;
-            if (pitch.trim()) {
-                // Determine created_by_type — this is a company-side action
-                let noteCreatorType: string;
-                if (isAdmin) {
-                    noteCreatorType = "platform_admin";
-                } else if (hasRole("hiring_manager")) {
-                    noteCreatorType = "hiring_manager";
-                } else if (hasRole("company_admin")) {
-                    noteCreatorType = "company_admin";
-                } else {
-                    noteCreatorType = "company_recruiter";
+                const appResponse = await client.post("/applications", {
+                    candidate_id: selectedCandidate.id,
+                    job_id: selectedJob.id,
+                    document_ids: documentIds,
+                });
+
+                // Create the pitch as an application note
+                const applicationId = appResponse.data.id;
+                if (pitch.trim()) {
+                    let noteCreatorType: string;
+                    if (isAdmin) {
+                        noteCreatorType = "platform_admin";
+                    } else if (hasRole("hiring_manager")) {
+                        noteCreatorType = "hiring_manager";
+                    } else if (hasRole("company_admin")) {
+                        noteCreatorType = "company_admin";
+                    } else {
+                        noteCreatorType = "company_recruiter";
+                    }
+                    await client.post(
+                        `/application-notes`,
+                        {
+                            application_id: applicationId,
+                            created_by_type: noteCreatorType,
+                            note_type: "pitch",
+                            visibility: "shared",
+                            message_text: pitch.trim(),
+                        },
+                    );
                 }
-                await client.post(
-                    `/application-notes`,
-                    {
-                        application_id: applicationId,
-                        created_by_type: noteCreatorType,
-                        note_type: "pitch",
-                        visibility: "shared",
-                        message_text: pitch.trim(),
-                    },
+
+                toast.success(
+                    `Proposal submitted. ${selectedCandidate.full_name} has been notified.`,
                 );
             }
-
-            toast.success(
-                `Proposal submitted. ${selectedCandidate.full_name} has been notified.`,
-            );
             onSuccess?.();
             onClose();
         } catch (err: any) {
@@ -428,7 +447,11 @@ export default function BaselSubmitCandidateWizard({
     const canProceed = () => {
         if (currentStepId === "find-role") return !!selectedJob;
         if (currentStepId === "select-candidate") return !!selectedCandidate;
-        if (currentStepId === "build-case") return !!pitch.trim();
+        if (currentStepId === "build-case") {
+            // Pitch is optional for company users sending a recommendation
+            if (isCompanyUser && !isRecruiter) return true;
+            return !!pitch.trim();
+        }
         return true;
     };
 
@@ -443,7 +466,7 @@ export default function BaselSubmitCandidateWizard({
         <BaselWizardModal
             isOpen={isOpen}
             onClose={handleClose}
-            title="Propose a Candidate"
+            title={isCompanyUser && !isRecruiter ? "Send Role to Candidate" : "Propose a Candidate"}
             icon="fa-paper-plane"
             accentColor="primary"
             steps={wizardSteps}
@@ -454,8 +477,8 @@ export default function BaselSubmitCandidateWizard({
             submitting={submitting}
             nextDisabled={!canProceed()}
             nextLabel={isLastContentStep ? "Review Submission" : "Continue"}
-            submitLabel="Propose Candidate"
-            submittingLabel="Submitting Proposal..."
+            submitLabel={isCompanyUser && !isRecruiter ? "Send Role to Candidate" : "Propose Candidate"}
+            submittingLabel={isCompanyUser && !isRecruiter ? "Sending..." : "Submitting Proposal..."}
             maxWidth="max-w-4xl"
         >
             {error && (
@@ -512,6 +535,7 @@ export default function BaselSubmitCandidateWizard({
                     resumeFile={resumeFile}
                     onResumeFileChange={setResumeFile}
                     onFileError={setError}
+                    isRecommendation={isCompanyUser && !isRecruiter}
                 />
             )}
 

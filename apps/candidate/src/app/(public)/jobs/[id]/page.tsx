@@ -26,9 +26,7 @@ function truncateText(value: string, maxLength = 155) {
 
 const fetchJob = cache(async (id: string): Promise<Job | null> => {
     try {
-        const response = await apiClient.get<{ data: Job }>(`/jobs/${id}`, {
-            params: { include: "company,requirements" },
-        });
+        const response = await apiClient.get<{ data: Job }>(`/jobs/${id}/view/candidate-detail`);
         return response.data;
     } catch (error) {
         console.error("Failed to fetch job:", error);

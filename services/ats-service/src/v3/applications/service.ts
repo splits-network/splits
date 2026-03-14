@@ -96,7 +96,7 @@ export class ApplicationService {
 
     const { document_ids, ...appData } = input;
     const hasRecruiter = !!candidateRecruiterId || !!companyRecruiterId;
-    const initialStage = hasRecruiter ? 'recruiter_proposed' : 'ai_review';
+    const initialStage = hasRecruiter ? 'recruiter_proposed' : 'draft';
 
     const application = await this.repository.create({
       ...appData, candidate_id: candidateId,
