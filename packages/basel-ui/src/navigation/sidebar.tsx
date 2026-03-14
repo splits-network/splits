@@ -25,6 +25,8 @@ export interface BaselSidebarNavItem {
     onToggle?: () => void;
     /** Show a "NEW" indicator pill next to the label */
     isNew?: boolean;
+    /** Show a "BETA" indicator pill next to the label */
+    isBeta?: boolean;
 }
 
 export interface BaselSidebarSection {
@@ -117,6 +119,11 @@ function SidebarNavItem({
                             New
                         </span>
                     )}
+                    {item.isBeta && (
+                        <span className="px-1.5 py-0.5 bg-info text-info-content text-[8px] font-black uppercase tracking-wider leading-none">
+                            Beta
+                        </span>
+                    )}
                     {item.badge !== undefined && item.badge > 0 && (
                         <span className="min-w-5 h-5 flex items-center justify-center bg-primary text-primary-content text-sm font-bold px-1">
                             {item.badge > 99 ? "99+" : item.badge}
@@ -151,6 +158,13 @@ function SidebarNavItem({
                     {item.isNew && (
                         <span className="px-1.5 py-0.5 bg-accent text-accent-content text-[8px] font-black uppercase tracking-wider leading-none">
                             New
+                        </span>
+                    )}
+
+                    {/* Beta indicator */}
+                    {item.isBeta && (
+                        <span className="px-1.5 py-0.5 bg-info text-info-content text-[8px] font-black uppercase tracking-wider leading-none">
+                            Beta
                         </span>
                     )}
 
@@ -214,6 +228,13 @@ function SidebarNavItem({
                 {item.isNew && (
                     <span className="px-1.5 py-0.5 bg-accent text-accent-content text-[8px] font-black uppercase tracking-wider leading-none">
                         New
+                    </span>
+                )}
+
+                {/* Beta indicator */}
+                {item.isBeta && (
+                    <span className="px-1.5 py-0.5 bg-info text-info-content text-[8px] font-black uppercase tracking-wider leading-none">
+                        Beta
                     </span>
                 )}
 

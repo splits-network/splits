@@ -402,7 +402,7 @@ export function UserProfileProvider({
         isCandidate,
         hasRole,
         hasAnyRole,
-        refresh: () => fetchProfile(),
+        refresh: () => fetchProfile({ silent: true }),
         logout,
         // Subscription fields
         subscription,

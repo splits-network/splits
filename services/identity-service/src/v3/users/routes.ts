@@ -8,7 +8,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { UserRepository } from './repository';
-import { UserService } from './service';
+import { UserService, type SourceApp } from './service';
 import {
   CreateUserInput,
   UpdateUserInput,
@@ -62,7 +62,8 @@ export function registerUserRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const data = await service.updateMe(clerkUserId, request.body as UpdateUserInput);
+    const sourceApp = request.headers['x-source-app'] as SourceApp | undefined;
+    const data = await service.updateMe(clerkUserId, request.body as UpdateUserInput, sourceApp);
     return reply.send({ data });
   });
 
@@ -95,8 +96,9 @@ export function registerUserRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
+    const sourceApp = request.headers['x-source-app'] as SourceApp | undefined;
     const body = request.body as ProfileImageInput;
-    const data = await service.updateProfileImage(clerkUserId, body);
+    const data = await service.updateProfileImage(clerkUserId, body, sourceApp);
     return reply.send({ data });
   });
 
@@ -106,7 +108,8 @@ export function registerUserRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const data = await service.deleteProfileImage(clerkUserId);
+    const sourceApp = request.headers['x-source-app'] as SourceApp | undefined;
+    const data = await service.deleteProfileImage(clerkUserId, sourceApp);
     return reply.send({ data });
   });
 
@@ -143,8 +146,9 @@ export function registerUserRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
+    const sourceApp = request.headers['x-source-app'] as SourceApp | undefined;
     const { id } = request.params as { id: string };
-    const data = await service.update(id, request.body as UpdateUserInput, clerkUserId);
+    const data = await service.update(id, request.body as UpdateUserInput, clerkUserId, sourceApp);
     return reply.send({ data });
   });
 

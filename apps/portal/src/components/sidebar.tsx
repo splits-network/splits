@@ -29,6 +29,7 @@ interface NavItemData {
     expandable?: boolean;
     shortcut?: string;
     isNew?: boolean;
+    isBeta?: boolean;
 }
 
 // ─── Navigation Items ───────────────────────────────────────────────────────
@@ -189,7 +190,7 @@ const navItems: NavItemData[] = [
         icon: "fa-duotone fa-regular fa-envelope",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "management",
-        isNew: true,
+        isBeta: true,
     },
     {
         href: "/portal/calendar",
@@ -197,7 +198,7 @@ const navItems: NavItemData[] = [
         icon: "fa-duotone fa-regular fa-calendar",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "management",
-        isNew: true,
+        isBeta: true,
     },
     {
         href: "/portal/calls",
@@ -205,7 +206,7 @@ const navItems: NavItemData[] = [
         icon: "fa-duotone fa-regular fa-video",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "management",
-        isNew: true,
+        isBeta: true,
     },
     {
         href: "/portal/placements",
@@ -246,6 +247,7 @@ const navItems: NavItemData[] = [
         icon: "fa-duotone fa-regular fa-plug",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "settings",
+        isBeta: true,
     },
     {
         href: "/portal/company/settings",
@@ -456,6 +458,7 @@ export function Sidebar() {
                     ? `Alt+${item.shortcut}`
                     : undefined,
                 isNew: item.isNew,
+                isBeta: item.isBeta,
                 children: item.children?.map(mapItem),
                 expanded: expandedItems.has(item.href),
                 onToggle: item.expandable

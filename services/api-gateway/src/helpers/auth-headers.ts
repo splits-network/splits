@@ -65,6 +65,12 @@ export function buildAuthHeaders(request: FastifyRequest): Record<string, string
     'x-clerk-user-id': auth.clerkUserId,
   };
 
+  // Forward which Clerk app authenticated this user (portal or candidate)
+  // Backend services need this for Clerk write-back operations (profile image sync, etc.)
+  if (auth.sourceApp) {
+    headers['x-source-app'] = auth.sourceApp;
+  }
+
   // Include organization ID if user has memberships (for context/logging only)
   // Backend will resolve actual company access via database JOINs
   if (auth.memberships && auth.memberships.length > 0) {

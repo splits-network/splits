@@ -12,6 +12,8 @@ import { IEventPublisher } from '../../v2/shared/events';
 import { UserRepository } from './repository';
 import { CreateUserInput, UpdateUserInput, RegisterUserInput, UserListParams } from './types';
 
+export type SourceApp = 'portal' | 'candidate';
+
 export class UserService {
   private accessResolver: AccessContextResolver;
 
@@ -21,6 +23,18 @@ export class UserService {
     private eventPublisher?: IEventPublisher
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
+  }
+
+  /**
+   * Resolve the correct Clerk secret key based on which app the request came from.
+   * Portal users are in the SPLITS Clerk instance, candidate users in the APP instance.
+   */
+  private getClerkSecretKey(sourceApp?: SourceApp): string | undefined {
+    if (sourceApp === 'candidate') {
+      return process.env.APP_CLERK_SECRET_KEY;
+    }
+    // Default to portal (SPLITS) — most profile operations come from portal
+    return process.env.SPLITS_CLERK_SECRET_KEY;
   }
 
   async getAll(params: UserListParams, clerkUserId: string) {
@@ -137,7 +151,7 @@ export class UserService {
     }
   }
 
-  async update(id: string, input: UpdateUserInput, clerkUserId: string) {
+  async update(id: string, input: UpdateUserInput, clerkUserId: string, sourceApp?: SourceApp) {
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('User', id);
 
@@ -151,7 +165,7 @@ export class UserService {
 
     // Sync name changes to Clerk (non-blocking, best-effort)
     if (input.name !== undefined) {
-      this.syncUserNameToClerk(existing.clerk_user_id, input.name).catch(() => {});
+      this.syncUserNameToClerk(existing.clerk_user_id, input.name, sourceApp).catch(() => {});
     }
 
     await this.eventPublisher?.publish('user.updated', {
@@ -162,8 +176,8 @@ export class UserService {
     return updated;
   }
 
-  private async syncUserNameToClerk(clerkUserId: string, fullName: string): Promise<void> {
-    const secretKey = process.env.APP_CLERK_SECRET_KEY;
+  private async syncUserNameToClerk(clerkUserId: string, fullName: string, sourceApp?: SourceApp): Promise<void> {
+    const secretKey = this.getClerkSecretKey(sourceApp);
     if (!secretKey) return;
 
     try {
@@ -180,15 +194,16 @@ export class UserService {
     }
   }
 
-  async updateMe(clerkUserId: string, input: UpdateUserInput) {
+  async updateMe(clerkUserId: string, input: UpdateUserInput, sourceApp?: SourceApp) {
     const user = await this.repository.findByClerkId(clerkUserId);
     if (!user) throw new NotFoundError('User', clerkUserId);
-    return this.update(user.id, input, clerkUserId);
+    return this.update(user.id, input, clerkUserId, sourceApp);
   }
 
   async updateProfileImage(
     clerkUserId: string,
-    profileImageData: { profile_image_url: string; profile_image_path: string }
+    profileImageData: { profile_image_url: string; profile_image_path: string },
+    sourceApp?: SourceApp
   ) {
     const user = await this.repository.findByClerkId(clerkUserId);
     if (!user) throw new NotFoundError('User', clerkUserId);
@@ -197,6 +212,9 @@ export class UserService {
       profile_image_url: profileImageData.profile_image_url,
       profile_image_path: profileImageData.profile_image_path,
     });
+
+    // Sync to Clerk (best-effort, don't block)
+    this.syncProfileImageToClerk(clerkUserId, profileImageData.profile_image_url, sourceApp);
 
     await this.eventPublisher?.publish('user.profile_image_updated', {
       user_id: user.id,
@@ -208,7 +226,7 @@ export class UserService {
     return updated;
   }
 
-  async deleteProfileImage(clerkUserId: string) {
+  async deleteProfileImage(clerkUserId: string, sourceApp?: SourceApp) {
     const user = await this.repository.findByClerkId(clerkUserId);
     if (!user) throw new NotFoundError('User', clerkUserId);
 
@@ -217,12 +235,53 @@ export class UserService {
       profile_image_path: null,
     });
 
+    // Remove from Clerk (best-effort, don't block)
+    this.deleteProfileImageFromClerk(clerkUserId, sourceApp);
+
     await this.eventPublisher?.publish('user.profile_image_deleted', {
       user_id: user.id,
       clerk_user_id: clerkUserId,
     }, 'identity-service');
 
     return updated;
+  }
+
+  private async syncProfileImageToClerk(clerkUserId: string, imageUrl: string, sourceApp?: SourceApp): Promise<void> {
+    const secretKey = this.getClerkSecretKey(sourceApp);
+    if (!secretKey) return;
+
+    try {
+      const { createClerkClient } = await import('@clerk/backend');
+      const clerkClient = createClerkClient({ secretKey });
+
+      const imageResponse = await fetch(imageUrl);
+      if (!imageResponse.ok) return;
+
+      const imageBlob = await imageResponse.blob();
+      await clerkClient.users.updateUserProfileImage(clerkUserId, { file: imageBlob });
+      await clerkClient.users.updateUser(clerkUserId, {
+        publicMetadata: { profile_image_url: imageUrl },
+      });
+    } catch {
+      // Best-effort — don't throw
+    }
+  }
+
+  private async deleteProfileImageFromClerk(clerkUserId: string, sourceApp?: SourceApp): Promise<void> {
+    const secretKey = this.getClerkSecretKey(sourceApp);
+    if (!secretKey) return;
+
+    try {
+      const { createClerkClient } = await import('@clerk/backend');
+      const clerkClient = createClerkClient({ secretKey });
+
+      await clerkClient.users.deleteUserProfileImage(clerkUserId);
+      await clerkClient.users.updateUser(clerkUserId, {
+        publicMetadata: { profile_image_url: null },
+      });
+    } catch {
+      // Best-effort — don't throw
+    }
   }
 
   async touchLastActive(userId: string): Promise<void> {
