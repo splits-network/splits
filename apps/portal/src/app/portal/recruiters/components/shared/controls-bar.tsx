@@ -109,11 +109,11 @@ export function ControlsBar({
                 <>
                     {canInvite && (
                         <BaselScopeToggle
-                            value={showingMyRecruiters ? "my" : "all"}
-                            onChange={(v) => onFilterChange("company_ids", v === "my" ? companyIds : undefined)}
+                            value={showingMyRecruiters ? "mine" : "all"}
+                            onChange={(v) => onFilterChange("company_ids", v === "mine" ? companyIds : undefined)}
                             options={[
-                                { value: "all", label: "All Recruiters" },
-                                { value: "my", label: "My Recruiters" },
+                                { value: "mine", label: "Mine" },
+                                { value: "all", label: "All" },
                             ]}
                         />
                     )}

@@ -101,8 +101,8 @@ export function ControlsBar({
                         value={activeTab}
                         onChange={(v) => onTabChange(v as CompanyTab)}
                         options={[
-                            { value: "marketplace", label: "Marketplace" },
-                            { value: "my-companies", label: "My Companies" },
+                            { value: "my-companies", label: "Mine" },
+                            { value: "marketplace", label: "All" },
                         ]}
                     />
                     <BaselResultsCount count={companyCount} total={totalCount} />

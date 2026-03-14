@@ -97,7 +97,7 @@ export const listQuerySchema = {
     status: { type: 'string' },
     location: { type: 'string' },
     employment_type: { type: 'string' },
-    commute_type: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+    commute_type: { type: 'string' },
     job_level: { type: 'string' },
     company_id: { type: 'string', format: 'uuid' },
     job_owner_filter: { type: 'string', enum: ['all', 'assigned', 'saved'] },

@@ -68,6 +68,19 @@ You have a library of reusable effects. Mix and match — but **do NOT reuse the
 - **Glow backgrounds**: large blurred circles for ambient color
 - **Stripe accents**: horizontal color bars
 
+## Typography & Readability Rules
+
+These videos are viewed on **phone screens**. Font sizes must be large enough to read at a glance on a 6" display. The 1080x1920 canvas is ~3x a phone's CSS pixels, so sizes must be scaled up accordingly.
+
+**MANDATORY minimum font sizes (at 1080x1920 canvas):**
+- **Headlines**: minimum `80px`, prefer `84-96px`
+- **Subheadlines / taglines**: minimum `52px`, prefer `56-64px`
+- **Body text / list items / descriptions**: minimum `36px`, prefer `38-44px`
+- **Labels / tags / badges**: minimum `26px`, prefer `28-32px`
+- **Monospace labels / small UI chrome**: minimum `24px`, prefer `28-32px`
+
+**NEVER** use font sizes below `24px` for any visible text. If text doesn't fit at these sizes, reduce the word count — don't shrink the font.
+
 ## Pacing Guidelines
 
 - **Scene hold times**: minimum 2-3 seconds per scene so text is readable
@@ -109,3 +122,4 @@ Check `showcase/` for existing videos to avoid repeating the same style:
 - `applicant-network-promo-portrait.html` — boot terminal + scene cards + ghost killing
 - `splits-network-residual-income-portrait.html` — boot terminal + flow diagrams + compounding graph
 - `splits-network-shakeup-giveaway-portrait.html` — kinetic typography + slam text + checklist
+- `splits-network-swarm-recruiting-portrait.html` — radar/command-center + comparison table + stats dashboard

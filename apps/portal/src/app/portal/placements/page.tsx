@@ -86,7 +86,6 @@ export default function PlacementsBaselPage() {
         setSortOrder,
     } = useStandardList<Placement, PlacementFilters>({
         endpoint: "/placements",
-        include: "candidate,job,company,splits",
         defaultFilters: { status: undefined },
         defaultSortBy: "hired_at",
         defaultSortOrder: "desc",

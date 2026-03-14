@@ -20,7 +20,7 @@ export function CallCard({ call }: { call: CallListItem }) {
         <Link href={`/portal/calls/${call.id}`}>
             <article
                 className={[
-                    "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-md p-4",
+                    "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-shadow hover:shadow-md p-4",
                     isUpcoming ? "border-l-primary" : "border-l-base-300",
                 ].join(" ")}
             >

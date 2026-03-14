@@ -131,9 +131,9 @@ export function ControlsBar({
                         value={filters.job_owner_filter || "assigned"}
                         onChange={(v) => onFilterChange("job_owner_filter", v as "all" | "assigned" | "saved")}
                         options={[
-                            { value: "assigned", label: "My Roles" },
+                            { value: "assigned", label: "Mine" },
+                            { value: "all", label: "All" },
                             ...(isRecruiter ? [{ value: "saved", label: "Saved" }] : []),
-                            { value: "all", label: "All Roles" },
                         ]}
                     />
                     <BaselResultsCount count={jobCount} total={totalCount} />

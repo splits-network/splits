@@ -95,8 +95,7 @@ export default function MatchesPage() {
         setSortBy,
         setSortOrder,
     } = useStandardList<EnrichedMatch, MatchFilters>({
-        endpoint: "/matches",
-        include: "candidate,job,company",
+        endpoint: "/matches/views/enriched",
         defaultFilters: { status: "active" },
         defaultSortBy: "match_score",
         defaultSortOrder: "desc",

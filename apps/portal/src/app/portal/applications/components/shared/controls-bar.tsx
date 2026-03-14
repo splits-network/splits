@@ -116,8 +116,8 @@ export function ControlsBar({
                         value={filters.scope || "all"}
                         onChange={(v) => onFilterChange("scope", v as "all" | "mine")}
                         options={[
-                            { value: "all", label: "All Applications" },
-                            { value: "mine", label: "My Applications" },
+                            { value: "mine", label: "Mine" },
+                            { value: "all", label: "All" },
                         ]}
                     />
                     <BaselResultsCount count={applicationCount} total={totalCount} />

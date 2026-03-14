@@ -176,7 +176,6 @@ export default function InvitationsBaselPage() {
         setSortOrder,
     } = useStandardList<Invitation, InvitationFilters>({
         endpoint: "/recruiter-candidates",
-        include: "candidate",
         defaultFilters,
         defaultSortBy: "invited_at",
         defaultSortOrder: "desc",

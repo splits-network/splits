@@ -120,9 +120,9 @@ export function ControlsBar({
                         value={scope}
                         onChange={(v) => onScopeChange(v as CandidateScope)}
                         options={[
-                            { value: "mine", label: "My Candidates" },
+                            { value: "mine", label: "Mine" },
+                            { value: "all", label: "All" },
                             { value: "saved", label: "Saved" },
-                            { value: "all", label: "All Candidates" },
                         ]}
                     />
                     <BaselResultsCount count={candidateCount} total={totalCount} />

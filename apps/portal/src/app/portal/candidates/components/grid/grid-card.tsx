@@ -97,7 +97,7 @@ export function GridCard({
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-md",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-shadow hover:shadow-md",
                 isSelected
                     ? "border-l-primary border-primary"
                     : "border-l-primary",

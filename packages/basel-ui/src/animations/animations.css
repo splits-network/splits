@@ -202,7 +202,7 @@
 
 .controls-bar {
     position: sticky;
-    z-index: 10;
+    z-index: 30;
 }
 
 .content-area {
