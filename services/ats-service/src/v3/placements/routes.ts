@@ -8,6 +8,7 @@ import { IEventPublisher } from '../../v2/shared/events';
 import { PlacementRepository } from './repository';
 import { PlacementService } from './service';
 import { registerPlacementDetailView } from './views/detail.route';
+import { registerEnrichedPlacementView } from './views/enriched.route';
 import {
   CreatePlacementInput,
   UpdatePlacementInput,
@@ -24,6 +25,7 @@ export function registerPlacementRoutes(
   eventPublisher?: IEventPublisher
 ) {
   // --- Views (registered before :id routes to avoid collision) ---
+  registerEnrichedPlacementView(app, supabase);
   registerPlacementDetailView(app, supabase);
 
   const repository = new PlacementRepository(supabase);

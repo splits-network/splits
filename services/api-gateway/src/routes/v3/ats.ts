@@ -119,6 +119,7 @@ const atsV3Routes: V3RouteConfig[] = [
   { resource: 'placements', auth: 'required' },
 
   // ── Placements Views ────────────────────────────────────────
+  { path: '/placements/views/enriched', method: 'GET', auth: 'required' },
   { path: '/placements/:id/view/detail', method: 'GET', auth: 'required' },
 
   // ── Candidate Sourcers Core CRUD ──────────────────────────────
