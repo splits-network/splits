@@ -27,6 +27,18 @@ interface DiscountInfo {
     savings_percentage?: number;
 }
 
+export interface PaymentFormBillingDetails {
+    name?: string;
+    email?: string;
+    address?: {
+        line1?: string;
+        city?: string;
+        state?: string;
+        postal_code?: string;
+        country?: string;
+    };
+}
+
 export interface PaymentFormProps {
     onPaymentSuccess: (paymentMethodId: string) => void;
     onCancel?: () => void;
@@ -37,6 +49,9 @@ export interface PaymentFormProps {
     billingPeriod?: "monthly" | "annual";
     onDiscountApplied?: (discount: DiscountInfo) => void;
     returnUrl?: string;
+    formId?: string;
+    hideActions?: boolean;
+    billingDetails?: PaymentFormBillingDetails;
 }
 
 export function PaymentForm({
@@ -49,6 +64,9 @@ export function PaymentForm({
     billingPeriod = "monthly",
     onDiscountApplied,
     returnUrl,
+    formId,
+    hideActions = false,
+    billingDetails,
 }: PaymentFormProps) {
     const stripe = useStripe();
     const elements = useElements();
@@ -177,13 +195,26 @@ export function PaymentForm({
     const isSubmitting = processing || isProcessing;
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" id={formId}>
             {/* Payment Element */}
             <div className="p-4 bg-base-100 border border-base-300 border-l-4 border-l-primary">
                 <PaymentElement
                     onReady={() => setReady(true)}
                     options={{
                         layout: "tabs",
+                        defaultValues: billingDetails ? {
+                            billingDetails: {
+                                name: billingDetails.name || "",
+                                email: billingDetails.email || "",
+                                address: billingDetails.address ? {
+                                    line1: billingDetails.address.line1 || "",
+                                    city: billingDetails.address.city || "",
+                                    state: billingDetails.address.state || "",
+                                    postal_code: billingDetails.address.postal_code || "",
+                                    country: billingDetails.address.country || "US",
+                                } : undefined,
+                            },
+                        } : undefined,
                     }}
                 />
             </div>
@@ -270,44 +301,48 @@ export function PaymentForm({
             )}
 
             {/* Security Note */}
-            <div className="flex items-center gap-2 text-sm text-base-content/70">
-                <i className="fa-duotone fa-regular fa-lock text-success"></i>
-                <span>
-                    Your payment information is securely processed by Stripe
-                </span>
-            </div>
+            {!hideActions && (
+                <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <i className="fa-duotone fa-regular fa-lock text-success"></i>
+                    <span>
+                        Your payment information is securely processed by Stripe
+                    </span>
+                </div>
+            )}
 
             {/* Action Buttons */}
-            <div className="flex gap-2 justify-between">
-                {onCancel && (
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="btn"
-                        disabled={isSubmitting}
-                    >
-                        <i className="fa-duotone fa-regular fa-arrow-left"></i>
-                        Back
-                    </button>
-                )}
-                <button
-                    type="submit"
-                    className={`btn btn-primary ${onCancel ? "" : "btn-block"}`}
-                    disabled={!stripe || !elements || !ready || isSubmitting}
-                >
-                    {isSubmitting ? (
-                        <>
-                            <span className="loading loading-spinner loading-sm" />
-                            Processing...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-duotone fa-regular fa-credit-card" />
-                            {submitButtonText}
-                        </>
+            {!hideActions && (
+                <div className="flex gap-2 justify-between">
+                    {onCancel && (
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="btn"
+                            disabled={isSubmitting}
+                        >
+                            <i className="fa-duotone fa-regular fa-arrow-left"></i>
+                            Back
+                        </button>
                     )}
-                </button>
-            </div>
+                    <button
+                        type="submit"
+                        className={`btn btn-primary ${onCancel ? "" : "btn-block"}`}
+                        disabled={!stripe || !elements || !ready || isSubmitting}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm" />
+                                Processing...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-credit-card" />
+                                {submitButtonText}
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
         </form>
     );
 }

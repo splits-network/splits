@@ -12,9 +12,10 @@ export class CompanyBillingRepository {
       .from('company_billing_profiles')
       .select('*')
       .eq('company_id', companyId)
-      .maybeSingle();
+      .order('created_at', { ascending: false })
+      .limit(1);
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   }
 
   async list(page: number, limit: number): Promise<{ data: any[]; total: number }> {
@@ -28,10 +29,10 @@ export class CompanyBillingRepository {
     return { data: data || [], total: count || 0 };
   }
 
-  async upsert(companyId: string, record: Record<string, any>): Promise<any> {
+  async create(companyId: string, record: Record<string, any>): Promise<any> {
     const { data, error } = await this.supabase
       .from('company_billing_profiles')
-      .upsert({ ...record, company_id: companyId }, { onConflict: 'company_id' })
+      .insert({ ...record, company_id: companyId, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       .select()
       .single();
     if (error) throw error;
@@ -44,8 +45,9 @@ export class CompanyBillingRepository {
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('company_id', companyId)
       .select()
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1);
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   }
 }

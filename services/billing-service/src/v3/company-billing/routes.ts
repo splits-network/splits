@@ -6,7 +6,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CompanyBillingRepository } from './repository';
 import { CompanyBillingService } from './service';
-import { CompanyBillingCreateInput, CompanyBillingUpdateInput, companyIdParamSchema, setupIntentSchema, updatePaymentMethodSchema } from './types';
+import { CompanyBillingCreateInput, CompanyBillingUpdateInput, companyIdParamSchema, updatePaymentMethodSchema } from './types';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -54,7 +54,7 @@ export function registerCompanyBillingRoutes(app: FastifyInstance, supabase: Sup
 
   // POST /:companyId/setup-intent
   app.post('/api/v3/company-billing/:companyId/setup-intent', {
-    schema: { params: companyIdParamSchema, body: setupIntentSchema },
+    schema: { params: companyIdParamSchema },
   }, async (request, reply) => {
     const clerkUserId = request.headers['x-clerk-user-id'] as string;
     if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);

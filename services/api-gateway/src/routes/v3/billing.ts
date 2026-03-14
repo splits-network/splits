@@ -100,6 +100,7 @@ const billingV3Routes: V3RouteConfig[] = [
   { path: '/firm-billing-profiles/:firmId', method: 'POST', auth: 'required' },
   { path: '/firm-billing-profiles/:firmId', method: 'PATCH', auth: 'required' },
   { path: '/firm-billing-profiles/:firmId/setup-intent', method: 'POST', auth: 'required' },
+  { path: '/firm-billing-profiles/:firmId/payment-method', method: 'GET', auth: 'required' },
   { path: '/firm-billing-profiles/:firmId/payment-method', method: 'POST', auth: 'required' },
   { path: '/firm-billing-profiles/:firmId/readiness', method: 'GET', auth: 'required' },
 

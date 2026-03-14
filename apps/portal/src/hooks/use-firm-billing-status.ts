@@ -86,7 +86,7 @@ export function useFirmBillingStatus(
             const [profileRes, pmRes, readinessRes] = await Promise.allSettled([
                 client.get(`/firm-billing-profiles/${firmId}`),
                 client.get(`/firm-billing-profiles/${firmId}/payment-method`),
-                client.get(`/firm-billing-profiles/${firmId}/billing-readiness`),
+                client.get(`/firm-billing-profiles/${firmId}/readiness`),
             ]);
 
             if (profileRes.status === "fulfilled") {

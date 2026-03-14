@@ -54,7 +54,7 @@ export function useJobBillingReadiness(jobs: Job[]) {
             // Fetch firm billing readiness in parallel
             const firmPromises = firmIds.map(async (id) => {
                 try {
-                    const res = await client.get(`/firm-billing-profiles/${id}/billing-readiness`);
+                    const res = await client.get(`/firm-billing-profiles/${id}/readiness`);
                     results[`firm:${id}`] = res?.data?.status ?? "not_started";
                 } catch {
                     results[`firm:${id}`] = "not_started";

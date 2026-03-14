@@ -13,14 +13,14 @@ export const firmIdParamSchema = {
 
 export const createSchema = {
   type: 'object',
-  required: ['firm_id', 'billing_email', 'billing_terms'],
+  required: ['billing_email', 'billing_terms'],
   properties: {
-    firm_id: { type: 'string' },
     billing_email: { type: 'string' },
     billing_terms: { type: 'string', enum: ['immediate', 'net_30', 'net_60', 'net_90'] },
     invoice_delivery_method: { type: 'string', enum: ['email', 'manual'] },
     billing_contact_name: { type: 'string' },
     billing_address: { type: 'object' },
+    stripe_tax_id: { type: 'string' },
   },
   additionalProperties: false,
 };

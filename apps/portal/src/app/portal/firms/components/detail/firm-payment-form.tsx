@@ -4,23 +4,26 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { StripeProvider, PaymentForm } from "@/components/stripe";
+import type { PaymentFormBillingDetails } from "@/components/stripe/payment-form";
 
 interface FirmPaymentFormProps {
     firmId: string;
     onSuccess: () => void;
     onCancel?: () => void;
-    allowSkip?: boolean;
-    onSkip?: () => void;
     submitButtonText?: string;
+    formId?: string;
+    hideActions?: boolean;
+    billingDetails?: PaymentFormBillingDetails;
 }
 
 export function FirmPaymentForm({
     firmId,
     onSuccess,
     onCancel,
-    allowSkip,
-    onSkip,
     submitButtonText = "Save Payment Method",
+    formId,
+    hideActions,
+    billingDetails,
 }: FirmPaymentFormProps) {
     const { getToken } = useAuth();
     const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -39,7 +42,7 @@ export function FirmPaymentForm({
             const client = createAuthenticatedClient(token);
             const response = await client.post<{
                 data: { client_secret: string; customer_id: string };
-            }>(`/firm-billing-profiles/${firmId}/setup-intent`);
+            }>(`/firm-billing-profiles/${firmId}/setup-intent`, {});
 
             setClientSecret(response.data.client_secret);
         } catch (err: any) {
@@ -99,19 +102,12 @@ export function FirmPaymentForm({
                         Retry
                     </button>
                 </div>
-                <div className="flex items-center justify-between">
-                    {allowSkip && onSkip && (
-                        <button className="btn btn-sm btn-ghost" onClick={onSkip}>
-                            Skip for now
-                        </button>
-                    )}
-                    {onCancel && (
-                        <button className="btn btn-ghost" onClick={onCancel}>
-                            <i className="fa-duotone fa-regular fa-arrow-left mr-1" />
-                            Back
-                        </button>
-                    )}
-                </div>
+                {onCancel && (
+                    <button className="btn btn-ghost" onClick={onCancel}>
+                        <i className="fa-duotone fa-regular fa-arrow-left mr-1" />
+                        Back
+                    </button>
+                )}
             </div>
         );
     }
@@ -131,20 +127,11 @@ export function FirmPaymentForm({
                         onCancel={onCancel}
                         submitButtonText={submitButtonText}
                         isProcessing={saving}
+                        formId={formId}
+                        hideActions={hideActions}
+                        billingDetails={billingDetails}
                     />
                 </StripeProvider>
-            )}
-
-            {allowSkip && onSkip && (
-                <div className="flex justify-start">
-                    <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={onSkip}
-                        disabled={saving}
-                    >
-                        Skip for now
-                    </button>
-                </div>
             )}
 
             <p className="text-sm text-base-content/50 flex items-start gap-2">
@@ -152,7 +139,7 @@ export function FirmPaymentForm({
                 A 3% processing fee applies to all placement invoices to cover payment processing costs.
             </p>
 
-            <p className="text-xs text-base-content/30 flex items-center gap-1">
+            <p className="text-sm text-base-content/30 flex items-center gap-1">
                 <i className="fa-duotone fa-regular fa-lock" />
                 Your payment details are collected and stored securely by
                 Stripe. Splits Network never sees or stores your account details.

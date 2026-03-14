@@ -12,10 +12,11 @@ export class FirmBillingRepository {
       .from('firm_billing_profiles')
       .select('*')
       .eq('firm_id', firmId)
-      .maybeSingle();
+      .order('created_at', { ascending: false })
+      .limit(1);
 
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   }
 
   async create(record: Record<string, any>): Promise<any> {
@@ -35,12 +36,10 @@ export class FirmBillingRepository {
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('firm_id', firmId)
       .select()
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1);
 
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw error;
-    }
-    return data;
+    if (error) throw error;
+    return data?.[0] || null;
   }
 }

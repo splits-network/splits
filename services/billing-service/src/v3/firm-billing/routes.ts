@@ -7,7 +7,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { FirmBillingRepository } from './repository';
 import { FirmBillingService } from './service';
-import { firmIdParamSchema, createSchema, updateSchema, setupIntentSchema, updatePaymentMethodSchema } from './types';
+import { firmIdParamSchema, createSchema, updateSchema, updatePaymentMethodSchema } from './types';
 
 export function registerFirmBillingRoutes(
   app: FastifyInstance,
@@ -47,11 +47,20 @@ export function registerFirmBillingRoutes(
   });
 
   // POST /:firmId/setup-intent
-  app.post(`${basePath}/:firmId/setup-intent`, { schema: { params: firmIdParamSchema, body: setupIntentSchema } }, async (request, reply) => {
+  app.post(`${basePath}/:firmId/setup-intent`, { schema: { params: firmIdParamSchema } }, async (request, reply) => {
     const clerkUserId = request.headers['x-clerk-user-id'] as string;
     if (!clerkUserId) return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     const { firmId } = request.params as { firmId: string };
     const data = await service.createSetupIntent(firmId, clerkUserId);
+    return reply.send({ data });
+  });
+
+  // GET /:firmId/payment-method
+  app.get(`${basePath}/:firmId/payment-method`, { schema: { params: firmIdParamSchema } }, async (request, reply) => {
+    const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    if (!clerkUserId) return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
+    const { firmId } = request.params as { firmId: string };
+    const data = await service.getPaymentMethod(firmId, clerkUserId);
     return reply.send({ data });
   });
 

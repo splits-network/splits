@@ -40,7 +40,11 @@ export class CompanyBillingService {
 
   async upsert(companyId: string, input: CompanyBillingCreateInput, clerkUserId: string) {
     await this.assertAccess(clerkUserId);
-    return this.repository.upsert(companyId, input);
+    const existing = await this.repository.findByCompanyId(companyId);
+    if (existing) {
+      return this.repository.update(companyId, input);
+    }
+    return this.repository.create(companyId, input);
   }
 
   async update(companyId: string, input: CompanyBillingUpdateInput, clerkUserId: string) {

@@ -51,7 +51,9 @@ export class FirmBillingService {
     await this.requireFirmAccess(clerkUserId, firmId);
 
     const existing = await this.repository.findByFirmId(firmId);
-    if (existing) throw new BadRequestError('Firm billing profile already exists');
+    if (existing) {
+      return this.updateProfile(firmId, input, clerkUserId);
+    }
 
     const record = {
       firm_id: firmId,
@@ -60,6 +62,7 @@ export class FirmBillingService {
       invoice_delivery_method: input.invoice_delivery_method || 'email',
       billing_contact_name: input.billing_contact_name || null,
       billing_address: input.billing_address || null,
+      stripe_tax_id: input.stripe_tax_id || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -101,6 +104,40 @@ export class FirmBillingService {
     });
 
     return { client_secret: si.client_secret!, customer_id: customerId };
+  }
+
+  async getPaymentMethod(firmId: string, clerkUserId: string) {
+    await this.requireFirmAccess(clerkUserId, firmId);
+    const profile = await this.repository.findByFirmId(firmId);
+    if (!profile) return { has_payment_method: false, default_payment_method: null };
+
+    if (!profile.stripe_customer_id || !profile.stripe_default_payment_method_id) {
+      return { has_payment_method: false, default_payment_method: null };
+    }
+
+    try {
+      const pm = await this.stripe.paymentMethods.retrieve(profile.stripe_default_payment_method_id);
+      return {
+        has_payment_method: true,
+        default_payment_method: {
+          id: pm.id,
+          type: pm.type,
+          brand: pm.card?.brand || undefined,
+          last4: pm.card?.last4 || pm.us_bank_account?.last4 || undefined,
+          exp_month: pm.card?.exp_month || undefined,
+          exp_year: pm.card?.exp_year || undefined,
+          bank_name: pm.us_bank_account?.bank_name || undefined,
+          account_type: pm.us_bank_account?.account_type || undefined,
+          display_label: pm.card
+            ? `${(pm.card.brand || 'Card').charAt(0).toUpperCase() + (pm.card.brand || 'card').slice(1)} ••••${pm.card.last4}`
+            : pm.us_bank_account
+              ? `${pm.us_bank_account.bank_name || 'Bank'} ••••${pm.us_bank_account.last4}`
+              : pm.type,
+        },
+      };
+    } catch {
+      return { has_payment_method: false, default_payment_method: null };
+    }
   }
 
   async updatePaymentMethod(firmId: string, paymentMethodId: string, clerkUserId: string) {
