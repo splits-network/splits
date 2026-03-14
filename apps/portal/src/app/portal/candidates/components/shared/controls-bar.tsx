@@ -55,6 +55,7 @@ interface ControlsBarProps {
     sortBy: string;
     sortOrder: "asc" | "desc";
     onSortChange: (field: string, order: "asc" | "desc") => void;
+    isRecruiter?: boolean;
 }
 
 export function ControlsBar({
@@ -74,6 +75,7 @@ export function ControlsBar({
     sortBy,
     sortOrder,
     onSortChange,
+    isRecruiter,
 }: ControlsBarProps) {
     const [expanded, setExpanded] = useState(false);
 
@@ -119,10 +121,13 @@ export function ControlsBar({
                     <BaselScopeToggle
                         value={scope}
                         onChange={(v) => onScopeChange(v as CandidateScope)}
-                        options={[
+                        options={isRecruiter ? [
                             { value: "mine", label: "Mine" },
                             { value: "all", label: "All" },
                             { value: "saved", label: "Saved" },
+                        ] : [
+                            { value: "mine", label: "Mine" },
+                            { value: "all", label: "All" },
                         ]}
                     />
                     <BaselResultsCount count={candidateCount} total={totalCount} />

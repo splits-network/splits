@@ -206,6 +206,7 @@ export default function CandidatesPage() {
                     sortBy={sortBy}
                     sortOrder={sortOrder}
                     onSortChange={handleSortChange}
+                    isRecruiter={isRecruiter}
                 />
 
                 {/* Content Area */}

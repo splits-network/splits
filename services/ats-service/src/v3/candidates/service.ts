@@ -46,9 +46,15 @@ export class CandidateService {
       }
       // scope === 'all' — recruiters see all candidates (no additional filter)
     } else if (context.organizationIds.length > 0) {
-      // Company users see candidates who applied to their jobs
-      // For now, no extra scoping — they see all candidates
-      // (company-level candidate filtering would require join on applications + jobs)
+      const scope = params.scope || 'all';
+      if (scope === 'mine') {
+        if (context.companyIds.length === 0) return this.emptyPage(params);
+        const ids = await this.repository.getCompanyCandidateIds(context.companyIds);
+        if (ids.length === 0) return this.emptyPage(params);
+        scopeFilters.candidate_ids = ids;
+      }
+      // scope === 'saved' not supported for company users — falls through to 'all'
+      // scope === 'all' — company users see all candidates
     } else {
       return this.emptyPage(params);
     }

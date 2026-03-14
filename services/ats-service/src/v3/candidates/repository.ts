@@ -239,6 +239,28 @@ export class CandidateRepository {
     return (data || []).map(r => r.candidate_id);
   }
 
+  async getCompanyCandidateIds(companyIds: string[]): Promise<string[]> {
+    // Step 1: Get job IDs for the company
+    const { data: jobs, error: jobsError } = await this.supabase
+      .from('jobs')
+      .select('id')
+      .in('company_id', companyIds);
+
+    if (jobsError) throw jobsError;
+    if (!jobs || jobs.length === 0) return [];
+
+    const jobIds = jobs.map((j: any) => j.id);
+
+    // Step 2: Get distinct candidate IDs from applications on those jobs
+    const { data: apps, error: appsError } = await this.supabase
+      .from('applications')
+      .select('candidate_id')
+      .in('job_id', jobIds);
+
+    if (appsError) throw appsError;
+    return [...new Set((apps || []).map((a: any) => a.candidate_id))];
+  }
+
   async getSavedCandidateIds(recruiterId: string): Promise<string[]> {
     const { data, error } = await this.supabase
       .from('recruiter_saved_candidates')
