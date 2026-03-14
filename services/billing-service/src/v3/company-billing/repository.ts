@@ -31,7 +31,7 @@ export class CompanyBillingRepository {
   async upsert(companyId: string, record: Record<string, any>): Promise<any> {
     const { data, error } = await this.supabase
       .from('company_billing_profiles')
-      .upsert({ ...record, company_id: companyId })
+      .upsert({ ...record, company_id: companyId }, { onConflict: 'company_id' })
       .select()
       .single();
     if (error) throw error;

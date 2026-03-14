@@ -9,25 +9,23 @@ interface ConnectStatusCardProps {
     variant?: "full" | "compact";
     showActions?: boolean;
     className?: string;
-    onAction?: () => void;
 }
 
 export function ConnectStatusCard({
     variant = "full",
     showActions = true,
     className = "",
-    onAction,
 }: ConnectStatusCardProps) {
     const {
         loading,
         status,
+        createAccountAndRedirect,
+        openStripeOnboarding,
     } = useStripeConnectStatus();
 
     if (loading) {
         return (
-            <div
-                className={`bg-base-200 border border-base-300 ${className}`}
-            >
+            <div className={`bg-base-200 border border-base-300 ${className}`}>
                 <div className="p-6">
                     <LoadingState message="Loading payout status..." />
                 </div>
@@ -40,7 +38,7 @@ export function ConnectStatusCard({
             <CompactCard
                 status={status}
                 showActions={showActions}
-                onAction={onAction}
+                onSetup={createAccountAndRedirect}
                 className={className}
             />
         );
@@ -50,44 +48,24 @@ export function ConnectStatusCard({
         <FullCard
             status={status}
             showActions={showActions}
-            onAction={onAction}
+            onSetup={createAccountAndRedirect}
+            onManage={openStripeOnboarding}
             className={className}
         />
-    );
-}
-
-function ActionButton({
-    onAction,
-    className,
-    children,
-}: {
-    onAction?: () => void;
-    className: string;
-    children: React.ReactNode;
-}) {
-    if (onAction) {
-        return (
-            <button className={className} onClick={onAction}>
-                {children}
-            </button>
-        );
-    }
-    return (
-        <Link href="/portal/billing/connect" className={className}>
-            {children}
-        </Link>
     );
 }
 
 function FullCard({
     status,
     showActions,
-    onAction,
+    onSetup,
+    onManage,
     className,
 }: {
     status: string;
     showActions: boolean;
-    onAction?: () => void;
+    onSetup: () => void;
+    onManage: () => void;
     className: string;
 }) {
     return (
@@ -105,23 +83,17 @@ function FullCard({
                                     <i className="fa-duotone fa-regular fa-circle text-base-content/30"></i>
                                 </div>
                                 <div>
-                                    <div className="font-semibold">
-                                        Payouts Not Set Up
-                                    </div>
+                                    <div className="font-semibold">Payouts Not Set Up</div>
                                     <div className="text-sm text-base-content/70">
-                                        Connect your bank account to
-                                        receive placement commissions.
+                                        Connect your bank account to receive placement commissions.
                                     </div>
                                 </div>
                             </div>
                             {showActions && (
-                                <ActionButton
-                                    onAction={onAction}
-                                    className="btn btn-primary btn-sm"
-                                >
+                                <button className="btn btn-primary btn-sm" onClick={onSetup}>
                                     <i className="fa-duotone fa-regular fa-rocket"></i>
                                     Set Up Payouts
-                                </ActionButton>
+                                </button>
                             )}
                         </div>
                     )}
@@ -133,23 +105,17 @@ function FullCard({
                                     <i className="fa-duotone fa-regular fa-circle-half-stroke text-warning"></i>
                                 </div>
                                 <div>
-                                    <div className="font-semibold">
-                                        Setup Incomplete
-                                    </div>
+                                    <div className="font-semibold">Setup Incomplete</div>
                                     <div className="text-sm text-base-content/70">
-                                        You started connecting your
-                                        account but didn&apos;t finish.
+                                        Continue on Stripe to finish setting up your account.
                                     </div>
                                 </div>
                             </div>
                             {showActions && (
-                                <ActionButton
-                                    onAction={onAction}
-                                    className="btn btn-warning btn-sm"
-                                >
-                                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                                    Continue Setup
-                                </ActionButton>
+                                <button className="btn btn-warning btn-sm" onClick={onManage}>
+                                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square"></i>
+                                    Continue on Stripe
+                                </button>
                             )}
                         </div>
                     )}
@@ -160,12 +126,9 @@ function FullCard({
                                 <i className="fa-duotone fa-regular fa-clock text-warning"></i>
                             </div>
                             <div>
-                                <div className="font-semibold">
-                                    Verification Pending
-                                </div>
+                                <div className="font-semibold">Verification Pending</div>
                                 <div className="text-sm text-base-content/70">
-                                    Stripe is reviewing your information.
-                                    This usually takes 1-2 business days.
+                                    Stripe is reviewing your information. This usually takes 1-2 business days.
                                 </div>
                             </div>
                         </div>
@@ -178,24 +141,17 @@ function FullCard({
                                     <i className="fa-duotone fa-regular fa-circle-exclamation text-error"></i>
                                 </div>
                                 <div>
-                                    <div className="font-semibold">
-                                        Action Required
-                                    </div>
+                                    <div className="font-semibold">Action Required</div>
                                     <div className="text-sm text-base-content/70">
-                                        Stripe needs additional
-                                        information to keep your payouts
-                                        active.
+                                        Stripe needs additional information to keep your payouts active.
                                     </div>
                                 </div>
                             </div>
                             {showActions && (
-                                <ActionButton
-                                    onAction={onAction}
-                                    className="btn btn-error btn-sm"
-                                >
-                                    <i className="fa-duotone fa-regular fa-pen-to-square"></i>
-                                    Update Information
-                                </ActionButton>
+                                <button className="btn btn-error btn-sm" onClick={onManage}>
+                                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square"></i>
+                                    Update on Stripe
+                                </button>
                             )}
                         </div>
                     )}
@@ -207,26 +163,16 @@ function FullCard({
                                     <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                                 </div>
                                 <div>
-                                    <div className="font-semibold">
-                                        Payouts Ready
-                                    </div>
+                                    <div className="font-semibold">Payouts Ready</div>
                                     <div className="text-sm text-base-content/70">
-                                        Your bank account is connected
-                                        and payouts are enabled.
+                                        Your bank account is connected and payouts are enabled.
                                     </div>
                                 </div>
                             </div>
-
                             <div className="flex flex-wrap items-center gap-2">
-                                <BaselStatusPill color="success">
-                                    Identity verified
-                                </BaselStatusPill>
-                                <BaselStatusPill color="success">
-                                    Bank connected
-                                </BaselStatusPill>
-                                <BaselStatusPill color="success">
-                                    Payouts enabled
-                                </BaselStatusPill>
+                                <BaselStatusPill color="success">Identity verified</BaselStatusPill>
+                                <BaselStatusPill color="success">Bank connected</BaselStatusPill>
+                                <BaselStatusPill color="success">Payouts enabled</BaselStatusPill>
                             </div>
                         </div>
                     )}
@@ -239,46 +185,30 @@ function FullCard({
 function CompactCard({
     status,
     showActions,
-    onAction,
+    onSetup,
     className,
 }: {
     status: string;
     showActions: boolean;
-    onAction?: () => void;
+    onSetup: () => void;
     className: string;
 }) {
     if (status === "ready") {
         return (
-            <div
-                className={`flex items-center gap-2 ${className}`}
-            >
-                <BaselStatusPill color="success">
-                    Payout Ready
-                </BaselStatusPill>
+            <div className={`flex items-center gap-2 ${className}`}>
+                <BaselStatusPill color="success">Payout Ready</BaselStatusPill>
             </div>
         );
     }
 
     return (
         <div className={`flex items-center gap-2 ${className}`}>
-            <BaselStatusPill color="warning">
-                Payouts Not Set Up
-            </BaselStatusPill>
-            {showActions && onAction ? (
-                <button
-                    className="text-xs text-primary hover:underline"
-                    onClick={onAction}
-                >
+            <BaselStatusPill color="warning">Payouts Not Set Up</BaselStatusPill>
+            {showActions && (
+                <button className="text-xs text-primary hover:underline" onClick={onSetup}>
                     Set up
                 </button>
-            ) : showActions ? (
-                <Link
-                    href="/portal/billing/connect"
-                    className="text-xs text-primary hover:underline"
-                >
-                    Set up
-                </Link>
-            ) : null}
+            )}
         </div>
     );
 }

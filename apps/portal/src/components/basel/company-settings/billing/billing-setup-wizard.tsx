@@ -119,7 +119,7 @@ export function BaselBillingSetupWizard({
             if (zip) billingAddress.zip = zip;
             if (country) billingAddress.country = country;
 
-            await client.post(`/company-billing-profiles/${companyId}`, {
+            await client.post(`/company-billing/${companyId}`, {
                 billing_email: billingEmail.trim(),
                 billing_terms: billingTerms,
                 billing_contact_name: billingContactName.trim() || null,

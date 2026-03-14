@@ -90,9 +90,9 @@ export function useCompanyBillingStatus(
             const client = createAuthenticatedClient(token);
 
             const [profileRes, pmRes, readinessRes] = await Promise.allSettled([
-                client.get(`/company-billing-profiles/${companyId}`),
-                client.get(`/company-billing-profiles/${companyId}/payment-method`),
-                client.get(`/company-billing-profiles/${companyId}/billing-readiness`),
+                client.get(`/company-billing/${companyId}`),
+                client.get(`/company-billing/${companyId}/payment-method`),
+                client.get(`/company-billing/${companyId}/readiness`),
             ]);
 
             if (profileRes.status === "fulfilled") {

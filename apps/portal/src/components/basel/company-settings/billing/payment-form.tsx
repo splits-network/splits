@@ -39,7 +39,7 @@ export function BaselPaymentForm({
             const client = createAuthenticatedClient(token);
             const response = await client.post<{
                 data: { client_secret: string; customer_id: string };
-            }>(`/company-billing-profiles/${companyId}/setup-intent`);
+            }>(`/company-billing/${companyId}/setup-intent`);
 
             setClientSecret(response.data.client_secret);
         } catch (err: any) {
@@ -65,7 +65,7 @@ export function BaselPaymentForm({
 
             const client = createAuthenticatedClient(token);
             await client.post(
-                `/company-billing-profiles/${companyId}/payment-method`,
+                `/company-billing/${companyId}/payment-method`,
                 { payment_method_id: paymentMethodId },
             );
 

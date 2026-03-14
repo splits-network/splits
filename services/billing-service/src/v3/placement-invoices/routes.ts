@@ -63,8 +63,8 @@ export function registerPlacementInvoiceRoutes(
     return reply.code(201).send({ data });
   });
 
-  // GET /api/v3/company-billing-profiles/:companyId/invoices
-  app.get('/api/v3/company-billing-profiles/:companyId/invoices', {
+  // GET /api/v3/company-billing/:companyId/invoices
+  app.get('/api/v3/company-billing/:companyId/invoices', {
     schema: { params: companyIdParamSchema },
   }, async (request, reply) => {
     const clerkUserId = request.headers['x-clerk-user-id'] as string;

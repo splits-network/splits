@@ -67,7 +67,7 @@ export default function AdminBillingProfilesPage() {
         setPage,
         refresh,
     } = useStandardList<CompanyBillingProfile>({
-        endpoint: '/company-billing-profiles',
+        endpoint: '/company-billing',
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
         defaultLimit: 25,
@@ -114,7 +114,7 @@ export default function AdminBillingProfilesPage() {
             queryParams.set('limit', String(params.limit));
 
             const response = await apiClient.get(
-                `/company-billing-profiles/${selectedProfile.company_id}/invoices?${queryParams.toString()}`
+                `/company-billing/${selectedProfile.company_id}/invoices?${queryParams.toString()}`
             );
 
             return response;

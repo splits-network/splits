@@ -38,7 +38,7 @@ function formatPayoutStatus(status: string): string {
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 export function PayoutHistoryList() {
-    const { payouts, hasMore, loading, error, loadMore } = usePayoutHistory();
+    const { payouts, loading, error } = usePayoutHistory();
 
     if (loading && payouts.length === 0) {
         return (
@@ -107,27 +107,6 @@ export function PayoutHistoryList() {
                 </table>
             </div>
 
-            {hasMore && (
-                <div className="text-center mt-4">
-                    <button
-                        className="btn btn-sm btn-outline"
-                        onClick={loadMore}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <span className="loading loading-spinner loading-xs" />
-                                Loading...
-                            </>
-                        ) : (
-                            <>
-                                <i className="fa-duotone fa-regular fa-chevron-down" />
-                                Load More
-                            </>
-                        )}
-                    </button>
-                </div>
-            )}
         </div>
     );
 }

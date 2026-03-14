@@ -1,13 +1,14 @@
 /**
  * Connect V3 Service — Stripe Connect for individual recruiters
  *
- * Preserves all Stripe API integration patterns from V2.
+ * Uses Stripe-hosted onboarding exclusively. No custom form collection.
+ * All identity, bank account, and TOS handled by Stripe's hosted flow.
  */
 
 import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
+import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../v2/shared/events';
 import { ConnectRepository } from './repository';
 
@@ -38,12 +39,6 @@ export class ConnectService {
         country: 'US',
         business_type: 'individual',
         capabilities: { card_payments: { requested: true }, transfers: { requested: true } },
-        controller: {
-          stripe_dashboard: { type: 'none' },
-          fees: { payer: 'application' },
-          losses: { payments: 'application' },
-          requirement_collection: 'application',
-        },
         metadata: { recruiter_id: context.recruiterId, user_id: context.identityUserId || '' },
       });
       await this.repository.setConnectAccount(context.recruiterId, account.id);
@@ -59,7 +54,7 @@ export class ConnectService {
     const recruiter = await this.repository.getRecruiterById(context.recruiterId);
     if (!recruiter?.stripe_connect_account_id) throw new NotFoundError('StripeConnect', context.recruiterId);
 
-    const account = await this.stripe.accounts.retrieve(recruiter.stripe_connect_account_id);
+    const account = await this.safeRetrieveAccount(recruiter.stripe_connect_account_id);
     const onboarded = !!account.charges_enabled && !!account.payouts_enabled && !!account.details_submitted;
 
     if (onboarded !== !!recruiter.stripe_connect_onboarded) {
@@ -68,6 +63,17 @@ export class ConnectService {
 
     const externalAccounts = (account.external_accounts?.data || []) as any[];
     const bankAccount = externalAccounts.find((ea: any) => ea.object === 'bank_account');
+
+    // Fetch pending balance
+    let pendingBalance = 0;
+    try {
+      const balance = await this.stripe.balance.retrieve({
+        stripeAccount: recruiter.stripe_connect_account_id,
+      });
+      pendingBalance = balance.pending?.reduce((sum, b) => sum + b.amount, 0) || 0;
+    } catch {
+      // Balance may not be available for all account states
+    }
 
     return {
       account_id: recruiter.stripe_connect_account_id,
@@ -80,74 +86,8 @@ export class ConnectService {
       recruiter_id: context.recruiterId,
       bank_account: bankAccount ? { bank_name: bankAccount.bank_name || 'Bank Account', last4: bankAccount.last4, account_type: bankAccount.account_holder_type || 'individual' } : null,
       payout_schedule: (account.settings as any)?.payouts?.schedule || null,
-      individual: (account as any).individual || null,
+      pending_balance: pendingBalance,
     };
-  }
-
-  async updateAccountDetails(clerkUserId: string, body: any) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (!context.recruiterId) throw new ForbiddenError('Recruiter access required');
-
-    const recruiter = await this.repository.getRecruiterById(context.recruiterId);
-    if (!recruiter?.stripe_connect_account_id) throw new NotFoundError('StripeConnect', context.recruiterId);
-
-    await this.stripe.accounts.update(recruiter.stripe_connect_account_id, {
-      individual: {
-        first_name: body.first_name, last_name: body.last_name,
-        email: body.email, phone: body.phone,
-        dob: body.dob, ssn_last_4: body.ssn_last_4,
-        address: body.address,
-      },
-    });
-
-    return this.getAccountStatus(clerkUserId);
-  }
-
-  async addExternalAccount(clerkUserId: string, body: { token: string }) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (!context.recruiterId) throw new ForbiddenError('Recruiter access required');
-
-    const recruiter = await this.repository.getRecruiterById(context.recruiterId);
-    if (!recruiter?.stripe_connect_account_id) throw new NotFoundError('StripeConnect', context.recruiterId);
-
-    await this.stripe.accounts.createExternalAccount(recruiter.stripe_connect_account_id, {
-      external_account: body.token,
-    });
-
-    return this.getAccountStatus(clerkUserId);
-  }
-
-  async acceptTermsOfService(clerkUserId: string, ip: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (!context.recruiterId) throw new ForbiddenError('Recruiter access required');
-
-    const recruiter = await this.repository.getRecruiterById(context.recruiterId);
-    if (!recruiter?.stripe_connect_account_id) throw new NotFoundError('StripeConnect', context.recruiterId);
-
-    await this.stripe.accounts.update(recruiter.stripe_connect_account_id, {
-      tos_acceptance: { date: Math.floor(Date.now() / 1000), ip },
-    });
-
-    const status = await this.getAccountStatus(clerkUserId);
-    const account = await this.stripe.accounts.retrieve(recruiter.stripe_connect_account_id);
-    const needsVerification = (account.requirements?.currently_due || []).some((r: string) => r.includes('verification'));
-
-    return { ...status, needs_identity_verification: needsVerification };
-  }
-
-  async createVerificationSession(clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (!context.recruiterId) throw new ForbiddenError('Recruiter access required');
-
-    const recruiter = await this.repository.getRecruiterById(context.recruiterId);
-    if (!recruiter?.stripe_connect_account_id) throw new NotFoundError('StripeConnect', context.recruiterId);
-
-    const session = await this.stripe.identity.verificationSessions.create({
-      type: 'document',
-      metadata: { recruiter_id: context.recruiterId, stripe_account_id: recruiter.stripe_connect_account_id },
-    });
-
-    return { client_secret: session.client_secret!, session_id: session.id, status: session.status };
   }
 
   async listPayouts(clerkUserId: string, limit: number = 10) {
@@ -180,5 +120,21 @@ export class ConnectService {
     });
 
     return { url: link.url };
+  }
+
+  /**
+   * Safely retrieve a Stripe account, handling OAuth/Express permission errors.
+   */
+  private async safeRetrieveAccount(accountId: string): Promise<Stripe.Account> {
+    try {
+      return await this.stripe.accounts.retrieve(accountId);
+    } catch (err: any) {
+      if (err.code === 'oauth_not_supported' || err.statusCode === 403) {
+        return await this.stripe.accounts.retrieve(accountId, {
+          expand: ['external_accounts'],
+        });
+      }
+      throw err;
+    }
   }
 }

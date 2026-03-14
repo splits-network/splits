@@ -11,6 +11,7 @@ import RoleWizardModal from "../modals/role-wizard-modal";
 import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 import PipelineModal from "../modals/pipeline-modal";
 import type { Job } from "../../types";
+import { useBillingReadiness } from "../../hooks/billing-readiness-context";
 import {
     Button,
     SpeedMenu,
@@ -61,6 +62,8 @@ export default function RoleActionsToolbar({
     const toast = useToast();
     const { profile, isAdmin, isRecruiter, isCompanyUser, hasPermissionForCompany } =
         useUserProfile();
+    const { isBillingReady } = useBillingReadiness();
+    const billingReady = isBillingReady(job);
     const refresh = onRefresh ?? (() => {});
 
     const [showEditModal, setShowEditModal] = useState(false);
@@ -334,7 +337,7 @@ export default function RoleActionsToolbar({
                 />
             );
         }
-        if (job.status === "paused") {
+        if (job.status === "paused" && billingReady) {
             return (
                 <Button
                     icon="fa-duotone fa-regular fa-play"
@@ -347,7 +350,7 @@ export default function RoleActionsToolbar({
                 />
             );
         }
-        if (job.status === "draft") {
+        if (job.status === "draft" && billingReady) {
             return (
                 <Button
                     icon="fa-duotone fa-regular fa-play"
@@ -393,21 +396,29 @@ export default function RoleActionsToolbar({
         const items: StatusItem[] = [];
 
         if (job.status === "draft") {
-            items.push({ key: "active", status: "active", label: "Publish Live", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            if (billingReady) {
+                items.push({ key: "active", status: "active", label: "Publish Live", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            }
             items.push({ key: "pending", status: "pending", label: "Submit for Approval", icon: "fa-duotone fa-regular fa-paper-plane", btnClass: "text-warning" });
         }
         if (job.status === "pending") {
-            items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            if (billingReady) {
+                items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            }
             items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
         }
         if (job.status === "active") {
             items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
         }
         if (job.status === "paused") {
-            items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            if (billingReady) {
+                items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
+            }
         }
         if (job.status === "filled" || job.status === "closed") {
-            items.push({ key: "active", status: "active", label: "Reopen", icon: "fa-duotone fa-regular fa-rotate-left", btnClass: "text-success" });
+            if (billingReady) {
+                items.push({ key: "active", status: "active", label: "Reopen", icon: "fa-duotone fa-regular fa-rotate-left", btnClass: "text-success" });
+            }
         }
 
         // Toggle modifiers (only for active/paused jobs)
@@ -438,7 +449,7 @@ export default function RoleActionsToolbar({
 
         return items;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [job.status, job.is_early_access, job.is_priority]);
+    }, [job.status, job.is_early_access, job.is_priority, billingReady]);
 
     const renderStatusDropdown = () => {
         if (!actions.statusActions || statusItems.length === 0) return null;
@@ -622,7 +633,7 @@ export default function RoleActionsToolbar({
                     disabled: updatingStatus,
                     onClick: () => handleStatusChange("paused"),
                 });
-            } else if (job.status === "paused") {
+            } else if (job.status === "paused" && billingReady) {
                 speedDialActions.push({
                     key: "status",
                     icon: "fa-duotone fa-regular fa-play",
@@ -632,7 +643,7 @@ export default function RoleActionsToolbar({
                     disabled: updatingStatus,
                     onClick: () => handleStatusChange("active"),
                 });
-            } else if (job.status === "draft") {
+            } else if (job.status === "draft" && billingReady) {
                 speedDialActions.push({
                     key: "status",
                     icon: "fa-duotone fa-regular fa-play",

@@ -1,5 +1,8 @@
 /**
  * Connect V3 Routes — Stripe Connect for individual recruiters
+ *
+ * Simplified: status, create, payouts, onboarding link only.
+ * All identity/bank/TOS collection handled by Stripe's hosted onboarding.
  */
 
 import { FastifyInstance } from 'fastify';
@@ -7,12 +10,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { ConnectRepository } from './repository';
 import { ConnectService } from './service';
-import {
-  onboardingLinkSchema,
-  updateAccountSchema,
-  addBankAccountSchema,
-  payoutsQuerySchema,
-} from './types';
+import { onboardingLinkSchema, payoutsQuerySchema } from './types';
 
 export function registerConnectRoutes(
   app: FastifyInstance,
@@ -41,51 +39,6 @@ export function registerConnectRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const data = await service.getOrCreateAccount(clerkUserId);
-    return reply.send({ data });
-  });
-
-  // PATCH /account — update details
-  app.patch(`${basePath}/account`, {
-    schema: { body: updateAccountSchema },
-  }, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) {
-      return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
-    }
-    const data = await service.updateAccountDetails(clerkUserId, request.body);
-    return reply.send({ data });
-  });
-
-  // POST /bank-account — add bank account
-  app.post(`${basePath}/bank-account`, {
-    schema: { body: addBankAccountSchema },
-  }, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) {
-      return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
-    }
-    const data = await service.addExternalAccount(clerkUserId, request.body as { token: string });
-    return reply.send({ data });
-  });
-
-  // POST /accept-tos
-  app.post(`${basePath}/accept-tos`, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) {
-      return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
-    }
-    const ip = request.ip || (request.headers['x-forwarded-for'] as string) || '0.0.0.0';
-    const data = await service.acceptTermsOfService(clerkUserId, ip);
-    return reply.send({ data });
-  });
-
-  // POST /verification-session
-  app.post(`${basePath}/verification-session`, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) {
-      return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
-    }
-    const data = await service.createVerificationSession(clerkUserId);
     return reply.send({ data });
   });
 

@@ -24,9 +24,19 @@ export class FirmBillingService {
 
   private async requireFirmAccess(clerkUserId: string, firmId: string) {
     const context = await this.accessResolver.resolve(clerkUserId);
-    if (!context.isPlatformAdmin && !context.organizationIds.includes(firmId)) {
-      throw new ForbiddenError('Firm admin access required');
-    }
+    if (context.isPlatformAdmin) return context;
+
+    // Firm members are stored in firm_members (not memberships), so check directly
+    const { data: recruiter } = await this.supabase
+      .from('recruiters').select('id').eq('user_id', context.identityUserId).single();
+    if (!recruiter) throw new ForbiddenError('Firm admin access required');
+
+    const { data: member } = await this.supabase
+      .from('firm_members').select('role')
+      .eq('firm_id', firmId).eq('recruiter_id', recruiter.id).eq('status', 'active')
+      .in('role', ['owner', 'admin']).maybeSingle();
+    if (!member) throw new ForbiddenError('Firm admin access required');
+
     return context;
   }
 

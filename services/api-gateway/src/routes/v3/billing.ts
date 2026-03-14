@@ -49,7 +49,6 @@ const billingV3Routes: V3RouteConfig[] = [
   { path: '/placement-invoices', method: 'GET', auth: 'required' },
   { path: '/placements/:placementId/invoices', method: 'GET', auth: 'required' },
   { path: '/placements/:placementId/invoices', method: 'POST', auth: 'required' },
-  { path: '/company-billing-profiles/:companyId/invoices', method: 'GET', auth: 'required' },
 
   // ── Placement Snapshots ─────────────────────────────────────────
   { path: '/placement-snapshots', method: 'GET', auth: 'required' },
@@ -73,23 +72,15 @@ const billingV3Routes: V3RouteConfig[] = [
   { path: '/subscriptions/:id/discount', method: 'GET', auth: 'required' },
   { path: '/subscriptions/:id/discount', method: 'DELETE', auth: 'required' },
 
-  // ── Stripe Connect ──────────────────────────────────────────────
+  // ── Stripe Connect (Stripe-hosted onboarding) ──────────────────
   { path: '/stripe/connect/account', method: 'GET', auth: 'required' },
   { path: '/stripe/connect/account', method: 'POST', auth: 'required' },
-  { path: '/stripe/connect/account', method: 'PATCH', auth: 'required' },
-  { path: '/stripe/connect/bank-account', method: 'POST', auth: 'required' },
-  { path: '/stripe/connect/accept-tos', method: 'POST', auth: 'required' },
-  { path: '/stripe/connect/verification-session', method: 'POST', auth: 'required' },
   { path: '/stripe/connect/payouts', method: 'GET', auth: 'required' },
   { path: '/stripe/connect/onboarding-link', method: 'POST', auth: 'required' },
 
-  // ── Stripe Firm Connect ─────────────────────────────────────────
+  // ── Stripe Firm Connect (Stripe-hosted onboarding) ────────────
   { path: '/stripe/firm-connect/:firmId/account', method: 'GET', auth: 'required' },
   { path: '/stripe/firm-connect/:firmId/account', method: 'POST', auth: 'required' },
-  { path: '/stripe/firm-connect/:firmId/account', method: 'PATCH', auth: 'required' },
-  { path: '/stripe/firm-connect/:firmId/bank-account', method: 'POST', auth: 'required' },
-  { path: '/stripe/firm-connect/:firmId/accept-tos', method: 'POST', auth: 'required' },
-  { path: '/stripe/firm-connect/:firmId/verification-session', method: 'POST', auth: 'required' },
   { path: '/stripe/firm-connect/:firmId/payouts', method: 'GET', auth: 'required' },
   { path: '/stripe/firm-connect/:firmId/onboarding-link', method: 'POST', auth: 'required' },
 
@@ -98,6 +89,11 @@ const billingV3Routes: V3RouteConfig[] = [
   { path: '/company-billing/:companyId', method: 'GET', auth: 'required' },
   { path: '/company-billing/:companyId', method: 'POST', auth: 'required' },
   { path: '/company-billing/:companyId', method: 'PATCH', auth: 'required' },
+  { path: '/company-billing/:companyId/setup-intent', method: 'POST', auth: 'required' },
+  { path: '/company-billing/:companyId/payment-method', method: 'POST', auth: 'required' },
+  { path: '/company-billing/:companyId/payment-method', method: 'GET', auth: 'required' },
+  { path: '/company-billing/:companyId/readiness', method: 'GET', auth: 'required' },
+  { path: '/company-billing/:companyId/invoices', method: 'GET', auth: 'required' },
 
   // ── Firm Billing Profiles ───────────────────────────────────────
   { path: '/firm-billing-profiles/:firmId', method: 'GET', auth: 'required' },

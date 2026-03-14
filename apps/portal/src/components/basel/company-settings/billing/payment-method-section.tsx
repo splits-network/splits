@@ -97,7 +97,7 @@ export function BaselPaymentMethodSection({
 
             const client = createAuthenticatedClient(token);
             const response = await client.get<{ data: PaymentMethodResponse }>(
-                `/company-billing-profiles/${companyId}/payment-method`,
+                `/company-billing/${companyId}/payment-method`,
             );
             setPaymentMethod(response.data);
         } catch (err: any) {
