@@ -49,11 +49,17 @@ export class MarketplaceListingRepository {
     else if (params.is_candidate_recruiter === 'no') query = query.eq('candidate_recruiter', false);
     if (params.is_company_recruiter === 'yes') query = query.eq('company_recruiter', true);
     else if (params.is_company_recruiter === 'no') query = query.eq('company_recruiter', false);
-    if (params.is_marketplace_enabled === 'yes') query = query.eq('marketplace_enabled', true);
-    else if (params.is_marketplace_enabled === 'no') query = query.eq('marketplace_enabled', false);
-
-    if (params.filters?.marketplace_enabled !== undefined) {
-      query = query.eq('marketplace_enabled', params.filters.marketplace_enabled);
+    // marketplace_enabled filter — support all input shapes:
+    // top-level string "true"/"false" (from flattened filters), "yes"/"no", or nested filters object
+    const meFlag =
+      (params as any).marketplace_enabled ??
+      params.is_marketplace_enabled ??
+      params.filters?.marketplace_enabled;
+    if (meFlag !== undefined && meFlag !== null) {
+      const enabled = meFlag === true || meFlag === 'true' || meFlag === 'yes';
+      const disabled = meFlag === false || meFlag === 'false' || meFlag === 'no';
+      if (enabled) query = query.eq('marketplace_enabled', true);
+      else if (disabled) query = query.eq('marketplace_enabled', false);
     }
     if (params.filters?.company_ids?.length) {
       const { data: rels } = await this.supabase
