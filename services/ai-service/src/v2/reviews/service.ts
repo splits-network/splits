@@ -69,71 +69,74 @@ export class AIReviewServiceV2 {
 
         const { data: application } = (await response.json()) as { data: any };
 
-        // Build required_skills and preferred_skills from job_requirements
-        const mandatoryRequirements =
-            application.job_requirements
-                ?.filter((req: any) => req.requirement_type === 'mandatory')
-                .map((req: any) => req.description) || [];
+        // Job requirements are nested under job from the V2 applications endpoint
+        const jobRequirements = application.job?.job_requirements || [];
 
-        const preferredRequirements =
-            application.job_requirements
-                ?.filter((req: any) => req.requirement_type === 'preferred')
-                .map((req: any) => req.description) || [];
-// Extract resume text from ALL documents (combine them)
+        // Fetch actual job skills from DB (skill names like "Python", "React")
+        const jobId = input.job_id || application.job_id;
+        let jobSkills: { name: string; is_required: boolean }[] = [];
+        if (jobId) {
+            try {
+                jobSkills = await this.repository.getJobSkills(jobId);
+            } catch (err) {
+                this.logger.warn({ err, job_id: jobId }, 'Failed to fetch job skills for AI review');
+            }
+        }
+        const requiredSkillNames = jobSkills.filter(s => s.is_required).map(s => s.name);
+        const preferredSkillNames = jobSkills.filter(s => !s.is_required).map(s => s.name);
+        // Extract data from ALL application documents
         let resumeText = input.resume_text || '';
-        if (!resumeText && application.documents && Array.isArray(application.documents)) {
+        let resumeData = input.resume_data || undefined;
+        if (application.documents && Array.isArray(application.documents)) {
             const documentsWithText: string[] = [];
             const documentsWithoutText: any[] = [];
-            
-            // Process ALL documents, not just one
+
             for (const doc of application.documents) {
-                // CRITICAL: Resume text is stored in metadata.extracted_text (JSONB field)
+                // Raw text from metadata.extracted_text
                 if (doc.metadata?.extracted_text) {
                     documentsWithText.push(doc.metadata.extracted_text);
-                    this.logger.info({ 
-                        application_id: input.application_id, 
-                        document_id: doc.id,
-                        filename: doc.filename,
-                        text_length: doc.metadata.extracted_text.length
-                    }, '✅ Found extracted text in document');
-                } else {
+                }
+
+                // Structured data from structured_metadata (source of truth over application.resume_data)
+                if (!resumeData && doc.document_type === 'resume' && doc.structured_metadata) {
+                    const sm = doc.structured_metadata;
+                    resumeData = {
+                        summary: sm.professional_summary,
+                        experience: sm.experience,
+                        education: sm.education,
+                        skills: sm.skills,
+                        certifications: sm.certifications,
+                        total_years_experience: sm.total_years_experience,
+                        highest_degree: sm.highest_degree,
+                    };
+                }
+
+                if (!doc.metadata?.extracted_text) {
                     documentsWithoutText.push({
                         id: doc.id,
                         filename: doc.filename,
+                        document_type: doc.document_type,
                         processing_status: doc.processing_status,
-                        has_metadata: !!doc.metadata,
-                        metadata_keys: doc.metadata ? Object.keys(doc.metadata) : []
                     });
                 }
             }
-            
-            // Combine all document text
-            if (documentsWithText.length > 0) {
+
+            if (documentsWithText.length > 0 && !resumeText) {
                 resumeText = documentsWithText.join('\n\n=== NEXT DOCUMENT ===\n\n');
-                this.logger.info({ 
-                    application_id: input.application_id, 
-                    documents_processed: documentsWithText.length,
-                    total_text_length: resumeText.length
-                }, '✅ Combined text from multiple documents');
             }
-            
-            // Log warning for documents without text
+
             if (documentsWithoutText.length > 0) {
-                this.logger.error({ 
-                    application_id: input.application_id, 
-                    documents_without_text: documentsWithoutText.length,
-                    total_documents: application.documents?.length ?? 0,
-                    details: documentsWithoutText
-                }, '❌ CRITICAL: Documents found but NO extracted_text in metadata - document text extraction is not running!');
-            }
-            
-            // Log overall status
-            if (!resumeText) {
-                this.logger.error({ 
+                this.logger.warn({
                     application_id: input.application_id,
-                    total_documents: application.length
-                }, '❌ CRITICAL: NO resume text available for AI review - all documents have processing_status=pending');
+                    documents_without_text: documentsWithoutText.length,
+                    details: documentsWithoutText
+                }, 'Documents found without extracted text');
             }
+        }
+
+        // Fall back to application.resume_data if no document structured_metadata found
+        if (!resumeData && application.resume_data) {
+            resumeData = application.resume_data;
         }
 
         return {
@@ -141,16 +144,18 @@ export class AIReviewServiceV2 {
             candidate_id: input.candidate_id || application.candidate_id,
             job_id: input.job_id || application.job_id,
             resume_text: resumeText,
+            resume_data: application.resume_data || undefined,
+            cover_letter: application.cover_letter || undefined,
             documents_count: application.documents?.length || 0,
             job_description: input.job_description || application.job?.recruiter_description || application.job?.description || '',
             job_title: input.job_title || application.job?.title || 'Unknown Position',
-            required_skills: input.required_skills || mandatoryRequirements,
-            preferred_skills: input.preferred_skills || preferredRequirements,
+            required_skills: input.required_skills || requiredSkillNames,
+            preferred_skills: input.preferred_skills || preferredSkillNames,
             required_years: input.required_years,
             candidate_location: input.candidate_location || application.candidate?.location,
             job_location: input.job_location || application.job?.location,
             auto_transition: input.auto_transition,
-            job_requirements: application.job_requirements?.map((req: any) => ({
+            job_requirements: jobRequirements.map((req: any) => ({
                 requirement_text: req.description || req.requirement_text,
                 is_required: req.requirement_type === 'mandatory' || req.is_required,
                 category: req.category,
@@ -200,6 +205,8 @@ export class AIReviewServiceV2 {
                 matched_skills: result.matched_skills,
                 missing_skills: result.missing_skills,
                 skills_match_percentage: result.skills_match_percentage,
+                matched_requirements: result.matched_requirements,
+                missing_requirements: result.missing_requirements,
                 required_years: result.required_years,
                 candidate_years: result.candidate_years,
                 meets_experience_requirement: result.meets_experience_requirement,
@@ -408,19 +415,47 @@ export class AIReviewServiceV2 {
             });
         }
         
-        // Build resume text section with better context
+        // Build resume section — prefer structured data, fall back to raw text
         let resumeSection = '';
+        if (input.resume_data) {
+            const rd = input.resume_data;
+            resumeSection = '- Resume (Structured):\n';
+            if (rd.summary) resumeSection += `  Summary: ${rd.summary}\n`;
+            if (rd.skills?.length) resumeSection += `  Skills: ${rd.skills.join(', ')}\n`;
+            if (rd.experience?.length) {
+                resumeSection += '  Experience:\n';
+                rd.experience.slice(0, 10).forEach((exp: any) => {
+                    resumeSection += `    - ${exp.title || exp.role || ''} at ${exp.company || ''} (${exp.duration || exp.dates || ''})\n`;
+                });
+            }
+            if (rd.education?.length) {
+                resumeSection += '  Education:\n';
+                rd.education.slice(0, 5).forEach((edu: any) => {
+                    resumeSection += `    - ${edu.degree || ''} ${edu.field || ''} from ${edu.institution || edu.school || ''}\n`;
+                });
+            }
+            if (rd.certifications?.length) resumeSection += `  Certifications: ${rd.certifications.join(', ')}\n`;
+            if (rd.total_years_experience) resumeSection += `  Total Years Experience: ${rd.total_years_experience}\n`;
+            if (rd.highest_degree) resumeSection += `  Highest Degree: ${rd.highest_degree}\n`;
+        }
         if (input.resume_text && typeof input.resume_text === 'string') {
             // Truncate to 4000 chars to stay within token limits
-            resumeSection = `- Resume/Profile: ${input.resume_text.substring(0, 4000)}`;
-        } else if (input.documents_count && input.documents_count > 0) {
-            // Documents exist but text extraction failed/pending
-            resumeSection = `- Resume: ${input.documents_count} document(s) attached but text extraction is pending. Analysis is limited to pre-screen answers and basic profile information.`;
-        } else {
-            // No documents uploaded
-            resumeSection = '- Resume: Not provided';
+            resumeSection += `- Resume (Full Text): ${input.resume_text.substring(0, 4000)}`;
         }
-        
+        if (!resumeSection) {
+            if (input.documents_count && input.documents_count > 0) {
+                resumeSection = `- Resume: ${input.documents_count} document(s) attached but text extraction is pending. Analysis is limited to pre-screen answers and basic profile information.`;
+            } else {
+                resumeSection = '- Resume: Not provided';
+            }
+        }
+
+        // Build cover letter section
+        let coverLetterSection = '';
+        if (input.cover_letter) {
+            coverLetterSection = `\n- Cover Letter: ${input.cover_letter.substring(0, 2000)}`;
+        }
+
         return `Analyze the following candidate-job match and provide a detailed assessment.
 
 **Job Information:**
@@ -432,7 +467,7 @@ export class AIReviewServiceV2 {
 - Location: ${input.job_location || 'Not specified'}${requirementsSection}
 
 **Candidate Information:**
-${resumeSection}
+${resumeSection}${coverLetterSection}
 - Location: ${input.candidate_location || 'Not specified'}${preScreenSection}
 
 **Instructions:**
@@ -448,6 +483,8 @@ Analyze this candidate's fit for the role and provide your assessment in the fol
   "matched_skills": ["<skill 1>", "<skill 2>", ...],
   "missing_skills": ["<skill 1>", "<skill 2>", ...],
   "skills_match_percentage": <number 0-100>,
+  "matched_requirements": ["<requirement that candidate meets>", ...],
+  "missing_requirements": ["<requirement that candidate does not meet>", ...],
   "required_years": ${input.required_years || null},
   "candidate_years": <estimated years of relevant experience>,
   "meets_experience_requirement": <boolean>,
@@ -460,6 +497,8 @@ Analyze this candidate's fit for the role and provide your assessment in the fol
 - List 0-5 concerns (specific gaps or mismatches)
 - matched_skills: Skills from required/preferred list that candidate has
 - missing_skills: Skills from required/preferred list that candidate lacks
+- matched_requirements: Requirements from the required/preferred qualifications list that the candidate demonstrably meets based on their resume, cover letter, or pre-screen answers
+- missing_requirements: Requirements from the required/preferred qualifications list that the candidate does not meet or has no evidence for
 - location_compatibility: perfect (same location/remote), good (nearby/willing to relocate), challenging (different location but possible), mismatch (incompatible)
 
 Be honest and specific in your assessment. Focus on concrete qualifications and experience.`;

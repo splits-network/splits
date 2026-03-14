@@ -57,6 +57,8 @@ export class AIReviewRepository {
         matched_skills: string[];
         missing_skills: string[];
         skills_match_percentage: number;
+        matched_requirements: string[];
+        missing_requirements: string[];
         required_years?: number;
         candidate_years?: number;
         meets_experience_requirement?: boolean;
@@ -89,6 +91,8 @@ export class AIReviewRepository {
         matched_skills: string[];
         missing_skills: string[];
         skills_match_percentage: number;
+        matched_requirements: string[];
+        missing_requirements: string[];
         required_years?: number;
         candidate_years?: number;
         meets_experience_requirement?: boolean;
@@ -168,6 +172,19 @@ export class AIReviewRepository {
             data: (data || []).map(transformAIReviewFromDB),
             total: count || 0,
         };
+    }
+
+    async getJobSkills(jobId: string): Promise<{ name: string; is_required: boolean }[]> {
+        const { data, error } = await this.supabase
+            .from('job_skills')
+            .select('is_required, skill:skills(name)')
+            .eq('job_id', jobId);
+
+        if (error) throw error;
+        return (data || []).map((row: any) => ({
+            name: row.skill?.name || '',
+            is_required: row.is_required,
+        })).filter((s: any) => s.name);
     }
 
     async getStatsByJobId(jobId: string): Promise<any> {

@@ -141,9 +141,14 @@ export function DetailLoader({
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     const { getToken } = useAuth();
+    const { isRecruiter, isCompanyUser } = useUserProfile();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
+
+    const viewPath = isCompanyUser
+        ? "company-detail"
+        : "recruiter-detail";
 
     const fetchDetail = useCallback(
         async (id: string, signal?: { cancelled: boolean }) => {
@@ -151,16 +156,16 @@ export function DetailLoader({
                 const token = await getToken();
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: Job }>(`/jobs/${id}`, {
-                    params: { include: "company,requirements,skills" },
-                });
+                const res = await client.get<{ data: Job }>(
+                    `/jobs/${id}/view/${viewPath}`,
+                );
                 if (!signal?.cancelled) setJob(res.data);
             } catch (err) {
                 console.error("Failed to fetch job detail:", err);
             }
             // eslint-disable-next-line react-hooks/exhaustive-deps
         },
-        [],
+        [viewPath],
     );
 
     useEffect(() => {

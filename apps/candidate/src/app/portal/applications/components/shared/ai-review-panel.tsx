@@ -534,6 +534,46 @@ export default function AIReviewPanel({
                 </div>
             )}
 
+            {/* Requirements Analysis */}
+            {((aiReview.matched_requirements && aiReview.matched_requirements.length > 0) ||
+                (aiReview.missing_requirements && aiReview.missing_requirements.length > 0)) && (
+                <div className="bg-base-100 border-l-4 border-secondary p-5 shadow-sm">
+                    <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-4">
+                        Requirements Analysis
+                    </h4>
+
+                    {aiReview.matched_requirements && aiReview.matched_requirements.length > 0 && (
+                        <div className="mb-4">
+                            <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
+                                Met Requirements
+                            </span>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {aiReview.matched_requirements.map((req, index) => (
+                                    <BaselStatusPill key={index} color="success">
+                                        {req}
+                                    </BaselStatusPill>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {aiReview.missing_requirements && aiReview.missing_requirements.length > 0 && (
+                        <div>
+                            <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
+                                Unmet Requirements
+                            </span>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {aiReview.missing_requirements.map((req, index) => (
+                                    <BaselStatusPill key={index} color="error">
+                                        {req}
+                                    </BaselStatusPill>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Experience & Location */}
             <div className="grid grid-cols-2 gap-4">
                 {aiReview.candidate_years !== null &&

@@ -585,6 +585,8 @@ export interface AIReview {
     skills_match_percentage?: number | null;
     matched_skills?: string[];
     missing_skills?: string[];
+    matched_requirements?: string[];
+    missing_requirements?: string[];
 
     // Experience Analysis
     experience_analysis: AIExperienceAnalysis;

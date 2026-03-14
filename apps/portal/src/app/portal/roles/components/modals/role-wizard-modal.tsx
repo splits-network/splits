@@ -119,8 +119,9 @@ export default function RoleWizardModal({
                 const token = await getToken();
                 if (!token) throw new Error("Authentication required");
                 const client = createAuthenticatedClient(token);
-                const response = await client.get<{ data: any }>(`/jobs/${jobId}`, { params: { include: "requirements,pre_screen_questions" } });
+                const response = await client.get<{ data: any }>(`/jobs/${jobId}/view/editor`);
                 const job = response.data;
+                const jobSkills = job.skills || [];
                 setFormData({
                     title: job.title || "", company_id: job.company_id || "", location: job.location || "",
                     department: job.department || "", status: job.status || "draft",
@@ -139,19 +140,9 @@ export default function RoleWizardModal({
                         question: q.question, question_type: q.question_type, is_required: q.is_required,
                         options: q.options, disclaimer: q.disclaimer || "",
                     })) || [],
-                    required_skills: [], preferred_skills: [],
+                    required_skills: jobSkills.filter((js: any) => js.is_required && js.skill).map((js: any) => js.skill),
+                    preferred_skills: jobSkills.filter((js: any) => !js.is_required && js.skill).map((js: any) => js.skill),
                 });
-                try {
-                    const skillsResponse = await client.get<{ data: Array<{ skill_id: string; skill: SkillOption; is_required: boolean }> }>(`/job-skills?job_id=${jobId}`);
-                    const jobSkills = skillsResponse.data || [];
-                    setFormData(prev => ({
-                        ...prev,
-                        required_skills: jobSkills.filter(js => js.is_required && js.skill).map(js => js.skill),
-                        preferred_skills: jobSkills.filter(js => !js.is_required && js.skill).map(js => js.skill),
-                    }));
-                } catch (skillsErr) {
-                    console.error("Failed to load job skills:", skillsErr);
-                }
             } catch (err: any) {
                 console.error("Failed to load job:", err);
                 setError("Could not load role data. Close and reopen to try again.");
