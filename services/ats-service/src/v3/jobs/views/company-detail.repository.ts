@@ -14,9 +14,11 @@ export class CompanyDetailRepository {
       .select(`
         id, title, status, location, department, employment_type,
         salary_min, salary_max, fee_percentage, guarantee_days,
-        description, candidate_description,
+        description, recruiter_description, candidate_description,
         commute_types, job_level, open_to_relocation, show_salary_range,
         job_owner_recruiter_id, pre_screen_questions,
+        company_id, source_firm_id,
+        is_early_access, is_priority,
         activates_at, closes_at, created_at, updated_at,
         company:companies(id, name, logo_url, industry, headquarters_location, description, website)
       `)

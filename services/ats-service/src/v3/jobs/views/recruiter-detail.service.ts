@@ -27,11 +27,12 @@ export class RecruiterDetailService {
     const job = await this.repository.findById(id);
     if (!job) throw new NotFoundError('Job', id);
 
-    const [requirements, skills] = await Promise.all([
+    const [requirements, skills, application_count] = await Promise.all([
       this.repository.findRequirements(id),
       this.repository.findSkills(id),
+      this.repository.getApplicationCount(id),
     ]);
 
-    return { ...job, requirements, skills };
+    return { ...job, requirements, skills, application_count };
   }
 }

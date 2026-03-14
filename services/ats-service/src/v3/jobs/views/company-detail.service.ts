@@ -46,10 +46,13 @@ export class CompanyDetailService {
       ? await this.repository.getRecruiterName(job.job_owner_recruiter_id)
       : null;
 
+    const application_count = stageBreakdown.reduce((sum, s) => sum + s.count, 0);
+
     return {
       ...job,
       requirements,
       skills,
+      application_count,
       application_stages: stageBreakdown,
       posted_by_recruiter: recruiterName,
     };

@@ -44,4 +44,15 @@ export class RecruiterDetailRepository {
     if (error) throw error;
     return data || [];
   }
+
+  async getApplicationCount(jobId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('applications')
+      .select('id', { count: 'exact', head: true })
+      .eq('job_id', jobId)
+      .is('expired_at', null);
+
+    if (error) throw error;
+    return count || 0;
+  }
 }
