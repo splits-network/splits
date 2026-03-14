@@ -79,7 +79,7 @@ spec:
                       - name: MATCHING_SERVICE_URL
                         value: "http://matching-service:80"
                       - name: SUPPORT_SERVICE_URL
-                        value: "http://support-service:3021"
+                        value: "http://support-service:80"
                   resources:
                       requests:
                           cpu: 100m
