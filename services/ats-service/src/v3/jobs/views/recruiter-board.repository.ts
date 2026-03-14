@@ -29,6 +29,7 @@ export class RecruiterBoardRepository {
         fee_percentage, guarantee_days,
         location, department, employment_type, commute_types, job_level,
         salary_min, salary_max, source_firm_id, company_id,
+        description, recruiter_description,
         activates_at, closes_at, created_at, updated_at,
         job_owner_recruiter_id,
         company:companies(id, name, logo_url, industry, headquarters_location)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDrawer } from "@/contexts";
 import type { RecruiterCode } from "../../types";
 import { ReferralCodeDetailLoader } from "../shared/referral-code-detail-loader";
@@ -18,7 +18,16 @@ export function GridView({
     onRefresh?: () => void;
 }) {
     const selectedCode = codes.find((c) => c.id === selectedId);
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedCode) {
+            onSelect(selectedCode);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedCode) {

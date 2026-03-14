@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDrawer } from "@/contexts";
 import type { CompanyInvitation } from "../../types";
 import { InvitationDetailLoader } from "../shared/invitation-detail-loader";
@@ -18,7 +18,16 @@ export function GridView({
     onRefreshAction?: () => void;
 }) {
     const selectedInv = invitations.find((inv) => inv.id === selectedId);
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedInv) {
+            onSelectAction(selectedInv);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedInv) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDrawer } from "@/contexts";
 import type { Application } from "../../types";
 import { DetailLoader } from "../shared/application-detail";
@@ -19,7 +19,16 @@ export function GridView({
 }) {
     const selectedApplication =
         applications.find((a) => a.id === selectedId) ?? null;
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedApplication) {
+            onSelect(selectedApplication);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedApplication) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDrawer } from "@/contexts";
 import type { EnrichedMatch } from "../../types";
 import { GridCard } from "./grid-card";
@@ -22,7 +22,16 @@ export function GridView({
     dismissing?: boolean;
 }) {
     const selectedMatch = matches.find((m) => m.id === selectedId) ?? null;
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedMatch) {
+            onSelect(selectedMatch);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedMatch) {

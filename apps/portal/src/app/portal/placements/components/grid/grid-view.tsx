@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDrawer } from "@/contexts";
 import type { Placement } from "../../types";
 import { GridCard } from "./grid-card";
@@ -19,7 +19,16 @@ export function GridView({
 }) {
     const selectedPlacement =
         placements.find((p) => p.id === selectedId) ?? null;
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedPlacement) {
+            onSelect(selectedPlacement);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedPlacement) {

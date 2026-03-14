@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDrawer } from "@/contexts";
 import type { RecruiterWithUser } from "../../types";
 import { DetailLoader } from "../shared/recruiter-detail";
@@ -18,7 +18,16 @@ export function GridView({
     onRefreshAction?: () => void;
 }) {
     const selectedRecruiter = recruiters.find((r) => r.id === selectedId);
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedRecruiter) {
+            onSelectAction(selectedRecruiter);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedRecruiter) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useDrawer } from "@/contexts";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -30,11 +30,20 @@ export function GridView({
     const isMarketplace = activeTab === "marketplace";
     const { getToken } = useAuth();
     const [tagMap, setTagMap] = useState<TagMap>({});
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
 
     const selectedItem = items.find(
         (item) => rowId(item, isMarketplace) === selectedId,
     );
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedItem) {
+            onSelectAction(selectedItem);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (items.length === 0) return;

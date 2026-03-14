@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDrawer } from "@/contexts";
 import type { Firm } from "../../types";
 import { FirmDetailLoader } from "../shared/firm-detail-loader";
@@ -18,7 +18,16 @@ export function GridView({
     onRefreshAction?: () => void;
 }) {
     const selectedFirm = firms.find((t) => t.id === selectedId) ?? null;
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedFirm) {
+            onSelectAction(selectedFirm);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedFirm) {

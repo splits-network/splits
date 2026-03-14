@@ -23,10 +23,14 @@ export class CompanyBoardRepository {
     let query = this.supabase
       .from('jobs')
       .select(`
-        id, title, status, location, department, employment_type,
-        salary_min, salary_max, fee_percentage, guarantee_days,
-        activates_at, closes_at, created_at,
-        company:companies(id, name, logo_url)
+        id, title, status, is_early_access, is_priority,
+        fee_percentage, guarantee_days,
+        location, department, employment_type, commute_types, job_level,
+        salary_min, salary_max, source_firm_id, company_id,
+        description, recruiter_description,
+        activates_at, closes_at, created_at, updated_at,
+        job_owner_recruiter_id,
+        company:companies(id, name, logo_url, industry, headquarters_location)
       `, { count: 'exact' })
       .in('company_id', companyIds);
 
@@ -68,6 +72,21 @@ export class CompanyBoardRepository {
       }
     }
     return { total, active };
+  }
+
+  async batchFetchSkills(jobIds: string[]): Promise<Record<string, any[]>> {
+    if (jobIds.length === 0) return {};
+    const { data } = await this.supabase
+      .from('job_skills')
+      .select('job_id, skill_id, is_required, skill:skills(id, name, slug)')
+      .in('job_id', jobIds);
+
+    const map: Record<string, any[]> = {};
+    for (const s of data || []) {
+      if (!map[s.job_id]) map[s.job_id] = [];
+      map[s.job_id].push(s);
+    }
+    return map;
   }
 
   async getCompanyIdsForOrg(organizationIds: string[]): Promise<string[]> {

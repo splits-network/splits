@@ -39,10 +39,15 @@ export class CompanyBoardService {
     );
 
     const jobIds = jobs.map((j: any) => j.id);
-    const appCounts = await this.repository.batchFetchApplicationCounts(jobIds);
+    const [appCounts, skillsMap] = await Promise.all([
+      this.repository.batchFetchApplicationCounts(jobIds),
+      this.repository.batchFetchSkills(jobIds),
+    ]);
 
     const enriched = jobs.map((job: any) => ({
       ...job,
+      skills: skillsMap[job.id] || [],
+      application_count: appCounts.total[job.id] || 0,
       total_applications: appCounts.total[job.id] || 0,
       active_applications: appCounts.active[job.id] || 0,
     }));

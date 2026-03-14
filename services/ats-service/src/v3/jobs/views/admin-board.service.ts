@@ -26,12 +26,25 @@ export class AdminBoardService {
       throw new ForbiddenError('Platform admin access required');
     }
 
-    const { data, total } = await this.repository.findForBoard(params);
+    const { data: jobs, total } = await this.repository.findForBoard(params);
+
+    const jobIds = jobs.map((j: any) => j.id);
+    const [skillsMap, appCounts] = await Promise.all([
+      this.repository.batchFetchSkills(jobIds),
+      this.repository.batchFetchApplicationCounts(jobIds),
+    ]);
+
+    const enriched = jobs.map((job: any) => ({
+      ...job,
+      skills: skillsMap[job.id] || [],
+      application_count: appCounts[job.id] || 0,
+    }));
+
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
 
     return {
-      data,
+      data: enriched,
       pagination: { total, page, limit, total_pages: Math.ceil(total / limit) },
     };
   }

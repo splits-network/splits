@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDrawer } from "@/contexts";
 import type { RecruiterCompanyRelationship } from "../../types";
 import { ConnectionDetail } from "../shared/connection-detail";
@@ -18,7 +18,16 @@ export function GridView({
     onRefreshAction?: () => void;
 }) {
     const selectedInvitation = invitations.find((inv) => inv.id === selectedId) ?? null;
-    const { open, close } = useDrawer();
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
+
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedInvitation) {
+            onSelectAction(selectedInvitation);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedInvitation) {
