@@ -21,6 +21,8 @@ interface CandidatePipelineChartProps {
 const STAGE_MAPPING: Record<string, string> = {
     draft: "In Review",
     ai_review: "In Review",
+    gpt_review: "In Review",
+    ai_failed: "In Review",
     ai_reviewed: "In Review",
     recruiter_request: "In Review",
     recruiter_proposed: "In Review",

@@ -14,6 +14,8 @@ export function getApplicationStageIcon(stage: string): string {
         recruiter_proposed: 'fa-handshake',
         recruiter_request: 'fa-user-clock',
         ai_review: 'fa-robot',
+        gpt_review: 'fa-robot',
+        ai_failed: 'fa-triangle-exclamation',
         screen: 'fa-eye',
         submitted: 'fa-paper-plane',
         interview: 'fa-comments',

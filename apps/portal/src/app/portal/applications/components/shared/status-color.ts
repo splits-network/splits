@@ -36,6 +36,10 @@ export function getStageDisplay(stage: string | null | undefined): StageDisplay 
         case "ai_review":
         case "ai_reviewed":
             return { label: "AI Review", icon: "fa-robot", color: "info" };
+        case "gpt_review":
+            return { label: "GPT Review", icon: "fa-robot", color: "info" };
+        case "ai_failed":
+            return { label: "Review Failed", icon: "fa-triangle-exclamation", color: "error" };
         case "recruiter_request":
             return { label: "Requested", icon: "fa-user-tie", color: "warning" };
         case "recruiter_proposed":

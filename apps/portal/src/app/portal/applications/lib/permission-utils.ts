@@ -209,6 +209,8 @@ function getStageLabel(stage: ApplicationStage): string {
     const labels: Record<ApplicationStage, string> = {
         draft: 'Draft',
         ai_review: 'AI Review',
+        gpt_review: 'GPT Review',
+        ai_failed: 'Review Failed',
         ai_reviewed: 'AI Reviewed',
         recruiter_request: 'Recruiter Request',
         recruiter_proposed: 'Recruiter Proposal',

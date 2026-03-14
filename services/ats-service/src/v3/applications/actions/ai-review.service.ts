@@ -28,12 +28,12 @@ export class AIReviewService {
     if (!application) throw new NotFoundError('Application', id);
 
     const context = await this.accessResolver.resolve(clerkUserId);
-    const isRetrigger = application.stage === 'ai_review';
+    const isRetrigger = application.stage === 'ai_review' || application.stage === 'gpt_review';
 
     if (isRetrigger && !context.isPlatformAdmin) {
       throw new ForbiddenError('Only platform admins can retrigger a stuck AI review');
     }
-    if (!isRetrigger && application.stage !== 'draft') {
+    if (!isRetrigger && application.stage !== 'draft' && application.stage !== 'ai_failed') {
       throw new BadRequestError(`Cannot trigger AI review from stage: ${application.stage}`);
     }
 

@@ -110,7 +110,7 @@ export function useCandidateDashboardData() {
 
             // Response rate: % of submitted apps that got a company response
             // Pre-submission stages don't count as "submitted to company"
-            const preSubmissionStages = ['draft', 'ai_review', 'ai_reviewed', 'recruiter_request', 'recruiter_proposed', 'recruiter_review'];
+            const preSubmissionStages = ['draft', 'ai_review', 'gpt_review', 'ai_failed', 'ai_reviewed', 'recruiter_request', 'recruiter_proposed', 'recruiter_review'];
             const submittedToCompany = allApps.filter(a => !preSubmissionStages.includes(a.stage));
             const gotResponse = submittedToCompany.filter(a =>
                 !['submitted', 'company_review'].includes(a.stage)

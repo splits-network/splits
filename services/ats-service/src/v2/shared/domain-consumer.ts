@@ -56,8 +56,9 @@ export class DomainEventConsumer {
             // Bind to application.stage_changed events from other services
             await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
 
-            // Bind to ai_review.completed events to trigger stage transitions
+            // Bind to ai_review events to trigger stage transitions
             await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.completed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.failed');
 
             // Bind to candidate events from network service
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.link_requested');
@@ -113,6 +114,10 @@ export class DomainEventConsumer {
 
                 case 'ai_review.completed':
                     await this.handleAIReviewCompleted(event);
+                    break;
+
+                case 'ai_review.failed':
+                    await this.handleAIReviewFailed(event);
                     break;
 
                 case 'candidate.link_requested':
@@ -364,6 +369,90 @@ export class DomainEventConsumer {
                 'Failed to process ai_review.completed event'
             );
             throw error; // Rethrow to trigger message requeue
+        }
+    }
+
+    /**
+     * Handle ai_review.failed events
+     * Transitions application to 'ai_failed' so candidate can resubmit
+     */
+    async handleAIReviewFailed(event: any): Promise<void> {
+        try {
+            const payload = event.payload;
+
+            this.logger.info(
+                {
+                    application_id: payload.application_id,
+                    error: payload.error,
+                },
+                'Processing ai_review.failed event'
+            );
+
+            const application = await this.applicationRepository.findApplication(payload.application_id, 'internal-service');
+            if (!application) {
+                this.logger.warn(
+                    { application_id: payload.application_id },
+                    'Application not found for AI review failure'
+                );
+                return;
+            }
+
+            // Only transition if still in a review stage (ai_review or gpt_review)
+            if (application.stage !== 'ai_review' && application.stage !== 'gpt_review') {
+                this.logger.info(
+                    { application_id: application.id, current_stage: application.stage },
+                    'Application not in review stage, skipping ai_failed transition'
+                );
+                return;
+            }
+
+            const nextStage = 'ai_failed';
+
+            const updatedApplication = await this.applicationRepository.updateApplication(application.id, {
+                stage: nextStage,
+            });
+
+            await this.applicationRepository.createAuditLog({
+                application_id: updatedApplication.id,
+                action: 'ai_review_failed',
+                performed_by_user_id: 'system',
+                performed_by_role: 'system',
+                old_value: { stage: application.stage },
+                new_value: { stage: nextStage },
+                metadata: {
+                    error: payload.error,
+                    source_event: event.event_id,
+                },
+            });
+
+            if (this.eventPublisher) {
+                await this.eventPublisher.publish('application.stage_changed', {
+                    application_id: updatedApplication.id,
+                    candidate_id: updatedApplication.candidate_id,
+                    job_id: updatedApplication.job_id,
+                    recruiter_id: updatedApplication.recruiter_id,
+                    old_stage: application.stage,
+                    new_stage: nextStage,
+                    changed_by: 'system',
+                });
+            }
+
+            this.logger.info(
+                {
+                    application_id: updatedApplication.id,
+                    stage_change: `${application.stage} -> ${nextStage}`,
+                },
+                'Application moved to ai_failed — candidate can resubmit for review'
+            );
+        } catch (error) {
+            this.logger.error(
+                {
+                    error: (error as Error).message,
+                    event: event,
+                },
+                'Failed to process ai_review.failed event'
+            );
+            throw error;
         }
     }
 

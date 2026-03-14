@@ -12,7 +12,9 @@ import { BadRequestError, ForbiddenError } from '@splits-network/shared-fastify'
  */
 export const STAGE_TRANSITIONS: Record<string, string[]> = {
   draft: ['ai_review', 'screen', 'rejected'],
-  ai_review: ['ai_reviewed', 'rejected'],
+  ai_review: ['ai_reviewed', 'ai_failed', 'rejected'],
+  gpt_review: ['ai_reviewed', 'ai_failed', 'rejected'],
+  ai_failed: ['ai_review', 'draft', 'rejected'],
   ai_reviewed: ['draft', 'screen', 'submitted', 'rejected'],
   recruiter_request: ['draft', 'ai_review', 'rejected'],
   recruiter_proposed: ['ai_review', 'draft', 'recruiter_review', 'screen', 'submitted', 'rejected'],

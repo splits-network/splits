@@ -193,17 +193,18 @@ export default function ApplicationWizardModal({
             });
 
             if (existingApplication) {
+                // Save application data first (stage stays as-is)
                 await authClient.patch<{ data: any }>(
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
                         pre_screen_answers: preScreenAnswers,
-                        stage: "ai_review",
                     },
                 );
                 applicationId = existingApplication.id;
             } else {
+                // Create as draft first (ATS always creates as draft for candidates)
                 const result = await authClient.post<{ data: any }>(
                     "/applications",
                     {
@@ -211,11 +212,17 @@ export default function ApplicationWizardModal({
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
                         pre_screen_answers: preScreenAnswers,
-                        stage: "ai_review",
                     },
                 );
                 applicationId = result.data.id;
             }
+
+            // Transition to ai_review — triggers application.stage_changed event
+            // which the ai-service picks up to run the AI review pipeline
+            await authClient.patch<{ data: any }>(
+                `/applications/${applicationId}`,
+                { stage: "ai_review" },
+            );
 
             if (formData.notes && formData.notes.trim()) {
                 try {
@@ -278,11 +285,11 @@ export default function ApplicationWizardModal({
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
                         pre_screen_answers: preScreenAnswers,
-                        stage: "draft",
                     },
                 );
                 applicationId = existingApplication.id;
             } else {
+                // ATS creates as draft by default for candidates
                 const result = await authClient.post<{ data: any }>(
                     "/applications",
                     {
@@ -290,7 +297,6 @@ export default function ApplicationWizardModal({
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
                         pre_screen_answers: preScreenAnswers,
-                        stage: "draft",
                     },
                 );
                 applicationId = result.data.id;

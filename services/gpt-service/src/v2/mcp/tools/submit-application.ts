@@ -287,24 +287,23 @@ export function registerSubmitApplicationTool(
             // Publish events for AI review pipeline
             if (eventPublisher) {
                 try {
-                    if (isProposalAcceptance) {
-                        // Stage change event — AI service listens for new_stage === 'ai_review'
-                        await eventPublisher.publish('application.stage_changed', {
-                            application_id: application.id,
-                            candidate_id: storedToken.candidateId,
-                            job_id: storedToken.jobId,
-                            old_stage: 'recruiter_proposed',
-                            new_stage: 'ai_review',
-                        });
-                    } else {
-                        // Created event — AI service listens for stage === 'ai_review'
+                    // Publish application.created for other services (notification, analytics, etc.)
+                    if (!isProposalAcceptance) {
                         await eventPublisher.publish('application.created', {
                             application_id: application.id,
                             candidate_id: storedToken.candidateId,
                             job_id: storedToken.jobId,
-                            stage: 'ai_review',
+                            stage: 'gpt_review',
                         });
                     }
+                    // Stage change event — AI service listens for new_stage === 'gpt_review'
+                    await eventPublisher.publish('application.stage_changed', {
+                        application_id: application.id,
+                        candidate_id: storedToken.candidateId,
+                        job_id: storedToken.jobId,
+                        old_stage: isProposalAcceptance ? 'recruiter_proposed' : 'draft',
+                        new_stage: 'gpt_review',
+                    });
                     // Audit event
                     await eventPublisher.publish('gpt.action.application_submitted', {
                         application_id: application.id,

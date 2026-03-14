@@ -40,6 +40,8 @@ function getPipelineProgress(stage: string): { current: number; total: number } 
     }
     const normalized =
         stage === "ai_reviewed" ? "ai_review" :
+        stage === "gpt_review" ? "ai_review" :
+        stage === "ai_failed" ? "ai_review" :
         stage === "recruiter_request" || stage === "recruiter_proposed" ? "recruiter_review" :
         stage === "screen" ? "submitted" :
         stage === "company_feedback" ? "company_review" :

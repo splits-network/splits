@@ -459,8 +459,10 @@ export interface MaskedCandidate {
 export type ApplicationStage =
     // Candidate self-service stages
     | 'draft'              // Candidate working on application
-    | 'ai_review'          // AI analyzing fit
+    | 'ai_review'          // AI analyzing fit (user-submitted)
+    | 'gpt_review'         // AI analyzing fit (GPT-submitted)
     | 'ai_reviewed'        // AI review complete, awaiting candidate action
+    | 'ai_failed'          // AI review failed — candidate can resubmit
 
     // Recruiter involvement stages
     | 'recruiter_request'  // Recruiter requested more details from candidate (should also contain notes that are appended to recruiter_notes)

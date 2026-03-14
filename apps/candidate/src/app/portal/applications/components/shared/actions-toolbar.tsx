@@ -18,6 +18,8 @@ import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 
 const BACK_TO_DRAFT_STAGES = [
     "ai_review",
+    "gpt_review",
+    "ai_failed",
     "ai_reviewed",
     "recruiter_request",
     "recruiter_review",
@@ -25,7 +27,7 @@ const BACK_TO_DRAFT_STAGES = [
     "rejected",
 ];
 
-const SUBMITTABLE_STAGES = ["draft", "ai_reviewed"];
+const SUBMITTABLE_STAGES = ["draft", "ai_reviewed", "ai_failed"];
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -68,7 +70,7 @@ export default function ActionsToolbar({
 
     // Derived state
     const recruiterUserId = item.recruiter?.user?.id;
-    const canEdit = item.stage === "draft";
+    const canEdit = item.stage === "draft" || item.stage === "ai_failed";
     const canBackToDraft = BACK_TO_DRAFT_STAGES.includes(item.stage);
     const canSubmit = SUBMITTABLE_STAGES.includes(item.stage);
     const canWithdraw = WITHDRAWABLE_STAGES.includes(item.stage);
@@ -146,7 +148,7 @@ export default function ActionsToolbar({
 
     // Submit handler
     const handleSubmit = async () => {
-        if (item.stage === "draft") {
+        if (item.stage === "draft" || item.stage === "ai_failed") {
             await actions.submitToAiReview(item.id);
         } else if (item.stage === "ai_reviewed") {
             await actions.submitApplication(item.id);
@@ -180,6 +182,7 @@ export default function ActionsToolbar({
     // Get submit button label based on stage
     const getSubmitLabel = () => {
         if (item.stage === "draft") return "Submit for Review";
+        if (item.stage === "ai_failed") return "Resubmit for Review";
         if (item.stage === "ai_reviewed") return "Submit";
         return "Submit";
     };

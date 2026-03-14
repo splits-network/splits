@@ -25,7 +25,7 @@ const ACTIVE_STAGES = [
     "company_feedback",
     "recruiter_review",
 ];
-const PENDING_STAGES = ["draft", "ai_review", "ai_reviewed"];
+const PENDING_STAGES = ["draft", "ai_review", "gpt_review", "ai_failed", "ai_reviewed"];
 
 export default function ApplicationsBaselPage() {
     const searchParams = useSearchParams();

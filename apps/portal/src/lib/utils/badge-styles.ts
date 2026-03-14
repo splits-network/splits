@@ -16,6 +16,8 @@ export function getApplicationStageBadge(stage: string | null | undefined): { cl
     const styles: Record<string, { className: string; label: string }> = {
         draft: { className: 'badge-neutral', label: 'Draft' },
         ai_review: { className: 'badge-warning', label: 'AI Review' },
+        gpt_review: { className: 'badge-warning', label: 'GPT Review' },
+        ai_failed: { className: 'badge-error', label: 'Review Failed' },
         ai_reviewed: { className: 'badge-warning', label: 'AI Reviewed' },
         recruiter_request: { className: 'badge-info', label: 'Recruiter Request' },
         recruiter_proposed: { className: 'badge-primary', label: 'Proposed by Recruiter' },

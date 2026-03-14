@@ -887,8 +887,8 @@ export class ApplicationsEventConsumer {
                 return;
             }
 
-            // Scenario 5: Application submitted for AI review
-            if (stage === 'ai_review') {
+            // Scenario 5: Application submitted for AI review (user or GPT)
+            if (stage === 'ai_review' || stage === 'gpt_review') {
 
                 const nextSteps = has_recruiter
                     ? 'Your application is being reviewed by our AI system. Once complete, your recruiter will review and submit it to the company.'

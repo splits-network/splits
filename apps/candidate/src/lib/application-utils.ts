@@ -3,7 +3,10 @@ export const getStatusColor = (stage: string) => {
         case 'draft':
             return 'badge-ghost';
         case 'ai_review':
+        case 'gpt_review':
             return 'badge-warning';
+        case 'ai_failed':
+            return 'badge-error';
         case 'ai_reviewed':
             return 'badge-success badge-soft';
         case 'screen':
@@ -42,6 +45,10 @@ export const formatStage = (stage: string) => {
             return 'Draft';
         case 'ai_review':
             return 'AI Review';
+        case 'gpt_review':
+            return 'GPT Review';
+        case 'ai_failed':
+            return 'Review Failed';
         case 'ai_reviewed':
             return 'AI Reviewed';
         case 'screen':

@@ -22,6 +22,8 @@ interface ApplicationStatusChartProps {
 const STAGE_TO_GROUP: Record<string, string> = {
     draft: "review",
     ai_review: "review",
+    gpt_review: "review",
+    ai_failed: "review",
     ai_reviewed: "review",
     recruiter_request: "review",
     recruiter_proposed: "review",

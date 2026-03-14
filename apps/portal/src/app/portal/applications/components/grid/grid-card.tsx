@@ -33,6 +33,7 @@ const iconStyles = [
 const PIPELINE_STAGES = [
     "draft",
     "ai_review",
+    "gpt_review",
     "recruiter_review",
     "submitted",
     "company_review",
@@ -50,6 +51,8 @@ function getPipelineProgress(stage: string): { current: number; total: number } 
     // Map aliases to canonical stages
     const normalized =
         stage === "ai_reviewed" ? "ai_review" :
+        stage === "gpt_review" ? "gpt_review" :
+        stage === "ai_failed" ? "ai_review" :
         stage === "recruiter_request" || stage === "recruiter_proposed" ? "recruiter_review" :
         stage === "screen" ? "submitted" :
         stage === "company_feedback" ? "company_review" :
