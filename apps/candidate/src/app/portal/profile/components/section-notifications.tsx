@@ -13,7 +13,6 @@ interface EffectivePreference {
     email_enabled: boolean;
     in_app_enabled: boolean;
     unsubscribable: boolean;
-    email_entitled: boolean;
 }
 
 /** Candidate-relevant categories only */
@@ -117,7 +116,6 @@ export function SectionNotifications() {
     }
 
     const prefMap = new Map(preferences.map((p) => [p.category, p]));
-    const emailEntitled = preferences[0]?.email_entitled ?? true;
 
     return (
         <div className="space-y-8">
@@ -146,16 +144,6 @@ export function SectionNotifications() {
                 </div>
             )}
 
-            {!emailEntitled && (
-                <div className="alert alert-info">
-                    <i className="fa-duotone fa-regular fa-circle-info" />
-                    <span>
-                        Email notifications are available on Pro and Partner
-                        plans. Upgrade to enable email delivery.
-                    </span>
-                </div>
-            )}
-
             {/* Column headers */}
             <div className="flex items-center justify-end gap-8 pr-2 text-sm font-semibold text-base-content/40 uppercase tracking-wider">
                 <span className="w-14 text-center">Email</span>
@@ -176,8 +164,7 @@ export function SectionNotifications() {
                             const pref = prefMap.get(cat);
                             if (!pref) return null;
 
-                            const emailDisabled =
-                                pref.unsubscribable || !emailEntitled;
+                            const emailDisabled = pref.unsubscribable;
                             const inAppDisabled = pref.unsubscribable;
 
                             return (
@@ -205,33 +192,18 @@ export function SectionNotifications() {
                                     </div>
 
                                     <div className="w-14 flex justify-center">
-                                        <div
-                                            className={
-                                                !emailEntitled &&
-                                                !pref.unsubscribable
-                                                    ? "tooltip tooltip-left"
-                                                    : ""
+                                        <input
+                                            type="checkbox"
+                                            className="toggle toggle-sm toggle-primary"
+                                            checked={pref.email_enabled}
+                                            disabled={emailDisabled}
+                                            onChange={() =>
+                                                togglePreference(
+                                                    cat,
+                                                    "email_enabled",
+                                                )
                                             }
-                                            data-tip={
-                                                !emailEntitled &&
-                                                !pref.unsubscribable
-                                                    ? "Upgrade to enable"
-                                                    : undefined
-                                            }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                className="toggle toggle-sm toggle-primary"
-                                                checked={pref.email_enabled}
-                                                disabled={emailDisabled}
-                                                onChange={() =>
-                                                    togglePreference(
-                                                        cat,
-                                                        "email_enabled",
-                                                    )
-                                                }
-                                            />
-                                        </div>
+                                        />
                                     </div>
 
                                     <div className="w-14 flex justify-center">

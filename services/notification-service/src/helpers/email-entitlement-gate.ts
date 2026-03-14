@@ -53,6 +53,10 @@ export class EmailEntitlementGate {
 
             if (hasEmail) return requestedChannel;
 
+            // Candidates (non-recruiter users) are not subject to subscription-based email gating
+            const isRecruiter = await this.isRecruiterUser(recipientUserId);
+            if (!isRecruiter) return requestedChannel;
+
             // Downgrade: 'both' → 'in_app', 'email' → skip
             if (requestedChannel === 'both') {
                 this.logger.info(
@@ -76,6 +80,29 @@ export class EmailEntitlementGate {
             );
             return requestedChannel;
         }
+    }
+
+    /**
+     * Check if a user has a recruiter profile. Candidates (non-recruiters)
+     * are not subject to subscription-based email gating.
+     */
+    private async isRecruiterUser(userId: string): Promise<boolean> {
+        const { data, error } = await this.supabase
+            .from('recruiters')
+            .select('id')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (error) {
+            this.logger.error(
+                { userId, error: error.message },
+                'Failed to check recruiter status for email gate',
+            );
+            // Fail open — don't block email if we can't determine user type
+            return false;
+        }
+
+        return !!data;
     }
 
     /**

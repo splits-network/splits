@@ -44,12 +44,16 @@ export class PreferenceService {
   async getAll(clerkUserId: string): Promise<EffectivePreference[]> {
     const userId = await this.resolveUserId(clerkUserId);
 
-    const [saved, hasEmailEntitlement] = await Promise.all([
+    const [saved, hasEmailEntitlement, isRecruiter] = await Promise.all([
       this.repository.findByUserId(userId),
       this.entitlementChecker
         .hasEntitlement(clerkUserId, 'email_notifications')
         .catch(() => true),
+      this.isRecruiterUser(userId),
     ]);
+
+    // Candidates (non-recruiter users) are not subject to email entitlement gating
+    const emailEntitled = isRecruiter ? hasEmailEntitlement : true;
 
     const savedMap = new Map(saved.map((p: any) => [p.category, p]));
 
@@ -64,7 +68,7 @@ export class PreferenceService {
         email_enabled: pref?.email_enabled ?? true,
         in_app_enabled: pref?.in_app_enabled ?? true,
         unsubscribable: config.unsubscribable,
-        email_entitled: hasEmailEntitlement,
+        email_entitled: emailEntitled,
       };
     });
   }
@@ -80,9 +84,13 @@ export class PreferenceService {
     const userId = await this.resolveUserId(clerkUserId);
     const saved = await this.repository.upsertPreference(userId, category, input);
     const config = PREFERENCE_CATEGORIES[category as PreferenceCategory];
-    const hasEmailEntitlement = await this.entitlementChecker
-      .hasEntitlement(clerkUserId, 'email_notifications')
-      .catch(() => true);
+    const [hasEmailEntitlement, isRecruiter] = await Promise.all([
+      this.entitlementChecker
+        .hasEntitlement(clerkUserId, 'email_notifications')
+        .catch(() => true),
+      this.isRecruiterUser(userId),
+    ]);
+    const emailEntitled = isRecruiter ? hasEmailEntitlement : true;
 
     return {
       category,
@@ -92,7 +100,7 @@ export class PreferenceService {
       email_enabled: saved.email_enabled,
       in_app_enabled: saved.in_app_enabled,
       unsubscribable: config.unsubscribable,
-      email_entitled: hasEmailEntitlement,
+      email_entitled: emailEntitled,
     };
   }
 
@@ -108,6 +116,15 @@ export class PreferenceService {
     const userId = await this.resolveUserId(clerkUserId);
     await this.repository.bulkUpsert(userId, input.preferences);
     return this.getAll(clerkUserId);
+  }
+
+  private async isRecruiterUser(userId: string): Promise<boolean> {
+    const { data } = await this.supabase
+      .from('recruiters')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    return !!data;
   }
 
   private validateCategory(category: string): void {
