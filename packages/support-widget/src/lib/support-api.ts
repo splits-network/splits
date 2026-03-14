@@ -66,15 +66,11 @@ export async function createConversation(
         method: 'POST',
         headers,
         body: JSON.stringify({
-            session_id: config.sessionId,
-            body: input.body,
-            category: input.category,
-            subject: input.subject,
+            visitor_session_id: config.sessionId,
+            initial_message: input.body,
             visitor_name: input.visitorName,
             visitor_email: input.visitorEmail,
             source_app: input.sourceApp,
-            page_url: input.pageUrl,
-            user_agent: input.userAgent,
         }),
     });
 
@@ -144,7 +140,7 @@ export async function createTicket(
         method: 'POST',
         headers,
         body: JSON.stringify({
-            session_id: config.sessionId,
+            visitor_session_id: config.sessionId,
             body: input.body,
             category: input.category,
             subject: input.subject,
