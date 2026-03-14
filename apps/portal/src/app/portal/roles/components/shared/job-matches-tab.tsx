@@ -58,7 +58,7 @@ export function JobMatchesTab({
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: EnrichedMatch[] }>(
-                    "/matches",
+                    "/matches/views/enriched",
                     {
                         params: {
                             job_id: job.id,

@@ -93,6 +93,8 @@ Design standards: in the root /showcase directory
 | `/seo`                   | SEO audit & optimization         |
 | `/aio`                   | AI optimization audit            |
 | `/dashboard`             | Dashboard design patterns (GA-quality) |
+| `/promo:create`          | Create social media promo video  |
+| `/promo:record`          | Record HTML animation to MP4     |
 
 ## Guidance Documents
 

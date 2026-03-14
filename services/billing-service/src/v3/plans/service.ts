@@ -20,7 +20,7 @@ export class PlanService {
     this.accessResolver = new AccessContextResolver(supabase);
   }
 
-  async getAll(params: PlanListParams, _clerkUserId: string) {
+  async getAll(params: PlanListParams, _clerkUserId?: string) {
     const { data, total } = await this.repository.findAll(params);
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);

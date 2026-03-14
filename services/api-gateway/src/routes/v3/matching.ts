@@ -10,10 +10,18 @@ import { ServiceRegistry } from '../../clients';
 import { registerV3Routes, V3RouteConfig } from './proxy';
 
 const matchingV3Routes: V3RouteConfig[] = [
+  // ── Matches Views ─────────────────────────────────────────────
+  { path: '/matches/views/enriched', method: 'GET', auth: 'required' },
+
   // ── Matches ────────────────────────────────────────────────────
   { path: '/matches', method: 'GET', auth: 'required' },
   { path: '/matches/:id', method: 'GET', auth: 'required' },
   { path: '/matches/:id', method: 'PATCH', auth: 'required' },
+
+  // ── Matches Actions ──────────────────────────────────────────
+  { path: '/matches/:id/invite', method: 'POST', auth: 'required' },
+  { path: '/matches/:id/dismiss', method: 'PATCH', auth: 'required' },
+  { path: '/matches/:id/deny-invite', method: 'PATCH', auth: 'required' },
 
   // ── Embeddings ─────────────────────────────────────────────────
   { path: '/embeddings', method: 'GET', auth: 'required' },

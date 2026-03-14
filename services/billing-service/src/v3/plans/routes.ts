@@ -25,6 +25,15 @@ export function registerPlanRoutes(
   const repository = new PlanRepository(supabase);
   const service = new PlanService(repository, supabase, eventPublisher);
 
+  // GET /api/v3/public/plans — public listing (no auth, active plans only)
+  app.get('/api/v3/public/plans', {
+    schema: { querystring: listQuerySchema },
+  }, async (request, reply) => {
+    const params: PlanListParams = { ...(request.query as PlanListParams), status: 'active' as const };
+    const result = await service.getAll(params);
+    return reply.send({ data: result.data, pagination: result.pagination });
+  });
+
   // GET /api/v3/plans — list
   app.get('/api/v3/plans', {
     schema: { querystring: listQuerySchema },

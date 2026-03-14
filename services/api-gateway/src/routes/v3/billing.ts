@@ -12,6 +12,9 @@ import { requireAuth } from '../../middleware/auth';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 const billingV3Routes: V3RouteConfig[] = [
+  // ── Plans Public Listing ───────────────────────────────────────
+  { path: '/public/plans', method: 'GET', auth: 'none' },
+
   // ── Plans Core CRUD ─────────────────────────────────────────────
   { resource: 'plans', auth: 'required' },
 

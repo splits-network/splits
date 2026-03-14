@@ -8,6 +8,10 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { MatchRepository } from './repository';
 import { MatchService } from './service';
+import { registerEnrichedMatchView } from './views/enriched.route';
+import { registerInviteAction } from './actions/invite.route';
+import { registerDismissAction } from './actions/dismiss.route';
+import { registerDenyInviteAction } from './actions/deny-invite.route';
 import {
   UpdateMatchInput, MatchListParams,
   idParamSchema, listQuerySchema, updateMatchSchema,
@@ -18,6 +22,12 @@ export function registerMatchRoutes(
   supabase: SupabaseClient,
   eventPublisher?: IEventPublisher,
 ) {
+  // Register views and actions before CRUD to avoid param collision
+  registerEnrichedMatchView(app, supabase);
+  registerInviteAction(app, supabase, eventPublisher);
+  registerDismissAction(app, supabase, eventPublisher);
+  registerDenyInviteAction(app, supabase, eventPublisher);
+
   const repository = new MatchRepository(supabase);
   const service = new MatchService(repository, supabase, eventPublisher);
 

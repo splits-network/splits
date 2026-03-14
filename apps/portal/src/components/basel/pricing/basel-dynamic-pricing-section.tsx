@@ -33,7 +33,7 @@ export function BaselDynamicPricingSection({
                 setLoading(true);
                 setError(null);
 
-                const result = await apiClient.get("/plans?status=active&limit=50");
+                const result = await apiClient.get("/public/plans?status=active&limit=50");
 
                 if (result?.data) {
                     const activePlans = (result.data || [])
