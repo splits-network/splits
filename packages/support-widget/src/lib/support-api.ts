@@ -67,7 +67,6 @@ export async function createConversation(
         headers,
         body: JSON.stringify({
             visitor_session_id: config.sessionId,
-            initial_message: input.body,
             visitor_name: input.visitorName,
             visitor_email: input.visitorEmail,
             source_app: input.sourceApp,
@@ -76,7 +75,12 @@ export async function createConversation(
 
     if (!res.ok) throw new Error('Failed to create conversation');
     const json = await res.json();
-    return json.data;
+    const conversation = json.data;
+
+    // Send the initial message as a separate call
+    const message = await sendMessage(config, conversation.id, input.body);
+
+    return { conversation, message };
 }
 
 export async function sendMessage(

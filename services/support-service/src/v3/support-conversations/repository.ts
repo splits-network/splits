@@ -91,4 +91,120 @@ export class SupportConversationRepository {
 
         if (error) throw error;
     }
+
+    async listMessages(
+        conversationId: string,
+        limit: number = 50,
+        before?: string,
+    ): Promise<any[]> {
+        let query = this.supabase
+            .from("support_messages")
+            .select("*")
+            .eq("conversation_id", conversationId)
+            .order("created_at", { ascending: true })
+            .limit(limit);
+
+        if (before) {
+            query = query.lt("created_at", before);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+    }
+
+    async addMessage(
+        conversationId: string,
+        senderType: "visitor" | "admin" | "system",
+        senderId: string | null,
+        body: string,
+    ): Promise<any> {
+        const { data, error } = await this.supabase
+            .from("support_messages")
+            .insert({
+                conversation_id: conversationId,
+                sender_type: senderType,
+                sender_id: senderId,
+                body,
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await this.supabase
+            .from("support_conversations")
+            .update({ last_message_at: new Date().toISOString() })
+            .eq("id", conversationId);
+
+        return data;
+    }
+
+    async linkSessionToUser(
+        sessionId: string,
+        clerkUserId: string,
+    ): Promise<void> {
+        const { resolveAccessContext } = await import(
+            "@splits-network/shared-access-context"
+        );
+        const ctx = await resolveAccessContext(this.supabase, clerkUserId);
+        const userId = ctx.identityUserId || null;
+
+        const updates: Record<string, any> = {
+            clerk_user_id: clerkUserId,
+            user_id: userId,
+        };
+
+        if (userId) {
+            const { data: user } = await this.supabase
+                .from("users")
+                .select("name, email")
+                .eq("id", userId)
+                .single();
+
+            if (user) {
+                if (user.name) updates.visitor_name = user.name;
+                if (user.email) updates.visitor_email = user.email;
+            }
+        }
+
+        await this.supabase
+            .from("support_conversations")
+            .update(updates)
+            .eq("visitor_session_id", sessionId)
+            .is("clerk_user_id", null);
+    }
+
+    async findVisitorConversations(
+        sessionId?: string,
+        clerkUserId?: string,
+    ): Promise<any[]> {
+        if (clerkUserId) {
+            const { data, error } = await this.supabase
+                .from("support_conversations")
+                .select("*")
+                .eq("clerk_user_id", clerkUserId)
+                .neq("status", "closed")
+                .order("created_at", { ascending: false })
+                .limit(20);
+
+            if (error) throw error;
+            return data || [];
+        }
+
+        if (sessionId) {
+            const { data, error } = await this.supabase
+                .from("support_conversations")
+                .select("*")
+                .eq("visitor_session_id", sessionId)
+                .neq("status", "closed")
+                .order("created_at", { ascending: false })
+                .limit(20);
+
+            if (error) throw error;
+            return data || [];
+        }
+
+        return [];
+    }
 }
