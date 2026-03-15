@@ -63,7 +63,7 @@ function CompactHeader({
 }: Pick<BaselPageHeaderProps, "icon" | "kicker" | "stats" | "onToggle">) {
     return (
         <section className="bg-base-300 text-base-content border-b-2 border-base-300">
-            <div className="container mx-auto px-6 lg:px-12 py-3">
+            <div className="px-6 lg:px-12 py-3">
                 <div className="flex items-center justify-between gap-6">
                     <div className="flex items-center gap-6 min-w-0">
                         {/* Kicker */}
@@ -117,7 +117,10 @@ function FullHeader({
     useScrollReveal(sectionRef);
 
     return (
-        <section ref={sectionRef} className="relative bg-base-300 text-base-content py-16 lg:py-20">
+        <section
+            ref={sectionRef}
+            className="relative bg-base-300 text-base-content py-16 lg:py-20"
+        >
             {/* Subtle grid pattern overlay */}
             <div
                 className="absolute inset-0 opacity-[0.03]"
