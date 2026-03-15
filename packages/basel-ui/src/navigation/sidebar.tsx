@@ -303,11 +303,8 @@ export function BaselSidebar({
     const sidebarContent = (
         <aside
             ref={containerRef as React.RefObject<HTMLElement>}
-            className={`${width} h-full bg-base-300 text-base-content flex flex-col ${className || ""}`}
+            className={`${width} h-full bg-base-300 text-base-content flex flex-col border-t border-r border-2 border-primary ${className || ""}`}
         >
-            {/* Primary accent line */}
-            <div className="h-1 bg-primary w-full" />
-
             {/* Brand slot */}
             {brand && <div className="sidebar-brand p-5 pb-3">{brand}</div>}
 

@@ -483,7 +483,21 @@ export function registerOnboardingV3Routes(
         );
         const organization = orgResponse?.data ?? orgResponse;
 
-        // Step 3: Create company
+        // Step 3: Create membership (must happen before company creation
+        // so the user passes the organization ownership check in ats-service)
+        const membershipResponse = await identityService().post<any>(
+          '/api/v3/memberships',
+          {
+            user_id: user.id,
+            role_name: 'company_admin',
+            organization_id: organization.id,
+          },
+          correlationId,
+          authHeaders
+        );
+        const membership = membershipResponse?.data ?? membershipResponse;
+
+        // Step 4: Create company
         const companyResponse = await atsService().post<any>(
           '/api/v3/companies',
           {
@@ -500,19 +514,6 @@ export function registerOnboardingV3Routes(
           authHeaders
         );
         const company = companyResponse?.data ?? companyResponse;
-
-        // Step 4: Create membership
-        const membershipResponse = await identityService().post<any>(
-          '/api/v3/memberships',
-          {
-            user_id: user.id,
-            role_name: 'company_admin',
-            organization_id: organization.id,
-          },
-          correlationId,
-          authHeaders
-        );
-        const membership = membershipResponse?.data ?? membershipResponse;
 
         // Step 5: Create billing profile
         let billingProfile: any = null;
