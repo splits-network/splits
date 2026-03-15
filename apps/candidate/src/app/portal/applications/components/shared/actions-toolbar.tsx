@@ -169,11 +169,6 @@ export default function ActionsToolbar({
         await actions.withdraw(item.id);
     };
 
-    // Accept offer handler
-    const handleAcceptOffer = async () => {
-        await actions.acceptOffer(item.id);
-    };
-
     // Decline proposal handler
     const handleDeclineProposal = async (reason: string, details?: string) => {
         await actions.declineProposal(item.id, reason, details);
@@ -329,29 +324,21 @@ export default function ActionsToolbar({
                         </button>
                     )}
 
-                    {/* Accept Offer */}
+                    {/* Review Offer */}
                     {isOffer && (
                         <button
                             className={`btn btn-success ${getSizeClass()} gap-2`}
                             style={{ borderRadius: 0 }}
-                            disabled={isLoading}
                             onClick={() =>
-                                handleConfirmClick(
-                                    "accept-offer",
-                                    handleAcceptOffer,
+                                router.push(
+                                    `/portal/applications/${item.id}/offer`,
                                 )
                             }
-                            title="Accept this offer"
+                            title="Review and accept this offer"
                         >
-                            {actions.loading === "accept-offer" ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-check" />
-                            )}
+                            <i className="fa-duotone fa-regular fa-file-signature" />
                             <span className="hidden md:inline">
-                                {confirmAction === "accept-offer"
-                                    ? "Confirm?"
-                                    : "Accept Offer"}
+                                Review Offer
                             </span>
                         </button>
                     )}
@@ -510,21 +497,12 @@ export default function ActionsToolbar({
 
     if (isOffer) {
         speedDialActions.push({
-            key: "accept-offer",
-            icon:
-                confirmAction === "accept-offer"
-                    ? "fa-duotone fa-regular fa-check-double"
-                    : "fa-duotone fa-regular fa-check",
-            label:
-                confirmAction === "accept-offer"
-                    ? "Confirm?"
-                    : "Accept Offer",
+            key: "review-offer",
+            icon: "fa-duotone fa-regular fa-file-signature",
+            label: "Review Offer",
             variant: "btn-success",
-            loading: actions.loading === "accept-offer",
-            disabled: isLoading,
-            keepOpen: confirmAction !== "accept-offer",
             onClick: () =>
-                handleConfirmClick("accept-offer", handleAcceptOffer),
+                router.push(`/portal/applications/${item.id}/offer`),
         });
     }
 

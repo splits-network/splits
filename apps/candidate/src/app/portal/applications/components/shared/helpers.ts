@@ -49,6 +49,16 @@ export function salaryDisplay(app: Application): string | null {
     return null;
 }
 
+export function offerSalaryDisplay(app: Application): string | null {
+    if (!app.salary) return null;
+    const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: app.job?.salary_currency || "USD",
+        maximumFractionDigits: 0,
+    }).format(app.salary);
+    return `${formatted}/year`;
+}
+
 export function hasAiReview(app: Application): boolean {
     return !!app.ai_review?.id;
 }

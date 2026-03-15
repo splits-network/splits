@@ -125,28 +125,52 @@ export class DomainEventConsumerV3 {
   }
 
   /**
-   * Link a Clerk user ID to a candidate profile when they accept invitation
+   * Link a Clerk user ID to a candidate profile when they accept invitation.
+   * Also ensures user_roles entry exists so resolveAccessContext can resolve
+   * the candidateId — the webhook's ensureCandidateExists may not have run
+   * (wrong sourceApp) or may have created a different candidate (email mismatch).
    */
   private async handleCandidateLinkRequested(event: DomainEvent): Promise<void> {
     const { candidate_id, user_id } = event.payload;
 
-    const { data: user } = await this.supabase
+    const { data: user, error: userError } = await this.supabase
       .from('users')
       .select('id')
       .eq('clerk_user_id', user_id)
       .single();
 
-    if (!user) {
-      this.logger.warn({ user_id, candidate_id }, 'User not found for candidate link');
-      return;
+    if (userError || !user) {
+      // Throw to nack/requeue — user record may not exist yet (webhook race)
+      throw userError || new Error(`User not found for clerk_user_id: ${user_id}`);
     }
 
-    const { error } = await this.supabase
+    const { error: linkError } = await this.supabase
       .from('candidates')
       .update({ user_id: user.id })
       .eq('id', candidate_id);
 
-    if (error) throw error;
+    if (linkError) throw linkError;
+
+    // Ensure user_roles entry exists for this candidate
+    const { error: roleError } = await this.supabase
+      .from('user_roles')
+      .upsert(
+        {
+          user_id: user.id,
+          role_name: 'candidate',
+          role_entity_id: candidate_id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,role_name,role_entity_id' }
+      );
+
+    if (roleError) {
+      this.logger.warn(
+        { candidate_id, user_id: user.id, error: roleError.message },
+        'Failed to upsert user_roles for candidate (non-fatal)'
+      );
+    }
 
     this.logger.info({ candidate_id, user_id }, 'Linked user to candidate profile');
   }

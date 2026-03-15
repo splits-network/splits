@@ -474,21 +474,55 @@ export class DomainEventConsumer {
         );
 
         try {
+            const supabase = this.candidateRepository.getSupabase();
 
-            const { data: user, error: identityError } = await this.candidateRepository.getSupabase()
+            const { data: user, error: identityError } = await supabase
                 .from('users')
-                .select('*')
+                .select('id')
                 .eq('clerk_user_id', user_id)
                 .single();
 
-            // Update candidate with user_id using direct Supabase call
-            const { error } = await this.candidateRepository.getSupabase()
+            if (identityError || !user) {
+                throw identityError || new Error(`User not found for clerk_user_id: ${user_id}`);
+            }
+
+            // Update candidate with user_id
+            const { error: linkError } = await supabase
                 .from('candidates')
                 .update({ user_id: user.id })
                 .eq('id', candidate_id);
 
-            if (error) {
-                throw error;
+            if (linkError) {
+                throw linkError;
+            }
+
+            // Ensure user_roles entry exists so resolveAccessContext can find
+            // the candidateId. The webhook's ensureCandidateExists may not have
+            // run (wrong sourceApp) or may have created a different candidate
+            // (email mismatch). This guarantees the invited candidate is linked.
+            const { error: roleError } = await supabase
+                .from('user_roles')
+                .upsert(
+                    {
+                        user_id: user.id,
+                        role_name: 'candidate',
+                        role_entity_id: candidate_id,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                    },
+                    { onConflict: 'user_id,role_name,role_entity_id' }
+                );
+
+            if (roleError) {
+                // Log but don't fail — the link itself succeeded
+                this.logger.warn(
+                    {
+                        candidate_id,
+                        user_id: user.id,
+                        error: roleError.message,
+                    },
+                    'Failed to upsert user_roles for candidate (non-fatal)'
+                );
             }
 
             this.logger.info(

@@ -347,6 +347,31 @@ export function ApplicationDetail({
                     </div>
                 )}
 
+                {/* Offer banner */}
+                {application.stage === "offer" && (
+                    <div className={`border-2 p-6 ${application.accepted_by_candidate ? "border-success bg-success/5" : "border-primary bg-primary/5"}`}>
+                        <p className={`text-sm font-bold uppercase tracking-[0.2em] ${application.accepted_by_candidate ? "text-success" : "text-primary"} mb-2`}>
+                            <i className={`fa-duotone fa-regular ${application.accepted_by_candidate ? "fa-check-double" : "fa-file-signature"} mr-2`} />
+                            {application.accepted_by_candidate ? "Offer Accepted" : "You Have an Offer"}
+                        </p>
+                        <h3 className="text-lg font-black tracking-tight mb-3">
+                            {application.accepted_by_candidate
+                                ? "Congratulations — you've accepted this offer!"
+                                : `${name} has extended you a formal offer`}
+                        </h3>
+                        {!application.accepted_by_candidate && (
+                            <Link
+                                href={`/portal/applications/${application.id}/offer`}
+                                className="btn btn-success btn-sm gap-2"
+                                style={{ borderRadius: 0 }}
+                            >
+                                <i className="fa-duotone fa-regular fa-file-signature" />
+                                Review & Accept Offer
+                            </Link>
+                        )}
+                    </div>
+                )}
+
                 {/* AI Review */}
                 {application.ai_review?.id && (
                     <div>
@@ -512,19 +537,6 @@ export function ApplicationDetail({
                             ))}
                         </div>
 
-                        {/* Company documents highlight for offer stage */}
-                        {application.stage === "offer" &&
-                            documents.some((d) =>
-                                companyDocTypes.includes(d.document_type || ""),
-                            ) && (
-                                <div className="bg-success/5 border-l-4 border-success p-4 mt-3">
-                                    <p className="font-bold text-sm">
-                                        <i className="fa-duotone fa-regular fa-party-horn mr-2" />
-                                        You have documents from the company to
-                                        review!
-                                    </p>
-                                </div>
-                            )}
                     </div>
                 )}
 
