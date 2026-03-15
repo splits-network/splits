@@ -21,12 +21,10 @@ export interface CreateRecruiterCandidateInput {
   recruiter_id: string;
   candidate_id: string;
   status?: string;
-  notes?: string;
 }
 
 export interface RecruiterCandidateUpdate {
   status?: string;
-  notes?: string;
   resend_invitation?: boolean;
   cancel_invitation?: boolean;
   [key: string]: any;
@@ -62,7 +60,6 @@ export const createSchema = {
     recruiter_id: { type: 'string', format: 'uuid' },
     candidate_id: { type: 'string', format: 'uuid' },
     status: { type: 'string' },
-    notes: { type: 'string' },
   },
   additionalProperties: false,
 };
@@ -71,7 +68,6 @@ export const updateSchema = {
   type: 'object',
   properties: {
     status: { type: 'string' },
-    notes: { type: 'string' },
     resend_invitation: { type: 'boolean' },
     cancel_invitation: { type: 'boolean' },
   },

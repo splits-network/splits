@@ -49,7 +49,7 @@ export class RecruiterCandidateService {
 
     const rel = await this.repository.create({
       recruiter_id: input.recruiter_id, candidate_id: input.candidate_id,
-      status: input.status || 'active', notes: input.notes || null,
+      status: input.status || 'active',
       invitation_token: token, invitation_expires_at: expires.toISOString(),
       invited_at: now, created_at: now, updated_at: now,
     });
