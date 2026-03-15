@@ -17,7 +17,7 @@ interface HeaderSectionProps {
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
     return (
-        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+        <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
             {/* Diagonal accent bar */}
             <div
                 className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"

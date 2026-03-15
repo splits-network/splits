@@ -11,7 +11,7 @@ interface HeaderSectionProps {
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
     return (
-        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+        <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
             <div className="container mx-auto px-6 lg:px-12">
                 <div className="max-w-4xl">
                     <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
@@ -31,10 +31,10 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                         </span>
                     </h1>
 
-                    <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
-                        Track each application from submission through offer.
-                        AI scoring, stage progression, and recruiter activity
-                        — visible at every step.
+                    <p className="hero-subtitle text-lg text-base-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
+                        Track each application from submission through offer. AI
+                        scoring, stage progression, and recruiter activity —
+                        visible at every step.
                     </p>
 
                     <div className="header-stat-bar flex flex-wrap gap-8 mt-8 scroll-reveal fade-up">
@@ -43,8 +43,12 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                                 <i className="fa-duotone fa-regular fa-file-lines text-primary-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{stats.total}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Total</div>
+                                <div className="text-2xl font-black">
+                                    {stats.total}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Total
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -52,8 +56,12 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                                 <i className="fa-duotone fa-regular fa-paper-plane text-accent-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{stats.submitted}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Submitted</div>
+                                <div className="text-2xl font-black">
+                                    {stats.submitted}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Submitted
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -61,8 +69,12 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                                 <i className="fa-duotone fa-regular fa-comments text-secondary-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{stats.interview}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Interview</div>
+                                <div className="text-2xl font-black">
+                                    {stats.interview}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Interview
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -70,8 +82,12 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                                 <i className="fa-duotone fa-regular fa-handshake text-base-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{stats.offer}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Offers</div>
+                                <div className="text-2xl font-black">
+                                    {stats.offer}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Offers
+                                </div>
                             </div>
                         </div>
                     </div>

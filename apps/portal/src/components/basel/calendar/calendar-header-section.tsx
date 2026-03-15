@@ -16,7 +16,7 @@ export default function CalendarHeaderSection() {
     }).length;
 
     return (
-        <section className="relative bg-neutral text-neutral-content py-12 lg:py-16">
+        <section className="relative bg-base-300 text-base-content py-12 lg:py-16">
             {/* Diagonal accent bar */}
             <div
                 className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"

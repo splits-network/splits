@@ -5,7 +5,7 @@ interface LeaderboardHeroProps {
 
 export function LeaderboardHero({ title, subtitle }: LeaderboardHeroProps) {
     return (
-        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+        <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
             <div className="container mx-auto px-6 lg:px-12">
                 <div className="max-w-4xl">
                     <p className="scroll-reveal fade-up text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6">
@@ -14,13 +14,15 @@ export function LeaderboardHero({ title, subtitle }: LeaderboardHeroProps) {
                     </p>
 
                     <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="scroll-reveal fade-up inline-block">{title}</span>{" "}
+                        <span className="scroll-reveal fade-up inline-block">
+                            {title}
+                        </span>{" "}
                         <span className="scroll-reveal fade-up inline-block text-primary">
                             Leaderboard.
                         </span>
                     </h1>
 
-                    <p className="scroll-reveal fade-up text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10">
+                    <p className="scroll-reveal fade-up text-lg text-base-content/60 leading-relaxed max-w-xl mb-10">
                         {subtitle}
                     </p>
 
@@ -31,7 +33,9 @@ export function LeaderboardHero({ title, subtitle }: LeaderboardHeroProps) {
                             </div>
                             <div>
                                 <div className="text-2xl font-black">247</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Placements</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Placements
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -40,7 +44,9 @@ export function LeaderboardHero({ title, subtitle }: LeaderboardHeroProps) {
                             </div>
                             <div>
                                 <div className="text-2xl font-black">84</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Recruiters</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Recruiters
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -49,7 +55,9 @@ export function LeaderboardHero({ title, subtitle }: LeaderboardHeroProps) {
                             </div>
                             <div>
                                 <div className="text-2xl font-black">31</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Companies</div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Companies
+                                </div>
                             </div>
                         </div>
                     </div>

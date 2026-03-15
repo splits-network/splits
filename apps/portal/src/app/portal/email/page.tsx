@@ -1,6 +1,9 @@
 "use client";
 
-import { EmailProvider, useEmail } from "@/components/basel/email/email-context";
+import {
+    EmailProvider,
+    useEmail,
+} from "@/components/basel/email/email-context";
 import EmailHeaderSection from "@/components/basel/email/email-header-section";
 import EmailSplitView from "@/components/basel/email/email-split-view";
 import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
@@ -20,7 +23,7 @@ function EmailPageInner() {
             </section>
 
             {/* Footer accent */}
-            <section className="bg-neutral text-neutral-content py-8">
+            <section className="bg-base-300 text-base-content py-8">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
