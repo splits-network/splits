@@ -28,6 +28,7 @@ export default function RequestToRepresentModal({
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [alreadyExists, setAlreadyExists] = useState(false);
 
     const handleSubmit = async () => {
         if (!profile?.recruiter_id) {
@@ -60,9 +61,7 @@ export default function RequestToRepresentModal({
                 message.includes("already exists") ||
                 message.includes("CONFLICT")
             ) {
-                setError(
-                    "You already have an active relationship with this candidate.",
-                );
+                setAlreadyExists(true);
             } else {
                 setError(
                     message ||
@@ -81,6 +80,7 @@ export default function RequestToRepresentModal({
         }
         setError(null);
         setSuccess(false);
+        setAlreadyExists(false);
         onClose();
     };
 
@@ -96,7 +96,11 @@ export default function RequestToRepresentModal({
                 {/* Header */}
                 <div className="bg-primary px-6 py-4 flex items-center justify-between">
                     <h2 className="text-xl font-black uppercase tracking-tight text-primary-content">
-                        {success ? "Request Sent" : "Request to Represent"}
+                        {success
+                            ? "Request Sent"
+                            : alreadyExists
+                              ? "Already Representing"
+                              : "Request to Represent"}
                     </h2>
                     <button
                         type="button"
@@ -123,6 +127,37 @@ export default function RequestToRepresentModal({
                                             <strong>{candidateName}</strong> will
                                             receive an email to accept or decline
                                             your right-to-represent agreement.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    style={{ borderRadius: 0 }}
+                                    onClick={handleClose}
+                                >
+                                    Done
+                                </button>
+                            </div>
+                        </div>
+                    ) : alreadyExists ? (
+                        <div className="space-y-6">
+                            <div className="bg-info/10 border-l-4 border-info p-4">
+                                <div className="flex gap-3 items-start">
+                                    <i className="fa-duotone fa-regular fa-handshake text-info text-xl mt-0.5" />
+                                    <div className="text-sm">
+                                        <p className="font-black text-base-content uppercase tracking-wider text-xs mb-1">
+                                            Relationship exists
+                                        </p>
+                                        <p className="text-base-content/70 font-medium leading-relaxed">
+                                            You already have an active
+                                            representation agreement with{" "}
+                                            <strong>{candidateName}</strong>.
+                                            You can manage this relationship from
+                                            your candidates list.
                                         </p>
                                     </div>
                                 </div>

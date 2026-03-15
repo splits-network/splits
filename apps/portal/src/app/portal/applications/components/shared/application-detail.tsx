@@ -28,7 +28,7 @@ export function DetailLoader({
             if (!token || signal?.cancelled) return;
             const client = createAuthenticatedClient(token);
             const response = await client.get(
-                `/applications/${id}/view/detail`,
+                `/applications/${id}/view/detail?include=audit,documents`,
             );
             if (!signal?.cancelled) setApplication(response.data || null);
         } catch (error) {

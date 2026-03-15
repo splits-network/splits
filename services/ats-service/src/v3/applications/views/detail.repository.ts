@@ -24,7 +24,7 @@ export class ApplicationDetailRepository {
     if (include?.includes('recruiter')) {
       selectClause += `,recruiter:recruiters!candidate_recruiter_id(id, bio, phone, tagline, specialties, status, user_id, user:users!recruiters_user_id_fkey(name, email))`;
     }
-    if (include?.includes('audit')) {
+    if (include?.includes('audit') || include?.includes('timeline')) {
       selectClause += `,audit_log:application_audit_log!application_audit_log_application_id_fkey(id, action, performed_by_user_id, performed_by_role, company_id, old_value, new_value, metadata, ip_address, user_agent, created_at)`;
     }
 
