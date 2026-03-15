@@ -52,13 +52,10 @@ export function BaselProfileImageUpload({
             const document = uploadResponse?.data;
             if (!document?.public_url)
                 throw new Error("Invalid response from upload service");
-            const updateResponse = await client.patch(
-                "/users/profile-image",
-                {
-                    profile_image_url: document.public_url,
-                    profile_image_path: document.file_path,
-                },
-            );
+            const updateResponse = await client.patch("/users/profile-image", {
+                profile_image_url: document.public_url,
+                profile_image_path: document.file_path,
+            });
             if (updateResponse?.data) {
                 const newImageUrl = updateResponse.data.profile_image_url;
                 setImageUrl(newImageUrl);
@@ -120,12 +117,12 @@ export function BaselProfileImageUpload({
                 )}
                 {!isLoading && (
                     <div className="absolute inset-0 bg-neutral/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <i className="fa-duotone fa-regular fa-camera text-neutral-content text-xl" />
+                        <i className="fa-duotone fa-regular fa-camera text-base-content text-xl" />
                     </div>
                 )}
                 {isLoading && (
                     <div className="absolute inset-0 bg-neutral/80 flex items-center justify-center">
-                        <span className="loading loading-spinner loading-sm text-neutral-content" />
+                        <span className="loading loading-spinner loading-sm text-base-content" />
                     </div>
                 )}
             </label>

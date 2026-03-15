@@ -130,7 +130,7 @@ export default function EmptyOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Header */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -150,7 +150,7 @@ export default function EmptyOne() {
                                 nothing.
                             </span>
                         </h1>
-                        <p className="empty-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
+                        <p className="empty-desc text-base text-base-content/50 max-w-xl scroll-reveal fade-up">
                             Empty states are opportunities. They guide users
                             forward, explain context, and turn dead ends into
                             starting points.
@@ -162,7 +162,10 @@ export default function EmptyOne() {
             {/* Empty State Showcases */}
             <section className="container mx-auto px-6 lg:px-12 py-10 lg:py-14 space-y-16">
                 {emptyStates.map((state) => (
-                    <div key={state.id} className="empty-card scroll-reveal fade-up">
+                    <div
+                        key={state.id}
+                        className="empty-card scroll-reveal fade-up"
+                    >
                         {/* Label */}
                         <div className="flex items-center gap-3 mb-4">
                             <span className="px-3 py-1 bg-base-200 text-sm font-semibold uppercase tracking-widest text-base-content/40">

@@ -65,7 +65,7 @@ export function BaselFooter({
             )}
 
             {/* ── 2–5. Footer ─────────────────────────────────────── */}
-            <footer className="bg-neutral text-neutral-content">
+            <footer className="bg-base-300 text-base-content">
                 {/* ── Newsletter + Brand (split-screen) ────────────── */}
                 {(newsletter || brand) && (
                     <div className="container mx-auto px-4 sm:px-6 lg:px-12">

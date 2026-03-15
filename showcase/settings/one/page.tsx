@@ -126,7 +126,7 @@ export default function SettingsOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Header */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
@@ -146,7 +146,7 @@ export default function SettingsOne() {
                                 settings.
                             </span>
                         </h1>
-                        <p className="settings-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
+                        <p className="settings-desc text-base text-base-content/50 max-w-xl scroll-reveal fade-up">
                             Manage your profile, security, notifications, and
                             integrations all in one place.
                         </p>
@@ -559,7 +559,7 @@ export default function SettingsOne() {
                                     </h3>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-7 bg-neutral text-neutral-content flex items-center justify-center text-xs font-bold">
+                                            <div className="w-10 h-7 bg-base-300 text-base-content flex items-center justify-center text-xs font-bold">
                                                 VISA
                                             </div>
                                             <div>

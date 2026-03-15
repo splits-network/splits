@@ -281,7 +281,7 @@ export default function AboutPage() {
             </section>
 
             {/* Team Section */}
-            <section className="py-20 bg-neutral text-neutral-content overflow-hidden">
+            <section className="py-20 bg-base-300 text-base-content overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-12 scroll-reveal fade-up">
                         <h2 className="text-4xl font-bold mb-4">

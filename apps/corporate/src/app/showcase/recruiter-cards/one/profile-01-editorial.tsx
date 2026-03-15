@@ -7,7 +7,7 @@ import { SAMPLE_PROFILE, type RecruiterProfileData } from "./profile-data";
 
 function HeroHeader({ profile }: { profile: RecruiterProfileData }) {
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                 style={{ clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)" }}
@@ -15,7 +15,7 @@ function HeroHeader({ profile }: { profile: RecruiterProfileData }) {
             <div className="relative px-8 pt-10 pb-0">
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-8">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                         {profile.firm}
                     </p>
                     <div className="flex items-center gap-4">
@@ -26,8 +26,16 @@ function HeroHeader({ profile }: { profile: RecruiterProfileData }) {
                             </span>
                         )}
                         <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider">
-                            <span className={`inline-block w-2 h-2 ${profile.online ? "bg-success" : "bg-neutral-content/20"}`} />
-                            <span className={profile.online ? "text-success" : "text-neutral-content/30"}>
+                            <span
+                                className={`inline-block w-2 h-2 ${profile.online ? "bg-success" : "bg-neutral-content/20"}`}
+                            />
+                            <span
+                                className={
+                                    profile.online
+                                        ? "text-success"
+                                        : "text-base-content/30"
+                                }
+                            >
                                 {profile.online ? "Online" : "Away"}
                             </span>
                         </span>
@@ -44,15 +52,15 @@ function HeroHeader({ profile }: { profile: RecruiterProfileData }) {
                             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1">
                                 {profile.title}
                             </p>
-                            <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-none text-neutral-content mb-3">
+                            <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-none text-base-content mb-3">
                                 {profile.name}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                 <span className="flex items-center gap-1.5">
                                     <i className="fa-duotone fa-regular fa-location-dot text-xs" />
                                     {profile.location}
                                 </span>
-                                <span className="text-neutral-content/20">|</span>
+                                <span className="text-base-content/20">|</span>
                                 <span className="flex items-center gap-1.5">
                                     <i className="fa-duotone fa-regular fa-calendar text-xs" />
                                     Member since {profile.memberSince}
@@ -89,13 +97,22 @@ function HeroHeader({ profile }: { profile: RecruiterProfileData }) {
                         ];
                         const iconStyle = iconStyles[i % iconStyles.length];
                         return (
-                            <div key={stat.label} className="flex items-center gap-3 px-4 py-4">
-                                <div className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}>
+                            <div
+                                key={stat.label}
+                                className="flex items-center gap-3 px-4 py-4"
+                            >
+                                <div
+                                    className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}
+                                >
                                     <i className={`${stat.icon} text-base`} />
                                 </div>
                                 <div>
-                                    <span className="text-xl font-black text-neutral-content leading-none block">{stat.value}</span>
-                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">{stat.label}</span>
+                                    <span className="text-xl font-black text-base-content leading-none block">
+                                        {stat.value}
+                                    </span>
+                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
+                                        {stat.label}
+                                    </span>
                                 </div>
                             </div>
                         );
@@ -112,11 +129,21 @@ type TabKey = "about" | "experience" | "reviews";
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "about", label: "About", icon: "fa-duotone fa-regular fa-user" },
-    { key: "experience", label: "Experience", icon: "fa-duotone fa-regular fa-briefcase" },
+    {
+        key: "experience",
+        label: "Experience",
+        icon: "fa-duotone fa-regular fa-briefcase",
+    },
     { key: "reviews", label: "Reviews", icon: "fa-duotone fa-regular fa-star" },
 ];
 
-function TabNav({ active, onChange }: { active: TabKey; onChange: (t: TabKey) => void }) {
+function TabNav({
+    active,
+    onChange,
+}: {
+    active: TabKey;
+    onChange: (t: TabKey) => void;
+}) {
     return (
         <nav className="bg-base-100 border-b border-base-300">
             <div className="max-w-6xl mx-auto px-8">
@@ -163,7 +190,10 @@ function AboutPanel({ profile }: { profile: RecruiterProfileData }) {
                 </p>
                 <div className="flex flex-wrap gap-2 mb-5">
                     {profile.specializations.map((spec) => (
-                        <span key={spec} className="px-3 py-1.5 bg-primary text-primary-content text-xs font-bold uppercase tracking-wider">
+                        <span
+                            key={spec}
+                            className="px-3 py-1.5 bg-primary text-primary-content text-xs font-bold uppercase tracking-wider"
+                        >
                             {spec}
                         </span>
                     ))}
@@ -173,7 +203,10 @@ function AboutPanel({ profile }: { profile: RecruiterProfileData }) {
                 </p>
                 <div className="flex flex-wrap gap-2">
                     {profile.industries.map((ind) => (
-                        <span key={ind} className="px-3 py-1.5 bg-base-200 border border-base-300 text-xs font-bold uppercase tracking-wider text-base-content/60">
+                        <span
+                            key={ind}
+                            className="px-3 py-1.5 bg-base-200 border border-base-300 text-xs font-bold uppercase tracking-wider text-base-content/60"
+                        >
                             {ind}
                         </span>
                     ))}
@@ -186,11 +219,15 @@ function AboutPanel({ profile }: { profile: RecruiterProfileData }) {
                     Partnership
                 </p>
                 <div className="flex flex-wrap gap-2">
-                    <span className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider ${profile.seekingSplits ? "bg-primary text-primary-content" : "bg-base-200 border border-base-300 text-base-content/30"}`}>
+                    <span
+                        className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider ${profile.seekingSplits ? "bg-primary text-primary-content" : "bg-base-200 border border-base-300 text-base-content/30"}`}
+                    >
                         <i className="fa-duotone fa-regular fa-handshake text-sm" />
                         Seeking Splits
                     </span>
-                    <span className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider ${profile.acceptsCandidates ? "bg-secondary text-secondary-content" : "bg-base-200 border border-base-300 text-base-content/30"}`}>
+                    <span
+                        className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider ${profile.acceptsCandidates ? "bg-secondary text-secondary-content" : "bg-base-200 border border-base-300 text-base-content/30"}`}
+                    >
                         <i className="fa-duotone fa-regular fa-user-plus text-sm" />
                         Accepts Candidates
                     </span>
@@ -204,10 +241,17 @@ function AboutPanel({ profile }: { profile: RecruiterProfileData }) {
                 </p>
                 <div className="divide-y divide-base-300 border border-base-300">
                     {profile.recentActivity.map((item, i) => (
-                        <div key={i} className="flex items-center gap-4 px-5 py-4">
-                            <i className={`${item.icon} ${item.color} text-base w-4 text-center shrink-0`} />
+                        <div
+                            key={i}
+                            className="flex items-center gap-4 px-5 py-4"
+                        >
+                            <i
+                                className={`${item.icon} ${item.color} text-base w-4 text-center shrink-0`}
+                            />
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm text-base-content/80">{item.action}</p>
+                                <p className="text-sm text-base-content/80">
+                                    {item.action}
+                                </p>
                             </div>
                             <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 shrink-0">
                                 {item.time}
@@ -230,7 +274,10 @@ function ExperiencePanel({ profile }: { profile: RecruiterProfileData }) {
             </p>
             <div className="space-y-0">
                 {profile.experience.map((exp, i) => (
-                    <div key={i} className="relative flex gap-6 pb-10 last:pb-0">
+                    <div
+                        key={i}
+                        className="relative flex gap-6 pb-10 last:pb-0"
+                    >
                         {/* Timeline connector */}
                         {i < profile.experience.length - 1 && (
                             <div className="absolute left-[17px] top-11 bottom-0 w-px bg-base-300" />
@@ -249,7 +296,9 @@ function ExperiencePanel({ profile }: { profile: RecruiterProfileData }) {
                             <h3 className="text-base font-black tracking-tight text-base-content leading-tight">
                                 {exp.title}
                             </h3>
-                            <p className="text-sm font-bold text-primary mb-2">{exp.company}</p>
+                            <p className="text-sm font-bold text-primary mb-2">
+                                {exp.company}
+                            </p>
                             <p className="text-sm text-base-content/60 leading-relaxed">
                                 {exp.description}
                             </p>
@@ -272,7 +321,10 @@ function ReviewsPanel({ profile }: { profile: RecruiterProfileData }) {
                 </p>
                 <div className="flex items-center gap-1.5">
                     {[1, 2, 3, 4, 5].map((n) => (
-                        <i key={n} className="fa-duotone fa-regular fa-star text-warning text-sm" />
+                        <i
+                            key={n}
+                            className="fa-duotone fa-regular fa-star text-warning text-sm"
+                        />
                     ))}
                     <span className="ml-2 text-sm font-black text-base-content">
                         {profile.stats.find((s) => s.label === "Rating")?.value}
@@ -281,7 +333,10 @@ function ReviewsPanel({ profile }: { profile: RecruiterProfileData }) {
             </div>
             <div className="space-y-6">
                 {profile.testimonials.map((t, i) => (
-                    <blockquote key={i} className="bg-base-200 border-l-4 border-l-primary px-7 py-6">
+                    <blockquote
+                        key={i}
+                        className="bg-base-200 border-l-4 border-l-primary px-7 py-6"
+                    >
                         <i className="fa-duotone fa-regular fa-quote-left text-2xl text-primary/20 mb-4 block" />
                         <p className="text-base text-base-content/70 leading-relaxed italic mb-5">
                             &ldquo;{t.text}&rdquo;
@@ -291,7 +346,9 @@ function ReviewsPanel({ profile }: { profile: RecruiterProfileData }) {
                                 {t.initials}
                             </div>
                             <div>
-                                <p className="text-sm font-black text-base-content">{t.author}</p>
+                                <p className="text-sm font-black text-base-content">
+                                    {t.author}
+                                </p>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40">
                                     {t.role}
                                 </p>
@@ -308,9 +365,21 @@ function ReviewsPanel({ profile }: { profile: RecruiterProfileData }) {
 
 function Sidebar({ profile }: { profile: RecruiterProfileData }) {
     const contactItems = [
-        { icon: "fa-duotone fa-regular fa-envelope", label: "Email", value: profile.email },
-        { icon: "fa-duotone fa-regular fa-phone", label: "Phone", value: profile.phone },
-        { icon: "fa-brands fa-linkedin-in", label: "LinkedIn", value: profile.linkedin },
+        {
+            icon: "fa-duotone fa-regular fa-envelope",
+            label: "Email",
+            value: profile.email,
+        },
+        {
+            icon: "fa-duotone fa-regular fa-phone",
+            label: "Phone",
+            value: profile.phone,
+        },
+        {
+            icon: "fa-brands fa-linkedin-in",
+            label: "LinkedIn",
+            value: profile.linkedin,
+        },
     ];
 
     return (
@@ -324,9 +393,14 @@ function Sidebar({ profile }: { profile: RecruiterProfileData }) {
                 </div>
                 <div className="divide-y divide-base-300">
                     {contactItems.map((c) => (
-                        <div key={c.label} className="flex items-center gap-4 px-6 py-4">
+                        <div
+                            key={c.label}
+                            className="flex items-center gap-4 px-6 py-4"
+                        >
                             <div className="w-8 h-8 bg-primary/10 flex items-center justify-center shrink-0">
-                                <i className={`${c.icon} text-primary text-xs`} />
+                                <i
+                                    className={`${c.icon} text-primary text-xs`}
+                                />
                             </div>
                             <div className="min-w-0">
                                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-0.5">
@@ -356,8 +430,13 @@ function Sidebar({ profile }: { profile: RecruiterProfileData }) {
                 </div>
                 <div className="grid grid-cols-2 gap-px bg-base-300">
                     {profile.badges.map((badge) => (
-                        <div key={badge.label} className="flex flex-col items-center gap-2 bg-base-200 px-4 py-5">
-                            <i className={`${badge.icon} ${badge.color} text-xl`} />
+                        <div
+                            key={badge.label}
+                            className="flex flex-col items-center gap-2 bg-base-200 px-4 py-5"
+                        >
+                            <i
+                                className={`${badge.icon} ${badge.color} text-xl`}
+                            />
                             <span className="text-xs font-bold uppercase tracking-wider text-base-content/60 text-center leading-tight">
                                 {badge.label}
                             </span>
@@ -375,16 +454,33 @@ function Sidebar({ profile }: { profile: RecruiterProfileData }) {
                 </div>
                 <div className="divide-y divide-base-300">
                     {[
-                        { label: "Response Rate", value: "98%", icon: "fa-duotone fa-regular fa-reply" },
-                        { label: "Avg Response Time", value: "< 2 hrs", icon: "fa-duotone fa-regular fa-clock" },
-                        { label: "Active Since", value: profile.memberSince, icon: "fa-duotone fa-regular fa-calendar" },
+                        {
+                            label: "Response Rate",
+                            value: "98%",
+                            icon: "fa-duotone fa-regular fa-reply",
+                        },
+                        {
+                            label: "Avg Response Time",
+                            value: "< 2 hrs",
+                            icon: "fa-duotone fa-regular fa-clock",
+                        },
+                        {
+                            label: "Active Since",
+                            value: profile.memberSince,
+                            icon: "fa-duotone fa-regular fa-calendar",
+                        },
                     ].map((item) => (
-                        <div key={item.label} className="flex items-center justify-between px-6 py-3.5">
+                        <div
+                            key={item.label}
+                            className="flex items-center justify-between px-6 py-3.5"
+                        >
                             <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-base-content/40">
                                 <i className={`${item.icon} text-xs`} />
                                 {item.label}
                             </span>
-                            <span className="text-sm font-black text-base-content">{item.value}</span>
+                            <span className="text-sm font-black text-base-content">
+                                {item.value}
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -408,9 +504,15 @@ export default function Profile01() {
                 <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
                     {/* Main content */}
                     <div className="lg:col-span-3">
-                        {activeTab === "about" && <AboutPanel profile={profile} />}
-                        {activeTab === "experience" && <ExperiencePanel profile={profile} />}
-                        {activeTab === "reviews" && <ReviewsPanel profile={profile} />}
+                        {activeTab === "about" && (
+                            <AboutPanel profile={profile} />
+                        )}
+                        {activeTab === "experience" && (
+                            <ExperiencePanel profile={profile} />
+                        )}
+                        {activeTab === "reviews" && (
+                            <ReviewsPanel profile={profile} />
+                        )}
                     </div>
 
                     {/* Sidebar */}

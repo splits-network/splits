@@ -2,7 +2,10 @@
 
 import type { PublicFirm, FirmPlacementStats } from "../types";
 import { firmLocation, firmInitials } from "../types";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 interface HeroSectionProps {
     firm: PublicFirm;
@@ -19,7 +22,12 @@ function extractDomain(url: string): string {
     }
 }
 
-export default function HeroSection({ firm, placementStats, connected, onRequestPartnership }: HeroSectionProps) {
+export default function HeroSection({
+    firm,
+    placementStats,
+    connected,
+    onRequestPartnership,
+}: HeroSectionProps) {
     const { getLevel } = useGamification();
     const firmLevel = firm.id ? getLevel(firm.id) : undefined;
     const location = firmLocation(firm);
@@ -27,21 +35,37 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
 
     const stats = [
         firm.team_size_range
-            ? { label: "Team Size", value: firm.team_size_range.replace("-", "\u2013"), icon: "fa-duotone fa-regular fa-users" }
+            ? {
+                  label: "Team Size",
+                  value: firm.team_size_range.replace("-", "\u2013"),
+                  icon: "fa-duotone fa-regular fa-users",
+              }
             : null,
         firm.show_member_count && firm.active_member_count != null
-            ? { label: "Active", value: String(firm.active_member_count), icon: "fa-duotone fa-regular fa-user-check" }
+            ? {
+                  label: "Active",
+                  value: String(firm.active_member_count),
+                  icon: "fa-duotone fa-regular fa-user-check",
+              }
             : null,
         firm.founded_year
-            ? { label: "Founded", value: String(firm.founded_year), icon: "fa-duotone fa-regular fa-calendar" }
+            ? {
+                  label: "Founded",
+                  value: String(firm.founded_year),
+                  icon: "fa-duotone fa-regular fa-calendar",
+              }
             : null,
         firm.placement_types.length > 0
-            ? { label: "Placement Types", value: String(firm.placement_types.length), icon: "fa-duotone fa-regular fa-briefcase" }
+            ? {
+                  label: "Placement Types",
+                  value: String(firm.placement_types.length),
+                  icon: "fa-duotone fa-regular fa-briefcase",
+              }
             : null,
     ].filter(Boolean) as { label: string; value: string; icon: string }[];
 
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
             {/* Diagonal clip-path accent */}
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -51,7 +75,7 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
             <div className="relative px-8 pt-10 pb-0">
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-8">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                         {firm.industries.join(" \u00B7 ")}
                     </p>
                     <div className="flex items-center gap-4">
@@ -95,10 +119,10 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1">
                                 Recruiting Firm
                             </p>
-                            <h1 className="scroll-reveal fade-up text-4xl lg:text-5xl font-black tracking-tight leading-none text-neutral-content mb-3">
+                            <h1 className="scroll-reveal fade-up text-4xl lg:text-5xl font-black tracking-tight leading-none text-base-content mb-3">
                                 {firm.name}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                 {location && (
                                     <span className="scroll-reveal fade-up flex items-center gap-1.5">
                                         <i className="fa-duotone fa-regular fa-location-dot text-xs" />
@@ -107,7 +131,9 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                                 )}
                                 {firm.founded_year && (
                                     <>
-                                        <span className="text-neutral-content/20">|</span>
+                                        <span className="text-base-content/20">
+                                            |
+                                        </span>
                                         <span className="scroll-reveal fade-up flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-calendar text-xs" />
                                             Est. {firm.founded_year}
@@ -116,7 +142,9 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                                 )}
                                 {firm.website_url && (
                                     <>
-                                        <span className="text-neutral-content/20">|</span>
+                                        <span className="text-base-content/20">
+                                            |
+                                        </span>
                                         <span className="scroll-reveal fade-up flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-globe text-xs" />
                                             {extractDomain(firm.website_url)}
@@ -176,15 +204,22 @@ export default function HeroSection({ firm, placementStats, connected, onRequest
                             ];
                             const iconStyle = iconStyles[i % iconStyles.length];
                             return (
-                                <div key={stat.label} className="scroll-reveal fade-up flex items-center gap-3 px-4 py-4">
-                                    <div className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}>
-                                        <i className={`${stat.icon} text-base`} />
+                                <div
+                                    key={stat.label}
+                                    className="scroll-reveal fade-up flex items-center gap-3 px-4 py-4"
+                                >
+                                    <div
+                                        className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}
+                                    >
+                                        <i
+                                            className={`${stat.icon} text-base`}
+                                        />
                                     </div>
                                     <div>
-                                        <span className="text-xl font-black text-neutral-content leading-none block">
+                                        <span className="text-xl font-black text-base-content leading-none block">
                                             {stat.value}
                                         </span>
-                                        <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                                        <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                             {stat.label}
                                         </span>
                                     </div>

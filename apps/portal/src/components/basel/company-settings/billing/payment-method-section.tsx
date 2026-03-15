@@ -169,7 +169,7 @@ export function BaselPaymentMethodSection({
             {hasPaymentMethod && pm ? (
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-7 bg-neutral text-neutral-content flex items-center justify-center text-xs font-bold">
+                        <div className="w-10 h-7 bg-base-300 text-base-content flex items-center justify-center text-xs font-bold">
                             <i className={getPaymentMethodIcon(pm)} />
                         </div>
                         <div>
@@ -213,35 +213,33 @@ export function BaselPaymentMethodSection({
             )}
 
             <ModalPortal>
-            <BaselModal
-                isOpen={modalOpen}
-                onClose={handleCloseModal}
-                maxWidth="max-w-md"
-            >
-                <BaselModalHeader
-                    title={
-                        hasPaymentMethod
-                            ? "Update Payment"
-                            : "Add Payment"
-                    }
-                    icon="fa-duotone fa-regular fa-wallet"
+                <BaselModal
+                    isOpen={modalOpen}
                     onClose={handleCloseModal}
-                />
-                <BaselModalBody>
-                    {modalOpen && (
-                        <BaselPaymentForm
-                            companyId={companyId}
-                            onSuccess={handlePaymentSuccess}
-                            onCancel={handleCloseModal}
-                            submitButtonText={
-                                hasPaymentMethod
-                                    ? "Update Payment Method"
-                                    : "Add Payment Method"
-                            }
-                        />
-                    )}
-                </BaselModalBody>
-            </BaselModal>
+                    maxWidth="max-w-md"
+                >
+                    <BaselModalHeader
+                        title={
+                            hasPaymentMethod ? "Update Payment" : "Add Payment"
+                        }
+                        icon="fa-duotone fa-regular fa-wallet"
+                        onClose={handleCloseModal}
+                    />
+                    <BaselModalBody>
+                        {modalOpen && (
+                            <BaselPaymentForm
+                                companyId={companyId}
+                                onSuccess={handlePaymentSuccess}
+                                onCancel={handleCloseModal}
+                                submitButtonText={
+                                    hasPaymentMethod
+                                        ? "Update Payment Method"
+                                        : "Add Payment Method"
+                                }
+                            />
+                        )}
+                    </BaselModalBody>
+                </BaselModal>
             </ModalPortal>
         </div>
     );

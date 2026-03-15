@@ -129,7 +129,7 @@ export default function CalendarEventDetail() {
         <div className="flex flex-col h-full">
             {/* Header */}
             <div
-                className={`${interview ? "bg-accent text-accent-content" : "bg-neutral text-neutral-content"} px-6 py-5 shrink-0`}
+                className={`${interview ? "bg-accent text-accent-content" : "bg-base-300 text-base-content"} px-6 py-5 shrink-0`}
             >
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -278,8 +278,7 @@ export default function CalendarEventDetail() {
                                         <div className="w-8 h-8 bg-primary/10 flex items-center justify-center shrink-0">
                                             <span className="text-sm font-black text-primary uppercase">
                                                 {(
-                                                    att.displayName ||
-                                                    att.email
+                                                    att.displayName || att.email
                                                 ).charAt(0)}
                                             </span>
                                         </div>

@@ -12,31 +12,29 @@ interface VerificationModalProps {
     onUpdate: (updatedCandidate: any) => void;
 }
 
-const STATUS_COLORS: Record<
-    string,
-    { bg: string; text: string; dot: string }
-> = {
-    verified: {
-        bg: "bg-success/10",
-        text: "text-success",
-        dot: "bg-success",
-    },
-    pending: {
-        bg: "bg-warning/10",
-        text: "text-warning",
-        dot: "bg-warning",
-    },
-    unverified: {
-        bg: "bg-base-content/10",
-        text: "text-base-content/50",
-        dot: "bg-base-content/50",
-    },
-    rejected: {
-        bg: "bg-error/10",
-        text: "text-error",
-        dot: "bg-error",
-    },
-};
+const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> =
+    {
+        verified: {
+            bg: "bg-success/10",
+            text: "text-success",
+            dot: "bg-success",
+        },
+        pending: {
+            bg: "bg-warning/10",
+            text: "text-warning",
+            dot: "bg-warning",
+        },
+        unverified: {
+            bg: "bg-base-content/10",
+            text: "text-base-content/50",
+            dot: "bg-base-content/50",
+        },
+        rejected: {
+            bg: "bg-error/10",
+            text: "text-error",
+            dot: "bg-error",
+        },
+    };
 
 export default function VerificationModal({
     candidate,
@@ -69,14 +67,11 @@ export default function VerificationModal({
                 verification_method: "manual_admin_review",
             };
 
-            const response = await client.patch(
-                `/candidates/${candidate.id}`,
-                {
-                    verification_status: status,
-                    verification_metadata: verificationMetadata,
-                    verified_at: new Date().toISOString(),
-                },
-            );
+            const response = await client.patch(`/candidates/${candidate.id}`, {
+                verification_status: status,
+                verification_metadata: verificationMetadata,
+                verified_at: new Date().toISOString(),
+            });
 
             onUpdate(response.data);
             onClose();
@@ -84,9 +79,7 @@ export default function VerificationModal({
             setStatus("unverified");
         } catch (err: any) {
             console.error("Failed to update verification:", err);
-            setError(
-                err.message || "Failed to update verification status",
-            );
+            setError(err.message || "Failed to update verification status");
         } finally {
             setSubmitting(false);
         }
@@ -133,7 +126,7 @@ export default function VerificationModal({
                                 Candidate
                             </label>
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-neutral text-neutral-content flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                                <div className="w-10 h-10 bg-base-300 text-base-content flex items-center justify-center flex-shrink-0 font-bold text-sm">
                                     {candidate.full_name?.[0] || "?"}
                                 </div>
                                 <div>
@@ -167,9 +160,7 @@ export default function VerificationModal({
                                 <option value="rejected">Rejected</option>
                             </select>
                             <div className="mt-2 flex items-center gap-2">
-                                <div
-                                    className={`w-3 h-3 ${colors.dot}`}
-                                />
+                                <div className={`w-3 h-3 ${colors.dot}`} />
                                 <span
                                     className={`text-sm font-bold uppercase tracking-[0.15em] ${colors.text}`}
                                 >
@@ -193,7 +184,8 @@ export default function VerificationModal({
                                 disabled={submitting}
                             />
                             <p className="text-sm text-base-content/40 mt-1">
-                                Record any context about this verification decision for your team
+                                Record any context about this verification
+                                decision for your team
                             </p>
                         </div>
 
@@ -212,7 +204,8 @@ export default function VerificationModal({
                                                 <strong className="text-base-content">
                                                     Unverified:
                                                 </strong>{" "}
-                                                Initial state. No review has been conducted.
+                                                Initial state. No review has
+                                                been conducted.
                                             </span>
                                         </li>
                                         <li className="flex items-start gap-2">
@@ -230,7 +223,8 @@ export default function VerificationModal({
                                                 <strong className="text-base-content">
                                                     Verified:
                                                 </strong>{" "}
-                                                Profile information has been confirmed as accurate.
+                                                Profile information has been
+                                                confirmed as accurate.
                                             </span>
                                         </li>
                                         <li className="flex items-start gap-2">
@@ -239,7 +233,8 @@ export default function VerificationModal({
                                                 <strong className="text-base-content">
                                                     Rejected:
                                                 </strong>{" "}
-                                                Verification did not pass review.
+                                                Verification did not pass
+                                                review.
                                             </span>
                                         </li>
                                     </ul>

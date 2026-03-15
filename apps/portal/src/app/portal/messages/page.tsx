@@ -23,12 +23,7 @@ export default function MessagesPage() {
 }
 
 function MessagesContent() {
-    const {
-        data,
-        error,
-        refresh,
-        requestCount,
-    } = useFilter();
+    const { data, error, refresh, requestCount } = useFilter();
 
     const stats = {
         totalConversations: data.length,
@@ -37,8 +32,9 @@ function MessagesContent() {
             0,
         ),
         pendingRequests: requestCount,
-        archivedConversations: data.filter((row) => !!row.participant.archived_at)
-            .length,
+        archivedConversations: data.filter(
+            (row) => !!row.participant.archived_at,
+        ).length,
     };
 
     if (error) {
@@ -58,7 +54,7 @@ function MessagesContent() {
             </section>
 
             {/* ═══ Footer Accent — Editorial style (from showcase) ═══ */}
-            <section className="bg-neutral text-neutral-content py-8">
+            <section className="bg-base-300 text-base-content py-8">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4">

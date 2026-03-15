@@ -12,7 +12,7 @@ export function HeaderSection({
     companyFirms,
 }: HeaderSectionProps) {
     return (
-        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+        <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
             <div className="container mx-auto px-6 lg:px-12">
                 <div className="max-w-4xl">
                     {/* Kicker */}
@@ -32,7 +32,7 @@ export function HeaderSection({
                     </h1>
 
                     {/* Subtitle */}
-                    <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
+                    <p className="hero-subtitle text-lg text-base-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                         Discover marketplace-approved recruiting firms and
                         connect with your next split-fee partner.
                     </p>
@@ -44,7 +44,9 @@ export function HeaderSection({
                                 <i className="fa-duotone fa-regular fa-building-columns text-primary-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{total}</div>
+                                <div className="text-2xl font-black">
+                                    {total}
+                                </div>
                                 <div className="text-xs uppercase tracking-wider opacity-60">
                                     Active Firms
                                 </div>

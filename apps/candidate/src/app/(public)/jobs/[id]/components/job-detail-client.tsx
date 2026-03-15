@@ -24,7 +24,10 @@ import {
     type Job,
     type JobRequirement,
 } from "../../types";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 interface JobDetailClientProps {
     job: Job;
@@ -217,7 +220,7 @@ export default function JobDetailClient({
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* ── Hero Header ─────────────────────────────────── */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -227,10 +230,10 @@ export default function JobDetailClient({
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         {/* Breadcrumb */}
-                        <div className="scroll-reveal fade-up detail-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6">
+                        <div className="scroll-reveal fade-up detail-kicker flex items-center gap-2 text-sm text-base-content/40 mb-6">
                             <Link
                                 href="/jobs"
-                                className="hover:text-neutral-content transition-colors"
+                                className="hover:text-base-content transition-colors"
                             >
                                 <i className="fa-duotone fa-regular fa-arrow-left mr-1" />
                                 Jobs
@@ -238,13 +241,13 @@ export default function JobDetailClient({
                             {job.department && (
                                 <>
                                     <i className="fa-solid fa-chevron-right text-[8px]" />
-                                    <span className="text-neutral-content/60">
+                                    <span className="text-base-content/60">
                                         {job.department}
                                     </span>
                                 </>
                             )}
                             <i className="fa-solid fa-chevron-right text-[8px]" />
-                            <span className="text-neutral-content/70">
+                            <span className="text-base-content/70">
                                 {job.title}
                             </span>
                         </div>
@@ -265,7 +268,10 @@ export default function JobDetailClient({
                                 )}
                                 {companyLevel && (
                                     <div className="absolute -bottom-1 -right-1">
-                                        <LevelBadge level={companyLevel} size="sm" />
+                                        <LevelBadge
+                                            level={companyLevel}
+                                            size="sm"
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -275,7 +281,7 @@ export default function JobDetailClient({
                                         {job.title}
                                     </span>
                                 </h1>
-                                <p className="scroll-reveal fade-up detail-meta text-lg text-neutral-content/60 mt-2">
+                                <p className="scroll-reveal fade-up detail-meta text-lg text-base-content/60 mt-2">
                                     {companyDisplay}
                                 </p>
                             </div>
@@ -601,7 +607,10 @@ export default function JobDetailClient({
                                     )}
                                     {companyLevel && (
                                         <div className="absolute -bottom-1 -right-1">
-                                            <LevelBadge level={companyLevel} size="sm" />
+                                            <LevelBadge
+                                                level={companyLevel}
+                                                size="sm"
+                                            />
                                         </div>
                                     )}
                                 </div>

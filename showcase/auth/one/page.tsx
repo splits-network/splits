@@ -253,7 +253,7 @@ export default function AuthOne() {
             </div>
 
             {/* Right Panel - Branding */}
-            <div className="hidden lg:flex lg:w-2/5 bg-neutral text-neutral-content flex-col justify-between p-12 relative">
+            <div className="hidden lg:flex lg:w-2/5 bg-base-300 text-base-content flex-col justify-between p-12 relative">
                 <div
                     className="absolute top-0 left-0 w-full h-full bg-primary/5"
                     style={{
@@ -268,7 +268,7 @@ export default function AuthOne() {
                             split-fee recruiting.
                         </span>
                     </h2>
-                    <p className="text-sm text-neutral-content/40 leading-relaxed max-w-sm">
+                    <p className="text-sm text-base-content/40 leading-relaxed max-w-sm">
                         Connect with companies, submit candidates, and earn
                         split fees on every successful placement.
                     </p>
@@ -303,7 +303,7 @@ export default function AuthOne() {
                                 <div className="text-lg font-black">
                                     {stat.value}
                                 </div>
-                                <div className="text-sm uppercase tracking-widest text-neutral-content/40">
+                                <div className="text-sm uppercase tracking-widest text-base-content/40">
                                     {stat.label}
                                 </div>
                             </div>
@@ -313,13 +313,13 @@ export default function AuthOne() {
 
                 <div className="relative ">
                     <div className="border-l-4 border-coral pl-4">
-                        <p className="text-sm text-neutral-content/60 italic mb-3">
+                        <p className="text-sm text-base-content/60 italic mb-3">
                             &ldquo;Splits Network transformed my independent
                             recruiting practice. I earned more in my first
                             quarter than I did all of last year.&rdquo;
                         </p>
                         <p className="text-xs font-bold">Sarah Kim</p>
-                        <p className="text-sm text-neutral-content/40">
+                        <p className="text-sm text-base-content/40">
                             Senior Technical Recruiter
                         </p>
                     </div>

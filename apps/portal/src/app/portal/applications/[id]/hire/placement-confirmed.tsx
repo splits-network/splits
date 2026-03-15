@@ -42,7 +42,7 @@ export default function PlacementConfirmed({
     return (
         <main className="min-h-[70vh]">
             {/* Hero Section */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-24">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-24">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-success/10"
                     style={{
@@ -62,8 +62,9 @@ export default function PlacementConfirmed({
                         ${placementFee.toLocaleString()}
                     </p>
 
-                    <p className="text-base text-neutral-content/60 max-w-xl mx-auto">
-                        {candidateName} has been hired as {jobTitle} at {companyName}
+                    <p className="text-base text-base-content/60 max-w-xl mx-auto">
+                        {candidateName} has been hired as {jobTitle} at{" "}
+                        {companyName}
                     </p>
                 </div>
             </section>
@@ -78,28 +79,44 @@ export default function PlacementConfirmed({
                         </p>
                         <div className="grid grid-cols-2 gap-6">
                             <div>
-                                <p className="text-sm text-base-content/50">Salary</p>
+                                <p className="text-sm text-base-content/50">
+                                    Salary
+                                </p>
                                 <p className="text-lg font-black">
                                     ${salary.toLocaleString()}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-base-content/50">Placement Fee</p>
+                                <p className="text-sm text-base-content/50">
+                                    Placement Fee
+                                </p>
                                 <p className="text-lg font-black text-success">
                                     ${placementFee.toLocaleString()}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-base-content/50">Start Date</p>
-                                <p className="text-lg font-black">{formattedStartDate}</p>
+                                <p className="text-sm text-base-content/50">
+                                    Start Date
+                                </p>
+                                <p className="text-lg font-black">
+                                    {formattedStartDate}
+                                </p>
                             </div>
                             <div>
-                                <p className="text-sm text-base-content/50">Guarantee Period</p>
-                                <p className="text-lg font-black">{guaranteeDays} days</p>
+                                <p className="text-sm text-base-content/50">
+                                    Guarantee Period
+                                </p>
+                                <p className="text-lg font-black">
+                                    {guaranteeDays} days
+                                </p>
                             </div>
                             <div className="col-span-2">
-                                <p className="text-sm text-base-content/50">Guarantee Expires</p>
-                                <p className="text-lg font-black">{guaranteeExpiresAt}</p>
+                                <p className="text-sm text-base-content/50">
+                                    Guarantee Expires
+                                </p>
+                                <p className="text-lg font-black">
+                                    {guaranteeExpiresAt}
+                                </p>
                             </div>
                         </div>
                     </div>

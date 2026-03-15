@@ -22,7 +22,11 @@ import type { ApplicationStage } from "@splits-network/shared-types";
 
 /* ─── Stage definitions ──────────────────────────────────────────────────── */
 
-const stages: Array<{ key: ApplicationStage; label: string; color: BaselSemanticColor }> = [
+const stages: Array<{
+    key: ApplicationStage;
+    label: string;
+    color: BaselSemanticColor;
+}> = [
     { key: "recruiter_proposed", label: "Proposed", color: "secondary" },
     { key: "screen", label: "Screen", color: "info" },
     { key: "submitted", label: "Submitted", color: "neutral" },
@@ -260,7 +264,7 @@ export default function PipelineModal({
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-9 h-9 flex items-center justify-center bg-neutral text-neutral-content text-xs font-bold flex-shrink-0">
+                                                        <div className="w-9 h-9 flex items-center justify-center bg-base-300 text-base-content text-xs font-bold flex-shrink-0">
                                                             {initials}
                                                         </div>
                                                         <span className="font-semibold text-sm">
@@ -300,7 +304,10 @@ export default function PipelineModal({
                                                         </select>
                                                     ) : (
                                                         <BaselBadge
-                                                            color={stage?.color || "neutral"}
+                                                            color={
+                                                                stage?.color ||
+                                                                "neutral"
+                                                            }
                                                             size="xs"
                                                             variant="soft"
                                                         >

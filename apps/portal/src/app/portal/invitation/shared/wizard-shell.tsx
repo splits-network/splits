@@ -26,7 +26,7 @@ export function WizardShell({
     return (
         <main>
             {/* Hero Header */}
-            <section className="relative bg-neutral text-neutral-content py-12 lg:py-16">
+            <section className="relative bg-base-300 text-base-content py-12 lg:py-16">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -41,7 +41,7 @@ export function WizardShell({
                         <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.92] tracking-tight mb-4">
                             {title}
                         </h1>
-                        <p className="text-base text-neutral-content/50 max-w-xl">
+                        <p className="text-base text-base-content/50 max-w-xl">
                             {subtitle}
                         </p>
                     </div>

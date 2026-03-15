@@ -28,7 +28,7 @@ export function PressListing({ articles }: PressListingProps) {
     return (
         <div ref={mainRef} className="min-h-screen bg-base-100">
             {/* ── Hero ────────────────────────────────────────── */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-24">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-24">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -38,15 +38,15 @@ export function PressListing({ articles }: PressListingProps) {
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         {/* Breadcrumb */}
-                        <div className="scroll-reveal fade-up flex items-center gap-2 text-sm text-neutral-content/40 mb-6">
+                        <div className="scroll-reveal fade-up flex items-center gap-2 text-sm text-base-content/40 mb-6">
                             <Link
                                 href="/"
-                                className="hover:text-neutral-content transition-colors"
+                                className="hover:text-base-content transition-colors"
                             >
                                 Home
                             </Link>
                             <i className="fa-solid fa-chevron-right text-[8px]" />
-                            <span className="text-neutral-content/70">
+                            <span className="text-base-content/70">
                                 Press & Updates
                             </span>
                         </div>
@@ -63,7 +63,7 @@ export function PressListing({ articles }: PressListingProps) {
                             ))}
                         </h1>
 
-                        <p className="scroll-reveal fade-up text-lg text-neutral-content/60 max-w-2xl mb-8">
+                        <p className="scroll-reveal fade-up text-lg text-base-content/60 max-w-2xl mb-8">
                             Platform news, feature releases, and engineering
                             updates from the Splits Network team.
                         </p>

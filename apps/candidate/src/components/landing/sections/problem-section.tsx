@@ -38,7 +38,7 @@ export function ProblemSection() {
     return (
         <section
             ref={sectionRef}
-            className="py-24 bg-neutral text-neutral-content overflow-hidden"
+            className="py-24 bg-base-300 text-base-content overflow-hidden"
         >
             <div className="container mx-auto px-4">
                 <div className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto">

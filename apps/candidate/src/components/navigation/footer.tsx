@@ -194,7 +194,7 @@ export default function Footer({
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@company.com"
                                 required
-                                className="input input-sm flex-1 min-w-0 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-primary focus:outline-none"
+                                className="input input-sm flex-1 min-w-0 bg-neutral-content/5 border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-primary focus:outline-none"
                             />
                             <button
                                 type="submit"
@@ -245,7 +245,7 @@ export default function Footer({
                 <>
                     {sections.map((section) => (
                         <div key={section.title}>
-                            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4">
+                            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
                                 {section.title}
                             </h4>
                             <ul className="space-y-2.5">
@@ -256,14 +256,14 @@ export default function Footer({
                                                 href={link.href}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                                className="text-sm text-base-content/60 hover:text-base-content transition-colors"
                                             >
                                                 {link.label}
                                             </a>
                                         ) : (
                                             <Link
                                                 href={link.href}
-                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                                className="text-sm text-base-content/60 hover:text-base-content transition-colors"
                                             >
                                                 {link.label}
                                             </Link>

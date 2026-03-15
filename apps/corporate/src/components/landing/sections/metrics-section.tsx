@@ -38,13 +38,13 @@ const metrics = [
     },
 ];
 
-function MetricCard({ metric }: { metric: typeof metrics[number] }) {
-    const counterRef = useAnimatedCounter(metric.value, { suffix: metric.suffix });
+function MetricCard({ metric }: { metric: (typeof metrics)[number] }) {
+    const counterRef = useAnimatedCounter(metric.value, {
+        suffix: metric.suffix,
+    });
 
     return (
-        <div
-            className="scroll-reveal fade-up metric-card bg-base-100/5 border border-base-100/10 rounded-2xl p-8 text-center"
-        >
+        <div className="scroll-reveal fade-up metric-card bg-base-100/5 border border-base-100/10 rounded-2xl p-8 text-center">
             <div
                 className={`scroll-reveal scale-in metric-icon w-16 h-16 rounded-full bg-${metric.color}/20 flex items-center justify-center mx-auto mb-6`}
             >
@@ -58,12 +58,8 @@ function MetricCard({ metric }: { metric: typeof metrics[number] }) {
             >
                 0{metric.suffix}
             </span>
-            <div className="font-semibold text-lg mb-1">
-                {metric.label}
-            </div>
-            <div className="text-sm opacity-60">
-                {metric.description}
-            </div>
+            <div className="font-semibold text-lg mb-1">{metric.label}</div>
+            <div className="text-sm opacity-60">{metric.description}</div>
         </div>
     );
 }
@@ -76,12 +72,10 @@ export function MetricsSection() {
     return (
         <section
             ref={sectionRef}
-            className="py-24 bg-neutral text-neutral-content overflow-hidden"
+            className="py-24 bg-base-300 text-base-content overflow-hidden"
         >
             <div className="container mx-auto px-4">
-                <div
-                    className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto"
-                >
+                <div className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto">
                     <p className="text-sm uppercase tracking-wider opacity-60 mb-3">
                         By The Numbers
                     </p>
@@ -94,9 +88,7 @@ export function MetricsSection() {
                     </p>
                 </div>
 
-                <div
-                    className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto stagger-children"
-                >
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto stagger-children">
                     {metrics.map((metric, index) => (
                         <MetricCard key={index} metric={metric} />
                     ))}

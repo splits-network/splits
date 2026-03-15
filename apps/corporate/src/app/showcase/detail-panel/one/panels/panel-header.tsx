@@ -42,7 +42,7 @@ export function PanelHeader({
     ];
 
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
             {/* Diagonal accent */}
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -52,12 +52,15 @@ export function PanelHeader({
             <div className="relative px-6 pt-6 pb-0">
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-6">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40 truncate">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40 truncate">
                         {kicker}
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
                         {badges.map((b) => (
-                            <span key={b.label} className={`badge ${b.className}`}>
+                            <span
+                                key={b.label}
+                                className={`badge ${b.className}`}
+                            >
                                 {b.label}
                             </span>
                         ))}
@@ -77,13 +80,16 @@ export function PanelHeader({
                                 {subtitle}
                             </p>
                         )}
-                        <h2 className="text-3xl font-black tracking-tight leading-none text-neutral-content mb-2 truncate">
+                        <h2 className="text-3xl font-black tracking-tight leading-none text-base-content mb-2 truncate">
                             {title}
                         </h2>
                         {meta && meta.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                 {meta.map((m, i) => (
-                                    <span key={i} className="flex items-center gap-1.5">
+                                    <span
+                                        key={i}
+                                        className="flex items-center gap-1.5"
+                                    >
                                         <i className={`${m.icon} text-xs`} />
                                         {m.text}
                                     </span>
@@ -97,7 +103,10 @@ export function PanelHeader({
                 {actions && actions.length > 0 && (
                     <div className="mt-5 flex flex-wrap items-center gap-2">
                         {actions.map((a) => (
-                            <button key={a.label} className={`btn btn-sm ${a.className || "btn-ghost text-neutral-content/60"}`}>
+                            <button
+                                key={a.label}
+                                className={`btn btn-sm ${a.className || "btn-ghost text-base-content/60"}`}
+                            >
                                 <i className={a.icon} />
                                 {a.label}
                             </button>
@@ -108,18 +117,25 @@ export function PanelHeader({
                 {/* Stats strip */}
                 <div
                     className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
-                    style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
+                    style={{
+                        gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                    }}
                 >
                     {stats.map((stat, i) => (
-                        <div key={stat.label} className="flex items-center gap-2.5 px-3 py-4">
-                            <div className={`w-9 h-9 flex items-center justify-center shrink-0 ${iconStyles[i % iconStyles.length]}`}>
+                        <div
+                            key={stat.label}
+                            className="flex items-center gap-2.5 px-3 py-4"
+                        >
+                            <div
+                                className={`w-9 h-9 flex items-center justify-center shrink-0 ${iconStyles[i % iconStyles.length]}`}
+                            >
                                 <i className={`${stat.icon} text-sm`} />
                             </div>
                             <div>
-                                <span className="text-lg font-black text-neutral-content leading-none block">
+                                <span className="text-lg font-black text-base-content leading-none block">
                                     {stat.value}
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                                <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                     {stat.label}
                                 </span>
                             </div>

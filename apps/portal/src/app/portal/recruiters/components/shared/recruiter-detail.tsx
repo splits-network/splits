@@ -88,7 +88,7 @@ function HeroHeader({
     ].filter(Boolean) as { label: string; value: string; icon: string }[];
 
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
             {/* Diagonal accent */}
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -110,7 +110,7 @@ function HeroHeader({
 
                 {/* Kicker row: firm + status */}
                 <div className="flex items-center justify-between mb-6 pr-10">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40 truncate">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40 truncate">
                         {recruiter.firm_name || "Independent"}
                     </p>
                     <div className="flex items-center gap-3 shrink-0">
@@ -148,7 +148,7 @@ function HeroHeader({
                                 {recruiter.tagline}
                             </p>
                         )}
-                        <h2 className="text-3xl font-black tracking-tight leading-none text-neutral-content mb-2 truncate">
+                        <h2 className="text-3xl font-black tracking-tight leading-none text-base-content mb-2 truncate">
                             {name}
                             {level && (
                                 <span className="ml-2 align-middle inline-block">
@@ -156,7 +156,7 @@ function HeroHeader({
                                 </span>
                             )}
                         </h2>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                             {location && (
                                 <span className="flex items-center gap-1.5">
                                     <i className="fa-duotone fa-regular fa-location-dot text-xs" />
@@ -166,7 +166,7 @@ function HeroHeader({
                             {memberSince && (
                                 <>
                                     {location && (
-                                        <span className="text-neutral-content/20">
+                                        <span className="text-base-content/20">
                                             |
                                         </span>
                                     )}
@@ -225,10 +225,10 @@ function HeroHeader({
                                     <i className={`${stat.icon} text-sm`} />
                                 </div>
                                 <div>
-                                    <span className="text-lg font-black text-neutral-content leading-none block">
+                                    <span className="text-lg font-black text-base-content leading-none block">
                                         {stat.value}
                                     </span>
-                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                         {stat.label}
                                     </span>
                                 </div>
@@ -447,8 +447,16 @@ export function RecruiterDetail({
             />
             <BaselTabBar
                 tabs={[
-                    { label: "About", value: "about", icon: "fa-duotone fa-regular fa-user" },
-                    { label: "Contact", value: "contact", icon: "fa-duotone fa-regular fa-address-book" },
+                    {
+                        label: "About",
+                        value: "about",
+                        icon: "fa-duotone fa-regular fa-user",
+                    },
+                    {
+                        label: "Contact",
+                        value: "contact",
+                        icon: "fa-duotone fa-regular fa-address-book",
+                    },
                 ]}
                 active={activeTab}
                 onChange={(v) => setActiveTab(v as DetailTab)}

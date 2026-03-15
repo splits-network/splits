@@ -206,7 +206,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="you@company.com"
                                     required
-                                    className="input input-sm flex-1 min-w-0 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-primary focus:outline-none"
+                                    className="input input-sm flex-1 min-w-0 bg-neutral-content/5 border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-primary focus:outline-none"
                                 />
                                 <button
                                     type="submit"
@@ -263,7 +263,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                 key={section.title}
                                 className="footer-col scroll-reveal fade-up"
                             >
-                                <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
+                                <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4 flex items-center gap-2">
                                     <span className="w-4 h-0.5 bg-primary" />
                                     {section.title}
                                 </h4>
@@ -272,7 +272,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                         <li key={link.label}>
                                             <Link
                                                 href={link.href}
-                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                                className="text-sm text-base-content/60 hover:text-base-content transition-colors"
                                             >
                                                 {link.label}
                                             </Link>

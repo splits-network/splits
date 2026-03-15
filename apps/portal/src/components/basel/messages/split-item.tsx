@@ -42,7 +42,7 @@ const roleMeta: Record<
     },
     admin: {
         label: "Admin",
-        bgClass: "bg-neutral text-neutral-content",
+        bgClass: "bg-base-300 text-base-content",
         textClass: "text-neutral",
         icon: "fa-duotone fa-regular fa-shield-halved",
     },

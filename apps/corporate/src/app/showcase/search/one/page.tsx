@@ -186,7 +186,7 @@ export default function SearchOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Header */}
-            <section className="relative bg-neutral text-neutral-content py-14 lg:py-18">
+            <section className="relative bg-base-300 text-base-content py-14 lg:py-18">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -208,13 +208,13 @@ export default function SearchOne() {
                     {/* Search bar */}
                     <div className="search-bar-main scroll-reveal fade-up max-w-2xl">
                         <div className="relative">
-                            <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-content/40" />
+                            <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40" />
                             <input
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Search jobs, skills, companies..."
-                                className="input w-full pl-12 pr-24 bg-neutral-content/10 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-coral focus:outline-none h-14 text-lg"
+                                className="input w-full pl-12 pr-24 bg-neutral-content/10 border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-coral focus:outline-none h-14 text-lg"
                             />
                             <button className="btn btn-primary absolute right-1.5 top-1/2 -translate-y-1/2">
                                 Search

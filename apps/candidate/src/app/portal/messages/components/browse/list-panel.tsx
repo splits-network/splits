@@ -4,7 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useChatGateway } from "@/hooks/use-chat-gateway";
-import { registerChatRefresh, requestChatRefresh } from "@/lib/chat-refresh-queue";
+import {
+    registerChatRefresh,
+    requestChatRefresh,
+} from "@/lib/chat-refresh-queue";
 import { getCachedCurrentUserId } from "@/lib/current-user-profile";
 import { usePresence } from "@/hooks/use-presence";
 import MessageListItem from "./list-item";
@@ -35,7 +38,6 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
         });
         setRows((response?.data || []) as ConversationRow[]);
     }, [filter, getToken]);
-
 
     useEffect(() => {
         let mounted = true;
@@ -137,9 +139,7 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
         >
             <div className="p-4 border-b border-base-300 bg-base-200">
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-black tracking-tight">
-                        Inbox
-                    </h2>
+                    <h2 className="text-lg font-black tracking-tight">Inbox</h2>
                 </div>
 
                 {/* Search */}
@@ -156,21 +156,19 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
 
                 {/* Filter pills */}
                 <div className="flex gap-1.5 flex-wrap">
-                    {(["inbox", "requests", "archived"] as const).map(
-                        (tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setFilter(tab)}
-                                className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all ${
-                                    filter === tab
-                                        ? "bg-neutral text-neutral-content"
-                                        : "bg-base-100 text-base-content/60 hover:bg-base-300"
-                                }`}
-                            >
-                                {tab[0].toUpperCase() + tab.slice(1)}
-                            </button>
-                        ),
-                    )}
+                    {(["inbox", "requests", "archived"] as const).map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setFilter(tab)}
+                            className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all ${
+                                filter === tab
+                                    ? "bg-base-300 text-base-content"
+                                    : "bg-base-100 text-base-content/60 hover:bg-base-300"
+                            }`}
+                        >
+                            {tab[0].toUpperCase() + tab.slice(1)}
+                        </button>
+                    ))}
                 </div>
             </div>
 

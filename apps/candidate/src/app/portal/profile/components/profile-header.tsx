@@ -10,7 +10,7 @@ export function ProfileHeader() {
     return (
         <section
             ref={headerRef}
-            className="relative bg-neutral text-neutral-content py-16 lg:py-20"
+            className="relative bg-base-300 text-base-content py-16 lg:py-20"
         >
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -31,7 +31,7 @@ export function ProfileHeader() {
                             profile.
                         </span>
                     </h1>
-                    <p className="scroll-reveal fade-up text-base text-neutral-content/50 max-w-xl">
+                    <p className="scroll-reveal fade-up text-base text-base-content/50 max-w-xl">
                         Manage your profile, career preferences, privacy, and
                         connected services all in one place.
                     </p>

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { BrandedHeader } from '@/components/branded-header';
-import { ExchangeResult } from '@/lib/types';
-import { BaselBadge } from '@splits-network/basel-ui';
+import { BrandedHeader } from "@/components/branded-header";
+import { ExchangeResult } from "@/lib/types";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 interface IdentityConfirmProps {
     result: ExchangeResult;
@@ -13,18 +13,22 @@ const MAX_VISIBLE_AVATARS = 5;
 
 function callTypeBadgeColor(callType: string) {
     switch (callType) {
-        case 'interview': return 'info' as const;
-        case 'screening': return 'warning' as const;
-        case 'debrief': return 'accent' as const;
-        default: return 'neutral' as const;
+        case "interview":
+            return "info" as const;
+        case "screening":
+            return "warning" as const;
+        case "debrief":
+            return "accent" as const;
+        default:
+            return "neutral" as const;
     }
 }
 
 export function IdentityConfirm({ result, onConfirm }: IdentityConfirmProps) {
     const { call } = result;
     const currentUser = call.participants[0];
-    const currentName = currentUser?.user.name || 'Participant';
-    const nameWords = currentName.split(' ');
+    const currentName = currentUser?.user.name || "Participant";
+    const nameWords = currentName.split(" ");
     const otherParticipants = call.participants.slice(1);
     const visibleAvatars = otherParticipants.slice(0, MAX_VISIBLE_AVATARS);
     const overflowCount = otherParticipants.length - MAX_VISIBLE_AVATARS;
@@ -54,12 +58,15 @@ export function IdentityConfirm({ result, onConfirm }: IdentityConfirmProps) {
 
                         {/* Subtitle */}
                         <p className="text-sm text-base-content/60 mt-2">
-                            Confirm your details below, then step in when you&apos;re ready.
+                            Confirm your details below, then step in when
+                            you&apos;re ready.
                         </p>
 
                         {/* Call title */}
                         {call.title && (
-                            <p className="text-xl text-base-content/70 mt-4">{call.title}</p>
+                            <p className="text-xl text-base-content/70 mt-4">
+                                {call.title}
+                            </p>
                         )}
 
                         {/* Call type badge */}
@@ -70,7 +77,7 @@ export function IdentityConfirm({ result, onConfirm }: IdentityConfirmProps) {
                                 size="md"
                                 icon="fa-video"
                             >
-                                {call.call_type.replace(/_/g, ' ')}
+                                {call.call_type.replace(/_/g, " ")}
                             </BaselBadge>
                         </div>
 
@@ -92,17 +99,17 @@ export function IdentityConfirm({ result, onConfirm }: IdentityConfirmProps) {
                                     {visibleAvatars.map((p, i) => (
                                         <div
                                             key={p.id}
-                                            className={`w-10 h-10 rounded-none border-2 border-base-100 overflow-hidden flex-shrink-0 ${i > 0 ? '-ml-2' : ''}`}
+                                            className={`w-10 h-10 rounded-none border-2 border-base-100 overflow-hidden flex-shrink-0 ${i > 0 ? "-ml-2" : ""}`}
                                         >
                                             {p.user.avatar_url ? (
                                                 <img
                                                     src={p.user.avatar_url}
-                                                    alt={p.user.name || ''}
+                                                    alt={p.user.name || ""}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-base-300 flex items-center justify-center text-sm font-bold">
-                                                    {(p.user.name || '?')[0]}
+                                                    {(p.user.name || "?")[0]}
                                                 </div>
                                             )}
                                         </div>
@@ -114,7 +121,9 @@ export function IdentityConfirm({ result, onConfirm }: IdentityConfirmProps) {
                                     )}
                                 </div>
                                 <p className="text-sm text-base-content/60 mt-2">
-                                    {otherParticipants.map((p) => p.user.name || 'Unknown').join(', ')}
+                                    {otherParticipants
+                                        .map((p) => p.user.name || "Unknown")
+                                        .join(", ")}
                                 </p>
                             </div>
                         )}
@@ -123,10 +132,12 @@ export function IdentityConfirm({ result, onConfirm }: IdentityConfirmProps) {
                         {agendaText && (
                             <div className="mt-8">
                                 <p className="text-sm uppercase tracking-[0.15em] font-semibold text-base-content/50 mb-3">
-                                    {call.agenda ? 'Agenda' : 'Notes'}
+                                    {call.agenda ? "Agenda" : "Notes"}
                                 </p>
                                 <blockquote className="border-l-4 border-primary pl-4 py-2">
-                                    <p className="text-base-content/70 italic">{agendaText}</p>
+                                    <p className="text-base-content/70 italic">
+                                        {agendaText}
+                                    </p>
                                 </blockquote>
                             </div>
                         )}
@@ -144,13 +155,15 @@ export function IdentityConfirm({ result, onConfirm }: IdentityConfirmProps) {
 
                 {/* Right panel — decorative */}
                 <div
-                    className="hidden lg:flex col-span-2 bg-neutral text-neutral-content items-center justify-center relative overflow-hidden"
-                    style={{ clipPath: 'polygon(12% 0, 100% 0, 100% 100%, 0% 100%)' }}
+                    className="hidden lg:flex col-span-2 bg-base-300 text-base-content items-center justify-center relative overflow-hidden"
+                    style={{
+                        clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0% 100%)",
+                    }}
                 >
                     <div className="lobby-panel-fade flex flex-col items-center select-none">
-                        <i className="fa-duotone fa-regular fa-video text-[10rem] text-neutral-content/5" />
+                        <i className="fa-duotone fa-regular fa-video text-[10rem] text-base-content/5" />
                         {call.participants.length > 1 && (
-                            <p className="text-[6rem] font-black text-neutral-content/5 leading-none mt-4">
+                            <p className="text-[6rem] font-black text-base-content/5 leading-none mt-4">
                                 {call.participants.length}
                             </p>
                         )}

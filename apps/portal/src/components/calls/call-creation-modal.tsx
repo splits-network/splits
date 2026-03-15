@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useState, useCallback, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import {
     BaselModal,
     BaselModalHeader,
@@ -9,15 +9,19 @@ import {
     BaselModalFooter,
     BaselConfirmModal,
     BaselFormField,
-} from '@splits-network/basel-ui';
-import { useCreateCall } from '@/hooks/use-create-call';
-import { useUserProfile } from '@/contexts/user-profile-context';
-import { ParticipantPicker, type Participant } from './participant-picker';
-import { EntityLinker, type LinkedEntity, type LinkableEntityType } from './entity-linker';
-import { SchedulingPanel, type ScheduleSelection } from './scheduling-panel';
-import { TagPicker } from './tag-picker';
-import { CallTypeSelector, inferCallType } from './call-type-selector';
-import { RecordingControls } from './recording-controls';
+} from "@splits-network/basel-ui";
+import { useCreateCall } from "@/hooks/use-create-call";
+import { useUserProfile } from "@/contexts/user-profile-context";
+import { ParticipantPicker, type Participant } from "./participant-picker";
+import {
+    EntityLinker,
+    type LinkedEntity,
+    type LinkableEntityType,
+} from "./entity-linker";
+import { SchedulingPanel, type ScheduleSelection } from "./scheduling-panel";
+import { TagPicker } from "./tag-picker";
+import { CallTypeSelector, inferCallType } from "./call-type-selector";
+import { RecordingControls } from "./recording-controls";
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -31,18 +35,18 @@ interface CallCreationModalProps {
     defaultEntityId?: string;
     defaultEntityLabel?: string;
     /** Start in instant or scheduled mode */
-    defaultMode?: 'instant' | 'scheduled';
+    defaultMode?: "instant" | "scheduled";
     /** Callback after successful creation */
-    onSuccess?: (callId: string, mode: 'instant' | 'scheduled') => void;
+    onSuccess?: (callId: string, mode: "instant" | "scheduled") => void;
 }
 
-type CallMode = 'instant' | 'scheduled';
+type CallMode = "instant" | "scheduled";
 
 const DURATION_OPTIONS = [
-    { value: 15, label: '15 min' },
-    { value: 30, label: '30 min' },
-    { value: 45, label: '45 min' },
-    { value: 60, label: '60 min' },
+    { value: 15, label: "15 min" },
+    { value: 30, label: "30 min" },
+    { value: 45, label: "45 min" },
+    { value: 60, label: "60 min" },
 ];
 
 /* ─── Component ────────────────────────────────────────────────────── */
@@ -54,11 +58,18 @@ export function CallCreationModal({
     defaultEntityType,
     defaultEntityId,
     defaultEntityLabel,
-    defaultMode = 'instant',
+    defaultMode = "instant",
     onSuccess,
 }: CallCreationModalProps) {
     const { user } = useUser();
-    const { createCall, startCall, generateToken, createCalendarEvents, isLoading, error } = useCreateCall();
+    const {
+        createCall,
+        startCall,
+        generateToken,
+        createCalendarEvents,
+        isLoading,
+        error,
+    } = useCreateCall();
     const { planTier, isCompanyUser } = useUserProfile();
 
     /* ── State ── */
@@ -68,25 +79,25 @@ export function CallCreationModal({
         if (user && !initial.some((p) => p.user_id === user.id)) {
             initial.unshift({
                 user_id: user.id,
-                first_name: user.firstName || '',
-                last_name: user.lastName || '',
-                email: user.primaryEmailAddress?.emailAddress || '',
+                first_name: user.firstName || "",
+                last_name: user.lastName || "",
+                email: user.primaryEmailAddress?.emailAddress || "",
                 avatar_url: user.imageUrl || null,
-                role: 'host',
+                role: "host",
             });
         }
         return initial;
     });
     const [entities, setEntities] = useState<LinkedEntity[]>([]);
-    const [title, setTitle] = useState('');
-    const [agenda, setAgenda] = useState('');
-    const [preCallNotes, setPreCallNotes] = useState('');
+    const [title, setTitle] = useState("");
+    const [agenda, setAgenda] = useState("");
+    const [preCallNotes, setPreCallNotes] = useState("");
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [duration, setDuration] = useState(30);
     const [schedule, setSchedule] = useState<ScheduleSelection | null>(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
-    const [callType, setCallType] = useState('recruiting_call');
+    const [callType, setCallType] = useState("recruiting_call");
     const [recordingEnabled, setRecordingEnabled] = useState(false);
     const [transcriptionEnabled, setTranscriptionEnabled] = useState(false);
     const [aiAnalysisEnabled, setAiAnalysisEnabled] = useState(false);
@@ -98,27 +109,30 @@ export function CallCreationModal({
         if (!updated.some((p) => p.user_id === user.id)) {
             updated.unshift({
                 user_id: user.id,
-                first_name: user.firstName || '',
-                last_name: user.lastName || '',
-                email: user.primaryEmailAddress?.emailAddress || '',
+                first_name: user.firstName || "",
+                last_name: user.lastName || "",
+                email: user.primaryEmailAddress?.emailAddress || "",
                 avatar_url: user.imageUrl || null,
-                role: 'host',
+                role: "host",
             });
         }
         setParticipants(updated);
         setMode(defaultMode);
-        setTitle('');
-        setAgenda('');
-        setPreCallNotes('');
+        setTitle("");
+        setAgenda("");
+        setPreCallNotes("");
         setSelectedTags([]);
         setDuration(30);
         setSchedule(null);
         setEntities([]);
         setShowConfirm(false);
         setSubmitError(null);
-        const inferLinks = entities.length > 0
-            ? entities.map((e) => ({ entity_type: e.entity_type }))
-            : defaultEntityType ? [{ entity_type: defaultEntityType }] : [];
+        const inferLinks =
+            entities.length > 0
+                ? entities.map((e) => ({ entity_type: e.entity_type }))
+                : defaultEntityType
+                  ? [{ entity_type: defaultEntityType }]
+                  : [];
         setCallType(inferCallType(inferLinks));
         setRecordingEnabled(false);
         setTranscriptionEnabled(false);
@@ -127,7 +141,9 @@ export function CallCreationModal({
     }, [isOpen, defaultParticipants, defaultMode, defaultEntityType]);
 
     /* ── Derived ── */
-    const otherParticipants = participants.filter((p) => p.user_id !== user?.id);
+    const otherParticipants = participants.filter(
+        (p) => p.user_id !== user?.id,
+    );
     const hasParticipants = otherParticipants.length > 0;
     const primaryRecipient = otherParticipants[0];
 
@@ -141,9 +157,13 @@ export function CallCreationModal({
         const payload = {
             call_type: callType,
             title: title || undefined,
-            scheduled_at: mode === 'scheduled' && schedule ? schedule.dateTime : undefined,
-            agenda: mode === 'scheduled' ? agenda || undefined : undefined,
-            duration_minutes_planned: mode === 'scheduled' ? duration : undefined,
+            scheduled_at:
+                mode === "scheduled" && schedule
+                    ? schedule.dateTime
+                    : undefined,
+            agenda: mode === "scheduled" ? agenda || undefined : undefined,
+            duration_minutes_planned:
+                mode === "scheduled" ? duration : undefined,
             pre_call_notes: preCallNotes || undefined,
             tags: selectedTags.length > 0 ? selectedTags : undefined,
             recording_enabled: recordingEnabled,
@@ -162,35 +182,62 @@ export function CallCreationModal({
         try {
             const call = await createCall(payload);
 
-            if (mode === 'instant') {
+            if (mode === "instant") {
                 await startCall(call.id);
                 const tokenResult = await generateToken(call.id);
-                const videoBaseUrl = process.env.NEXT_PUBLIC_VIDEO_APP_URL || 'https://video.splits.network';
-                window.open(`${videoBaseUrl}/join/${tokenResult.access_token}`, '_blank');
+                const videoBaseUrl =
+                    process.env.NEXT_PUBLIC_VIDEO_APP_URL ||
+                    "https://video.splits.network";
+                window.open(
+                    `${videoBaseUrl}/join/${tokenResult.access_token}`,
+                    "_blank",
+                );
             }
 
             // Fire-and-forget: create calendar events for scheduled calls
-            if (mode === 'scheduled' && schedule) {
+            if (mode === "scheduled" && schedule) {
                 createCalendarEvents({
                     callId: call.id,
-                    title: title || `Call with ${otherParticipants.map(p => p.first_name).join(', ')}`,
+                    title:
+                        title ||
+                        `Call with ${otherParticipants.map((p) => p.first_name).join(", ")}`,
                     scheduledAt: schedule.dateTime,
                     durationMinutes: duration,
                     agenda: agenda || undefined,
-                    participants: participants.filter(p => !p.user_id.startsWith('email:')),
+                    participants: participants.filter(
+                        (p) => !p.user_id.startsWith("email:"),
+                    ),
                 }).catch(() => {
                     // Silently ignore — calendar is best-effort
                 });
             }
 
             onSuccess?.(call.id, mode);
-            if (mode === 'scheduled') {
+            if (mode === "scheduled") {
                 onClose();
             }
         } catch (err: any) {
-            setSubmitError(err.message || 'Failed to create call');
+            setSubmitError(err.message || "Failed to create call");
         }
-    }, [mode, title, agenda, duration, preCallNotes, selectedTags, entities, participants, schedule, callType, recordingEnabled, transcriptionEnabled, aiAnalysisEnabled, createCall, generateToken, onSuccess, onClose]);
+    }, [
+        mode,
+        title,
+        agenda,
+        duration,
+        preCallNotes,
+        selectedTags,
+        entities,
+        participants,
+        schedule,
+        callType,
+        recordingEnabled,
+        transcriptionEnabled,
+        aiAnalysisEnabled,
+        createCall,
+        generateToken,
+        onSuccess,
+        onClose,
+    ]);
 
     const handleInstantClick = () => {
         if (!hasParticipants) return;
@@ -201,10 +248,18 @@ export function CallCreationModal({
 
     return (
         <>
-            <BaselModal isOpen={isOpen && !showConfirm} onClose={onClose} maxWidth="max-w-2xl">
+            <BaselModal
+                isOpen={isOpen && !showConfirm}
+                onClose={onClose}
+                maxWidth="max-w-2xl"
+            >
                 <BaselModalHeader
                     title="New Call"
-                    subtitle={mode === 'instant' ? 'Start an instant call' : 'Schedule a future call'}
+                    subtitle={
+                        mode === "instant"
+                            ? "Start an instant call"
+                            : "Schedule a future call"
+                    }
                     icon="fa-phone"
                     iconColor="primary"
                     onClose={onClose}
@@ -215,11 +270,11 @@ export function CallCreationModal({
                         <button
                             type="button"
                             className={`flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-widest transition-colors ${
-                                mode === 'instant'
-                                    ? 'bg-primary text-primary-content'
-                                    : 'text-neutral-content/50 hover:text-neutral-content/80'
+                                mode === "instant"
+                                    ? "bg-primary text-primary-content"
+                                    : "text-base-content/50 hover:text-base-content/80"
                             }`}
-                            onClick={() => setMode('instant')}
+                            onClick={() => setMode("instant")}
                         >
                             <i className="fa-duotone fa-regular fa-phone" />
                             Call Now
@@ -227,11 +282,11 @@ export function CallCreationModal({
                         <button
                             type="button"
                             className={`flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-widest transition-colors ${
-                                mode === 'scheduled'
-                                    ? 'bg-primary text-primary-content'
-                                    : 'text-neutral-content/50 hover:text-neutral-content/80'
+                                mode === "scheduled"
+                                    ? "bg-primary text-primary-content"
+                                    : "text-base-content/50 hover:text-base-content/80"
                             }`}
-                            onClick={() => setMode('scheduled')}
+                            onClick={() => setMode("scheduled")}
                         >
                             <i className="fa-duotone fa-regular fa-calendar-clock" />
                             Schedule
@@ -253,7 +308,9 @@ export function CallCreationModal({
                         <CallTypeSelector
                             value={callType}
                             onChange={setCallType}
-                            entityLinks={entities.map((e) => ({ entity_type: e.entity_type }))}
+                            entityLinks={entities.map((e) => ({
+                                entity_type: e.entity_type,
+                            }))}
                         />
 
                         {/* Participants */}
@@ -273,7 +330,10 @@ export function CallCreationModal({
                         />
 
                         {/* Title (optional) */}
-                        <BaselFormField label="Title" hint="Optional — auto-generated if empty">
+                        <BaselFormField
+                            label="Title"
+                            hint="Optional — auto-generated if empty"
+                        >
                             <input
                                 type="text"
                                 value={title}
@@ -284,21 +344,32 @@ export function CallCreationModal({
                         </BaselFormField>
 
                         {/* Schedule mode fields */}
-                        {mode === 'scheduled' && (
+                        {mode === "scheduled" && (
                             <>
                                 <SchedulingPanel
-                                    participantUserIds={participants.map((p) => p.user_id).filter((id) => !id.startsWith('email:'))}
+                                    participantUserIds={participants
+                                        .map((p) => p.user_id)
+                                        .filter(
+                                            (id) => !id.startsWith("email:"),
+                                        )}
                                     onScheduleSelect={setSchedule}
                                     selection={schedule}
                                     sideSlot={
                                         <BaselFormField label="Duration">
                                             <select
                                                 value={duration}
-                                                onChange={(e) => setDuration(Number(e.target.value))}
+                                                onChange={(e) =>
+                                                    setDuration(
+                                                        Number(e.target.value),
+                                                    )
+                                                }
                                                 className="select w-full"
                                             >
                                                 {DURATION_OPTIONS.map((opt) => (
-                                                    <option key={opt.value} value={opt.value}>
+                                                    <option
+                                                        key={opt.value}
+                                                        value={opt.value}
+                                                    >
                                                         {opt.label}
                                                     </option>
                                                 ))}
@@ -307,10 +378,15 @@ export function CallCreationModal({
                                     }
                                 />
 
-                                <BaselFormField label="Agenda" hint="Optional — included in calendar invite">
+                                <BaselFormField
+                                    label="Agenda"
+                                    hint="Optional — included in calendar invite"
+                                >
                                     <textarea
                                         value={agenda}
-                                        onChange={(e) => setAgenda(e.target.value)}
+                                        onChange={(e) =>
+                                            setAgenda(e.target.value)
+                                        }
                                         placeholder="Topics to discuss..."
                                         rows={3}
                                         className="textarea w-full"
@@ -320,10 +396,15 @@ export function CallCreationModal({
                         )}
 
                         {/* Pre-call notes (private) */}
-                        <BaselFormField label="Pre-call Notes" hint="Private — only visible to you">
+                        <BaselFormField
+                            label="Pre-call Notes"
+                            hint="Private — only visible to you"
+                        >
                             <textarea
                                 value={preCallNotes}
-                                onChange={(e) => setPreCallNotes(e.target.value)}
+                                onChange={(e) =>
+                                    setPreCallNotes(e.target.value)
+                                }
                                 placeholder="Talking points, reminders..."
                                 rows={2}
                                 className="textarea w-full"
@@ -360,7 +441,7 @@ export function CallCreationModal({
                         Cancel
                     </button>
 
-                    {mode === 'instant' ? (
+                    {mode === "instant" ? (
                         <button
                             type="button"
                             className="btn btn-primary"
@@ -412,13 +493,20 @@ export function CallCreationModal({
                 <p className="text-sm text-base-content/60">
                     {otherParticipants.length === 1 ? (
                         <>
-                            Call <span className="font-bold">{primaryRecipient?.first_name} {primaryRecipient?.last_name}</span>?
-                            They will be notified.
+                            Call{" "}
+                            <span className="font-bold">
+                                {primaryRecipient?.first_name}{" "}
+                                {primaryRecipient?.last_name}
+                            </span>
+                            ? They will be notified.
                         </>
                     ) : (
                         <>
-                            Start a call with <span className="font-bold">{otherParticipants.length} participants</span>?
-                            They will be notified.
+                            Start a call with{" "}
+                            <span className="font-bold">
+                                {otherParticipants.length} participants
+                            </span>
+                            ? They will be notified.
                         </>
                     )}
                 </p>

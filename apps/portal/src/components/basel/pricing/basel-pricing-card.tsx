@@ -24,12 +24,12 @@ const tierColors = {
         text: "text-primary-content",
         checkColor: "text-primary",
         cardBg: "bg-neutral",
-        cardText: "text-neutral-content",
-        cardTextMuted: "text-neutral-content/50",
-        cardTextSubtle: "text-neutral-content/70",
-        cardTextSoft: "text-neutral-content/80",
-        cardTextFaint: "text-neutral-content/50",
-        cardTextFaintest: "text-neutral-content/40",
+        cardText: "text-base-content",
+        cardTextMuted: "text-base-content/50",
+        cardTextSubtle: "text-base-content/70",
+        cardTextSoft: "text-base-content/80",
+        cardTextFaint: "text-base-content/50",
+        cardTextFaintest: "text-base-content/40",
     },
     partner: {
         border: "border-accent",
@@ -146,9 +146,7 @@ export function BaselPricingCard({
 
             {/* Headline */}
             {planFeatures.headline && (
-                <h3
-                    className={`text-base font-bold mb-3 ${colors.cardText}`}
-                >
+                <h3 className={`text-base font-bold mb-3 ${colors.cardText}`}>
                     {planFeatures.headline}
                 </h3>
             )}
@@ -181,19 +179,17 @@ export function BaselPricingCard({
 
                 {planFeatures.not_included &&
                     planFeatures.not_included.length > 0 &&
-                    planFeatures.not_included.map(
-                        (feat: string, i: number) => (
-                            <li
-                                key={`exc-${i}`}
-                                className={`flex items-start gap-3 text-sm leading-relaxed ${colors.cardTextFaint}`}
-                            >
-                                <i
-                                    className={`fa-duotone fa-regular fa-xmark mt-0.5 flex-shrink-0 ${colors.cardTextFaintest}`}
-                                />
-                                {feat}
-                            </li>
-                        ),
-                    )}
+                    planFeatures.not_included.map((feat: string, i: number) => (
+                        <li
+                            key={`exc-${i}`}
+                            className={`flex items-start gap-3 text-sm leading-relaxed ${colors.cardTextFaint}`}
+                        >
+                            <i
+                                className={`fa-duotone fa-regular fa-xmark mt-0.5 flex-shrink-0 ${colors.cardTextFaintest}`}
+                            />
+                            {feat}
+                        </li>
+                    ))}
             </ul>
 
             {/* CTA Button */}

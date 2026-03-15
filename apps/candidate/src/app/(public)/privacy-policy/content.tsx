@@ -563,7 +563,7 @@ export default function PrivacyPolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 1
                ═══════════════════════════════════════════════════════ */}
-            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-neutral text-neutral-content">
+            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -572,7 +572,7 @@ export default function PrivacyPolicyContent() {
                                 &ldquo;Your data belongs to you. We are
                                 custodians, not owners.&rdquo;
                             </blockquote>
-                            <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
+                            <cite className="text-sm uppercase tracking-[0.2em] text-base-content/50 not-italic">
                                 -- Applicant Network Privacy Principles
                             </cite>
                         </div>
@@ -1554,7 +1554,7 @@ export default function PrivacyPolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 3
                ═══════════════════════════════════════════════════════ */}
-            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-neutral text-neutral-content">
+            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -1563,7 +1563,7 @@ export default function PrivacyPolicyContent() {
                                 &ldquo;AI should serve people, not surveil
                                 them.&rdquo;
                             </blockquote>
-                            <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
+                            <cite className="text-sm uppercase tracking-[0.2em] text-base-content/50 not-italic">
                                 -- Applicant Network AI Ethics Principles
                             </cite>
                         </div>

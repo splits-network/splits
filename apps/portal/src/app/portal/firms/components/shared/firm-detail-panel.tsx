@@ -6,7 +6,11 @@ import { formatCurrency, formatDate } from "../../types";
 import { firmStatusBadgeColor } from "./status-color";
 import { formatStatus, memberCountDisplay, firmInitials } from "./helpers";
 import { FirmActionsToolbar } from "./actions-toolbar";
-import { LevelBadge, BadgeGrid, useGamification } from "@splits-network/shared-gamification";
+import {
+    LevelBadge,
+    BadgeGrid,
+    useGamification,
+} from "@splits-network/shared-gamification";
 import { BaselTabBar, BaselBadge } from "@splits-network/basel-ui";
 import { MembersSection } from "../detail/members-section";
 import { BillingSection } from "../detail/billing-section";
@@ -55,29 +59,47 @@ export function FirmDetail({
     const initials = firmInitials(firm.name);
 
     const stats = [
-        { label: "Members", value: String(firm.active_member_count || 0), icon: "fa-duotone fa-regular fa-users" },
-        { label: "Placements", value: String(firm.total_placements), icon: "fa-duotone fa-regular fa-briefcase" },
-        { label: "Revenue", value: formatCurrency(firm.total_revenue), icon: "fa-duotone fa-regular fa-dollar-sign" },
+        {
+            label: "Members",
+            value: String(firm.active_member_count || 0),
+            icon: "fa-duotone fa-regular fa-users",
+        },
+        {
+            label: "Placements",
+            value: String(firm.total_placements),
+            icon: "fa-duotone fa-regular fa-briefcase",
+        },
+        {
+            label: "Revenue",
+            value: formatCurrency(firm.total_revenue),
+            icon: "fa-duotone fa-regular fa-dollar-sign",
+        },
     ];
 
     return (
         <div className="w-full">
             {/* Dark Header */}
-            <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+            <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
                 {/* Diagonal accent */}
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
-                    style={{ clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)" }}
+                    style={{
+                        clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)",
+                    }}
                 />
 
                 <div className="relative px-6 pt-6 pb-0">
                     {/* Kicker row: member count left, status + close right */}
                     <div className="flex items-center justify-between mb-6">
-                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40 truncate">
+                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40 truncate">
                             {memberCountDisplay(firm)}
                         </p>
                         <div className="flex items-center gap-2 shrink-0">
-                            <BaselBadge color={firmStatusBadgeColor(firm.status)} variant="soft" size="sm">
+                            <BaselBadge
+                                color={firmStatusBadgeColor(firm.status)}
+                                variant="soft"
+                                size="sm"
+                            >
                                 {formatStatus(firm.status)}
                             </BaselBadge>
                             {onClose && (
@@ -115,10 +137,10 @@ export function FirmDetail({
                             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1 truncate">
                                 Recruiting Firm
                             </p>
-                            <h2 className="text-3xl font-black tracking-tight leading-none text-neutral-content mb-2 truncate">
+                            <h2 className="text-3xl font-black tracking-tight leading-none text-base-content mb-2 truncate">
                                 {firm.name}
                             </h2>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                 {location && (
                                     <span className="flex items-center gap-1.5">
                                         <i className="fa-duotone fa-regular fa-location-dot text-xs" />
@@ -147,18 +169,25 @@ export function FirmDetail({
                     {/* Stats strip */}
                     <div
                         className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
-                        style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
+                        style={{
+                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                        }}
                     >
                         {stats.map((stat, i) => (
-                            <div key={stat.label} className="flex items-center gap-2.5 px-3 py-4">
-                                <div className={`w-9 h-9 flex items-center justify-center shrink-0 ${ICON_STYLES[i % ICON_STYLES.length]}`}>
+                            <div
+                                key={stat.label}
+                                className="flex items-center gap-2.5 px-3 py-4"
+                            >
+                                <div
+                                    className={`w-9 h-9 flex items-center justify-center shrink-0 ${ICON_STYLES[i % ICON_STYLES.length]}`}
+                                >
                                     <i className={`${stat.icon} text-sm`} />
                                 </div>
                                 <div>
-                                    <span className="text-lg font-black text-neutral-content leading-none block">
+                                    <span className="text-lg font-black text-base-content leading-none block">
                                         {stat.value}
                                     </span>
-                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                         {stat.label}
                                     </span>
                                 </div>

@@ -84,7 +84,7 @@ Basel pages use split-screen editorial compositions inspired by magazine design:
 
 ```tsx
 {/* 60/40 split-screen with diagonal clip-path */}
-<section className="relative min-h-[70vh] flex items-center bg-neutral text-neutral-content">
+<section className="relative min-h-[70vh] flex items-center bg-base-300 text-base-content">
     <div
         className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
         style={{ clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0% 100%)" }}
@@ -130,7 +130,7 @@ Every page section follows the kicker -> headline -> body pattern:
 className="bg-primary text-primary-content"
 className="bg-secondary text-secondary-content"
 className="bg-accent text-accent-content"
-className="bg-neutral text-neutral-content"
+className="bg-base-300 text-base-content"
 className="bg-base-100 text-base-content"
 className="bg-base-200 border-base-300"
 className="text-base-content/60"   // opacity modifier for secondary text

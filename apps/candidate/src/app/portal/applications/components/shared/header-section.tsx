@@ -9,7 +9,7 @@ interface HeaderSectionProps {
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
     return (
-        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+        <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
             <div className="container mx-auto px-6 lg:px-12">
                 <div className="max-w-4xl">
                     {/* Kicker */}
@@ -32,7 +32,7 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                     </h1>
 
                     {/* Subtitle */}
-                    <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
+                    <p className="hero-subtitle text-lg text-base-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                         Monitor your applications from draft to offer. Review AI
                         feedback, respond to proposals, and stay on top of every
                         stage.
@@ -45,8 +45,12 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                                 <i className="fa-duotone fa-regular fa-file-lines text-primary-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{stats.total}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Total</div>
+                                <div className="text-2xl font-black">
+                                    {stats.total}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Total
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -54,8 +58,12 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                                 <i className="fa-duotone fa-regular fa-bolt text-accent-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{stats.active}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Active</div>
+                                <div className="text-2xl font-black">
+                                    {stats.active}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Active
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -63,8 +71,12 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                                 <i className="fa-duotone fa-regular fa-hourglass-half text-secondary-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{stats.pending}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Pending</div>
+                                <div className="text-2xl font-black">
+                                    {stats.pending}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Pending
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -72,8 +84,12 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                                 <i className="fa-duotone fa-regular fa-paper-plane text-base-content" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black">{stats.proposals}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Proposals</div>
+                                <div className="text-2xl font-black">
+                                    {stats.proposals}
+                                </div>
+                                <div className="text-xs uppercase tracking-wider opacity-60">
+                                    Proposals
+                                </div>
                             </div>
                         </div>
                     </div>

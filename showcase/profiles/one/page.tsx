@@ -125,7 +125,7 @@ export default function ProfilesOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Header */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
@@ -152,7 +152,7 @@ export default function ProfilesOne() {
                                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-2">
                                     {profile.name}
                                 </h1>
-                                <p className="text-lg text-neutral-content/60 mb-3">
+                                <p className="text-lg text-base-content/60 mb-3">
                                     {profile.title}
                                 </p>
                                 <div className="flex flex-wrap gap-3">
@@ -168,7 +168,7 @@ export default function ProfilesOne() {
                                     ].map((m) => (
                                         <span
                                             key={m.text}
-                                            className="profile-meta scroll-reveal fade-up flex items-center gap-1.5 text-sm text-neutral-content/40"
+                                            className="profile-meta scroll-reveal fade-up flex items-center gap-1.5 text-sm text-base-content/40"
                                         >
                                             <i
                                                 className={`${m.icon} text-xs`}

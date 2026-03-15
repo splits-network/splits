@@ -82,7 +82,7 @@ export default function EmailInboxHeader() {
                             onClick={() => selectConnection(conn)}
                             className={`px-3 py-1 text-sm font-semibold uppercase tracking-wider transition-all ${
                                 selectedConnection?.id === conn.id
-                                    ? "bg-neutral text-neutral-content"
+                                    ? "bg-base-300 text-base-content"
                                     : "bg-base-100 text-base-content/60 hover:bg-base-300"
                             }`}
                         >

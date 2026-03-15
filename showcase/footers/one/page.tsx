@@ -92,7 +92,7 @@ export default function FootersOne() {
             {/* ═══════════════════════════════════════════════════════
                 HERO — Showcase description
                ═══════════════════════════════════════════════════════ */}
-            <section className="relative min-h-[60vh] flex items-center bg-neutral text-neutral-content">
+            <section className="relative min-h-[60vh] flex items-center bg-base-300 text-base-content">
                 {/* Diagonal accent panel */}
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -123,7 +123,7 @@ export default function FootersOne() {
                             </span>
                         </h1>
 
-                        <p className="showcase-desc text-lg text-neutral-content/60 leading-relaxed max-w-xl scroll-reveal fade-up">
+                        <p className="showcase-desc text-lg text-base-content/60 leading-relaxed max-w-xl scroll-reveal fade-up">
                             A comprehensive footer system built on the editorial
                             grid. Features a bold CTA band, newsletter signup
                             with split-screen layout, organized navigation
@@ -146,7 +146,7 @@ export default function FootersOne() {
                             ].map((feat) => (
                                 <span
                                     key={feat}
-                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-neutral-content/10 text-neutral-content/60"
+                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-neutral-content/10 text-base-content/60"
                                 >
                                     {feat}
                                 </span>
@@ -338,7 +338,7 @@ export default function FootersOne() {
             </section>
 
             {/* ── 2. Newsletter + Logo (split-screen layout) ──────── */}
-            <footer className="bg-neutral text-neutral-content">
+            <footer className="bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-0 py-16 border-b border-neutral-content/10">
                         {/* Left: Newsletter */}
@@ -385,7 +385,7 @@ export default function FootersOne() {
                                         }
                                         placeholder="you@company.com"
                                         required
-                                        className="input input-sm flex-1 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-coral focus:outline-none"
+                                        className="input input-sm flex-1 bg-neutral-content/5 border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-coral focus:outline-none"
                                     />
                                     <button
                                         type="submit"
@@ -451,7 +451,7 @@ export default function FootersOne() {
                                 key={section.title}
                                 className="footer-col scroll-reveal fade-up"
                             >
-                                <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4">
+                                <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
                                     {section.title}
                                 </h4>
                                 <ul className="space-y-2.5">
@@ -459,7 +459,7 @@ export default function FootersOne() {
                                         <li key={link.label}>
                                             <a
                                                 href={link.href}
-                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                                className="text-sm text-base-content/60 hover:text-base-content transition-colors"
                                             >
                                                 {link.label}
                                             </a>

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useBrand } from '@/hooks/use-brand';
-import type { CallDetail } from '@/lib/types';
+import { useBrand } from "@/hooks/use-brand";
+import type { CallDetail } from "@/lib/types";
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -33,20 +33,20 @@ function buildPortalCallUrl(portalUrl: string, callId: string): string {
 
 function buildFollowUpUrl(portalUrl: string, call: CallDetail): string {
     const params = new URLSearchParams();
-    params.set('mode', 'scheduled');
-    params.set('followUpFrom', call.id);
+    params.set("mode", "scheduled");
+    params.set("followUpFrom", call.id);
 
     const participantIds = call.participants
         .map((p) => p.user_id)
-        .filter((id) => !id.startsWith('email:'));
+        .filter((id) => !id.startsWith("email:"));
     if (participantIds.length > 0) {
-        params.set('participants', participantIds.join(','));
+        params.set("participants", participantIds.join(","));
     }
 
     if (call.entity_links.length > 0) {
         const link = call.entity_links[0];
-        params.set('entityType', link.entity_type);
-        params.set('entityId', link.entity_id);
+        params.set("entityType", link.entity_type);
+        params.set("entityId", link.entity_id);
     }
 
     return `${portalUrl}/portal/calls/new?${params.toString()}`;
@@ -54,10 +54,14 @@ function buildFollowUpUrl(portalUrl: string, call: CallDetail): string {
 
 function entityIcon(type: string): string {
     switch (type) {
-        case 'application': return 'fa-file-user';
-        case 'job': return 'fa-briefcase';
-        case 'candidate': return 'fa-user';
-        default: return 'fa-link';
+        case "application":
+            return "fa-file-user";
+        case "job":
+            return "fa-briefcase";
+        case "candidate":
+            return "fa-user";
+        default:
+            return "fa-link";
     }
 }
 
@@ -99,10 +103,12 @@ export function PostCallSummary({ call, duration }: PostCallSummaryProps) {
             {(call.title || call.call_type) && (
                 <div className="bg-base-100 border-l-4 border-primary p-4 shadow-sm">
                     {call.title && (
-                        <h3 className="font-bold text-base-content text-lg">{call.title}</h3>
+                        <h3 className="font-bold text-base-content text-lg">
+                            {call.title}
+                        </h3>
                     )}
                     <span className="badge badge-ghost rounded-none text-sm mt-1">
-                        {call.call_type.replace(/_/g, ' ')}
+                        {call.call_type.replace(/_/g, " ")}
                     </span>
                 </div>
             )}
@@ -118,29 +124,31 @@ export function PostCallSummary({ call, duration }: PostCallSummaryProps) {
                             {visibleAvatars.map((p, i) => (
                                 <div
                                     key={p.id}
-                                    className={`w-10 h-10 rounded-none border-2 border-base-100 overflow-hidden flex-shrink-0 ${i > 0 ? '-ml-2' : ''}`}
+                                    className={`w-10 h-10 rounded-none border-2 border-base-100 overflow-hidden flex-shrink-0 ${i > 0 ? "-ml-2" : ""}`}
                                 >
                                     {p.user.avatar_url ? (
                                         <img
                                             src={p.user.avatar_url}
-                                            alt={p.user.name || ''}
+                                            alt={p.user.name || ""}
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-primary text-primary-content flex items-center justify-center text-sm font-bold">
-                                            {(p.user.name || '?')[0]}
+                                            {(p.user.name || "?")[0]}
                                         </div>
                                     )}
                                 </div>
                             ))}
                             {overflowCount > 0 && (
-                                <div className="-ml-2 w-10 h-10 rounded-none border-2 border-base-100 bg-neutral text-neutral-content flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                <div className="-ml-2 w-10 h-10 rounded-none border-2 border-base-100 bg-base-300 text-base-content flex items-center justify-center text-sm font-bold flex-shrink-0">
                                     +{overflowCount}
                                 </div>
                             )}
                         </div>
                         <p className="text-sm text-base-content/60 mt-3">
-                            {call.participants.map((p) => p.user.name || 'Unknown').join(', ')}
+                            {call.participants
+                                .map((p) => p.user.name || "Unknown")
+                                .join(", ")}
                         </p>
                     </div>
                 </div>
@@ -158,7 +166,9 @@ export function PostCallSummary({ call, duration }: PostCallSummaryProps) {
                                 key={`${link.entity_type}-${link.entity_id}`}
                                 className="bg-base-100 border-l-4 border-accent p-3 flex items-center gap-3 shadow-sm"
                             >
-                                <i className={`fa-duotone fa-regular ${entityIcon(link.entity_type)} text-accent`} />
+                                <i
+                                    className={`fa-duotone fa-regular ${entityIcon(link.entity_type)} text-accent`}
+                                />
                                 <span className="text-sm font-medium text-base-content capitalize">
                                     {link.entity_type}
                                 </span>
@@ -176,9 +186,9 @@ export function PostCallSummary({ call, duration }: PostCallSummaryProps) {
                         Recording
                     </p>
                     <p className="text-sm text-base-content/60 mt-1">
-                        {call.status === 'completed'
-                            ? 'Your recording is being processed and will appear in the portal shortly.'
-                            : 'Head to the portal to check your recording status.'}
+                        {call.status === "completed"
+                            ? "Your recording is being processed and will appear in the portal shortly."
+                            : "Head to the portal to check your recording status."}
                     </p>
                 </div>
             </div>

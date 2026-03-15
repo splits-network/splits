@@ -41,7 +41,7 @@ const roleMeta: Record<
     admin: {
         label: "Admin",
         color: "neutral",
-        bgClass: "bg-neutral text-neutral-content",
+        bgClass: "bg-base-300 text-base-content",
         textClass: "text-neutral",
         icon: "fa-duotone fa-regular fa-shield-halved",
     },
@@ -561,7 +561,7 @@ export default function MessagesOne() {
             {/* ═══════════════════════════════════════════════════════
                 HEADER — Editorial split-screen style
                ═══════════════════════════════════════════════════════ */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 {/* Diagonal accent bar */}
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
@@ -695,7 +695,7 @@ export default function MessagesOne() {
                                         className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all ${
                                             filterRole === role
                                                 ? role === "all"
-                                                    ? "bg-neutral text-neutral-content"
+                                                    ? "bg-base-300 text-base-content"
                                                     : roleMeta[role].bgClass
                                                 : "bg-base-100 text-base-content/60 hover:bg-base-300"
                                         }`}
@@ -1097,7 +1097,7 @@ export default function MessagesOne() {
             {/* ═══════════════════════════════════════════════════════
                 FOOTER ACCENT — Editorial style
                ═══════════════════════════════════════════════════════ */}
-            <section className="bg-neutral text-neutral-content py-8">
+            <section className="bg-base-300 text-base-content py-8">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4">

@@ -18,7 +18,7 @@ export default function HeaderSection({
     onSearchClear,
 }: HeaderSectionProps) {
     return (
-        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20 overflow-hidden">
+        <section className="relative bg-base-300 text-base-content py-16 lg:py-20 overflow-hidden">
             {/* Diagonal accent */}
             <div
                 className="absolute top-0 right-0 bottom-0 w-1/3 bg-primary/5"
@@ -49,7 +49,7 @@ export default function HeaderSection({
                     </h1>
 
                     {/* Subtitle */}
-                    <p className="hero-subtitle scroll-reveal fade-up text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10">
+                    <p className="hero-subtitle scroll-reveal fade-up text-lg text-base-content/60 leading-relaxed max-w-xl mb-10">
                         Connect with expert recruiters who specialize in your
                         industry. Browse profiles, check reputation scores, and
                         start your next career move.
@@ -58,19 +58,19 @@ export default function HeaderSection({
                     {/* Search bar */}
                     <div className="search-bar scroll-reveal fade-up max-w-xl">
                         <div className="relative">
-                            <i className="fa-duotone fa-regular fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-content/30 text-sm" />
+                            <i className="fa-duotone fa-regular fa-search absolute left-4 top-1/2 -translate-y-1/2 text-base-content/30 text-sm" />
                             <input
                                 type="text"
                                 placeholder="Search by name, specialty, or location..."
                                 value={searchInput}
                                 onChange={(e) => onSearchChange(e.target.value)}
-                                className="input input-bordered w-full pl-11 bg-neutral-content/10 border-neutral-content/20 text-neutral-content placeholder:text-neutral-content/30 text-sm font-medium focus:border-primary focus:outline-none"
+                                className="input input-bordered w-full pl-11 bg-neutral-content/10 border-neutral-content/20 text-base-content placeholder:text-base-content/30 text-sm font-medium focus:border-primary focus:outline-none"
                                 style={{ borderRadius: 0 }}
                             />
                             {searchInput && (
                                 <button
                                     onClick={onSearchClear}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-content/40 hover:text-neutral-content text-sm"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content text-sm"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark" />
                                 </button>

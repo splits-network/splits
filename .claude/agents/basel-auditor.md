@@ -57,7 +57,7 @@ bg-yellow  -> bg-warning or bg-accent
 bg-purple  -> bg-info or bg-accent
 text-coral -> text-primary
 text-teal  -> text-secondary
-text-cream -> text-base-content (with opacity) or text-neutral-content
+text-cream -> text-base-content (with opacity) or text-base-content
 text-dark  -> text-base-content
 ```
 
@@ -152,7 +152,7 @@ Basel uses DaisyUI opacity modifiers for text hierarchy:
 - Primary text: `text-base-content` (full opacity)
 - Secondary text: `text-base-content/70` or `text-base-content/60`
 - Tertiary text: `text-base-content/50` or `text-base-content/40`
-- On dark backgrounds: `text-neutral-content/60` etc.
+- On dark backgrounds: `text-base-content/60` etc.
 
 Flag usage of raw Tailwind `opacity-` classes where DaisyUI opacity modifiers would work:
 ```tsx
@@ -339,7 +339,7 @@ Info violations: -1 point each
 | `bg-teal` | `bg-secondary` |
 | `text-teal` | `text-secondary` |
 | `bg-cream` | `bg-base-100` |
-| `text-cream` | `text-neutral-content` (on dark) or `text-base-content` (on light) |
+| `text-cream` | `text-base-content` (on dark) or `text-base-content` (on light) |
 | `bg-dark` | `bg-neutral` |
 | `text-dark` | `text-base-content` |
 | `bg-purple` | `bg-accent` or `bg-info` |

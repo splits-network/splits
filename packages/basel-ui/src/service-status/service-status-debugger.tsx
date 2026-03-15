@@ -66,7 +66,7 @@ export function ServiceStatusDebugger() {
         return (
             <button
                 onClick={() => setCollapsed(false)}
-                className="fixed bottom-4 right-4 z-[9999] h-8 px-3 bg-neutral text-neutral-content text-sm font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-shadow"
+                className="fixed bottom-4 right-4 z-[9999] h-8 px-3 bg-base-300 text-base-content text-sm font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-shadow"
                 title="Service Status Debugger"
             >
                 <span className={`w-2 h-2 ${statusDot} flex-shrink-0`} />
@@ -130,7 +130,7 @@ export function ServiceStatusDebugger() {
 
     // ── Expanded panel ──
     return (
-        <div className="fixed bottom-4 right-4 z-[9999] w-80 bg-neutral text-neutral-content shadow-xl flex flex-col max-h-[70vh]">
+        <div className="fixed bottom-4 right-4 z-[9999] w-80 bg-base-300 text-base-content shadow-xl flex flex-col max-h-[70vh]">
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-content/10">
                 <div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ export function ServiceStatusDebugger() {
                 </div>
                 <button
                     onClick={() => setCollapsed(true)}
-                    className="w-6 h-6 flex items-center justify-center text-neutral-content/40 hover:text-neutral-content transition-colors"
+                    className="w-6 h-6 flex items-center justify-center text-base-content/40 hover:text-base-content transition-colors"
                     aria-label="Collapse"
                 >
                     <i className="fa-solid fa-chevron-down text-sm" />
@@ -152,7 +152,7 @@ export function ServiceStatusDebugger() {
             <div className="overflow-y-auto flex-1 p-3 space-y-3">
                 {/* API Status */}
                 <div className="space-y-1.5">
-                    <div className="text-sm font-semibold uppercase tracking-[0.15em] text-neutral-content/40">
+                    <div className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40">
                         API Connection
                     </div>
                     <div className="flex items-center gap-2 text-xs">
@@ -174,11 +174,11 @@ export function ServiceStatusDebugger() {
                                   ? "Failed"
                                   : "Checking..."}
                         </span>
-                        <span className="text-neutral-content/40">
+                        <span className="text-base-content/40">
                             {apiDetail}
                         </span>
                     </div>
-                    <div className="text-sm text-neutral-content/30 font-mono break-all">
+                    <div className="text-sm text-base-content/30 font-mono break-all">
                         {apiUrl}
                     </div>
                 </div>
@@ -189,7 +189,7 @@ export function ServiceStatusDebugger() {
                 {/* Banner Previews */}
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                        <div className="text-sm font-semibold uppercase tracking-[0.15em] text-neutral-content/40">
+                        <div className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40">
                             Banner Previews
                         </div>
                         <button
@@ -245,7 +245,7 @@ export function ServiceStatusDebugger() {
                     )}
 
                     {showPreviews && visiblePreviews.length === 0 && (
-                        <div className="text-sm text-neutral-content/30 py-1">
+                        <div className="text-sm text-base-content/30 py-1">
                             All dismissed.{" "}
                             <button
                                 onClick={() => setDismissedPreviews(new Set())}
@@ -261,7 +261,7 @@ export function ServiceStatusDebugger() {
             {/* Footer */}
             <div className="px-3 py-2 border-t border-neutral-content/10 flex gap-2">
                 <button
-                    className="btn btn-xs btn-ghost text-neutral-content/50 hover:text-neutral-content flex-1"
+                    className="btn btn-xs btn-ghost text-base-content/50 hover:text-base-content flex-1"
                     onClick={() => window.location.reload()}
                 >
                     <i className="fa-solid fa-rotate-right text-sm" />

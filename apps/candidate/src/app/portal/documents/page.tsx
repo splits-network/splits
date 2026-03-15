@@ -301,7 +301,7 @@ function DocumentsContent() {
     return (
         <main ref={mainRef} className="">
             {/* ── EDITORIAL HERO ── */}
-            <section className="relative bg-neutral text-neutral-content py-10 sm:py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-10 sm:py-16 lg:py-20">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-12">
                     <div className="max-w-4xl">
                         <p className="scroll-reveal fade-up text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 sm:mb-6">
@@ -320,7 +320,7 @@ function DocumentsContent() {
                             </span>
                         </h1>
 
-                        <p className="scroll-reveal fade-up text-base sm:text-lg text-neutral-content/70 leading-relaxed max-w-xl mb-4">
+                        <p className="scroll-reveal fade-up text-base sm:text-lg text-base-content/70 leading-relaxed max-w-xl mb-4">
                             {/* COPY: hero body paragraph */}
                             Your resumes, cover letters, and portfolios in one
                             place. Upload once, attach to any application, and
@@ -365,10 +365,11 @@ function DocumentsContent() {
                                 </p>
                                 <p className="text-sm text-base-content/60 leading-relaxed">
                                     Your primary resume auto-attaches to new
-                                    applications, powers smarter job matching, and
-                                    gives recruiters immediate access to your
-                                    qualifications. Click &ldquo;Set
-                                    Primary&rdquo; on your strongest resume below.
+                                    applications, powers smarter job matching,
+                                    and gives recruiters immediate access to
+                                    your qualifications. Click &ldquo;Set
+                                    Primary&rdquo; on your strongest resume
+                                    below.
                                 </p>
                             </div>
                         </div>

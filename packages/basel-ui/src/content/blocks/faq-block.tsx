@@ -1,17 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { FaqBlock } from '@splits-network/shared-types';
+import { useState } from "react";
+import type { FaqBlock } from "@splits-network/shared-types";
 
 const bgMap: Record<string, { bg: string; text: string }> = {
-    neutral: { bg: 'bg-neutral', text: 'text-neutral-content' },
-    'base-100': { bg: 'bg-base-100', text: 'text-base-content' },
-    'base-200': { bg: 'bg-base-200', text: 'text-base-content' },
+    neutral: { bg: "bg-neutral", text: "text-base-content" },
+    "base-100": { bg: "bg-base-100", text: "text-base-content" },
+    "base-200": { bg: "bg-base-200", text: "text-base-content" },
 };
 
-export function FaqBlockComponent({ block }: { block: FaqBlock; index: number }) {
+export function FaqBlockComponent({
+    block,
+}: {
+    block: FaqBlock;
+    index: number;
+}) {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
-    const theme = bgMap[block.bg || 'base-100'] || bgMap['base-100'];
+    const theme = bgMap[block.bg || "base-100"] || bgMap["base-100"];
 
     return (
         <section className={`py-20 overflow-hidden ${theme.bg} ${theme.text}`}>
@@ -43,7 +48,9 @@ export function FaqBlockComponent({ block }: { block: FaqBlock; index: number })
                             className="faq-card border border-base-300"
                         >
                             <button
-                                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                                onClick={() =>
+                                    setOpenIndex(openIndex === i ? null : i)
+                                }
                                 className="w-full flex items-center justify-between p-6 text-left"
                             >
                                 <span className="font-bold text-base pr-4">
@@ -51,7 +58,7 @@ export function FaqBlockComponent({ block }: { block: FaqBlock; index: number })
                                 </span>
                                 <i
                                     className={`fa-duotone fa-regular ${
-                                        openIndex === i ? 'fa-minus' : 'fa-plus'
+                                        openIndex === i ? "fa-minus" : "fa-plus"
                                     } flex-shrink-0 text-primary`}
                                 />
                             </button>

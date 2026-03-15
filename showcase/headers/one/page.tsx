@@ -479,7 +479,7 @@ export default function HeadersOne() {
             {/* ═══════════════════════════════════════════════════════
                 HERO — Showcase description (Split-Screen Editorial)
                ═══════════════════════════════════════════════════════ */}
-            <section className="relative min-h-[70vh] flex items-center bg-neutral text-neutral-content pt-24">
+            <section className="relative min-h-[70vh] flex items-center bg-base-300 text-base-content pt-24">
                 {/* Diagonal accent panel */}
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -507,7 +507,7 @@ export default function HeadersOne() {
                             </span>
                         </h1>
 
-                        <p className="showcase-desc text-lg text-neutral-content/60 leading-relaxed max-w-xl scroll-reveal fade-up">
+                        <p className="showcase-desc text-lg text-base-content/60 leading-relaxed max-w-xl scroll-reveal fade-up">
                             A bold, editorial-inspired navigation system. Clean
                             lines, sharp typography, and deliberate negative
                             space create a professional hierarchy. Features
@@ -530,7 +530,7 @@ export default function HeadersOne() {
                             ].map((feat) => (
                                 <span
                                     key={feat}
-                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-neutral-content/10 text-neutral-content/60"
+                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-neutral-content/10 text-base-content/60"
                                 >
                                     {feat}
                                 </span>
@@ -736,7 +736,7 @@ export default function HeadersOne() {
             </section>
 
             {/* ── Scroll behavior section ─────────────────────── */}
-            <section className="content-section py-24 bg-neutral text-neutral-content scroll-reveal fade-up">
+            <section className="content-section py-24 bg-base-300 text-base-content scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <div>

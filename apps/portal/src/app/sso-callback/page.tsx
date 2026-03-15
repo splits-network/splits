@@ -344,7 +344,7 @@ function SSOCallbackInner() {
             </div>
 
             {/* Right Panel — Branding */}
-            <div className="hidden lg:flex lg:w-2/5 bg-neutral text-neutral-content flex-col justify-between p-12 relative">
+            <div className="hidden lg:flex lg:w-2/5 bg-base-300 text-base-content flex-col justify-between p-12 relative">
                 <div
                     className="absolute top-0 left-0 w-full h-full bg-primary/5"
                     style={{
@@ -357,7 +357,7 @@ function SSOCallbackInner() {
                         <br />
                         <span className="text-primary">split-fee work.</span>
                     </h2>
-                    <p className="text-sm text-neutral-content/40 leading-relaxed max-w-sm">
+                    <p className="text-sm text-base-content/40 leading-relaxed max-w-sm">
                         Recruiters and companies operating on shared
                         infrastructure. One role posted once reaches every
                         qualified recruiter in the network.
@@ -377,7 +377,7 @@ function SSOCallbackInner() {
                                 <div className="text-lg font-black">
                                     {stat.value}
                                 </div>
-                                <div className="text-sm text-neutral-content/40">
+                                <div className="text-sm text-base-content/40">
                                     {stat.label}
                                 </div>
                             </div>
@@ -387,13 +387,13 @@ function SSOCallbackInner() {
 
                 <div className="scroll-reveal fade-up relative ">
                     <div className="border-l-4 border-primary pl-4">
-                        <p className="text-sm text-neutral-content/60 italic mb-3">
+                        <p className="text-sm text-base-content/60 italic mb-3">
                             &ldquo;We filled three senior engineering roles in
                             six weeks. All through splits with recruiters
                             we&apos;d never worked with before.&rdquo;
                         </p>
                         <p className="text-sm font-bold">Rachel Simmons</p>
-                        <p className="text-sm text-neutral-content/40">
+                        <p className="text-sm text-base-content/40">
                             Talent Acquisition Director, Meridian Technologies
                         </p>
                     </div>
@@ -444,7 +444,7 @@ function LoadingFallback() {
                     </div>
                 </div>
             </div>
-            <div className="hidden lg:flex lg:w-2/5 bg-neutral text-neutral-content flex-col justify-center items-center p-12 relative">
+            <div className="hidden lg:flex lg:w-2/5 bg-base-300 text-base-content flex-col justify-center items-center p-12 relative">
                 <div
                     className="absolute top-0 left-0 w-full h-full bg-primary/5"
                     style={{
@@ -455,7 +455,7 @@ function LoadingFallback() {
                     <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center font-black text-2xl mx-auto mb-4">
                         S
                     </div>
-                    <p className="text-sm text-neutral-content/40">
+                    <p className="text-sm text-base-content/40">
                         Splits Network
                     </p>
                 </div>

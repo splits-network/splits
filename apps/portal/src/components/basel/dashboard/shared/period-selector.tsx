@@ -31,7 +31,7 @@ export function PeriodSelector({
                     onClick={() => onChange(p.months)}
                     className={`px-3 py-1 text-sm font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                         value === p.months
-                            ? "bg-neutral text-neutral-content"
+                            ? "bg-base-300 text-base-content"
                             : "bg-base-100 text-base-content/50 hover:bg-base-200"
                     }`}
                 >

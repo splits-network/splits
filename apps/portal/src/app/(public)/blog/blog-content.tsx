@@ -88,9 +88,7 @@ export function BlogContent() {
     return (
         <div ref={containerRef}>
             {/* Hero Section */}
-            <section
-                className="hero bg-gradient-to-r from-info to-secondary text-info-content py-20 overflow-hidden"
-            >
+            <section className="hero bg-gradient-to-r from-info to-secondary text-info-content py-20 overflow-hidden">
                 <div className="scroll-reveal fade-up text-center max-w-5xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
@@ -105,9 +103,7 @@ export function BlogContent() {
             </section>
 
             {/* Coming Soon Message */}
-            <section
-                className="py-20 bg-base-100 overflow-hidden"
-            >
+            <section className="py-20 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="scroll-reveal pop-in mb-12">
@@ -135,9 +131,7 @@ export function BlogContent() {
             </section>
 
             {/* What to Expect */}
-            <section
-                className="py-20 bg-base-200 overflow-hidden"
-            >
+            <section className="py-20 bg-base-200 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
                         <h2 className="scroll-reveal fade-up text-4xl font-bold mb-12 text-center">
@@ -172,9 +166,7 @@ export function BlogContent() {
             </section>
 
             {/* Newsletter Signup */}
-            <section
-                className="py-20 bg-base-100 overflow-hidden"
-            >
+            <section className="py-20 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl mx-auto">
                         <div className="scroll-reveal scale-in card bg-primary text-primary-content shadow">
@@ -214,9 +206,7 @@ export function BlogContent() {
             </section>
 
             {/* In the Meantime */}
-            <section
-                className="py-20 bg-neutral text-neutral-content overflow-hidden"
-            >
+            <section className="py-20 bg-base-300 text-base-content overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto text-center">
                         <div className="scroll-reveal fade-up">
@@ -259,9 +249,7 @@ export function BlogContent() {
             </section>
 
             {/* CTA Section */}
-            <section
-                className="py-20 bg-primary text-primary-content overflow-hidden"
-            >
+            <section className="py-20 bg-primary text-primary-content overflow-hidden">
                 <AuthenticatedCTAWrapper>
                     <div className="scroll-reveal fade-up container mx-auto px-4 text-center">
                         <h2 className="text-4xl font-bold mb-6">

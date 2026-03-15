@@ -146,16 +146,16 @@ export default function ATSConfigPanel({
                 {/* Header */}
                 <div className="bg-neutral px-6 py-5 flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-neutral-content/60">
+                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-base-content/60">
                             Integrations
                         </p>
-                        <h2 className="text-lg font-black text-neutral-content mt-0.5">
+                        <h2 className="text-lg font-black text-base-content mt-0.5">
                             ATS Connections
                         </h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-ghost btn-sm btn-circle text-neutral-content hover:bg-neutral-content/10"
+                        className="btn btn-ghost btn-sm btn-circle text-base-content hover:bg-neutral-content/10"
                     >
                         <i className="fa-solid fa-xmark text-lg" />
                     </button>
@@ -682,298 +682,307 @@ function IntegrationDetail({
 
     return (
         <>
-        <div className="space-y-6">
-            {/* Back button */}
-            <button
-                onClick={onBack}
-                className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-base-content/50 hover:text-base-content transition-colors"
-            >
-                <i className="fa-duotone fa-regular fa-arrow-left" />
-                Back
-            </button>
-
-            {/* Platform header */}
-            <div className="flex items-center gap-4 border-l-4 border-primary pl-4">
-                <div
-                    className={`w-12 h-12 flex items-center justify-center ${
-                        integration.sync_enabled
-                            ? "bg-success/10 border border-success/20"
-                            : "bg-base-200 border border-base-300"
-                    }`}
+            <div className="space-y-6">
+                {/* Back button */}
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-base-content/50 hover:text-base-content transition-colors"
                 >
-                    <i
-                        className={`${meta.icon} text-xl ${integration.sync_enabled ? "text-success" : "text-base-content/40"}`}
-                    />
-                </div>
-                <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-black tracking-tight">
-                            {meta.name}
-                        </h3>
-                        <BaselStatusPill
-                            color={
-                                integration.sync_enabled ? "success" : "warning"
-                            }
-                        >
-                            {integration.sync_enabled ? "Active" : "Paused"}
-                        </BaselStatusPill>
+                    <i className="fa-duotone fa-regular fa-arrow-left" />
+                    Back
+                </button>
+
+                {/* Platform header */}
+                <div className="flex items-center gap-4 border-l-4 border-primary pl-4">
+                    <div
+                        className={`w-12 h-12 flex items-center justify-center ${
+                            integration.sync_enabled
+                                ? "bg-success/10 border border-success/20"
+                                : "bg-base-200 border border-base-300"
+                        }`}
+                    >
+                        <i
+                            className={`${meta.icon} text-xl ${integration.sync_enabled ? "text-success" : "text-base-content/40"}`}
+                        />
                     </div>
-                    <p className="text-xs text-base-content/40">
-                        Connected{" "}
-                        {new Date(integration.created_at).toLocaleDateString(
-                            undefined,
-                            {
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-black tracking-tight">
+                                {meta.name}
+                            </h3>
+                            <BaselStatusPill
+                                color={
+                                    integration.sync_enabled
+                                        ? "success"
+                                        : "warning"
+                                }
+                            >
+                                {integration.sync_enabled ? "Active" : "Paused"}
+                            </BaselStatusPill>
+                        </div>
+                        <p className="text-xs text-base-content/40">
+                            Connected{" "}
+                            {new Date(
+                                integration.created_at,
+                            ).toLocaleDateString(undefined, {
                                 month: "long",
                                 day: "numeric",
                                 year: "numeric",
-                            },
-                        )}
-                    </p>
-                </div>
-            </div>
-
-            {error && (
-                <div className="bg-error/5 border-l-4 border-error px-4 py-3">
-                    <p className="text-sm font-semibold text-error">{error}</p>
-                </div>
-            )}
-
-            {/* ── Stats ── */}
-            {stats && (
-                <div className="grid grid-cols-4 gap-3">
-                    {[
-                        {
-                            label: "Total",
-                            value: stats.total,
-                            color: "text-base-content",
-                        },
-                        {
-                            label: "Success",
-                            value: stats.success,
-                            color: "text-success",
-                        },
-                        {
-                            label: "Failed",
-                            value: stats.failed,
-                            color: "text-error",
-                        },
-                        {
-                            label: "Pending",
-                            value: stats.pending,
-                            color: "text-warning",
-                        },
-                    ].map((stat) => (
-                        <div
-                            key={stat.label}
-                            className="bg-base-200/50 border border-base-300 p-3 text-center"
-                        >
-                            <p className={`text-xl font-black ${stat.color}`}>
-                                {stat.value}
-                            </p>
-                            <p className="text-sm font-semibold uppercase tracking-wider text-base-content/40">
-                                {stat.label}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* ── Sync settings toggles ── */}
-            <div>
-                <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-base-content/40 mb-3">
-                    Sync Settings
-                </h4>
-                <div className="border border-base-300 divide-y divide-base-300">
-                    {SYNC_TOGGLES.map((toggle) => {
-                        const isEnabled = integration[
-                            toggle.field as keyof ATSIntegrationPublic
-                        ] as boolean;
-                        const isMaster = toggle.field === "sync_enabled";
-                        return (
-                            <div
-                                key={toggle.field}
-                                className={`flex items-center justify-between px-4 py-3 ${isMaster ? "bg-base-200/30" : ""}`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <i
-                                        className={`${toggle.icon} text-sm ${isEnabled ? "text-primary" : "text-base-content/30"}`}
-                                    />
-                                    <div>
-                                        <p className="text-sm font-bold">
-                                            {toggle.label}
-                                        </p>
-                                        <p className="text-sm text-base-content/40">
-                                            {toggle.description}
-                                        </p>
-                                    </div>
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    className="toggle toggle-primary toggle-sm"
-                                    checked={isEnabled}
-                                    disabled={
-                                        updating ||
-                                        (!isMaster && !integration.sync_enabled)
-                                    }
-                                    onChange={(e) =>
-                                        toggleSetting(
-                                            toggle.field,
-                                            e.target.checked,
-                                        )
-                                    }
-                                />
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* ── Last sync info ── */}
-            {integration.last_synced_at && (
-                <div className="border-l-4 border-base-300 bg-base-200/30 p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                        <i className="fa-duotone fa-regular fa-clock text-base-content/40 text-sm" />
-                        <span className="text-xs font-bold text-base-content/60">
-                            Last Sync
-                        </span>
+                            })}
+                        </p>
                     </div>
-                    <p className="text-sm text-base-content/70 ml-6">
-                        {new Date(integration.last_synced_at).toLocaleString(
-                            undefined,
+                </div>
+
+                {error && (
+                    <div className="bg-error/5 border-l-4 border-error px-4 py-3">
+                        <p className="text-sm font-semibold text-error">
+                            {error}
+                        </p>
+                    </div>
+                )}
+
+                {/* ── Stats ── */}
+                {stats && (
+                    <div className="grid grid-cols-4 gap-3">
+                        {[
                             {
+                                label: "Total",
+                                value: stats.total,
+                                color: "text-base-content",
+                            },
+                            {
+                                label: "Success",
+                                value: stats.success,
+                                color: "text-success",
+                            },
+                            {
+                                label: "Failed",
+                                value: stats.failed,
+                                color: "text-error",
+                            },
+                            {
+                                label: "Pending",
+                                value: stats.pending,
+                                color: "text-warning",
+                            },
+                        ].map((stat) => (
+                            <div
+                                key={stat.label}
+                                className="bg-base-200/50 border border-base-300 p-3 text-center"
+                            >
+                                <p
+                                    className={`text-xl font-black ${stat.color}`}
+                                >
+                                    {stat.value}
+                                </p>
+                                <p className="text-sm font-semibold uppercase tracking-wider text-base-content/40">
+                                    {stat.label}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* ── Sync settings toggles ── */}
+                <div>
+                    <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-base-content/40 mb-3">
+                        Sync Settings
+                    </h4>
+                    <div className="border border-base-300 divide-y divide-base-300">
+                        {SYNC_TOGGLES.map((toggle) => {
+                            const isEnabled = integration[
+                                toggle.field as keyof ATSIntegrationPublic
+                            ] as boolean;
+                            const isMaster = toggle.field === "sync_enabled";
+                            return (
+                                <div
+                                    key={toggle.field}
+                                    className={`flex items-center justify-between px-4 py-3 ${isMaster ? "bg-base-200/30" : ""}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <i
+                                            className={`${toggle.icon} text-sm ${isEnabled ? "text-primary" : "text-base-content/30"}`}
+                                        />
+                                        <div>
+                                            <p className="text-sm font-bold">
+                                                {toggle.label}
+                                            </p>
+                                            <p className="text-sm text-base-content/40">
+                                                {toggle.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="toggle toggle-primary toggle-sm"
+                                        checked={isEnabled}
+                                        disabled={
+                                            updating ||
+                                            (!isMaster &&
+                                                !integration.sync_enabled)
+                                        }
+                                        onChange={(e) =>
+                                            toggleSetting(
+                                                toggle.field,
+                                                e.target.checked,
+                                            )
+                                        }
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* ── Last sync info ── */}
+                {integration.last_synced_at && (
+                    <div className="border-l-4 border-base-300 bg-base-200/30 p-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <i className="fa-duotone fa-regular fa-clock text-base-content/40 text-sm" />
+                            <span className="text-xs font-bold text-base-content/60">
+                                Last Sync
+                            </span>
+                        </div>
+                        <p className="text-sm text-base-content/70 ml-6">
+                            {new Date(
+                                integration.last_synced_at,
+                            ).toLocaleString(undefined, {
                                 month: "short",
                                 day: "numeric",
                                 year: "numeric",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                            },
-                        )}
-                    </p>
-                    {integration.last_sync_error && (
-                        <div className="mt-2 ml-6 flex items-start gap-2">
-                            <i className="fa-duotone fa-regular fa-triangle-exclamation text-error text-xs mt-0.5" />
-                            <p className="text-xs text-error">
-                                {integration.last_sync_error}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* ── Sync logs ── */}
-            {!showLogs ? (
-                <button
-                    onClick={loadLogs}
-                    className="btn btn-ghost btn-sm w-full"
-                    style={{ borderRadius: 0 }}
-                >
-                    <i className="fa-duotone fa-regular fa-list-timeline mr-2" />
-                    View Sync History
-                </button>
-            ) : (
-                <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-base-content/40 mb-3">
-                        Recent Sync Log
-                    </h4>
-                    {syncLogs.length === 0 ? (
-                        <p className="text-xs text-base-content/40 text-center py-6">
-                            No sync history yet
+                            })}
                         </p>
-                    ) : (
-                        <div className="border border-base-300 divide-y divide-base-300 max-h-60 overflow-y-auto">
-                            {syncLogs.map((log) => (
-                                <div
-                                    key={log.id}
-                                    className="px-4 py-2 flex items-center gap-3 text-xs"
-                                >
-                                    <i
-                                        className={`fa-solid fa-circle text-[6px] ${
-                                            log.status === "success"
-                                                ? "text-success"
-                                                : log.status === "failed"
-                                                  ? "text-error"
-                                                  : log.status === "conflict"
-                                                    ? "text-warning"
-                                                    : "text-base-content/30"
-                                        }`}
-                                    />
-                                    <span className="font-semibold text-base-content/70 w-20 shrink-0 capitalize">
-                                        {log.entity_type}
-                                    </span>
-                                    <span className="text-base-content/50 capitalize">
-                                        {log.action}
-                                    </span>
-                                    <span className="text-base-content/30 ml-auto">
-                                        {new Date(
-                                            log.synced_at,
-                                        ).toLocaleTimeString(undefined, {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        })}
-                                    </span>
-                                    {log.error_message && (
-                                        <span
-                                            className="text-error truncate max-w-[200px]"
-                                            title={log.error_message}
-                                        >
-                                            {log.error_message}
+                        {integration.last_sync_error && (
+                            <div className="mt-2 ml-6 flex items-start gap-2">
+                                <i className="fa-duotone fa-regular fa-triangle-exclamation text-error text-xs mt-0.5" />
+                                <p className="text-xs text-error">
+                                    {integration.last_sync_error}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ── Sync logs ── */}
+                {!showLogs ? (
+                    <button
+                        onClick={loadLogs}
+                        className="btn btn-ghost btn-sm w-full"
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-list-timeline mr-2" />
+                        View Sync History
+                    </button>
+                ) : (
+                    <div>
+                        <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-base-content/40 mb-3">
+                            Recent Sync Log
+                        </h4>
+                        {syncLogs.length === 0 ? (
+                            <p className="text-xs text-base-content/40 text-center py-6">
+                                No sync history yet
+                            </p>
+                        ) : (
+                            <div className="border border-base-300 divide-y divide-base-300 max-h-60 overflow-y-auto">
+                                {syncLogs.map((log) => (
+                                    <div
+                                        key={log.id}
+                                        className="px-4 py-2 flex items-center gap-3 text-xs"
+                                    >
+                                        <i
+                                            className={`fa-solid fa-circle text-[6px] ${
+                                                log.status === "success"
+                                                    ? "text-success"
+                                                    : log.status === "failed"
+                                                      ? "text-error"
+                                                      : log.status ===
+                                                          "conflict"
+                                                        ? "text-warning"
+                                                        : "text-base-content/30"
+                                            }`}
+                                        />
+                                        <span className="font-semibold text-base-content/70 w-20 shrink-0 capitalize">
+                                            {log.entity_type}
                                         </span>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+                                        <span className="text-base-content/50 capitalize">
+                                            {log.action}
+                                        </span>
+                                        <span className="text-base-content/30 ml-auto">
+                                            {new Date(
+                                                log.synced_at,
+                                            ).toLocaleTimeString(undefined, {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </span>
+                                        {log.error_message && (
+                                            <span
+                                                className="text-error truncate max-w-[200px]"
+                                                title={log.error_message}
+                                            >
+                                                {log.error_message}
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
 
-            {/* ── Actions ── */}
-            <div className="flex items-center justify-between pt-2 border-t border-base-300">
-                <button
-                    onClick={handleDisconnect}
-                    disabled={disconnecting}
-                    className="btn btn-outline btn-error btn-sm"
-                    style={{ borderRadius: 0 }}
-                >
-                    {disconnecting ? (
-                        <span className="loading loading-spinner loading-xs" />
-                    ) : (
-                        <>
-                            <i className="fa-duotone fa-regular fa-unlink mr-1" />
-                            Disconnect
-                        </>
-                    )}
-                </button>
-
-                <button
-                    onClick={handleSync}
-                    disabled={syncing || !integration.sync_enabled}
-                    className="btn btn-primary btn-sm"
-                    style={{ borderRadius: 0 }}
-                >
-                    {syncing ? (
-                        <>
+                {/* ── Actions ── */}
+                <div className="flex items-center justify-between pt-2 border-t border-base-300">
+                    <button
+                        onClick={handleDisconnect}
+                        disabled={disconnecting}
+                        className="btn btn-outline btn-error btn-sm"
+                        style={{ borderRadius: 0 }}
+                    >
+                        {disconnecting ? (
                             <span className="loading loading-spinner loading-xs" />
-                            Syncing...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-duotone fa-regular fa-arrows-rotate mr-1" />
-                            Sync Now
-                        </>
-                    )}
-                </button>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-unlink mr-1" />
+                                Disconnect
+                            </>
+                        )}
+                    </button>
+
+                    <button
+                        onClick={handleSync}
+                        disabled={syncing || !integration.sync_enabled}
+                        className="btn btn-primary btn-sm"
+                        style={{ borderRadius: 0 }}
+                    >
+                        {syncing ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs" />
+                                Syncing...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-arrows-rotate mr-1" />
+                                Sync Now
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
-        </div>
-        <BaselConfirmModal
-            isOpen={showDisconnectConfirm}
-            onClose={() => setShowDisconnectConfirm(false)}
-            onConfirm={confirmDisconnect}
-            title={`Disconnect ${meta.name}`}
-            icon="fa-triangle-exclamation"
-            confirmColor="btn-error"
-        >
-            <p>Disconnect {meta.name}? Sync data will be preserved but syncing will stop.</p>
-        </BaselConfirmModal>
+            <BaselConfirmModal
+                isOpen={showDisconnectConfirm}
+                onClose={() => setShowDisconnectConfirm(false)}
+                onConfirm={confirmDisconnect}
+                title={`Disconnect ${meta.name}`}
+                icon="fa-triangle-exclamation"
+                confirmColor="btn-error"
+            >
+                <p>
+                    Disconnect {meta.name}? Sync data will be preserved but
+                    syncing will stop.
+                </p>
+            </BaselConfirmModal>
         </>
     );
 }

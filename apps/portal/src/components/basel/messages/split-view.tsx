@@ -127,7 +127,7 @@ export default function SplitView() {
                                 onClick={() => setFilter("mailbox", opt.value)}
                                 className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all ${
                                     filters.mailbox === opt.value
-                                        ? "bg-neutral text-neutral-content"
+                                        ? "bg-base-300 text-base-content"
                                         : "bg-base-100 text-base-content/60 hover:bg-base-300"
                                 }`}
                             >

@@ -119,10 +119,10 @@ export default function CreateInvitationModal({
                 style={{ borderRadius: 0 }}
             >
                 {/* Basel header */}
-                <div className="bg-neutral text-neutral-content px-6 py-5 relative">
+                <div className="bg-base-300 text-base-content px-6 py-5 relative">
                     <button
                         type="button"
-                        className="btn btn-sm btn-square btn-ghost text-neutral-content absolute right-3 top-3 "
+                        className="btn btn-sm btn-square btn-ghost text-base-content absolute right-3 top-3 "
                         onClick={handleClose}
                         disabled={isSubmitting}
                     >

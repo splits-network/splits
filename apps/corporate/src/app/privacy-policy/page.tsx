@@ -14,7 +14,11 @@ export default function PrivacyPolicyBaselPage() {
 
     const tocItems = [
         { n: "1", id: "overview", label: "Overview" },
-        { n: "2", id: "information-collection", label: "Information Collection" },
+        {
+            n: "2",
+            id: "information-collection",
+            label: "Information Collection",
+        },
         { n: "3", id: "how-we-use", label: "How We Use" },
         { n: "4", id: "information-sharing", label: "Information Sharing" },
         { n: "5", id: "data-security", label: "Data Security" },
@@ -31,13 +35,12 @@ export default function PrivacyPolicyBaselPage() {
         { n: "16", id: "changes", label: "Changes to This Policy" },
     ];
 
-    const badgeColor = (n: number) =>
-        ["primary", "secondary", "accent"][n % 3];
+    const badgeColor = (n: number) => ["primary", "secondary", "accent"][n % 3];
 
     return (
         <LegalBaselAnimator>
             {/* ═══ HERO ═══ */}
-            <section className="py-28 bg-neutral text-neutral-content">
+            <section className="py-28 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
                         <p className="bl-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
@@ -99,17 +102,18 @@ export default function PrivacyPolicyBaselPage() {
                         <p className="text-base leading-relaxed text-base-content/80 mb-6">
                             Employment Networks, Inc. (&ldquo;Splits
                             Network,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo;
-                            or &ldquo;our&rdquo;) operates a split-fee recruiting
-                            marketplace that connects recruiters, candidates, and
-                            companies. We are committed to protecting your privacy
-                            and being transparent about how we handle your personal
-                            information in compliance with GDPR, CCPA, and other
-                            applicable privacy regulations.
+                            or &ldquo;our&rdquo;) operates a split-fee
+                            recruiting marketplace that connects recruiters,
+                            candidates, and companies. We are committed to
+                            protecting your privacy and being transparent about
+                            how we handle your personal information in
+                            compliance with GDPR, CCPA, and other applicable
+                            privacy regulations.
                         </p>
                         <p className="text-base leading-relaxed text-base-content/80 mb-6">
                             This Privacy Policy explains how we collect, use,
-                            disclose, and safeguard your information when you visit
-                            our websites or use our services, including:
+                            disclose, and safeguard your information when you
+                            visit our websites or use our services, including:
                         </p>
                         <div className="space-y-2 mb-6">
                             {[
@@ -344,9 +348,9 @@ export default function PrivacyPolicyBaselPage() {
                             </p>
                             <p className="text-sm text-base-content/70">
                                 Your personal information is never sold to third
-                                parties for advertising or marketing purposes. We
-                                enter into data processing agreements with all
-                                service providers.
+                                parties for advertising or marketing purposes.
+                                We enter into data processing agreements with
+                                all service providers.
                             </p>
                         </div>
                     </div>
@@ -422,9 +426,9 @@ export default function PrivacyPolicyBaselPage() {
                             </h2>
                         </div>
                         <p className="text-base text-base-content/80 mb-6">
-                            We retain your personal information only for as long as
-                            necessary to fulfill the purposes for which it was
-                            collected.
+                            We retain your personal information only for as long
+                            as necessary to fulfill the purposes for which it
+                            was collected.
                         </p>
                         <div className="space-y-3">
                             {[
@@ -580,8 +584,9 @@ export default function PrivacyPolicyBaselPage() {
                                     Google Analytics (GA4)
                                 </h3>
                                 <p className="text-sm text-base-content/70 mb-2">
-                                    Tracks page views, user interactions, session
-                                    duration, demographics, and geographic location.
+                                    Tracks page views, user interactions,
+                                    session duration, demographics, and
+                                    geographic location.
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                     <code className="text-sm bg-base-200 px-2 py-0.5">
@@ -606,9 +611,10 @@ export default function PrivacyPolicyBaselPage() {
                                     Microsoft Clarity
                                 </h3>
                                 <p className="text-sm text-base-content/70 mb-2">
-                                    Session recordings, heatmaps, click tracking,
-                                    and scroll depth analysis. Sensitive input
-                                    fields are automatically masked.
+                                    Session recordings, heatmaps, click
+                                    tracking, and scroll depth analysis.
+                                    Sensitive input fields are automatically
+                                    masked.
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                     <code className="text-sm bg-base-200 px-2 py-0.5">
@@ -633,8 +639,8 @@ export default function PrivacyPolicyBaselPage() {
                             </div>
                         </div>
                         <p className="text-sm text-base-content/70 mt-6">
-                            You can manage cookie preferences through your browser
-                            settings. For detailed information, see our{" "}
+                            You can manage cookie preferences through your
+                            browser settings. For detailed information, see our{" "}
                             <a
                                 href="/cookie-policy"
                                 className="text-primary underline"
@@ -660,79 +666,90 @@ export default function PrivacyPolicyBaselPage() {
                             </h2>
                         </div>
                         <p className="text-base text-base-content/80 mb-6">
-                            Our platform integrates with the following third-party
-                            services. Each provider maintains their own privacy
-                            policy governing how they process your data.
+                            Our platform integrates with the following
+                            third-party services. Each provider maintains their
+                            own privacy policy governing how they process your
+                            data.
                         </p>
                         <div className="space-y-4">
                             {[
                                 {
                                     icon: "fa-duotone fa-regular fa-lock",
                                     name: "Clerk",
-                                    purpose: "Authentication, identity management, SSO, social login",
+                                    purpose:
+                                        "Authentication, identity management, SSO, social login",
                                     data: "Name, email, profile image, session data, login history",
                                     url: "https://clerk.com/privacy",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-credit-card",
                                     name: "Stripe",
-                                    purpose: "Payment processing, billing, invoicing",
+                                    purpose:
+                                        "Payment processing, billing, invoicing",
                                     data: "Payment method details, transaction history, billing address",
                                     url: "https://stripe.com/privacy",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-chart-line",
                                     name: "Google Analytics (GA4)",
-                                    purpose: "Page views, user interactions, demographics, device info",
+                                    purpose:
+                                        "Page views, user interactions, demographics, device info",
                                     data: "Browsing behavior, session duration, geographic location",
                                     url: "https://policies.google.com/privacy",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-cursor",
                                     name: "Microsoft Clarity",
-                                    purpose: "Session recordings, heatmaps, click tracking, scroll depth",
+                                    purpose:
+                                        "Session recordings, heatmaps, click tracking, scroll depth",
                                     data: "User interaction recordings, mouse movements, click patterns",
                                     url: "https://privacy.microsoft.com/en-us/privacystatement",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-brain",
                                     name: "OpenAI / ChatGPT",
-                                    purpose: "AI-powered candidate matching, job recommendations, AI assistant",
+                                    purpose:
+                                        "AI-powered candidate matching, job recommendations, AI assistant",
                                     data: "Job descriptions, anonymized candidate profiles, AI chat messages",
                                     url: "https://openai.com/privacy",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-database",
                                     name: "Supabase",
-                                    purpose: "Database infrastructure, real-time data, file storage",
+                                    purpose:
+                                        "Database infrastructure, real-time data, file storage",
                                     data: "All platform data stored in encrypted PostgreSQL database",
                                     url: "https://supabase.com/privacy",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-envelope",
                                     name: "Resend",
-                                    purpose: "Transactional and marketing email delivery",
+                                    purpose:
+                                        "Transactional and marketing email delivery",
                                     data: "Email addresses, message content, delivery status",
                                     url: "https://resend.com/legal/privacy-policy",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-briefcase",
                                     name: "LinkedIn",
-                                    purpose: "Professional network integration, profile import",
+                                    purpose:
+                                        "Professional network integration, profile import",
                                     data: "Professional profile data, work history, connections (with consent)",
                                     url: "https://www.linkedin.com/legal/privacy-policy",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-calendar",
                                     name: "Google Calendar",
-                                    purpose: "Interview scheduling and calendar sync (recruiter integration)",
+                                    purpose:
+                                        "Interview scheduling and calendar sync (recruiter integration)",
                                     data: "Calendar event details, free/busy availability, calendar list",
                                     url: "https://policies.google.com/privacy",
                                 },
                                 {
                                     icon: "fa-duotone fa-regular fa-envelope",
                                     name: "Gmail (Google)",
-                                    purpose: "Email tracking and communication management (recruiter integration)",
+                                    purpose:
+                                        "Email tracking and communication management (recruiter integration)",
                                     data: "Email messages read and sent via the platform on behalf of the connected recruiter",
                                     url: "https://policies.google.com/privacy",
                                 },
@@ -787,8 +804,8 @@ export default function PrivacyPolicyBaselPage() {
                             </h2>
                         </div>
                         <p className="text-base text-base-content/80 mb-4">
-                            Splits Network&apos;s use of information received from
-                            Google APIs adheres to the{" "}
+                            Splits Network&apos;s use of information received
+                            from Google APIs adheres to the{" "}
                             <a
                                 href="https://developers.google.com/terms/api-services-user-data-policy"
                                 target="_blank"
@@ -847,9 +864,9 @@ export default function PrivacyPolicyBaselPage() {
                             <p className="text-sm text-base-content/70">
                                 Google user data is used solely to provide
                                 user-facing features prominent in the requesting
-                                application&apos;s user interface. Recruiters can
-                                revoke access at any time from Account Settings or
-                                from their{" "}
+                                application&apos;s user interface. Recruiters
+                                can revoke access at any time from Account
+                                Settings or from their{" "}
                                 <a
                                     href="https://myaccount.google.com/permissions"
                                     target="_blank"
@@ -878,10 +895,10 @@ export default function PrivacyPolicyBaselPage() {
                             </h2>
                         </div>
                         <p className="text-base text-base-content/80 mb-6">
-                            Splits Network uses artificial intelligence powered by
-                            OpenAI/ChatGPT to enhance platform services, including
-                            candidate matching, job recommendations, and our AI
-                            assistant.
+                            Splits Network uses artificial intelligence powered
+                            by OpenAI/ChatGPT to enhance platform services,
+                            including candidate matching, job recommendations,
+                            and our AI assistant.
                         </p>
                         <div className="space-y-3 mb-6">
                             {[
@@ -933,9 +950,9 @@ export default function PrivacyPolicyBaselPage() {
                         </div>
                         <p className="text-base text-base-content/80 mb-6">
                             Employment Networks, Inc. is based in the United
-                            States. Your information may be transferred to, stored
-                            in, and processed in the United States and other
-                            countries where our service providers operate.
+                            States. Your information may be transferred to,
+                            stored in, and processed in the United States and
+                            other countries where our service providers operate.
                         </p>
                         <div className="space-y-3">
                             {[
@@ -982,17 +999,19 @@ export default function PrivacyPolicyBaselPage() {
                             </h2>
                         </div>
                         <p className="text-base text-base-content/80 mb-4">
-                            Our services are designed for professional use and are
-                            not intended for individuals under the age of 16. We do
-                            not knowingly collect, solicit, or maintain personal
-                            information from anyone under 16 years of age.
+                            Our services are designed for professional use and
+                            are not intended for individuals under the age of
+                            16. We do not knowingly collect, solicit, or
+                            maintain personal information from anyone under 16
+                            years of age.
                         </p>
                         <p className="text-base text-base-content/80">
                             If we become aware that we have collected personal
                             information from a child under 16, we will take
-                            immediate steps to delete that information. If you are
-                            a parent or guardian and believe your child has provided
-                            us with personal information, please contact us at{" "}
+                            immediate steps to delete that information. If you
+                            are a parent or guardian and believe your child has
+                            provided us with personal information, please
+                            contact us at{" "}
                             <a
                                 href="mailto:privacy@splits.network"
                                 className="text-primary underline"
@@ -1020,7 +1039,8 @@ export default function PrivacyPolicyBaselPage() {
                         <p className="text-base text-base-content/80 mb-6">
                             If you are a California resident, the California
                             Consumer Privacy Act (CCPA) and California Privacy
-                            Rights Act (CPRA) provide you with additional rights:
+                            Rights Act (CPRA) provide you with additional
+                            rights:
                         </p>
                         <div className="grid md:grid-cols-2 gap-4 mb-6">
                             {[
@@ -1063,8 +1083,8 @@ export default function PrivacyPolicyBaselPage() {
                             ))}
                         </div>
                         <p className="text-sm text-base-content/70">
-                            To exercise your California privacy rights, contact us
-                            at{" "}
+                            To exercise your California privacy rights, contact
+                            us at{" "}
                             <a
                                 href="mailto:privacy@splits.network"
                                 className="text-primary underline"
@@ -1092,8 +1112,8 @@ export default function PrivacyPolicyBaselPage() {
                         </div>
                         <p className="text-base text-base-content/80 mb-6">
                             If you are in the European Economic Area (EEA), we
-                            process your personal data under the following lawful
-                            bases:
+                            process your personal data under the following
+                            lawful bases:
                         </p>
                         <div className="space-y-3 mb-6">
                             {[
@@ -1140,10 +1160,11 @@ export default function PrivacyPolicyBaselPage() {
                                 >
                                     dpo@splits.network
                                 </a>
-                                . We respond to GDPR requests within 30 days. You
-                                also have the right to lodge a complaint with your
-                                local supervisory authority if you believe your
-                                data protection rights have been violated.
+                                . We respond to GDPR requests within 30 days.
+                                You also have the right to lodge a complaint
+                                with your local supervisory authority if you
+                                believe your data protection rights have been
+                                violated.
                             </p>
                         </div>
                     </div>
@@ -1163,12 +1184,12 @@ export default function PrivacyPolicyBaselPage() {
                             </h2>
                         </div>
                         <p className="text-base text-base-content/80 mb-4">
-                            We may update this Privacy Policy from time to time to
-                            reflect changes in our practices, technology, legal
-                            requirements, or other factors. For material changes,
-                            we will provide at least 30 days&apos; advance notice
-                            via email or a prominent notice on our platform before
-                            the changes take effect.
+                            We may update this Privacy Policy from time to time
+                            to reflect changes in our practices, technology,
+                            legal requirements, or other factors. For material
+                            changes, we will provide at least 30 days&apos;
+                            advance notice via email or a prominent notice on
+                            our platform before the changes take effect.
                         </p>
                         <p className="text-base text-base-content/80">
                             Previous versions of this policy are available upon
@@ -1179,8 +1200,9 @@ export default function PrivacyPolicyBaselPage() {
                             >
                                 legal@splits.network
                             </a>
-                            . We encourage you to review this policy periodically
-                            to stay informed about how we protect your information.
+                            . We encourage you to review this policy
+                            periodically to stay informed about how we protect
+                            your information.
                         </p>
                     </div>
                 </div>
