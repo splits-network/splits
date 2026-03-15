@@ -87,7 +87,7 @@ export default function MarketplaceClient({
         defaultFilters: { marketplace_enabled: true },
         defaultSortBy: "reputation_score",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
         initialData,
         initialPagination,

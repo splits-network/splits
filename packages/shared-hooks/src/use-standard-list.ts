@@ -66,6 +66,8 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
      * When omitted and syncToUrl is true, URL sync is silently disabled.
      */
     urlSync?: UrlSync;
+    /** localStorage key for persisting per-page limit preference across sessions */
+    limitKey?: string;
     /** Storage key for view mode preference */
     viewModeKey?: string;
     /** @deprecated Use `viewModeKey` instead */
@@ -181,6 +183,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         transformData,
         syncToUrl = true,
         urlSync,
+        limitKey,
         viewModeKey,
         storageKey, // Deprecated alias for viewModeKey
         autoFetch = true,
@@ -212,9 +215,22 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const urlSyncRef = useRef(urlSync);
     urlSyncRef.current = urlSync;
 
+    // Resolve the effective limit: URL param > localStorage > defaultLimit
+    const resolveLimit = useCallback(() => {
+        if (limitKey && typeof window !== 'undefined') {
+            const saved = localStorage.getItem(limitKey);
+            if (saved) {
+                const parsed = parseInt(saved, 10);
+                if (!isNaN(parsed) && parsed > 0) return parsed;
+            }
+        }
+        return defaultLimit;
+    }, [limitKey, defaultLimit]);
+
     // Initialize state from URL if syncing
     const getInitialState = useCallback(() => {
         const stableDefaultFilters = defaultFiltersRef.current;
+        const savedLimit = resolveLimit();
         if (effectiveUrlSync) {
             const { searchParams } = effectiveUrlSync;
             const urlPage = searchParams.get('page');
@@ -235,7 +251,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
             return {
                 page: urlPage ? parseInt(urlPage, 10) : DEFAULT_PAGE,
-                limit: urlLimit ? parseInt(urlLimit, 10) : defaultLimit,
+                limit: urlLimit ? parseInt(urlLimit, 10) : savedLimit,
                 search: urlSearch || '',
                 sortBy: urlSortBy || defaultSortBy,
                 sortOrder: (urlSortOrder as 'asc' | 'desc') || defaultSortOrder,
@@ -245,7 +261,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
         return {
             page: DEFAULT_PAGE,
-            limit: defaultLimit,
+            limit: savedLimit,
             search: '',
             sortBy: defaultSortBy,
             sortOrder: defaultSortOrder,
@@ -521,7 +537,10 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const setLimit = useCallback((newLimit: number) => {
         setLimitState(newLimit);
         setPage(DEFAULT_PAGE);
-    }, []);
+        if (typeof window !== 'undefined' && limitKey) {
+            localStorage.setItem(limitKey, String(newLimit));
+        }
+    }, [limitKey]);
 
     // View mode handler (with localStorage persistence)
     const setViewMode = useCallback((mode: 'grid' | 'table') => {

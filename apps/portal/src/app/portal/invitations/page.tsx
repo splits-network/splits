@@ -179,7 +179,7 @@ export default function InvitationsBaselPage() {
         defaultFilters,
         defaultSortBy: "invited_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
     });
 

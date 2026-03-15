@@ -93,7 +93,7 @@ export default function ApplicationsBaselPage() {
         defaultFilters: { stage: undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
         include: "job,recruiter,ai_review",
     });

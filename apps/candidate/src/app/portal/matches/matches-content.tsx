@@ -77,7 +77,7 @@ export default function MatchesContent() {
         defaultFilters: { status: "active", min_score_tier: "" },
         defaultSortBy: "match_score",
         defaultSortOrder: "desc",
-        defaultLimit: 12,
+        defaultLimit: 10,
         syncToUrl: true,
     });
 

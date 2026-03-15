@@ -101,7 +101,7 @@ function RecruitersContent() {
         defaultFilters: { status: "active", marketplace_enabled: true },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
     });
 

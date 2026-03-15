@@ -140,7 +140,8 @@ export default function RolesPage() {
         defaultFilters: { status: undefined, job_owner_filter: isRecruiter ? "assigned" : undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 10,
+        limitKey: 'roles-per-page',
         syncToUrl: true,
     });
 

@@ -89,7 +89,7 @@ function JobsPageInner() {
         defaultFilters: { employment_type: undefined },
         defaultSortBy: "updated_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
         autoFetch: true,
         requireAuth: false,

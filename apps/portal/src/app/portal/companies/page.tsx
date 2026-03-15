@@ -85,7 +85,7 @@ export default function CompaniesBaselPage() {
         defaultFilters: { browse_all: "true" },
         defaultSortBy: "name",
         defaultSortOrder: "asc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: false,
     });
 
@@ -94,7 +94,7 @@ export default function CompaniesBaselPage() {
         defaultFilters: { status: undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: false,
     });
 

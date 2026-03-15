@@ -41,7 +41,7 @@ export function useCalls() {
         defaultFilters: {},
         defaultSortBy: "scheduled_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
     });
 
