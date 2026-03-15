@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MatchListParams } from './types';
+import { MatchListParams, MatchUpsert } from './types';
 
 const SORTABLE_FIELDS = ['created_at', 'match_score'];
 
@@ -45,6 +45,32 @@ export class MatchRepository {
 
     if (error) throw error;
     return data;
+  }
+
+  async upsertMatch(data: MatchUpsert): Promise<any> {
+    const { data: row, error } = await this.supabase
+      .from('candidate_role_matches')
+      .upsert(
+        {
+          candidate_id: data.candidate_id,
+          job_id: data.job_id,
+          match_score: data.match_score,
+          rule_score: data.rule_score,
+          skills_score: data.skills_score,
+          ai_score: data.ai_score ?? null,
+          match_factors: data.match_factors,
+          match_tier: data.match_tier,
+          generated_at: new Date().toISOString(),
+          generated_by: data.generated_by || 'system',
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'candidate_id,job_id' },
+      )
+      .select()
+      .single();
+
+    if (error) throw error;
+    return row;
   }
 
   async update(id: string, input: Record<string, any>): Promise<any> {

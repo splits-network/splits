@@ -216,14 +216,20 @@ export class PlacementService {
     const isOffPlatform = job.source_firm_id && !job.company_id;
     const jobOwner = isOffPlatform ? null : (job.job_owner_recruiter_id || null);
 
-    // Candidate sourcer
+    // Candidate sourcer — only include if recruiter is still active
+    let candidateSourcerRecruiterId: string | null = null;
     const { data: candidateSourcer } = await this.supabase
       .from('candidate_sourcers')
       .select('sourcer_recruiter_id')
       .eq('candidate_id', application.candidate_id)
       .maybeSingle();
 
-    // Company sourcer (skip for off-platform jobs)
+    if (candidateSourcer?.sourcer_recruiter_id) {
+      const isActive = await this.isRecruiterActive(candidateSourcer.sourcer_recruiter_id);
+      candidateSourcerRecruiterId = isActive ? candidateSourcer.sourcer_recruiter_id : null;
+    }
+
+    // Company sourcer — only include if recruiter is still active (skip for off-platform jobs)
     let companySourcerRecruiterId: string | null = null;
     if (job.company_id) {
       const { data: companySourcer } = await this.supabase
@@ -231,16 +237,29 @@ export class PlacementService {
         .select('recruiter_id')
         .eq('company_id', job.company_id)
         .maybeSingle();
-      companySourcerRecruiterId = companySourcer?.recruiter_id || null;
+
+      if (companySourcer?.recruiter_id) {
+        const isActive = await this.isRecruiterActive(companySourcer.recruiter_id);
+        companySourcerRecruiterId = isActive ? companySourcer.recruiter_id : null;
+      }
     }
 
     return {
       candidate_recruiter_id: application.candidate_recruiter_id || null,
       company_recruiter_id: application.company_recruiter_id || null,
       job_owner_recruiter_id: jobOwner,
-      candidate_sourcer_recruiter_id: candidateSourcer?.sourcer_recruiter_id || null,
+      candidate_sourcer_recruiter_id: candidateSourcerRecruiterId,
       company_sourcer_recruiter_id: companySourcerRecruiterId,
     };
+  }
+
+  private async isRecruiterActive(recruiterId: string): Promise<boolean> {
+    const { data } = await this.supabase
+      .from('recruiters')
+      .select('id, status')
+      .eq('id', recruiterId)
+      .maybeSingle();
+    return !!data && data.status !== 'deactivated';
   }
 
   private validateStatusTransition(from: string, to: string): void {

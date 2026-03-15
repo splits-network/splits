@@ -104,11 +104,19 @@ export class CandidateSourcerService {
 
     const created = await this.repository.create(record);
 
+    // Publish both V3 and V2 event names — consumers are bound to V2 names
     await this.eventPublisher?.publish('candidate_sourcer.created', {
       id: created.id,
       candidate_id: created.candidate_id,
       sourcer_recruiter_id: created.sourcer_recruiter_id,
       created_by: context.identityUserId,
+    }, 'ats-service');
+    await this.eventPublisher?.publish('candidate.sourced', {
+      candidate_id: created.candidate_id,
+      sourcer_user_id: created.sourcer_recruiter_id,
+      sourcer_type: created.sourcer_type,
+      sourced_at: created.sourced_at,
+      protection_expires_at: created.protection_expires_at,
     }, 'ats-service');
 
     return created;
@@ -149,6 +157,11 @@ export class CandidateSourcerService {
     await this.eventPublisher?.publish('candidate_sourcer.updated', {
       id, updated_fields: Object.keys(updates), updated_by: context.identityUserId,
     }, 'ats-service');
+    await this.eventPublisher?.publish('candidate.sourcer_updated', {
+      candidate_id: existing.candidate_id,
+      sourcer_recruiter_id: existing.sourcer_recruiter_id,
+      updated_fields: Object.keys(updates),
+    }, 'ats-service');
 
     return updated;
   }
@@ -166,6 +179,10 @@ export class CandidateSourcerService {
 
     await this.eventPublisher?.publish('candidate_sourcer.deleted', {
       id, candidate_id: existing.candidate_id, deleted_by: context.identityUserId,
+    }, 'ats-service');
+    await this.eventPublisher?.publish('candidate.sourcer_removed', {
+      candidate_id: existing.candidate_id,
+      sourcer_recruiter_id: existing.sourcer_recruiter_id,
     }, 'ats-service');
   }
 

@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useFilter } from "@/app/portal/messages/contexts/filter-context";
+import { requestChatRefresh } from "@/lib/chat-refresh-queue";
 import type { ConversationRow } from "@/app/portal/messages/types";
 import { getOtherParticipant, getInitials } from "@/app/portal/messages/types";
 import { ActionsToolbar } from "./actions-toolbar";
@@ -92,6 +93,7 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
         const client = createAuthenticatedClient(token);
         await client.post(`/chat/conversations/${item.conversation.id}/accept`);
         refresh();
+        requestChatRefresh();
     };
 
     const handleDecline = async () => {
@@ -103,6 +105,7 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
             `/chat/conversations/${item.conversation.id}/decline`,
         );
         refresh();
+        requestChatRefresh();
     };
 
     return (

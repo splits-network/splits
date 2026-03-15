@@ -70,6 +70,10 @@ export class ProposalService {
       candidate_recruiter_id: data.candidate_recruiter_id,
       stage: 'recruiter_proposed',
       application_source: 'recruiter',
+      metadata: {
+        ...(data.pitch && { proposal_pitch: data.pitch }),
+        ...(data.notes && { proposal_notes: data.notes }),
+      },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
@@ -82,7 +86,7 @@ export class ProposalService {
       performed_by_user_id: context.identityUserId || 'system',
       performed_by_role: 'recruiter',
       new_value: { stage: 'recruiter_proposed', candidate_recruiter_id: data.candidate_recruiter_id },
-      metadata: { pitch_length: data.pitch?.length || 0, has_notes: !!data.notes },
+      metadata: { pitch: data.pitch || null, notes: data.notes || null },
     });
 
     await this.eventPublisher?.publish('application.recruiter_proposed', {
@@ -91,6 +95,8 @@ export class ProposalService {
       candidate_id: data.candidate_id,
       job_id: data.job_id,
       proposed_by: context.identityUserId,
+      pitch: data.pitch || null,
+      notes: data.notes || null,
     }, 'ats-service');
 
     return application;
@@ -156,6 +162,7 @@ export class ProposalService {
     await this.eventPublisher?.publish('application.proposal_declined', {
       application_id: id, candidate_id: application.candidate_id,
       job_id: application.job_id, declined_by: context.identityUserId,
+      candidate_recruiter_id: application.candidate_recruiter_id,
       reason: reason || null,
     }, 'ats-service');
 

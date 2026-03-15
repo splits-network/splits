@@ -27,6 +27,8 @@ import { registerAdminBillingRoutes } from './admin/routes';
 interface RegisterV3Config {
   supabase: SupabaseClient;
   eventPublisher?: IEventPublisher;
+  stripeWebhookSecret?: string;
+  stripeSecretKey?: string;
 }
 
 export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config) {
@@ -45,7 +47,7 @@ export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config)
   registerFirmBillingRoutes(app, config.supabase);
   registerCompanyBillingRoutes(app, config.supabase);
   registerWebhookEventRoutes(app, config.supabase);
-  registerWebhookRoutes(app, config.supabase);
+  registerWebhookRoutes(app, config.supabase, config.eventPublisher, config.stripeWebhookSecret, config.stripeSecretKey);
   registerAuditRoutes(app, config.supabase);
   registerAdminBillingRoutes(app, config.supabase);
 }

@@ -15,6 +15,7 @@ import {
   UpdateConversationInput,
 } from './types';
 import { IEventPublisher } from '../../v2/shared/events';
+import { IChatEventPublisher } from '../shared/chat-event-publisher';
 
 export class ConversationService {
   private accessResolver: AccessContextResolver;
@@ -23,6 +24,7 @@ export class ConversationService {
     private repository: ConversationRepository,
     private supabase: SupabaseClient,
     private eventPublisher?: IEventPublisher,
+    private chatEventPublisher?: IChatEventPublisher,
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
   }
@@ -77,6 +79,15 @@ export class ConversationService {
       participant_count: allParticipants.length,
     }, 'chat-service');
 
+    // Notify other participants via real-time channel
+    const otherParticipants = allParticipants.filter((id) => id !== userId);
+    for (const participantId of otherParticipants) {
+      await this.chatEventPublisher?.conversationRequested(participantId, {
+        conversationId: conversation.id,
+        requestedBy: userId,
+      });
+    }
+
     return conversation;
   }
 
@@ -90,7 +101,14 @@ export class ConversationService {
       throw new ForbiddenError('You are not a participant in this conversation');
     }
 
-    return this.repository.update(id, input);
+    const updated = await this.repository.update(id, input);
+
+    await this.chatEventPublisher?.conversationUpdated(userId, {
+      conversationId: id,
+      subject: input.subject,
+    });
+
+    return updated;
   }
 
   async archive(id: string, clerkUserId: string) {
@@ -104,5 +122,10 @@ export class ConversationService {
     }
 
     await this.repository.softDelete(id);
+
+    await this.chatEventPublisher?.conversationUpdated(userId, {
+      conversationId: id,
+      archived: true,
+    });
   }
 }

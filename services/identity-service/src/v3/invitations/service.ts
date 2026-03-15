@@ -157,7 +157,8 @@ export class InvitationService {
   }
 
   async accept(invitationId: string, clerkUserId: string, userEmail: string) {
-    const user = await this.userRepository.findByClerkId(clerkUserId);
+    // Lazy-sync: if the Clerk webhook hasn't created the user row yet, create it now
+    const user = await this.ensureUserExists(clerkUserId, userEmail);
     if (!user) throw new NotFoundError('User', clerkUserId);
 
     const invitation = await this.repository.findById(invitationId);
@@ -229,6 +230,57 @@ export class InvitationService {
       role: invitation.role,
       invited_by: invitation.invited_by,
     }, 'identity-service');
+  }
+
+  /**
+   * Ensure a user record exists in the database for the given Clerk user ID.
+   * If the Clerk webhook hasn't synced the user yet, fetch from Clerk API and create inline.
+   */
+  private async ensureUserExists(clerkUserId: string, fallbackEmail: string): Promise<any | null> {
+    const existing = await this.userRepository.findByClerkId(clerkUserId);
+    if (existing) return existing;
+
+    // Webhook hasn't fired yet — fetch user details from Clerk and create the record
+    let email = fallbackEmail;
+    let name = '';
+
+    try {
+      const { createClerkClient } = await import('@clerk/backend');
+      const secretKey = process.env.SPLITS_CLERK_SECRET_KEY || process.env.CLERK_SECRET_KEY;
+      if (secretKey) {
+        const clerkClient = createClerkClient({ secretKey });
+        const clerkUser = await clerkClient.users.getUser(clerkUserId);
+        email = clerkUser.emailAddresses[0]?.emailAddress || fallbackEmail;
+        name = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim();
+      }
+    } catch {
+      // Best-effort — proceed with fallback email
+    }
+
+    const now = new Date().toISOString();
+    try {
+      const created = await this.userRepository.create({
+        clerk_user_id: clerkUserId,
+        email,
+        name: name || email,
+        onboarding_status: 'pending',
+        onboarding_step: 1,
+        created_at: now,
+        updated_at: now,
+      });
+
+      await this.eventPublisher?.publish('user.created', {
+        userId: created.id, clerkUserId, email, name: created.name,
+      }, 'identity-service');
+
+      return created;
+    } catch (error: any) {
+      // Handle race condition if webhook fires between our check and insert
+      if (error?.code === '23505' || error?.message?.includes('duplicate')) {
+        return this.userRepository.findByClerkId(clerkUserId);
+      }
+      throw error;
+    }
   }
 
   private requireCompanyAdminOrPlatformAdmin(

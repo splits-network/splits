@@ -192,7 +192,12 @@ async function main() {
     registerWebhookRoutes(app, webhookService, stripeConfig.webhookSecret, webhookEventRepository);
 
     // Register V3 routes
-    registerV3Routes(app, { supabase, eventPublisher: outboxPublisher });
+    registerV3Routes(app, {
+        supabase,
+        eventPublisher: outboxPublisher,
+        stripeWebhookSecret: stripeConfig.webhookSecret,
+        stripeSecretKey: stripeConfig.secretKey,
+    });
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {

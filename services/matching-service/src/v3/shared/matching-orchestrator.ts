@@ -1,0 +1,230 @@
+/**
+ * V3 Matching Orchestrator
+ *
+ * Coordinates L1 (rule) + L2 (skills) + L3 (AI) scoring pipeline.
+ * Triggered by domain events or batch refresh.
+ */
+
+import { SupabaseClient } from '@supabase/supabase-js';
+import { Logger } from '@splits-network/shared-logging';
+import { IEventPublisher } from '../../v2/shared/events';
+import { MatchRepository } from '../matches/repository';
+import { MatchUpsert, MatchFactors } from '../matches/types';
+import { computeRuleScore, RuleScoringInput } from '../../v2/matches/rule-scorer';
+import { computeSkillsScore } from '../../v2/matches/skills-scorer';
+import { computeAiScore } from '../../v2/matches/ai-scorer';
+import { EmbeddingService } from '../../v2/embeddings/service';
+import { EmbeddingRepository } from '../../v2/embeddings/repository';
+import { MatchDataFetcher } from './match-data-fetcher';
+
+export interface MatchingOrchestratorConfig {
+  repository: MatchRepository;
+  embeddingService: EmbeddingService;
+  embeddingRepository: EmbeddingRepository;
+  supabase: SupabaseClient;
+  eventPublisher?: IEventPublisher;
+  logger: Logger;
+}
+
+export class MatchingOrchestrator {
+  private repository: MatchRepository;
+  private fetcher: MatchDataFetcher;
+  private eventPublisher?: IEventPublisher;
+  private logger: Logger;
+
+  constructor(config: MatchingOrchestratorConfig) {
+    this.repository = config.repository;
+    this.eventPublisher = config.eventPublisher;
+    this.logger = config.logger;
+    this.fetcher = new MatchDataFetcher(
+      config.supabase, config.embeddingService,
+      config.embeddingRepository, config.logger,
+    );
+  }
+
+  async scoreCandidate(candidateId: string): Promise<void> {
+    const candidate = await this.fetcher.fetchCandidate(candidateId);
+    if (!candidate || candidate.marketplace_visibility !== 'public') return;
+
+    await this.fetcher.updateCandidateEmbedding(candidate);
+
+    const jobIds = await this.fetcher.fetchActiveJobIds();
+    for (const jobId of jobIds) {
+      try {
+        await this.generateMatchForPair(candidateId, jobId);
+      } catch (error) {
+        this.logger.warn({ candidateId, jobId, error }, 'Failed to generate match');
+      }
+    }
+  }
+
+  async scoreJob(jobId: string): Promise<void> {
+    const job = await this.fetcher.fetchJob(jobId);
+    if (!job || job.status !== 'active') return;
+
+    await this.fetcher.updateJobEmbedding(job);
+
+    const candidateIds = await this.fetcher.fetchPublicCandidateIds();
+    for (const candidateId of candidateIds) {
+      try {
+        await this.generateMatchForPair(candidateId, jobId);
+      } catch (error) {
+        this.logger.warn({ candidateId, jobId, error }, 'Failed to generate match');
+      }
+    }
+  }
+
+  async handleJobStatusChanged(jobId: string, status: string): Promise<void> {
+    if (status === 'active') {
+      await this.scoreJob(jobId);
+    }
+    // For closed/paused/filled jobs, matches stay but no new ones are generated
+  }
+
+  async rescoreWithResumeData(candidateId: string): Promise<void> {
+    await this.scoreCandidate(candidateId);
+  }
+
+  async runBatchCatchup(limit: number = 200): Promise<number> {
+    const jobIds = await this.fetcher.fetchActiveJobIds(limit);
+    let count = 0;
+    for (const jobId of jobIds) {
+      try {
+        await this.scoreJob(jobId);
+        count++;
+      } catch (error) {
+        this.logger.warn({ jobId, error }, 'Batch catch-up failed for job');
+      }
+    }
+    return count;
+  }
+
+  private async generateMatchForPair(candidateId: string, jobId: string): Promise<void> {
+    const [candidate, job, requirements, jobSkills, candidateSkills] =
+      await Promise.all([
+        this.fetcher.fetchCandidate(candidateId),
+        this.fetcher.fetchJob(jobId),
+        this.fetcher.fetchJobRequirements(jobId),
+        this.fetcher.fetchJobSkills(jobId),
+        this.fetcher.fetchCandidateSkills(candidateId),
+      ]);
+
+    if (!candidate || !job) return;
+    if (candidate.marketplace_visibility !== 'public' || job.status !== 'active') return;
+
+    const ruleResult = this.computeRuleScore(candidate, job);
+    const skillsResult = this.computeSkillsScore(candidate, requirements, jobSkills, candidateSkills);
+    const { aiScore, aiSummary, cosineSimilarity } = await this.computeAiLayer(
+      candidate, job, requirements, candidateId, jobId,
+    );
+
+    const matchTier = aiScore != null ? 'true' as const : 'standard' as const;
+    const matchScore = aiScore != null
+      ? (ruleResult.score * 0.4) + (skillsResult.score * 0.4) + (aiScore * 0.2)
+      : (ruleResult.score * 0.5) + (skillsResult.score * 0.5);
+
+    const matchFactors: MatchFactors = {
+      ...ruleResult.factors,
+      skills_matched: skillsResult.matched_skills,
+      skills_missing: [...skillsResult.missing_mandatory, ...skillsResult.missing_preferred],
+      skills_match_pct: skillsResult.match_pct,
+      skills_source: skillsResult.skills_source,
+      ...(aiSummary && { ai_summary: aiSummary }),
+      ...(cosineSimilarity !== undefined && { cosine_similarity: cosineSimilarity }),
+    };
+
+    const upsert: MatchUpsert = {
+      candidate_id: candidateId,
+      job_id: jobId,
+      match_score: Math.round(matchScore * 100) / 100,
+      rule_score: ruleResult.score,
+      skills_score: skillsResult.score,
+      ai_score: aiScore,
+      match_factors: matchFactors,
+      match_tier: matchTier,
+    };
+
+    const match = await this.repository.upsertMatch(upsert);
+    await this.publishMatchGenerated(match, candidateId, jobId, matchTier, ruleResult, skillsResult);
+  }
+
+  private computeRuleScore(candidate: any, job: any) {
+    const ruleInput: RuleScoringInput = {
+      candidate: {
+        desired_salary_min: candidate.desired_salary_min,
+        desired_salary_max: candidate.desired_salary_max,
+        desired_job_type: candidate.desired_job_type,
+        open_to_remote: candidate.open_to_remote,
+        open_to_relocation: candidate.open_to_relocation,
+        location: candidate.location,
+        availability: candidate.availability,
+      },
+      job: {
+        salary_min: job.salary_min,
+        salary_max: job.salary_max,
+        employment_type: job.employment_type,
+        commute_types: job.commute_types,
+        job_level: job.job_level,
+        location: job.location,
+        open_to_relocation: job.open_to_relocation,
+      },
+      candidate_years_experience: candidate.resume_metadata?.total_years_experience,
+    };
+    return computeRuleScore(ruleInput);
+  }
+
+  private computeSkillsScore(
+    candidate: any, requirements: any[],
+    jobSkills: any[], candidateSkills: any[],
+  ) {
+    return computeSkillsScore({
+      candidate_skills: candidate.resume_metadata?.skills || [],
+      job_requirements: requirements,
+      structured_candidate_skills: candidateSkills,
+      structured_job_skills: jobSkills,
+    });
+  }
+
+  private async computeAiLayer(
+    candidate: any, job: any, requirements: any[],
+    candidateId: string, jobId: string,
+  ) {
+    let aiScore: number | null = null;
+    let aiSummary: string | undefined;
+    let cosineSimilarity: number | undefined;
+
+    const isPartner = await this.fetcher.isPartnerJob(job);
+    if (!isPartner) return { aiScore, aiSummary, cosineSimilarity };
+
+    const similarity = await this.fetcher.getCosineSimilarity(candidateId, jobId);
+    cosineSimilarity = similarity ?? undefined;
+
+    if (similarity !== null) {
+      const aiResult = await computeAiScore(
+        { candidate, job, requirements, cosine_similarity: similarity },
+        this.logger,
+      );
+      aiScore = aiResult.score;
+      aiSummary = aiResult.summary;
+      cosineSimilarity = aiResult.cosine_similarity;
+    }
+
+    return { aiScore, aiSummary, cosineSimilarity };
+  }
+
+  private async publishMatchGenerated(
+    match: any, candidateId: string, jobId: string,
+    matchTier: string, ruleResult: any, skillsResult: any,
+  ): Promise<void> {
+    if (!this.eventPublisher) return;
+    await this.eventPublisher.publish('match.generated', {
+      match_id: match.id,
+      candidate_id: candidateId,
+      job_id: jobId,
+      match_score: match.match_score,
+      match_tier: matchTier,
+      rule_score: ruleResult.score,
+      skills_score: skillsResult.score,
+    });
+  }
+}

@@ -42,7 +42,7 @@ export function registerApplicationRoutes(
   const hireService = new HireService(repository, supabase, eventPublisher);
   const aiReviewService = new AIReviewService(repository, supabase, eventPublisher);
   const prescreenService = new PrescreenService(repository, supabase, eventPublisher);
-  const terminationService = new TerminationService(repository);
+  const terminationService = new TerminationService(repository, eventPublisher);
 
   // Register view routes BEFORE core CRUD (to avoid :id collision)
   registerApplicationDetailView(app, supabase);

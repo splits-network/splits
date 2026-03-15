@@ -5,6 +5,7 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
+import { IChatEventPublisher } from '../shared/chat-event-publisher';
 import { ConversationRepository } from './repository';
 import { ConversationService } from './service';
 import {
@@ -21,9 +22,10 @@ export function registerConversationRoutes(
   app: FastifyInstance,
   supabase: SupabaseClient,
   eventPublisher?: IEventPublisher,
+  chatEventPublisher?: IChatEventPublisher,
 ) {
   const repository = new ConversationRepository(supabase);
-  const service = new ConversationService(repository, supabase, eventPublisher);
+  const service = new ConversationService(repository, supabase, eventPublisher, chatEventPublisher);
 
   // GET /api/v3/chat/conversations — handled by V3 alias in V2 routes
   // (uses listConversationsWithParticipants for enriched { conversation, participant } shape)

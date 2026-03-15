@@ -36,6 +36,12 @@ export class ExecutionRepository {
     return data;
   }
 
+  async create(input: Record<string, any>): Promise<any> {
+    const { data, error } = await this.supabase.from('automation_executions').insert(input).select().single();
+    if (error) throw error;
+    return data;
+  }
+
   async update(id: string, input: Record<string, any>): Promise<any> {
     const { data, error } = await this.supabase.from('automation_executions')
       .update({ ...input, updated_at: new Date().toISOString() }).eq('id', id).select().single();

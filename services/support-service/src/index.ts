@@ -91,17 +91,22 @@ async function main() {
 
     // Register V3 routes (coexist with V2)
     const { createClient } = await import('@supabase/supabase-js');
-    const { SupportEventPublisher } = await import('./v2/support/events');
+    const { SupportEventPublisher: V2SupportEventPublisher } = await import('./v2/support/events');
+    const { SupportEventPublisher: V3SupportEventPublisher } = await import('./v3/shared/support-event-publisher');
     const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
-    const supportEventPublisher = new SupportEventPublisher(redisConfig, app.log as any);
+    // V2 publisher used by V2 routes (unchanged)
+    const supportEventPublisher = new V2SupportEventPublisher(redisConfig, app.log as any);
+    // V3 publisher used by V3 routes
+    const v3SupportEventPublisher = new V3SupportEventPublisher(redisConfig, app.log as any);
 
     app.addHook('onClose', async () => {
         await supportEventPublisher.close();
+        await v3SupportEventPublisher.close();
     });
 
     registerV3Routes(app, {
         supabase: supabaseClient,
-        supportEventPublisher,
+        supportEventPublisher: v3SupportEventPublisher,
     });
 
     app.get('/health', async (_request, reply) => {

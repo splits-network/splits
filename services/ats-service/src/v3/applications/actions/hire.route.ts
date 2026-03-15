@@ -63,6 +63,31 @@ export function registerHireRoutes(
       notes: body.notes,
     }, clerkUserId);
 
+    // Create application note if hiring notes provided (V2 parity)
+    if (body.notes?.trim()) {
+      const { error: noteError } = await supabase
+        .from('application_notes')
+        .insert({
+          application_id: id,
+          note_type: 'hiring',
+          visibility: 'internal',
+          message_text: body.notes.trim(),
+          created_by_type: 'recruiter',
+          created_by_user_id: clerkUserId,
+          created_at: new Date().toISOString(),
+        });
+
+      if (noteError) {
+        // Non-critical — log but don't fail the hire
+        app.log.warn({ error: noteError, application_id: id }, 'Failed to create hiring note');
+      } else {
+        await eventPublisher?.publish('application.note.created', {
+          application_id: id, note_type: 'hiring',
+          visibility: 'internal', created_by_user_id: clerkUserId,
+        }, 'ats-service');
+      }
+    }
+
     return reply.send({ data: { ...hireResult, placement_id: placement.id } });
   });
 }

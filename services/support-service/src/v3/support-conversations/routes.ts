@@ -9,7 +9,7 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
-import { SupportEventPublisher } from '../../v2/support/events';
+import { SupportEventPublisher } from '../shared/support-event-publisher';
 import { requireSupportIdentity, getSupportContext } from '../../v2/shared/helpers';
 import { SupportConversationRepository } from './repository';
 import { SupportConversationService } from './service';

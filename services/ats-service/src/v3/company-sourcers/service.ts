@@ -88,11 +88,19 @@ export class CompanySourcerService {
 
     const created = await this.repository.create(record);
 
+    // Publish both V3 and V2 event names — consumers are bound to V2 names
     await this.eventPublisher?.publish('company_sourcer.created', {
       id: created.id,
       company_id: created.company_id,
       sourcer_recruiter_id: created.sourcer_recruiter_id,
       created_by: context.identityUserId,
+    }, 'ats-service');
+    await this.eventPublisher?.publish('company.sourced', {
+      company_id: created.company_id,
+      sourcer_user_id: created.sourcer_recruiter_id,
+      sourcer_type: created.sourcer_type,
+      sourced_at: created.sourced_at,
+      protection_expires_at: created.protection_expires_at,
     }, 'ats-service');
 
     return created;
@@ -133,6 +141,11 @@ export class CompanySourcerService {
     await this.eventPublisher?.publish('company_sourcer.updated', {
       id, updated_fields: Object.keys(updates), updated_by: context.identityUserId,
     }, 'ats-service');
+    await this.eventPublisher?.publish('company.sourcer_updated', {
+      company_id: existing.company_id,
+      sourcer_recruiter_id: existing.sourcer_recruiter_id,
+      updated_fields: Object.keys(updates),
+    }, 'ats-service');
 
     return updated;
   }
@@ -150,6 +163,10 @@ export class CompanySourcerService {
 
     await this.eventPublisher?.publish('company_sourcer.deleted', {
       id, company_id: existing.company_id, deleted_by: context.identityUserId,
+    }, 'ats-service');
+    await this.eventPublisher?.publish('company.sourcer_removed', {
+      company_id: existing.company_id,
+      sourcer_recruiter_id: existing.sourcer_recruiter_id,
     }, 'ats-service');
   }
 

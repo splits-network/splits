@@ -25,6 +25,9 @@ import { MatchRepository } from "./v2/matches/repository";
 import { EmbeddingService } from "./v2/embeddings/service";
 import { EmbeddingRepository } from "./v2/embeddings/repository";
 import { MatchingOrchestrator } from "./v2/matches/matching-orchestrator";
+import { MatchRepository as V3MatchRepository } from "./v3/matches/repository";
+import { MatchingOrchestrator as V3MatchingOrchestrator } from "./v3/shared/matching-orchestrator";
+import { DomainEventConsumer as V3DomainEventConsumer } from "./v3/shared/domain-consumer";
 import * as Sentry from "@sentry/node";
 
 if (process.env.SENTRY_DSN) {
@@ -172,7 +175,7 @@ async function main() {
         eventPublisher: outboxPublisher || undefined,
     });
 
-    // Initialize domain event consumer
+    // Initialize V2 domain event consumer
     let domainConsumer: DomainEventConsumer | null = null;
     try {
         domainConsumer = new DomainEventConsumer(
@@ -181,9 +184,33 @@ async function main() {
             logger,
         );
         await domainConsumer.connect();
-        logger.info("Domain event consumer connected and listening");
+        logger.info("V2 domain event consumer connected and listening");
     } catch (error) {
-        logger.error({ err: error }, "Failed to connect domain event consumer");
+        logger.error({ err: error }, "Failed to connect V2 domain event consumer");
+    }
+
+    // Initialize V3 matching orchestrator and domain consumer
+    const v3MatchRepository = new V3MatchRepository(supabaseClient);
+    const v3Orchestrator = new V3MatchingOrchestrator({
+        repository: v3MatchRepository,
+        embeddingService,
+        embeddingRepository,
+        supabase: supabaseClient,
+        eventPublisher: outboxPublisher || undefined,
+        logger,
+    });
+
+    let v3DomainConsumer: V3DomainEventConsumer | null = null;
+    try {
+        v3DomainConsumer = new V3DomainEventConsumer({
+            rabbitMqUrl: rabbitConfig.url,
+            orchestrator: v3Orchestrator,
+            logger,
+        });
+        await v3DomainConsumer.connect();
+        logger.info("V3 domain event consumer connected and listening");
+    } catch (error) {
+        logger.error({ err: error }, "Failed to connect V3 domain event consumer");
     }
 
     // Health check
@@ -200,6 +227,10 @@ async function main() {
                 rabbitmq_consumer:
                     HealthCheckers.rabbitMqConsumer(domainConsumer),
             }),
+            ...(v3DomainConsumer && {
+                rabbitmq_v3_consumer:
+                    HealthCheckers.rabbitMqConsumer(v3DomainConsumer),
+            }),
         },
     });
 
@@ -214,6 +245,7 @@ async function main() {
         try {
             await app.close();
             outboxWorker?.stop();
+            if (v3DomainConsumer) await v3DomainConsumer.close();
             if (domainConsumer) await domainConsumer.close();
             if (eventPublisher) await eventPublisher.close();
         } finally {

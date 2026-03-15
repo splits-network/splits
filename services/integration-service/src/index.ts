@@ -154,6 +154,8 @@ async function main() {
     registerV3Routes(app, {
         supabase: supabaseClient,
         eventPublisher: outboxPublisher,
+        logger,
+        crypto,
     });
 
     app.get("/health", async (request, reply) => {

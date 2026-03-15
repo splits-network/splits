@@ -1,5 +1,5 @@
 /**
- * Calls V3 Routes — Core 5 CRUD
+ * Calls V3 Routes — Core 5 CRUD + Lifecycle
  */
 
 import { FastifyInstance } from 'fastify';
@@ -7,6 +7,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { CallRepository } from './repository';
 import { CallService } from './service';
+import { registerCallLifecycleRoutes } from './lifecycle-routes';
 import {
   CreateCallInput, UpdateCallInput, CallListParams,
   idParamSchema, listQuerySchema, createCallSchema, updateCallSchema,
@@ -19,6 +20,11 @@ export function registerCallRoutes(
 ) {
   const repository = new CallRepository(supabase);
   const service = new CallService(repository, supabase, eventPublisher);
+
+  // Register lifecycle routes (start, end, cancel, reschedule, decline)
+  if (eventPublisher) {
+    registerCallLifecycleRoutes(app, supabase, eventPublisher);
+  }
 
   // GET /api/v3/calls
   app.get('/api/v3/calls', {

@@ -132,6 +132,113 @@ export class AIReviewService {
     return { application: updated };
   }
 
+  /**
+   * Handle AI review completion event (called by domain consumer).
+   * Transitions application from 'ai_review' to 'ai_reviewed'.
+   * Candidate must review feedback before submission.
+   */
+  async handleAIReviewCompleted(data: {
+    application_id: string;
+    review_id?: string;
+    ai_review_id?: string;
+    recommendation?: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
+    fit_score?: number;
+    concerns?: string[];
+  }) {
+    const reviewId = data.review_id || data.ai_review_id;
+    const application = await this.repository.findById(data.application_id);
+    if (!application) return;
+
+    // Only transition if still in a review stage
+    if (application.stage !== 'ai_review' && application.stage !== 'gpt_review') {
+      return;
+    }
+
+    await this.repository.update(data.application_id, {
+      stage: 'ai_reviewed',
+      ai_reviewed: true,
+    });
+
+    await this.repository.createAuditLog({
+      application_id: data.application_id,
+      action: 'ai_review_completed',
+      performed_by_user_id: 'system',
+      performed_by_role: 'system',
+      old_value: { stage: application.stage },
+      new_value: { stage: 'ai_reviewed' },
+      metadata: {
+        review_id: reviewId,
+        recommendation: data.recommendation,
+        fit_score: data.fit_score,
+        concern_count: data.concerns?.length ?? 0,
+      },
+    });
+
+    await this.eventPublisher?.publish('application.ai_reviewed', {
+      application_id: data.application_id,
+      review_id: reviewId,
+      recommendation: data.recommendation,
+      has_concerns: (data.concerns?.length ?? 0) > 0,
+    }, 'ats-service');
+
+    await this.eventPublisher?.publish('application.stage_changed', {
+      application_id: data.application_id,
+      candidate_id: application.candidate_id,
+      job_id: application.job_id,
+      old_stage: application.stage,
+      new_stage: 'ai_reviewed',
+      changed_by: 'system',
+    }, 'ats-service');
+
+    // If poor/fair fit with concerns, publish needs_improvement
+    if (
+      data.recommendation === 'poor_fit' ||
+      (data.recommendation === 'fair_fit' && (data.concerns?.length ?? 0) > 0)
+    ) {
+      await this.eventPublisher?.publish('application.needs_improvement', {
+        application_id: data.application_id,
+        concerns: data.concerns,
+      }, 'ats-service');
+    }
+  }
+
+  /**
+   * Handle AI review failure event (called by domain consumer).
+   * Transitions application to 'ai_failed' so candidate can retry.
+   */
+  async handleAIReviewFailed(data: {
+    application_id: string;
+    error?: string;
+  }) {
+    const application = await this.repository.findById(data.application_id);
+    if (!application) return;
+
+    if (application.stage !== 'ai_review' && application.stage !== 'gpt_review') {
+      return;
+    }
+
+    await this.repository.update(data.application_id, { stage: 'ai_failed' });
+
+    await this.repository.createAuditLog({
+      application_id: data.application_id,
+      action: 'ai_review_failed',
+      performed_by_user_id: 'system',
+      performed_by_role: 'system',
+      old_value: { stage: application.stage },
+      new_value: { stage: 'ai_failed' },
+      metadata: { error: data.error },
+    });
+
+    await this.eventPublisher?.publish('application.stage_changed', {
+      application_id: data.application_id,
+      candidate_id: application.candidate_id,
+      job_id: application.job_id,
+      old_stage: application.stage,
+      new_stage: 'ai_failed',
+      changed_by: 'system',
+    }, 'ats-service');
+  }
+
   private resolveRole(context: any): string {
     if (context.isPlatformAdmin) return 'admin';
     if (context.recruiterId) return 'recruiter';

@@ -14,7 +14,7 @@ import {
     UpdateSupportConversationInput,
 } from "./types";
 import { IEventPublisher } from "../../v2/shared/events";
-import { SupportEventPublisher } from "../../v2/support/events";
+import { SupportEventPublisher } from "../shared/support-event-publisher";
 
 export class SupportConversationService {
     constructor(

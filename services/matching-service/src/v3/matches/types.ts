@@ -51,6 +51,34 @@ export const listQuerySchema = {
   additionalProperties: true,
 };
 
+export interface MatchFactors {
+  salary_overlap: boolean;
+  salary_overlap_pct: number;
+  employment_type_match: boolean;
+  commute_compatible: boolean;
+  job_level_match: boolean;
+  location_compatible: boolean;
+  availability_compatible: boolean;
+  skills_matched: string[];
+  skills_missing: string[];
+  skills_match_pct: number;
+  skills_source?: 'structured' | 'legacy';
+  ai_summary?: string;
+  cosine_similarity?: number;
+}
+
+export interface MatchUpsert {
+  candidate_id: string;
+  job_id: string;
+  match_score: number;
+  rule_score: number;
+  skills_score: number;
+  ai_score?: number | null;
+  match_factors: MatchFactors;
+  match_tier: MatchTier;
+  generated_by?: string;
+}
+
 export const updateMatchSchema = {
   type: 'object',
   properties: {

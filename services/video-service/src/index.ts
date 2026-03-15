@@ -136,6 +136,24 @@ async function main() {
         logger.warn('Supabase S3 storage vars not set - recording upload will fail');
     }
 
+    // Create shared recording infrastructure used by both V2 and V3 routes
+    const { CallRecordingRepository: V2CallRecordingRepository } = await import('./v2/calls/call-repository');
+    const { CallRecordingService: V2CallRecordingService } = await import('./v2/calls/call-recording-service');
+    const callRecordingRepository = new V2CallRecordingRepository(supabaseClient);
+    const callRecordingService = new V2CallRecordingService(
+        callRecordingRepository,
+        livekitApiKey,
+        livekitApiSecret,
+        livekitWsUrl,
+        {
+            endpoint: supabaseS3Endpoint,
+            region: supabaseS3Region,
+            accessKey: supabaseS3AccessKey,
+            secretKey: supabaseS3SecretKey,
+            bucket: supabaseS3Bucket,
+        },
+    );
+
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
@@ -151,8 +169,14 @@ async function main() {
         supabaseS3Bucket,
     });
 
-    // Register V3 routes
-    registerV3Routes(app, supabaseClient);
+    // Register V3 routes (including webhook handler)
+    registerV3Routes(app, {
+        supabase: supabaseClient,
+        eventPublisher: outboxPublisher,
+        callRecordingService,
+        livekitApiKey,
+        livekitApiSecret,
+    });
 
     app.get("/health", async (request, reply) => {
         return reply.status(200).send({

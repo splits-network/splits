@@ -172,7 +172,12 @@ export class ApplicationService {
         performed_by_role: this.resolveRole(context),
         old_value: { stage: current.stage },
         new_value: { stage: input.stage },
-        metadata: { decline_reason, decline_details },
+        metadata: {
+          decline_reason, decline_details,
+          job_id: current.job_id,
+          candidate_id: current.candidate_id,
+          candidate_recruiter_id: current.candidate_recruiter_id,
+        },
       });
 
       await this.eventPublisher?.publish('application.stage_changed', {
@@ -180,6 +185,15 @@ export class ApplicationService {
         changed_by: context.identityUserId,
       }, 'ats-service');
     }
+
+    // Generic update event — downstream consumers depend on this for non-stage changes
+    await this.eventPublisher?.publish('application.updated', {
+      application_id: id,
+      job_id: current.job_id,
+      candidate_id: current.candidate_id,
+      updated_fields: Object.keys(persistedUpdates),
+      updated_by: context.identityUserId,
+    }, 'ats-service');
 
     return updated;
   }

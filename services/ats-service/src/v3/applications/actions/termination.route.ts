@@ -40,7 +40,7 @@ export function registerTerminationRoutes(app: FastifyInstance, service: Termina
       });
     }
 
-    await service.processDecisions(body.decisions);
+    await service.processDecisions(body.decisions, clerkUserId);
     return reply.send({ data: { message: 'Termination decisions processed' } });
   });
 }
