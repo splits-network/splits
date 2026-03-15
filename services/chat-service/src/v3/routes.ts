@@ -11,7 +11,6 @@ import { IEventPublisher } from '../v2/shared/events';
 import { IChatEventPublisher } from './shared/chat-event-publisher';
 import { registerConversationRoutes } from './conversations/routes';
 import { registerMessagingCounterRoutes } from './messaging-counters/routes';
-import { registerMessageRoutes } from './messages/routes';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;
@@ -21,6 +20,7 @@ interface RegisterV3Config {
 
 export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config) {
   registerConversationRoutes(app, config.supabase, config.eventPublisher, config.chatEventPublisher);
-  registerMessageRoutes(app, config.supabase, config.eventPublisher, config.chatEventPublisher);
+  // Message routes (GET/POST .../messages) are registered as V3 aliases in V2 chat routes
+  // to preserve the richer V2 service logic (participant-aware, resync, etc.)
   registerMessagingCounterRoutes(app, config.supabase);
 }
