@@ -27,7 +27,7 @@ export function SplitView({
         >
             {/* Left list — hidden on mobile when a job is selected */}
             <div
-                className={`w-full md:w-2/5 border-r-2 border-base-300 overflow-y-auto ${
+                className={`w-full md:w-1/3 border-r-2 border-base-300 overflow-y-auto ${
                     selectedId ? "hidden md:block" : "block"
                 }`}
             >
@@ -45,7 +45,7 @@ export function SplitView({
             {/* Right detail — MobileDetailOverlay handles mobile portal */}
             <MobileDetailOverlay
                 isOpen={!!selectedJob}
-                className="md:w-3/5 w-full bg-base-100"
+                className="md:w-2/3 w-full bg-base-100"
             >
                 {selectedJob ? (
                     <DetailLoader

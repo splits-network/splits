@@ -44,7 +44,7 @@ export function FinancialsTab({ job }: { job: Job }) {
             </div>
 
             {/* Calculator */}
-            <div className="border-l-4 border-l-primary bg-base-100 shadow-sm p-6">
+            <div className="border-l-4 border-l-primary bg-base-100 p-6">
                 <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
                     <i className="fa-duotone fa-regular fa-calculator mr-2" />
                     Payout Calculator

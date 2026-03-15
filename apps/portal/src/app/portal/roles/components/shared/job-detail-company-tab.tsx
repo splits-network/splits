@@ -146,9 +146,11 @@ export function CompanyTab({ job }: { job: Job }) {
 
     if (loading) {
         return (
-            <div className="flex items-center gap-3 py-8 justify-center">
-                <span className="loading loading-spinner loading-sm text-primary" />
-                <span className="text-sm text-base-content/50">Loading company...</span>
+            <div className="py-12 text-center">
+                <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
+                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    Loading company...
+                </p>
             </div>
         );
     }
@@ -263,25 +265,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function CompanyFactsGrid({ company }: { company: CompanyProfile | null }) {
     if (!company) return null;
 
-    const facts: { label: string; value: string; icon: string }[] = [];
-
-    if (company.headquarters_location) {
-        facts.push({ label: "HQ", value: company.headquarters_location, icon: "fa-location-dot" });
-    }
-    if (company.company_size) {
-        facts.push({ label: "Size", value: company.company_size, icon: "fa-users" });
-    }
-    if (company.stage) {
-        facts.push({ label: "Stage", value: company.stage, icon: "fa-seedling" });
-    }
-    if (company.founded_year) {
-        facts.push({ label: "Founded", value: String(company.founded_year), icon: "fa-calendar" });
-    }
-    if (company.open_roles_count !== undefined && company.open_roles_count > 0) {
-        facts.push({ label: "Open Roles", value: String(company.open_roles_count), icon: "fa-briefcase" });
-    }
-
-    if (facts.length === 0) return null;
+    const facts: { label: string; value: string | null; icon: string }[] = [
+        { label: "HQ", value: company.headquarters_location || null, icon: "fa-location-dot" },
+        { label: "Size", value: company.company_size || null, icon: "fa-users" },
+        { label: "Stage", value: company.stage || null, icon: "fa-seedling" },
+        { label: "Founded", value: company.founded_year ? String(company.founded_year) : null, icon: "fa-calendar" },
+        { label: "Open Roles", value: company.open_roles_count != null ? String(company.open_roles_count) : null, icon: "fa-briefcase" },
+    ];
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-[2px] bg-base-300">
@@ -291,7 +281,9 @@ function CompanyFactsGrid({ company }: { company: CompanyProfile | null }) {
                         <i className={`fa-duotone fa-regular ${f.icon} mr-1`} />
                         {f.label}
                     </p>
-                    <p className="font-bold text-sm">{f.value}</p>
+                    <p className={`font-bold text-sm ${!f.value ? "text-base-content/30 italic font-normal" : ""}`}>
+                        {f.value || "Not specified"}
+                    </p>
                 </div>
             ))}
         </div>

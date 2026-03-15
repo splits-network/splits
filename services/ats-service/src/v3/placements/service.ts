@@ -69,6 +69,7 @@ export class PlacementService {
     }
 
     const attribution = await this.gatherAttribution(input.application_id);
+    const denormalized = await this.gatherDenormalizedFields(input.job_id, input.candidate_id);
     const guaranteeDays = input.guarantee_days ?? 90;
     const guaranteeExpiresAt = this.computeGuaranteeExpiresAt(input.start_date, guaranteeDays);
     const placementFee = Math.round((input.salary * input.fee_percentage) / 100);
@@ -84,8 +85,8 @@ export class PlacementService {
       fee_amount: placementFee,
       guarantee_days: guaranteeDays,
       guarantee_expires_at: guaranteeExpiresAt,
-      notes: input.notes || null,
       state: 'hired',
+      ...denormalized,
       ...attribution,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -133,8 +134,6 @@ export class PlacementService {
     if (input.start_date !== undefined) updates.start_date = input.start_date;
     if (input.fee_percentage !== undefined) updates.fee_percentage = input.fee_percentage;
     if (input.guarantee_days !== undefined) updates.guarantee_days = input.guarantee_days;
-    if (input.notes !== undefined) updates.notes = input.notes;
-
     // Recompute guarantee expiry if start_date or guarantee_days changed
     if (input.start_date || input.guarantee_days) {
       const nextStart = input.start_date ?? existing.start_date;
@@ -250,6 +249,33 @@ export class PlacementService {
       job_owner_recruiter_id: jobOwner,
       candidate_sourcer_recruiter_id: candidateSourcerRecruiterId,
       company_sourcer_recruiter_id: companySourcerRecruiterId,
+    };
+  }
+
+  /**
+   * Gather denormalized display fields for the placement record.
+   * These power search indexing and avoid joins for listing views.
+   */
+  private async gatherDenormalizedFields(jobId: string, candidateId: string): Promise<{
+    candidate_name: string | null;
+    candidate_email: string | null;
+    job_title: string | null;
+    company_name: string | null;
+    company_id: string | null;
+  }> {
+    const [candidateResult, jobResult] = await Promise.all([
+      this.supabase.from('candidates').select('full_name, email').eq('id', candidateId).maybeSingle(),
+      this.supabase.from('jobs').select('title, company_id, companies(name)').eq('id', jobId).maybeSingle(),
+    ]);
+
+    const company = jobResult.data?.companies as unknown as { name: string } | null;
+
+    return {
+      candidate_name: candidateResult.data?.full_name || null,
+      candidate_email: candidateResult.data?.email || null,
+      job_title: jobResult.data?.title || null,
+      company_name: company?.name || null,
+      company_id: jobResult.data?.company_id || null,
     };
   }
 

@@ -66,14 +66,11 @@ export function JobDetail({
     onClose,
     onRefresh,
     onUpdateItem,
-    accent: _accent,
 }: {
     job: Job;
     onClose?: () => void;
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
-    /** @deprecated Basel ignores this prop. Kept for backward compatibility with Memphis consumers. */
-    accent?: unknown;
 }) {
     const { isRecruiter, isCompanyUser } = useUserProfile();
 

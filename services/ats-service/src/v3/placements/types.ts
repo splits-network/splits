@@ -13,7 +13,6 @@ export interface CreatePlacementInput {
   salary: number;
   fee_percentage: number;
   guarantee_days?: number;
-  notes?: string;
 }
 
 export interface UpdatePlacementInput {
@@ -22,7 +21,6 @@ export interface UpdatePlacementInput {
   start_date?: string;
   fee_percentage?: number;
   guarantee_days?: number;
-  notes?: string;
 }
 
 export interface PlacementListParams {
@@ -78,7 +76,6 @@ export const createSchema = {
     salary: { type: 'number', minimum: 0 },
     fee_percentage: { type: 'number', minimum: 0, maximum: 100 },
     guarantee_days: { type: 'integer', minimum: 0, default: 90 },
-    notes: { type: 'string', maxLength: 5000 },
   },
   additionalProperties: false,
 };
@@ -91,7 +88,6 @@ export const updateSchema = {
     start_date: { type: 'string', format: 'date' },
     fee_percentage: { type: 'number', minimum: 0, maximum: 100 },
     guarantee_days: { type: 'integer', minimum: 0 },
-    notes: { type: 'string', maxLength: 5000 },
   },
   additionalProperties: false,
 };

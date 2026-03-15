@@ -1,6 +1,7 @@
 "use client";
 
 import { useStandardList, PaginationControls } from "@/hooks/use-standard-list";
+import { BaselEmptyState } from "@splits-network/basel-ui";
 import type { JobActivityItem } from "../../types";
 import { TimelineItem } from "./timeline-item";
 
@@ -32,7 +33,10 @@ export function JobTimelineTab({ jobId }: JobTimelineTabProps) {
 
     return (
         <div className="space-y-4">
-            <h3 className="text-lg font-bold">Activity Timeline</h3>
+            <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30">
+                <i className="fa-duotone fa-regular fa-clock-rotate-left mr-1.5" />
+                Activity Timeline
+            </h3>
 
             {/* Loading */}
             {loading && activities.length === 0 && (
@@ -46,10 +50,13 @@ export function JobTimelineTab({ jobId }: JobTimelineTabProps) {
 
             {/* Empty */}
             {!loading && activities.length === 0 && (
-                <div className="py-12 text-center">
-                    <i className="fa-duotone fa-regular fa-clock-rotate-left text-4xl text-info/20 mb-4 block" />
-                    <p className="text-base-content/50">No activity recorded yet.</p>
-                </div>
+                <BaselEmptyState
+                    icon="fa-duotone fa-regular fa-clock-rotate-left"
+                    iconColor="text-info"
+                    iconBg="bg-info/10"
+                    title="No Activity"
+                    description="Activity will appear here as events occur on this role."
+                />
             )}
 
             {/* Timeline */}

@@ -2,6 +2,7 @@
 
 import type { Job } from "../../types";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
+import { BaselEmptyState } from "@splits-network/basel-ui";
 
 /* ─── Candidate Description Tab ─────────────────────────────────────────── */
 
@@ -10,12 +11,11 @@ export function CandidateDescriptionTab({ job }: { job: Job }) {
 
     if (!content) {
         return (
-            <div className="text-center py-12">
-                <i className="fa-duotone fa-regular fa-user text-3xl text-base-content/20 mb-3 block" />
-                <p className="text-sm font-semibold text-base-content/40">
-                    No candidate description available
-                </p>
-            </div>
+            <BaselEmptyState
+                icon="fa-duotone fa-regular fa-user"
+                title="No Description"
+                description="No candidate description has been added to this role yet."
+            />
         );
     }
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useStandardList, PaginationControls, SearchInput } from "@/hooks/use-standard-list";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { BaselEmptyState } from "@splits-network/basel-ui";
 import { CallTable } from "@/app/portal/calls/components/table/call-table";
 import { CallFilterDropdowns } from "@/app/portal/calls/components/shared/call-filters";
 import { CallCreationModal } from "@/components/calls/call-creation-modal";
@@ -28,18 +29,18 @@ function EntityCallStats({ stats, loading }: { stats: CallStats | null; loading:
     ];
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-[2px] bg-base-300 mb-6">
             {items.map((item) => (
-                <div key={item.label} className="flex items-center gap-3 bg-base-200 p-3">
-                    <i className={`${item.icon} ${item.color}`} />
-                    <div>
-                        {loading ? (
-                            <div className="h-5 w-8 bg-base-300 animate-pulse" />
-                        ) : (
-                            <div className="text-lg font-black">{item.value}</div>
-                        )}
-                        <div className="text-sm uppercase tracking-wider text-base-content/50">{item.label}</div>
-                    </div>
+                <div key={item.label} className="bg-base-100 p-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        <i className={`${item.icon} ${item.color} mr-1`} />
+                        {item.label}
+                    </p>
+                    {loading ? (
+                        <div className="h-5 w-8 bg-base-300 animate-pulse" />
+                    ) : (
+                        <p className="text-lg font-black tracking-tight">{item.value}</p>
+                    )}
                 </div>
             ))}
         </div>
@@ -106,7 +107,10 @@ export function JobCallsTab({ jobId, jobTitle }: JobCallsTabProps) {
         <div className="space-y-4">
             {/* Header + New Call button */}
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold">Calls</h3>
+                <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30">
+                    <i className="fa-duotone fa-regular fa-video mr-1.5" />
+                    Calls
+                </h3>
                 <button
                     type="button"
                     className="btn btn-primary btn-sm"
@@ -144,10 +148,11 @@ export function JobCallsTab({ jobId, jobTitle }: JobCallsTabProps) {
                     </p>
                 </div>
             ) : calls.length === 0 ? (
-                <div className="py-12 text-center">
-                    <i className="fa-duotone fa-regular fa-video text-4xl text-primary/20 mb-4 block" />
-                    <p className="text-base-content/50">No calls linked to this job yet.</p>
-                </div>
+                <BaselEmptyState
+                    icon="fa-duotone fa-regular fa-video"
+                    title="No Calls"
+                    description="No calls linked to this job yet. Schedule one to get started."
+                />
             ) : (
                 <CallTable calls={calls} />
             )}

@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { useStandardList, PaginationControls } from "@/hooks/use-standard-list";
+import { BaselEmptyState } from "@splits-network/basel-ui";
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
 
@@ -87,12 +88,12 @@ function NoteItem({
     const typeColor = NOTE_TYPE_COLORS[note.note_type];
 
     return (
-        <div className="card bg-base-200 p-4">
+        <div className="bg-base-100 p-4">
             <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                     {/* Header */}
                     <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <span className="font-semibold text-sm">
+                        <span className="font-bold text-sm">
                             {authorName}
                         </span>
                         <span className={`badge badge-sm ${typeColor}`}>
@@ -115,12 +116,12 @@ function NoteItem({
                     </div>
 
                     {/* Message */}
-                    <p className="text-sm whitespace-pre-wrap break-words">
+                    <p className="text-sm whitespace-pre-wrap break-words text-base-content/70">
                         {note.message_text}
                     </p>
 
                     {/* Timestamp */}
-                    <p className="text-sm text-base-content/40 mt-2">
+                    <p className="text-sm text-base-content/30 mt-2">
                         {new Date(note.created_at).toLocaleString()}
                     </p>
                 </div>
@@ -177,7 +178,7 @@ function AddNoteForm({
     return (
         <form
             onSubmit={handleSubmit}
-            className="card bg-base-200 p-4 space-y-3"
+            className="bg-base-200 p-4 space-y-3"
         >
             <div className="flex gap-3">
                 <fieldset className="flex-1">
@@ -323,11 +324,11 @@ export function JobNotesTab({ jobId }: JobNotesTabProps) {
         <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                    <i className="fa-duotone fa-regular fa-notes" />
+                <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30">
+                    <i className="fa-duotone fa-regular fa-notes mr-1.5" />
                     Notes
                     {total > 0 && (
-                        <span className="badge badge-sm badge-primary">
+                        <span className="badge badge-sm badge-primary ml-2">
                             {total}
                         </span>
                     )}
@@ -365,18 +366,16 @@ export function JobNotesTab({ jobId }: JobNotesTabProps) {
 
             {/* Empty */}
             {!loading && notes.length === 0 && (
-                <div className="py-12 text-center">
-                    <i className="fa-duotone fa-regular fa-notes text-4xl text-primary/20 mb-4 block" />
-                    <p className="text-base-content/50">
-                        No notes yet. Add a note to track internal discussions
-                        about this role.
-                    </p>
-                </div>
+                <BaselEmptyState
+                    icon="fa-duotone fa-regular fa-notes"
+                    title="No Notes"
+                    description="Add a note to track internal discussions about this role."
+                />
             )}
 
             {/* Notes list */}
             {notes.length > 0 && (
-                <div className="space-y-3">
+                <div className="space-y-[2px] bg-base-300">
                     {notes.map((note) => (
                         <NoteItem
                             key={note.id}
