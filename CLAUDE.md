@@ -125,10 +125,11 @@ The interface should evoke:
 - **Professional Pride** — "This tool reflects well on my work"
 
 ### Aesthetic Direction
+- **Design language**: Editorial product design — Basel UI treats every surface like a magazine layout. Uppercase kicker labels, bold display headings, section-based composition with clear visual rhythm. Data-dense but editorially composed, not dashboard-generic.
 - **Reference**: Stripe Dashboard — data-dense but elegant, professional financial feel
 - **Visual tone**: Sharp, minimal, zero-depth (0 border-radius, no shadows, no gradients)
 - **Colors**: Deep indigo primary (`#233876`), teal secondary (`#0f9d8a`), magenta accent (`#db2777`). Full light/dark theme support.
-- **Typography**: System font stack, bold headings, `text-sm` body in portal, `text-base` on public pages
+- **Typography**: System font stack, bold headings, `text-sm` body in portal, `text-base` on public pages. Editorial kickers use `text-sm font-bold uppercase tracking-[0.2em]`.
 - **Icons**: FontAwesome 6 duotone inline icons
 - **Animations**: CSS-only keyframes with scroll reveal. Reduced motion respected automatically.
 - **Theme**: Light + dark mode via DaisyUI semantic tokens (`splits-light`, `splits-dark`)
