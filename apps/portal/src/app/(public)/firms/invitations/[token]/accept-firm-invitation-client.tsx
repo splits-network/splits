@@ -82,15 +82,16 @@ export default function AcceptFirmInvitationClient({
                 throw new Error("Authentication token not available");
 
             const client = createAuthenticatedClient(authToken);
-            await client.post(`/firm-invitations/${token}/accept`, {
+            const response = await client.post(`/firm-invitations/${token}/accept`, {
                 user_email: userEmail,
             });
 
             await refreshProfile();
             setShowSuccess(true);
 
+            const needsOnboarding = response.data?.needs_onboarding;
             setTimeout(() => {
-                router.push("/portal/dashboard");
+                router.push(needsOnboarding ? "/onboarding" : "/portal/dashboard");
             }, 2000);
         } catch (err: any) {
             const message =

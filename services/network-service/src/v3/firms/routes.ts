@@ -115,8 +115,8 @@ export function registerFirmRoutes(
     if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
     const { token } = request.params as { token: string };
     const { user_email } = request.body as { user_email: string };
-    await service.acceptInvitation(token, clerkUserId, user_email);
-    return reply.send({ data: { success: true } });
+    const result = await service.acceptInvitation(token, clerkUserId, user_email);
+    return reply.send({ data: { success: true, needs_onboarding: result.needsOnboarding } });
   });
 
   // --- Views (before :id to avoid route collision) ---

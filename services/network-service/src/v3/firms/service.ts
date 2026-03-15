@@ -213,8 +213,38 @@ export class FirmService {
 
     const ctx = await this.accessResolver.resolve(clerkUserId);
     if (!ctx.identityUserId) throw new BadRequestError('User not found');
-    const recruiter = await this.repository.getRecruiterByUserId(ctx.identityUserId);
-    if (!recruiter) throw new BadRequestError('You must have a recruiter profile to join a firm');
+    let recruiter = await this.repository.getRecruiterByUserId(ctx.identityUserId);
+
+    // Auto-create a minimal recruiter profile for new users accepting a firm invitation
+    if (!recruiter) {
+      const { data: user } = await this.supabase.from('users').select('id, name, email')
+        .eq('id', ctx.identityUserId).single();
+      if (!user) throw new BadRequestError('User not found');
+
+      const now = new Date().toISOString();
+      const slug = user.name
+        ? await this.generateRecruiterSlug(user.name)
+        : undefined;
+
+      const { data: newRecruiter, error: createError } = await this.supabase.from('recruiters').insert({
+        user_id: user.id, name: user.name || null, email: user.email || userEmail,
+        status: 'active', ...(slug ? { slug } : {}), created_at: now, updated_at: now,
+      }).select('id, user_id').single();
+      if (createError) throw new BadRequestError(`Failed to create recruiter profile: ${createError.message}`);
+
+      // Create user_roles entry so user is recognized as a recruiter
+      await this.supabase.from('user_roles').insert({
+        user_id: user.id, role_name: 'recruiter', role_entity_id: newRecruiter.id,
+        created_at: now, updated_at: now,
+      });
+
+      await this.eventPublisher?.publish('recruiter.created', {
+        recruiterId: newRecruiter.id, userId: user.id, status: 'active',
+        fromFirmInvitation: true,
+      }, 'network-service');
+
+      recruiter = newRecruiter;
+    }
 
     const existingMember = await this.repository.findMemberByRecruiterId(invitation.firm_id, recruiter.id);
     if (existingMember) throw new BadRequestError('You are already a member of this firm');
@@ -226,6 +256,13 @@ export class FirmService {
       firmId: invitation.firm_id, invitationId: invitation.id, recruiterId: recruiter.id,
       role: invitation.role, acceptedBy: clerkUserId,
     }, 'network-service');
+
+    // Check if user still needs onboarding
+    const { data: userRecord } = await this.supabase.from('users').select('onboarding_status')
+      .eq('id', ctx.identityUserId).single();
+    const needsOnboarding = userRecord?.onboarding_status !== 'completed';
+
+    return { needsOnboarding };
   }
 
   // --- Public ---
@@ -297,5 +334,19 @@ export class FirmService {
     if (!(valid[currentStatus] || []).includes(newStatus)) {
       throw new BadRequestError(`Cannot transition firm from ${currentStatus} to ${newStatus}`);
     }
+  }
+
+  private async generateRecruiterSlug(name: string): Promise<string | undefined> {
+    const base = name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (!base) return undefined;
+    let slug = base;
+    let counter = 2;
+    while (true) {
+      const { data } = await this.supabase.from('recruiters').select('id').eq('slug', slug).maybeSingle();
+      if (!data) break;
+      slug = `${base}-${counter}`;
+      counter++;
+    }
+    return slug;
   }
 }
