@@ -56,8 +56,8 @@ const NOTE_TYPE_ICONS: Record<JobNoteType, string> = {
 };
 
 const NOTE_TYPE_COLORS: Record<JobNoteType, string> = {
-    general: "badge-neutral",
-    note: "badge-neutral",
+    general: "badge-primary",
+    note: "badge-primary",
     info_request: "badge-info",
     info_response: "badge-success",
     improvement_request: "badge-warning",
@@ -96,7 +96,9 @@ function NoteItem({
                             {authorName}
                         </span>
                         <span className={`badge badge-sm ${typeColor}`}>
-                            <i className={`fa-duotone fa-regular ${typeConfig} mr-1`} />
+                            <i
+                                className={`fa-duotone fa-regular ${typeConfig} mr-1`}
+                            />
                             {NOTE_TYPE_OPTIONS.find(
                                 (t) => t.value === note.note_type,
                             )?.label || note.note_type}
@@ -157,25 +159,35 @@ function AddNoteForm({
 }) {
     const [message, setMessage] = useState("");
     const [noteType, setNoteType] = useState<JobNoteType>("general");
-    const [visibility, setVisibility] = useState<JobNoteVisibility>("company_only");
+    const [visibility, setVisibility] =
+        useState<JobNoteVisibility>("company_only");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!message.trim()) return;
-        await onSubmit({ message_text: message.trim(), note_type: noteType, visibility });
+        await onSubmit({
+            message_text: message.trim(),
+            note_type: noteType,
+            visibility,
+        });
         setMessage("");
         setNoteType("general");
     };
 
     return (
-        <form onSubmit={handleSubmit} className="card bg-base-200 p-4 space-y-3">
+        <form
+            onSubmit={handleSubmit}
+            className="card bg-base-200 p-4 space-y-3"
+        >
             <div className="flex gap-3">
                 <fieldset className="flex-1">
                     <label className="label text-sm font-medium">Type</label>
                     <select
                         className="select select-sm w-full"
                         value={noteType}
-                        onChange={(e) => setNoteType(e.target.value as JobNoteType)}
+                        onChange={(e) =>
+                            setNoteType(e.target.value as JobNoteType)
+                        }
                     >
                         {NOTE_TYPE_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -185,7 +197,9 @@ function AddNoteForm({
                     </select>
                 </fieldset>
                 <fieldset className="flex-1">
-                    <label className="label text-sm font-medium">Visibility</label>
+                    <label className="label text-sm font-medium">
+                        Visibility
+                    </label>
                     <select
                         className="select select-sm w-full"
                         value={visibility}

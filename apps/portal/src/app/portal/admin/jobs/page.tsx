@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
 import {
     useStandardList,
     PaginationControls,
@@ -12,13 +12,13 @@ import {
     EmptyState,
     LoadingState,
     ErrorState,
-} from '@/hooks/use-standard-list';
-import { AdminPageHeader, useAdminConfirm } from '../components';
+} from "@/hooks/use-standard-list";
+import { AdminPageHeader, useAdminConfirm } from "../components";
 
 interface Job {
     id: string;
     title: string;
-    status: 'draft' | 'pending' | 'active' | 'paused' | 'filled' | 'closed';
+    status: "draft" | "pending" | "active" | "paused" | "filled" | "closed";
     is_early_access?: boolean;
     is_priority?: boolean;
     location?: string;
@@ -37,7 +37,7 @@ interface Job {
 }
 
 interface JobFilters {
-    status?: Job['status'];
+    status?: Job["status"];
     company_id?: string;
 }
 
@@ -63,32 +63,37 @@ export default function JobsAdminPage() {
     } = useStandardList<Job, JobFilters>({
         fetchFn: async (params) => {
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
 
             const queryParams = new URLSearchParams();
-            queryParams.set('page', String(params.page));
-            queryParams.set('limit', String(params.limit));
-            if (params.search) queryParams.set('search', params.search);
-            if (params.filters?.status) queryParams.set('status', params.filters.status);
-            if (params.filters?.company_id) queryParams.set('company_id', params.filters.company_id);
-            if (params.sort_by) queryParams.set('sort_by', params.sort_by);
-            if (params.sort_order) queryParams.set('sort_order', params.sort_order);
+            queryParams.set("page", String(params.page));
+            queryParams.set("limit", String(params.limit));
+            if (params.search) queryParams.set("search", params.search);
+            if (params.filters?.status)
+                queryParams.set("status", params.filters.status);
+            if (params.filters?.company_id)
+                queryParams.set("company_id", params.filters.company_id);
+            if (params.sort_by) queryParams.set("sort_by", params.sort_by);
+            if (params.sort_order)
+                queryParams.set("sort_order", params.sort_order);
 
-            const response = await apiClient.get(`/jobs?${queryParams.toString()}`);
+            const response = await apiClient.get(
+                `/jobs?${queryParams.toString()}`,
+            );
             return response;
         },
         defaultFilters,
-        defaultSortBy: 'created_at',
-        defaultSortOrder: 'desc',
+        defaultSortBy: "created_at",
+        defaultSortOrder: "desc",
         syncToUrl: true,
     });
 
-    async function updateJobStatus(jobId: string, newStatus: Job['status']) {
+    async function updateJobStatus(jobId: string, newStatus: Job["status"]) {
         const statusLabels: Record<string, string> = {
-            active: 'reopen',
-            closed: 'close',
-            paused: 'pause',
+            active: "reopen",
+            closed: "close",
+            paused: "pause",
         };
         const action = statusLabels[newStatus] || newStatus;
 
@@ -96,14 +101,14 @@ export default function JobsAdminPage() {
             title: `${action.charAt(0).toUpperCase() + action.slice(1)} Job`,
             message: `Are you sure you want to ${action} this job?`,
             confirmText: action.charAt(0).toUpperCase() + action.slice(1),
-            type: newStatus === 'closed' ? 'warning' : 'info',
+            type: newStatus === "closed" ? "warning" : "info",
         });
         if (!confirmed) return;
 
         setUpdatingId(jobId);
         try {
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
 
             await apiClient.patch(`/jobs/${jobId}`, { status: newStatus });
@@ -117,28 +122,33 @@ export default function JobsAdminPage() {
         }
     }
 
-    function StatusBadge({ status }: { status: Job['status'] }) {
+    function StatusBadge({ status }: { status: Job["status"] }) {
         const colors: Record<string, string> = {
-            draft: 'badge-ghost',
-            pending: 'badge-warning',
-            early: 'badge-accent',
-            active: 'badge-success',
-            priority: 'badge-primary',
-            paused: 'badge-warning',
-            closed: 'badge-neutral',
-            filled: 'badge-info',
+            draft: "badge-ghost",
+            pending: "badge-warning",
+            early: "badge-accent",
+            active: "badge-success",
+            priority: "badge-primary",
+            paused: "badge-warning",
+            closed: "badge-primary",
+            filled: "badge-info",
         };
         const labels: Record<string, string> = {
-            early: 'Early Access',
+            early: "Early Access",
         };
-        return <span className={`badge ${colors[status] || 'badge-ghost'}`}>{labels[status] || status}</span>;
+        return (
+            <span className={`badge ${colors[status] || "badge-ghost"}`}>
+                {labels[status] || status}
+            </span>
+        );
     }
 
     function formatSalary(min?: number, max?: number) {
-        if (!min && !max) return '-';
-        if (min && max) return `$${(min/1000).toFixed(0)}k - $${(max/1000).toFixed(0)}k`;
-        if (min) return `$${(min/1000).toFixed(0)}k+`;
-        return `Up to $${(max!/1000).toFixed(0)}k`;
+        if (!min && !max) return "-";
+        if (min && max)
+            return `$${(min / 1000).toFixed(0)}k - $${(max / 1000).toFixed(0)}k`;
+        if (min) return `$${(min / 1000).toFixed(0)}k+`;
+        return `Up to $${(max! / 1000).toFixed(0)}k`;
     }
 
     return (
@@ -146,7 +156,7 @@ export default function JobsAdminPage() {
             <AdminPageHeader
                 title="Job Management"
                 subtitle="Manage all job postings across the platform"
-                breadcrumbs={[{ label: 'Jobs' }]}
+                breadcrumbs={[{ label: "Jobs" }]}
             />
 
             {/* Stats */}
@@ -154,31 +164,39 @@ export default function JobsAdminPage() {
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-sm">Total Jobs</div>
                     <div className="stat-value text-2xl text-primary">
-                        {loading ? '...' : pagination.total}
+                        {loading ? "..." : pagination.total}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-sm">Active</div>
                     <div className="stat-value text-2xl text-success">
-                        {loading ? '...' : jobs.filter(j => j.status === 'active').length}
+                        {loading
+                            ? "..."
+                            : jobs.filter((j) => j.status === "active").length}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-sm">Paused</div>
                     <div className="stat-value text-2xl text-warning">
-                        {loading ? '...' : jobs.filter(j => j.status === 'paused').length}
+                        {loading
+                            ? "..."
+                            : jobs.filter((j) => j.status === "paused").length}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-sm">Closed</div>
                     <div className="stat-value text-2xl text-base-content/50">
-                        {loading ? '...' : jobs.filter(j => j.status === 'closed').length}
+                        {loading
+                            ? "..."
+                            : jobs.filter((j) => j.status === "closed").length}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-sm">Filled</div>
                     <div className="stat-value text-2xl text-info">
-                        {loading ? '...' : jobs.filter(j => j.status === 'filled').length}
+                        {loading
+                            ? "..."
+                            : jobs.filter((j) => j.status === "filled").length}
                     </div>
                 </div>
             </div>
@@ -192,8 +210,15 @@ export default function JobsAdminPage() {
                 />
                 <select
                     className="select select-sm"
-                    value={filters.status || ''}
-                    onChange={(e) => setFilters({ ...filters, status: e.target.value as JobFilters['status'] || undefined })}
+                    value={filters.status || ""}
+                    onChange={(e) =>
+                        setFilters({
+                            ...filters,
+                            status:
+                                (e.target.value as JobFilters["status"]) ||
+                                undefined,
+                        })
+                    }
                 >
                     <option value="">All Status</option>
                     <option value="draft">Draft</option>
@@ -214,7 +239,11 @@ export default function JobsAdminPage() {
                 <EmptyState
                     icon="fa-briefcase"
                     title="No jobs found"
-                    description={search || filters.status ? 'Try adjusting your search or filters' : 'Jobs will appear here once posted'}
+                    description={
+                        search || filters.status
+                            ? "Try adjusting your search or filters"
+                            : "Jobs will appear here once posted"
+                    }
                 />
             ) : (
                 <div className="card bg-base-100 shadow">
@@ -238,68 +267,129 @@ export default function JobsAdminPage() {
                                     {jobs.map((job) => (
                                         <tr key={job.id}>
                                             <td>
-                                                <div className="font-semibold">{job.title}</div>
+                                                <div className="font-semibold">
+                                                    {job.title}
+                                                </div>
                                                 <div className="text-xs text-base-content/50 font-mono">
                                                     {job.id.substring(0, 8)}...
                                                 </div>
                                             </td>
                                             <td>
                                                 {job.company ? (
-                                                    <Link href={`/portal/admin/companies/${job.company.id}`} className="link link-hover text-sm">
+                                                    <Link
+                                                        href={`/portal/admin/companies/${job.company.id}`}
+                                                        className="link link-hover text-sm"
+                                                    >
                                                         {job.company.name}
                                                     </Link>
                                                 ) : (
-                                                    <span className="text-base-content/50">-</span>
+                                                    <span className="text-base-content/50">
+                                                        -
+                                                    </span>
                                                 )}
                                             </td>
                                             <td>
-                                                <span className="text-sm">{job.location || 'Remote'}</span>
+                                                <span className="text-sm">
+                                                    {job.location || "Remote"}
+                                                </span>
                                             </td>
                                             <td>
-                                                <span className="text-sm">{formatSalary(job.salary_min, job.salary_max)}</span>
+                                                <span className="text-sm">
+                                                    {formatSalary(
+                                                        job.salary_min,
+                                                        job.salary_max,
+                                                    )}
+                                                </span>
                                             </td>
                                             <td>
-                                                <span className="text-sm font-semibold">{job.fee_percentage ? `${job.fee_percentage}%` : '-'}</span>
+                                                <span className="text-sm font-semibold">
+                                                    {job.fee_percentage
+                                                        ? `${job.fee_percentage}%`
+                                                        : "-"}
+                                                </span>
                                             </td>
                                             <td>
-                                                <StatusBadge status={job.status} />
+                                                <StatusBadge
+                                                    status={job.status}
+                                                />
                                             </td>
                                             <td>
-                                                <span className="badge badge-neutral">{job.application_count ?? 0}</span>
+                                                <span className="badge badge-primary">
+                                                    {job.application_count ?? 0}
+                                                </span>
                                             </td>
                                             <td>
-                                                <span className="badge badge-neutral">{job.recruiter_count ?? 0}</span>
+                                                <span className="badge badge-primary">
+                                                    {job.recruiter_count ?? 0}
+                                                </span>
                                             </td>
                                             <td>
                                                 <div className="flex gap-1">
-                                                    {job.status === 'active' && (
+                                                    {job.status ===
+                                                        "active" && (
                                                         <>
                                                             <button
-                                                                onClick={() => updateJobStatus(job.id, 'paused')}
+                                                                onClick={() =>
+                                                                    updateJobStatus(
+                                                                        job.id,
+                                                                        "paused",
+                                                                    )
+                                                                }
                                                                 className="btn btn-xs btn-ghost text-warning"
-                                                                disabled={updatingId === job.id}
+                                                                disabled={
+                                                                    updatingId ===
+                                                                    job.id
+                                                                }
                                                                 title="Pause"
                                                             >
                                                                 <i className="fa-duotone fa-regular fa-pause"></i>
                                                             </button>
                                                             <button
-                                                                onClick={() => updateJobStatus(job.id, 'closed')}
+                                                                onClick={() =>
+                                                                    updateJobStatus(
+                                                                        job.id,
+                                                                        "closed",
+                                                                    )
+                                                                }
                                                                 className="btn btn-xs btn-ghost text-error"
-                                                                disabled={updatingId === job.id}
+                                                                disabled={
+                                                                    updatingId ===
+                                                                    job.id
+                                                                }
                                                                 title="Close"
                                                             >
                                                                 <i className="fa-duotone fa-regular fa-xmark"></i>
                                                             </button>
                                                         </>
                                                     )}
-                                                    {['draft', 'pending', 'paused', 'closed', 'filled'].includes(job.status) && (
+                                                    {[
+                                                        "draft",
+                                                        "pending",
+                                                        "paused",
+                                                        "closed",
+                                                        "filled",
+                                                    ].includes(job.status) && (
                                                         <button
-                                                            onClick={() => updateJobStatus(job.id, 'active')}
+                                                            onClick={() =>
+                                                                updateJobStatus(
+                                                                    job.id,
+                                                                    "active",
+                                                                )
+                                                            }
                                                             className="btn btn-xs btn-ghost text-success"
-                                                            disabled={updatingId === job.id}
-                                                            title={job.status === 'draft' ? 'Publish' : 'Reopen'}
+                                                            disabled={
+                                                                updatingId ===
+                                                                job.id
+                                                            }
+                                                            title={
+                                                                job.status ===
+                                                                "draft"
+                                                                    ? "Publish"
+                                                                    : "Reopen"
+                                                            }
                                                         >
-                                                            {updatingId === job.id ? (
+                                                            {updatingId ===
+                                                            job.id ? (
                                                                 <span className="loading loading-spinner loading-xs"></span>
                                                             ) : (
                                                                 <i className="fa-duotone fa-regular fa-play"></i>

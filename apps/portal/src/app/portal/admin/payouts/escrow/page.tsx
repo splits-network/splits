@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useEffect } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
+import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
 import {
     useStandardList,
     PaginationControls,
@@ -12,26 +12,26 @@ import {
     EmptyState,
     LoadingState,
     ErrorState,
-} from '@/hooks/use-standard-list';
-import { ReleaseModal } from './components/release-modal';
-import { AdminPageHeader, useAdminConfirm } from '../../components';
+} from "@/hooks/use-standard-list";
+import { ReleaseModal } from "./components/release-modal";
+import { AdminPageHeader, useAdminConfirm } from "../../components";
 
 interface EscrowHold {
     id: string;
     payout_id?: string;
     placement_id: string;
     hold_amount: number;
-    hold_reason: 'guarantee_period' | 'dispute' | 'verification' | 'other';
+    hold_reason: "guarantee_period" | "dispute" | "verification" | "other";
     release_scheduled_date: string;
-    status: 'active' | 'released' | 'cancelled';
+    status: "active" | "released" | "cancelled";
     released_at?: string;
     created_at: string;
     updated_at: string;
 }
 
 interface HoldFilters {
-    status?: EscrowHold['status'];
-    hold_reason?: EscrowHold['hold_reason'];
+    status?: EscrowHold["status"];
+    hold_reason?: EscrowHold["hold_reason"];
 }
 
 interface Stats {
@@ -50,7 +50,10 @@ export default function EscrowHoldsPage() {
     const toast = useToast();
     const confirm = useAdminConfirm();
 
-    const defaultFilters = useMemo<HoldFilters>(() => ({ status: 'active' }), []);
+    const defaultFilters = useMemo<HoldFilters>(
+        () => ({ status: "active" }),
+        [],
+    );
 
     const {
         items: holds,
@@ -66,19 +69,24 @@ export default function EscrowHoldsPage() {
     } = useStandardList<EscrowHold, HoldFilters>({
         fetchFn: async (params) => {
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
 
             const queryParams = new URLSearchParams();
-            queryParams.set('page', String(params.page));
-            queryParams.set('limit', String(params.limit));
-            if (params.search) queryParams.set('search', params.search);
-            if (params.filters?.status) queryParams.set('status', params.filters.status);
-            if (params.filters?.hold_reason) queryParams.set('hold_reason', params.filters.hold_reason);
-            if (params.sort_by) queryParams.set('sort_by', params.sort_by);
-            if (params.sort_order) queryParams.set('sort_order', params.sort_order);
+            queryParams.set("page", String(params.page));
+            queryParams.set("limit", String(params.limit));
+            if (params.search) queryParams.set("search", params.search);
+            if (params.filters?.status)
+                queryParams.set("status", params.filters.status);
+            if (params.filters?.hold_reason)
+                queryParams.set("hold_reason", params.filters.hold_reason);
+            if (params.sort_by) queryParams.set("sort_by", params.sort_by);
+            if (params.sort_order)
+                queryParams.set("sort_order", params.sort_order);
 
-            const response = await apiClient.get(`/escrow-holds?${queryParams.toString()}`);
+            const response = await apiClient.get(
+                `/escrow-holds?${queryParams.toString()}`,
+            );
             return response;
         },
         defaultFilters,
@@ -93,33 +101,33 @@ export default function EscrowHoldsPage() {
                 if (!token) return;
                 const apiClient = createAuthenticatedClient(token);
 
-                const response = await apiClient.get('/escrow-holds/stats');
+                const response = await apiClient.get("/escrow-holds/stats");
                 setStats(response.data);
             } catch (error) {
-                console.error('Failed to load stats:', error);
+                console.error("Failed to load stats:", error);
             } finally {
                 setLoadingStats(false);
             }
         }
         loadStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    async function releaseHold(notes: string = '') {
+    async function releaseHold(notes: string = "") {
         if (!holdToRelease) return;
 
         setReleasingId(holdToRelease.id);
         try {
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
             await apiClient.post(`/escrow-holds/${holdToRelease.id}/release`, {
                 notes: notes || undefined,
             });
-            toast.success('Escrow hold released.');
+            toast.success("Escrow hold released.");
             refresh();
         } catch (error) {
-            console.error('Failed to release hold:', error);
+            console.error("Failed to release hold:", error);
             toast.error("Hold couldn't be released. Try again.");
             throw error; // Propagate to modal
         } finally {
@@ -137,53 +145,57 @@ export default function EscrowHoldsPage() {
 
     async function cancelHold(holdId: string) {
         const confirmed = await confirm({
-            title: 'Cancel Escrow Hold',
-            message: 'Cancel this escrow hold? This action cannot be undone.',
-            confirmText: 'Cancel Hold',
-            type: 'error',
+            title: "Cancel Escrow Hold",
+            message: "Cancel this escrow hold? This action cannot be undone.",
+            confirmText: "Cancel Hold",
+            type: "error",
         });
         if (!confirmed) return;
 
         try {
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
             await apiClient.post(`/escrow-holds/${holdId}/cancel`);
-            toast.success('Escrow hold cancelled.');
+            toast.success("Escrow hold cancelled.");
             refresh();
         } catch (error) {
-            console.error('Failed to cancel hold:', error);
+            console.error("Failed to cancel hold:", error);
             toast.error("Hold couldn't be cancelled. Try again.");
         }
     }
 
-    function StatusBadge({ status }: { status: EscrowHold['status'] }) {
+    function StatusBadge({ status }: { status: EscrowHold["status"] }) {
         const colors: Record<string, string> = {
-            active: 'badge-warning',
-            released: 'badge-success',
-            cancelled: 'badge-neutral',
-        };
-
-        return <span className={`badge ${colors[status] || 'badge-neutral'}`}>{status}</span>;
-    }
-
-    function ReasonBadge({ reason }: { reason: EscrowHold['hold_reason'] }) {
-        const labels: Record<string, string> = {
-            guarantee_period: 'Guarantee Period',
-            dispute: 'Dispute',
-            verification: 'Verification',
-            other: 'Other',
-        };
-
-        const colors: Record<string, string> = {
-            guarantee_period: 'badge-info',
-            dispute: 'badge-error',
-            verification: 'badge-warning',
-            other: 'badge-ghost',
+            active: "badge-warning",
+            released: "badge-success",
+            cancelled: "badge-primary",
         };
 
         return (
-            <span className={`badge ${colors[reason] || 'badge-ghost'}`}>
+            <span className={`badge ${colors[status] || "badge-primary"}`}>
+                {status}
+            </span>
+        );
+    }
+
+    function ReasonBadge({ reason }: { reason: EscrowHold["hold_reason"] }) {
+        const labels: Record<string, string> = {
+            guarantee_period: "Guarantee Period",
+            dispute: "Dispute",
+            verification: "Verification",
+            other: "Other",
+        };
+
+        const colors: Record<string, string> = {
+            guarantee_period: "badge-info",
+            dispute: "badge-error",
+            verification: "badge-warning",
+            other: "badge-ghost",
+        };
+
+        return (
+            <span className={`badge ${colors[reason] || "badge-ghost"}`}>
                 {labels[reason] || reason}
             </span>
         );
@@ -200,11 +212,14 @@ export default function EscrowHoldsPage() {
                 title="Escrow Holds"
                 subtitle="Manage funds held in escrow during guarantee periods"
                 breadcrumbs={[
-                    { label: 'Payouts', href: '/portal/admin/payouts' },
-                    { label: 'Escrow Holds' },
+                    { label: "Payouts", href: "/portal/admin/payouts" },
+                    { label: "Escrow Holds" },
                 ]}
                 actions={
-                    <Link href="/portal/admin/payouts/audit" className="btn btn-ghost">
+                    <Link
+                        href="/portal/admin/payouts/audit"
+                        className="btn btn-ghost"
+                    >
                         <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
                         Audit Log
                     </Link>
@@ -227,13 +242,19 @@ export default function EscrowHoldsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="card bg-base-200">
                         <div className="card-body">
-                            <h3 className="text-sm text-base-content/60">Active Holds</h3>
-                            <p className="text-3xl font-bold">{stats.active_holds}</p>
+                            <h3 className="text-sm text-base-content/60">
+                                Active Holds
+                            </h3>
+                            <p className="text-3xl font-bold">
+                                {stats.active_holds}
+                            </p>
                         </div>
                     </div>
                     <div className="card bg-base-200">
                         <div className="card-body">
-                            <h3 className="text-sm text-base-content/60">Total Held</h3>
+                            <h3 className="text-sm text-base-content/60">
+                                Total Held
+                            </h3>
                             <p className="text-3xl font-bold">
                                 ${stats.total_held.toLocaleString()}
                             </p>
@@ -241,7 +262,9 @@ export default function EscrowHoldsPage() {
                     </div>
                     <div className="card bg-base-200">
                         <div className="card-body">
-                            <h3 className="text-sm text-base-content/60">Due for Release</h3>
+                            <h3 className="text-sm text-base-content/60">
+                                Due for Release
+                            </h3>
                             <p className="text-3xl font-bold text-warning">
                                 {stats.due_for_release}
                             </p>
@@ -249,7 +272,9 @@ export default function EscrowHoldsPage() {
                     </div>
                     <div className="card bg-base-200">
                         <div className="card-body">
-                            <h3 className="text-sm text-base-content/60">Released Today</h3>
+                            <h3 className="text-sm text-base-content/60">
+                                Released Today
+                            </h3>
                             <p className="text-3xl font-bold text-success">
                                 {stats.released_today}
                             </p>
@@ -262,14 +287,23 @@ export default function EscrowHoldsPage() {
             <div className="card bg-base-200">
                 <div className="card-body">
                     <div className="flex flex-col md:flex-row gap-4">
-                        <SearchInput value={search} onChange={setSearch} placeholder="Search holds..." />
+                        <SearchInput
+                            value={search}
+                            onChange={setSearch}
+                            placeholder="Search holds..."
+                        />
 
                         <fieldset className="fieldset">
                             <legend className="fieldset-legend">Status</legend>
                             <select
                                 className="select w-full md:w-48"
-                                value={filters.status || ''}
-                                onChange={(e) => setFilters({ ...filters, status: e.target.value as any })}
+                                value={filters.status || ""}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        status: e.target.value as any,
+                                    })
+                                }
                             >
                                 <option value="">All Statuses</option>
                                 <option value="active">Active</option>
@@ -282,13 +316,22 @@ export default function EscrowHoldsPage() {
                             <legend className="fieldset-legend">Reason</legend>
                             <select
                                 className="select w-full md:w-48"
-                                value={filters.hold_reason || ''}
-                                onChange={(e) => setFilters({ ...filters, hold_reason: e.target.value as any })}
+                                value={filters.hold_reason || ""}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        hold_reason: e.target.value as any,
+                                    })
+                                }
                             >
                                 <option value="">All Reasons</option>
-                                <option value="guarantee_period">Guarantee Period</option>
+                                <option value="guarantee_period">
+                                    Guarantee Period
+                                </option>
                                 <option value="dispute">Dispute</option>
-                                <option value="verification">Verification</option>
+                                <option value="verification">
+                                    Verification
+                                </option>
                                 <option value="other">Other</option>
                             </select>
                         </fieldset>
@@ -297,7 +340,7 @@ export default function EscrowHoldsPage() {
                             <button
                                 onClick={() => {
                                     setFilters({});
-                                    setSearch('');
+                                    setSearch("");
                                 }}
                                 className="btn btn-ghost"
                             >
@@ -322,8 +365,8 @@ export default function EscrowHoldsPage() {
                             title="No escrow holds found"
                             description={
                                 filters.status || search
-                                    ? 'Try adjusting your filters'
-                                    : 'Escrow holds will appear here when placements enter guarantee periods'
+                                    ? "Try adjusting your filters"
+                                    : "Escrow holds will appear here when placements enter guarantee periods"
                             }
                         />
                     ) : (
@@ -344,30 +387,45 @@ export default function EscrowHoldsPage() {
                                         {holds.map((hold) => (
                                             <tr key={hold.id}>
                                                 <td>
-                                                    <StatusBadge status={hold.status} />
+                                                    <StatusBadge
+                                                        status={hold.status}
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <ReasonBadge reason={hold.hold_reason} />
+                                                    <ReasonBadge
+                                                        reason={
+                                                            hold.hold_reason
+                                                        }
+                                                    />
                                                 </td>
                                                 <td>
                                                     <span className="font-semibold">
-                                                        ${hold.hold_amount.toLocaleString()}
+                                                        $
+                                                        {hold.hold_amount.toLocaleString()}
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <div className="flex flex-col">
                                                         <span
                                                             className={
-                                                                hold.status === 'active' &&
-                                                                    isDueForRelease(hold.release_scheduled_date)
-                                                                    ? 'text-warning font-semibold'
-                                                                    : ''
+                                                                hold.status ===
+                                                                    "active" &&
+                                                                isDueForRelease(
+                                                                    hold.release_scheduled_date,
+                                                                )
+                                                                    ? "text-warning font-semibold"
+                                                                    : ""
                                                             }
                                                         >
-                                                            {new Date(hold.release_scheduled_date).toLocaleDateString()}
+                                                            {new Date(
+                                                                hold.release_scheduled_date,
+                                                            ).toLocaleDateString()}
                                                         </span>
-                                                        {hold.status === 'active' &&
-                                                            isDueForRelease(hold.release_scheduled_date) && (
+                                                        {hold.status ===
+                                                            "active" &&
+                                                            isDueForRelease(
+                                                                hold.release_scheduled_date,
+                                                            ) && (
                                                                 <span className="badge badge-warning badge-xs mt-1">
                                                                     Due now
                                                                 </span>
@@ -376,27 +434,42 @@ export default function EscrowHoldsPage() {
                                                 </td>
                                                 <td>
                                                     <div className="text-xs text-base-content/60">
-                                                        {new Date(hold.created_at).toLocaleDateString()}
+                                                        {new Date(
+                                                            hold.created_at,
+                                                        ).toLocaleDateString()}
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <div className="flex gap-2">
-                                                        {hold.status === 'active' && (
+                                                        {hold.status ===
+                                                            "active" && (
                                                             <>
                                                                 <button
-                                                                    onClick={() => openReleaseModal(hold)}
-                                                                    disabled={releasingId === hold.id}
+                                                                    onClick={() =>
+                                                                        openReleaseModal(
+                                                                            hold,
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        releasingId ===
+                                                                        hold.id
+                                                                    }
                                                                     className="btn btn-sm btn-success"
                                                                     title="Release hold"
                                                                 >
-                                                                    {releasingId === hold.id ? (
+                                                                    {releasingId ===
+                                                                    hold.id ? (
                                                                         <span className="loading loading-spinner loading-xs"></span>
                                                                     ) : (
                                                                         <i className="fa-duotone fa-regular fa-lock-open"></i>
                                                                     )}
                                                                 </button>
                                                                 <button
-                                                                    onClick={() => cancelHold(hold.id)}
+                                                                    onClick={() =>
+                                                                        cancelHold(
+                                                                            hold.id,
+                                                                        )
+                                                                    }
                                                                     className="btn btn-sm btn-ghost"
                                                                     title="Cancel hold"
                                                                 >
@@ -404,16 +477,23 @@ export default function EscrowHoldsPage() {
                                                                 </button>
                                                             </>
                                                         )}
-                                                        {hold.status === 'released' && hold.released_at && (
+                                                        {hold.status ===
+                                                            "released" &&
+                                                            hold.released_at && (
+                                                                <span className="text-xs text-base-content/60">
+                                                                    Released{" "}
+                                                                    {new Date(
+                                                                        hold.released_at,
+                                                                    ).toLocaleDateString()}
+                                                                </span>
+                                                            )}
+                                                        {hold.status ===
+                                                            "cancelled" && (
                                                             <span className="text-xs text-base-content/60">
-                                                                Released{' '}
-                                                                {new Date(hold.released_at).toLocaleDateString()}
-                                                            </span>
-                                                        )}
-                                                        {hold.status === 'cancelled' && (
-                                                            <span className="text-xs text-base-content/60">
-                                                                Cancelled{' '}
-                                                                {new Date(hold.updated_at).toLocaleDateString()}
+                                                                Cancelled{" "}
+                                                                {new Date(
+                                                                    hold.updated_at,
+                                                                ).toLocaleDateString()}
                                                             </span>
                                                         )}
                                                     </div>
@@ -424,7 +504,10 @@ export default function EscrowHoldsPage() {
                                 </table>
                             </div>
 
-                            <PaginationControls pagination={pagination} setPage={setPage} />
+                            <PaginationControls
+                                pagination={pagination}
+                                setPage={setPage}
+                            />
                         </>
                     )}
                 </div>

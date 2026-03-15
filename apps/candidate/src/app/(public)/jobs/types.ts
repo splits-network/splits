@@ -141,7 +141,7 @@ export function getStatusBadgeColor(status?: string): string {
         case "closed":
             return "badge-error";
         default:
-            return "badge-neutral";
+            return "badge-primary";
     }
 }
 

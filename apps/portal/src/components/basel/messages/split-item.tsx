@@ -140,11 +140,11 @@ export default function SplitItem({
                                     Online
                                 </span>
                             ) : presenceStatus === "offline" ? (
-                                <span className="badge badge-xs badge-neutral badge-soft badge-outline">
+                                <span className="badge badge-xs badge-primary badge-soft badge-outline">
                                     Offline
                                 </span>
                             ) : (
-                                <span className="badge badge-xs badge-neutral badge-soft badge-outline">
+                                <span className="badge badge-xs badge-primary badge-soft badge-outline">
                                     Unknown
                                 </span>
                             )}

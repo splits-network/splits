@@ -273,12 +273,12 @@ export default function CompaniesAdminPage() {
                                                 </span>
                                             </td>
                                             <td>
-                                                <span className="badge badge-neutral">
+                                                <span className="badge badge-primary">
                                                     {company.job_count ?? 0}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span className="badge badge-neutral">
+                                                <span className="badge badge-primary">
                                                     {company.placement_count ??
                                                         0}
                                                 </span>

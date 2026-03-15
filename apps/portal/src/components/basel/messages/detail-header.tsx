@@ -152,11 +152,11 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                                 Online
                             </span>
                         ) : presenceMap[otherId ?? ""]?.status === "offline" ? (
-                            <span className="badge badge-sm badge-neutral badge-soft badge-outline">
+                            <span className="badge badge-sm badge-primary badge-soft badge-outline">
                                 Offline
                             </span>
                         ) : (
-                            <span className="badge badge-sm badge-neutral badge-soft badge-outline">
+                            <span className="badge badge-sm badge-primary badge-soft badge-outline">
                                 Unknown
                             </span>
                         )}

@@ -66,7 +66,7 @@ export const NOTE_TYPE_CONFIG: Record<ApplicationNoteType, { label: string; icon
     note: {
         label: 'Note',
         icon: 'fa-sticky-note',
-        color: 'badge-neutral',
+        color: 'badge-primary',
     },
     improvement_request: {
         label: 'Improvement',
@@ -86,7 +86,7 @@ export const NOTE_TYPE_CONFIG: Record<ApplicationNoteType, { label: string; icon
     general: {
         label: 'General',
         icon: 'fa-comment',
-        color: 'badge-neutral',
+        color: 'badge-primary',
     },
     pitch: {
         label: 'Pitch',

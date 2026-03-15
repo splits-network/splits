@@ -44,7 +44,9 @@ export default function FraudSignalsPage() {
     ) => {
         const action = isFalsePositive ? "mark as false positive" : "resolve";
         const confirmed = await confirm({
-            title: isFalsePositive ? "Mark as False Positive" : "Resolve Signal",
+            title: isFalsePositive
+                ? "Mark as False Positive"
+                : "Resolve Signal",
             message: `Are you sure you want to ${action} this fraud signal?`,
             confirmText: isFalsePositive ? "Mark False Positive" : "Resolve",
             type: isFalsePositive ? "info" : "warning",
@@ -75,7 +77,7 @@ export default function FraudSignalsPage() {
             high: "badge-error",
             critical: "badge-error",
         };
-        return colors[severity] || "badge-neutral";
+        return colors[severity] || "badge-primary";
     };
 
     return (
@@ -83,7 +85,7 @@ export default function FraudSignalsPage() {
             <AdminPageHeader
                 title="Fraud Detection"
                 subtitle="Review and resolve fraud signals"
-                breadcrumbs={[{ label: 'Fraud Detection' }]}
+                breadcrumbs={[{ label: "Fraud Detection" }]}
             />
 
             {/* Filters */}

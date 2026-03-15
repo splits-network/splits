@@ -243,12 +243,12 @@ export default function OrganizationsAdminPage() {
                                                 </span>
                                             </td>
                                             <td>
-                                                <span className="badge badge-neutral">
+                                                <span className="badge badge-primary">
                                                     {org.member_count ?? 0}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span className="badge badge-neutral">
+                                                <span className="badge badge-primary">
                                                     {org.company_count ?? 0}
                                                 </span>
                                             </td>

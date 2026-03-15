@@ -369,7 +369,7 @@ export default function RoleAssignmentsPage() {
                                             <td>{job.location || "Remote"}</td>
                                             <td>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="badge badge-neutral">
+                                                    <span className="badge badge-primary">
                                                         {count} recruiter
                                                         {count !== 1 ? "s" : ""}
                                                     </span>

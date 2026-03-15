@@ -43,5 +43,5 @@ export const STEP_LABELS: Record<StepId, string> = {
 export const STATUS_BADGE_MAP: Record<string, string> = {
     active: "badge-success",
     paused: "badge-warning",
-    closed: "badge-neutral",
+    closed: "badge-primary",
 };

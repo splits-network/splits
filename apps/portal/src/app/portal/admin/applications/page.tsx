@@ -108,7 +108,7 @@ const STAGE_CONFIG: Record<
     },
     screen: { color: "badge-info", icon: "fa-filter", label: "Screen" },
     submitted: {
-        color: "badge-neutral",
+        color: "badge-primary",
         icon: "fa-inbox",
         label: "Submitted",
     },
@@ -206,9 +206,7 @@ export default function ApplicationsAdminPage() {
             toast.success("AI review retriggered.");
             refresh();
         } catch (err: any) {
-            toast.error(
-                err?.message || "Failed to retrigger AI review",
-            );
+            toast.error(err?.message || "Failed to retrigger AI review");
         } finally {
             setRetriggeringId(null);
         }
@@ -217,9 +215,7 @@ export default function ApplicationsAdminPage() {
     function StageBadge({ stage }: { stage: ApplicationStage }) {
         const config = STAGE_CONFIG[stage];
         return (
-            <span
-                className={`badge ${config?.color || "badge-ghost"} gap-1`}
-            >
+            <span className={`badge ${config?.color || "badge-ghost"} gap-1`}>
                 <i
                     className={`fa-duotone fa-regular ${config?.icon || "fa-circle-question"} text-xs`}
                 ></i>
@@ -327,21 +323,15 @@ export default function ApplicationsAdminPage() {
                     <option value="gpt_review">GPT Review</option>
                     <option value="ai_failed">Review Failed</option>
                     <option value="ai_reviewed">AI Reviewed</option>
-                    <option value="recruiter_request">
-                        Recruiter Request
-                    </option>
+                    <option value="recruiter_request">Recruiter Request</option>
                     <option value="recruiter_proposed">
                         Recruiter Proposed
                     </option>
-                    <option value="recruiter_review">
-                        Recruiter Review
-                    </option>
+                    <option value="recruiter_review">Recruiter Review</option>
                     <option value="screen">Screen</option>
                     <option value="submitted">Submitted</option>
                     <option value="company_review">Company Review</option>
-                    <option value="company_feedback">
-                        Company Feedback
-                    </option>
+                    <option value="company_feedback">Company Feedback</option>
                     <option value="interview">Interview</option>
                     <option value="offer">Offer</option>
                     <option value="hired">Hired</option>
@@ -490,7 +480,11 @@ export default function ApplicationsAdminPage() {
                                                         <i className="fa-duotone fa-regular fa-eye"></i>
                                                     </Link>
                                                     {(app.stage ===
-                                                        "ai_review" || app.stage === "gpt_review" || app.stage === "ai_failed") && (
+                                                        "ai_review" ||
+                                                        app.stage ===
+                                                            "gpt_review" ||
+                                                        app.stage ===
+                                                            "ai_failed") && (
                                                         <button
                                                             className="btn btn-xs btn-warning"
                                                             title="Retrigger AI Review"

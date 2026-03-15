@@ -54,7 +54,7 @@ const SEVERITY_LEVELS = [
     { value: "primary", label: "Primary", badge: "badge-primary" },
     { value: "secondary", label: "Secondary", badge: "badge-secondary" },
     { value: "accent", label: "Accent", badge: "badge-accent" },
-    { value: "neutral", label: "Neutral", badge: "badge-neutral" },
+    { value: "neutral", label: "Neutral", badge: "badge-primary" },
 ];
 
 function getTypeBadge(type: string) {
@@ -80,7 +80,8 @@ function getSeverityBadge(severity: string) {
 }
 
 function getStatusLabel(notification: SiteNotification) {
-    if (!notification.is_active) return { label: "Inactive", badge: "badge-ghost" };
+    if (!notification.is_active)
+        return { label: "Inactive", badge: "badge-ghost" };
     const now = new Date();
     if (notification.starts_at && new Date(notification.starts_at) > now) {
         return { label: "Scheduled", badge: "badge-info" };
@@ -326,7 +327,9 @@ export default function NotificationsAdminPage() {
             await apiClient.post("/site-notifications/bulk-delete", {
                 ids: Array.from(selectedIds),
             });
-            toast.success(`${selectedIds.size} notification${selectedIds.size > 1 ? "s" : ""} deleted.`);
+            toast.success(
+                `${selectedIds.size} notification${selectedIds.size > 1 ? "s" : ""} deleted.`,
+            );
             setSelectedIds(new Set());
             refresh();
         } catch (err) {
@@ -383,9 +386,8 @@ export default function NotificationsAdminPage() {
                     <div className="stat-value text-2xl text-accent">
                         {loading
                             ? "..."
-                            : notifications.filter(
-                                  (n) => n.source === "admin",
-                              ).length}
+                            : notifications.filter((n) => n.source === "admin")
+                                  .length}
                     </div>
                 </div>
             </div>
@@ -401,7 +403,10 @@ export default function NotificationsAdminPage() {
                     className="select select-sm"
                     value={filters.type || ""}
                     onChange={(e) =>
-                        setFilters({ ...filters, type: e.target.value || undefined })
+                        setFilters({
+                            ...filters,
+                            type: e.target.value || undefined,
+                        })
                     }
                 >
                     <option value="">All Types</option>
@@ -476,190 +481,215 @@ export default function NotificationsAdminPage() {
                 />
             ) : (
                 <>
-                {selectedIds.size > 0 && (
-                    <div className="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
-                        <span className="text-sm font-medium">
-                            {selectedIds.size} selected
-                        </span>
-                        <button
-                            className="btn btn-error btn-sm"
-                            onClick={bulkDelete}
-                            disabled={bulkDeleting}
-                        >
-                            {bulkDeleting ? (
-                                <span className="loading loading-spinner loading-xs"></span>
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-trash mr-1"></i>
-                            )}
-                            Delete Selected
-                        </button>
-                        <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={() => setSelectedIds(new Set())}
-                        >
-                            Clear Selection
-                        </button>
-                    </div>
-                )}
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body p-0">
-                        <div className="overflow-x-auto">
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            <input
-                                                type="checkbox"
-                                                className="checkbox checkbox-sm"
-                                                checked={selectedIds.size === notifications.length && notifications.length > 0}
-                                                onChange={toggleSelectAll}
-                                            />
-                                        </th>
-                                        <th>Title</th>
-                                        <th>Type</th>
-                                        <th>Banner Style</th>
-                                        <th>Source</th>
-                                        <th>Status</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {notifications.map((notification) => {
-                                        const status =
-                                            getStatusLabel(notification);
-                                        return (
-                                            <tr key={notification.id} className={selectedIds.has(notification.id) ? "bg-base-200" : ""}>
-                                                <td>
-                                                    <input
-                                                        type="checkbox"
-                                                        className="checkbox checkbox-sm"
-                                                        checked={selectedIds.has(notification.id)}
-                                                        onChange={() => toggleSelect(notification.id)}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <div>
-                                                        <div className="font-semibold">
-                                                            {notification.title}
-                                                        </div>
-                                                        {notification.message && (
-                                                            <div className="text-xs text-base-content/50 truncate max-w-xs">
+                    {selectedIds.size > 0 && (
+                        <div className="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+                            <span className="text-sm font-medium">
+                                {selectedIds.size} selected
+                            </span>
+                            <button
+                                className="btn btn-error btn-sm"
+                                onClick={bulkDelete}
+                                disabled={bulkDeleting}
+                            >
+                                {bulkDeleting ? (
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                ) : (
+                                    <i className="fa-duotone fa-regular fa-trash mr-1"></i>
+                                )}
+                                Delete Selected
+                            </button>
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => setSelectedIds(new Set())}
+                            >
+                                Clear Selection
+                            </button>
+                        </div>
+                    )}
+                    <div className="card bg-base-100 shadow">
+                        <div className="card-body p-0">
+                            <div className="overflow-x-auto">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <input
+                                                    type="checkbox"
+                                                    className="checkbox checkbox-sm"
+                                                    checked={
+                                                        selectedIds.size ===
+                                                            notifications.length &&
+                                                        notifications.length > 0
+                                                    }
+                                                    onChange={toggleSelectAll}
+                                                />
+                                            </th>
+                                            <th>Title</th>
+                                            <th>Type</th>
+                                            <th>Banner Style</th>
+                                            <th>Source</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {notifications.map((notification) => {
+                                            const status =
+                                                getStatusLabel(notification);
+                                            return (
+                                                <tr
+                                                    key={notification.id}
+                                                    className={
+                                                        selectedIds.has(
+                                                            notification.id,
+                                                        )
+                                                            ? "bg-base-200"
+                                                            : ""
+                                                    }
+                                                >
+                                                    <td>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="checkbox checkbox-sm"
+                                                            checked={selectedIds.has(
+                                                                notification.id,
+                                                            )}
+                                                            onChange={() =>
+                                                                toggleSelect(
+                                                                    notification.id,
+                                                                )
+                                                            }
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <div>
+                                                            <div className="font-semibold">
                                                                 {
-                                                                    notification.message
+                                                                    notification.title
                                                                 }
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        className={`badge badge-sm ${getTypeBadge(notification.type)}`}
-                                                    >
-                                                        {notification.type.replace(
-                                                            /_/g,
-                                                            " ",
-                                                        )}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        className={`badge badge-sm ${getSeverityBadge(notification.severity)}`}
-                                                    >
-                                                        {notification.severity}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span className="text-sm text-base-content/70">
-                                                        {notification.source}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        className={`badge badge-sm ${status.badge}`}
-                                                    >
-                                                        {status.label}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        className="text-sm text-base-content/60"
-                                                        suppressHydrationWarning
-                                                    >
-                                                        {new Date(
-                                                            notification.created_at,
-                                                        ).toLocaleDateString()}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div className="flex gap-1">
-                                                        <button
-                                                            onClick={() =>
-                                                                toggleActive(
-                                                                    notification,
-                                                                )
-                                                            }
-                                                            className={`btn btn-xs btn-ghost ${notification.is_active ? "text-warning" : "text-success"}`}
-                                                            disabled={
-                                                                updatingId ===
-                                                                notification.id
-                                                            }
-                                                            title={
-                                                                notification.is_active
-                                                                    ? "Deactivate"
-                                                                    : "Activate"
-                                                            }
-                                                        >
-                                                            {updatingId ===
-                                                            notification.id ? (
-                                                                <span className="loading loading-spinner loading-xs"></span>
-                                                            ) : notification.is_active ? (
-                                                                <i className="fa-duotone fa-regular fa-pause"></i>
-                                                            ) : (
-                                                                <i className="fa-duotone fa-regular fa-play"></i>
+                                                            {notification.message && (
+                                                                <div className="text-xs text-base-content/50 truncate max-w-xs">
+                                                                    {
+                                                                        notification.message
+                                                                    }
+                                                                </div>
                                                             )}
-                                                        </button>
-                                                        <button
-                                                            onClick={() =>
-                                                                openEditModal(
-                                                                    notification,
-                                                                )
-                                                            }
-                                                            className="btn btn-xs btn-ghost"
-                                                            title="Edit"
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className={`badge badge-sm ${getTypeBadge(notification.type)}`}
                                                         >
-                                                            <i className="fa-duotone fa-regular fa-pen"></i>
-                                                        </button>
-                                                        <button
-                                                            onClick={() =>
-                                                                deleteNotification(
-                                                                    notification,
-                                                                )
-                                                            }
-                                                            className="btn btn-xs btn-ghost text-error"
-                                                            disabled={
-                                                                updatingId ===
-                                                                notification.id
-                                                            }
-                                                            title="Delete"
-                                                        >
-                                                            {updatingId ===
-                                                            notification.id ? (
-                                                                <span className="loading loading-spinner loading-xs"></span>
-                                                            ) : (
-                                                                <i className="fa-duotone fa-regular fa-trash"></i>
+                                                            {notification.type.replace(
+                                                                /_/g,
+                                                                " ",
                                                             )}
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className={`badge badge-sm ${getSeverityBadge(notification.severity)}`}
+                                                        >
+                                                            {
+                                                                notification.severity
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span className="text-sm text-base-content/70">
+                                                            {
+                                                                notification.source
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className={`badge badge-sm ${status.badge}`}
+                                                        >
+                                                            {status.label}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className="text-sm text-base-content/60"
+                                                            suppressHydrationWarning
+                                                        >
+                                                            {new Date(
+                                                                notification.created_at,
+                                                            ).toLocaleDateString()}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div className="flex gap-1">
+                                                            <button
+                                                                onClick={() =>
+                                                                    toggleActive(
+                                                                        notification,
+                                                                    )
+                                                                }
+                                                                className={`btn btn-xs btn-ghost ${notification.is_active ? "text-warning" : "text-success"}`}
+                                                                disabled={
+                                                                    updatingId ===
+                                                                    notification.id
+                                                                }
+                                                                title={
+                                                                    notification.is_active
+                                                                        ? "Deactivate"
+                                                                        : "Activate"
+                                                                }
+                                                            >
+                                                                {updatingId ===
+                                                                notification.id ? (
+                                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                                ) : notification.is_active ? (
+                                                                    <i className="fa-duotone fa-regular fa-pause"></i>
+                                                                ) : (
+                                                                    <i className="fa-duotone fa-regular fa-play"></i>
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                onClick={() =>
+                                                                    openEditModal(
+                                                                        notification,
+                                                                    )
+                                                                }
+                                                                className="btn btn-xs btn-ghost"
+                                                                title="Edit"
+                                                            >
+                                                                <i className="fa-duotone fa-regular fa-pen"></i>
+                                                            </button>
+                                                            <button
+                                                                onClick={() =>
+                                                                    deleteNotification(
+                                                                        notification,
+                                                                    )
+                                                                }
+                                                                className="btn btn-xs btn-ghost text-error"
+                                                                disabled={
+                                                                    updatingId ===
+                                                                    notification.id
+                                                                }
+                                                                title="Delete"
+                                                            >
+                                                                {updatingId ===
+                                                                notification.id ? (
+                                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                                ) : (
+                                                                    <i className="fa-duotone fa-regular fa-trash"></i>
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
                 </>
             )}
 
@@ -668,10 +698,7 @@ export default function NotificationsAdminPage() {
             )}
 
             {/* Create/Edit Modal */}
-            <dialog
-                className="modal"
-                open={showModal}
-            >
+            <dialog className="modal" open={showModal}>
                 <div className="modal-box max-w-lg">
                     <h3 className="font-bold text-lg mb-4">
                         {editingNotification
@@ -682,7 +709,9 @@ export default function NotificationsAdminPage() {
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Type</legend>
+                                <legend className="fieldset-legend">
+                                    Type
+                                </legend>
                                 <select
                                     className="select w-full"
                                     value={formData.type}
@@ -850,7 +879,9 @@ export default function NotificationsAdminPage() {
                             <ButtonLoading
                                 loading={submitting}
                                 text={
-                                    editingNotification ? "Save Changes" : "Create"
+                                    editingNotification
+                                        ? "Save Changes"
+                                        : "Create"
                                 }
                                 loadingText="Saving..."
                             />
