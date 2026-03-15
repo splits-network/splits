@@ -225,6 +225,7 @@ export class RecruiterCandidateService {
     const ctx = await this.accessResolver.resolve(clerkUserId);
     if (ctx.isPlatformAdmin) return {};
     if (ctx.recruiterId) return { recruiter_id: ctx.recruiterId };
+    if (ctx.candidateId) return { candidate_id: ctx.candidateId };
     return null;
   }
 }
