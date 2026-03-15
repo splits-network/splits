@@ -166,7 +166,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                     ) : undefined
                 }
                 newsletter={
-                    <div>
+                    <div className="text-neutral-content">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-envelope text-primary-content" />
@@ -235,7 +235,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                 className="h-12 w-auto brightness-0 invert"
                             />
                         </div>
-                        <p className="text-sm opacity-50 leading-relaxed mb-4">
+                        <p className="text-sm opacity-50 leading-relaxed mb-4 text-neutral-content/70">
                             The split-fee recruiting marketplace that connects
                             recruiters, companies, and candidates in a single
                             transparent ecosystem.
@@ -263,7 +263,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                 key={section.title}
                                 className="footer-col scroll-reveal fade-up"
                             >
-                                <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4 flex items-center gap-2">
+                                <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
                                     <span className="w-4 h-0.5 bg-primary" />
                                     {section.title}
                                 </h4>
@@ -272,7 +272,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                         <li key={link.label}>
                                             <Link
                                                 href={link.href}
-                                                className="text-sm text-base-content/60 hover:text-base-content transition-colors"
+                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
                                             >
                                                 {link.label}
                                             </Link>

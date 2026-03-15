@@ -270,13 +270,17 @@ export function GridCard({
                 className="mt-auto flex items-center justify-between gap-3 px-6 py-4 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
-                <Link
-                    href={`/firms/${firm.slug}`}
-                    className="btn btn-sm btn-link gap-1"
-                >
-                    View Profile
-                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
-                </Link>
+                {firm.slug ? (
+                    <Link
+                        href={`/firms/${firm.slug}`}
+                        className="btn btn-sm btn-link gap-1"
+                    >
+                        View Profile
+                        <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
+                    </Link>
+                ) : (
+                    <span className="text-sm text-base-content/40">No slug provided</span>
+                )}
                 <FirmActionsToolbar
                     firm={firm}
                     variant="icon-only"

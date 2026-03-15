@@ -65,11 +65,11 @@ export function BaselFooter({
             )}
 
             {/* ── 2–5. Footer ─────────────────────────────────────── */}
-            <footer className="bg-base-300 text-base-content">
+            <footer className="bg-neutral text-neutral-content">
                 {/* ── Newsletter + Brand (split-screen) ────────────── */}
                 {(newsletter || brand) && (
                     <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-                        <div className="grid lg:grid-cols-5 gap-0 py-16 border-b border-neutral-content/10">
+                        <div className="grid lg:grid-cols-5 gap-0 py-16 border-b border-neutral-content/80">
                             {newsletter && (
                                 <div className="footer-newsletter lg:col-span-3 lg:pr-16 lg:border-r lg:border-neutral-content/10 mb-10 lg:mb-0">
                                     {newsletter}

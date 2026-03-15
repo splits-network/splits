@@ -225,7 +225,7 @@ export default function Footer({
                         opportunities through expert recruiters in a single
                         transparent marketplace.
                     </p>
-                    <div className="flex gap-2">
+                    <div className="social-row flex gap-2">
                         {socialLinks.map((social) => (
                             <a
                                 key={social.label}
@@ -233,7 +233,7 @@ export default function Footer({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title={social.label}
-                                className="w-9 h-9 bg-neutral-content/5 hover:bg-primary hover:text-primary-content flex items-center justify-center transition-all"
+                                className="social-icon scroll-reveal scale-in w-9 h-9 bg-neutral-content/5 hover:bg-primary hover:text-primary-content flex items-center justify-center transition-all"
                             >
                                 <i className={`${social.icon} text-sm`} />
                             </a>
@@ -245,7 +245,8 @@ export default function Footer({
                 <>
                     {sections.map((section) => (
                         <div key={section.title}>
-                            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
+                            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
+                                <span className="w-4 h-0.5 bg-primary" />
                                 {section.title}
                             </h4>
                             <ul className="space-y-2.5">
@@ -256,14 +257,14 @@ export default function Footer({
                                                 href={link.href}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-sm text-base-content/60 hover:text-base-content transition-colors"
+                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
                                             >
                                                 {link.label}
                                             </a>
                                         ) : (
                                             <Link
                                                 href={link.href}
-                                                className="text-sm text-base-content/60 hover:text-base-content transition-colors"
+                                                className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
                                             >
                                                 {link.label}
                                             </Link>

@@ -309,7 +309,7 @@ export function BaselSidebar({
             {brand && <div className="sidebar-brand p-5 pb-3">{brand}</div>}
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 py-2 overflow-y-auto">
+            <nav className="flex-1 px-3 py-2 overflow-y-auto border-r-4 border-primary">
                 {sections.map((section, sIdx) => (
                     <div key={section.title || `section-${sIdx}`}>
                         {section.title && (
