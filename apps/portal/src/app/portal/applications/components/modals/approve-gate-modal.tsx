@@ -19,6 +19,7 @@ interface ApproveGateModalProps {
     gateName: string;
     applicationId?: string;
     currentStage?: string;
+    isCompanyUser?: boolean;
 }
 
 export default function ApproveGateModal({
@@ -29,6 +30,7 @@ export default function ApproveGateModal({
     jobTitle,
     gateName,
     currentStage,
+    isCompanyUser,
 }: ApproveGateModalProps) {
     const [notes, setNotes] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -37,9 +39,9 @@ export default function ApproveGateModal({
     const getTitleText = () => {
         switch (currentStage) {
             case "screen":
-                return "Approve & Submit to Company";
+                return isCompanyUser ? "Accept Application" : "Approve & Submit to Company";
             case "submitted":
-                return "Approve & Move to Company Review";
+                return isCompanyUser ? "Accept Application" : "Approve & Move to Company Review";
             case "company_review":
                 return "Approve & Move Forward";
             case "recruiter_review":

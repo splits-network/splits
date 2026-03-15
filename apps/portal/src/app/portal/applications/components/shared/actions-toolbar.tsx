@@ -445,6 +445,7 @@ export default function ActionsToolbar({
                 gateName={permissions.stageLabel}
                 applicationId={application.id}
                 currentStage={application.stage ?? undefined}
+                isCompanyUser={isCompanyUser || false}
             />
             <DenyGateModal
                 isOpen={showDenyModal}

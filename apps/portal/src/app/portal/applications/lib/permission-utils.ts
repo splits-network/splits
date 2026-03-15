@@ -114,7 +114,7 @@ function getPermissionsByStage(
                 canApprove: isRecruiter || isCompanyUser || isPlatformAdmin,
                 canReject: isRecruiter || isCompanyUser || isPlatformAdmin,
                 canRequestChanges: isRecruiter || isPlatformAdmin,
-                approveButtonText: 'Send to Company',
+                approveButtonText: isCompanyUser ? 'Accept' : 'Send to Company',
                 rejectButtonText: 'Reject',
                 waitingMessage: 'Application is being screened.',
             };
@@ -125,7 +125,7 @@ function getPermissionsByStage(
                 canApprove: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canReject: isCompanyUser || isPlatformAdmin || recruiterHasFullControl,
                 canRequestPrescreen: !candidateRecruiterId && (isCompanyUser || isPlatformAdmin),
-                approveButtonText: 'Send to Company',
+                approveButtonText: isCompanyUser ? 'Accept' : 'Send to Company',
                 rejectButtonText: 'Reject',
                 waitingMessage: 'Application is awaiting company acceptance.',
             };
