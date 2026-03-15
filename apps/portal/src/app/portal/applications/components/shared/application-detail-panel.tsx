@@ -1,20 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
-import { useUserProfile } from "@/contexts";
 import { BaselTabBar } from "@splits-network/basel-ui";
 import { ApplicationDetailHeader } from "./application-detail-header";
 import { ApplicationOverviewTab } from "./application-overview-tab";
 import { ApplicationCandidateDetail } from "./application-candidate-detail";
 import { ApplicationRoleDetail } from "./application-role-detail";
-import ResumeTab from "./resume-tab";
+import { ResumeSummaryTab } from "./resume-summary-tab";
 import { ApplicationDocumentsTab } from "./application-documents-tab";
 import AIReviewPanel from "@/components/basel/applications/ai-review-panel";
 import { ApplicationNotesTab } from "./application-notes-tab";
 import { ApplicationCallsTab } from "./application-calls-tab";
 import ApplicationTimeline from "./application-timeline";
+import { ExpiredBanner } from "./expired-banner";
 import type { Application } from "../../types";
 
 type TabKey =
@@ -113,7 +111,7 @@ export function ApplicationDetailPanel({
                         />
                     ))}
                 {activeTab === "resume" && (
-                    <ResumeTab resumeData={application.resume_data} />
+                    <ResumeSummaryTab resumeData={application.resume_data} />
                 )}
                 {activeTab === "documents" && (
                     <ApplicationDocumentsTab application={application} />
@@ -146,66 +144,6 @@ function EmptyState({ icon, message }: { icon: string; message: string }) {
         <div className="text-center p-8 text-base-content/50">
             <i className={`fa-duotone ${icon} text-4xl mb-2 block`} />
             <p>{message}</p>
-        </div>
-    );
-}
-
-function ExpiredBanner({
-    applicationId,
-    onReactivated,
-}: {
-    applicationId: string;
-    onReactivated: () => void;
-}) {
-    const { getToken } = useAuth();
-    const { isRecruiter, isAdmin } = useUserProfile();
-    const [loading, setLoading] = useState(false);
-
-    const canReactivate = isRecruiter || isAdmin;
-
-    const handleReactivate = async () => {
-        setLoading(true);
-        try {
-            const token = await getToken();
-            if (!token) throw new Error("Not authenticated");
-            const client = createAuthenticatedClient(token);
-            await client.post(`/applications/${applicationId}/reactivate`);
-            onReactivated();
-        } catch (err: any) {
-            console.error("Failed to reactivate application:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="bg-warning/10 border-l-4 border-warning p-4 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-3">
-                <i className="fa-duotone fa-regular fa-clock text-warning text-lg" />
-                <div>
-                    <div className="font-bold text-sm text-base-content">
-                        This application has expired
-                    </div>
-                    <div className="text-sm text-base-content/60">
-                        The original pipeline stage is preserved. Reactivate to
-                        resume processing.
-                    </div>
-                </div>
-            </div>
-            {canReactivate && (
-                <button
-                    onClick={handleReactivate}
-                    className="btn btn-warning btn-sm shrink-0"
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <span className="loading loading-spinner loading-xs" />
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-rotate-right mr-1" />
-                    )}
-                    Reactivate
-                </button>
-            )}
         </div>
     );
 }

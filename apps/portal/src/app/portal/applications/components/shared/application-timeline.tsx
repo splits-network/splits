@@ -73,7 +73,7 @@ export default function ApplicationTimeline({ auditLogs, currentStage }: Applica
                                 ))}
                             </div>
                         )}
-                        <p className="text-sm text-base-content/30 mt-1">
+                        <p className="text-sm text-base-content/40 mt-1">
                             {formatDateTime(event.timestamp)}
                         </p>
                     </div>

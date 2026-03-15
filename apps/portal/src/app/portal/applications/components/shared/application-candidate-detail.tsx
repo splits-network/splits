@@ -1,130 +1,38 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { BaselBadge, BaselTabBar } from "@splits-network/basel-ui";
-import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
-import { LoadingState } from "@splits-network/shared-ui";
+import { useState } from "react";
+import { BaselBadge, BaselModal, BaselModalBody } from "@splits-network/basel-ui";
+import { ModalPortal } from "@splits-network/shared-ui";
+import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
+import { formatVerificationStatus } from "@/app/portal/candidates/types";
+import { skillsList } from "@/app/portal/candidates/components/shared/helpers";
 import type { Candidate } from "@/app/portal/candidates/types";
-import {
-    formatJobType,
-    formatAvailability,
-    formatVerificationStatus,
-} from "@/app/portal/candidates/types";
-import {
-    salaryDisplay,
-    candidateName,
-    skillsList,
-} from "@/app/portal/candidates/components/shared/helpers";
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
 
-/* ─── Tab Types ─────────────────────────────────────────────────────────── */
+/* ─── Helpers ──────────────────────────────────────────────────────────── */
 
-type TabType = "overview" | "resume" | "applications" | "documents";
+function verificationColor(status?: string | null): BaselSemanticColor {
+    switch (status) {
+        case "verified": return "success";
+        case "pending": return "warning";
+        case "rejected": return "error";
+        default: return "neutral";
+    }
+}
 
-const TABS = [
-    {
-        value: "overview",
-        label: "Overview",
-        icon: "fa-duotone fa-regular fa-user",
-    },
-    {
-        value: "resume",
-        label: "Resume",
-        icon: "fa-duotone fa-regular fa-file-user",
-    },
-    {
-        value: "applications",
-        label: "Applications",
-        icon: "fa-duotone fa-regular fa-briefcase",
-    },
-    // {
-    //     value: "documents",
-    //     label: "Documents",
-    //     icon: "fa-duotone fa-regular fa-file-lines",
-    // },
-];
+/* ─── Application Candidate Detail (Summary) ──────────────────────────── */
 
-/* ─── Application Candidate Detail ─────────────────────────────────────── */
+export function ApplicationCandidateDetail({ candidate }: { candidate: Candidate }) {
+    const [showFullProfile, setShowFullProfile] = useState(false);
 
-export function ApplicationCandidateDetail({
-    candidate: initialCandidate,
-}: {
-    candidate: Candidate;
-}) {
-    const { getToken } = useAuth();
-    const [activeTab, setActiveTab] = useState<TabType>("overview");
-    const [candidate, setCandidate] = useState<Candidate>(initialCandidate);
-
-    /* Fetch enriched candidate detail (with relationship status) */
-    useEffect(() => {
-        let cancelled = false;
-        (async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: Candidate }>(
-                    `/candidates/${initialCandidate.id}/view/detail`,
-                );
-                if (!cancelled && res.data) setCandidate(res.data);
-            } catch {
-                // Fall back to initial candidate data
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialCandidate.id]);
-
-    /* Lazy-loaded applications */
-    const [applications, setApplications] = useState<any[]>([]);
-    const [appsLoading, setAppsLoading] = useState(false);
-
-    const tabsWithCounts = useMemo(
-        () =>
-            TABS.map((tab) =>
-                tab.value === "applications"
-                    ? { ...tab, count: applications.length }
-                    : tab,
-            ),
-        [applications.length],
-    );
-
-    const fetchApplications = useCallback(async () => {
-        setAppsLoading(true);
-        try {
-            const token = await getToken();
-            if (!token) return;
-            const client = createAuthenticatedClient(token);
-            const res = await client.get(
-                `/applications?candidate_id=${candidate.id}&include=job`,
-            );
-            setApplications(res.data || []);
-        } catch (e) {
-            console.error("Failed to fetch applications:", e);
-        } finally {
-            setAppsLoading(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [candidate.id]);
-
-    useEffect(() => {
-        if (activeTab === "applications") fetchApplications();
-    }, [activeTab, fetchApplications]);
-
-    const name = candidateName(candidate);
-    const salary = salaryDisplay(candidate);
     const skills = skillsList(candidate);
-    const bioText =
-        candidate.marketplace_profile?.bio ||
-        candidate.bio ||
-        candidate.description;
+    const topSkills = skills.slice(0, 8);
+    const bioText = candidate.marketplace_profile?.bio || candidate.bio || candidate.description;
 
     return (
-        <div className="flex flex-col h-full min-h-0">
-            {/* Contact & Social Info (compact, no duplicate name/title) */}
-            <div className="px-6 py-4 border-b border-base-300">
+        <>
+            <div className="space-y-6">
+                {/* Contact Info */}
                 <div className="flex flex-wrap items-center gap-4 text-sm text-base-content/60">
                     {candidate.email && (
                         <a
@@ -149,382 +57,114 @@ export function ApplicationCandidateDetail({
                     )}
                 </div>
 
-                {/* Status badges */}
-                <div className="flex items-center gap-2 mt-2">
-                    <span
-                        className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1`}
+                {/* Status Badges */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <BaselBadge
+                        color={verificationColor(candidate.verification_status)}
+                        size="sm"
+                        variant="soft"
                     >
-                        {formatVerificationStatus(
-                            candidate.verification_status,
-                        )}
-                    </span>
+                        {formatVerificationStatus(candidate.verification_status)}
+                    </BaselBadge>
+                    {candidate.has_active_relationship && (
+                        <BaselBadge color="success" size="sm" variant="soft">
+                            <i className="fa-duotone fa-regular fa-user-check" />
+                            Your Candidate
+                        </BaselBadge>
+                    )}
+                    {!candidate.has_active_relationship && candidate.has_other_active_recruiters && (
+                        <BaselBadge color="warning" size="sm" variant="soft">
+                            <i className="fa-duotone fa-regular fa-user-shield" />
+                            Has Recruiter
+                        </BaselBadge>
+                    )}
+                    {!candidate.has_active_relationship && !candidate.has_other_active_recruiters && candidate.has_pending_invitation && (
+                        <BaselBadge color="info" size="sm" variant="soft">
+                            <i className="fa-duotone fa-regular fa-clock" />
+                            Invitation Pending
+                        </BaselBadge>
+                    )}
                 </div>
 
-                {/* Social links */}
-                {(candidate.linkedin_url ||
-                    candidate.github_url ||
-                    candidate.portfolio_url) && (
-                    <div className="flex flex-wrap gap-3 mt-3">
-                        {candidate.linkedin_url && (
-                            <a
-                                href={candidate.linkedin_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
-                            >
-                                <i className="fa-brands fa-linkedin" />
-                                LinkedIn
-                            </a>
-                        )}
-                        {candidate.github_url && (
-                            <a
-                                href={candidate.github_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
-                            >
-                                <i className="fa-brands fa-github" />
-                                GitHub
-                            </a>
-                        )}
-                        {candidate.portfolio_url && (
-                            <a
-                                href={candidate.portfolio_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm font-bold text-base-content/50 hover:text-primary transition-colors flex items-center gap-1.5"
-                            >
-                                <i className="fa-duotone fa-regular fa-globe" />
-                                Portfolio
-                            </a>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            {/* Tab Bar */}
-            <BaselTabBar
-                tabs={tabsWithCounts}
-                active={activeTab}
-                onChange={(v) => setActiveTab(v as TabType)}
-            />
-
-            {/* Tab Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto">
-                {activeTab === "overview" && (
-                    <OverviewTab
-                        candidate={candidate}
-                        bioText={bioText}
-                        skills={skills}
-                        salary={salary}
-                    />
-                )}
-                {activeTab === "resume" && <ResumeTab />}
-                {activeTab === "applications" && (
-                    <ApplicationsTab
-                        applications={applications}
-                        loading={appsLoading}
-                    />
-                )}
-                {activeTab === "documents" && <DocumentsTab />}
-            </div>
-        </div>
-    );
-}
-
-/* ─── Overview Tab ──────────────────────────────────────────────────────── */
-
-function OverviewTab({
-    candidate,
-    bioText,
-    skills,
-    salary,
-}: {
-    candidate: Candidate;
-    bioText?: string;
-    skills: string[];
-    salary: string | null;
-}) {
-    return (
-        <div className="p-6 space-y-8">
-            {/* About / Bio */}
-            {bioText ? (
-                <div className="border-l-4 border-primary pl-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
-                        About
-                    </h3>
-                    <p className="text-sm text-base-content/70 leading-relaxed whitespace-pre-line">
-                        {bioText}
-                    </p>
-                </div>
-            ) : (
-                <div className="border-l-4 border-base-300 pl-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
-                        About
-                    </h3>
-                    <p className="text-sm text-base-content/40 italic">
-                        No biography added. Edit the profile to include one.
-                    </p>
-                </div>
-            )}
-
-            {/* Career Preferences */}
-            <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
-                    Career Preferences
-                </h3>
-                <div className="grid grid-cols-2 gap-[2px] bg-base-300">
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Desired Salary
+                {/* Bio */}
+                {bioText ? (
+                    <div className="border-l-4 border-primary pl-4">
+                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                            About
+                        </h3>
+                        <p className="text-sm text-base-content/70 leading-relaxed">
+                            {bioText.length > 300 ? bioText.substring(0, 300).trim() + "..." : bioText}
                         </p>
-                        <p className="text-lg font-black tracking-tight">
-                            {salary || "N/A"}
-                        </p>
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Job Type
-                        </p>
-                        <p className="text-lg font-black tracking-tight capitalize">
-                            {formatJobType(candidate.desired_job_type)}
-                        </p>
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Availability
-                        </p>
-                        <p className="text-lg font-black tracking-tight capitalize">
-                            {formatAvailability(candidate.availability)}
-                        </p>
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Work Mode
-                        </p>
-                        <div className="flex flex-wrap gap-1.5 mt-1">
-                            {candidate.open_to_remote && (
-                                <BaselBadge
-                                    color="success"
-                                    size="sm"
-                                    variant="soft"
-                                >
-                                    Remote
-                                </BaselBadge>
-                            )}
-                            {candidate.open_to_relocation && (
-                                <BaselBadge
-                                    color="info"
-                                    size="sm"
-                                    variant="soft"
-                                >
-                                    Relocation
-                                </BaselBadge>
-                            )}
-                            {!candidate.open_to_remote &&
-                                !candidate.open_to_relocation && (
-                                    <span className="text-sm text-base-content/40 italic">
-                                        No preference set
-                                    </span>
-                                )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Skills & Expertise */}
-            <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
-                    Skills & Expertise
-                </h3>
-                {skills.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                        {skills.map((skill, i) => (
-                            <span
-                                key={i}
-                                className="bg-primary/10 text-primary px-3 py-1 text-sm font-semibold"
-                            >
-                                {skill}
-                            </span>
-                        ))}
                     </div>
                 ) : (
-                    <p className="text-sm text-base-content/40 italic">
-                        No skills added. Edit the profile to include them.
-                    </p>
+                    <div className="border-l-4 border-base-300 pl-4">
+                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                            About
+                        </h3>
+                        <p className="text-sm text-base-content/40 italic">No biography added.</p>
+                    </div>
                 )}
-            </div>
 
-            {/* Profile Status Grid */}
-            <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
-                    Profile Status
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Representation
-                        </p>
-                        {candidate.has_active_relationship ? (
-                            <p className="font-bold text-sm text-success flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-user-check" />
-                                Your Candidate
-                            </p>
-                        ) : candidate.has_other_active_recruiters ? (
-                            <p className="font-bold text-sm text-warning flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-user-shield" />
-                                Has Recruiter
-                            </p>
-                        ) : candidate.has_pending_invitation ? (
-                            <p className="font-bold text-sm text-info flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-clock" />
-                                Invitation Pending
-                            </p>
-                        ) : (
-                            <p className="font-bold text-sm text-base-content/50 flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-user-xmark" />
-                                Unrepresented
-                            </p>
-                        )}
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Verification
-                        </p>
-                        <p className="font-bold text-sm">
-                            {formatVerificationStatus(
-                                candidate.verification_status,
+                {/* Work Mode */}
+                <div className="flex flex-wrap items-center gap-2">
+                    {candidate.open_to_remote && (
+                        <BaselBadge color="success" size="sm" variant="soft">Remote</BaselBadge>
+                    )}
+                    {candidate.open_to_relocation && (
+                        <BaselBadge color="info" size="sm" variant="soft">Relocation</BaselBadge>
+                    )}
+                </div>
+
+                {/* Skills */}
+                {topSkills.length > 0 && (
+                    <div>
+                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            Skills
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                            {topSkills.map((skill, i) => (
+                                <span key={i} className="bg-primary/10 text-primary px-3 py-1 text-sm font-semibold">
+                                    {skill}
+                                </span>
+                            ))}
+                            {skills.length > 8 && (
+                                <span className="text-sm px-3 py-1 text-base-content/40">
+                                    +{skills.length - 8} more
+                                </span>
                             )}
-                        </p>
-                    </div>
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                            Marketplace
-                        </p>
-                        <p className="font-bold text-sm capitalize">
-                            {candidate.marketplace_visibility ||
-                                "Not configured"}
-                        </p>
-                    </div>
-                    {candidate.onboarding_status && (
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                                Onboarding
-                            </p>
-                            <p className="font-bold text-sm capitalize">
-                                {candidate.onboarding_status.replace(/_/g, " ")}
-                            </p>
                         </div>
-                    )}
-                    {candidate.created_at && (
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                                Profile Created
-                            </p>
-                            <p className="font-bold text-sm">
-                                {new Date(
-                                    candidate.created_at,
-                                ).toLocaleDateString()}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-/* ─── Resume Tab ────────────────────────────────────────────────────────── */
-
-function ResumeTab() {
-    return (
-        <div className="h-full flex items-center justify-center p-12">
-            <div className="text-center">
-                <i className="fa-duotone fa-regular fa-file-user text-3xl text-base-content/20 mb-4 block" />
-                <h3 className="text-lg font-black tracking-tight mb-2">
-                    No Resume on File
-                </h3>
-                <p className="text-sm text-base-content/40">
-                    Resume parsing is not yet available. Upload documents in the
-                    Documents tab.
-                </p>
-            </div>
-        </div>
-    );
-}
-
-/* ─── Applications Tab ──────────────────────────────────────────────────── */
-
-function ApplicationsTab({
-    applications,
-    loading,
-}: {
-    applications: any[];
-    loading: boolean;
-}) {
-    if (loading) {
-        return (
-            <div className="p-6">
-                <LoadingState message="Loading applications..." />
-            </div>
-        );
-    }
-
-    if (applications.length === 0) {
-        return (
-            <div className="h-full flex items-center justify-center p-12">
-                <div className="text-center">
-                    <i className="fa-duotone fa-regular fa-briefcase text-3xl text-base-content/20 mb-4 block" />
-                    <h3 className="text-lg font-black tracking-tight mb-2">
-                        No Active Applications
-                    </h3>
-                    <p className="text-sm text-base-content/40">
-                        This candidate has not been submitted to any roles. Use
-                        Send Opportunity to get started.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="p-6 space-y-[2px] bg-base-300">
-            {applications.map((app) => (
-                <div key={app.id} className="bg-base-100 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                        <div>
-                            <h4 className="font-bold text-sm tracking-tight">
-                                {app.job?.title || "Untitled Role"}
-                            </h4>
-                            <p className="text-sm text-base-content/60 mt-0.5">
-                                {app.job?.company?.name || "Company not listed"}
-                            </p>
-                        </div>
-                        <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/60">
-                            {app.status_id || "Applied"}
-                        </span>
                     </div>
-                </div>
-            ))}
-        </div>
-    );
-}
+                )}
 
-/* ─── Documents Tab ─────────────────────────────────────────────────────── */
-
-function DocumentsTab() {
-    return (
-        <div className="h-full flex items-center justify-center p-12">
-            <div className="text-center">
-                <i className="fa-duotone fa-regular fa-file-lines text-3xl text-base-content/20 mb-4 block" />
-                <h3 className="text-lg font-black tracking-tight mb-2">
-                    No Documents
-                </h3>
-                <p className="text-sm text-base-content/40">
-                    No files have been uploaded for this candidate. Document
-                    management is coming soon.
-                </p>
+                {/* View Full Profile */}
+                <button
+                    type="button"
+                    className="btn btn-primary btn-sm w-full"
+                    onClick={() => setShowFullProfile(true)}
+                >
+                    <i className="fa-duotone fa-regular fa-user mr-1" />
+                    View Full Profile
+                </button>
             </div>
-        </div>
+
+            {/* Full Profile Modal */}
+            {showFullProfile && (
+                <ModalPortal>
+                    <BaselModal
+                        isOpen
+                        onClose={() => setShowFullProfile(false)}
+                        maxWidth="max-w-5xl"
+                        className="h-[90vh]"
+                    >
+                        <BaselModalBody padding="p-0" scrollable>
+                            <CandidateDetailLoader
+                                candidateId={candidate.id}
+                                onClose={() => setShowFullProfile(false)}
+                            />
+                        </BaselModalBody>
+                    </BaselModal>
+                </ModalPortal>
+            )}
+        </>
     );
 }

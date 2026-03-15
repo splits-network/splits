@@ -53,7 +53,7 @@ export function ApplicationDocumentsTab({ application }: DocumentsTabProps) {
                             <i className={`fa-duotone fa-regular ${getDocIcon(doc.document_type)} text-primary`} />
                             <div className="flex-1 min-w-0">
                                 <div className="font-bold text-sm truncate">{doc.file_name}</div>
-                                <div className="text-xs text-base-content/50">
+                                <div className="text-sm text-base-content/50">
                                     {doc.document_type?.replace("_", " ").toUpperCase()}
                                     {doc.file_size && ` \u2022 ${(doc.file_size / 1024).toFixed(1)} KB`}
                                 </div>
