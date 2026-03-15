@@ -64,6 +64,19 @@ export class RecruiterCandidateRepository {
     return { data: data || [], total: count || 0 };
   }
 
+  async findExistingRelationship(recruiterId: string, candidateId: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('recruiter_candidates')
+      .select('*')
+      .eq('recruiter_id', recruiterId)
+      .eq('candidate_id', candidateId)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('recruiter_candidates').select('*').eq('id', id).maybeSingle();

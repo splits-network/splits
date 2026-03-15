@@ -4,7 +4,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { BadRequestError, NotFoundError } from '@splits-network/shared-fastify';
+import { BadRequestError, ConflictError, NotFoundError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../v2/shared/events';
 import { RecruiterCandidateRepository } from './repository';
 import { RecruiterActivityService } from '../recruiter-activity/service';
@@ -42,6 +42,41 @@ export class RecruiterCandidateService {
     if (!input.recruiter_id || !input.candidate_id) {
       throw new BadRequestError('recruiter_id and candidate_id are required');
     }
+
+    const existing = await this.repository.findExistingRelationship(input.recruiter_id, input.candidate_id);
+    if (existing) {
+      if (existing.status === 'active') {
+        throw new ConflictError('An active relationship already exists with this candidate');
+      }
+
+      if (['terminated', 'declined', 'inactive'].includes(existing.status)) {
+        const token = this.repository.generateInvitationToken();
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 7);
+        const now = new Date().toISOString();
+
+        const reactivated = await this.repository.update(existing.id, {
+          status: 'active', invitation_token: token,
+          invitation_expires_at: expires.toISOString(), invited_at: now,
+          consent_given: null, consent_given_at: null,
+          declined_at: null, declined_reason: null,
+          termination_reason: null, terminated_by: null,
+          relationship_start_date: null, relationship_end_date: null,
+        });
+
+        await this.eventPublisher?.publish('candidate.invited', {
+          relationship_id: reactivated!.id, recruiter_id: reactivated!.recruiter_id,
+          candidate_id: reactivated!.candidate_id, invitation_token: token,
+          invitation_expires_at: expires.toISOString(),
+        }, 'network-service');
+        await this.activityService?.recordActivity({
+          recruiter_id: reactivated!.recruiter_id, activity_type: 'candidate_connected',
+          description: 'Reconnected with a candidate', metadata: { candidate_id: reactivated!.candidate_id },
+        });
+        return reactivated;
+      }
+    }
+
     const token = this.repository.generateInvitationToken();
     const expires = new Date();
     expires.setDate(expires.getDate() + 7);

@@ -56,6 +56,13 @@ export default function RequestToRepresentModal({
 
             if (message.includes("Not authenticated")) {
                 setError("Session expired. Refresh the page and try again.");
+            } else if (
+                message.includes("already exists") ||
+                message.includes("CONFLICT")
+            ) {
+                setError(
+                    "You already have an active relationship with this candidate.",
+                );
             } else {
                 setError(
                     message ||
