@@ -14,7 +14,7 @@ const ENRICHED_SELECT = `
   splits:placement_splits(id, role, split_percentage, split_amount, recruiter_id, recruiter:recruiters(id, user:users!recruiters_user_id_fkey(name)))
 `;
 
-const SORTABLE_FIELDS = ['created_at', 'hired_at', 'status', 'salary', 'fee_percentage'];
+const SORTABLE_FIELDS = ['created_at', 'hired_at', 'state', 'salary', 'fee_percentage'];
 
 export class EnrichedPlacementRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -59,7 +59,7 @@ export class EnrichedPlacementRepository {
       const tsquery = params.search.replace(/[@+._\-/:]/g, ' ').trim().split(/\s+/).filter(Boolean).join(' & ');
       query = query.textSearch('search_vector', tsquery, { type: 'websearch', config: 'english' });
     }
-    if (params.status) query = query.eq('status', params.status);
+    if (params.status) query = query.eq('state', params.status);
     if (params.job_id) query = query.eq('job_id', params.job_id);
     if (params.candidate_id) query = query.eq('candidate_id', params.candidate_id);
 

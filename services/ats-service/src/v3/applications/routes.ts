@@ -50,7 +50,7 @@ export function registerApplicationRoutes(
   // Register action routes BEFORE core CRUD (non-parameterized first)
   registerTerminationRoutes(app, terminationService);
   registerProposalRoutes(app, proposalService);
-  registerHireRoutes(app, hireService);
+  registerHireRoutes(app, hireService, supabase, eventPublisher);
   registerAIReviewRoutes(app, aiReviewService);
   registerPrescreenRoutes(app, prescreenService);
 

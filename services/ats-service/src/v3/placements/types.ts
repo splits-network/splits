@@ -17,7 +17,7 @@ export interface CreatePlacementInput {
 }
 
 export interface UpdatePlacementInput {
-  status?: string;
+  state?: string;
   salary?: number;
   start_date?: string;
   fee_percentage?: number;
@@ -51,7 +51,7 @@ export const listQuerySchema = {
     page: { type: 'integer', minimum: 1, default: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
     search: { type: 'string' },
-    status: { type: 'string', enum: ['pending', 'confirmed', 'active', 'completed', 'cancelled'] },
+    status: { type: 'string', enum: ['hired', 'active', 'completed', 'failed'] },
     job_id: { type: 'string', format: 'uuid' },
     candidate_id: { type: 'string', format: 'uuid' },
     include: { type: 'string' },
@@ -86,7 +86,7 @@ export const createSchema = {
 export const updateSchema = {
   type: 'object',
   properties: {
-    status: { type: 'string', enum: ['pending', 'confirmed', 'active', 'completed', 'cancelled'] },
+    state: { type: 'string', enum: ['hired', 'active', 'completed', 'failed'] },
     salary: { type: 'number', minimum: 0 },
     start_date: { type: 'string', format: 'date' },
     fee_percentage: { type: 'number', minimum: 0, maximum: 100 },

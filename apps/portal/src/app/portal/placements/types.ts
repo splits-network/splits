@@ -123,5 +123,5 @@ export const PAYOUT_STATUS_LABELS: Record<string, string> = {
 export const PLACEMENT_SORT_OPTIONS: BaselSortOption[] = [
     { value: "created_at", label: "Date Created" },
     { value: "hired_at", label: "Hire Date" },
-    { value: "status", label: "Status" },
+    { value: "state", label: "Status" },
 ];

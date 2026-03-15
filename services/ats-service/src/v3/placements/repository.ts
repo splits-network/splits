@@ -72,7 +72,7 @@ export class PlacementRepository {
       const tsquery = params.search.replace(/[@+._\-/:]/g, ' ').trim().split(/\s+/).filter(Boolean).join(' & ');
       query = query.textSearch('search_vector', tsquery, { type: 'websearch', config: 'english' });
     }
-    if (params.status) query = query.eq('status', params.status);
+    if (params.status) query = query.eq('state', params.status);
     if (params.job_id) query = query.eq('job_id', params.job_id);
     if (params.candidate_id) query = query.eq('candidate_id', params.candidate_id);
 
@@ -186,10 +186,10 @@ export class PlacementRepository {
   }
 
   async delete(id: string): Promise<void> {
-    // Soft delete — set status to cancelled
+    // Soft delete — set state to failed
     const { error } = await this.supabase
       .from('placements')
-      .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+      .update({ state: 'failed', updated_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;

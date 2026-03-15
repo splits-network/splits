@@ -13,11 +13,10 @@ import { PlacementRepository, PlacementScopeFilters } from './repository';
 import { CreatePlacementInput, UpdatePlacementInput, PlacementListParams } from './types';
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-  pending: ['confirmed', 'cancelled'],
-  confirmed: ['active', 'cancelled'],
-  active: ['completed', 'cancelled'],
+  hired: ['active', 'failed'],
+  active: ['completed', 'failed'],
   completed: [],
-  cancelled: [],
+  failed: [],
 };
 
 export class PlacementService {
@@ -86,7 +85,7 @@ export class PlacementService {
       guarantee_days: guaranteeDays,
       guarantee_expires_at: guaranteeExpiresAt,
       notes: input.notes || null,
-      status: 'pending',
+      state: 'hired',
       ...attribution,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -118,8 +117,8 @@ export class PlacementService {
       throw new ForbiddenError('Insufficient permissions to update this placement');
     }
 
-    if (input.status && input.status !== existing.status) {
-      this.validateStatusTransition(existing.status, input.status);
+    if (input.state && input.state !== existing.state) {
+      this.validateStatusTransition(existing.state, input.state);
     }
     if (input.fee_percentage !== undefined && (input.fee_percentage < 0 || input.fee_percentage > 100)) {
       throw new BadRequestError('Fee percentage must be between 0 and 100');
@@ -129,7 +128,7 @@ export class PlacementService {
     }
 
     const updates: Record<string, any> = {};
-    if (input.status !== undefined) updates.status = input.status;
+    if (input.state !== undefined) updates.state = input.state;
     if (input.salary !== undefined) updates.salary = input.salary;
     if (input.start_date !== undefined) updates.start_date = input.start_date;
     if (input.fee_percentage !== undefined) updates.fee_percentage = input.fee_percentage;
@@ -149,11 +148,11 @@ export class PlacementService {
     if (!updated) throw new NotFoundError('Placement', id);
 
     // Publish events
-    if (input.status && input.status !== existing.status) {
+    if (input.state && input.state !== existing.state) {
       await this.eventPublisher?.publish('placement.status_changed', {
         placement_id: id,
-        previous_status: existing.status,
-        new_status: input.status,
+        previous_status: existing.state,
+        new_status: input.state,
         changed_by: context.identityUserId,
       }, 'ats-service');
     }
