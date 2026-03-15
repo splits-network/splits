@@ -33,17 +33,6 @@ import {
 } from "./financials-export";
 import { FeatureGate } from "@/components/entitlements/feature-gate";
 
-/* ─── Badge class mapping ──────────────────────────────────────────────── */
-
-const STATUS_BADGE_CLASS: Record<string, string> = {
-    success: "badge-success",
-    info: "badge-info badge-soft",
-    primary: "badge-primary",
-    warning: "badge-warning badge-soft badge-outline",
-    error: "badge-error",
-    neutral: "badge-ghost",
-};
-
 /* ─── Tabs ─────────────────────────────────────────────────────────────── */
 
 const TABS = [
@@ -80,18 +69,26 @@ export function PlacementDetailPanel({
     const company = companyName(placement);
     const job = jobTitle(placement);
 
-    /* Header badges */
+    /* Header badges — PanelHeader uses className-based badges */
     const statusColor = statusColorName(state);
+    const badgeClass: Record<string, string> = {
+        success: "badge-success",
+        info: "badge-info badge-soft",
+        primary: "badge-primary",
+        warning: "badge-warning badge-soft",
+        error: "badge-error",
+        neutral: "badge-ghost",
+    };
     const headerBadges = [
         {
             label: formatStatus(state),
-            className: STATUS_BADGE_CLASS[statusColor] || "badge-ghost",
+            className: badgeClass[statusColor] || "badge-ghost",
         },
         ...(isNew(placement)
             ? [
                   {
                       label: "New",
-                      className: "badge-warning badge-soft badge-outline",
+                      className: "badge-warning badge-soft",
                   },
               ]
             : []),
@@ -114,17 +111,17 @@ export function PlacementDetailPanel({
     const stats: PanelStat[] = [
         {
             label: "Salary",
-            value: formatCurrencyShort(placement.salary || 0),
+            value: placement.salary ? formatCurrencyShort(placement.salary) : "\u2014",
             icon: "fa-duotone fa-regular fa-dollar-sign",
         },
         {
             label: "Fee Rate",
-            value: `${placement.fee_percentage || 0}%`,
+            value: placement.fee_percentage ? `${placement.fee_percentage}%` : "\u2014",
             icon: "fa-duotone fa-regular fa-percent",
         },
         {
             label: "Your Share",
-            value: formatCurrencyShort(placement.recruiter_share || 0),
+            value: placement.recruiter_share ? formatCurrencyShort(placement.recruiter_share) : "\u2014",
             icon: "fa-duotone fa-regular fa-coins",
         },
         ...(placement.guarantee_days != null
@@ -266,7 +263,7 @@ function FinancialsTab({
 
             {/* Commission breakdown */}
             <div className="border-l-4 border-l-primary pl-6">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-4">
                     Commission Breakdown
                 </p>
                 {[
@@ -299,7 +296,7 @@ function FinancialsTab({
             {/* Guarantee period */}
             {placement.guarantee_days != null && (
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-3">
                         Guarantee Period
                     </p>
                     <div className="bg-primary/5 p-4">
@@ -316,7 +313,7 @@ function FinancialsTab({
             {/* Failed info */}
             {state === "failed" && placement.failed_at && (
                 <div className="border-t-2 border-base-300 pt-6">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-error mb-3">
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] text-error mb-3">
                         Placement Failed
                     </p>
                     <p className="text-sm text-base-content/60">
@@ -382,7 +379,7 @@ function DatesTab({ placement }: { placement: Placement }) {
     return (
         <div className="flex-1 min-h-0 overflow-y-auto space-y-8 p-6">
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-3">
                     Key Dates
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
@@ -398,7 +395,7 @@ function DatesTab({ placement }: { placement: Placement }) {
             </div>
 
             <div className="border-l-4 border-l-primary pl-6">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-4">
                     Placement Info
                 </p>
                 <div className="bg-base-200 border border-base-300 divide-y divide-base-300">
@@ -407,7 +404,7 @@ function DatesTab({ placement }: { placement: Placement }) {
                             key={r.l}
                             className="flex justify-between px-4 py-3"
                         >
-                            <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40">
+                            <span className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40">
                                 {r.l}
                             </span>
                             <span className="text-sm font-semibold text-right">
@@ -432,7 +429,7 @@ function SplitsTab({ placement }: { placement: Placement }) {
         <div className="flex-1 min-h-0 overflow-y-auto space-y-8 p-6">
             {placement.splits && placement.splits.length > 0 ? (
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-3">
                         Split Partners
                     </p>
                     <ul className="space-y-2">
@@ -444,7 +441,7 @@ function SplitsTab({ placement }: { placement: Placement }) {
                             return (
                                 <li
                                     key={split.id}
-                                    className="flex items-center justify-between text-base-content/70 border-b border-base-200 pb-2"
+                                    className="flex items-center justify-between text-base-content/70 border-b border-base-300 pb-2"
                                 >
                                     <span className="flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-circle-check text-primary text-sm" />

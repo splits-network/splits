@@ -145,7 +145,7 @@ export default function CompanyInvitationsBaselPage() {
         setSortBy,
         setSortOrder,
     } = useStandardList<RecruiterCompanyRelationship, ConnectionFilters>({
-        endpoint: "/recruiter-companies",
+        endpoint: "/recruiter-companies/views/list",
         defaultFilters: { status: undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
@@ -208,7 +208,7 @@ export default function CompanyInvitationsBaselPage() {
                     {loading && invitations.length === 0 ? (
                         <div className="py-28 text-center">
                             <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                            <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                            <p className="text-sm uppercase tracking-[0.15em] font-bold text-base-content/40">
                                 Loading connections...
                             </p>
                         </div>
@@ -227,8 +227,7 @@ export default function CompanyInvitationsBaselPage() {
                                     clearSearch();
                                     clearFilters();
                                 }}
-                                className="btn btn-outline btn-sm"
-                                style={{ borderRadius: 0 }}
+                                className="btn btn-outline btn-sm rounded-none"
                             >
                                 Reset Filters
                             </button>

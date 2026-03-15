@@ -16,6 +16,8 @@ import {
   updateSchema,
   idParamSchema,
 } from './types';
+import { registerCandidateDetailView } from './views/detail.route';
+import { registerCandidateEnrichedView } from './views/enriched.route';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -30,6 +32,10 @@ export function registerCandidateRoutes(
 ) {
   const repository = new CandidateRepository(supabase);
   const service = new CandidateService(repository, supabase, eventPublisher);
+
+  // --- Views ---
+  registerCandidateEnrichedView(app, supabase);
+  registerCandidateDetailView(app, supabase);
 
   // --- Non-parameterized routes FIRST (before :id) ---
 

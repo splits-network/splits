@@ -216,8 +216,7 @@ export default function AddCandidateModal({
     return (
         <dialog className="modal modal-open modal-bottom sm:modal-middle">
             <div
-                className="modal-box max-w-md w-full p-0"
-                style={{ borderRadius: 0 }}
+                className="modal-box max-w-md w-full p-0 rounded-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -312,8 +311,7 @@ export default function AddCandidateModal({
                             <div className="flex justify-end">
                                 <button
                                     type="button"
-                                    className="btn btn-primary"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-primary rounded-none"
                                     onClick={handleDone}
                                 >
                                     Done
@@ -349,8 +347,7 @@ export default function AddCandidateModal({
                                     </label>
                                     <input
                                         type="text"
-                                        className="input input-bordered w-full"
-                                        style={{ borderRadius: 0 }}
+                                        className="input input-bordered w-full rounded-none"
                                         value={formData.full_name}
                                         onChange={(e) =>
                                             setFormData({
@@ -374,8 +371,7 @@ export default function AddCandidateModal({
                                     <div className="relative">
                                         <input
                                             type="email"
-                                            className="input input-bordered w-full"
-                                            style={{ borderRadius: 0 }}
+                                            className="input input-bordered w-full rounded-none"
                                             value={formData.email}
                                             onChange={(e) => {
                                                 setSelectedFromSuggestion(
@@ -464,8 +460,7 @@ export default function AddCandidateModal({
                                 <div className="flex gap-3 justify-end pt-2">
                                     <button
                                         type="button"
-                                        className="btn btn-outline"
-                                        style={{ borderRadius: 0 }}
+                                        className="btn btn-outline rounded-none"
                                         onClick={handleClose}
                                         disabled={submitting}
                                     >
@@ -473,8 +468,7 @@ export default function AddCandidateModal({
                                     </button>
                                     <button
                                         type="submit"
-                                        className="btn btn-primary"
-                                        style={{ borderRadius: 0 }}
+                                        className="btn btn-primary rounded-none"
                                         disabled={
                                             submitting ||
                                             !formData.full_name.trim() ||

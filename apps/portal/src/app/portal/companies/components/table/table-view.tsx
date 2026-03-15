@@ -33,11 +33,11 @@ export function TableView({
         <div className="overflow-x-auto border-2 border-base-300">
             <table className="w-full" style={{ minWidth: 900 }}>
                 <thead>
-                    <tr className="bg-base-200 border-b-2 border-base-300">
+                    <tr className="bg-base-300 border-b-2 border-base-300">
                         {columns.map((h, i) => (
                             <th
                                 key={i}
-                                className={`px-4 py-3 text-left text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 ${i === 0 ? "w-8" : ""} ${i === columns.length - 1 ? "w-24" : ""}`}
+                                className={`px-4 py-3 text-left text-sm uppercase tracking-[0.15em] font-bold ${i === 0 ? "w-8" : ""} ${i === columns.length - 1 ? "w-24" : ""}`}
                             >
                                 {h}
                             </th>

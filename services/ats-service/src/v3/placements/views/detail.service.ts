@@ -60,6 +60,13 @@ export class PlacementDetailService {
       }
     }
 
+    // Compute recruiter_share from splits for the current recruiter
+    if (context.recruiterId && placement.splits?.length) {
+      placement.recruiter_share = placement.splits
+        .filter((s: any) => s.recruiter_id === context.recruiterId)
+        .reduce((sum: number, s: any) => sum + (s.split_amount || 0), 0);
+    }
+
     return placement;
   }
 }

@@ -1,10 +1,5 @@
 import type { RecruiterCompanyRelationship } from "../../types";
 
-export function formatStatus(status?: string): string {
-    if (!status) return "Unknown";
-    return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
 export function isNew(invitation: RecruiterCompanyRelationship): boolean {
     if (!invitation.created_at) return false;
     const d = new Date(invitation.created_at);

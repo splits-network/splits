@@ -15,7 +15,7 @@ export function CompanyRelationshipTab({
         return (
             <div className="flex flex-col items-center justify-center p-12 text-center">
                 <i className="fa-duotone fa-regular fa-handshake text-3xl text-base-content/20 mb-3" />
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40">
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40">
                     No relationship
                 </p>
                 <p className="text-sm text-base-content/30 mt-2">
@@ -30,24 +30,24 @@ export function CompanyRelationshipTab({
             {/* Status & Type */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                 <div className="bg-base-100 p-4">
-                    <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Status</p>
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Status</p>
                     <BaselBadge color={statusColorName(relationship.status)} size="sm">
                         {formatStatus(relationship.status)}
                     </BaselBadge>
                 </div>
                 <div className="bg-base-100 p-4">
-                    <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Type</p>
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Type</p>
                     <p className="font-bold text-sm capitalize">{relationship.relationship_type}</p>
                 </div>
                 {relationship.relationship_start_date && (
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Start Date</p>
+                        <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Start Date</p>
                         <p className="font-bold text-sm">{formatDate(relationship.relationship_start_date)}</p>
                     </div>
                 )}
                 {relationship.relationship_end_date && (
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">End Date</p>
+                        <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">End Date</p>
                         <p className="font-bold text-sm">{formatDate(relationship.relationship_end_date)}</p>
                     </div>
                 )}
@@ -56,7 +56,7 @@ export function CompanyRelationshipTab({
             {/* Granular Permissions */}
             {relationship.permissions && (
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Permissions</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Permissions</p>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                         {([
                             { key: "can_view_jobs" as const, label: "View Jobs" },

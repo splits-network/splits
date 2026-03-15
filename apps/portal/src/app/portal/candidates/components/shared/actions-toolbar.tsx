@@ -8,7 +8,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
-import { usePresence } from "@/hooks/use-presence";
+import { usePresenceStatus } from "@/contexts";
 import { Presence } from "@/components/presense";
 import { useChatSidebar } from "@splits-network/chat-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
@@ -95,10 +95,8 @@ export default function CandidateActionsToolbar({
     const chatDisabledReason = canChat
         ? null
         : "This candidate isn't linked to a user yet.";
-    const presence = usePresence([candidate.user_id], { enabled: canChat });
-    const presenceStatus = candidate.user_id
-        ? presence[candidate.user_id]?.status
-        : undefined;
+    const presenceData = usePresenceStatus(candidate.user_id);
+    const presenceStatus = presenceData?.status;
 
     /* ── Permissions ── */
 
@@ -222,7 +220,7 @@ export default function CandidateActionsToolbar({
         save: showActions.save !== false && isRecruiter,
     };
 
-    const getSizeClass = () => `btn-${size}`;
+    const getSizeClass = () => `btn-${size} rounded-none`;
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
@@ -422,7 +420,6 @@ export default function CandidateActionsToolbar({
                     <button
                         onClick={() => setShowSubmitWizard(true)}
                         className={`btn ${getSizeClass()} btn-primary gap-2`}
-                        style={{ borderRadius: 0 }}
                         title="Send Job Opportunity"
                     >
                         <i className="fa-duotone fa-regular fa-paper-plane" />
@@ -435,7 +432,6 @@ export default function CandidateActionsToolbar({
                     <button
                         onClick={() => setShowEmailModal(true)}
                         className={`btn ${getSizeClass()} btn-secondary gap-2`}
-                        style={{ borderRadius: 0 }}
                         title="Send Email"
                     >
                         <i className="fa-duotone fa-regular fa-envelope" />
@@ -448,7 +444,6 @@ export default function CandidateActionsToolbar({
                     <button
                         onClick={() => setShowCallModal(true)}
                         className={`btn ${getSizeClass()} btn-primary btn-outline gap-2`}
-                        style={{ borderRadius: 0 }}
                         title="Schedule Call"
                     >
                         <i className="fa-duotone fa-regular fa-phone" />
@@ -462,8 +457,7 @@ export default function CandidateActionsToolbar({
                         <button
                             onClick={() => setShowVerifyModal(true)}
                             className={`btn ${getSizeClass()} btn-success gap-2`}
-                            style={{ borderRadius: 0 }}
-                            title="Verify Candidate"
+                                title="Verify Candidate"
                         >
                             <i className="fa-duotone fa-regular fa-badge-check" />
                             <span className="hidden md:inline">Verify</span>
@@ -475,7 +469,6 @@ export default function CandidateActionsToolbar({
                     <button
                         onClick={() => setShowRTRModal(true)}
                         className={`btn ${getSizeClass()} btn-accent gap-2`}
-                        style={{ borderRadius: 0 }}
                         title="Request to Represent"
                     >
                         <i className="fa-duotone fa-regular fa-handshake" />
@@ -490,7 +483,6 @@ export default function CandidateActionsToolbar({
                     <button
                         onClick={() => setShowTerminateModal(true)}
                         className={`btn ${getSizeClass()} btn-error btn-outline gap-2`}
-                        style={{ borderRadius: 0 }}
                         title="End Representation"
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
@@ -505,7 +497,6 @@ export default function CandidateActionsToolbar({
                     <button
                         onClick={handleToggleSave}
                         className={`btn ${getSizeClass()} ${candidate.is_saved ? "btn-warning" : "btn-ghost"} gap-2`}
-                        style={{ borderRadius: 0 }}
                         title={candidate.is_saved ? "Unsave Candidate" : "Save Candidate"}
                         disabled={isSaving}
                     >
@@ -535,8 +526,7 @@ export default function CandidateActionsToolbar({
                         <button
                             onClick={handleStartChat}
                             className={`btn ${getSizeClass()} btn-outline gap-2`}
-                            style={{ borderRadius: 0 }}
-                            title="Message Candidate"
+                                title="Message Candidate"
                             disabled={!canChat || startingChat}
                         >
                             <Presence status={presenceStatus} />
@@ -558,8 +548,7 @@ export default function CandidateActionsToolbar({
                             <button
                                 onClick={handleViewDetails}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
-                                style={{ borderRadius: 0 }}
-                                title="View Details"
+                                        title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
                                 <span className="hidden md:inline">
@@ -570,8 +559,7 @@ export default function CandidateActionsToolbar({
                             <Link
                                 href={`/portal/candidates?candidateId=${candidate.id}`}
                                 className={`btn ${getSizeClass()} btn-outline gap-2`}
-                                style={{ borderRadius: 0 }}
-                                title="View Details"
+                                        title="View Details"
                             >
                                 <i className="fa-duotone fa-regular fa-eye" />
                                 <span className="hidden md:inline">

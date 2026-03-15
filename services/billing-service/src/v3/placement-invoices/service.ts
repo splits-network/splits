@@ -41,7 +41,8 @@ export class PlacementInvoiceService {
 
   async getByPlacementId(placementId: string, clerkUserId: string) {
     await this.accessResolver.resolve(clerkUserId);
-    return this.repository.findByPlacementId(placementId);
+    const invoices = await this.repository.findByPlacementId(placementId);
+    return invoices[0] ?? null;
   }
 
   async getByCompanyId(companyId: string, clerkUserId: string) {

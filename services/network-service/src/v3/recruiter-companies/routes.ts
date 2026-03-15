@@ -16,6 +16,7 @@ import {
   requestConnectionSchema, idParamSchema, companyIdParamSchema,
 } from './types';
 import { registerRecruiterCompanyDetailView } from './views/detail.route';
+import { registerRecruiterCompanyListView } from './views/list.route';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -83,6 +84,7 @@ export function registerRecruiterCompanyRoutes(
   });
 
   // --- Views (before :id to avoid collision) ---
+  registerRecruiterCompanyListView(app, supabase);
   registerRecruiterCompanyDetailView(app, supabase);
 
   // --- Core CRUD ---

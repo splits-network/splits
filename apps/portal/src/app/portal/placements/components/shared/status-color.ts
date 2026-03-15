@@ -5,8 +5,6 @@
 
 import type { BaselSemanticColor } from "@splits-network/basel-ui";
 
-export type ViewMode = "table" | "grid" | "split";
-
 /** Status → BaselSemanticColor name for use with BaselBadge */
 export function statusColorName(status?: string): BaselSemanticColor {
     switch (status) {

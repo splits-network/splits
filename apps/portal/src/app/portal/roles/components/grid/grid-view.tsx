@@ -49,7 +49,7 @@ export function GridView({
     }, [selectedJob?.id]);
 
     return (
-        <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
             {jobs.map((job) => (
                 <GridCard
                     key={job.id}

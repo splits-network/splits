@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
-import { usePresence } from "@/hooks/use-presence";
+import { usePresenceStatus } from "@/contexts";
 import { Presence } from "@/components/presense";
 import { useChatSidebar } from "@splits-network/chat-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
@@ -62,10 +62,8 @@ export default function RecruiterActionsToolbar({
     const chatDisabledReason = canChat
         ? null
         : "This recruiter isn't linked to a user account.";
-    const presence = usePresence([recruiterUserId], { enabled: canChat });
-    const presenceStatus = recruiterUserId
-        ? presence[recruiterUserId]?.status
-        : undefined;
+    const presenceData = usePresenceStatus(recruiterUserId);
+    const presenceStatus = presenceData?.status;
 
     const canInvite = useMemo(() => {
         return isCompanyUser || isAdmin;
@@ -215,8 +213,7 @@ export default function RecruiterActionsToolbar({
                 {actions.inviteToCompany && (
                     <button
                         onClick={handleInviteToCompany}
-                        className={`btn btn-${size} btn-primary gap-2`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-primary gap-2 rounded-none`}
                         title="Invite to Company"
                     >
                         <i className="fa-duotone fa-regular fa-paper-plane" />
@@ -227,8 +224,7 @@ export default function RecruiterActionsToolbar({
                 {actions.endRelationship && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
-                        className={`btn btn-${size} btn-error gap-2`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-error gap-2 rounded-none`}
                         title="End Relationship"
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
@@ -245,8 +241,7 @@ export default function RecruiterActionsToolbar({
                     <span title={chatDisabledReason || undefined}>
                         <button
                             onClick={handleStartChat}
-                            className={`btn btn-${size} btn-primary gap-2 relative`}
-                            style={{ borderRadius: 0 }}
+                            className={`btn btn-${size} btn-primary gap-2 relative rounded-none`}
                             disabled={!canChat || startingChat}
                         >
                             <Presence status={presenceStatus} />
@@ -265,8 +260,7 @@ export default function RecruiterActionsToolbar({
                         <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                         <button
                             onClick={handleViewDetails}
-                            className={`btn btn-${size} btn-primary gap-2`}
-                            style={{ borderRadius: 0 }}
+                            className={`btn btn-${size} btn-primary gap-2 rounded-none`}
                             title="View Details"
                         >
                             <i className="fa-duotone fa-regular fa-eye" />

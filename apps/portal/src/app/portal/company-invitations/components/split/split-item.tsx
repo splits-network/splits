@@ -7,7 +7,7 @@ import {
     getCounterpartyName,
     getCounterpartySubtext,
 } from "../../types";
-import { statusColorName } from "../shared/status-color";
+import { statusColorName, statusBorder } from "../shared/status-color";
 import { BaselBadge } from "@splits-network/basel-ui";
 import { isNew, postedAgo } from "../shared/helpers";
 import ConnectionActionsToolbar from "../shared/actions-toolbar";
@@ -30,17 +30,17 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
-                    : "bg-base-100 border-transparent"
+                    : `bg-base-100 ${statusBorder(invitation.status)}`
             }`}
         >
             {/* Row 1: name + posted time */}
-            <div className="flex items-start justify-between gap-2 mb-1">
+            <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                     {isNew(invitation) && invitation.status === "pending" && (
-                        <i className="fa-duotone fa-regular fa-star text-primary text-xs flex-shrink-0" />
+                        <i className="fa-duotone fa-regular fa-sparkles text-warning text-sm flex-shrink-0" />
                     )}
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {counterpartyName}
@@ -52,18 +52,15 @@ export function SplitItem({
             </div>
 
             {/* Row 2: subtext */}
-            {counterpartySubtext && (
-                <div className="text-sm font-semibold text-base-content/60 mb-1 truncate">
-                    {counterpartySubtext}
-                </div>
-            )}
+            <div className={`text-sm mt-0.5 truncate ${counterpartySubtext ? "text-base-content/60" : "text-base-content/30"}`}>
+                {counterpartySubtext || "No details"}
+            </div>
 
             {/* Row 3: type + status pill */}
-            <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="text-sm text-base-content/50 capitalize truncate">
-                    <i className="fa-duotone fa-regular fa-tag mr-1" />
+            <div className="flex items-center justify-between gap-2 mt-0.5 pr-10">
+                <span className="text-sm font-bold text-base-content/60 capitalize">
                     {invitation.relationship_type}
-                </div>
+                </span>
                 <BaselBadge color={statusColorName(invitation.status)} size="xs" variant="soft">
                     {getStatusLabel(invitation.status)}
                 </BaselBadge>

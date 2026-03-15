@@ -85,6 +85,8 @@ const atsV3Routes: V3RouteConfig[] = [
 
   // ── Candidates Views ──────────────────────────────────────────
   { path: '/candidates/me', method: 'GET', auth: 'required' },
+  { path: '/candidates/views/enriched', method: 'GET', auth: 'required' },
+  { path: '/candidates/:id/view/detail', method: 'GET', auth: 'required' },
   { path: '/candidates/:id/dashboard-stats', method: 'GET', auth: 'required' },
   { path: '/candidates/:id/recent-applications', method: 'GET', auth: 'required' },
   { path: '/candidates/:id/primary-resume', method: 'GET', auth: 'required' },

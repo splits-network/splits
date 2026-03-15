@@ -11,7 +11,6 @@ import {
 } from "../../types";
 import { statusColorName } from "./status-color";
 import { BaselBadge } from "@splits-network/basel-ui";
-import { formatStatus } from "./helpers";
 import ConnectionActionsToolbar from "./actions-toolbar";
 
 export function ConnectionDetail({
@@ -49,19 +48,17 @@ export function ConnectionDetail({
                                 {getStatusLabel(invitation.status)}
                             </BaselBadge>
                         </div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-2">
+                        <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-2">
                             {invitation.relationship_type}
                         </p>
                         <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-3">
                             {counterpartyName}
                         </h2>
-                        <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
-                            {counterpartySubtext && (
-                                <span>
-                                    <i className="fa-duotone fa-regular fa-envelope mr-1" />
-                                    {counterpartySubtext}
-                                </span>
-                            )}
+                        <div className="flex flex-wrap gap-3 text-sm">
+                            <span className={counterpartySubtext ? "text-base-content/60" : "text-base-content/30"}>
+                                <i className="fa-duotone fa-regular fa-envelope mr-1" />
+                                {counterpartySubtext || "No contact info"}
+                            </span>
                         </div>
                     </div>
                     {onClose && (
@@ -90,7 +87,7 @@ export function ConnectionDetail({
                 {/* Stats grid */}
                 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">
                             Status
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -98,7 +95,7 @@ export function ConnectionDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">
                             Type
                         </p>
                         <p className="text-lg font-black tracking-tight capitalize">
@@ -106,7 +103,7 @@ export function ConnectionDetail({
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">
                             Received
                         </p>
                         <p className="text-lg font-black tracking-tight">
@@ -117,7 +114,7 @@ export function ConnectionDetail({
 
                 {/* Counterparty Info */}
                 <div className="border-t-2 border-base-300 pt-6">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
+                    <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 mb-4">
                         {isCompanyUser ? "Recruiter" : "Company"}
                     </h3>
                     <div className="flex items-center gap-4">
@@ -134,59 +131,50 @@ export function ConnectionDetail({
                         )}
                         <div>
                             <p className="font-bold">{counterpartyName}</p>
-                            {isCompanyUser &&
-                                invitation.recruiter?.user?.email && (
-                                    <p className="text-sm text-base-content/50">
-                                        {invitation.recruiter.user.email}
-                                    </p>
-                                )}
-                            {!isCompanyUser && invitation.company?.industry && (
-                                <p className="text-sm text-base-content/50">
-                                    {invitation.company.industry}
+                            {isCompanyUser && (
+                                <p className={`text-sm ${invitation.recruiter?.user?.email ? "text-base-content/50" : "text-base-content/30"}`}>
+                                    {invitation.recruiter?.user?.email || "No email"}
                                 </p>
                             )}
-                            {!isCompanyUser &&
-                                invitation.company?.headquarters_location && (
-                                    <p className="text-sm text-base-content/50">
-                                        {
-                                            invitation.company
-                                                .headquarters_location
-                                        }
+                            {!isCompanyUser && (
+                                <>
+                                    <p className={`text-sm ${invitation.company?.industry ? "text-base-content/50" : "text-base-content/30"}`}>
+                                        {invitation.company?.industry || "No industry"}
                                     </p>
-                                )}
+                                    <p className={`text-sm ${invitation.company?.headquarters_location ? "text-base-content/50" : "text-base-content/30"}`}>
+                                        {invitation.company?.headquarters_location || "No location"}
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* Details grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                    {invitation.relationship_start_date && (
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                                Connected Since
-                            </p>
-                            <p className="font-bold text-sm">
-                                {formatDate(invitation.relationship_start_date)}
-                            </p>
-                        </div>
-                    )}
-                    {invitation.relationship_end_date && (
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
-                                Ended
-                            </p>
-                            <p className="font-bold text-sm">
-                                {formatDate(invitation.relationship_end_date)}
-                            </p>
-                        </div>
-                    )}
+                    <div className="bg-base-100 p-4">
+                        <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">
+                            Connected Since
+                        </p>
+                        <p className={`font-bold text-sm ${invitation.relationship_start_date ? "" : "text-base-content/30"}`}>
+                            {invitation.relationship_start_date ? formatDate(invitation.relationship_start_date) : "Not yet connected"}
+                        </p>
+                    </div>
+                    <div className="bg-base-100 p-4">
+                        <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">
+                            Ended
+                        </p>
+                        <p className={`font-bold text-sm ${invitation.relationship_end_date ? "" : "text-base-content/30"}`}>
+                            {invitation.relationship_end_date ? formatDate(invitation.relationship_end_date) : "Active"}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Termination Reason */}
                 {invitation.status === "terminated" &&
                     invitation.termination_reason && (
                         <div>
-                            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
+                            <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 mb-3">
                                 Termination Reason
                             </h3>
                             <div className="p-3 border-2 border-error/20 text-sm text-base-content/70">

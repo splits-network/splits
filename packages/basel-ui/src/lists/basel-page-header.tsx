@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useRef } from "react";
+import { useScrollReveal } from "../animations";
 
 export interface BaselPageHeaderStat {
     value: string | number;
@@ -112,8 +113,11 @@ function FullHeader({
     stats,
     onToggle,
 }: Omit<BaselPageHeaderProps, "isCompact" | "isLoaded">) {
+    const sectionRef = useRef<HTMLElement>(null);
+    useScrollReveal(sectionRef);
+
     return (
-        <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
+        <section ref={sectionRef} className="relative bg-base-300 text-base-content py-16 lg:py-20">
             {/* Subtle grid pattern overlay */}
             <div
                 className="absolute inset-0 opacity-[0.03]"

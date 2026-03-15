@@ -205,7 +205,7 @@ export default function TerminateModal({
                     ) : (
                         affectedJobs.length > 0 && (
                             <div className="mb-4">
-                                <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                                <h4 className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/40 mb-2">
                                     Affected Jobs ({affectedJobs.length})
                                 </h4>
                                 <p className="text-xs text-base-content/50 mb-3">
@@ -275,7 +275,7 @@ export default function TerminateModal({
 
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40 mb-2 block">
+                            <label className="text-sm uppercase tracking-[0.15em] font-bold text-base-content/40 mb-2 block">
                                 Reason *
                             </label>
                             <textarea

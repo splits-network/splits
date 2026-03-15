@@ -5,6 +5,7 @@ import {
     relationshipStatusBadge,
     relationshipTypeBadge,
 } from "../shared/company-badges";
+import { statusBorder } from "../shared/status-color";
 import {
     companyName,
     companyInitials,
@@ -22,9 +23,9 @@ import {
     useGamification,
 } from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
+import { formatCompanySize } from "../../types";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
-import { CompanyStats } from "./grid-card-stats";
 
 export function GridCard({
     item,
@@ -64,20 +65,17 @@ export function GridCard({
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer bg-base-100 border border-base-300 border-l-4 transition-all",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-colors",
                 isSelected
-                    ? "border-l-primary shadow-md"
-                    : "border-l-base-300 hover:border-l-primary/50 hover:shadow-md",
+                    ? "border-primary border-l-primary bg-primary/5"
+                    : `${statusBorder(relationship?.status)} hover:border-base-content/20`,
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 border-b border-base-300 px-5 pt-5 pb-4">
-                {/* Kicker row: industry + badges */}
-                <div className="flex items-center justify-between gap-2 mb-3">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate">
-                        {industry || "Company"}
-                    </p>
-                    <div className="flex items-center gap-1 shrink-0">
+            <div className="bg-base-300 px-5 pt-4 pb-4">
+                {/* Kicker row: badges */}
+                <div className="flex items-center justify-between mb-3 gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         {relStatus && (
                             <BaselBadge color={relStatus.color} size="sm" variant="soft">
                                 {relStatus.label}
@@ -92,16 +90,16 @@ export function GridCard({
                 </div>
 
                 {/* Avatar + Name block */}
-                <div className="flex items-end gap-3">
-                    <div className="relative shrink-0">
+                <div className="flex items-start gap-3">
+                    <div className="relative shrink-0 mt-0.5">
                         {company.logo_url ? (
                             <img
                                 src={company.logo_url}
                                 alt={name}
-                                className="w-14 h-14 object-contain bg-base-100"
+                                className="w-12 h-12 object-contain bg-base-100"
                             />
                         ) : (
-                            <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center text-lg font-black tracking-tight select-none">
+                            <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
                                 {initials}
                             </div>
                         )}
@@ -111,140 +109,120 @@ export function GridCard({
                             </div>
                         )}
                     </div>
-                    <div className="min-w-0">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
-                            Company
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
+                            {industry || "Company"}
                         </p>
-                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                        <h3 className="text-lg font-black tracking-tight leading-tight text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
                         </h3>
                     </div>
                 </div>
 
                 {/* Location + founded/added date */}
-                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/40">
-                    {location && (
-                        <span className="flex items-center gap-1.5 truncate">
-                            <i className="fa-duotone fa-regular fa-location-dot text-xs" />
-                            {location}
-                        </span>
-                    )}
-                    {location && (
-                        <span className="text-base-content/20">|</span>
-                    )}
-                    {foundedYear ? (
-                        <span className="flex items-center gap-1.5 shrink-0">
-                            <i className="fa-duotone fa-regular fa-calendar text-xs" />
-                            Est. {foundedYear}
-                        </span>
-                    ) : (
-                        <span className="flex items-center gap-1.5 shrink-0">
-                            <i className="fa-duotone fa-regular fa-clock text-xs" />
-                            {addedAgo(item)}
-                        </span>
+                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/50">
+                    <span className="flex items-center gap-1.5 truncate">
+                        <i className="fa-duotone fa-regular fa-location-dot text-xs text-secondary" />
+                        {location || "Location not specified"}
+                    </span>
+                    {(foundedYear || addedAgo(item)) && (
+                        <>
+                            <span className="text-base-content/20">|</span>
+                            {foundedYear ? (
+                                <span className="flex items-center gap-1.5 shrink-0">
+                                    <i className="fa-duotone fa-regular fa-calendar text-xs text-accent" />
+                                    Est. {foundedYear}
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-1.5 shrink-0">
+                                    <i className="fa-duotone fa-regular fa-clock text-xs text-accent" />
+                                    {addedAgo(item)}
+                                </span>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
 
-            {/* Tagline / About */}
-            <div className="px-5 py-4 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
-                    About
-                </p>
+            {/* Inline metadata: size · stage · founded · roles */}
+            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {([
+                    { icon: "fa-users", color: "text-primary", value: formatCompanySize(company.company_size) || "\u2014", muted: !company.company_size, tooltip: "Company size" },
+                    { icon: "fa-rocket", color: "text-secondary", value: company.stage || "\u2014", muted: !company.stage, tooltip: "Company stage" },
+                    { icon: "fa-calendar", color: "text-accent", value: foundedYear ? `Est. ${foundedYear}` : "\u2014", muted: !foundedYear, tooltip: "Year founded" },
+                    { icon: "fa-briefcase", color: "text-success", value: company.open_roles_count != null ? `${company.open_roles_count} roles` : "\u2014", muted: company.open_roles_count == null, tooltip: "Open roles" },
+                ] as const).map((item, i) => (
+                    <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
+                        <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
+                        <span className="truncate">{item.value}</span>
+                    </span>
+                ))}
+            </div>
+
+            {/* About snippet */}
+            <div className="px-5 py-3 border-b border-base-300">
                 {tagline ? (
-                    <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+                    <div className="text-sm text-base-content/60 leading-relaxed line-clamp-2">
                         <MarkdownRenderer content={tagline} />
                     </div>
                 ) : (
-                    <p className="text-sm text-base-content/20 italic">No description added yet</p>
+                    <p className="text-sm text-base-content/30">No description provided</p>
                 )}
             </div>
 
-            {/* Stats Row */}
-            <div className="border-b border-base-300">
-                <CompanyStats company={company} />
-            </div>
-
-            {/* Tech Stack */}
-            <div className="px-5 py-4 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                    Tech Stack
-                </p>
-                {techStack.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                        {techStack.slice(0, 6).map((tech) => (
-                            <BaselBadge key={tech} variant="outline" size="sm">
-                                {tech}
-                            </BaselBadge>
-                        ))}
-                        {techStack.length > 6 && (
-                            <span className="text-sm font-semibold text-base-content/40 self-center">
-                                +{techStack.length - 6} more
+            {/* Tags: tech stack + perks + culture */}
+            <div className="px-5 py-3 border-b border-base-300">
+                <div className="flex flex-wrap gap-1.5">
+                    {techStack.slice(0, 3).map((tech) => (
+                        <BaselBadge key={tech} variant="outline" size="sm">
+                            {tech}
+                        </BaselBadge>
+                    ))}
+                    {perks.slice(0, 2).map((perk) => (
+                        <BaselBadge key={perk} color="secondary" size="sm">
+                            {perk}
+                        </BaselBadge>
+                    ))}
+                    {cultureTags.slice(0, 2).map((tag) => (
+                        <BaselBadge key={tag} color="accent" size="sm">
+                            {tag}
+                        </BaselBadge>
+                    ))}
+                    {(() => {
+                        const shown = Math.min(techStack.length, 3) + Math.min(perks.length, 2) + Math.min(cultureTags.length, 2);
+                        const total = techStack.length + perks.length + cultureTags.length;
+                        const remaining = total - shown;
+                        return remaining > 0 ? (
+                            <span className="text-sm font-semibold text-base-content/50 self-center">
+                                +{remaining} more
                             </span>
-                        )}
-                    </div>
-                ) : (
-                    <p className="text-sm text-base-content/20 italic">No tech stack listed</p>
-                )}
-            </div>
-
-            {/* Perks */}
-            <div className="px-5 py-4 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                    Perks
-                </p>
-                {perks.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                        {perks.slice(0, 4).map((perk) => (
-                            <BaselBadge key={perk} color="secondary" size="sm">
-                                {perk}
-                            </BaselBadge>
-                        ))}
-                        {perks.length > 4 && (
-                            <span className="text-sm font-semibold text-base-content/40 self-center">
-                                +{perks.length - 4} more
-                            </span>
-                        )}
-                    </div>
-                ) : (
-                    <p className="text-sm text-base-content/20 italic">No perks listed</p>
-                )}
-            </div>
-
-            {/* Culture & Values */}
-            <div className="px-5 py-4 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                    Culture & Values
-                </p>
-                {cultureTags.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                        {cultureTags.slice(0, 4).map((tag) => (
-                            <BaselBadge key={tag} color="accent" size="sm">
-                                {tag}
-                            </BaselBadge>
-                        ))}
-                        {cultureTags.length > 4 && (
-                            <span className="text-sm font-semibold text-base-content/40 self-center">
-                                +{cultureTags.length - 4} more
-                            </span>
-                        )}
-                    </div>
-                ) : (
-                    <p className="text-sm text-base-content/20 italic">No culture tags listed</p>
-                )}
-            </div>
-
-            {/* Footer: actions toolbar */}
-            <div className="px-5 py-3 flex items-center justify-end">
-                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <CompanyActionsToolbar
-                        company={company}
-                        relationship={relationship}
-                        variant="icon-only"
-                        size="sm"
-                        onRefresh={onRefresh}
-                    />
+                        ) : null;
+                    })()}
+                    {techStack.length === 0 && perks.length === 0 && cultureTags.length === 0 && (
+                        <span className="text-sm text-base-content/30">No details listed</span>
+                    )}
                 </div>
+            </div>
+
+            {/* Footer: view link + actions */}
+            <div
+                className="mt-auto flex items-center justify-between gap-3 px-5 py-3"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button
+                    onClick={onSelect}
+                    className="text-sm font-semibold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
+                >
+                    View Details
+                    <i className="fa-duotone fa-regular fa-arrow-right text-xs" />
+                </button>
+                <CompanyActionsToolbar
+                    company={company}
+                    relationship={relationship}
+                    variant="icon-only"
+                    size="sm"
+                    onRefresh={onRefresh}
+                />
             </div>
         </article>
     );

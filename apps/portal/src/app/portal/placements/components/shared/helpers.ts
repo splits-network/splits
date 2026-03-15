@@ -58,7 +58,8 @@ export function timeAgo(date: string | null | undefined): string {
     return `${Math.floor(days / 30)}mo ago`;
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number | null | undefined): string {
+    if (amount == null || isNaN(amount)) return "\u2014";
     return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
@@ -67,7 +68,8 @@ export function formatCurrency(amount: number): string {
     }).format(amount);
 }
 
-export function formatCurrencyShort(amount: number): string {
+export function formatCurrencyShort(amount: number | null | undefined): string {
+    if (amount == null || isNaN(amount)) return "\u2014";
     if (amount >= 1000) {
         return `$${Math.round(amount / 1000)}K`;
     }

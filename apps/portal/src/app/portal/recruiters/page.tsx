@@ -20,6 +20,7 @@ import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
 import { useCompanyContext } from "./contexts/company-context";
 import { useGamification } from "@splits-network/shared-gamification";
+import { PresenceProvider, useRegisterPresence } from "@/contexts";
 
 export default function RecruitersBaselPage() {
     return <RecruitersContent />;
@@ -113,6 +114,15 @@ function RecruitersContent() {
         }
     }, [recruiters, registerEntities]);
 
+    // Register user IDs with presence context for batch fetching
+    const registerPresence = useRegisterPresence();
+    useEffect(() => {
+        const userIds = recruiters.map(r => r.users?.id).filter(Boolean) as string[];
+        if (userIds.length > 0) {
+            registerPresence(userIds);
+        }
+    }, [recruiters, registerPresence]);
+
     const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
         setSortBy(field);
         setSortOrder(order);
@@ -158,6 +168,7 @@ function RecruitersContent() {
     }
 
     return (
+        <PresenceProvider>
         <RecruitersAnimator>
             <HeaderSection stats={stats} />
 
@@ -247,5 +258,6 @@ function RecruitersContent() {
                 </div>
             </section>
         </RecruitersAnimator>
+        </PresenceProvider>
     );
 }

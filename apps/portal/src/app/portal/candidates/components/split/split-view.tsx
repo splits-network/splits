@@ -24,7 +24,7 @@ export function SplitView({
         <div className="flex border-2 border-base-300" style={{ minHeight: 600 }}>
             {/* Left list -- hidden on mobile when a candidate is selected */}
             <div
-                className={`w-full md:w-2/5 border-r-2 border-base-300 overflow-y-auto ${
+                className={`w-full md:w-1/3 border-r border-base-300 overflow-y-auto ${
                     selectedId ? "hidden md:block" : "block"
                 }`}
             >
@@ -42,7 +42,7 @@ export function SplitView({
             {/* Right detail -- MobileDetailOverlay handles mobile portal */}
             <MobileDetailOverlay
                 isOpen={!!selectedCandidate}
-                className="md:w-3/5 w-full bg-base-100"
+                className="md:w-2/3 w-full bg-base-100"
             >
                 {selectedCandidate ? (
                     <DetailLoader
@@ -51,12 +51,13 @@ export function SplitView({
                         onRefresh={onRefresh}
                     />
                 ) : (
-                    <div className="h-full flex items-center justify-center p-12">
+                    <div className="flex-1 flex items-center justify-center p-12">
                         <div className="text-center">
-                            <i className="fa-duotone fa-regular fa-hand-pointer text-5xl text-base-content/30 mb-4" />
-                            <h3 className="font-bold text-base text-base-content/30 tracking-tight">
-                                Select a candidate to view details
-                            </h3>
+                            <div className="w-16 h-16 mx-auto mb-6 bg-primary/10 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-user text-2xl text-primary" />
+                            </div>
+                            <h3 className="font-black text-xl tracking-tight mb-2">Select a Candidate</h3>
+                            <p className="text-sm text-base-content/50">Click a candidate on the left to view their profile</p>
                         </div>
                     </div>
                 )}

@@ -185,7 +185,6 @@ export default function PlacementsBaselPage() {
                                     clearFilters();
                                 }}
                                 className="btn btn-outline btn-sm"
-                                style={{ borderRadius: 0 }}
                             >
                                 Reset Filters
                             </button>

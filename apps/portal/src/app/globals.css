@@ -3,6 +3,10 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@theme {
+    --breakpoint-3xl: 1920px;
+}
+
 @import "./themes/light.css";
 @import "./themes/dark.css";
 @import "../../../../packages/basel-ui/src/animations/animations.css";

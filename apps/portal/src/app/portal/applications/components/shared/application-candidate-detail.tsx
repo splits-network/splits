@@ -16,28 +16,64 @@ import {
     candidateName,
     skillsList,
 } from "@/app/portal/candidates/components/shared/helpers";
-import { statusColor } from "@/app/portal/candidates/components/shared/status-color";
 
 /* ─── Tab Types ─────────────────────────────────────────────────────────── */
 
 type TabType = "overview" | "resume" | "applications" | "documents";
 
 const TABS = [
-    { value: "overview", label: "Overview", icon: "fa-duotone fa-regular fa-user" },
-    { value: "resume", label: "Resume", icon: "fa-duotone fa-regular fa-file-user" },
-    { value: "applications", label: "Applications", icon: "fa-duotone fa-regular fa-briefcase" },
-    { value: "documents", label: "Documents", icon: "fa-duotone fa-regular fa-file-lines" },
+    {
+        value: "overview",
+        label: "Overview",
+        icon: "fa-duotone fa-regular fa-user",
+    },
+    {
+        value: "resume",
+        label: "Resume",
+        icon: "fa-duotone fa-regular fa-file-user",
+    },
+    {
+        value: "applications",
+        label: "Applications",
+        icon: "fa-duotone fa-regular fa-briefcase",
+    },
+    {
+        value: "documents",
+        label: "Documents",
+        icon: "fa-duotone fa-regular fa-file-lines",
+    },
 ];
 
 /* ─── Application Candidate Detail ─────────────────────────────────────── */
 
 export function ApplicationCandidateDetail({
-    candidate,
+    candidate: initialCandidate,
 }: {
     candidate: Candidate;
 }) {
     const { getToken } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>("overview");
+    const [candidate, setCandidate] = useState<Candidate>(initialCandidate);
+
+    /* Fetch enriched candidate detail (with relationship status) */
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Candidate }>(
+                    `/candidates/${initialCandidate.id}/view/detail`,
+                );
+                if (!cancelled && res.data) setCandidate(res.data);
+            } catch {
+                // Fall back to initial candidate data
+            }
+        })();
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialCandidate.id]);
 
     /* Lazy-loaded applications */
     const [applications, setApplications] = useState<any[]>([]);
@@ -114,7 +150,7 @@ export function ApplicationCandidateDetail({
                 {/* Status badges */}
                 <div className="flex items-center gap-2 mt-2">
                     <span
-                        className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(candidate.verification_status)}`}
+                        className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1`}
                     >
                         {formatVerificationStatus(
                             candidate.verification_status,
@@ -266,12 +302,20 @@ function OverviewTab({
                         </p>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                             {candidate.open_to_remote && (
-                                <BaselBadge color="success" size="sm" variant="soft">
+                                <BaselBadge
+                                    color="success"
+                                    size="sm"
+                                    variant="soft"
+                                >
                                     Remote
                                 </BaselBadge>
                             )}
                             {candidate.open_to_relocation && (
-                                <BaselBadge color="info" size="sm" variant="soft">
+                                <BaselBadge
+                                    color="info"
+                                    size="sm"
+                                    variant="soft"
+                                >
                                     Relocation
                                 </BaselBadge>
                             )}

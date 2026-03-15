@@ -68,7 +68,7 @@ export function CompanyRolesTab({ companyId }: { companyId: string }) {
         return (
             <div className="flex flex-col items-center justify-center p-12 text-center">
                 <i className="fa-duotone fa-regular fa-briefcase text-3xl text-base-content/20 mb-3" />
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40">No open roles</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40">No open roles</p>
             </div>
         );
     }

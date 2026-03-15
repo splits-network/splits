@@ -79,8 +79,7 @@ export default function VerificationModal({
     return (
         <dialog className="modal modal-open modal-bottom sm:modal-middle">
             <div
-                className="modal-box max-w-lg w-full p-0"
-                style={{ borderRadius: 0 }}
+                className="modal-box max-w-lg w-full p-0 rounded-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -130,11 +129,10 @@ export default function VerificationModal({
                                 <span className="text-error">*</span>
                             </label>
                             <select
-                                className="select w-full"
+                                className="select w-full rounded-none"
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
                                 required
-                                style={{ borderRadius: 0 }}
                                 disabled={submitting}
                             >
                                 <option value="unverified">Unverified</option>
@@ -144,8 +142,7 @@ export default function VerificationModal({
                             </select>
                             <div className="mt-2 flex items-center gap-2">
                                 <div
-                                    className={`w-3 h-3 ${statusDot(status)}`}
-                                    style={{ borderRadius: 0 }}
+                                    className={`w-3 h-3 ${statusDot(status)} rounded-none`}
                                 />
                                 <span className="text-xs font-bold uppercase tracking-wider text-base-content/70">
                                     {status}
@@ -159,12 +156,11 @@ export default function VerificationModal({
                                 Verification Notes
                             </label>
                             <textarea
-                                className="textarea textarea-bordered w-full"
+                                className="textarea textarea-bordered w-full rounded-none"
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
                                 placeholder="Record any context about this verification decision..."
                                 rows={4}
-                                style={{ borderRadius: 0 }}
                                 disabled={submitting}
                             />
                             <p className="text-xs font-bold text-base-content/50 mt-1 uppercase tracking-wider">
@@ -183,8 +179,7 @@ export default function VerificationModal({
                                     <ul className="space-y-1.5">
                                         <li className="flex items-start gap-2">
                                             <span
-                                                className="w-2 h-2 mt-1.5 bg-info flex-shrink-0"
-                                                style={{ borderRadius: 0 }}
+                                                className="w-2 h-2 mt-1.5 bg-info flex-shrink-0 rounded-none"
                                             />
                                             <span className="text-base-content/80">
                                                 <strong className="text-base-content">
@@ -195,8 +190,7 @@ export default function VerificationModal({
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <span
-                                                className="w-2 h-2 mt-1.5 bg-warning flex-shrink-0"
-                                                style={{ borderRadius: 0 }}
+                                                className="w-2 h-2 mt-1.5 bg-warning flex-shrink-0 rounded-none"
                                             />
                                             <span className="text-base-content/80">
                                                 <strong className="text-base-content">
@@ -207,8 +201,7 @@ export default function VerificationModal({
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <span
-                                                className="w-2 h-2 mt-1.5 bg-success flex-shrink-0"
-                                                style={{ borderRadius: 0 }}
+                                                className="w-2 h-2 mt-1.5 bg-success flex-shrink-0 rounded-none"
                                             />
                                             <span className="text-base-content/80">
                                                 <strong className="text-base-content">
@@ -219,8 +212,7 @@ export default function VerificationModal({
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <span
-                                                className="w-2 h-2 mt-1.5 bg-error flex-shrink-0"
-                                                style={{ borderRadius: 0 }}
+                                                className="w-2 h-2 mt-1.5 bg-error flex-shrink-0 rounded-none"
                                             />
                                             <span className="text-base-content/80">
                                                 <strong className="text-base-content">
@@ -250,8 +242,7 @@ export default function VerificationModal({
                         <div className="flex gap-3 justify-end pt-2">
                             <button
                                 type="button"
-                                className="btn btn-outline"
-                                style={{ borderRadius: 0 }}
+                                className="btn btn-outline rounded-none"
                                 onClick={handleClose}
                                 disabled={submitting}
                             >
@@ -259,8 +250,7 @@ export default function VerificationModal({
                             </button>
                             <button
                                 type="submit"
-                                className="btn btn-primary"
-                                style={{ borderRadius: 0 }}
+                                className="btn btn-primary rounded-none"
                                 disabled={submitting}
                             >
                                 <ButtonLoading

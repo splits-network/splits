@@ -40,6 +40,7 @@ const networkV3Routes: V3RouteConfig[] = [
   { path: '/recruiter-candidates/:id/terminate', method: 'PATCH', auth: 'required' },
 
   // ── Recruiter Companies ─────────────────────────────────────────
+  { path: '/recruiter-companies/views/list', method: 'GET', auth: 'required' },
   { path: '/recruiter-companies', method: 'GET', auth: 'required' },
   { path: '/recruiter-companies/:id/view/detail', method: 'GET', auth: 'required' },
   { path: '/recruiter-companies/:id', method: 'GET', auth: 'required' },

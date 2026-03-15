@@ -10,6 +10,7 @@ import {
     lastSeenAgo,
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/candidate-detail";
+import { statusBorder } from "../shared/status-color";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
 import { relationshipBadge, jobTypeBadges, accountBadge } from "../shared/candidate-badges";
@@ -19,7 +20,7 @@ import {
     useGamification,
 } from "@splits-network/shared-gamification";
 import { Presence } from "@/components/presense";
-import { usePresence } from "@/hooks/use-presence";
+import { usePresenceStatus } from "@/contexts";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function TableRow({
@@ -43,16 +44,12 @@ export function TableRow({
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
     const candidateUserId = candidate.user_id;
-    const presence = usePresence([candidateUserId], {
-        enabled: Boolean(candidateUserId),
-    });
-    const presenceStatus = candidateUserId
-        ? presence[candidateUserId]?.status
-        : undefined;
+    const presenceData = usePresenceStatus(candidateUserId);
+    const presenceStatus = presenceData?.status;
 
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
-        : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
+        : `border-l-4 ${statusBorder(candidate.verification_status)} ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     return (
         <Fragment>
@@ -104,12 +101,12 @@ export function TableRow({
 
                 {/* Title */}
                 <td className="px-4 py-3 text-sm font-semibold text-base-content/70">
-                    {candidateTitle(candidate) || "\u2014"}
+                    {candidateTitle(candidate) || <span className="text-base-content/30">No title</span>}
                 </td>
 
                 {/* Location */}
                 <td className="px-4 py-3 text-sm text-base-content/60">
-                    {candidate.location || "\u2014"}
+                    {candidate.location || <span className="text-base-content/30">No location</span>}
                 </td>
 
                 {/* Info: relationship + presence + work type */}
@@ -138,13 +135,13 @@ export function TableRow({
 
                 {/* Salary */}
                 <td className="px-4 py-3 text-sm font-bold text-base-content">
-                    {salaryDisplay(candidate) || "\u2014"}
+                    {salaryDisplay(candidate) || <span className="text-base-content/30 font-normal">Not specified</span>}
                 </td>
 
                 {/* Last Online */}
                 <td className="px-4 py-3 text-sm text-base-content/50">
                     {lastSeenAgo(
-                        candidateUserId ? presence[candidateUserId]?.lastSeenAt : null,
+                        presenceData?.lastSeenAt ?? null,
                         candidate.last_active_at,
                     )}
                 </td>

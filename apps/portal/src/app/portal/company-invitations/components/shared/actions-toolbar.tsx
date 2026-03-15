@@ -238,8 +238,8 @@ export default function ConnectionActionsToolbar({
                 {actions.accept && (
                     <button
                         onClick={handleAccept}
-                        className={`btn btn-${size} btn-success gap-2`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-success gap-2 rounded-none`}
+
                     >
                         <i className="fa-duotone fa-regular fa-arrow-right" />
                         Review & Respond
@@ -248,8 +248,8 @@ export default function ConnectionActionsToolbar({
                 {actions.decline && (
                     <button
                         onClick={handleDecline}
-                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-ghost gap-2 text-error rounded-none`}
+
                         disabled={declining}
                     >
                         {declining ? (
@@ -263,8 +263,8 @@ export default function ConnectionActionsToolbar({
                 {actions.revoke && (
                     <button
                         onClick={handleRevoke}
-                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-ghost gap-2 text-error rounded-none`}
+
                         disabled={revoking}
                     >
                         {revoking ? (
@@ -278,8 +278,8 @@ export default function ConnectionActionsToolbar({
                 {actions.terminate && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
-                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-ghost gap-2 text-error rounded-none`}
+
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
                         End Relationship

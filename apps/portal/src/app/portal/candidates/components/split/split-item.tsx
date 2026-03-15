@@ -10,6 +10,7 @@ import {
     isNew,
     lastSeenAgo,
 } from "../shared/helpers";
+import { statusBorder } from "../shared/status-color";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
 import {
@@ -17,7 +18,7 @@ import {
     useGamification,
 } from "@splits-network/shared-gamification";
 import { Presence } from "@/components/presense";
-import { usePresence } from "@/hooks/use-presence";
+import { usePresenceStatus } from "@/contexts";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function SplitItem({
@@ -38,12 +39,8 @@ export function SplitItem({
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
     const candidateUserId = candidate.user_id;
-    const presence = usePresence([candidateUserId], {
-        enabled: Boolean(candidateUserId),
-    });
-    const presenceStatus = candidateUserId
-        ? presence[candidateUserId]?.status
-        : undefined;
+    const presenceData = usePresenceStatus(candidateUserId);
+    const presenceStatus = presenceData?.status;
 
     const rel = relationshipBadge(candidate);
     const acct = accountBadge(candidate);
@@ -55,14 +52,14 @@ export function SplitItem({
             className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
-                    : "bg-base-100 border-transparent"
+                    : `bg-base-100 ${statusBorder(candidate.verification_status)}`
             }`}
         >
             {/* Row 1: name + last seen */}
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                     {isNew(candidate) && (
-                        <i className="fa-duotone fa-regular fa-star text-primary text-sm flex-shrink-0" />
+                        <i className="fa-duotone fa-regular fa-sparkles text-warning text-sm flex-shrink-0" />
                     )}
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {candidateName(candidate)}
@@ -89,7 +86,7 @@ export function SplitItem({
                 </div>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {lastSeenAgo(
-                        candidateUserId ? presence[candidateUserId]?.lastSeenAt : null,
+                        presenceData?.lastSeenAt ?? null,
                         candidate.last_active_at,
                     )}
                 </span>
@@ -97,21 +94,19 @@ export function SplitItem({
 
             {/* Row 2: title + location */}
             <div className="flex items-center justify-between gap-2 mt-0.5">
-                <span className="text-xs text-base-content/60 truncate">
-                    {title || "No title"}
+                <span className="text-sm text-base-content/60 truncate">
+                    {title || <span className="text-base-content/30">No title</span>}
                 </span>
-                {candidate.location && (
-                    <span className="text-sm text-base-content/40 flex-shrink-0 truncate max-w-[40%]">
-                        <i className="fa-duotone fa-regular fa-location-dot mr-0.5" />
-                        {candidate.location}
-                    </span>
-                )}
+                <span className="text-sm text-base-content/40 flex-shrink-0 truncate max-w-[40%]">
+                    <i className="fa-duotone fa-regular fa-location-dot mr-0.5" />
+                    {candidate.location || <span className="text-base-content/30">No location</span>}
+                </span>
             </div>
 
             {/* Row 3: salary */}
-            <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs font-bold text-base-content/60">
-                    {salaryDisplay(candidate) || "Not specified"}
+            <div className="flex items-center gap-2 mt-0.5 pr-10">
+                <span className="text-sm font-bold text-base-content/60">
+                    {salaryDisplay(candidate) || <span className="text-base-content/30 font-normal">Not specified</span>}
                 </span>
             </div>
 

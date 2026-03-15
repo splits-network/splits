@@ -217,9 +217,9 @@ export function GridCard({
             </div>
 
             {/* Inline metadata: salary · location · type */}
-            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex items-center gap-3 overflow-hidden">
+            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
                 {metaItems.map((item, i) => (
-                    <span key={i} className={`flex items-center gap-1 shrink-0 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`}>
+                    <span key={i} className={`flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
                         <span className="truncate">{item.value}</span>
                     </span>

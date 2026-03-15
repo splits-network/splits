@@ -84,8 +84,8 @@ export function TableRow({
                 </td>
 
                 {/* Location */}
-                <td className="px-4 py-3 text-sm text-base-content/60">
-                    {job.location || "—"}
+                <td className={`px-4 py-3 text-sm ${job.location ? "text-base-content/60" : "text-base-content/30"}`}>
+                    {job.location || "Not specified"}
                 </td>
 
                 {/* Info: status + employment type + commute + 3rd party */}
@@ -123,8 +123,8 @@ export function TableRow({
                 </td>
 
                 {/* Salary */}
-                <td className="px-4 py-3 text-sm font-bold text-base-content">
-                    {salaryDisplay(job) || "—"}
+                <td className={`px-4 py-3 text-sm font-bold ${salaryDisplay(job) ? "text-base-content" : "text-base-content/30"}`}>
+                    {salaryDisplay(job) || "TBD"}
                 </td>
 
                 {/* Fee % */}

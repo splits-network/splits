@@ -205,7 +205,7 @@ export function CompanyDetailLoader({
             <div className="h-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <span className="text-sm uppercase tracking-[0.15em] font-bold text-base-content/40">
                         Loading details...
                     </span>
                 </div>

@@ -5,6 +5,7 @@ import { formatDate, formatCompanySize } from "../../types";
 import { statusColorName } from "./status-color";
 import { formatStatus, formatSalary } from "./helpers";
 import { BaselBadge } from "@splits-network/basel-ui";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
 import { BadgeGrid, useGamification } from "@splits-network/shared-gamification";
 
 export function CompanyOverviewTab({
@@ -27,18 +28,20 @@ export function CompanyOverviewTab({
         <div className="space-y-8 p-6">
             {/* Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                {company.headquarters_location && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Location</p>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Location</p>
+                    {company.headquarters_location ? (
                         <p className="font-bold text-sm">
                             <i className="fa-duotone fa-regular fa-location-dot mr-1" />
                             {company.headquarters_location}
                         </p>
-                    </div>
-                )}
-                {company.website && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Website</p>
+                    ) : (
+                        <p className="text-sm text-base-content/30">---</p>
+                    )}
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Website</p>
+                    {company.website ? (
                         <a
                             href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
                             target="_blank"
@@ -47,20 +50,26 @@ export function CompanyOverviewTab({
                         >
                             {company.website}
                         </a>
-                    </div>
-                )}
-                {company.industry && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Industry</p>
+                    ) : (
+                        <p className="text-sm text-base-content/30">---</p>
+                    )}
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Industry</p>
+                    {company.industry ? (
                         <p className="font-bold text-sm">{company.industry}</p>
-                    </div>
-                )}
-                {company.company_size && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Company Size</p>
+                    ) : (
+                        <p className="text-sm text-base-content/30">---</p>
+                    )}
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Company Size</p>
+                    {company.company_size ? (
                         <p className="font-bold text-sm">{formatCompanySize(company.company_size)}</p>
-                    </div>
-                )}
+                    ) : (
+                        <p className="text-sm text-base-content/30">---</p>
+                    )}
+                </div>
             </div>
 
             {/* Relationship Summary */}
@@ -86,18 +95,18 @@ export function CompanyOverviewTab({
             {/* Avg Salary (not in header stats strip) */}
             {company.avg_salary != null && (
                 <div className="bg-base-200 border border-base-300 border-l-4 border-l-primary p-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">Avg Salary</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-1">Avg Salary</p>
                     <p className="text-lg font-black tracking-tight">{formatSalary(company.avg_salary)}</p>
                 </div>
             )}
 
             {/* Tagline */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">Tagline</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-3">Tagline</p>
                 {company.tagline ? (
-                    <p className="text-lg italic text-base-content/70 border-l-4 border-l-primary pl-4">
-                        {company.tagline}
-                    </p>
+                    <div className="text-lg italic text-base-content/70 border-l-4 border-l-primary pl-4">
+                        <MarkdownRenderer content={company.tagline} />
+                    </div>
                 ) : (
                     <p className="text-sm text-base-content/30 italic">No tagline provided</p>
                 )}
@@ -105,7 +114,7 @@ export function CompanyOverviewTab({
 
             {/* About */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">About</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-3">About</p>
                 {company.description ? (
                     <p className="text-sm text-base-content/70 leading-relaxed">{company.description}</p>
                 ) : (
@@ -115,7 +124,7 @@ export function CompanyOverviewTab({
 
             {/* Social Links */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">Social</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-3">Social</p>
                 {company.linkedin_url || company.twitter_url || company.glassdoor_url ? (
                     <div className="flex items-center gap-4">
                         {company.linkedin_url && (
@@ -141,7 +150,7 @@ export function CompanyOverviewTab({
 
             {/* Tech Stack */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Tech Stack</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Tech Stack</p>
                 {techStack.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {techStack.map((skill) => (
@@ -155,7 +164,7 @@ export function CompanyOverviewTab({
 
             {/* Perks & Benefits */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Perks & Benefits</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Perks & Benefits</p>
                 {perks.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {perks.map((perk) => (
@@ -169,7 +178,7 @@ export function CompanyOverviewTab({
 
             {/* Culture & Values */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Culture & Values</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Culture & Values</p>
                 {cultureTags.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {cultureTags.map((tag) => (
@@ -184,7 +193,7 @@ export function CompanyOverviewTab({
             {/* Achievements */}
             {badges.length > 0 && (
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Achievements</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Achievements</p>
                     <BadgeGrid badges={badges} maxVisible={6} />
                 </div>
             )}

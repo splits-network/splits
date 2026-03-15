@@ -139,7 +139,7 @@ export function CompanyCallsTab({ companyId, companyName }: CompanyCallsTabProps
             {loading && calls.length === 0 ? (
                 <div className="py-12 text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                    <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                    <p className="text-sm uppercase tracking-[0.15em] font-bold text-base-content/40">
                         Loading calls...
                     </p>
                 </div>

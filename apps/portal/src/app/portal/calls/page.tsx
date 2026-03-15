@@ -6,7 +6,7 @@ import {
     PaginationControls,
     ErrorState,
 } from "@/hooks/use-standard-list";
-import { CallStatsBar } from "./components/shared/call-stats-bar";
+import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
 import { CallTable } from "./components/table/call-table";
 import { CallGrid } from "./components/grid/call-grid";
@@ -51,8 +51,8 @@ export default function CallsPage() {
 
     return (
         <div>
-            {/* Stats Bar */}
-            <CallStatsBar stats={stats} loading={statsLoading} />
+            {/* Header */}
+            <HeaderSection stats={stats} loading={statsLoading} />
 
             {/* Controls */}
             <ControlsBar

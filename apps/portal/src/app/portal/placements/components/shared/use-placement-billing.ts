@@ -47,7 +47,7 @@ export function usePlacementBilling(placementId: string): PlacementBillingData {
                             .catch(() => null),
                         client
                             .get<{ data: PayoutSchedule[] }>(`/payout-schedules`, {
-                                params: { filters: { placement_id: id }, limit: 50 },
+                                params: { placement_id: id, limit: 50 },
                             })
                             .catch(() => null),
                         client
@@ -57,7 +57,10 @@ export function usePlacementBilling(placementId: string): PlacementBillingData {
 
                 if (signal.cancelled) return;
 
-                setInvoice(invoiceRes?.data ?? null);
+                const rawInvoice = invoiceRes?.data;
+                setInvoice(
+                    Array.isArray(rawInvoice) ? rawInvoice[0] ?? null : rawInvoice ?? null,
+                );
                 setPayoutTransactions(txRes?.data ?? []);
                 setPayoutSchedules(schedulesRes?.data ?? []);
                 setEscrowHolds(escrowRes?.data ?? []);

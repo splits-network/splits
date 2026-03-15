@@ -5,24 +5,6 @@
 
 import type { BaselSemanticColor } from "@splits-network/basel-ui";
 
-export type ViewMode = "table" | "grid" | "split";
-
-/** Relationship status → Tailwind class string (bg + text) for raw className usage */
-export function statusColor(status?: string): string {
-    switch (status) {
-        case "active":
-            return "bg-success/10 text-success";
-        case "pending":
-            return "bg-warning/10 text-warning";
-        case "declined":
-            return "bg-error/10 text-error";
-        case "terminated":
-            return "bg-base-300 text-base-content/50";
-        default:
-            return "bg-base-300 text-base-content/50";
-    }
-}
-
 /** Relationship status → BaselSemanticColor name for use with BaselBadge */
 export function statusColorName(status?: string): BaselSemanticColor {
     switch (status) {

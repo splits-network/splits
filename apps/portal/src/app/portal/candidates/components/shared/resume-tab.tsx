@@ -42,7 +42,7 @@ function degreeLabel(d?: string): string {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+        <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">
             {children}
         </p>
     );
@@ -95,19 +95,19 @@ export function ResumeTab({ candidate }: { candidate: Candidate }) {
                     {r.total_years_experience != null && (
                         <div className="bg-base-100 p-4 text-center">
                             <p className="text-2xl font-black tracking-tight">{r.total_years_experience}</p>
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40">Years Exp.</p>
+                            <p className="text-sm uppercase tracking-[0.15em] text-base-content/40">Years Exp.</p>
                         </div>
                     )}
                     {r.highest_degree && (
                         <div className="bg-base-100 p-4 text-center">
                             <p className="text-2xl font-black tracking-tight">{degreeLabel(r.highest_degree)}</p>
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40">Highest Degree</p>
+                            <p className="text-sm uppercase tracking-[0.15em] text-base-content/40">Highest Degree</p>
                         </div>
                     )}
                     {r.skills_count != null && (
                         <div className="bg-base-100 p-4 text-center">
                             <p className="text-2xl font-black tracking-tight">{r.skills_count}</p>
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40">Skills</p>
+                            <p className="text-sm uppercase tracking-[0.15em] text-base-content/40">Skills</p>
                         </div>
                     )}
                 </div>

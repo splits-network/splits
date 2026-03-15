@@ -1,7 +1,7 @@
 "use client";
 
 import type { Placement } from "../../types";
-import { statusColorName } from "../shared/status-color";
+import { statusColorName, statusBorder } from "../shared/status-color";
 import { BaselBadge } from "@splits-network/basel-ui";
 import {
     candidateName,
@@ -26,10 +26,10 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-6 py-4 border-b border-base-300 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
-                    : "bg-base-100 border-transparent"
+                    : `bg-base-100 ${statusBorder(state)}`
             }`}
         >
             {/* Row 1: candidate name + time ago */}
@@ -52,7 +52,9 @@ export function SplitItem({
             {/* Row 3: job title + status */}
             <div className="flex items-center justify-between gap-2 mb-1">
                 <div className="text-sm text-base-content/50 truncate">
-                    <i className="fa-duotone fa-regular fa-briefcase mr-1" />
+                    <span className="tooltip tooltip-bottom" data-tip="Job title">
+                        <i className="fa-duotone fa-regular fa-briefcase mr-1" />
+                    </span>
                     {jobTitle(placement)}
                 </div>
                 <BaselBadge color={statusColorName(state)} size="xs" variant="soft">
@@ -62,11 +64,11 @@ export function SplitItem({
 
             {/* Row 4: salary + your share */}
             <div className="flex items-center gap-3">
-                <span className="text-sm font-bold text-base-content/70">
-                    {formatCurrency(placement.salary || 0)}
+                <span className={`text-sm font-bold ${placement.salary ? "text-base-content/70" : "text-base-content/30"}`}>
+                    {placement.salary ? formatCurrency(placement.salary) : "\u2014"}
                 </span>
-                <span className="text-sm font-bold text-primary">
-                    {formatCurrency(placement.recruiter_share || 0)} share
+                <span className={`text-sm font-bold ${placement.recruiter_share ? "text-primary" : "text-base-content/30"}`}>
+                    {placement.recruiter_share ? `${formatCurrency(placement.recruiter_share)} share` : "\u2014"}
                 </span>
             </div>
         </div>

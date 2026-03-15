@@ -3,7 +3,8 @@
 import { Fragment } from "react";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
-import { statusColor, statusBorder } from "../shared/status-color";
+import { statusBorder } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     recruiterLocation,
     formatStatus,
@@ -39,6 +40,9 @@ export function TableRow({
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
     const status = recruiter.status || "active";
+    const reputation = reputationDisplay(recruiter);
+    const experience = experienceDisplay(recruiter);
+    const specialties = recruiter.specialties || [];
 
     return (
         <Fragment>
@@ -46,13 +50,13 @@ export function TableRow({
                 onClick={onSelect}
                 className={`cursor-pointer transition-colors border-l-4 ${
                     isSelected
-                        ? `bg-primary/5 ${statusBorder(status)}`
-                        : `border-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`
+                        ? "bg-primary/5 border-l-primary"
+                        : `${statusBorder(status)} ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`
                 }`}
             >
                 <td className="px-4 py-3 w-8">
                     <i
-                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? "text-primary" : "text-base-content/40"}`}
+                        className={`fa-duotone fa-regular ${isSelected ? "fa-chevron-down" : "fa-chevron-right"} text-sm transition-transform ${isSelected ? "text-primary" : "text-base-content/30"}`}
                     />
                 </td>
                 <td className="px-4 py-3">
@@ -68,53 +72,57 @@ export function TableRow({
                                 {getInitials(name)}
                             </div>
                         )}
-                        <div className="flex items-center gap-2">
-                            {isNew(recruiter) && (
-                                <i className="fa-duotone fa-regular fa-sparkles text-sm text-warning" />
+                        <div>
+                            <div className="flex items-center gap-1.5">
+                                {isNew(recruiter) && (
+                                    <i className="fa-duotone fa-regular fa-sparkles text-sm text-warning" />
+                                )}
+                                <span className="font-bold text-sm">{name}</span>
+                            </div>
+                            {(level || recruiter.plan_tier) && (
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                    {level && <LevelBadge level={level} size="sm" />}
+                                    {recruiter.plan_tier && <PlanBadge tier={recruiter.plan_tier as PlanTier} />}
+                                </div>
                             )}
-                            <span className="font-bold text-sm">{name}</span>
-                            {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
-                            {recruiter.plan_tier && <PlanBadge tier={recruiter.plan_tier as PlanTier} />}
                         </div>
                     </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-base-content/70">
-                    {location || "\u2014"}
+                <td className={`px-4 py-3 text-sm ${location ? "text-base-content/70" : "text-base-content/30"}`}>
+                    {location || "Not specified"}
                 </td>
                 <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
-                        {(recruiter.specialties || [])
-                            .slice(0, 2)
-                            .map((s, i) => (
-                                <span
-                                    key={i}
-                                    className="text-sm uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5"
-                                >
-                                    {s}
-                                </span>
-                            ))}
-                        {(recruiter.specialties || []).length > 2 && (
-                            <span className="text-sm text-base-content/40">
-                                +{(recruiter.specialties || []).length - 2}
+                        {specialties.slice(0, 2).map((s) => (
+                            <BaselBadge key={s} variant="outline" size="xs">
+                                {s}
+                            </BaselBadge>
+                        ))}
+                        {specialties.length > 2 && (
+                            <span className="text-sm font-semibold text-base-content/40 self-center">
+                                +{specialties.length - 2}
                             </span>
+                        )}
+                        {specialties.length === 0 && (
+                            <span className="text-sm text-base-content/30">None</span>
                         )}
                     </div>
                 </td>
                 <td className="px-4 py-3 text-sm font-bold">
                     {placementsDisplay(recruiter)}
                 </td>
-                <td className="px-4 py-3 text-sm font-bold text-accent">
-                    {reputationDisplay(recruiter) || "\u2014"}
+                <td className={`px-4 py-3 text-sm font-bold ${reputation ? "text-accent" : "text-base-content/30"}`}>
+                    {reputation || "N/A"}
                 </td>
-                <td className="px-4 py-3 text-sm font-bold">
-                    {experienceDisplay(recruiter) || "\u2014"}
+                <td className={`px-4 py-3 text-sm font-bold ${experience ? "text-base-content" : "text-base-content/30"}`}>
+                    {experience || "N/A"}
                 </td>
                 <td className="px-4 py-3">
-                    <span className={`badge ${statusColor(status)}`}>
+                    <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} size="xs" variant="soft">
                         {formatStatus(status)}
-                    </span>
+                    </BaselBadge>
                 </td>
-                <td className="px-4 py-3 text-sm text-base-content/60">
+                <td className="px-4 py-3 text-sm text-base-content/50">
                     {joinedAgo(recruiter)}
                 </td>
                 <td

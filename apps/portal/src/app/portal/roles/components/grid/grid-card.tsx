@@ -46,11 +46,11 @@ export function GridCard({
     const commute = formatCommuteTypes(job.commute_types);
 
     // Inline metadata — always show all 4 items, muted when empty
-    const metaItems: { icon: string; color: string; value: string; muted: boolean }[] = [
-        { icon: "fa-dollar-sign", color: "text-success", value: salary || "TBD", muted: !salary },
-        { icon: "fa-handshake", color: "text-secondary", value: `${job.fee_percentage}%`, muted: false },
-        { icon: "fa-coins", color: "text-accent", value: payout || "N/A", muted: !payout },
-        { icon: "fa-users", color: "text-info", value: job.application_count !== undefined ? String(job.application_count) : "\u2014", muted: job.application_count === undefined },
+    const metaItems: { icon: string; color: string; value: string; muted: boolean; tooltip: string }[] = [
+        { icon: "fa-dollar-sign", color: "text-success", value: salary || "TBD", muted: !salary, tooltip: "Salary range" },
+        { icon: "fa-handshake", color: "text-secondary", value: `${job.fee_percentage}%`, muted: false, tooltip: "Split fee percentage" },
+        { icon: "fa-coins", color: "text-accent", value: payout || "N/A", muted: !payout, tooltip: "Estimated payout" },
+        { icon: "fa-users", color: "text-info", value: job.application_count !== undefined ? String(job.application_count) : "\u2014", muted: job.application_count === undefined, tooltip: "Total applicants" },
     ];
 
     return (
@@ -152,9 +152,9 @@ export function GridCard({
             </div>
 
             {/* Inline metadata: salary · fee · payout · applicants */}
-            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex items-center gap-3 overflow-hidden">
+            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
                 {metaItems.map((item, i) => (
-                    <span key={i} className={`flex items-center gap-1 shrink-0 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`}>
+                    <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
                         <span className="truncate">{item.value}</span>
                     </span>

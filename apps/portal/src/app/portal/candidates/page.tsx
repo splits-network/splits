@@ -15,6 +15,7 @@ import type { Candidate, CandidateFilters, CandidateScope } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { isNew } from "./components/shared/helpers";
 import { useGamification } from "@splits-network/shared-gamification";
+import { PresenceProvider, useRegisterPresence } from "@/contexts";
 import { CandidatesAnimator } from "./candidates-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -117,7 +118,7 @@ export default function CandidatesPage() {
         setSortOrder,
         updateItem,
     } = useStandardList<Candidate, CandidateFilters>({
-        endpoint: "/candidates",
+        endpoint: "/candidates/views/enriched",
         defaultFilters: { scope: scopeLoaded ? scope : "mine" },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
@@ -166,6 +167,15 @@ export default function CandidatesPage() {
         }
     }, [candidates, registerEntities]);
 
+    // Register user IDs with presence context for batch fetching
+    const registerPresence = useRegisterPresence();
+    useEffect(() => {
+        const userIds = candidates.map(c => c.user_id).filter(Boolean) as string[];
+        if (userIds.length > 0) {
+            registerPresence(userIds);
+        }
+    }, [candidates, registerPresence]);
+
     const stats = useMemo(
         () => ({
             total: pagination?.total || candidates.length,
@@ -185,7 +195,7 @@ export default function CandidatesPage() {
     }
 
     return (
-        <>
+        <PresenceProvider>
             <CandidatesAnimator>
                 <HeaderSection stats={stats} />
 
@@ -215,7 +225,7 @@ export default function CandidatesPage() {
                         {loading && candidates.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                <p className="text-sm uppercase tracking-[0.15em] font-bold text-base-content/40">
                                     Loading candidates...
                                 </p>
                             </div>
@@ -236,8 +246,7 @@ export default function CandidatesPage() {
                                             clearSearch();
                                             clearFilters();
                                         }}
-                                        className="btn btn-outline btn-sm"
-                                        style={{ borderRadius: 0 }}
+                                        className="btn btn-outline btn-sm rounded-none"
                                     >
                                         Clear Filters
                                     </button>
@@ -303,6 +312,6 @@ export default function CandidatesPage() {
                     />
                 )}
             </ModalPortal>
-        </>
+        </PresenceProvider>
     );
 }

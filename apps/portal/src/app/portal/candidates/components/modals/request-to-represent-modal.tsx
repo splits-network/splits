@@ -89,8 +89,7 @@ export default function RequestToRepresentModal({
     return (
         <dialog className="modal modal-open modal-bottom sm:modal-middle">
             <div
-                className="modal-box max-w-md w-full p-0"
-                style={{ borderRadius: 0 }}
+                className="modal-box max-w-md w-full p-0 rounded-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -135,8 +134,7 @@ export default function RequestToRepresentModal({
                             <div className="flex justify-end">
                                 <button
                                     type="button"
-                                    className="btn btn-primary"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-primary rounded-none"
                                     onClick={handleClose}
                                 >
                                     Done
@@ -166,8 +164,7 @@ export default function RequestToRepresentModal({
                             <div className="flex justify-end">
                                 <button
                                     type="button"
-                                    className="btn btn-primary"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-primary rounded-none"
                                     onClick={handleClose}
                                 >
                                     Done
@@ -233,8 +230,7 @@ export default function RequestToRepresentModal({
                             <div className="flex gap-3 justify-end pt-2">
                                 <button
                                     type="button"
-                                    className="btn btn-outline"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-outline rounded-none"
                                     onClick={handleClose}
                                     disabled={submitting}
                                 >
@@ -242,8 +238,7 @@ export default function RequestToRepresentModal({
                                 </button>
                                 <button
                                     type="button"
-                                    className="btn btn-primary"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-primary rounded-none"
                                     onClick={handleSubmit}
                                     disabled={submitting}
                                 >

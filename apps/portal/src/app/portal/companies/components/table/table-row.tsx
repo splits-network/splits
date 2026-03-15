@@ -18,6 +18,7 @@ import {
     extractCompany,
     extractRelationship,
 } from "../shared/helpers";
+import { statusBorder } from "../shared/status-color";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { CompanyDetailLoader } from "../shared/company-detail";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
@@ -55,7 +56,7 @@ export function TableRow({
 
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
-        : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
+        : `border-l-4 ${statusBorder(relationship?.status)} ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     return (
         <Fragment>
@@ -80,12 +81,12 @@ export function TableRow({
 
                 {/* Industry */}
                 <td className="px-4 py-3 text-sm font-semibold text-base-content/70">
-                    {industry || "---"}
+                    {industry || <span className="text-base-content/30">No industry</span>}
                 </td>
 
                 {/* Location */}
                 <td className="px-4 py-3 text-sm text-base-content/60">
-                    {location || "---"}
+                    {location || <span className="text-base-content/30">No location</span>}
                 </td>
 
                 {/* Info: badges */}

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Job } from "../../types";
-import { statusBadgeColor } from "../shared/status-color";
+import { statusBadgeColor, statusBorder } from "../shared/status-color";
 import { BaselBadge } from "@splits-network/basel-ui";
 import { employmentBadge, commuteBadges, thirdPartyBadge } from "../shared/role-badges";
 import {
@@ -39,14 +39,14 @@ export function SplitItem({
             className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
-                    : "bg-base-100 border-transparent"
+                    : `bg-base-100 ${statusBorder(job.status)}`
             }`}
         >
             {/* Row 1: title + posted time */}
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                     {isNew(job) && (
-                        <i className="fa-duotone fa-regular fa-star text-primary text-sm flex-shrink-0" />
+                        <i className="fa-duotone fa-regular fa-sparkles text-warning text-sm flex-shrink-0" />
                     )}
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {job.title}
@@ -67,20 +67,26 @@ export function SplitItem({
                 </span>
             </div>
 
-            {/* Row 2: company name */}
-            <div className="text-xs text-base-content/60 truncate mt-0.5">
-                {companyName(job)}
+            {/* Row 2: company + location */}
+            <div className="flex items-center gap-1.5 mt-0.5 truncate">
+                <span className="text-sm text-base-content/60 truncate">
+                    {companyName(job)}
+                </span>
+                <span className="text-base-content/20">·</span>
+                <span className={`text-sm truncate ${job.location ? "text-base-content/50" : "text-base-content/30"}`}>
+                    {job.location || "No location"}
+                </span>
             </div>
 
             {/* Row 3: salary + fee % + apps */}
             <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs font-bold text-base-content/60">
-                    {salaryDisplay(job) || "Competitive"}
+                <span className={`text-sm font-bold ${salaryDisplay(job) ? "text-base-content/60" : "text-base-content/30"}`}>
+                    {salaryDisplay(job) || "Salary TBD"}
                 </span>
-                <span className="text-xs font-bold text-accent">
+                <span className="text-sm font-bold text-accent">
                     {job.fee_percentage}%
                 </span>
-                <span className="text-xs text-base-content/40">
+                <span className="text-sm text-base-content/40">
                     {job.application_count ?? 0} apps
                 </span>
             </div>
@@ -125,6 +131,7 @@ export function SplitItem({
                     size="xs"
                     showActions={{ viewDetails: false }}
                     onRefresh={onRefresh}
+                    onUpdateItem={onUpdateItem}
                 />
             </div>
         </div>

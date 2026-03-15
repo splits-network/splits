@@ -36,6 +36,18 @@ export class EnrichedPlacementService {
     }
 
     const { data, total } = await this.repository.findEnriched(params, scopeFilters);
+
+    // Compute recruiter_share from splits for the current recruiter
+    if (context.recruiterId) {
+      for (const p of data) {
+        if (p.splits?.length) {
+          p.recruiter_share = p.splits
+            .filter((s: any) => s.recruiter_id === context.recruiterId)
+            .reduce((sum: number, s: any) => sum + (s.split_amount || 0), 0);
+        }
+      }
+    }
+
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
     return {

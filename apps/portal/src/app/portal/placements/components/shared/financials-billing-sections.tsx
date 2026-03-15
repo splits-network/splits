@@ -70,7 +70,7 @@ export function InvoiceSection({ invoice }: { invoice: PlacementInvoice | null }
     if (!invoice) {
         return (
             <div className="border-l-4 border-l-base-300 pl-6">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-3">
                     Invoice
                 </p>
                 <p className="text-sm text-base-content/40 italic">
@@ -83,7 +83,7 @@ export function InvoiceSection({ invoice }: { invoice: PlacementInvoice | null }
     return (
         <div className="border-l-4 border-l-primary pl-6">
             <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30">
                     Invoice
                 </p>
                 <BaselBadge color={INVOICE_COLOR[invoice.invoice_status]} size="sm" variant="soft">
@@ -153,7 +153,7 @@ export function PayoutTransactionsSection({
     if (transactions.length === 0) {
         return (
             <div className="border-l-4 border-l-base-300 pl-6">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-3">
                     Payout Transactions
                 </p>
                 <p className="text-sm text-base-content/40 italic">
@@ -165,7 +165,7 @@ export function PayoutTransactionsSection({
 
     return (
         <div className="border-l-4 border-l-primary pl-6">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-4">
                 Payout Transactions
             </p>
             <ul className="space-y-2">
@@ -219,7 +219,7 @@ export function PayoutScheduleSection({
     if (schedules.length === 0) {
         return (
             <div className="border-l-4 border-l-base-300 pl-6">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-3">
                     Payout Schedule
                 </p>
                 <p className="text-sm text-base-content/40 italic">
@@ -231,7 +231,7 @@ export function PayoutScheduleSection({
 
     return (
         <div className="border-l-4 border-l-primary pl-6">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-4">
                 Payout Schedule
             </p>
             <div className="bg-base-200 border border-base-300 divide-y divide-base-300">
@@ -270,7 +270,7 @@ export function EscrowHoldsSection({ holds }: { holds: EscrowHold[] }) {
 
     return (
         <div className="border-l-4 border-l-warning pl-6">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/30 mb-4">
                 Escrow Holds
             </p>
             <div className="bg-base-200 border border-base-300 divide-y divide-base-300">
@@ -304,7 +304,7 @@ export function EscrowHoldsSection({ holds }: { holds: EscrowHold[] }) {
 function Row({ label, value }: { label: string; value: string }) {
     return (
         <div className="flex justify-between px-4 py-3">
-            <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40">
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40">
                 {label}
             </span>
             <span className="text-sm font-semibold text-right">{value}</span>

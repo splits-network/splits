@@ -124,7 +124,7 @@ export function GridView({
     }, [selectedId]);
 
     return (
-        <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
+        <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
             {items.map((item) => {
                 const rId = rowId(item, isMarketplace);
                 const cId = companyId(item, isMarketplace);

@@ -17,9 +17,9 @@ const contentV3Routes: V3RouteConfig[] = [
   { resource: 'pages', auth: 'required' },
 
   // ── Navigation ─────────────────────────────────────────────────
-  { path: '/navigation', method: 'GET', auth: 'required' },
+  { path: '/navigation', method: 'GET', auth: 'none' },
   { path: '/navigation', method: 'POST', auth: 'required' },
-  { path: '/navigation/:id', method: 'GET', auth: 'required' },
+  { path: '/navigation/:id', method: 'GET', auth: 'none' },
   { path: '/navigation/:id', method: 'DELETE', auth: 'required' },
 
   // ── Content Images ─────────────────────────────────────────────

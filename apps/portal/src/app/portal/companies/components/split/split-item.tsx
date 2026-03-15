@@ -16,6 +16,7 @@ import {
     addedAgo,
     extractRelationship,
 } from "../shared/helpers";
+import { statusBorder } from "../shared/status-color";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
 
@@ -55,7 +56,7 @@ export function SplitItem({
             className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
-                    : "bg-base-100 border-transparent"
+                    : `bg-base-100 ${statusBorder(relationship?.status)}`
             }`}
         >
             {/* Row 1: name + time */}
@@ -69,20 +70,16 @@ export function SplitItem({
                 </span>
             </div>
 
-            {/* Row 2: industry */}
-            {industry && (
-                <div className="text-xs text-base-content/60 truncate mt-0.5">
-                    {industry}
-                </div>
-            )}
-
-            {/* Row 3: location */}
-            {location && (
-                <div className="text-xs text-base-content/50 truncate mt-0.5">
-                    <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                    {location}
-                </div>
-            )}
+            {/* Row 2: industry + location */}
+            <div className="flex items-center justify-between gap-2 mt-0.5">
+                <span className="text-sm text-base-content/60 truncate">
+                    {industry || <span className="text-base-content/30">No industry</span>}
+                </span>
+                <span className="text-sm text-base-content/40 flex-shrink-0 truncate max-w-[40%]">
+                    <i className="fa-duotone fa-regular fa-location-dot mr-0.5" />
+                    {location || <span className="text-base-content/30">No location</span>}
+                </span>
+            </div>
 
             {/* Row 4: badge bar */}
             <div className="flex flex-wrap items-center gap-1 mt-1.5 pr-10">
