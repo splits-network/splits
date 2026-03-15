@@ -1,93 +1,29 @@
+"use client";
+
+import { BaselPageHeader } from "@splits-network/basel-ui";
+import { useCompactHeaders } from "@/hooks/use-view-mode";
+
 interface HeaderSectionProps {
-    stats: {
-        total: number;
-        myCompanies: number;
-        pending: number;
-    };
+    stats: { total: number; myCompanies: number; pending: number };
 }
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
+    const { isCompact, toggleCompact, isLoaded } = useCompactHeaders();
+
     return (
-        <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
-            <div className="container mx-auto px-6 lg:px-12">
-                <div className="max-w-4xl">
-                    {/* Kicker */}
-                    <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
-                        <i className="fa-duotone fa-regular fa-building mr-2" />
-                        Company Network
-                    </p>
-
-                    {/* Headline */}
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="hero-headline-word inline-block scroll-reveal fade-up">
-                            Browse
-                        </span>{" "}
-                        <span className="hero-headline-word inline-block scroll-reveal fade-up text-primary">
-                            companies,
-                        </span>{" "}
-                        <span className="hero-headline-word inline-block scroll-reveal fade-up">
-                            build networks.
-                        </span>
-                    </h1>
-
-                    {/* Subtitle */}
-                    <p className="hero-subtitle text-lg text-base-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
-                        Discover companies, build relationships, and grow your
-                        split-fee recruiting network from a single view.
-                    </p>
-
-                    {/* Stats */}
-                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 scroll-reveal fade-up">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-building text-primary-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">
-                                    {stats.total}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Marketplace
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-building-user text-accent-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">
-                                    {stats.myCompanies}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">
-                                    My Companies
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-hourglass-half text-secondary-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">
-                                    {stats.pending}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Pending
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Diagonal clip-path accent */}
-            <div
-                className="absolute top-0 right-0 bottom-0 w-1/3 bg-primary/5 hidden lg:block"
-                style={{
-                    clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)",
-                }}
-            />
-        </section>
+        <BaselPageHeader
+            icon="fa-building"
+            kicker="Company Network"
+            headline={[{ text: "Browse" }, { text: "companies,", highlight: true }, { text: "build networks." }]}
+            subtitle="Discover companies, build relationships, and grow your split-fee recruiting network from a single view."
+            stats={[
+                { value: stats.total, label: "Marketplace", icon: "fa-building", color: "primary" },
+                { value: stats.myCompanies, label: "My Companies", icon: "fa-building-user", color: "accent" },
+                { value: stats.pending, label: "Pending", icon: "fa-hourglass-half", color: "secondary" },
+            ]}
+            isCompact={isCompact}
+            onToggle={toggleCompact}
+            isLoaded={isLoaded}
+        />
     );
 }

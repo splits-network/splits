@@ -190,6 +190,9 @@ export {
     type BaselSortOption,
     BaselExpandToggle,
     type BaselExpandToggleProps,
+    BaselPageHeader,
+    type BaselPageHeaderProps,
+    type BaselPageHeaderStat,
 } from './lists';
 
 // Panel components (detail panel header, tabs)

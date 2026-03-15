@@ -1,108 +1,31 @@
+"use client";
+
+import { BaselPageHeader } from "@splits-network/basel-ui";
+import { useCompactHeaders } from "@/hooks/use-view-mode";
 import { formatCurrencyShort } from "./helpers";
 
 interface HeaderSectionProps {
-    stats: {
-        total: number;
-        totalEarnings: number;
-        thisYearEarnings: number;
-        avgCommission: number;
-    };
+    stats: { total: number; totalEarnings: number; thisYearEarnings: number; avgCommission: number };
 }
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
+    const { isCompact, toggleCompact, isLoaded } = useCompactHeaders();
+
     return (
-        <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
-            <div className="container mx-auto px-6 lg:px-12">
-                <div className="max-w-4xl">
-                    {/* Kicker */}
-                    <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
-                        <i className="fa-duotone fa-regular fa-handshake mr-2" />
-                        Placements
-                    </p>
-
-                    {/* Headline */}
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="hero-headline-word inline-block scroll-reveal fade-up">
-                            Track every
-                        </span>{" "}
-                        <span className="hero-headline-word inline-block scroll-reveal fade-up text-primary">
-                            placement.
-                        </span>
-                    </h1>
-
-                    {/* Subtitle */}
-                    <p className="hero-subtitle text-lg text-base-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
-                        Monitor filled roles, guarantee periods, and split-fee
-                        commissions across your recruiting network.
-                    </p>
-
-                    {/* Stats */}
-                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 scroll-reveal fade-up">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-handshake text-primary-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">
-                                    {stats.total}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Placements
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-dollar-sign text-accent-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">
-                                    {formatCurrencyShort(stats.totalEarnings)}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Total Earnings
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-calendar-check text-secondary-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">
-                                    {formatCurrencyShort(
-                                        stats.thisYearEarnings,
-                                    )}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">
-                                    {new Date().getFullYear()} Earnings
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-chart-line text-base-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">
-                                    {formatCurrencyShort(stats.avgCommission)}
-                                </div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">
-                                    Avg. Commission
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Diagonal clip-path accent */}
-            <div
-                className="absolute top-0 right-0 bottom-0 w-1/3 bg-primary/5 hidden lg:block"
-                style={{
-                    clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)",
-                }}
-            />
-        </section>
+        <BaselPageHeader
+            icon="fa-handshake"
+            kicker="Placements"
+            headline={[{ text: "Track every" }, { text: "placement.", highlight: true }]}
+            subtitle="Monitor filled roles, guarantee periods, and split-fee commissions across your recruiting network."
+            stats={[
+                { value: stats.total, label: "Placements", icon: "fa-handshake", color: "primary" },
+                { value: formatCurrencyShort(stats.totalEarnings), label: "Total Earnings", icon: "fa-dollar-sign", color: "accent" },
+                { value: formatCurrencyShort(stats.thisYearEarnings), label: `${new Date().getFullYear()} Earnings`, icon: "fa-calendar-check", color: "secondary" },
+                { value: formatCurrencyShort(stats.avgCommission), label: "Avg. Commission", icon: "fa-chart-line", color: "base" },
+            ]}
+            isCompact={isCompact}
+            onToggle={toggleCompact}
+            isLoaded={isLoaded}
+        />
     );
 }

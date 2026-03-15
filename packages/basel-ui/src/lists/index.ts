@@ -40,3 +40,9 @@ export {
     BaselExpandToggle,
     type BaselExpandToggleProps,
 } from './basel-expand-toggle';
+
+export {
+    BaselPageHeader,
+    type BaselPageHeaderProps,
+    type BaselPageHeaderStat,
+} from './basel-page-header';
