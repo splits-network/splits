@@ -106,3 +106,42 @@ Key standards in `docs/guidance/`:
 - `pagination.md` — StandardListParams/StandardListResponse
 - `user-identification-standard.md` — Always use `clerkUserId`
 - `loading-patterns-usage-guide.md` — Standardized loading components
+
+## Design Context
+
+### Users
+- **Recruiters** (portal): Power users managing candidate pipelines, split-fee deals, and placements. They work in the app daily and need speed, clarity, and confidence that nothing falls through the cracks.
+- **Candidates** (applicant network): Job seekers reviewing opportunities and managing their profile. They need a trustworthy, straightforward experience.
+- **Companies** (corporate): Employers evaluating the platform. They need to quickly understand the value proposition and feel this is a professional, credible partner.
+
+### Brand Personality
+**Bold, Transparent, Energetic.** The interface should feel like a sharp, modern tool that moves fast and hides nothing. Strong visual presence without being loud. The brand takes a stand — split-fee recruiting done right, with radical transparency on fees and process.
+
+### Emotional Goals
+The interface should evoke:
+- **Confidence & Control** — "I'm on top of my pipeline, everything is clear"
+- **Speed & Efficiency** — "Nothing slows me down, minimal friction"
+- **Trust & Transparency** — "I see exactly what's happening, no surprises"
+- **Professional Pride** — "This tool reflects well on my work"
+
+### Aesthetic Direction
+- **Reference**: Stripe Dashboard — data-dense but elegant, professional financial feel
+- **Visual tone**: Sharp, minimal, zero-depth (0 border-radius, no shadows, no gradients)
+- **Colors**: Deep indigo primary (`#233876`), teal secondary (`#0f9d8a`), magenta accent (`#db2777`). Full light/dark theme support.
+- **Typography**: System font stack, bold headings, `text-sm` body in portal, `text-base` on public pages
+- **Icons**: FontAwesome 6 duotone inline icons
+- **Animations**: CSS-only keyframes with scroll reveal. Reduced motion respected automatically.
+- **Theme**: Light + dark mode via DaisyUI semantic tokens (`splits-light`, `splits-dark`)
+
+### Design Principles
+1. **Clarity over decoration** — Every element earns its place. No ornamental UI. If it doesn't help the user act, remove it.
+2. **Data density done right** — Show more information per screen (like Stripe), but with clear hierarchy so nothing feels cluttered.
+3. **Sharp and decisive** — Zero border-radius, no shadows, strong contrasts. The UI reflects the brand's boldness and transparency.
+4. **Framework-first** — Use DaisyUI semantic tokens and Basel UI components. Never build custom when the framework provides.
+5. **Speed is a feature** — System fonts, minimal assets, CSS-only animations. Performance is a design choice.
+
+### Accessibility
+- WCAG 2.1 AA compliance
+- Semantic color system with proper contrast ratios in both themes
+- Reduced motion support via `@media (prefers-reduced-motion)` in all animations
+- Text opacity hierarchy: `base-content` (primary), `base-content/70` (secondary), `base-content/50` (muted)

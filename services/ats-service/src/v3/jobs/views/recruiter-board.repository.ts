@@ -16,7 +16,8 @@ export class RecruiterBoardRepository {
     recruiterId: string,
     excludeEarlyAccess: boolean,
     involvedJobIds?: string[],
-    savedJobIds?: string[]
+    savedJobIds?: string[],
+    recruiterFirmIds?: string[]
   ): Promise<{ data: any[]; total: number }> {
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
@@ -41,11 +42,14 @@ export class RecruiterBoardRepository {
       query = query.eq('is_early_access', false);
     }
 
-    // Assigned filter
+    // Assigned filter — jobs owned by recruiter, from recruiter's firms, or with active involvement
     if (params.job_owner_filter === 'assigned' && involvedJobIds) {
       const orConditions = [
         `job_owner_recruiter_id.eq.${recruiterId}`,
       ];
+      if (recruiterFirmIds && recruiterFirmIds.length > 0) {
+        orConditions.push(`source_firm_id.in.(${recruiterFirmIds.join(',')})`);
+      }
       if (involvedJobIds.length > 0) {
         orConditions.push(`id.in.(${involvedJobIds.join(',')})`);
       }
@@ -136,6 +140,16 @@ export class RecruiterBoardRepository {
     const appIds = apps?.map(a => a.job_id) || [];
     const placementIds = placements?.map(p => p.job_id) || [];
     return [...new Set([...appIds, ...placementIds])];
+  }
+
+  async getRecruiterFirmIds(recruiterId: string): Promise<string[]> {
+    const { data } = await this.supabase
+      .from('firm_members')
+      .select('firm_id')
+      .eq('recruiter_id', recruiterId)
+      .eq('status', 'active');
+
+    return data?.map(m => m.firm_id) || [];
   }
 
   async getRecruiterTier(recruiterId: string): Promise<string> {

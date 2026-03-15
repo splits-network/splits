@@ -33,10 +33,14 @@ export class RecruiterBoardService {
     const tier = await this.repository.getRecruiterTier(context.recruiterId);
     const excludeEarlyAccess = tier !== 'partner';
 
-    // Get involved job IDs for assigned filter
+    // Get involved job IDs and firm IDs for assigned filter
     let involvedJobIds: string[] | undefined;
+    let recruiterFirmIds: string[] | undefined;
     if (params.job_owner_filter === 'assigned') {
-      involvedJobIds = await this.repository.getInvolvedJobIds(context.recruiterId);
+      [involvedJobIds, recruiterFirmIds] = await Promise.all([
+        this.repository.getInvolvedJobIds(context.recruiterId),
+        this.repository.getRecruiterFirmIds(context.recruiterId),
+      ]);
     }
 
     // Get saved job IDs for saved filter
@@ -54,7 +58,7 @@ export class RecruiterBoardService {
     }
 
     const { data: jobs, total } = await this.repository.findForBoard(
-      params, context.recruiterId, excludeEarlyAccess, involvedJobIds, savedJobIds
+      params, context.recruiterId, excludeEarlyAccess, involvedJobIds, savedJobIds, recruiterFirmIds
     );
 
     // Batch-fetch enrichments
