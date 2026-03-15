@@ -64,14 +64,15 @@ export function registerCandidateRoutes(
     return reply.send({ data });
   });
 
-  // POST /api/v3/candidates — create
+  // POST /api/v3/candidates — create (returns existing candidate if email matches)
   app.post('/api/v3/candidates', {
     schema: { body: createSchema },
   }, async (request, reply) => {
     const clerkUserId = getClerkUserId(request);
     if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
-    const data = await service.create(request.body as CreateCandidateInput, clerkUserId);
-    return reply.code(201).send({ data });
+    const result = await service.create(request.body as CreateCandidateInput, clerkUserId);
+    const status = result.meta.existing ? 200 : 201;
+    return reply.code(status).send({ data: result.candidate, meta: result.meta });
   });
 
   // PATCH /api/v3/candidates/:id — update

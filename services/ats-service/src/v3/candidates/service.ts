@@ -98,6 +98,12 @@ export class CandidateService {
       throw new BadRequestError('Invalid email format');
     }
 
+    // Check for existing candidate by email
+    const existing = await this.repository.findByEmail(input.email);
+    if (existing) {
+      return { candidate: existing, meta: { existing: true } };
+    }
+
     const now = new Date().toISOString();
     const record = {
       full_name: input.full_name,
@@ -122,7 +128,7 @@ export class CandidateService {
       createdBy: context.identityUserId,
     }, 'ats-service');
 
-    return candidate;
+    return { candidate, meta: { existing: false } };
   }
 
   async update(id: string, input: UpdateCandidateInput, clerkUserId: string) {

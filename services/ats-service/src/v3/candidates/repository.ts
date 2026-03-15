@@ -96,6 +96,17 @@ export class CandidateRepository {
     return data;
   }
 
+  async findByEmail(email: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('candidates')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
+
   async create(record: Record<string, any>): Promise<any> {
     const { data, error } = await this.supabase
       .from('candidates')
