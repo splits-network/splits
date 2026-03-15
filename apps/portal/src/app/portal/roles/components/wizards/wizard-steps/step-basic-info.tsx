@@ -236,39 +236,49 @@ export function StepBasicInfo({
 
             {/* Visibility modifiers */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <fieldset className="fieldset">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            className="toggle toggle-accent toggle-sm"
-                            checked={formData.is_early_access}
-                            onChange={(e) => onChange({ is_early_access: e.target.checked })}
-                        />
-                        <div>
-                            <span className="text-sm font-bold">Early Access</span>
-                            <p className="text-sm text-base-content/50">
-                                Only partner-tier recruiters can see this role until the activation date.
-                            </p>
-                        </div>
-                    </label>
-                </fieldset>
+                <label className={`flex items-center gap-3 cursor-pointer border-2 p-4 transition-colors ${
+                    formData.is_early_access
+                        ? "border-accent bg-accent/5"
+                        : "border-base-300"
+                }`}>
+                    <input
+                        type="checkbox"
+                        className="toggle toggle-accent toggle-sm"
+                        checked={formData.is_early_access}
+                        onChange={(e) => onChange({ is_early_access: e.target.checked })}
+                    />
+                    <div>
+                        <span className="text-sm font-bold flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-lock text-accent" />
+                            Early Access
+                        </span>
+                        <p className="text-sm text-base-content/50">
+                            Only partner-tier recruiters can see this role until the activation date.
+                        </p>
+                    </div>
+                </label>
 
-                <fieldset className="fieldset">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            className="toggle toggle-primary toggle-sm"
-                            checked={formData.is_priority}
-                            onChange={(e) => onChange({ is_priority: e.target.checked })}
-                        />
-                        <div>
-                            <span className="text-sm font-bold">Priority</span>
-                            <p className="text-sm text-base-content/50">
-                                Boost this role with featured placement and higher visibility.
-                            </p>
-                        </div>
-                    </label>
-                </fieldset>
+                <label className={`flex items-center gap-3 cursor-pointer border-2 p-4 transition-colors ${
+                    formData.is_priority
+                        ? "border-primary bg-primary/5"
+                        : "border-base-300"
+                }`}>
+                    <input
+                        type="checkbox"
+                        className="toggle toggle-primary toggle-sm"
+                        checked={formData.is_priority}
+                        onChange={(e) => onChange({ is_priority: e.target.checked })}
+                    />
+                    <div>
+                        <span className="text-sm font-bold flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-bolt text-primary" />
+                            Priority
+                        </span>
+                        <p className="text-sm text-base-content/50">
+                            Boost this role with featured placement and higher visibility.
+                        </p>
+                    </div>
+                </label>
             </div>
         </div>
     );
