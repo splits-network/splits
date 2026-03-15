@@ -52,6 +52,40 @@ export class CandidateListingRepository {
     return { data: data || [], total: count || 0 };
   }
 
+  /** Resolve clerk_user_id → candidate_id via users table */
+  async resolveCandidateId(clerkUserId: string): Promise<string | null> {
+    const { data: user } = await this.supabase
+      .from('users')
+      .select('id')
+      .eq('clerk_user_id', clerkUserId)
+      .maybeSingle();
+    if (!user) return null;
+
+    const { data: candidate } = await this.supabase
+      .from('candidates')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    return candidate?.id || null;
+  }
+
+  /** Batch fetch match scores for a candidate across multiple jobs */
+  async batchFetchMatchScores(candidateId: string, jobIds: string[]): Promise<Record<string, number>> {
+    if (jobIds.length === 0) return {};
+    const { data } = await this.supabase
+      .from('candidate_role_matches')
+      .select('job_id, match_score')
+      .eq('candidate_id', candidateId)
+      .eq('status', 'active')
+      .in('job_id', jobIds);
+
+    const map: Record<string, number> = {};
+    for (const row of data || []) {
+      map[row.job_id] = Number(row.match_score);
+    }
+    return map;
+  }
+
   async batchFetchSkills(jobIds: string[]): Promise<Record<string, any[]>> {
     if (jobIds.length === 0) return {};
     const { data } = await this.supabase

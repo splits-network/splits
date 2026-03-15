@@ -19,6 +19,7 @@ import {
 import RoleActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function GridCard({
     job,
@@ -33,6 +34,7 @@ export function GridCard({
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
+    const { isRecruiter } = useUserProfile();
     const { getLevel } = useGamification();
     const companyLevel = job.company_id ? getLevel(job.company_id) : undefined;
     const name = companyName(job);
@@ -115,14 +117,16 @@ export function GridCard({
                                 3rd Party
                             </BaselBadge>
                         )}
-                        <SaveBookmark
-                            entityType="job"
-                            entityId={job.id}
-                            isSaved={!!job.is_saved}
-                            savedRecordId={job.saved_record_id ?? null}
-                            size="sm"
-                            onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
-                        />
+                        {isRecruiter && (
+                            <SaveBookmark
+                                entityType="job"
+                                entityId={job.id}
+                                isSaved={!!job.is_saved}
+                                savedRecordId={job.saved_record_id ?? null}
+                                size="sm"
+                                onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
+                            />
+                        )}
                     </div>
                 </div>
 

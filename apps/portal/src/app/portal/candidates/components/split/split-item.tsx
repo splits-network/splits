@@ -18,6 +18,7 @@ import {
 } from "@splits-network/shared-gamification";
 import { Presence } from "@/components/presense";
 import { usePresence } from "@/hooks/use-presence";
+import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function SplitItem({
     candidate,
@@ -32,6 +33,7 @@ export function SplitItem({
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Candidate>) => void;
 }) {
+    const { isRecruiter } = useUserProfile();
     const title = candidateTitle(candidate);
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
@@ -65,14 +67,16 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {candidateName(candidate)}
                     </h4>
-                    <SaveBookmark
-                        entityType="candidate"
-                        entityId={candidate.id}
-                        isSaved={!!candidate.is_saved}
-                        savedRecordId={candidate.saved_record_id ?? null}
-                        size="xs"
-                        onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
-                    />
+                    {isRecruiter && (
+                        <SaveBookmark
+                            entityType="candidate"
+                            entityId={candidate.id}
+                            isSaved={!!candidate.is_saved}
+                            savedRecordId={candidate.saved_record_id ?? null}
+                            size="xs"
+                            onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
+                    )}
                     {level && <span className="ml-1 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
                     {acct && (
                         <span

@@ -16,10 +16,11 @@ export function registerCandidateDetailView(app: FastifyInstance, supabase: Supa
   app.get('/api/v3/jobs/:id/view/candidate-detail', {
     schema: { params: idParamSchema },
   }, async (request, reply) => {
-    // Auth is optional — public access allowed
+    // Auth is optional — enrich with match score when authenticated
+    const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
     const { id } = request.params as { id: string };
-    const data = await service.getDetail(id);
-    reply.header('Cache-Control', 'public, max-age=60');
+    const data = await service.getDetail(id, clerkUserId);
+    reply.header('Cache-Control', clerkUserId ? 'private, no-cache' : 'public, max-age=60');
     return reply.send({ data });
   });
 }

@@ -28,6 +28,7 @@ import {
 } from "@splits-network/shared-gamification";
 import { Presence } from "@/components/presense";
 import { usePresence } from "@/hooks/use-presence";
+import { useUserProfile } from "@/contexts/user-profile-context";
 
 const iconStyles = [
     "bg-primary text-primary-content",
@@ -49,6 +50,7 @@ export function GridCard({
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Candidate>) => void;
 }) {
+    const { isRecruiter } = useUserProfile();
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
     const name = candidateName(candidate);
@@ -151,14 +153,16 @@ export function GridCard({
                             size="sm"
                             status={presenceStatus}
                         />
-                        <SaveBookmark
-                            entityType="candidate"
-                            entityId={candidate.id}
-                            isSaved={!!candidate.is_saved}
-                            savedRecordId={candidate.saved_record_id ?? null}
-                            size="sm"
-                            onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
-                        />
+                        {isRecruiter && (
+                            <SaveBookmark
+                                entityType="candidate"
+                                entityId={candidate.id}
+                                isSaved={!!candidate.is_saved}
+                                savedRecordId={candidate.saved_record_id ?? null}
+                                size="sm"
+                                onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
+                            />
+                        )}
                     </div>
                 </div>
 

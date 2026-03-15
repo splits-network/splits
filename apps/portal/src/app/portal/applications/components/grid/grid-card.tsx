@@ -100,11 +100,12 @@ export function GridCard({
     const cInitials = companyInitials(company);
     const submittedDate = submittedDateLabel(application);
 
-    // Inline metadata fragments with semantic icons
-    const metaItems: { icon: string; color: string; value: string }[] = [];
-    if (salary) metaItems.push({ icon: "fa-dollar-sign", color: "text-success", value: salary });
-    if (location) metaItems.push({ icon: "fa-location-dot", color: "text-info", value: location });
-    if (employmentType) metaItems.push({ icon: "fa-briefcase", color: "text-secondary", value: employmentType });
+    // Inline metadata with semantic icons — always show all fields
+    const metaItems: { icon: string; color: string; value: string; muted: boolean }[] = [
+        { icon: "fa-dollar-sign", color: "text-success", value: salary || "Not listed", muted: !salary },
+        { icon: "fa-location-dot", color: "text-info", value: location || "Not listed", muted: !location },
+        { icon: "fa-briefcase", color: "text-secondary", value: employmentType || "Not listed", muted: !employmentType },
+    ];
 
     return (
         <article
@@ -145,41 +146,44 @@ export function GridCard({
                         <h3 className="text-lg font-black tracking-tight leading-tight text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
                         </h3>
-                        {headline && (
-                            <p className="text-sm text-base-content/50 truncate mt-0.5">
-                                {headline}
-                            </p>
+                        <p className={`text-sm truncate mt-0.5 ${headline ? "text-base-content/50" : "text-base-content/30"}`}>
+                            {headline || "No headline"}
+                        </p>
+                    </div>
+                    <div className="text-right shrink-0 pl-2 pt-0.5">
+                        {score !== null ? (
+                            <>
+                                <span className={`text-xl font-black leading-none ${SCORE_COLORS[scoreColor] || "text-base-content"}`}>
+                                    {score}%
+                                </span>
+                                <span className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 block mt-0.5">
+                                    AI Fit
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-xl font-black leading-none text-base-content/20">
+                                    &mdash;
+                                </span>
+                                <span className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/20 block mt-0.5">
+                                    AI Fit
+                                </span>
+                            </>
                         )}
                     </div>
-                    {score !== null && (
-                        <div className="text-right shrink-0 pl-2 pt-0.5">
-                            <span className={`text-xl font-black leading-none ${SCORE_COLORS[scoreColor] || "text-base-content"}`}>
-                                {score}%
-                            </span>
-                            <span className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 block mt-0.5">
-                                AI Fit
-                            </span>
-                        </div>
-                    )}
                 </div>
 
                 {/* Byline: Recruiter + date */}
-                {(recruiter || submittedDate) && (
-                    <div className="flex items-center gap-2 mt-3 text-sm text-base-content/40">
-                        {recruiter && (
-                            <span className="truncate">
-                                <i className="fa-duotone fa-regular fa-user-tie mr-1 text-primary/60" />
-                                {recruiter}
-                            </span>
-                        )}
-                        {recruiter && submittedDate && (
-                            <span className="text-base-content/20">&middot;</span>
-                        )}
-                        {submittedDate && (
-                            <span className="shrink-0">{submittedDate}</span>
-                        )}
-                    </div>
-                )}
+                <div className="flex items-center gap-2 mt-3 text-sm text-base-content/40">
+                    <span className={`truncate ${recruiter ? "" : "text-base-content/30"}`}>
+                        <i className={`fa-duotone fa-regular fa-user-tie mr-1 ${recruiter ? "text-primary/60" : "text-base-content/20"}`} />
+                        {recruiter || "No recruiter"}
+                    </span>
+                    <span className="text-base-content/20">&middot;</span>
+                    <span className={`shrink-0 ${submittedDate ? "" : "text-base-content/30"}`}>
+                        {submittedDate || "Not submitted"}
+                    </span>
+                </div>
             </div>
 
             {/* Pipeline Progress */}
@@ -213,16 +217,14 @@ export function GridCard({
             </div>
 
             {/* Inline metadata: salary · location · type */}
-            {metaItems.length > 0 && (
-                <div className="px-5 py-2.5 border-b border-base-300 text-sm text-base-content/50 flex items-center gap-3 overflow-hidden">
-                    {metaItems.map((item, i) => (
-                        <span key={i} className="flex items-center gap-1 shrink-0">
-                            <i className={`fa-duotone fa-regular ${item.icon} ${item.color} text-xs`} />
-                            <span className="truncate">{item.value}</span>
-                        </span>
-                    ))}
-                </div>
-            )}
+            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex items-center gap-3 overflow-hidden">
+                {metaItems.map((item, i) => (
+                    <span key={i} className={`flex items-center gap-1 shrink-0 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`}>
+                        <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
+                        <span className="truncate">{item.value}</span>
+                    </span>
+                ))}
+            </div>
 
             {/* Footer: company + actions */}
             <div className="mt-auto flex items-center justify-between gap-3 px-5 py-3">

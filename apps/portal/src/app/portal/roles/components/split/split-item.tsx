@@ -13,6 +13,7 @@ import {
 } from "../shared/helpers";
 import RoleActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
+import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function SplitItem({
     job,
@@ -27,6 +28,7 @@ export function SplitItem({
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
+    const { isRecruiter } = useUserProfile();
     const emp = employmentBadge(job.employment_type);
     const commutes = commuteBadges(job.commute_types);
     const thirdParty = thirdPartyBadge(job);
@@ -49,14 +51,16 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {job.title}
                     </h4>
-                    <SaveBookmark
-                        entityType="job"
-                        entityId={job.id}
-                        isSaved={!!job.is_saved}
-                        savedRecordId={job.saved_record_id ?? null}
-                        size="xs"
-                        onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
-                    />
+                    {isRecruiter && (
+                        <SaveBookmark
+                            entityType="job"
+                            entityId={job.id}
+                            isSaved={!!job.is_saved}
+                            savedRecordId={job.saved_record_id ?? null}
+                            size="xs"
+                            onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
+                    )}
                 </div>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {postedAgo(job)}

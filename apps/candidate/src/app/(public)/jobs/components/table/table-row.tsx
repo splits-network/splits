@@ -2,14 +2,14 @@
 
 import { Fragment } from "react";
 import type { Job } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     salaryDisplay,
     formatEmploymentType,
-    formatStatusLabel,
     isNew,
     postedAgo,
     companyName,
+    matchScoreTextColor,
 } from "../shared/helpers";
 import { JobDetailLoader } from "../shared/job-detail";
 
@@ -31,8 +31,8 @@ export function TableRow({
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const rowBase = isSelected
-        ? "bg-primary/5 border-l-4 border-l-primary"
-        : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
+        ? "bg-primary/5 border-l-2 border-l-primary"
+        : `${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     return (
         <Fragment>
@@ -73,29 +73,31 @@ export function TableRow({
                 </td>
 
                 {/* Location */}
-                <td className="px-4 py-3 text-sm text-base-content/60 hidden md:table-cell">
-                    {job.location || "\u2014"}
+                <td className={`px-4 py-3 text-sm hidden md:table-cell ${job.location ? "text-base-content/60" : "text-base-content/30"}`}>
+                    {job.location || "Not listed"}
                 </td>
 
                 {/* Salary */}
-                <td className="px-4 py-3 text-sm font-bold text-base-content hidden lg:table-cell">
-                    {salary || "\u2014"}
+                <td className={`px-4 py-3 text-sm font-bold hidden lg:table-cell ${salary ? "text-base-content" : "text-base-content/30 font-normal"}`}>
+                    {salary || "Not listed"}
                 </td>
 
                 {/* Type */}
                 <td className="px-4 py-3 hidden xl:table-cell">
-                    <span className="text-sm uppercase tracking-wider bg-base-200 text-base-content/50 px-2 py-1">
+                    <BaselBadge variant="outline" size="sm">
                         {formatEmploymentType(job.employment_type)}
-                    </span>
+                    </BaselBadge>
                 </td>
 
-                {/* Status */}
-                <td className="px-4 py-3">
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(job.status)}`}
-                    >
-                        {formatStatusLabel(job.status)}
-                    </span>
+                {/* Match */}
+                <td className="px-4 py-3 hidden lg:table-cell">
+                    {job.match_score != null ? (
+                        <span className={`text-sm font-black ${matchScoreTextColor(job.match_score)}`}>
+                            {Math.round(job.match_score)}%
+                        </span>
+                    ) : (
+                        <span className="text-sm text-base-content/30">&mdash;</span>
+                    )}
                 </td>
 
                 {/* Posted */}

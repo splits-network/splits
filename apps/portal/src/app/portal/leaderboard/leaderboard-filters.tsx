@@ -63,7 +63,7 @@ export function LeaderboardFilterBar({
                 onChange={(v) => onEntityTypeChange(v as EntityType)}
             />
 
-            <div className="sticky top-0 z-10 backdrop-blur-md bg-base-100/90 border-b border-base-300 py-4 flex flex-wrap gap-6 mt-4">
+            <div className="sticky z-30 backdrop-blur-md bg-base-100/90 border-b border-base-300 py-4 flex flex-wrap gap-6 mt-4" style={{ top: "calc(var(--header-h, 0px) + var(--banner-h, 0px))" }}>
                 <fieldset className="fieldset">
                     <label className="label text-xs font-bold uppercase tracking-widest text-base-content/40">
                         Period

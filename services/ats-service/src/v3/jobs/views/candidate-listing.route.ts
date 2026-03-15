@@ -16,9 +16,10 @@ export function registerCandidateListingView(app: FastifyInstance, supabase: Sup
   app.get('/api/v3/jobs/views/candidate-listing', {
     schema: { querystring: listQuerySchema },
   }, async (request, reply) => {
-    // Auth is optional for this view — public access allowed
-    const result = await service.getListing(request.query as JobListParams);
-    reply.header('Cache-Control', 'public, max-age=60');
+    // Auth is optional — enrich with match scores when authenticated
+    const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
+    const result = await service.getListing(request.query as JobListParams, clerkUserId);
+    reply.header('Cache-Control', clerkUserId ? 'private, no-cache' : 'public, max-age=60');
     return reply.send(result);
   });
 }

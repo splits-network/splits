@@ -27,6 +27,35 @@ export class CandidateDetailRepository {
     return data;
   }
 
+  /** Resolve clerk_user_id → candidate_id via users table */
+  async resolveCandidateId(clerkUserId: string): Promise<string | null> {
+    const { data: user } = await this.supabase
+      .from('users')
+      .select('id')
+      .eq('clerk_user_id', clerkUserId)
+      .maybeSingle();
+    if (!user) return null;
+
+    const { data: candidate } = await this.supabase
+      .from('candidates')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    return candidate?.id || null;
+  }
+
+  /** Fetch match score for a specific candidate + job */
+  async findMatchScore(candidateId: string, jobId: string): Promise<number | null> {
+    const { data } = await this.supabase
+      .from('candidate_role_matches')
+      .select('match_score')
+      .eq('candidate_id', candidateId)
+      .eq('job_id', jobId)
+      .eq('status', 'active')
+      .maybeSingle();
+    return data ? Number(data.match_score) : null;
+  }
+
   async findRequirements(jobId: string): Promise<any[]> {
     const { data, error } = await this.supabase
       .from('job_requirements')

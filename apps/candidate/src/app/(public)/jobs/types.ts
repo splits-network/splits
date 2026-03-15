@@ -25,6 +25,7 @@ export interface Job {
     show_salary_range?: boolean;
     guarantee_days?: number | null;
     status?: string;
+    match_score?: number | null;
     updated_at?: string;
     created_at?: string | Date;
     // Relation

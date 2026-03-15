@@ -27,7 +27,8 @@ export function BaselControlsBarShell({
 }: BaselControlsBarShellProps) {
     return (
         <section
-            className={`controls-bar scroll-reveal fade-in sticky top-0 bg-base-100 border-b-2 border-base-300 ${className ?? ""}`}
+            className={`controls-bar scroll-reveal fade-in sticky z-30 bg-base-100 border-b-2 border-base-300 ${className ?? ""}`}
+            style={{ top: "calc(var(--header-h, 0px) + var(--banner-h, 0px))" }}
         >
             <div className="container mx-auto px-6 lg:px-12 py-4">
                 <div className="flex flex-col gap-3">
