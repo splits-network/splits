@@ -64,7 +64,7 @@ export default function HeaderSection({
                                 placeholder="Search by name, specialty, or location..."
                                 value={searchInput}
                                 onChange={(e) => onSearchChange(e.target.value)}
-                                className="input input-bordered w-full pl-11 bg-neutral-content/10 border-neutral-content/20 text-base-content placeholder:text-base-content/30 text-sm font-medium focus:border-primary focus:outline-none"
+                                className="input input-bordered w-full pl-11  border-neutral-content/20 text-base-content placeholder:text-base-content/30 text-sm font-medium focus:border-primary focus:outline-none"
                                 style={{ borderRadius: 0 }}
                             />
                             {searchInput && (

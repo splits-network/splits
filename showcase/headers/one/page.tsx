@@ -530,7 +530,7 @@ export default function HeadersOne() {
                             ].map((feat) => (
                                 <span
                                     key={feat}
-                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-neutral-content/10 text-base-content/60"
+                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider  text-base-content/60"
                                 >
                                     {feat}
                                 </span>
@@ -780,12 +780,12 @@ export default function HeadersOne() {
 
                         <div className="bg-neutral-content/5 p-10">
                             <div className="space-y-4">
-                                <div className="h-3 bg-neutral-content/10 w-3/4" />
-                                <div className="h-3 bg-neutral-content/10 w-full" />
-                                <div className="h-3 bg-neutral-content/10 w-5/6" />
+                                <div className="h-3  w-3/4" />
+                                <div className="h-3  w-full" />
+                                <div className="h-3  w-5/6" />
                                 <div className="h-20 bg-neutral-content/5 mt-6" />
-                                <div className="h-3 bg-neutral-content/10 w-2/3" />
-                                <div className="h-3 bg-neutral-content/10 w-4/5" />
+                                <div className="h-3  w-2/3" />
+                                <div className="h-3  w-4/5" />
                             </div>
                         </div>
                     </div>

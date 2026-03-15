@@ -178,14 +178,13 @@ function SearchPageInner() {
                     {/* Search bar */}
                     <div className="scroll-reveal fade-up max-w-2xl">
                         <div className="relative">
-                            <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40" />
                             <input
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={handleSearchKeyDown}
                                 placeholder="Search candidates, jobs, companies, recruiters..."
-                                className="input w-full pl-12 pr-24 bg-base-content/10 border-base-content/10 text-base-content placeholder:text-base-content/30 focus:border-primary focus:outline-none h-14 text-lg"
+                                className="input w-full pl-12 pr-24 border-base-content/10 text-base-content placeholder:text-base-content/30 focus:border-primary focus:outline-none h-14 text-lg"
                                 autoFocus
                             />
                             <button
@@ -197,6 +196,7 @@ function SearchPageInner() {
                             >
                                 Search
                             </button>
+                            <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 " />
                         </div>
                     </div>
                 </div>

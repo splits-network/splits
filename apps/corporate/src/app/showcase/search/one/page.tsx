@@ -214,7 +214,7 @@ export default function SearchOne() {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Search jobs, skills, companies..."
-                                className="input w-full pl-12 pr-24 bg-neutral-content/10 border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-coral focus:outline-none h-14 text-lg"
+                                className="input w-full pl-12 pr-24  border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-coral focus:outline-none h-14 text-lg"
                             />
                             <button className="btn btn-primary absolute right-1.5 top-1/2 -translate-y-1/2">
                                 Search

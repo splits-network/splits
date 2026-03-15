@@ -169,7 +169,7 @@ function SearchPageInner() {
                                 onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={handleSearchKeyDown}
                                 placeholder="Search roles, companies, recruiters..."
-                                className="input w-full pl-12 pr-24 bg-neutral-content/10 border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-primary focus:outline-none h-14 text-lg"
+                                className="input w-full pl-12 pr-24  border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-primary focus:outline-none h-14 text-lg"
                                 autoFocus
                             />
                             <button
@@ -663,9 +663,9 @@ export default function SearchPage() {
                 <main className="min-h-screen bg-base-100">
                     <section className="bg-base-300 text-base-content py-14 lg:py-18">
                         <div className="container mx-auto px-6 lg:px-12">
-                            <div className="h-6 w-32 bg-neutral-content/10 mb-4 animate-pulse" />
-                            <div className="h-12 w-64 bg-neutral-content/10 mb-6 animate-pulse" />
-                            <div className="h-14 max-w-2xl bg-neutral-content/10 animate-pulse" />
+                            <div className="h-6 w-32  mb-4 animate-pulse" />
+                            <div className="h-12 w-64  mb-6 animate-pulse" />
+                            <div className="h-14 max-w-2xl  animate-pulse" />
                         </div>
                     </section>
                 </main>

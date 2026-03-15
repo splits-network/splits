@@ -236,7 +236,7 @@ export default function DetailsOne() {
                             ].map((tag) => (
                                 <span
                                     key={tag.text}
-                                    className="detail-meta scroll-reveal fade-up flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
+                                    className="detail-meta scroll-reveal fade-up flex items-center gap-1.5 px-3 py-1.5  text-sm"
                                 >
                                     <i
                                         className={`${tag.icon} text-xs text-secondary`}

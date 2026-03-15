@@ -22,7 +22,7 @@ export default function FirmCardsShowcase() {
                         <div className="flex gap-1">
                             <button
                                 onClick={() => setView("card")}
-                                className="px-4 py-1.5 text-sm font-semibold bg-neutral-content/10 hover:bg-neutral-content/20 transition-all"
+                                className="px-4 py-1.5 text-sm font-semibold  hover:bg-neutral-content/20 transition-all"
                             >
                                 Card
                             </button>

@@ -293,7 +293,7 @@ export default function JobDetailClient({
                                 {metaTags.map((tag, i) => (
                                     <span
                                         key={`${i}-${tag.text}`}
-                                        className="scroll-reveal fade-up detail-meta flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
+                                        className="scroll-reveal fade-up detail-meta flex items-center gap-1.5 px-3 py-1.5  text-sm"
                                     >
                                         <i
                                             className={`${tag.icon} text-xs text-secondary`}

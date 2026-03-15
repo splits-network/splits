@@ -146,7 +146,7 @@ export default function FootersOne() {
                             ].map((feat) => (
                                 <span
                                     key={feat}
-                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider bg-neutral-content/10 text-base-content/60"
+                                    className="px-3 py-1 text-sm font-semibold uppercase tracking-wider  text-base-content/60"
                                 >
                                     {feat}
                                 </span>

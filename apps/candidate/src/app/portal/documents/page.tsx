@@ -29,9 +29,9 @@ function DocumentsLoading() {
             <div className="bg-neutral py-10 sm:py-16 lg:py-20">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-12">
                     <div className="max-w-4xl">
-                        <div className="h-4 w-32 bg-neutral-content/10 mb-6" />
-                        <div className="h-12 w-80 bg-neutral-content/10 mb-4" />
-                        <div className="h-6 w-64 bg-neutral-content/10" />
+                        <div className="h-4 w-32  mb-6" />
+                        <div className="h-12 w-80  mb-4" />
+                        <div className="h-6 w-64 " />
                     </div>
                 </div>
             </div>

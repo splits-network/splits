@@ -120,10 +120,10 @@ export default function OnboardingOne() {
                     {steps.map((step) => (
                         <div
                             key={step.id}
-                            className={`onboard-step-indicator scroll-reveal fade-up flex items-center gap-3 px-4 py-3 transition-all ${currentStep === step.id ? "bg-neutral-content/10" : currentStep > step.id ? "opacity-60" : "opacity-30"}`}
+                            className={`onboard-step-indicator scroll-reveal fade-up flex items-center gap-3 px-4 py-3 transition-all ${currentStep === step.id ? "" : currentStep > step.id ? "opacity-60" : "opacity-30"}`}
                         >
                             <div
-                                className={`w-8 h-8 flex items-center justify-center text-xs font-bold flex-shrink-0 ${currentStep > step.id ? "bg-success text-success-content" : currentStep === step.id ? "bg-primary text-primary-content" : "bg-neutral-content/10"}`}
+                                className={`w-8 h-8 flex items-center justify-center text-xs font-bold flex-shrink-0 ${currentStep > step.id ? "bg-success text-success-content" : currentStep === step.id ? "bg-primary text-primary-content" : ""}`}
                             >
                                 {currentStep > step.id ? (
                                     <i className="fa-solid fa-check" />

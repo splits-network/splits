@@ -184,7 +184,7 @@ export function ServiceStatusDebugger() {
                 </div>
 
                 {/* Divider */}
-                <div className="h-px bg-neutral-content/10" />
+                <div className="h-px " />
 
                 {/* Banner Previews */}
                 <div className="space-y-1.5">

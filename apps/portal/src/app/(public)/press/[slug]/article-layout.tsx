@@ -101,7 +101,7 @@ export function ArticleLayout({
                             ].map((tag) => (
                                 <span
                                     key={tag.text}
-                                    className="scroll-reveal fade-up flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
+                                    className="scroll-reveal fade-up flex items-center gap-1.5 px-3 py-1.5  text-sm"
                                 >
                                     <i
                                         className={`${tag.icon} text-xs text-secondary`}
@@ -117,7 +117,7 @@ export function ArticleLayout({
                                 {article.tags.map((tag) => (
                                     <span
                                         key={tag}
-                                        className="scroll-reveal fade-up px-3 py-1 bg-neutral-content/10 text-xs font-semibold text-base-content/60 uppercase tracking-wider"
+                                        className="scroll-reveal fade-up px-3 py-1  text-xs font-semibold text-base-content/60 uppercase tracking-wider"
                                     >
                                         {tag}
                                     </span>

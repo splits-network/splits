@@ -155,7 +155,7 @@ export default function ATSConfigPanel({
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-ghost btn-sm btn-circle text-base-content hover:bg-neutral-content/10"
+                        className="btn btn-ghost btn-sm btn-circle text-base-content hover:"
                     >
                         <i className="fa-solid fa-xmark text-lg" />
                     </button>

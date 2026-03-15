@@ -248,7 +248,7 @@ export function OnboardingPage() {
                                 key={step.id}
                                 className={`scroll-reveal fade-up flex items-center gap-3 px-4 py-3 transition-all ${
                                     isActive
-                                        ? "bg-neutral-content/10"
+                                        ? ""
                                         : isCompleted
                                           ? "opacity-60"
                                           : "opacity-30"
@@ -260,7 +260,7 @@ export function OnboardingPage() {
                                             ? "bg-success text-success-content"
                                             : isActive
                                               ? "bg-primary text-primary-content"
-                                              : "bg-neutral-content/10"
+                                              : ""
                                     }`}
                                 >
                                     {isCompleted ? (
