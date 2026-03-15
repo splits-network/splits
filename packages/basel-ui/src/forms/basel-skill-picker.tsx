@@ -25,6 +25,8 @@ export interface BaselSkillPickerProps {
     maxSkills?: number;
     /** Label text */
     label?: string;
+    /** Open dropdown above the input instead of below (useful near container bottom) */
+    dropUp?: boolean;
     /** Additional className on the container */
     className?: string;
 }
@@ -39,12 +41,14 @@ export function BaselSkillPicker({
     placeholder = "Search skills...",
     maxSkills,
     label,
+    dropUp = false,
     className,
 }: BaselSkillPickerProps) {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<SkillOption[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [highlightIndex, setHighlightIndex] = useState(-1);
     const inputRef = useRef<HTMLInputElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -91,6 +95,7 @@ export function BaselSkillPicker({
     const handleInputChange = useCallback(
         (value: string) => {
             setQuery(value);
+            setError(null);
             if (debounceRef.current) clearTimeout(debounceRef.current);
             debounceRef.current = setTimeout(() => search(value), 300);
         },
@@ -119,11 +124,12 @@ export function BaselSkillPicker({
     const handleCreate = useCallback(async () => {
         if (!query.trim() || atMax) return;
         setIsLoading(true);
+        setError(null);
         try {
             const skill = await createFn(query.trim());
             addSkill(skill);
         } catch {
-            // Silently fail — user can retry
+            setError("Failed to create skill. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -228,7 +234,9 @@ export function BaselSkillPicker({
                 {isOpen && totalItems > 0 && (
                     <div
                         ref={dropdownRef}
-                        className="absolute top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 shadow-lg max-h-60 overflow-y-auto"
+                        className={`absolute left-0 right-0 z-50 bg-base-100 border border-base-300 shadow-lg max-h-60 overflow-y-auto ${
+                            dropUp ? "bottom-full mb-1" : "top-full mt-1"
+                        }`}
                     >
                         <ul className="menu menu-sm p-1 gap-0.5">
                             {filteredResults.map((skill, i) => (
@@ -259,6 +267,10 @@ export function BaselSkillPicker({
                     </div>
                 )}
             </div>
+
+            {error && (
+                <p className="text-sm text-error mt-1.5">{error}</p>
+            )}
 
             {maxSkills && (
                 <p className="text-xs text-base-content/30 mt-1.5">

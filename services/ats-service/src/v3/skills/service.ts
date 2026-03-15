@@ -1,7 +1,7 @@
 /**
  * Skills V3 Service — Business Logic
  *
- * Anyone can list/search skills. Admins can create/delete.
+ * Anyone authenticated can list/search/create skills. Admins can delete.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -35,9 +35,6 @@ export class SkillService {
 
   async create(input: CreateSkillInput, clerkUserId: string) {
     const context = await this.accessResolver.resolve(clerkUserId);
-    if (!context.isPlatformAdmin) {
-      throw new ForbiddenError('Only admins can create skills');
-    }
 
     const slug = input.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const existing = await this.repository.findBySlug(slug);

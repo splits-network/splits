@@ -54,6 +54,7 @@ export function StepSkills({
                     createFn={createFn}
                     placeholder="Search for preferred skills..."
                     maxSkills={20}
+                    dropUp
                 />
             </div>
         </div>
