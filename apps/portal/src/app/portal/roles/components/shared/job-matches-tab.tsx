@@ -155,9 +155,9 @@ export function JobMatchesTab({
             {isRecruiter && !hasEntitlement("ai_match_scoring") && <UpgradePrompt entitlement="ai_match_scoring" variant="card" />}
 
             {matches.length === 0 ? (
-                <div className="text-center py-12 text-base-content/40">
-                    <i className="fa-duotone fa-regular fa-bullseye text-3xl mb-3 block" />
-                    <p className="text-sm font-semibold">
+                <div className="text-center py-12">
+                    <i className="fa-duotone fa-regular fa-bullseye text-3xl text-primary/20 mb-3 block" />
+                    <p className="text-sm font-semibold text-base-content/40">
                         No matched candidates yet
                     </p>
                 </div>

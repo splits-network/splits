@@ -33,8 +33,9 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
     return (
         <div className="space-y-8">
             {/* Recruiter Description */}
-            <div className="border-l-4 border-l-primary pl-6">
+            <div className="border-l-4 border-l-warning pl-6">
                 <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    <i className="fa-duotone fa-regular fa-lock text-warning mr-1.5" />
                     Recruiter Brief
                 </h3>
                 {job.recruiter_description ? (
@@ -51,6 +52,7 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                 <div className="bg-base-100 p-4">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        <i className="fa-duotone fa-regular fa-car text-base-content/20 mr-1" />
                         Commute
                     </p>
                     <p className={`font-bold text-sm ${!commute ? "text-base-content/30 italic font-normal" : ""}`}>
@@ -59,6 +61,7 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
                 </div>
                 <div className="bg-base-100 p-4">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        <i className="fa-duotone fa-regular fa-sitemap text-base-content/20 mr-1" />
                         Department
                     </p>
                     <p className={`font-bold text-sm ${!job.department ? "text-base-content/30 italic font-normal" : ""}`}>
@@ -67,6 +70,7 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
                 </div>
                 <div className="bg-base-100 p-4">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        <i className="fa-duotone fa-regular fa-shield-halved text-base-content/20 mr-1" />
                         Guarantee
                     </p>
                     <p className={`font-bold text-sm ${job.guarantee_days == null ? "text-base-content/30 italic font-normal" : ""}`}>
@@ -75,6 +79,7 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
                 </div>
                 <div className="bg-base-100 p-4">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        <i className="fa-duotone fa-regular fa-signal text-base-content/20 mr-1" />
                         Level
                     </p>
                     <p className={`font-bold text-sm ${!level ? "text-base-content/30 italic font-normal" : ""}`}>
@@ -83,17 +88,19 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
                 </div>
                 <div className="bg-base-100 p-4">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">
+                        <i className={`fa-duotone fa-regular fa-plane mr-1 ${job.open_to_relocation ? "text-info" : "text-base-content/20"}`} />
                         Relocation
                     </p>
-                    <p className={`font-bold text-sm ${job.open_to_relocation ? "text-secondary" : "text-base-content/30 italic font-normal"}`}>
+                    <p className={`font-bold text-sm ${job.open_to_relocation ? "text-info" : "text-base-content/30 italic font-normal"}`}>
                         {job.open_to_relocation ? "Open to relocation" : "Not specified"}
                     </p>
                 </div>
             </div>
 
             {/* Mandatory Requirements */}
-            <div>
+            <div className="border-l-4 border-l-primary pl-4">
                 <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    <i className="fa-duotone fa-regular fa-shield-check text-primary mr-1.5" />
                     Must Have
                 </h3>
                 {mandatoryReqs.length > 0 ? (
@@ -116,8 +123,9 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
             </div>
 
             {/* Preferred Requirements */}
-            <div>
+            <div className="border-l-4 border-l-secondary pl-4">
                 <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    <i className="fa-duotone fa-regular fa-star text-secondary mr-1.5" />
                     Preferred
                 </h3>
                 {preferredReqs.length > 0 ? (
@@ -142,6 +150,7 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
             {/* Required Skills */}
             <div>
                 <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    <i className="fa-duotone fa-regular fa-stars text-primary mr-1.5" />
                     Required Skills
                 </h3>
                 {reqSkills.length > 0 ? (
@@ -160,6 +169,7 @@ export function RecruiterBriefTab({ job }: { job: Job }) {
             {/* Preferred Skills */}
             <div>
                 <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    <i className="fa-duotone fa-regular fa-star text-secondary mr-1.5" />
                     Nice-to-Have Skills
                 </h3>
                 {prefSkills.length > 0 ? (

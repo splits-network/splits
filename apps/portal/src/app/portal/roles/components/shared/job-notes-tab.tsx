@@ -366,7 +366,7 @@ export function JobNotesTab({ jobId }: JobNotesTabProps) {
             {/* Empty */}
             {!loading && notes.length === 0 && (
                 <div className="py-12 text-center">
-                    <i className="fa-duotone fa-regular fa-notes text-4xl text-base-content/15 mb-4 block" />
+                    <i className="fa-duotone fa-regular fa-notes text-4xl text-primary/20 mb-4 block" />
                     <p className="text-base-content/50">
                         No notes yet. Add a note to track internal discussions
                         about this role.

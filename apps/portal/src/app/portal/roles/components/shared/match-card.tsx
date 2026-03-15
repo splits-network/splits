@@ -71,12 +71,10 @@ export function MatchCard({ match, onInvite, onDismiss, isInviting }: Props) {
             {skills.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                     {skills.slice(0, 4).map((skill) => (
-                        <BaselBadge key={skill} color="neutral" size="xs" variant="outline">{skill}</BaselBadge>
+                        <BaselBadge key={skill} color="success" size="xs" variant="soft">{skill}</BaselBadge>
                     ))}
                     {missing.length > 0 && missing.slice(0, 2).map((skill) => (
-                        <span key={skill} className="line-through opacity-50">
-                            <BaselBadge color="neutral" size="xs" variant="ghost">{skill}</BaselBadge>
-                        </span>
+                        <BaselBadge key={skill} color="error" size="xs" variant="ghost">{skill}</BaselBadge>
                     ))}
                     {skills.length > 4 && (
                         <span className="text-sm text-base-content/40">+{skills.length - 4} more</span>

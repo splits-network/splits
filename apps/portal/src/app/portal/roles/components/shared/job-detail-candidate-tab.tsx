@@ -10,9 +10,9 @@ export function CandidateDescriptionTab({ job }: { job: Job }) {
 
     if (!content) {
         return (
-            <div className="text-center py-12 text-base-content/40">
-                <i className="fa-duotone fa-regular fa-user text-3xl mb-3 block" />
-                <p className="text-sm font-semibold">
+            <div className="text-center py-12">
+                <i className="fa-duotone fa-regular fa-user text-3xl text-base-content/20 mb-3 block" />
+                <p className="text-sm font-semibold text-base-content/40">
                     No candidate description available
                 </p>
             </div>
@@ -20,8 +20,9 @@ export function CandidateDescriptionTab({ job }: { job: Job }) {
     }
 
     return (
-        <div className="border-l-4 border-l-primary pl-6">
+        <div className="border-l-4 border-l-success pl-6">
             <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                <i className="fa-duotone fa-regular fa-globe text-success mr-1.5" />
                 Candidate Description
             </h3>
             <MarkdownRenderer

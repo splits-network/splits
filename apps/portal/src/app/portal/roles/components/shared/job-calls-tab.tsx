@@ -21,17 +21,17 @@ interface JobCallsTabProps {
 
 function EntityCallStats({ stats, loading }: { stats: CallStats | null; loading: boolean }) {
     const items = [
-        { label: "Upcoming", value: stats?.upcoming_count ?? 0, icon: "fa-duotone fa-regular fa-calendar-clock" },
-        { label: "This Month", value: stats?.this_month_count ?? 0, icon: "fa-duotone fa-regular fa-calendar" },
-        { label: "Avg Duration", value: formatDuration(stats?.avg_duration_minutes ?? null), icon: "fa-duotone fa-regular fa-clock" },
-        { label: "Follow-up", value: stats?.needs_follow_up_count ?? 0, icon: "fa-duotone fa-regular fa-flag" },
+        { label: "Upcoming", value: stats?.upcoming_count ?? 0, icon: "fa-duotone fa-regular fa-calendar-clock", color: "text-info" },
+        { label: "This Month", value: stats?.this_month_count ?? 0, icon: "fa-duotone fa-regular fa-calendar", color: "text-primary" },
+        { label: "Avg Duration", value: formatDuration(stats?.avg_duration_minutes ?? null), icon: "fa-duotone fa-regular fa-clock", color: "text-secondary" },
+        { label: "Follow-up", value: stats?.needs_follow_up_count ?? 0, icon: "fa-duotone fa-regular fa-flag", color: "text-warning" },
     ];
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {items.map((item) => (
                 <div key={item.label} className="flex items-center gap-3 bg-base-200 p-3">
-                    <i className={`${item.icon} text-primary`} />
+                    <i className={`${item.icon} ${item.color}`} />
                     <div>
                         {loading ? (
                             <div className="h-5 w-8 bg-base-300 animate-pulse" />
@@ -145,7 +145,7 @@ export function JobCallsTab({ jobId, jobTitle }: JobCallsTabProps) {
                 </div>
             ) : calls.length === 0 ? (
                 <div className="py-12 text-center">
-                    <i className="fa-duotone fa-regular fa-video text-4xl text-base-content/15 mb-4 block" />
+                    <i className="fa-duotone fa-regular fa-video text-4xl text-primary/20 mb-4 block" />
                     <p className="text-base-content/50">No calls linked to this job yet.</p>
                 </div>
             ) : (

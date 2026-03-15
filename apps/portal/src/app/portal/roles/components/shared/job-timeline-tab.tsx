@@ -47,7 +47,7 @@ export function JobTimelineTab({ jobId }: JobTimelineTabProps) {
             {/* Empty */}
             {!loading && activities.length === 0 && (
                 <div className="py-12 text-center">
-                    <i className="fa-duotone fa-regular fa-clock-rotate-left text-4xl text-base-content/15 mb-4 block" />
+                    <i className="fa-duotone fa-regular fa-clock-rotate-left text-4xl text-info/20 mb-4 block" />
                     <p className="text-base-content/50">No activity recorded yet.</p>
                 </div>
             )}
