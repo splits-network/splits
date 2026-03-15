@@ -60,6 +60,46 @@ export class RecruiterCandidateServiceV2 {
             throw { statusCode: 400, message: 'recruiter_id and candidate_id are required' };
         }
 
+        // Check for existing relationship
+        const existing = await this.repository.findExistingRelationship(data.recruiter_id, data.candidate_id);
+        if (existing) {
+            if (existing.status === 'active') {
+                throw { statusCode: 409, message: 'An active relationship already exists with this candidate.' };
+            }
+            // If previously terminated/declined/inactive, reactivate by creating a fresh invitation
+            // The old record stays as history; we update it to avoid the unique constraint
+            if (['terminated', 'declined', 'inactive'].includes(existing.status)) {
+                const invitationToken = this.generateInvitationToken();
+                const invitationExpiresAt = new Date();
+                invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7);
+
+                const reactivated = await this.repository.updateRecruiterCandidate(existing.id, {
+                    status: 'active',
+                    invitation_token: invitationToken,
+                    invitation_expires_at: invitationExpiresAt.toISOString(),
+                    invited_at: new Date().toISOString(),
+                    consent_given: null,
+                    consent_given_at: null,
+                    declined_at: null,
+                    declined_reason: null,
+                    termination_reason: null,
+                    terminated_by: null,
+                    relationship_start_date: null,
+                    relationship_end_date: null,
+                });
+
+                await this.eventPublisher.publish('candidate.invited', {
+                    relationship_id: reactivated.id,
+                    recruiter_id: reactivated.recruiter_id,
+                    candidate_id: reactivated.candidate_id,
+                    invitation_token: invitationToken,
+                    invitation_expires_at: invitationExpiresAt.toISOString(),
+                });
+
+                return reactivated;
+            }
+        }
+
         // Generate invitation token and expiry
         const invitationToken = this.generateInvitationToken();
         const invitationExpiresAt = new Date();

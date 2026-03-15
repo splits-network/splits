@@ -10,7 +10,9 @@
       "Bash(pnpm --filter @splits-network/ats-service build:*)",
       "Bash(pnpm --filter @splits-network/network-service test:*)",
       "Bash(docker exec:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "mcp__paper__write_html",
+      "mcp__paper__get_screenshot"
     ]
   }
 }

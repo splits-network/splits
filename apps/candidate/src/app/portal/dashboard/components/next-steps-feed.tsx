@@ -42,6 +42,8 @@ function getStageName(stage: string): string {
     const names: Record<string, string> = {
         draft: "Draft",
         ai_review: "AI Review",
+        gpt_review: "GPT Review",
+        ai_failed: "Review Failed",
         ai_reviewed: "AI Reviewed",
         recruiter_request: "Recruiter Review",
         recruiter_proposed: "Recruiter Proposed",
@@ -132,7 +134,7 @@ export default function NextStepsFeed({
             if (
                 app.updated_at &&
                 !app.expired_at &&
-                !["rejected", "withdrawn", "hired", "draft"].includes(app.stage)
+                !["rejected", "withdrawn", "hired", "draft", "ai_failed"].includes(app.stage)
             ) {
                 const daysSinceUpdate = Math.floor(
                     (now.getTime() - new Date(app.updated_at).getTime()) /
@@ -158,7 +160,7 @@ export default function NextStepsFeed({
             // P6: Recent submissions
             if (
                 !app.expired_at &&
-                !["rejected", "withdrawn", "hired", "draft"].includes(app.stage)
+                !["rejected", "withdrawn", "hired", "draft", "ai_failed"].includes(app.stage)
             ) {
                 result.push({
                     id: `recent-${app.id}`,

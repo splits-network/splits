@@ -38,21 +38,15 @@ export function FirmDetailLoader({
                 const client = createAuthenticatedClient(token);
 
                 // Fetch firm if not provided
-                if (!firmProp) {
-                    const firmRes = await client.get<{ data: Firm }>(
-                        `/firms/${id}`,
-                    );
-                    if (!signal?.cancelled) setLoadedFirm(firmRes.data);
-                }
-
-                // Fetch members and invitations in parallel
-                const [membersRes, invitationsRes] = await Promise.all([
-                    client.get(`/firms/${id}/members`),
-                    client.get(`/firms/${id}/invitations`),
-                ]);
+                // Detail view returns firm + members + invitations
+                const detailRes = await client.get<{ data: Firm & { members: FirmMember[]; invitations: FirmInvitation[] } }>(
+                    `/firms/${id}/view/detail`,
+                );
                 if (!signal?.cancelled) {
-                    setMembers(membersRes.data || []);
-                    setInvitations(invitationsRes.data || []);
+                    const detail = detailRes.data;
+                    if (!firmProp) setLoadedFirm(detail);
+                    setMembers(detail.members || []);
+                    setInvitations(detail.invitations || []);
                 }
             } catch (err) {
                 console.error("Failed to fetch firm details:", err);

@@ -1,8 +1,8 @@
 "use client";
 
 import type { Placement } from "../../types";
-import { statusColorName } from "../shared/status-color";
-import { BaselBadge, type BaselSemanticColor } from "@splits-network/basel-ui";
+import { statusColorName, statusBorder } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     isNew,
     candidateName,
@@ -25,22 +25,23 @@ export function GridCard({
     onSelect: () => void;
 }) {
     const state = placement.state || "unknown";
+    const hasShare = !!placement.recruiter_share;
 
     return (
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-md",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-colors",
                 isSelected
-                    ? "border-l-primary border-primary"
-                    : "border-l-primary",
+                    ? "border-primary border-l-primary bg-primary/5"
+                    : `${statusBorder(state)} hover:border-base-content/20`,
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 border-b border-base-300 px-5 pt-5 pb-4">
+            <div className="bg-base-300 px-5 pt-4 pb-4">
                 {/* Kicker row: status + NEW badge */}
-                <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40">
+                <div className="flex items-center justify-between mb-3 gap-2">
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40">
                         Placement
                     </p>
                     <div className="flex items-center gap-2">
@@ -56,123 +57,74 @@ export function GridCard({
                 </div>
 
                 {/* Overlapping avatars + Name block */}
-                <div className="flex items-end gap-3">
-                    <div className="relative shrink-0 w-14 h-14">
-                        {/* Candidate avatar (left, on top) */}
-                        <div className="absolute top-0 left-0 w-10 h-10 bg-primary text-primary-content flex items-center justify-center text-xs font-black tracking-tight select-none z-10 border-2 border-base-300">
+                <div className="flex items-start gap-3">
+                    <div className="relative shrink-0 w-14 h-14 mt-0.5">
+                        <div className="absolute top-0 left-0 w-10 h-10 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none z-10 border-2 border-base-300">
                             {candidateInitials(placement)}
                         </div>
-                        {/* Company avatar (offset right, behind) */}
-                        <div className="absolute bottom-0 right-0 w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center text-xs font-black tracking-tight select-none border-2 border-base-300">
+                        <div className="absolute bottom-0 right-0 w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center text-sm font-black tracking-tight select-none border-2 border-base-300">
                             {companyInitials(placement)}
                         </div>
                     </div>
-                    <div className="min-w-0">
-                        <h3 className="text-xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
+                            {companyName(placement)}
+                        </p>
+                        <h3 className="text-lg font-black tracking-tight leading-tight text-base-content truncate group-hover:text-primary transition-colors">
                             {candidateName(placement)}
                         </h3>
-                        <p className="text-sm font-semibold text-base-content/50 mt-1 truncate">
-                            {jobTitle(placement)}
+                        <p className={`text-sm truncate mt-0.5 ${jobTitle(placement) !== "Unknown Job" ? "text-base-content/50" : "text-base-content/30"}`}>
+                            {jobTitle(placement) !== "Unknown Job" ? jobTitle(placement) : "No title specified"}
                         </p>
                     </div>
                 </div>
-            </div>
 
-            {/* Placement Details */}
-            <div className="px-5 py-4 border-b border-base-300">
-                <div className="flex items-center gap-3 text-sm text-base-content/60 flex-wrap">
-                    <span className="flex items-center gap-1.5">
-                        <i className="fa-duotone fa-regular fa-calendar-check text-xs text-primary" />
+                {/* Inline context: hire date · guarantee */}
+                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/50">
+                    <span className="tooltip tooltip-bottom flex items-center gap-1.5 truncate" data-tip="Hire date">
+                        <i className={`fa-duotone fa-regular fa-calendar-check text-sm ${placement.hired_at ? "text-secondary" : "text-base-content/20"}`} />
                         {formatDate(placement.hired_at)}
                     </span>
-                    <span className="text-base-content/20">|</span>
-                    <span className="flex items-center gap-1.5">
-                        <i className="fa-duotone fa-regular fa-building text-xs text-primary" />
-                        {companyName(placement)}
-                    </span>
-                </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="border-b border-base-300">
-                <div className="grid grid-cols-2 divide-x divide-y divide-base-300">
-                    {[
-                        { label: "Salary", value: formatCurrency(placement.salary || 0), icon: "fa-duotone fa-regular fa-dollar-sign" },
-                        { label: "Fee", value: `${placement.fee_percentage || 0}%`, icon: "fa-duotone fa-regular fa-percent" },
-                        { label: "Share", value: formatCurrency(placement.recruiter_share || 0), icon: "fa-duotone fa-regular fa-coins" },
-                        { label: "Guarantee", value: placement.guarantee_days != null ? `${placement.guarantee_days}d` : "N/A", icon: "fa-duotone fa-regular fa-shield-check" },
-                    ].map((stat, i) => {
-                        const colors = [
-                            "bg-primary text-primary-content",
-                            "bg-secondary text-secondary-content",
-                            "bg-accent text-accent-content",
-                            "bg-warning text-warning-content",
-                        ];
-                        return (
-                            <div key={stat.label} className="flex items-center gap-2 px-2 py-3 min-w-0 overflow-hidden">
-                                <div className={`w-7 h-7 flex items-center justify-center shrink-0 ${colors[i]}`}>
-                                    <i className={`${stat.icon} text-xs`} />
-                                </div>
-                                <div className="min-w-0">
-                                    <span className="text-sm font-black text-base-content leading-none block truncate">
-                                        {stat.value}
-                                    </span>
-                                    <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate block">
-                                        {stat.label}
-                                    </span>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Split Partners */}
-            <div className="px-5 py-4 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                    Split Partners
-                </p>
-                {placement.splits && placement.splits.length > 0 ? (
-                    <div className="flex flex-col gap-2">
-                        {placement.splits.map((split, i) => {
-                            const badgeColors: BaselSemanticColor[] = ["primary", "secondary", "accent"];
-                            const color = badgeColors[i % badgeColors.length];
-                            const name = split.recruiter?.user?.name || split.role.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-                            return (
-                                <div key={split.id} className="flex items-center justify-between">
-                                    <BaselBadge color={color} size="sm" icon="fa-user">
-                                        {name}
-                                    </BaselBadge>
-                                    <span className="text-sm font-black text-base-content">
-                                        {split.split_percentage}%
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <p className="text-sm text-base-content/20 italic">No split partners</p>
-                )}
-            </div>
-
-            {/* Footer */}
-            <div className="mt-auto flex items-center justify-between gap-3 px-5 py-4">
-                <div className="flex items-center gap-2 min-w-0">
-                    {placement.job?.company?.logo_url ? (
-                        <img
-                            src={placement.job.company.logo_url}
-                            alt={companyName(placement)}
-                            className="w-8 h-8 object-contain bg-base-100 border border-base-300 p-0.5"
-                        />
-                    ) : (
-                        <div className="w-8 h-8 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
-                            {companyInitials(placement)}
-                        </div>
+                    {placement.guarantee_days != null && (
+                        <>
+                            <span className="text-base-content/20">|</span>
+                            <span className="tooltip tooltip-bottom flex items-center gap-1.5 shrink-0" data-tip="Guarantee period">
+                                <i className="fa-duotone fa-regular fa-shield-check text-sm text-accent" />
+                                {placement.guarantee_days}d
+                            </span>
+                        </>
                     )}
-                    <span className="text-sm font-semibold text-base-content truncate">
-                        {companyName(placement)}
-                    </span>
                 </div>
+            </div>
+
+            {/* Financial summary — hero share number */}
+            <div className="px-5 py-4 border-b border-base-300">
+                <div className="flex items-baseline justify-between gap-3">
+                    <div className="tooltip tooltip-bottom" data-tip="Your commission share">
+                        <span className={`text-xl font-black tracking-tight ${hasShare ? "text-primary" : "text-base-content/30"}`}>
+                            {hasShare ? formatCurrency(placement.recruiter_share!) : "\u2014"}
+                        </span>
+                        <span className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/30 ml-2">
+                            share
+                        </span>
+                    </div>
+                </div>
+                <p className="text-sm text-base-content/40 mt-1">
+                    {placement.salary ? formatCurrency(placement.salary) : "\u2014"} salary
+                    {placement.fee_percentage ? ` \u00b7 ${placement.fee_percentage}% fee` : ""}
+                    {placement.splits && placement.splits.length > 0 ? ` \u00b7 ${placement.splits.length} split${placement.splits.length > 1 ? "s" : ""}` : ""}
+                </p>
+            </div>
+
+            {/* Footer: view link */}
+            <div className="mt-auto flex items-center justify-between gap-3 px-5 py-3">
+                <button
+                    onClick={onSelect}
+                    className="text-sm font-semibold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
+                >
+                    View Details
+                    <i className="fa-duotone fa-regular fa-arrow-right text-sm" />
+                </button>
             </div>
         </article>
     );

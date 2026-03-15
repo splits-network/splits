@@ -24,6 +24,7 @@ export function ChatSidebarList({ currentUserId }: ChatSidebarListProps) {
     // Filter by mailbox
     const mailboxFiltered = useMemo(() => {
         return conversations.filter((row) => {
+            if (!row.participant) return false;
             const isArchived = !!row.participant.archived_at;
             const isPending = row.participant.request_state === "pending";
 
@@ -65,8 +66,12 @@ export function ChatSidebarList({ currentUserId }: ChatSidebarListProps) {
 
     const handleSelect = (row: typeof sorted[number]) => {
         const other = getOtherParticipant(row.conversation, currentUserId);
+        const otherId = currentUserId === row.conversation.participant_a_id
+            ? row.conversation.participant_b_id
+            : row.conversation.participant_a_id;
         openToThread(row.conversation.id, {
             otherUserName: other?.name ?? undefined,
+            otherUserId: otherId,
         });
     };
 

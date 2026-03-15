@@ -316,8 +316,16 @@ export default function StepDocuments({
                                         disabled={deletingDocId === doc.id}
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <div className="font-bold text-sm truncate">
-                                            {doc.file_name}
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-sm truncate">
+                                                {doc.file_name}
+                                            </span>
+                                            {doc.metadata?.is_primary_for_candidate && (
+                                                <span className="bg-primary/10 text-primary px-2 py-0.5 text-xs font-bold shrink-0">
+                                                    <i className="fa-duotone fa-regular fa-star mr-1" />
+                                                    Primary
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="text-xs text-base-content/40">
                                             {doc.file_size &&

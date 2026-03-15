@@ -108,7 +108,7 @@ export function RepresentationStatus({
             <span className="badge badge-error text-white">Declined</span>
         );
     } else if (isRevoked) {
-        statusBadge = <span className="badge badge-neutral">Revoked</span>;
+        statusBadge = <span className="badge badge-primary">Revoked</span>;
     } else if (isExpired) {
         statusBadge = (
             <span className="badge badge-warning text-white">Expired</span>

@@ -25,7 +25,7 @@ export function RecruiterCard({
                 {label}
             </h3>
             <div className={`flex gap-4 ${hasRecruiter ? "items-start" : "items-center"}`}>
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-lg flex-shrink-0 ${hasRecruiter ? avatarColor : "bg-base-200 text-base-content/40"}`}>
+                <div className={`w-12 h-12 flex items-center justify-center font-black text-lg flex-shrink-0 ${hasRecruiter ? avatarColor : "bg-base-200 text-base-content/40"}`}>
                     {initials}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -67,7 +67,7 @@ export function SourcerCard({
 
     return (
         <div className={`bg-base-200/50 border-l-4 ${borderColor} px-4 py-3 flex items-center gap-3`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${hasSourcer ? `${accentColor} bg-base-300` : "bg-base-200 text-base-content/30"}`}>
+            <div className={`w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0 ${hasSourcer ? `${accentColor} bg-base-300` : "bg-base-200 text-base-content/40"}`}>
                 {initials}
             </div>
             <div className="flex-1 min-w-0">

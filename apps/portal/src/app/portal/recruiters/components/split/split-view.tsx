@@ -20,12 +20,12 @@ export function SplitView({
 
     return (
         <div
-            className="flex gap-0 border-2 border-base-300 shadow-sm"
+            className="flex gap-0 border-2 border-base-300"
             style={{ minHeight: 600 }}
         >
             {/* Left list */}
             <div
-                className={`w-full md:w-2/5 border-r border-base-300 overflow-y-auto ${selectedId ? "hidden md:block" : "block"}`}
+                className={`w-full md:w-1/3 border-r border-base-300 overflow-y-auto ${selectedId ? "hidden md:block" : "block"}`}
             >
                 {recruiters.map((recruiter) => (
                     <SplitItem
@@ -40,7 +40,7 @@ export function SplitView({
             {/* Right detail */}
             <MobileDetailOverlay
                 isOpen={!!selectedRecruiter}
-                className="md:w-3/5 w-full bg-base-100 overflow-y-auto"
+                className="md:w-2/3 w-full bg-base-100 overflow-y-auto"
             >
                 {selectedRecruiter ? (
                     <DetailLoader
@@ -49,7 +49,7 @@ export function SplitView({
                         onRefresh={onRefresh}
                     />
                 ) : (
-                    <div className="h-full flex items-center justify-center p-12">
+                    <div className="flex-1 flex items-center justify-center p-12">
                         <div className="text-center">
                             <div className="w-16 h-16 mx-auto mb-6 bg-primary/10 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-users text-2xl text-primary" />

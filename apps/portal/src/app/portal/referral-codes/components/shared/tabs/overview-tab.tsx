@@ -96,9 +96,16 @@ export function OverviewTab({ code }: { code: RecruiterCode }) {
                     <DetailCell
                         label="Status"
                         value={
-                            <span className={`badge ${statusBadgeClass(code)}`}>
-                                {code.status}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className={`badge ${statusBadgeClass(code)}`}>
+                                    {code.status}
+                                </span>
+                                {code.is_default && (
+                                    <span className="badge badge-primary badge-sm">
+                                        Default
+                                    </span>
+                                )}
+                            </div>
                         }
                     />
                     <DetailCell

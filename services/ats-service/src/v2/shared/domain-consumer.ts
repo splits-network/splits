@@ -56,8 +56,9 @@ export class DomainEventConsumer {
             // Bind to application.stage_changed events from other services
             await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
 
-            // Bind to ai_review.completed events to trigger stage transitions
+            // Bind to ai_review events to trigger stage transitions
             await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.completed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.failed');
 
             // Bind to candidate events from network service
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.link_requested');
@@ -65,6 +66,9 @@ export class DomainEventConsumer {
 
             // Bind to resume metadata extraction events from AI service
             await this.channel.bindQueue(this.queue, this.exchange, 'resume.metadata.extracted');
+
+            // Bind to primary resume change events from document service
+            await this.channel.bindQueue(this.queue, this.exchange, 'resume.primary.changed');
 
             this.logger.info('V2 ATS domain consumer connected to RabbitMQ');
 
@@ -112,6 +116,10 @@ export class DomainEventConsumer {
                     await this.handleAIReviewCompleted(event);
                     break;
 
+                case 'ai_review.failed':
+                    await this.handleAIReviewFailed(event);
+                    break;
+
                 case 'candidate.link_requested':
                     await this.handleCandidateLinkRequested(event);
                     break;
@@ -122,6 +130,10 @@ export class DomainEventConsumer {
 
                 case 'resume.metadata.extracted':
                     await this.handleResumeMetadataExtracted(event);
+                    break;
+
+                case 'resume.primary.changed':
+                    await this.handleResumePrimaryChanged(event);
                     break;
 
                 default:
@@ -361,6 +373,90 @@ export class DomainEventConsumer {
     }
 
     /**
+     * Handle ai_review.failed events
+     * Transitions application to 'ai_failed' so candidate can resubmit
+     */
+    async handleAIReviewFailed(event: any): Promise<void> {
+        try {
+            const payload = event.payload;
+
+            this.logger.info(
+                {
+                    application_id: payload.application_id,
+                    error: payload.error,
+                },
+                'Processing ai_review.failed event'
+            );
+
+            const application = await this.applicationRepository.findApplication(payload.application_id, 'internal-service');
+            if (!application) {
+                this.logger.warn(
+                    { application_id: payload.application_id },
+                    'Application not found for AI review failure'
+                );
+                return;
+            }
+
+            // Only transition if still in a review stage (ai_review or gpt_review)
+            if (application.stage !== 'ai_review' && application.stage !== 'gpt_review') {
+                this.logger.info(
+                    { application_id: application.id, current_stage: application.stage },
+                    'Application not in review stage, skipping ai_failed transition'
+                );
+                return;
+            }
+
+            const nextStage = 'ai_failed';
+
+            const updatedApplication = await this.applicationRepository.updateApplication(application.id, {
+                stage: nextStage,
+            });
+
+            await this.applicationRepository.createAuditLog({
+                application_id: updatedApplication.id,
+                action: 'ai_review_failed',
+                performed_by_user_id: 'system',
+                performed_by_role: 'system',
+                old_value: { stage: application.stage },
+                new_value: { stage: nextStage },
+                metadata: {
+                    error: payload.error,
+                    source_event: event.event_id,
+                },
+            });
+
+            if (this.eventPublisher) {
+                await this.eventPublisher.publish('application.stage_changed', {
+                    application_id: updatedApplication.id,
+                    candidate_id: updatedApplication.candidate_id,
+                    job_id: updatedApplication.job_id,
+                    recruiter_id: updatedApplication.recruiter_id,
+                    old_stage: application.stage,
+                    new_stage: nextStage,
+                    changed_by: 'system',
+                });
+            }
+
+            this.logger.info(
+                {
+                    application_id: updatedApplication.id,
+                    stage_change: `${application.stage} -> ${nextStage}`,
+                },
+                'Application moved to ai_failed — candidate can resubmit for review'
+            );
+        } catch (error) {
+            this.logger.error(
+                {
+                    error: (error as Error).message,
+                    event: event,
+                },
+                'Failed to process ai_review.failed event'
+            );
+            throw error;
+        }
+    }
+
+    /**
      * Handle candidate.link_requested event
      * Links a Clerk user ID to a candidate profile when they accept invitation
      */
@@ -378,21 +474,55 @@ export class DomainEventConsumer {
         );
 
         try {
+            const supabase = this.candidateRepository.getSupabase();
 
-            const { data: user, error: identityError } = await this.candidateRepository.getSupabase()
+            const { data: user, error: identityError } = await supabase
                 .from('users')
-                .select('*')
+                .select('id')
                 .eq('clerk_user_id', user_id)
                 .single();
 
-            // Update candidate with user_id using direct Supabase call
-            const { error } = await this.candidateRepository.getSupabase()
+            if (identityError || !user) {
+                throw identityError || new Error(`User not found for clerk_user_id: ${user_id}`);
+            }
+
+            // Update candidate with user_id
+            const { error: linkError } = await supabase
                 .from('candidates')
                 .update({ user_id: user.id })
                 .eq('id', candidate_id);
 
-            if (error) {
-                throw error;
+            if (linkError) {
+                throw linkError;
+            }
+
+            // Ensure user_roles entry exists so resolveAccessContext can find
+            // the candidateId. The webhook's ensureCandidateExists may not have
+            // run (wrong sourceApp) or may have created a different candidate
+            // (email mismatch). This guarantees the invited candidate is linked.
+            const { error: roleError } = await supabase
+                .from('user_roles')
+                .upsert(
+                    {
+                        user_id: user.id,
+                        role_name: 'candidate',
+                        role_entity_id: candidate_id,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                    },
+                    { onConflict: 'user_id,role_name,role_entity_id' }
+                );
+
+            if (roleError) {
+                // Log but don't fail — the link itself succeeded
+                this.logger.warn(
+                    {
+                        candidate_id,
+                        user_id: user.id,
+                        error: roleError.message,
+                    },
+                    'Failed to upsert user_roles for candidate (non-fatal)'
+                );
             }
 
             this.logger.info(
@@ -563,6 +693,28 @@ export class DomainEventConsumer {
                 'Failed to sync resume metadata'
             );
             // Don't rethrow - this is a non-critical sync operation
+        }
+    }
+
+    /**
+     * Handle resume.primary.changed event from document service
+     * When an existing document is marked as primary, sync its structured_metadata to the candidate
+     */
+    private async handleResumePrimaryChanged(event: DomainEvent): Promise<void> {
+        const { document_id, entity_type, entity_id } = event.payload;
+
+        if (entity_type !== 'candidate') {
+            this.logger.debug({ document_id, entity_type }, 'Primary resume change not for candidate, skipping');
+            return;
+        }
+
+        try {
+            await this.syncResumeDataToCandidate(document_id, entity_id);
+        } catch (error: any) {
+            this.logger.error(
+                { err: error, document_id, entity_id, error_message: error.message },
+                'Failed to sync resume metadata after primary change'
+            );
         }
     }
 

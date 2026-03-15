@@ -18,7 +18,9 @@ import { Footer } from "@/components/footer";
 import { getHeaderNav, getFooterNav } from "@/lib/content";
 import { QueryProvider } from "@/providers/query-provider";
 import { PortalChatSidebar } from "@/components/portal-chat-sidebar";
+import { CompanyProvider } from "@/app/portal/recruiters/contexts/company-context";
 import { GamificationWrapper } from "@/providers/gamification-wrapper";
+import { SupportWidgetWrapper } from "@/components/support-widget-wrapper";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://splits.network"),
@@ -185,16 +187,20 @@ export default async function RootLayout({
                             <UserProfileProvider
                                 initialProfile={initialProfile}
                             >
+                                <CompanyProvider>
                                 <GamificationWrapper>
                                 <ToastProvider>
+                                    <SupportWidgetWrapper>
                                     <PortalChatSidebar>
                                         <Header navItems={headerNav?.items} />
                                         <main className="grow">{children}</main>
                                         <Footer footerNav={footerNav} />
                                     </PortalChatSidebar>
+                                    </SupportWidgetWrapper>
                                     <CookieConsent />
                                 </ToastProvider>
                                 </GamificationWrapper>
+                                </CompanyProvider>
                                 <DevDebugPanel />
                                 <PortalActivityTrackerWrapper />
                             </UserProfileProvider>

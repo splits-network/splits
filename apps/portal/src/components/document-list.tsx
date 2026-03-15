@@ -57,7 +57,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
             setDocuments(docs);
         } catch (error) {
             console.error('Failed to fetch documents:', error);
-            toast.error('Failed to load documents');
+            toast.error("Documents couldn't be loaded. Refresh the page.");
             setDocuments([]);
         } finally {
             setLoading(false);
@@ -82,7 +82,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
             }
         } catch (error) {
             console.error('Failed to download document:', error);
-            toast.error('Failed to download document');
+            toast.error("Document couldn't be downloaded. Try again.");
         } finally {
             setDownloading(null);
         }
@@ -104,7 +104,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
             await fetchDocuments();
         } catch (error) {
             console.error('Failed to delete document:', error);
-            toast.error('Failed to delete document');
+            toast.error("Document couldn't be deleted. Try again.");
         }
     };
 

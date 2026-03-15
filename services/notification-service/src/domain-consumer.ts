@@ -1,7 +1,6 @@
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { ServiceRegistry } from './clients';
 import { NotificationService } from './service';
 import { NotificationRepository } from './repository';
 import { ApplicationsEventConsumer } from './consumers/applications/consumer';
@@ -26,6 +25,8 @@ import { RecruiterCodesEventConsumer } from './consumers/recruiter-codes/consume
 import { DocumentsEventConsumer } from './consumers/documents/consumer';
 import { GamificationEventConsumer } from './consumers/gamification/consumer';
 import { MatchesEventConsumer } from './consumers/matches/consumer';
+import { CallsEventConsumer } from './consumers/calls/consumer';
+import { CallInAppNotificationService } from './services/calls/in-app-service';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -63,11 +64,11 @@ export class DomainEventConsumer {
     private documentsConsumer: DocumentsEventConsumer;
     private gamificationConsumer: GamificationEventConsumer;
     private matchesConsumer: MatchesEventConsumer;
+    private callsConsumer: CallsEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
         notificationService: NotificationService,
-        services: ServiceRegistry,
         private repository: NotificationRepository,
         private logger: Logger,
         portalUrl: string,
@@ -81,21 +82,18 @@ export class DomainEventConsumer {
 
         this.applicationsConsumer = new ApplicationsEventConsumer(
             notificationService.applications,
-            services,
             logger,
             dataLookup,
             contactLookup
         );
         this.placementsConsumer = new PlacementsEventConsumer(
             notificationService.placements,
-            services,
             logger,
             dataLookup,
             contactLookup
         );
         this.candidatesConsumer = new CandidatesEventConsumer(
             notificationService.candidates,
-            services,
             this.repository,
             logger,
             dataLookup,
@@ -103,14 +101,12 @@ export class DomainEventConsumer {
         );
         this.collaborationConsumer = new CollaborationEventConsumer(
             notificationService.collaboration,
-            services,
             logger,
             dataLookup,
             contactLookup
         );
         this.invitationsConsumer = new InvitationsConsumer(
             notificationService,
-            services,
             logger,
             portalUrl,
             candidateWebsiteUrl,
@@ -140,7 +136,6 @@ export class DomainEventConsumer {
         );
         this.recruiterSubmissionConsumer = new RecruiterSubmissionEventConsumer(
             notificationService.recruiterSubmission,
-            services,
             logger,
             portalUrl,
             dataLookup,
@@ -226,6 +221,16 @@ export class DomainEventConsumer {
             candidateWebsiteUrl,
             contactLookup,
             dataLookup
+        );
+        const callInAppService = new CallInAppNotificationService(repository, logger, portalUrl, candidateWebsiteUrl);
+        this.callsConsumer = new CallsEventConsumer(
+            notificationService.calls,
+            callInAppService,
+            logger,
+            portalUrl,
+            candidateWebsiteUrl,
+            contactLookup,
+            dataLookup,
         );
     }
 
@@ -370,6 +375,9 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
             await this.channel.bindQueue(this.queue, this.exchange, 'chat.message.created');
 
+            // Support ticket events
+            await this.channel.bindQueue(this.queue, this.exchange, 'support_ticket.replied');
+
             // Onboarding events
             await this.channel.bindQueue(this.queue, this.exchange, 'user.registered');
             await this.channel.bindQueue(this.queue, this.exchange, 'recruiter.created');
@@ -378,6 +386,9 @@ export class DomainEventConsumer {
             // Job lifecycle events
             await this.channel.bindQueue(this.queue, this.exchange, 'job.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'job.status_changed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'job.updated');
+            await this.channel.bindQueue(this.queue, this.exchange, 'job.deleted');
+            await this.channel.bindQueue(this.queue, this.exchange, 'job_recommendation.created');
 
             // Relationship management events
             await this.channel.bindQueue(this.queue, this.exchange, 'recruiter_company.connection_requested');
@@ -402,6 +413,16 @@ export class DomainEventConsumer {
             // Match invite events
             await this.channel.bindQueue(this.queue, this.exchange, 'match.invited');
             await this.channel.bindQueue(this.queue, this.exchange, 'match.invite_denied');
+
+            // Call lifecycle events
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.cancelled');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.rescheduled');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.recording_ready');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.starting_soon');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.reminder');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.declined');
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.participant.joined');
 
             // Gamification events
             await this.channel.bindQueue(this.queue, this.exchange, 'badge.awarded');
@@ -693,6 +714,9 @@ export class DomainEventConsumer {
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
                 break;
+            case 'support_ticket.replied':
+                await this.supportConsumer.handleTicketReplied(event);
+                break;
             case 'chat.message.created':
                 await this.chatConsumer.handleMessageCreated(event.payload as any);
                 break;
@@ -733,6 +757,15 @@ export class DomainEventConsumer {
                 break;
             case 'job.status_changed':
                 await this.jobsConsumer.handleJobStatusChanged(event);
+                break;
+            case 'job.updated':
+                await this.jobsConsumer.handleJobUpdated(event);
+                break;
+            case 'job.deleted':
+                await this.jobsConsumer.handleJobDeleted(event);
+                break;
+            case 'job_recommendation.created':
+                await this.jobsConsumer.handleJobRecommendationCreated(event);
                 break;
 
             // Relationships domain
@@ -781,6 +814,32 @@ export class DomainEventConsumer {
                 break;
             case 'match.invite_denied':
                 await this.matchesConsumer.handleMatchInviteDenied(event);
+                break;
+
+            // Calls domain
+            case 'call.created':
+                await this.callsConsumer.handleCallCreated(event);
+                break;
+            case 'call.cancelled':
+                await this.callsConsumer.handleCallCancelled(event);
+                break;
+            case 'call.rescheduled':
+                await this.callsConsumer.handleCallRescheduled(event);
+                break;
+            case 'call.recording_ready':
+                await this.callsConsumer.handleRecordingReady(event);
+                break;
+            case 'call.starting_soon':
+                await this.callsConsumer.handleStartingSoon(event);
+                break;
+            case 'call.reminder':
+                await this.callsConsumer.handleReminder(event);
+                break;
+            case 'call.declined':
+                await this.callsConsumer.handleCallDeclined(event);
+                break;
+            case 'call.participant.joined':
+                await this.callsConsumer.handleParticipantJoined(event);
                 break;
 
             // Gamification domain

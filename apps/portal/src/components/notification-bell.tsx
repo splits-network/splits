@@ -172,7 +172,7 @@ export default function NotificationBell() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const res = await client.get("/notifications/unread-count");
+            const res = await client.get("/notifications/views/unread-count");
             const count = res?.data?.count ?? 0;
 
             if (
@@ -265,7 +265,7 @@ export default function NotificationBell() {
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.post("/notifications/mark-all-read", {});
+            await client.post("/notifications/actions/mark-all-read", {});
             setUnreadCount(0);
             previousUnreadCount.current = 0;
             setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));

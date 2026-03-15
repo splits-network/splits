@@ -5,22 +5,36 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { StripeProvider, PaymentForm } from "@/components/stripe";
 
+export interface BillingDetails {
+    name?: string;
+    email?: string;
+    address?: {
+        line1?: string;
+        city?: string;
+        state?: string;
+        postal_code?: string;
+        country?: string;
+    };
+}
+
 interface BaselPaymentFormProps {
     companyId: string;
     onSuccess: () => void;
     onCancel?: () => void;
-    allowSkip?: boolean;
-    onSkip?: () => void;
     submitButtonText?: string;
+    formId?: string;
+    hideActions?: boolean;
+    billingDetails?: BillingDetails;
 }
 
 export function BaselPaymentForm({
     companyId,
     onSuccess,
     onCancel,
-    allowSkip,
-    onSkip,
     submitButtonText = "Save Payment Method",
+    formId,
+    hideActions,
+    billingDetails,
 }: BaselPaymentFormProps) {
     const { getToken } = useAuth();
     const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -39,7 +53,7 @@ export function BaselPaymentForm({
             const client = createAuthenticatedClient(token);
             const response = await client.post<{
                 data: { client_secret: string; customer_id: string };
-            }>(`/company-billing-profiles/${companyId}/setup-intent`);
+            }>(`/company-billing/${companyId}/setup-intent`, {});
 
             setClientSecret(response.data.client_secret);
         } catch (err: any) {
@@ -65,7 +79,7 @@ export function BaselPaymentForm({
 
             const client = createAuthenticatedClient(token);
             await client.post(
-                `/company-billing-profiles/${companyId}/payment-method`,
+                `/company-billing/${companyId}/payment-method`,
                 { payment_method_id: paymentMethodId },
             );
 
@@ -103,22 +117,12 @@ export function BaselPaymentForm({
                         Retry
                     </button>
                 </div>
-                <div className="flex items-center justify-between">
-                    {allowSkip && onSkip && (
-                        <button
-                            className="btn btn-sm btn-ghost"
-                            onClick={onSkip}
-                        >
-                            Skip for now
-                        </button>
-                    )}
-                    {onCancel && (
-                        <button className="btn btn-ghost" onClick={onCancel}>
-                            <i className="fa-duotone fa-regular fa-arrow-left mr-1" />
-                            Back
-                        </button>
-                    )}
-                </div>
+                {onCancel && (
+                    <button className="btn btn-ghost" onClick={onCancel}>
+                        <i className="fa-duotone fa-regular fa-arrow-left mr-1" />
+                        Back
+                    </button>
+                )}
             </div>
         );
     }
@@ -138,20 +142,11 @@ export function BaselPaymentForm({
                         onCancel={onCancel}
                         submitButtonText={submitButtonText}
                         isProcessing={saving}
+                        formId={formId}
+                        hideActions={hideActions}
+                        billingDetails={billingDetails}
                     />
                 </StripeProvider>
-            )}
-
-            {allowSkip && onSkip && (
-                <div className="flex justify-start">
-                    <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={onSkip}
-                        disabled={saving}
-                    >
-                        Skip for now
-                    </button>
-                </div>
             )}
 
             <p className="text-sm text-base-content/50 flex items-start gap-2">
@@ -159,7 +154,7 @@ export function BaselPaymentForm({
                 A 3% processing fee applies to all placement invoices to cover payment processing costs.
             </p>
 
-            <p className="text-xs text-base-content/30 flex items-center gap-1">
+            <p className="text-sm text-base-content/30 flex items-center gap-1">
                 <i className="fa-duotone fa-regular fa-lock" />
                 Your payment details are collected and stored securely by
                 Stripe. Splits Network never sees or stores your account

@@ -4,10 +4,11 @@ import {
     JobPreScreenQuestion,
     JobSkill,
 } from "@splits-network/shared-types";
+import type { BaselSortOption } from "@splits-network/basel-ui";
 
 // Local type definitions (these exist in shared-types/models but aren't exported from index)
-export type JobStatus = "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed";
-export type EmploymentType = "full_time" | "contract" | "temporary";
+export type JobStatus = "draft" | "pending" | "active" | "paused" | "filled" | "closed";
+export type EmploymentType = "full_time" | "part_time" | "contract" | "temporary";
 
 /**
  * Unified Job type for all roles views (grid, table, browse)
@@ -44,13 +45,13 @@ export interface Job {
     is_remote?: boolean;
 
     // Ownership/Assignment
-    job_owner_id?: string;
     recruiter_id?: string;
-    company_recruiter_id?: string;
     job_owner_recruiter_id?: string;
 
-    // Status
+    // Status & visibility modifiers
     status: JobStatus | string;
+    is_early_access?: boolean;
+    is_priority?: boolean;
 
     // Timestamps
     activates_at?: string | null;
@@ -71,12 +72,29 @@ export interface Job {
 
     // Computed/aggregated fields
     application_count?: number;
+
+    // Saved state (enriched by backend)
+    is_saved?: boolean;
+    saved_record_id?: string | null;
 }
 
-/**
- * Unified filter interface for all view modes (browse, grid, table)
- */
 // ===== LABEL MAPS =====
+
+export const JOB_STATUS_LABELS: Record<string, string> = {
+    draft: "Draft",
+    pending: "Pending",
+    active: "Active",
+    paused: "Paused",
+    filled: "Filled",
+    closed: "Closed",
+};
+
+export const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
+    full_time: "Full Time",
+    part_time: "Part Time",
+    contract: "Contract",
+    temporary: "Temporary",
+};
 
 export const COMMUTE_TYPE_LABELS: Record<string, string> = {
     remote: "Remote",
@@ -108,18 +126,106 @@ export function formatJobLevel(level?: string | null): string | null {
     return JOB_LEVEL_LABELS[level] || level;
 }
 
+
+export const RELOCATION_LABELS: Record<string, string> = {
+    true: "Open to Relocation",
+    false: "Not Relocating",
+};
+
+export const REMOTE_LABELS: Record<string, string> = {
+    true: "Remote",
+    false: "Not Remote",
+};
+
+export const JOB_SOURCE_LABELS: Record<string, string> = {
+    company: "Company Jobs",
+    firm: "Firm Jobs",
+};
+
+export const SALARY_RANGE_LABELS: Record<string, string> = {
+    under_50k: "Under $50k",
+    "50k_100k": "$50k – $100k",
+    "100k_150k": "$100k – $150k",
+    "150k_200k": "$150k – $200k",
+    over_200k: "$200k+",
+};
+
+export const FEE_RANGE_LABELS: Record<string, string> = {
+    under_15: "Under 15%",
+    "15_20": "15% – 20%",
+    "20_25": "20% – 25%",
+    over_25: "25%+",
+};
+
+export const GUARANTEE_RANGE_LABELS: Record<string, string> = {
+    "30": "30 Days or Less",
+    "60": "31 – 60 Days",
+    "90": "61 – 90 Days",
+    over_90: "90+ Days",
+};
+
+export const HAS_APPLICATIONS_LABELS: Record<string, string> = {
+    yes: "Has Applications",
+    no: "No Applications",
+};
+
+// ===== SORT OPTIONS =====
+
+export const ROLE_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "updated_at", label: "Last Updated" },
+    { value: "title", label: "Title" },
+    { value: "status", label: "Status" },
+    { value: "salary_min", label: "Salary" },
+];
+
+// ===== FILTERS =====
+
 /**
  * Unified filter interface for all view modes (browse, grid, table)
+ * Includes all filterable fields from the jobs data model
  */
 export interface UnifiedJobFilters {
-    // Common filters
-    status?: string;
-    job_owner_filter?: "all" | "assigned";
+    // Scope
+    job_owner_filter?: "all" | "assigned" | "saved";
 
-    // Additional filters
+    // Inline filters (Row 1)
+    status?: string;
     employment_type?: string;
-    is_remote?: boolean;
+
+    // Expanded filters (Row 3)
     commute_type?: string;
     job_level?: string;
     company_id?: string;
+    is_early_access?: string;
+    is_priority?: string;
+    open_to_relocation?: string;
+    is_remote?: string;
+    job_source?: string;
+    salary_range?: string;
+    fee_range?: string;
+    guarantee_range?: string;
+    has_applications?: string;
+}
+
+// ===== ACTIVITY LOG =====
+
+export type JobActivityType =
+    | "job_created"
+    | "job_status_changed"
+    | "job_fields_updated"
+    | "job_deleted"
+    | "participant_added"
+    | "participant_removed";
+
+export interface JobActivityItem {
+    id: string;
+    job_id: string;
+    activity_type: JobActivityType;
+    description: string;
+    actor_user_id: string | null;
+    actor_name: string | null;
+    actor_avatar_url: string | null;
+    metadata: Record<string, any>;
+    created_at: string;
 }

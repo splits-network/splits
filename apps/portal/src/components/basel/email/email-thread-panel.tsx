@@ -8,16 +8,14 @@ import type {
     EmailMessage,
     EmailThread,
     EmailListResponse,
+    EmailListItem,
 } from "@splits-network/shared-types";
 
 /* ─── Types ────────────────────────────────────────────────────────────── */
 
 interface EmailThreadPanelProps {
-    /** Email address to search for — filters messages to/from this person */
     contactEmail?: string;
-    /** Contact name for display */
     contactName?: string;
-    /** Compact mode for embedding in sidebars */
     compact?: boolean;
     className?: string;
 }
@@ -37,12 +35,7 @@ export default function EmailThreadPanel({
     const [connections, setConnections] = useState<OAuthConnectionPublic[]>([]);
     const [selectedConnection, setSelectedConnection] =
         useState<OAuthConnectionPublic | null>(null);
-    const [messages, setMessages] = useState<
-        Array<{ id: string; threadId: string }>
-    >([]);
-    const [expandedMessage, setExpandedMessage] = useState<EmailMessage | null>(
-        null,
-    );
+    const [messages, setMessages] = useState<EmailListItem[]>([]);
     const [thread, setThread] = useState<EmailThread | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState(false);
@@ -61,7 +54,8 @@ export default function EmailThreadPanel({
             const emailConns = (res.data ?? []).filter(
                 (c) =>
                     (c.provider_slug.includes("email") ||
-                        c.provider_slug.includes("gmail")) &&
+                        c.provider_slug.includes("gmail") ||
+                        c.provider_slug.includes("combo")) &&
                     c.status === "active",
             );
             setConnections(emailConns);
@@ -104,24 +98,6 @@ export default function EmailThreadPanel({
         }
     };
 
-    const fetchMessageDetail = async (messageId: string) => {
-        if (!selectedConnection) return;
-        try {
-            setLoadingMessage(true);
-            const token = await getToken();
-            if (!token) return;
-            const client = createAuthenticatedClient(token);
-            const res = (await client.get(
-                `/integrations/email/${selectedConnection.id}/messages/${messageId}`,
-            )) as { data: EmailMessage };
-            setExpandedMessage(res.data);
-        } catch (err: any) {
-            setError("Failed to load message");
-        } finally {
-            setLoadingMessage(false);
-        }
-    };
-
     const fetchThread = async (threadId: string) => {
         if (!selectedConnection) return;
         try {
@@ -149,41 +125,56 @@ export default function EmailThreadPanel({
     const handleSelectConnection = async (conn: OAuthConnectionPublic) => {
         setSelectedConnection(conn);
         setMessages([]);
-        setExpandedMessage(null);
         setThread(null);
         await fetchMessages(conn.id);
     };
 
-    const handleViewMessage = (msg: { id: string; threadId: string }) => {
+    const handleViewThread = (msg: EmailListItem) => {
         setThread(null);
-        setExpandedMessage(null);
         fetchThread(msg.threadId);
     };
 
     const handleBack = () => {
         setThread(null);
-        setExpandedMessage(null);
     };
 
-    /* ── No connections ── */
+    /* ── Helpers ── */
     const noConnections = !loading && connections.length === 0;
+
+    const formatDate = (dateStr?: string) => {
+        if (!dateStr) return "";
+        const d = new Date(dateStr);
+        const now = new Date();
+        const isToday = d.toDateString() === now.toDateString();
+        if (isToday) {
+            return d.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+            });
+        }
+        return d.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+        });
+    };
 
     /* ── Render ── */
     return (
         <div ref={containerRef} className={`flex flex-col ${className}`}>
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-base-300">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-base-300 bg-base-200/30">
                 <div className="flex items-center gap-2">
                     <i className="fa-duotone fa-regular fa-envelope text-primary" />
                     <h3 className="text-sm font-black uppercase tracking-wider">
-                        {contactName ? `Emails — ${contactName}` : "Email Sync"}
+                        {contactName
+                            ? `Emails — ${contactName}`
+                            : "Email Inbox"}
                     </h3>
                 </div>
                 {thread && (
                     <button
                         onClick={handleBack}
-                        className="btn btn-ghost btn-xs"
-                        style={{ borderRadius: 0 }}
+                        className="btn btn-ghost btn-xs rounded-none"
                     >
                         <i className="fa-solid fa-arrow-left mr-1" />
                         Back
@@ -194,7 +185,7 @@ export default function EmailThreadPanel({
             {/* Error */}
             {error && (
                 <div className="bg-error/5 border-l-4 border-error px-4 py-2 mx-4 mt-3">
-                    <p className="text-xs font-semibold text-error">{error}</p>
+                    <p className="text-sm font-semibold text-error">{error}</p>
                 </div>
             )}
 
@@ -207,20 +198,19 @@ export default function EmailThreadPanel({
 
             {/* No connections */}
             {noConnections && (
-                <div className="text-center py-10 px-4">
-                    <div className="w-12 h-12 bg-base-200 border border-base-300 flex items-center justify-center mx-auto mb-3">
-                        <i className="fa-duotone fa-regular fa-envelope-circle-check text-xl text-base-content/30" />
+                <div className="text-center py-16 px-4">
+                    <div className="w-14 h-14 bg-base-200 border border-base-300 flex items-center justify-center mx-auto mb-4">
+                        <i className="fa-duotone fa-regular fa-envelope-circle-check text-2xl text-base-content/30" />
                     </div>
                     <p className="text-sm font-bold text-base-content/50 mb-1">
                         No email connected
                     </p>
-                    <p className="text-xs text-base-content/40 mb-3">
-                        Connect Gmail or Outlook to view email history.
+                    <p className="text-sm text-base-content/40 mb-4">
+                        Connect Gmail or Outlook to view and send emails.
                     </p>
                     <a
                         href="/portal/integrations"
-                        className="btn btn-primary btn-xs"
-                        style={{ borderRadius: 0 }}
+                        className="btn btn-primary btn-sm rounded-none"
                     >
                         <i className="fa-duotone fa-regular fa-plug mr-1" />
                         Connect Email
@@ -233,17 +223,16 @@ export default function EmailThreadPanel({
                 !noConnections &&
                 connections.length > 1 &&
                 !thread && (
-                    <div className="flex items-center gap-2 px-4 py-2 border-b border-base-300">
+                    <div className="flex items-center gap-2 px-4 py-2 border-b border-base-300 bg-base-200/20">
                         {connections.map((conn) => (
                             <button
                                 key={conn.id}
                                 onClick={() => handleSelectConnection(conn)}
-                                className={`btn btn-xs ${
+                                className={`btn btn-xs rounded-none ${
                                     selectedConnection?.id === conn.id
                                         ? "btn-primary"
                                         : "btn-ghost"
                                 }`}
-                                style={{ borderRadius: 0 }}
                             >
                                 <i
                                     className={
@@ -261,10 +250,11 @@ export default function EmailThreadPanel({
 
             {/* Message list */}
             {!loading && !noConnections && !thread && (
-                <div className="flex-1 overflow-y-auto">
-                    {messages.length === 0 && !loading && (
-                        <div className="text-center py-10">
-                            <p className="text-xs text-base-content/40">
+                <div className="flex-1 overflow-y-auto divide-y divide-base-200">
+                    {messages.length === 0 && (
+                        <div className="text-center py-16">
+                            <i className="fa-duotone fa-regular fa-inbox text-3xl text-base-content/20 mb-3" />
+                            <p className="text-sm text-base-content/40">
                                 {contactEmail
                                     ? `No emails found with ${contactEmail}`
                                     : "No recent messages"}
@@ -275,26 +265,74 @@ export default function EmailThreadPanel({
                     {messages.map((msg) => (
                         <button
                             key={msg.id}
-                            onClick={() => handleViewMessage(msg)}
-                            className="email-item w-full text-left px-4 py-3 border-b border-base-200 hover:bg-base-200/50 transition-colors animate-[fadeIn_0.3s_ease-out]"
+                            onClick={() => handleViewThread(msg)}
+                            className={`w-full text-left px-4 py-3 hover:bg-base-200/50 transition-colors ${
+                                msg.isRead === false
+                                    ? "bg-primary/5"
+                                    : ""
+                            }`}
                         >
-                            <div className="flex items-center gap-2">
-                                <i className="fa-duotone fa-regular fa-envelope text-base-content/30 text-xs" />
-                                <span className="text-xs font-mono text-base-content/40 truncate">
-                                    {msg.threadId.substring(0, 12)}...
-                                </span>
+                            <div className="flex items-start gap-3">
+                                {/* Avatar */}
+                                <div className="w-8 h-8 bg-primary/10 flex-shrink-0 flex items-center justify-center mt-0.5">
+                                    <span className="text-sm font-black text-primary uppercase">
+                                        {(
+                                            msg.from?.name ||
+                                            msg.from?.email ||
+                                            "?"
+                                        )[0]}
+                                    </span>
+                                </div>
+
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                                        <span
+                                            className={`text-sm truncate ${
+                                                msg.isRead === false
+                                                    ? "font-black"
+                                                    : "font-semibold text-base-content/70"
+                                            }`}
+                                        >
+                                            {msg.from?.name ||
+                                                msg.from?.email ||
+                                                "Unknown"}
+                                        </span>
+                                        <span className="text-sm text-base-content/40 flex-shrink-0">
+                                            {formatDate(msg.date)}
+                                        </span>
+                                    </div>
+                                    <p
+                                        className={`text-sm truncate ${
+                                            msg.isRead === false
+                                                ? "font-bold"
+                                                : "text-base-content/70"
+                                        }`}
+                                    >
+                                        {msg.subject || "(no subject)"}
+                                    </p>
+                                    {msg.snippet && (
+                                        <p className="text-sm text-base-content/40 truncate mt-0.5">
+                                            {msg.snippet}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Unread indicator */}
+                                {msg.isRead === false && (
+                                    <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
+                                )}
                             </div>
                         </button>
                     ))}
 
                     {nextPageToken && (
-                        <div className="text-center py-3">
+                        <div className="text-center py-4">
                             <button
                                 onClick={() => {
                                     /* TODO: load more */
                                 }}
-                                className="btn btn-ghost btn-xs text-primary"
-                                style={{ borderRadius: 0 }}
+                                className="btn btn-ghost btn-sm text-primary rounded-none"
                             >
                                 Load more
                             </button>
@@ -307,8 +345,8 @@ export default function EmailThreadPanel({
             {thread && (
                 <div className="flex-1 overflow-y-auto">
                     {loadingMessage && (
-                        <div className="flex items-center justify-center py-8">
-                            <span className="loading loading-spinner loading-sm" />
+                        <div className="flex items-center justify-center py-12">
+                            <span className="loading loading-spinner loading-md" />
                         </div>
                     )}
 
@@ -325,17 +363,17 @@ export default function EmailThreadPanel({
                                 {/* Sender row */}
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-7 h-7 bg-primary/10 flex items-center justify-center">
+                                        <div className="w-8 h-8 bg-primary/10 flex items-center justify-center">
                                             <span className="text-sm font-black text-primary uppercase">
-                                                {
-                                                    (msg.from?.name ||
-                                                        msg.from?.email ||
-                                                        "?")[0]
-                                                }
+                                                {(
+                                                    msg.from?.name ||
+                                                    msg.from?.email ||
+                                                    "?"
+                                                )[0]}
                                             </span>
                                         </div>
                                         <div>
-                                            <p className="text-xs font-bold">
+                                            <p className="text-sm font-bold">
                                                 {msg.from?.name ||
                                                     msg.from?.email}
                                             </p>
@@ -367,7 +405,7 @@ export default function EmailThreadPanel({
                                 )}
 
                                 {/* Body */}
-                                <div className="text-xs text-base-content/70 leading-relaxed">
+                                <div className="text-sm text-base-content/70 leading-relaxed">
                                     {msg.bodyText ? (
                                         <pre className="whitespace-pre-wrap font-sans">
                                             {msg.bodyText.substring(0, 1000)}
@@ -376,7 +414,7 @@ export default function EmailThreadPanel({
                                         </pre>
                                     ) : msg.bodyHtml ? (
                                         <div
-                                            className="prose prose-xs max-w-none"
+                                            className="prose prose-sm max-w-none"
                                             dangerouslySetInnerHTML={{
                                                 __html: msg.bodyHtml.substring(
                                                     0,

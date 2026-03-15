@@ -19,7 +19,7 @@ export function usePresence(
     options: UsePresenceOptions = {},
 ) {
     const { getToken } = useAuth();
-    const { enabled = true, refreshIntervalMs = 30000 } = options;
+    const { enabled = true, refreshIntervalMs = 60000 } = options;
 
     const normalizedIds = useMemo(() => {
         const unique = new Set<string>();
@@ -58,28 +58,32 @@ export function usePresence(
 
     const fetchPresence = useCallback(async () => {
         if (!enabled || normalizedIds.length === 0) return;
-        const token = await getToken();
-        if (!token) return;
-        const client = createAuthenticatedClient(token);
-        const response: any = await client.get("/chat/presence", {
-            params: { userIds: normalizedIds.join(",") },
-        });
-        const data = (response?.data || []) as Array<{
-            userId: string;
-            status: "online" | "idle" | "offline";
-            lastSeenAt: string | null;
-        }>;
-        const updates: Record<string, PresenceStatus> = {};
-        data.forEach((item) => {
-            const s = item?.status;
-            const entry: PresenceStatus = {
-                status: s === "online" ? "online" : s === "idle" ? "idle" : "offline",
-                lastSeenAt: item?.lastSeenAt ?? null,
-            };
-            updates[item.userId] = entry;
-            cache.set(item.userId, entry);
-        });
-        setPresence((prev) => ({ ...prev, ...updates }));
+        try {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            const response: any = await client.get("/chat/presence", {
+                params: { userIds: normalizedIds.join(",") },
+            });
+            const data = (response?.data || []) as Array<{
+                userId: string;
+                status: "online" | "idle" | "offline";
+                lastSeenAt: string | null;
+            }>;
+            const updates: Record<string, PresenceStatus> = {};
+            data.forEach((item) => {
+                const s = item?.status;
+                const entry: PresenceStatus = {
+                    status: s === "online" ? "online" : s === "idle" ? "idle" : "offline",
+                    lastSeenAt: item?.lastSeenAt ?? null,
+                };
+                updates[item.userId] = entry;
+                cache.set(item.userId, entry);
+            });
+            setPresence((prev) => ({ ...prev, ...updates }));
+        } catch {
+            // Presence is non-critical — silently degrade on rate limits or service errors
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [enabled, normalizedIds.join("|")]);
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { useUserProfile } from "@/contexts";
 import { ButtonLoading } from "@splits-network/shared-ui";
 
 interface CandidateSuggestion {
@@ -31,6 +32,9 @@ export default function AddCandidateModal({
     onSuccess,
 }: AddCandidateModalProps) {
     const { getToken } = useAuth();
+    const { profile } = useUserProfile();
+    const recruiterId = profile?.recruiter_id;
+
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<SuccessState | null>(null);
@@ -42,6 +46,9 @@ export default function AddCandidateModal({
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [searching, setSearching] = useState(false);
     const [selectedFromSuggestion, setSelectedFromSuggestion] = useState(false);
+    const [selectedCandidateId, setSelectedCandidateId] = useState<
+        string | null
+    >(null);
     const suggestionsRef = useRef<HTMLDivElement>(null);
 
     // Debounced email search
@@ -59,10 +66,15 @@ export default function AddCandidateModal({
                 if (!token) return;
 
                 const client = createAuthenticatedClient(token);
-                const response = await client.get<{ data: CandidateSuggestion[] }>(
-                    "/candidates",
-                    { params: { search: formData.email.trim(), scope: "all", limit: 5 } },
-                );
+                const response = await client.get<{
+                    data: CandidateSuggestion[];
+                }>("/candidates", {
+                    params: {
+                        search: formData.email.trim(),
+                        scope: "all",
+                        limit: 5,
+                    },
+                });
 
                 const results = response.data || [];
                 setSuggestions(results);
@@ -81,6 +93,7 @@ export default function AddCandidateModal({
 
     const handleSelectSuggestion = (candidate: CandidateSuggestion) => {
         setSelectedFromSuggestion(true);
+        setSelectedCandidateId(candidate.id);
         setFormData({
             full_name: candidate.full_name || "",
             email: candidate.email || "",
@@ -97,22 +110,65 @@ export default function AddCandidateModal({
         try {
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
+            if (!recruiterId) throw new Error("Recruiter profile not found");
 
             const client = createAuthenticatedClient(token);
-            const payload = {
-                email: formData.email.trim(),
-                full_name: formData.full_name.trim(),
-            };
 
-            const response = await client.post<{
-                data: any;
-                meta?: { existing?: boolean; invitation_sent?: boolean };
-            }>("/candidates", payload);
+            // Step 1: Create or find the candidate
+            let candidateId = selectedCandidateId;
+            let existing = !!selectedCandidateId;
+            let candidateData: any;
+
+            if (candidateId) {
+                // Selected from suggestions — candidate already exists
+                candidateData = {
+                    id: candidateId,
+                    full_name: formData.full_name,
+                    email: formData.email,
+                };
+            } else {
+                // New candidate — create them (handles duplicate email gracefully)
+                const createResponse = await client.post<{
+                    data: any;
+                    meta?: { existing?: boolean };
+                }>("/candidates", {
+                    email: formData.email.trim(),
+                    full_name: formData.full_name.trim(),
+                });
+
+                candidateData = createResponse.data;
+                candidateId = candidateData.id;
+                existing = createResponse.meta?.existing ?? false;
+            }
+
+            // Step 2: Create the recruiter-candidate relationship (triggers invitation email)
+            try {
+                await client.post("/recruiter-candidates", {
+                    recruiter_id: recruiterId,
+                    candidate_id: candidateId,
+                });
+            } catch (relError: any) {
+                // If the relationship already exists, that's OK — the candidate is already in their pipeline
+                const msg = relError?.message || "";
+                if (
+                    msg.includes("duplicate") ||
+                    msg.includes("already exists") ||
+                    msg.includes("23505")
+                ) {
+                    setSuccess({
+                        candidate: candidateData,
+                        existing: true,
+                        invitation_sent: false,
+                    });
+                    return;
+                }
+                throw relError;
+            }
 
             setSuccess({
-                candidate: response.data,
-                existing: response.meta?.existing ?? false,
-                invitation_sent: response.meta?.invitation_sent ?? false,
+                candidate: candidateData,
+                existing,
+                invitation_sent: true,
             });
         } catch (error: any) {
             console.error("Failed to invite candidate:", error);
@@ -121,6 +177,10 @@ export default function AddCandidateModal({
 
             if (errorMessage.includes("Not authenticated")) {
                 setError("Session expired. Refresh the page and try again.");
+            } else if (errorMessage.includes("Recruiter profile not found")) {
+                setError(
+                    "Your recruiter profile was not found. Please contact support.",
+                );
             } else {
                 setError(
                     errorMessage ||
@@ -147,6 +207,7 @@ export default function AddCandidateModal({
         setSuggestions([]);
         setShowSuggestions(false);
         setSelectedFromSuggestion(false);
+        setSelectedCandidateId(null);
         onClose();
     };
 
@@ -155,8 +216,7 @@ export default function AddCandidateModal({
     return (
         <dialog className="modal modal-open modal-bottom sm:modal-middle">
             <div
-                className="modal-box max-w-md w-full p-0"
-                style={{ borderRadius: 0 }}
+                className="modal-box max-w-md w-full p-0 rounded-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -192,8 +252,7 @@ export default function AddCandidateModal({
                                                     <p className="text-base-content/70 font-medium leading-relaxed">
                                                         <strong>
                                                             {
-                                                                success
-                                                                    .candidate
+                                                                success.candidate
                                                                     ?.email
                                                             }
                                                         </strong>{" "}
@@ -209,13 +268,12 @@ export default function AddCandidateModal({
                                                     <p className="font-black text-base-content uppercase tracking-wider text-xs mb-1">
                                                         Invitation sent
                                                     </p>
-                                                    <p className="text-base-content/70 font-medium leading-relaxed">
+                                                    <p className="text-base-content/70 font-medium leading-relaxed break-all">
                                                         An invitation has been
                                                         sent to{" "}
                                                         <strong>
                                                             {
-                                                                success
-                                                                    .candidate
+                                                                success.candidate
                                                                     ?.email
                                                             }
                                                         </strong>
@@ -230,7 +288,7 @@ export default function AddCandidateModal({
                                         ) : (
                                             <>
                                                 <p className="font-black text-base-content uppercase tracking-wider text-xs mb-1">
-                                                    Candidate added
+                                                    Already in your pipeline
                                                 </p>
                                                 <p className="text-base-content/70 font-medium leading-relaxed">
                                                     <strong>
@@ -239,8 +297,10 @@ export default function AddCandidateModal({
                                                                 ?.full_name
                                                         }
                                                     </strong>{" "}
-                                                    has been added to your
-                                                    pipeline.
+                                                    is already connected to you.
+                                                    You can manage their
+                                                    invitation from your
+                                                    candidates list.
                                                 </p>
                                             </>
                                         )}
@@ -251,8 +311,7 @@ export default function AddCandidateModal({
                             <div className="flex justify-end">
                                 <button
                                     type="button"
-                                    className="btn btn-primary"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-primary rounded-none"
                                     onClick={handleDone}
                                 >
                                     Done
@@ -288,8 +347,7 @@ export default function AddCandidateModal({
                                     </label>
                                     <input
                                         type="text"
-                                        className="input input-bordered w-full"
-                                        style={{ borderRadius: 0 }}
+                                        className="input input-bordered w-full rounded-none"
                                         value={formData.full_name}
                                         onChange={(e) =>
                                             setFormData({
@@ -313,11 +371,13 @@ export default function AddCandidateModal({
                                     <div className="relative">
                                         <input
                                             type="email"
-                                            className="input input-bordered w-full"
-                                            style={{ borderRadius: 0 }}
+                                            className="input input-bordered w-full rounded-none"
                                             value={formData.email}
                                             onChange={(e) => {
-                                                setSelectedFromSuggestion(false);
+                                                setSelectedFromSuggestion(
+                                                    false,
+                                                );
+                                                setSelectedCandidateId(null);
                                                 setFormData({
                                                     ...formData,
                                                     email: e.target.value,
@@ -349,11 +409,16 @@ export default function AddCandidateModal({
                                                     key={s.id}
                                                     type="button"
                                                     className="w-full px-3 py-2.5 text-left hover:bg-base-200 flex items-center gap-3 transition-colors"
-                                                    onClick={() => handleSelectSuggestion(s)}
+                                                    onClick={() =>
+                                                        handleSelectSuggestion(
+                                                            s,
+                                                        )
+                                                    }
                                                 >
                                                     <div className="w-8 h-8 bg-primary flex items-center justify-center shrink-0">
                                                         <span className="text-xs font-black text-primary-content">
-                                                            {s.full_name?.[0] || "?"}
+                                                            {s.full_name?.[0] ||
+                                                                "?"}
                                                         </span>
                                                     </div>
                                                     <div className="min-w-0">
@@ -362,7 +427,8 @@ export default function AddCandidateModal({
                                                         </p>
                                                         <p className="text-xs text-base-content/60 font-medium truncate">
                                                             {s.email}
-                                                            {s.current_title && ` · ${s.current_title}`}
+                                                            {s.current_title &&
+                                                                ` · ${s.current_title}`}
                                                         </p>
                                                     </div>
                                                     <span className="ml-auto shrink-0 text-xs font-bold text-info uppercase tracking-wider">
@@ -377,7 +443,8 @@ export default function AddCandidateModal({
                                         <div className="flex items-center gap-1.5 mt-2">
                                             <i className="fa-duotone fa-regular fa-circle-check text-info text-sm" />
                                             <p className="text-xs font-bold text-info uppercase tracking-wider">
-                                                Already on Splits Network — invitation will be sent
+                                                Already on Splits Network —
+                                                invitation will be sent
                                             </p>
                                         </div>
                                     ) : (
@@ -393,8 +460,7 @@ export default function AddCandidateModal({
                                 <div className="flex gap-3 justify-end pt-2">
                                     <button
                                         type="button"
-                                        className="btn btn-outline"
-                                        style={{ borderRadius: 0 }}
+                                        className="btn btn-outline rounded-none"
                                         onClick={handleClose}
                                         disabled={submitting}
                                     >
@@ -402,8 +468,7 @@ export default function AddCandidateModal({
                                     </button>
                                     <button
                                         type="submit"
-                                        className="btn btn-primary"
-                                        style={{ borderRadius: 0 }}
+                                        className="btn btn-primary rounded-none"
                                         disabled={
                                             submitting ||
                                             !formData.full_name.trim() ||

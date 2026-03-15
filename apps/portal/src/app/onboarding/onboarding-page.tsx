@@ -205,7 +205,7 @@ export function OnboardingPage() {
             </div>
 
             {/* ── Branding Panel (Right on desktop) ── */}
-            <div className="hidden lg:flex lg:w-2/5 bg-neutral text-neutral-content flex-col justify-between p-12 relative">
+            <div className="hidden lg:flex lg:w-2/5 bg-base-300 text-base-content flex-col justify-between p-12 relative">
                 {/* Diagonal accent */}
                 <div
                     className="absolute top-0 left-0 w-full h-full bg-primary/5"
@@ -220,7 +220,7 @@ export function OnboardingPage() {
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             S
                         </div>
-                        <p className="text-sm font-semibold text-neutral-content/40 mt-3">
+                        <p className="text-sm font-semibold text-base-content/40 mt-3">
                             Splits Network
                         </p>
                     </div>
@@ -230,7 +230,7 @@ export function OnboardingPage() {
                             <br />
                             <span className="text-primary">Start earning.</span>
                         </h2>
-                        <p className="text-sm text-neutral-content/40 leading-relaxed max-w-sm">
+                        <p className="text-sm text-base-content/40 leading-relaxed max-w-sm">
                             Set up your profile in minutes. We will match you
                             with companies and roles that fit your expertise.
                         </p>
@@ -248,7 +248,7 @@ export function OnboardingPage() {
                                 key={step.id}
                                 className={`scroll-reveal fade-up flex items-center gap-3 px-4 py-3 transition-all ${
                                     isActive
-                                        ? "bg-neutral-content/10"
+                                        ? ""
                                         : isCompleted
                                           ? "opacity-60"
                                           : "opacity-30"
@@ -260,7 +260,7 @@ export function OnboardingPage() {
                                             ? "bg-success text-success-content"
                                             : isActive
                                               ? "bg-primary text-primary-content"
-                                              : "bg-neutral-content/10"
+                                              : ""
                                     }`}
                                 >
                                     {isCompleted ? (
@@ -283,13 +283,13 @@ export function OnboardingPage() {
                 {/* Bottom: Testimonial */}
                 <div className="scroll-reveal fade-up relative ">
                     <div className="border-l-4 border-primary pl-4">
-                        <p className="text-sm text-neutral-content/60 italic mb-3">
+                        <p className="text-sm text-base-content/60 italic mb-3">
                             &ldquo;We filled three senior engineering roles in
                             six weeks. All through splits with recruiters
                             we&apos;d never worked with before.&rdquo;
                         </p>
                         <p className="text-sm font-bold">Rachel Simmons</p>
-                        <p className="text-sm text-neutral-content/40">
+                        <p className="text-sm text-base-content/40">
                             Talent Acquisition Director, Meridian Technologies
                         </p>
                     </div>

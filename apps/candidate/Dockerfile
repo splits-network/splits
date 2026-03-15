@@ -11,10 +11,13 @@ COPY packages/shared-api-client/package.json ./packages/shared-api-client/
 COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-ui/package.json ./packages/shared-ui/
+COPY packages/shared-hooks/package.json ./packages/shared-hooks/
+COPY packages/shared-charts/package.json ./packages/shared-charts/
 COPY packages/basel-ui/package.json ./packages/basel-ui/
 COPY packages/chat-ui/package.json ./packages/chat-ui/
-COPY packages/memphis-ui/package.json ./packages/memphis-ui/
 COPY packages/shared-gamification/package.json ./packages/shared-gamification/
+COPY packages/shared-video/package.json ./packages/shared-video/
+COPY packages/support-widget/package.json ./packages/support-widget/
 COPY apps/candidate/package.json ./apps/candidate/
 RUN pnpm install --frozen-lockfile
 
@@ -32,13 +35,17 @@ ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_API_GATEWAY_URL
 ARG NEXT_PUBLIC_CHAT_GATEWAY_URL
 ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_VIDEO_APP_URL
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_SUPPORT_GATEWAY_URL
 ARG SENTRY_AUTH_TOKEN
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_GATEWAY_URL=$NEXT_PUBLIC_API_GATEWAY_URL
 ENV NEXT_PUBLIC_CHAT_GATEWAY_URL=$NEXT_PUBLIC_CHAT_GATEWAY_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_VIDEO_APP_URL=$NEXT_PUBLIC_VIDEO_APP_URL
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_SUPPORT_GATEWAY_URL=$NEXT_PUBLIC_SUPPORT_GATEWAY_URL
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 # Clerk redirect URLs - static values inlined at build time for client-side SDK
 ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/portal/dashboard
@@ -51,20 +58,26 @@ COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
+COPY packages/shared-hooks ./packages/shared-hooks
+COPY packages/shared-charts ./packages/shared-charts
 COPY packages/basel-ui ./packages/basel-ui
 COPY packages/chat-ui ./packages/chat-ui
-COPY packages/memphis-ui ./packages/memphis-ui
 COPY packages/shared-gamification ./packages/shared-gamification
+COPY packages/shared-video ./packages/shared-video
+COPY packages/support-widget ./packages/support-widget
 COPY apps/candidate ./apps/candidate
 # Build shared packages first (in dependency order - types/config first, then api-client which depends on them)
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-api-client build
 RUN pnpm --filter @splits-network/shared-ui build
+RUN pnpm --filter @splits-network/shared-charts build
 RUN pnpm --filter @splits-network/basel-ui build
+RUN pnpm --filter @splits-network/shared-hooks build
 RUN pnpm --filter @splits-network/chat-ui build
-RUN pnpm --filter @splits-network/memphis-ui build
 RUN pnpm --filter @splits-network/shared-gamification build
+RUN pnpm --filter @splits-network/shared-video build
+RUN pnpm --filter @splits-network/support-widget build
 # Then build candidate (will transpile packages from source)
 RUN pnpm --filter @splits-network/candidate build
 # Prune to production dependencies (uses local store, no network)
@@ -91,14 +104,20 @@ COPY --from=build /app/packages/shared-api-client/package.json ./packages/shared
 COPY --from=build /app/packages/shared-api-client/dist ./packages/shared-api-client/dist
 COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
 COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
+COPY --from=build /app/packages/shared-hooks/package.json ./packages/shared-hooks/
+COPY --from=build /app/packages/shared-hooks/dist ./packages/shared-hooks/dist
+COPY --from=build /app/packages/shared-charts/package.json ./packages/shared-charts/
+COPY --from=build /app/packages/shared-charts/dist ./packages/shared-charts/dist
 COPY --from=build /app/packages/basel-ui/package.json ./packages/basel-ui/
 COPY --from=build /app/packages/basel-ui/dist ./packages/basel-ui/dist
 COPY --from=build /app/packages/chat-ui/package.json ./packages/chat-ui/
 COPY --from=build /app/packages/chat-ui/dist ./packages/chat-ui/dist
-COPY --from=build /app/packages/memphis-ui/package.json ./packages/memphis-ui/
-COPY --from=build /app/packages/memphis-ui/dist ./packages/memphis-ui/dist
 COPY --from=build /app/packages/shared-gamification/package.json ./packages/shared-gamification/
 COPY --from=build /app/packages/shared-gamification/dist ./packages/shared-gamification/dist
+COPY --from=build /app/packages/shared-video/package.json ./packages/shared-video/
+COPY --from=build /app/packages/shared-video/dist ./packages/shared-video/dist
+COPY --from=build /app/packages/support-widget/package.json ./packages/support-widget/
+COPY --from=build /app/packages/support-widget/dist ./packages/support-widget/dist
 
 # App package.json for pnpm filter
 COPY --from=build /app/apps/candidate/package.json ./apps/candidate/

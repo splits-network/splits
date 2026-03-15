@@ -9,6 +9,7 @@
 import { useState, useEffect } from "react";
 import { PricingCardGrid } from "./pricing-card-grid";
 import type { Plan } from "./types";
+import { apiClient } from "@/lib/api-client";
 
 interface DynamicPricingSectionProps {
     /** Whether to show billing toggle (monthly/annual) */
@@ -46,28 +47,9 @@ export function DynamicPricingSection({
                 setLoading(true);
                 setError(null);
 
-                // Make direct public request without any auth token
-                const response = await fetch(
-                    "/api/v2/plans?status=active&limit=50",
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            // No Authorization header - this is a public endpoint
-                        },
-                    },
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        `Failed to fetch plans: ${response.status} ${response.statusText}`,
-                    );
-                }
-
-                const result = await response.json();
+                const result = await apiClient.get("/plans?status=active&limit=50");
 
                 if (result?.data) {
-                    // Filter to only active plans and sort by price
                     const activePlans = (result.data || [])
                         .filter((plan: Plan) => plan.is_active !== false)
                         .sort(
@@ -82,8 +64,6 @@ export function DynamicPricingSection({
             } catch (err: any) {
                 console.error("Failed to fetch plans:", err);
                 setError(err.message || "Failed to load pricing plans");
-
-                // Fallback to empty array to prevent crashes
                 setPlans([]);
             } finally {
                 setLoading(false);

@@ -25,8 +25,10 @@ export interface Candidate {
 
 export interface CandidateDocument {
     id: string;
-    filename: string;
+    file_name: string;
+    filename?: string;
     file_type: string;
+    document_type?: string;
 }
 
 export type StepId = "find-role" | "select-candidate" | "build-case" | "review";
@@ -41,5 +43,5 @@ export const STEP_LABELS: Record<StepId, string> = {
 export const STATUS_BADGE_MAP: Record<string, string> = {
     active: "badge-success",
     paused: "badge-warning",
-    closed: "badge-neutral",
+    closed: "badge-primary",
 };

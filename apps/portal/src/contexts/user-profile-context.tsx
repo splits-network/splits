@@ -17,6 +17,7 @@ import {
     useState,
     ReactNode,
     useCallback,
+    useMemo,
 } from "react";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import {
@@ -28,6 +29,13 @@ import {
     type CompanyPermissionEntry,
 } from "@/hooks/use-recruiter-permissions";
 import type { RecruiterCompanyPermissions } from "@/app/portal/invitation/shared/types";
+import {
+    STARTER_ENTITLEMENTS,
+    type PlanEntitlements,
+    type BooleanEntitlement,
+    type NumericEntitlement,
+    type MarketplacePriority,
+} from "@splits-network/shared-types";
 
 /**
  * Plan tier types
@@ -62,6 +70,7 @@ export interface Plan {
     price_annual: number;
     currency: string;
     features: Record<string, any>;
+    entitlements?: PlanEntitlements;
     is_active: boolean;
 }
 
@@ -120,6 +129,8 @@ interface UserProfileContextValue {
     isRecruiter: boolean;
     /** Whether the user is a company user (company_admin or hiring_manager) */
     isCompanyUser: boolean;
+    /** Whether the user is a hiring manager (not full company admin) */
+    isHiringManager: boolean;
     /** Whether the user is a candidate (has candidate_id) */
     isCandidate: boolean;
     /** Check if user has a specific role */
@@ -147,6 +158,17 @@ interface UserProfileContextValue {
     isSubscriptionLoading: boolean;
     /** Refresh the subscription data */
     refreshSubscription: () => Promise<void>;
+    // Entitlement fields
+    /** The user's resolved entitlements (from plan or STARTER defaults) */
+    entitlements: PlanEntitlements;
+    /** Check if a boolean entitlement is enabled */
+    hasEntitlement: (key: BooleanEntitlement) => boolean;
+    /** Get the numeric limit for an entitlement (-1 = unlimited) */
+    getLimit: (key: NumericEntitlement) => number;
+    /** Check if current usage is within the entitlement limit */
+    isWithinLimit: (key: NumericEntitlement, current: number) => boolean;
+    /** The user's marketplace priority level */
+    marketplacePriority: MarketplacePriority;
     /** All company permissions for the recruiter */
     companyPermissions: CompanyPermissionEntry[];
     /** Whether permissions are loading */
@@ -285,6 +307,7 @@ export function UserProfileProvider({
     const isCompanyUser = roles.some(
         (role) => role === "company_admin" || role === "hiring_manager",
     );
+    const isHiringManager = roles.includes("hiring_manager") && !roles.includes("company_admin");
     const isCandidate = Boolean(profile?.candidate_id);
 
     // Subscription derived values
@@ -295,6 +318,42 @@ export function UserProfileProvider({
     const isSubscriptionActive =
         subscription?.status === "active" ||
         subscription?.status === "trialing";
+
+    // Entitlement derived values
+    const entitlements: PlanEntitlements = useMemo(
+        () => ({
+            ...STARTER_ENTITLEMENTS,
+            ...(plan?.entitlements ?? {}),
+        }),
+        [plan],
+    );
+
+    const hasEntitlement = useCallback(
+        (key: BooleanEntitlement): boolean => {
+            if (isAdmin) return true;
+            return Boolean(entitlements[key]);
+        },
+        [entitlements, isAdmin],
+    );
+
+    const getLimit = useCallback(
+        (key: NumericEntitlement): number => {
+            if (isAdmin) return -1;
+            return entitlements[key] as number;
+        },
+        [entitlements, isAdmin],
+    );
+
+    const isWithinLimit = useCallback(
+        (key: NumericEntitlement, current: number): boolean => {
+            const limit = getLimit(key);
+            return limit === -1 || current < limit;
+        },
+        [getLimit],
+    );
+
+    const marketplacePriority: MarketplacePriority =
+        (entitlements.marketplace_priority as MarketplacePriority) || "standard";
 
     const hasRole = useCallback(
         (role: string) => {
@@ -339,10 +398,11 @@ export function UserProfileProvider({
         isAdmin,
         isRecruiter,
         isCompanyUser,
+        isHiringManager,
         isCandidate,
         hasRole,
         hasAnyRole,
-        refresh: () => fetchProfile(),
+        refresh: () => fetchProfile({ silent: true }),
         logout,
         // Subscription fields
         subscription,
@@ -353,6 +413,12 @@ export function UserProfileProvider({
         isSubscriptionActive,
         isSubscriptionLoading,
         refreshSubscription: () => fetchSubscription(),
+        // Entitlement fields
+        entitlements,
+        hasEntitlement,
+        getLimit,
+        isWithinLimit,
+        marketplacePriority,
         companyPermissions,
         isPermissionsLoading,
         hasPermissionForCompany,

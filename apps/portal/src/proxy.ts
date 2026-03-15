@@ -25,10 +25,10 @@ export default clerkMiddleware(async (auth, request) => {
         pathname.startsWith('/sso-callback') ||
         pathname.startsWith('/accept-invitation') ||
         pathname.startsWith('/firms/invitations') ||
-        pathname.startsWith('/api/v2/plans') ||
         pathname.startsWith('/api/v2/jobs') ||
         pathname.startsWith('/api/v2/recruiters') ||
-        pathname.startsWith('/api/v2/status-contact');
+        pathname.startsWith('/api/v2/status-contact') ||
+        pathname.startsWith('/api/v3/');
 
     if (isPublicEndpoint) {
         return response; // Allow unauthenticated access, return response with cookie if set
@@ -55,8 +55,9 @@ export const config = {
         '/firms/invitations/(.*)', // Firm invitation acceptance
         //'/join(.*)', // Join platform (handled conditionally in page)
 
-        // V2 API routes (authentication handled conditionally in middleware)
-        '/api/v2/(.*)', // All V2 routes - public endpoints handled conditionally above
+        // API routes (authentication handled conditionally in middleware)
+        '/api/v2/(.*)', // V2 routes (internal proxies still at v2 path)
+        '/api/v3/(.*)', // V3 routes
 
         '/api/notifications/(.*)', // V1 notification APIs
         '/api/healthcheck', // Internal health check

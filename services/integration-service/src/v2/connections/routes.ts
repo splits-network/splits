@@ -1,4 +1,6 @@
 import { FastifyInstance } from 'fastify';
+import { createClient } from '@supabase/supabase-js';
+import { EntitlementChecker } from '@splits-network/shared-access-context';
 import { ConnectionRepository } from './repository';
 import { ConnectionService } from './service';
 import { ProviderRepository } from '../providers/repository';
@@ -6,6 +8,9 @@ import { IEventPublisher } from '../shared/events';
 import { requireUserContext } from '../shared/helpers';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
+
+const EMAIL_PROVIDER_SLUGS = ['google_email', 'microsoft_email'];
+const CALENDAR_PROVIDER_SLUGS = ['google_calendar', 'microsoft_calendar'];
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -19,6 +24,8 @@ export async function registerConnectionRoutes(app: FastifyInstance, config: Reg
     const connectionRepo = new ConnectionRepository(config.supabaseUrl, config.supabaseKey);
     const providerRepo = new ProviderRepository(config.supabaseUrl, config.supabaseKey);
     const service = new ConnectionService(connectionRepo, providerRepo, config.eventPublisher, config.logger, config.crypto);
+    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    const entitlementChecker = new EntitlementChecker(supabase);
 
     // GET /api/v2/integrations/connections — list user's connections
     app.get('/api/v2/integrations/connections', async (request, reply) => {
@@ -38,6 +45,25 @@ export async function registerConnectionRoutes(app: FastifyInstance, config: Reg
 
         if (!body.provider_slug || !body.redirect_uri) {
             return reply.status(400).send({ error: 'provider_slug and redirect_uri are required' });
+        }
+
+        // Entitlement gate: check email or calendar integration access
+        const isEmail = EMAIL_PROVIDER_SLUGS.includes(body.provider_slug);
+        const isCalendar = CALENDAR_PROVIDER_SLUGS.includes(body.provider_slug);
+        const requiredEntitlement = isEmail ? 'email_integration' : isCalendar ? 'calendar_integration' : null;
+
+        if (requiredEntitlement) {
+            const entitled = await entitlementChecker.hasEntitlementByClerkId(
+                clerkUserId,
+                requiredEntitlement as 'email_integration' | 'calendar_integration',
+            );
+            if (!entitled) {
+                return reply.status(403).send({
+                    error: 'Upgrade required',
+                    requiredTier: 'pro',
+                    entitlement: requiredEntitlement,
+                });
+            }
         }
 
         try {

@@ -11,18 +11,52 @@ import { CandidateDescriptionTab } from "./job-detail-candidate-tab";
 import { FinancialsTab } from "./job-detail-financials-tab";
 import { CompanyTab } from "./job-detail-company-tab";
 import { JobMatchesTab } from "./job-matches-tab";
+import { JobCallsTab } from "./job-calls-tab";
+import { JobTimelineTab } from "./job-timeline-tab";
+import { JobNotesTab } from "./job-notes-tab";
 import { JobHeroHeader } from "./job-detail-header";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
-type TabKey = "brief" | "candidate" | "financials" | "company" | "matches";
+type TabKey =
+    | "brief"
+    | "candidate"
+    | "financials"
+    | "company"
+    | "matches"
+    | "calls"
+    | "notes"
+    | "timeline";
 
 const TABS = [
-    { value: "brief", label: "Recruiter Brief", icon: "fa-duotone fa-regular fa-file-lines" },
-    { value: "candidate", label: "Candidate", icon: "fa-duotone fa-regular fa-user" },
-    { value: "financials", label: "Financials", icon: "fa-duotone fa-regular fa-calculator" },
-    { value: "company", label: "Company", icon: "fa-duotone fa-regular fa-building" },
-    { value: "matches", label: "Matches", icon: "fa-duotone fa-regular fa-bullseye" },
+    {
+        value: "brief",
+        label: "Recruiter Brief",
+        icon: "fa-duotone fa-regular fa-file-lines",
+    },
+    {
+        value: "candidate",
+        label: "Candidate",
+        icon: "fa-duotone fa-regular fa-user",
+    },
+    {
+        value: "financials",
+        label: "Financials",
+        icon: "fa-duotone fa-regular fa-calculator",
+    },
+    {
+        value: "company",
+        label: "Company",
+        icon: "fa-duotone fa-regular fa-building",
+    },
+    {
+        value: "matches",
+        label: "Matches",
+        icon: "fa-duotone fa-regular fa-bullseye",
+    },
+    { value: "calls", label: "Calls", icon: "fa-duotone fa-regular fa-video" },
+    { value: "notes", label: "Notes", icon: "fa-duotone fa-regular fa-notes" },
+    { value: "timeline", label: "Timeline", icon: "fa-duotone fa-regular fa-clock-rotate-left" },
 ];
 
 /* ─── Detail Panel ───────────────────────────────────────────────────────── */
@@ -32,20 +66,22 @@ export function JobDetail({
     onClose,
     onRefresh,
     onUpdateItem,
-    accent: _accent,
 }: {
     job: Job;
     onClose?: () => void;
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
-    /** @deprecated Basel ignores this prop. Kept for backward compatibility with Memphis consumers. */
-    accent?: unknown;
 }) {
+    const { isRecruiter, isCompanyUser } = useUserProfile();
+
+    const visibleTabs = isCompanyUser
+        ? TABS
+        : TABS.filter((t) => t.value !== "notes");
+
     const [activeTab, setActiveTab] = useState<TabKey>("brief");
-    const { planTier, isRecruiter } = useUserProfile();
 
     return (
-        <div>
+        <div className="w-full z-10">
             <JobHeroHeader
                 job={job}
                 onClose={onClose}
@@ -54,7 +90,7 @@ export function JobDetail({
             />
 
             <BaselTabBar
-                tabs={TABS}
+                tabs={visibleTabs}
                 active={activeTab}
                 onChange={(v) => setActiveTab(v as TabKey)}
                 className="bg-base-100 border-b border-base-300"
@@ -63,11 +99,25 @@ export function JobDetail({
             {/* Tab Content */}
             <div className="p-6">
                 {activeTab === "brief" && <RecruiterBriefTab job={job} />}
-                {activeTab === "candidate" && <CandidateDescriptionTab job={job} />}
+                {activeTab === "candidate" && (
+                    <CandidateDescriptionTab job={job} />
+                )}
                 {activeTab === "financials" && <FinancialsTab job={job} />}
                 {activeTab === "company" && <CompanyTab job={job} />}
                 {activeTab === "matches" && (
-                    <JobMatchesTab job={job} isPartner={planTier === "partner"} isRecruiter={isRecruiter} />
+                    <JobMatchesTab
+                        job={job}
+                        isRecruiter={isRecruiter}
+                    />
+                )}
+                {activeTab === "calls" && (
+                    <JobCallsTab jobId={job.id} jobTitle={job.title} />
+                )}
+                {activeTab === "notes" && (
+                    <JobNotesTab jobId={job.id} />
+                )}
+                {activeTab === "timeline" && (
+                    <JobTimelineTab jobId={job.id} />
                 )}
             </div>
         </div>
@@ -88,9 +138,14 @@ export function DetailLoader({
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     const { getToken } = useAuth();
+    const { isRecruiter, isCompanyUser } = useUserProfile();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
+
+    const viewPath = isCompanyUser
+        ? "company-detail"
+        : "recruiter-detail";
 
     const fetchDetail = useCallback(
         async (id: string, signal?: { cancelled: boolean }) => {
@@ -98,16 +153,16 @@ export function DetailLoader({
                 const token = await getToken();
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: Job }>(`/jobs/${id}`, {
-                    params: { include: "company,requirements,skills" },
-                });
+                const res = await client.get<{ data: Job }>(
+                    `/jobs/${id}/view/${viewPath}`,
+                );
                 if (!signal?.cancelled) setJob(res.data);
             } catch (err) {
                 console.error("Failed to fetch job detail:", err);
             }
             // eslint-disable-next-line react-hooks/exhaustive-deps
         },
-        [],
+        [viewPath],
     );
 
     useEffect(() => {

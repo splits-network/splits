@@ -70,7 +70,7 @@ const FirmConnectModal = forwardRef<FirmConnectModalHandle, FirmConnectModalProp
                     { body: message.trim() },
                 );
 
-                toast.success("Message sent! The firm will see your request.");
+                toast.success("Message sent. The firm will review your request.");
                 setIsOpen(false);
                 onConnected();
             } catch (err: any) {
@@ -79,7 +79,7 @@ const FirmConnectModal = forwardRef<FirmConnectModalHandle, FirmConnectModalProp
                     setIsOpen(false);
                     onConnected();
                 } else {
-                    toast.error("Failed to send message. Please try again.");
+                    toast.error("Message couldn't be sent. Try again.");
                 }
             } finally {
                 setSending(false);

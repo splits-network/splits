@@ -36,6 +36,7 @@ const createSchema = {
         type: 'object',
         properties: {
             label: { type: 'string', maxLength: 255 },
+            is_default: { type: 'boolean' },
             expiry_date: { type: 'string', format: 'date-time' },
             max_uses: { type: 'integer', minimum: 1 },
             uses_remaining: { type: 'integer', minimum: 0 },
@@ -49,6 +50,7 @@ const updateSchema = {
         properties: {
             label: { type: 'string', maxLength: 255 },
             status: { type: 'string', enum: ['active', 'inactive'] },
+            is_default: { type: 'boolean' },
             expiry_date: { type: ['string', 'null'], format: 'date-time' },
             max_uses: { type: ['integer', 'null'], minimum: 1 },
             uses_remaining: { type: ['integer', 'null'], minimum: 0 },
@@ -115,6 +117,14 @@ export async function recruiterCodeRoutes(
         }
     });
 
+    // GET default code for the authenticated recruiter
+    app.get('/api/v2/recruiter-codes/default', async (request, reply) => {
+        const { clerkUserId } = requireUserContext(request);
+
+        const code = await service.getDefault(clerkUserId);
+        return reply.send({ data: code });
+    });
+
     // GET single code (authenticated)
     app.get('/api/v2/recruiter-codes/:id', {
         schema: {
@@ -157,6 +167,12 @@ export async function recruiterCodeRoutes(
                 if (error.message.includes('Only recruiters')) {
                     return reply.code(403).send({
                         error: { code: 'FORBIDDEN', message: error.message },
+                    });
+                }
+                if (error.message.includes('maximum number of referral codes')) {
+                    return reply.code(403).send({
+                        error: { code: 'ENTITLEMENT_LIMIT', message: error.message },
+                        entitlement: 'max_referral_codes',
                     });
                 }
             }

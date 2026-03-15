@@ -12,7 +12,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { PageTitleProvider, useUserProfile } from "@/contexts";
+import { PageTitleProvider, DrawerProvider, useUserProfile } from "@/contexts";
 
 function OnboardingRedirectGuard({ children }: { children: React.ReactNode }) {
     const { profile, isLoading, isAdmin, error } = useUserProfile();
@@ -39,7 +39,9 @@ export function AuthenticatedLayoutClient({
 }) {
     return (
         <PageTitleProvider>
-            <OnboardingRedirectGuard>{children}</OnboardingRedirectGuard>
+            <DrawerProvider>
+                <OnboardingRedirectGuard>{children}</OnboardingRedirectGuard>
+            </DrawerProvider>
         </PageTitleProvider>
     );
 }

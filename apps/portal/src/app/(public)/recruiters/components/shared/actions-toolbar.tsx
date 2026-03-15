@@ -96,7 +96,7 @@ export default function RecruiterActionsToolbar({
             });
         } catch (err: any) {
             console.error("Failed to start chat:", err);
-            toast.error(err?.message || "Failed to start chat");
+            toast.error(err?.message || "Couldn't start conversation. Try again.");
         } finally {
             setStartingChat(false);
         }

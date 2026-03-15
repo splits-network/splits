@@ -28,10 +28,7 @@ export function DetailLoader({
             if (!token || signal?.cancelled) return;
             const client = createAuthenticatedClient(token);
             const response = await client.get(
-                `/applications/${id}`,
-                {
-                    params: { include: "candidate,job,company,recruiter,ai_review,documents,audit_log" },
-                },
+                `/applications/${id}/view/detail?include=audit,documents`,
             );
             if (!signal?.cancelled) setApplication(response.data || null);
         } catch (error) {

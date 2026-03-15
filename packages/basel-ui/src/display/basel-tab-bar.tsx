@@ -52,9 +52,7 @@ export function BaselTabBar({
         const el = scrollRef.current;
         if (!el) return;
         setCanScrollLeft(el.scrollLeft > 0);
-        setCanScrollRight(
-            el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
-        );
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
     }, []);
 
     useEffect(() => {
@@ -108,9 +106,7 @@ export function BaselTabBar({
                             className={`tab ${active === tab.value ? "tab-active" : ""}`}
                             onClick={() => onChange(tab.value)}
                         >
-                            {tab.icon && (
-                                <i className={`${tab.icon} mr-2`} />
-                            )}
+                            {tab.icon && <i className={`${tab.icon} mr-2`} />}
                             {tab.label}
                             {tab.count !== undefined && tab.count > 0 && (
                                 <span className="ml-1.5 text-sm uppercase tracking-[0.2em] font-bold px-1.5 py-0.5 bg-primary/15 text-primary">

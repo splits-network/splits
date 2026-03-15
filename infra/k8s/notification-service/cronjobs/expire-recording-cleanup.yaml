@@ -1,0 +1,88 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+    name: notification-service-expire-recording-cleanup
+    namespace: splits-network
+    labels:
+        app: notification-service
+        component: cron
+        job-type: expire-recording-cleanup
+spec:
+    # Daily at 3 AM UTC
+    schedule: "0 3 * * *"
+
+    concurrencyPolicy: Forbid
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 3
+
+    jobTemplate:
+        metadata:
+            labels:
+                app: notification-service
+                component: cron
+                job-type: expire-recording-cleanup
+        spec:
+            activeDeadlineSeconds: 600
+            backoffLimit: 3
+
+            template:
+                metadata:
+                    labels:
+                        app: notification-service
+                        component: cron
+                        job-type: expire-recording-cleanup
+                spec:
+                    nodeSelector:
+                        agentpool: userpool
+                    tolerations:
+                        - key: "kubernetes.azure.com/scalesetpriority"
+                          operator: "Equal"
+                          value: "spot"
+                          effect: "NoSchedule"
+                    restartPolicy: OnFailure
+
+                    containers:
+                        - name: expire-recording-cleanup
+                          image: ${ACR_SERVER}/notification-service:${IMAGE_TAG}
+                          imagePullPolicy: Always
+
+                          command: ["node"]
+                          args:
+                              [
+                                  "services/notification-service/dist/jobs/expire-recording-cleanup.js",
+                              ]
+
+                          env:
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-url
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-service-role-key
+                              - name: RESEND_API_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: resend-secrets
+                                        key: resend-api-key
+                              - name: FROM_EMAIL
+                                value: "Splits Network <notifications@splits.network>"
+                              - name: RESEND_CANDIDATE_FROM_EMAIL
+                                value: "notifications@updates.applicant.network"
+                              - name: PORTAL_URL
+                                value: "${PORTAL_URL}"
+                              - name: NODE_ENV
+                                value: "production"
+                              - name: LOG_LEVEL
+                                value: "info"
+
+                          resources:
+                              requests:
+                                  memory: "256Mi"
+                                  cpu: "250m"
+                              limits:
+                                  memory: "512Mi"
+                                  cpu: "500m"

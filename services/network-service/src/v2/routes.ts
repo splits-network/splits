@@ -61,7 +61,7 @@ export async function registerV2Routes(app: FastifyInstance, config: V2Config) {
     );
     const reputationService = new ReputationServiceV2(reputationRepository, config.eventPublisher);
     const companyReputationService = new CompanyReputationServiceV2(companyReputationRepository);
-    const firmService = new FirmServiceV2(firmRepository, config.eventPublisher);
+    const firmService = new FirmServiceV2(firmRepository, config.eventPublisher, supabase);
 
     registerRecruiterRoutes(app, { recruiterService });
     registerAssignmentRoutes(app, { assignmentService });

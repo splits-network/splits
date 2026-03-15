@@ -18,10 +18,22 @@ import { AITab } from "./match-panel-tabs/ai-tab";
 type MatchDetailTab = "factors" | "skills" | "ai" | "details";
 
 const TABS = [
-    { label: "Factors", value: "factors", icon: "fa-duotone fa-regular fa-list-check" },
+    {
+        label: "Factors",
+        value: "factors",
+        icon: "fa-duotone fa-regular fa-list-check",
+    },
     { label: "Skills", value: "skills", icon: "fa-duotone fa-regular fa-code" },
-    { label: "AI Analysis", value: "ai", icon: "fa-duotone fa-regular fa-brain" },
-    { label: "Details", value: "details", icon: "fa-duotone fa-regular fa-circle-info" },
+    {
+        label: "AI Analysis",
+        value: "ai",
+        icon: "fa-duotone fa-regular fa-brain",
+    },
+    {
+        label: "Details",
+        value: "details",
+        icon: "fa-duotone fa-regular fa-circle-info",
+    },
 ];
 
 interface MatchDetailPanelProps {
@@ -42,7 +54,7 @@ export function MatchDetailPanel({
     const [activeTab, setActiveTab] = useState<MatchDetailTab>("factors");
 
     return (
-        <div className="h-full overflow-y-auto">
+        <div className="h-full w-full overflow-y-auto">
             <MatchPanelHeader
                 match={match}
                 isPartner={isPartner}
@@ -56,9 +68,13 @@ export function MatchDetailPanel({
                 onChange={(v) => setActiveTab(v as MatchDetailTab)}
                 className="bg-base-100 border-b border-base-300"
             />
-            {activeTab === "factors" && <FactorsTab match={match} isPartner={isPartner} />}
+            {activeTab === "factors" && (
+                <FactorsTab match={match} isPartner={isPartner} />
+            )}
             {activeTab === "skills" && <SkillsTab match={match} />}
-            {activeTab === "ai" && <AITab match={match} isPartner={isPartner} />}
+            {activeTab === "ai" && (
+                <AITab match={match} />
+            )}
             {activeTab === "details" && <DetailsTab match={match} />}
         </div>
     );
@@ -68,17 +84,47 @@ export function MatchDetailPanel({
 
 function DetailsTab({ match }: { match: EnrichedMatch }) {
     const candidateRows = [
-        { icon: "fa-duotone fa-regular fa-user", label: "Full Name", value: candidateDisplayName(match) },
+        {
+            icon: "fa-duotone fa-regular fa-user",
+            label: "Full Name",
+            value: candidateDisplayName(match),
+        },
     ];
 
     const jobRows = [
-        { icon: "fa-duotone fa-regular fa-briefcase", label: "Job Title", value: jobDisplayTitle(match) },
-        { icon: "fa-duotone fa-regular fa-building", label: "Company", value: companyDisplayName(match) },
-        { icon: "fa-duotone fa-regular fa-location-dot", label: "Location", value: match.job?.location ?? "Remote" },
-        { icon: "fa-duotone fa-regular fa-clock", label: "Employment", value: match.job?.employment_type ?? "N/A" },
-        { icon: "fa-duotone fa-regular fa-user-tie", label: "Level", value: match.job?.job_level ?? "N/A" },
+        {
+            icon: "fa-duotone fa-regular fa-briefcase",
+            label: "Job Title",
+            value: jobDisplayTitle(match),
+        },
+        {
+            icon: "fa-duotone fa-regular fa-building",
+            label: "Company",
+            value: companyDisplayName(match),
+        },
+        {
+            icon: "fa-duotone fa-regular fa-location-dot",
+            label: "Location",
+            value: match.job?.location ?? "Remote",
+        },
+        {
+            icon: "fa-duotone fa-regular fa-clock",
+            label: "Employment",
+            value: match.job?.employment_type ?? "N/A",
+        },
+        {
+            icon: "fa-duotone fa-regular fa-user-tie",
+            label: "Level",
+            value: match.job?.job_level ?? "N/A",
+        },
         ...(match.job?.salary_min != null && match.job?.salary_max != null
-            ? [{ icon: "fa-duotone fa-regular fa-dollar-sign", label: "Salary Range", value: `$${match.job.salary_min.toLocaleString()} – $${match.job.salary_max.toLocaleString()}` }]
+            ? [
+                  {
+                      icon: "fa-duotone fa-regular fa-dollar-sign",
+                      label: "Salary Range",
+                      value: `$${match.job.salary_min.toLocaleString()} – $${match.job.salary_max.toLocaleString()}`,
+                  },
+              ]
             : []),
     ];
 
@@ -110,7 +156,10 @@ function DetailCard({
             </div>
             <div className="divide-y divide-base-300">
                 {rows.map((r) => (
-                    <div key={r.label} className="flex items-center gap-4 px-6 py-3">
+                    <div
+                        key={r.label}
+                        className="flex items-center gap-4 px-6 py-3"
+                    >
                         <div className="w-8 h-8 bg-primary/10 flex items-center justify-center shrink-0">
                             <i className={`${r.icon} text-primary text-sm`} />
                         </div>

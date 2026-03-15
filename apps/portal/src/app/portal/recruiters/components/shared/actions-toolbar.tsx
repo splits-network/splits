@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
-import { usePresence } from "@/hooks/use-presence";
+import { usePresenceStatus } from "@/contexts";
 import { Presence } from "@/components/presense";
 import { useChatSidebar } from "@splits-network/chat-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
@@ -52,17 +52,7 @@ export default function RecruiterActionsToolbar({
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
 
-    let companies: any[] = [];
-    let recruiterRelationships: Map<string, any> = new Map();
-    let refreshRelationships = () => {};
-    try {
-        const companyCtx = useCompanyContext();
-        companies = companyCtx.companies;
-        recruiterRelationships = companyCtx.recruiterRelationships;
-        refreshRelationships = companyCtx.refreshRelationships;
-    } catch {
-        // CompanyProvider not available (e.g., on public pages) - use defaults
-    }
+    const { companies, recruiterRelationships, refreshRelationships } = useCompanyContext();
 
     const companyRelationship = recruiterRelationships.get(recruiter.id);
     const hasActiveRelationship = companyRelationship?.status === "active";
@@ -72,10 +62,8 @@ export default function RecruiterActionsToolbar({
     const chatDisabledReason = canChat
         ? null
         : "This recruiter isn't linked to a user account.";
-    const presence = usePresence([recruiterUserId], { enabled: canChat });
-    const presenceStatus = recruiterUserId
-        ? presence[recruiterUserId]?.status
-        : undefined;
+    const presenceData = usePresenceStatus(recruiterUserId);
+    const presenceStatus = presenceData?.status;
 
     const canInvite = useMemo(() => {
         return isCompanyUser || isAdmin;
@@ -95,7 +83,7 @@ export default function RecruiterActionsToolbar({
             });
         } catch (err: any) {
             console.error("Failed to start chat:", err);
-            toast.error(err?.message || "Failed to start chat");
+            toast.error(err?.message || "Couldn't start conversation. Try again.");
         } finally {
             setStartingChat(false);
         }
@@ -174,7 +162,7 @@ export default function RecruiterActionsToolbar({
                 key: "endRelationship",
                 icon: "fa-duotone fa-regular fa-link-slash",
                 label: "End Relationship",
-                variant: "btn-ghost",
+                variant: "btn-error",
                 onClick: () => setShowTerminateModal(true),
                 title: "End Relationship",
             });
@@ -184,7 +172,7 @@ export default function RecruiterActionsToolbar({
                 key: "message",
                 icon: "fa-duotone fa-regular fa-messages",
                 label: "Message Recruiter",
-                variant: "btn-ghost",
+                variant: "btn-primary",
                 onClick: handleStartChat,
                 disabled: !canChat || startingChat,
                 loading: startingChat,
@@ -225,8 +213,7 @@ export default function RecruiterActionsToolbar({
                 {actions.inviteToCompany && (
                     <button
                         onClick={handleInviteToCompany}
-                        className={`btn btn-${size} btn-primary gap-2`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-primary gap-2 rounded-none`}
                         title="Invite to Company"
                     >
                         <i className="fa-duotone fa-regular fa-paper-plane" />
@@ -237,8 +224,7 @@ export default function RecruiterActionsToolbar({
                 {actions.endRelationship && (
                     <button
                         onClick={() => setShowTerminateModal(true)}
-                        className={`btn btn-${size} btn-ghost gap-2 text-error`}
-                        style={{ borderRadius: 0 }}
+                        className={`btn btn-${size} btn-error gap-2 rounded-none`}
                         title="End Relationship"
                     >
                         <i className="fa-duotone fa-regular fa-link-slash" />
@@ -248,15 +234,14 @@ export default function RecruiterActionsToolbar({
 
                 {actions.message &&
                     (actions.inviteToCompany || actions.endRelationship) && (
-                        <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                     )}
 
                 {actions.message && (
                     <span title={chatDisabledReason || undefined}>
                         <button
                             onClick={handleStartChat}
-                            className={`btn btn-${size} btn-ghost gap-2 relative`}
-                            style={{ borderRadius: 0 }}
+                            className={`btn btn-${size} btn-primary gap-2 relative rounded-none`}
                             disabled={!canChat || startingChat}
                         >
                             <Presence status={presenceStatus} />
@@ -272,11 +257,10 @@ export default function RecruiterActionsToolbar({
 
                 {actions.viewDetails && onViewDetails && (
                     <>
-                        <div className="hidden sm:block w-px self-stretch bg-base-content/20 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                         <button
                             onClick={handleViewDetails}
-                            className={`btn btn-${size} btn-ghost gap-2`}
-                            style={{ borderRadius: 0 }}
+                            className={`btn btn-${size} btn-primary gap-2 rounded-none`}
                             title="View Details"
                         >
                             <i className="fa-duotone fa-regular fa-eye" />

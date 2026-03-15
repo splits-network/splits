@@ -25,7 +25,7 @@ const ACTIVE_STAGES = [
     "company_feedback",
     "recruiter_review",
 ];
-const PENDING_STAGES = ["draft", "ai_review", "ai_reviewed"];
+const PENDING_STAGES = ["draft", "ai_review", "gpt_review", "ai_failed", "ai_reviewed"];
 
 export default function ApplicationsBaselPage() {
     const searchParams = useSearchParams();
@@ -93,7 +93,7 @@ export default function ApplicationsBaselPage() {
         defaultFilters: { stage: undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
         include: "job,recruiter,ai_review",
     });

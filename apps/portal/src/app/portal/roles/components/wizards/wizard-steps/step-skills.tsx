@@ -21,8 +21,9 @@ export function StepSkills({
 }: StepSkillsProps) {
     return (
         <div className="space-y-8">
-            <div>
-                <h4 className="text-sm font-bold text-base-content mb-1">
+            <div className="border-l-4 border-primary pl-4">
+                <h4 className="text-sm font-bold text-base-content mb-1 flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-shield-check text-primary" />
                     Required Skills
                 </h4>
                 <p className="text-sm text-base-content/50 mb-4">
@@ -40,8 +41,9 @@ export function StepSkills({
 
             <div className="divider" />
 
-            <div>
-                <h4 className="text-sm font-bold text-base-content mb-1">
+            <div className="border-l-4 border-secondary pl-4">
+                <h4 className="text-sm font-bold text-base-content mb-1 flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-star text-secondary" />
                     Nice-to-Have Skills
                 </h4>
                 <p className="text-sm text-base-content/50 mb-4">
@@ -54,6 +56,7 @@ export function StepSkills({
                     createFn={createFn}
                     placeholder="Search for preferred skills..."
                     maxSkills={20}
+                    dropUp
                 />
             </div>
         </div>

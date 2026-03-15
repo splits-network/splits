@@ -206,6 +206,30 @@ export class MatchRepository {
         if (filters.match_tier) query = query.eq('match_tier', filters.match_tier);
         if (filters.status) query = query.eq('status', filters.status);
         if (filters.min_score) query = query.gte('match_score', filters.min_score);
+
+        // Match factor filters (JSONB arrow operator)
+        if (filters.salary_overlap === 'yes') query = query.eq('match_factors->salary_overlap', true);
+        else if (filters.salary_overlap === 'no') query = query.eq('match_factors->salary_overlap', false);
+
+        if (filters.location_compatible === 'yes') query = query.eq('match_factors->location_compatible', true);
+        else if (filters.location_compatible === 'no') query = query.eq('match_factors->location_compatible', false);
+
+        if (filters.employment_type_match === 'yes') query = query.eq('match_factors->employment_type_match', true);
+        else if (filters.employment_type_match === 'no') query = query.eq('match_factors->employment_type_match', false);
+
+        if (filters.job_level_match === 'yes') query = query.eq('match_factors->job_level_match', true);
+        else if (filters.job_level_match === 'no') query = query.eq('match_factors->job_level_match', false);
+
+        if (filters.availability_compatible === 'yes') query = query.eq('match_factors->availability_compatible', true);
+        else if (filters.availability_compatible === 'no') query = query.eq('match_factors->availability_compatible', false);
+
+        // Invite status filter
+        if (filters.invite_status === 'not_invited') {
+            query = query.is('invite_status', null);
+        } else if (filters.invite_status) {
+            query = query.eq('invite_status', filters.invite_status);
+        }
+
         return query;
     }
 }

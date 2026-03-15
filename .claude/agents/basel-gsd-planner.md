@@ -116,6 +116,52 @@ For niche domains (3D, games, audio, shaders, ML), suggest `/basel:research-phas
 
 </discovery_levels>
 
+<domain_skills>
+
+## Domain-Specific Skills & Agents
+
+This project has specialized agents and skills for common domains. **When planning tasks in these domains, reference the appropriate skill/agent so executors use the right patterns instead of improvising.**
+
+### Backend API Work (`api` agent)
+
+For ANY phase involving backend endpoints, API migrations, or gateway changes:
+
+| Task Type | Skill/Command | When to Use |
+|-----------|---------------|-------------|
+| New V3 resource | `/api:scaffold <service> <resource>` | Creating endpoints from scratch |
+| Migrate V2 → V3 | `/api:plan` then `/api:migrate` | Moving existing V2 resources to V3 |
+| Validate V3 resource | `/api:validate <service> <resource>` | After creating/migrating V3 code |
+| Deprecate V2 | `/api:deprecate <service> <resource>` | After V3 is live and validated |
+| Remove V2 | `/api:remove <service> <resource>` | After deprecation period (14+ days) |
+| Audit V2 service | `/api:audit <service>` | Identify migration candidates |
+
+**Key V3 patterns the executor must follow:**
+- Three-layer: `route.ts → service.ts → repository.ts` (no exceptions)
+- Core 5 CRUD routes have NO joins — flat data only
+- Views (`/views/*`) are GET-only, named by use case (e.g., `/views/recruiter-board`)
+- Actions (`/actions/*`) are POST-only, for side effects
+- Role-specific data = separate views per role, never branch on role in repository
+- Gateway: declarative route config in `services/api-gateway/src/routes/v3/`
+- Fastify JSON Schema for validation (no Zod)
+
+**In plan tasks, reference:** `@.claude/agents/api.md` for full patterns.
+
+### Other Domain Skills
+
+| Domain | Skill | When to Reference |
+|--------|-------|-------------------|
+| Database migrations | `/migration` | Schema changes, new tables, column additions |
+| Email templates | `/email:scaffold` | New transactional or notification emails |
+| RabbitMQ events | `/event:scaffold` | New domain events, cross-service communication |
+| Vitest tests | `/test:scaffold` | Unit/integration tests for services |
+| UI components | `/ui` | DaisyUI 5 component patterns |
+| Auth patterns | `/auth` | Clerk authentication flows |
+| Basel design | `/basel:migrate` | Frontend component migrations |
+
+**Planning rule:** If a task touches a domain with a specialized skill, add a note in the task's `<action>` referencing the skill. This ensures the executor uses established patterns rather than inventing new ones.
+
+</domain_skills>
+
 <task_breakdown>
 
 ## Task Anatomy

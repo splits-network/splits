@@ -114,9 +114,7 @@ export function ProviderDetailModal({
     }, [onClose]);
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex justify-end animate-[fadeIn_0.2s_ease-out]"
-        >
+        <div className="fixed inset-0 z-50 flex justify-end animate-[fadeIn_0.2s_ease-out]">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-neutral/60 backdrop-blur-sm"
@@ -124,14 +122,12 @@ export function ProviderDetailModal({
             />
 
             {/* Slide-over panel */}
-            <div
-                className="relative w-full max-w-lg bg-base-100 shadow-2xl overflow-y-auto animate-[slideInRight_0.35s_ease-out]"
-            >
+            <div className="relative w-full max-w-lg bg-base-100 shadow-2xl overflow-y-auto animate-[slideInRight_0.35s_ease-out]">
                 {/* Header */}
-                <div className="sticky top-0  bg-neutral text-neutral-content p-6">
+                <div className="sticky top-0  bg-base-300 text-base-content p-6">
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-neutral-content/40 hover:text-neutral-content transition-colors"
+                        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-base-content/40 hover:text-base-content transition-colors"
                     >
                         <i className="fa-duotone fa-regular fa-xmark text-lg" />
                     </button>
@@ -163,7 +159,7 @@ export function ProviderDetailModal({
                                     </BaselStatusPill>
                                 )}
                             </div>
-                            <p className="text-sm text-neutral-content/50">
+                            <p className="text-sm text-base-content/50">
                                 {provider.description}
                             </p>
                         </div>

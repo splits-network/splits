@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
@@ -18,9 +19,10 @@ import ApproveGateModal from "../modals/approve-gate-modal";
 import DenyGateModal from "../modals/deny-gate-modal";
 import BaselAddNoteModal from "@/components/basel/applications/add-note-modal";
 import RequestChangesModal from "../modals/request-changes-modal";
-import HireModal from "../modals/hire-modal";
 import PreScreenRequestModal from "../modals/pre-screen-request-modal";
-import ScheduleInterviewModal from "@/components/basel/scheduling/schedule-interview-modal";
+import ComposeEmailModal from "@/components/basel/email/compose-email-modal";
+import { CallCreationModal } from "@/components/calls/call-creation-modal";
+import type { Participant } from "@/components/calls/participant-picker";
 import {
     canTakeActionOnApplication,
     getNextStageOnApprove,
@@ -71,6 +73,7 @@ export default function ActionsToolbar({
     onRefresh,
     className = "",
 }: ActionsToolbarProps) {
+    const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isAdmin, isRecruiter, isCompanyUser, hasPermissionForCompany } =
@@ -94,11 +97,11 @@ export default function ActionsToolbar({
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [showNoteModal, setShowNoteModal] = useState(false);
-    const [showHireModal, setShowHireModal] = useState(false);
     const [showPreScreenModal, setShowPreScreenModal] = useState(false);
     const [showRequestChangesModal, setShowRequestChangesModal] =
         useState(false);
-    const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [showCallModal, setShowCallModal] = useState(false);
     const [moveToOffer, setMoveToOffer] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [startingChat, setStartingChat] = useState(false);
@@ -115,6 +118,23 @@ export default function ActionsToolbar({
         ? presence[candidateUserId]?.status
         : undefined;
 
+    // Pre-fill for Schedule Call modal
+    const callDefaultParticipants: Participant[] = useMemo(() => {
+        if (!candidateUserId) return [];
+        const candidate = application.candidate;
+        const nameParts = (candidate?.full_name || "").split(" ");
+        return [{
+            user_id: candidateUserId,
+            first_name: nameParts[0] || "",
+            last_name: nameParts.slice(1).join(" ") || "",
+            email: candidate?.email || "",
+            avatar_url: null,
+            role: "participant" as const,
+        }];
+    }, [candidateUserId, application.candidate]);
+
+    const callEntityLabel = `${application.candidate?.full_name || "Candidate"} — ${application.job?.title || "Application"}`;
+
     const isFirmJob = !application.job?.company_id && !!application.job?.source_firm_id;
 
     const permissions = useMemo(() => {
@@ -129,10 +149,16 @@ export default function ActionsToolbar({
         );
 
         // Gate recruiter stage advancement by can_advance_candidates permission
+        // Skip for recruiter-owned stages where the recruiter should always have control
+        const recruiterOwnedStages = ['recruiter_review', 'recruiter_request', 'company_feedback'];
+        const isRecruiterOwnedStage = recruiterOwnedStages.includes(application.stage as string)
+            && !!application.candidate_recruiter_id;
+
         if (
             isRecruiter &&
             !isAdmin &&
             !isFirmJob &&
+            !isRecruiterOwnedStage &&
             application.job?.company_id &&
             !hasPermissionForCompany(
                 application.job.company_id,
@@ -187,7 +213,7 @@ export default function ActionsToolbar({
             }
         } catch (err: any) {
             console.error("Failed to start chat:", err);
-            toast.error(err?.message || "Failed to start chat");
+            toast.error(err?.message || "Couldn't start conversation. Try again.");
         } finally {
             setStartingChat(false);
         }
@@ -196,10 +222,22 @@ export default function ActionsToolbar({
     const isOfferStage = application.stage === "offer";
 
     const handleApprove = (toOffer: boolean = false) => {
+        // At offer stage, hire via wizard page
         if (isOfferStage) {
-            setShowHireModal(true);
+            router.push(`/portal/applications/${application.id}/hire`);
             return;
         }
+        // Check if this transition leads to offer stage
+        const nextStage = getNextStageOnApprove(
+            application.stage as ApplicationStage,
+            application.candidate_recruiter_id,
+            toOffer,
+        );
+        if (nextStage === "offer") {
+            router.push(`/portal/applications/${application.id}/offer`);
+            return;
+        }
+        // Regular stage transitions stay as modal
         setMoveToOffer(toOffer);
         setShowApproveModal(true);
     };
@@ -233,7 +271,8 @@ export default function ActionsToolbar({
             // Create a stage transition note if a note was provided
             if (note && note.trim()) {
                 try {
-                    await client.post(`/applications/${application.id}/notes`, {
+                    await client.post(`/application-notes`, {
+                        application_id: application.id,
                         created_by_type: getCreatorType(),
                         note_type: "stage_transition",
                         visibility: "shared",
@@ -250,10 +289,10 @@ export default function ActionsToolbar({
 
             if (isAcceptingApplication) {
                 toast.success(
-                    "Application accepted and moved to company review",
+                    "Application accepted. Moved to company review.",
                 );
             } else {
-                toast.success("Application moved to next stage successfully");
+                toast.success("Application advanced.");
             }
 
             setShowApproveModal(false);
@@ -282,7 +321,8 @@ export default function ActionsToolbar({
             // Create a stage transition note for the rejection reason
             if (reason && reason.trim()) {
                 try {
-                    await client.post(`/applications/${application.id}/notes`, {
+                    await client.post(`/application-notes`, {
+                        application_id: application.id,
                         created_by_type: getCreatorType(),
                         note_type: "stage_transition",
                         visibility: "shared",
@@ -294,7 +334,7 @@ export default function ActionsToolbar({
                 }
             }
 
-            toast.success("Application rejected");
+            toast.success("Application rejected.");
             setShowDenyModal(false);
             refresh();
         } catch (error: any) {
@@ -312,7 +352,8 @@ export default function ActionsToolbar({
             if (!token) throw new Error("Not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/applications/${application.id}/notes`, {
+            await client.post(`/application-notes`, {
+                        application_id: application.id,
                 created_by_type: data.created_by_type,
                 note_type: data.note_type,
                 visibility: data.visibility,
@@ -320,7 +361,7 @@ export default function ActionsToolbar({
                 in_response_to_id: data.in_response_to_id,
             });
 
-            toast.success("Note added successfully");
+            toast.success("Note added.");
             setShowNoteModal(false);
             refresh();
         } catch (error: any) {
@@ -344,7 +385,8 @@ export default function ActionsToolbar({
 
             // Create a stage transition note for the request
             try {
-                await client.post(`/applications/${application.id}/notes`, {
+                await client.post(`/application-notes`, {
+                        application_id: application.id,
                     created_by_type: getCreatorType(),
                     note_type: "stage_transition",
                     visibility: "shared",
@@ -359,7 +401,7 @@ export default function ActionsToolbar({
             }
 
             toast.success(
-                "Changes requested successfully. The candidate will be notified.",
+                "Changes requested. Candidate notified.",
             );
             setShowRequestChangesModal(false);
             refresh();
@@ -384,11 +426,8 @@ export default function ActionsToolbar({
         requestChanges:
             showActions.requestChanges !== false &&
             permissions.canRequestChanges,
-        scheduleInterview:
-            (isRecruiter || isAdmin) &&
-            ["screen", "company_review", "interview", "offer"].includes(
-                application.stage ?? "",
-            ),
+        sendEmail: isRecruiter || isCompanyUser || isAdmin,
+        scheduleCall: isRecruiter || isCompanyUser || isAdmin,
     };
 
     const isCompanyReviewStage = application.stage === "company_review";
@@ -406,6 +445,7 @@ export default function ActionsToolbar({
                 gateName={permissions.stageLabel}
                 applicationId={application.id}
                 currentStage={application.stage ?? undefined}
+                isCompanyUser={isCompanyUser || false}
             />
             <DenyGateModal
                 isOpen={showDenyModal}
@@ -426,17 +466,6 @@ export default function ActionsToolbar({
                     loading={actionLoading}
                 />
             )}
-            {showHireModal && (
-                <HireModal
-                    application={application}
-                    onClose={() => setShowHireModal(false)}
-                    onSuccess={() => {
-                        setShowHireModal(false);
-                        toast.success("Candidate hired successfully!");
-                        refresh();
-                    }}
-                />
-            )}
             {showPreScreenModal &&
                 application.job_id &&
                 application.job?.company?.id && (
@@ -447,7 +476,7 @@ export default function ActionsToolbar({
                         onClose={() => setShowPreScreenModal(false)}
                         onSuccess={() => {
                             setShowPreScreenModal(false);
-                            toast.success("Pre-screen requested successfully!");
+                            toast.success("Pre-screen requested.");
                             refresh();
                         }}
                     />
@@ -459,20 +488,34 @@ export default function ActionsToolbar({
                 candidateName={application.candidate?.full_name || "Unknown"}
                 jobTitle={application.job?.title || "Unknown"}
             />
-            {showScheduleModal && (
-                <ScheduleInterviewModal
-                    candidateName={
-                        application.candidate?.full_name || "Unknown"
+            {showEmailModal && (
+                <ComposeEmailModal
+                    toEmail={application.candidate?.email || undefined}
+                    subject={
+                        application.job?.title
+                            ? `Re: ${application.job.title}`
+                            : undefined
                     }
-                    candidateEmail={application.candidate?.email || undefined}
-                    jobTitle={application.job?.title || undefined}
-                    onClose={() => setShowScheduleModal(false)}
-                    onSuccess={() => {
-                        setShowScheduleModal(false);
+                    onClose={() => setShowEmailModal(false)}
+                    onSent={() => {
+                        setShowEmailModal(false);
                         refresh();
                     }}
                 />
             )}
+            <CallCreationModal
+                isOpen={showCallModal}
+                onClose={() => setShowCallModal(false)}
+                defaultParticipants={callDefaultParticipants}
+                defaultEntityType="application"
+                defaultEntityId={application.id}
+                defaultEntityLabel={callEntityLabel}
+                defaultMode="scheduled"
+                onSuccess={() => {
+                    setShowCallModal(false);
+                    refresh();
+                }}
+            />
         </ModalPortal>
     );
 
@@ -499,13 +542,22 @@ export default function ActionsToolbar({
                 onClick: () => setShowPreScreenModal(true),
             });
         }
-        if (actions.scheduleInterview) {
+        if (actions.scheduleCall) {
             speedDialActions.push({
-                key: "schedule-interview",
-                icon: "fa-duotone fa-regular fa-calendar-plus",
-                label: "Schedule Interview",
-                variant: "btn-info",
-                onClick: () => setShowScheduleModal(true),
+                key: "schedule-call",
+                icon: "fa-duotone fa-regular fa-phone",
+                label: "Schedule Call",
+                variant: "btn-primary btn-outline",
+                onClick: () => setShowCallModal(true),
+            });
+        }
+        if (actions.sendEmail) {
+            speedDialActions.push({
+                key: "send-email",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Send Email",
+                variant: "btn-secondary",
+                onClick: () => setShowEmailModal(true),
             });
         }
         if (actions.requestChanges) {
@@ -638,13 +690,22 @@ export default function ActionsToolbar({
                 onClick: () => setShowNoteModal(true),
             });
         }
-        if (actions.scheduleInterview) {
+        if (actions.scheduleCall) {
             speedDialActions.push({
-                key: "schedule-interview",
-                icon: "fa-duotone fa-regular fa-calendar-plus",
-                label: "Schedule Interview",
-                variant: "btn-info",
-                onClick: () => setShowScheduleModal(true),
+                key: "schedule-call",
+                icon: "fa-duotone fa-regular fa-phone",
+                label: "Schedule Call",
+                variant: "btn-primary btn-outline",
+                onClick: () => setShowCallModal(true),
+            });
+        }
+        if (actions.sendEmail) {
+            speedDialActions.push({
+                key: "send-email",
+                icon: "fa-duotone fa-regular fa-envelope",
+                label: "Send Email",
+                variant: "btn-secondary",
+                onClick: () => setShowEmailModal(true),
             });
         }
         if (actions.requestPrescreen) {
@@ -696,7 +757,7 @@ export default function ActionsToolbar({
                 {actions.addNote && (
                     <button
                         onClick={() => setShowNoteModal(true)}
-                        className={`btn ${sizeClass} btn-info btn-outline gap-2`}
+                        className={`btn ${sizeClass} btn-info gap-2`}
                         disabled={actionLoading}
                     >
                         <i className="fa-duotone fa-regular fa-note-sticky" />
@@ -713,20 +774,29 @@ export default function ActionsToolbar({
                         Request Pre-Screen
                     </button>
                 )}
-                {actions.scheduleInterview && (
+                {actions.scheduleCall && (
                     <button
-                        onClick={() => setShowScheduleModal(true)}
-                        className={`btn ${sizeClass} btn-info gap-2`}
+                        onClick={() => setShowCallModal(true)}
+                        className={`btn ${sizeClass} btn-primary gap-2`}
+                    >
+                        <i className="fa-duotone fa-regular fa-phone" />
+                        Call
+                    </button>
+                )}
+                {actions.sendEmail && (
+                    <button
+                        onClick={() => setShowEmailModal(true)}
+                        className={`btn ${sizeClass} btn-secondary gap-2`}
                         style={{ borderRadius: 0 }}
                     >
-                        <i className="fa-duotone fa-regular fa-calendar-plus" />
-                        Schedule
+                        <i className="fa-duotone fa-regular fa-envelope" />
+                        Email
                     </button>
                 )}
                 {actions.requestChanges && (
                     <button
                         onClick={() => setShowRequestChangesModal(true)}
-                        className={`btn ${sizeClass} btn-warning btn-outline gap-2`}
+                        className={`btn ${sizeClass} btn-warning gap-2`}
                         disabled={actionLoading}
                     >
                         <i className="fa-duotone fa-regular fa-comment-edit" />
@@ -751,7 +821,7 @@ export default function ActionsToolbar({
                                 </button>
                                 <button
                                     onClick={() => handleApprove(true)}
-                                    className={`btn ${sizeClass} btn-success btn-outline gap-2`}
+                                    className={`btn ${sizeClass} btn-success gap-2`}
                                     disabled={actionLoading}
                                 >
                                     {actionLoading && moveToOffer ? (
@@ -792,7 +862,7 @@ export default function ActionsToolbar({
                     <span title={chatDisabledReason || undefined}>
                         <button
                             onClick={handleStartChat}
-                            className={`btn ${sizeClass} btn-ghost rounded-full gap-2`}
+                            className={`btn ${sizeClass} btn-primary rounded-full gap-2`}
                             disabled={!canChat || startingChat}
                         >
                             <Presence status={presenceStatus} />

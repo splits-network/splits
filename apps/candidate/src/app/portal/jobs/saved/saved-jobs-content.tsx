@@ -54,7 +54,7 @@ export default function SavedJobsContent() {
         defaultFilters: {},
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 12,
+        defaultLimit: 10,
         syncToUrl: true,
     });
 

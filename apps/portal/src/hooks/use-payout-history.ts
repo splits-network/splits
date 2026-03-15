@@ -15,78 +15,53 @@ export interface Payout {
     created: string;
 }
 
-interface PayoutsResponse {
-    payouts: Payout[];
-    has_more: boolean;
-}
-
 export interface UsePayoutHistoryReturn {
     payouts: Payout[];
-    hasMore: boolean;
     loading: boolean;
     error: string | null;
-    loadMore: () => Promise<void>;
 }
 
 /* ─── Hook ───────────────────────────────────────────────────────────────── */
 
-export function usePayoutHistory(initialLimit: number = 10): UsePayoutHistoryReturn {
+export function usePayoutHistory(limit: number = 25): UsePayoutHistoryReturn {
     const { getToken } = useAuth();
     const [payouts, setPayouts] = useState<Payout[]>([]);
-    const [hasMore, setHasMore] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [limit, setLimit] = useState(initialLimit);
 
-    const fetchPayouts = useCallback(async (currentLimit: number, isLoadMore = false) => {
+    const fetchPayouts = useCallback(async () => {
         try {
-            if (isLoadMore) {
-                setLoadingMore(true);
-            } else {
-                setLoading(true);
-            }
+            setLoading(true);
             setError(null);
 
             const token = await getToken();
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get<{ data: PayoutsResponse }>(
-                `/stripe/connect/payouts?limit=${currentLimit}`,
+            const response = await client.get<{ data: Payout[] }>(
+                `/stripe/connect/payouts?limit=${limit}`,
             );
 
-            setPayouts(response.data.payouts);
-            setHasMore(response.data.has_more);
+            setPayouts(response.data ?? []);
         } catch (err: any) {
             if (err?.message?.includes("not found") || err?.status === 404) {
                 setPayouts([]);
-                setHasMore(false);
             } else {
                 setError(err?.message || "Failed to load payout history");
             }
         } finally {
             setLoading(false);
-            setLoadingMore(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [limit]);
 
     useEffect(() => {
-        fetchPayouts(limit);
-    }, [fetchPayouts, limit]);
-
-    const loadMore = useCallback(async () => {
-        const newLimit = limit + 10;
-        setLimit(newLimit);
-        await fetchPayouts(newLimit, true);
-    }, [limit, fetchPayouts]);
+        fetchPayouts();
+    }, [fetchPayouts]);
 
     return {
         payouts,
-        hasMore,
-        loading: loading || loadingMore,
+        loading,
         error,
-        loadMore,
     };
 }

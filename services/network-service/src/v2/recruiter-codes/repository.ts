@@ -65,7 +65,26 @@ export class RecruiterCodeRepository {
         }
         if (params.search) {
             query = query.or(`
-                code.ilike.%${params.search}%,
+                code.ilike.%${params.search}
+
+        if (params.is_default === 'yes') {
+            query = query.eq('is_default', true);
+        } else if (params.is_default === 'no') {
+            query = query.eq('is_default', false);
+        }
+        if (params.expiry_status === 'active') {
+            query = query.gte('expiry_date', new Date().toISOString());
+        } else if (params.expiry_status === 'expired') {
+            query = query.lt('expiry_date', new Date().toISOString()).not('expiry_date', 'is', null);
+        } else if (params.expiry_status === 'no_expiry') {
+            query = query.is('expiry_date', null);
+        }
+        if (params.has_usage_limit === 'yes') {
+            query = query.not('max_uses', 'is', null);
+        } else if (params.has_usage_limit === 'no') {
+            query = query.is('max_uses', null);
+        }
+%,
                 label.ilike.%${params.search}%
             `);
         }
@@ -143,9 +162,33 @@ export class RecruiterCodeRepository {
         return data;
     }
 
+    async findDefaultByRecruiterId(recruiterId: string): Promise<RecruiterCode | null> {
+        const { data, error } = await this.supabase
+            .from('recruiter_codes')
+            .select('*')
+            .eq('recruiter_id', recruiterId)
+            .eq('is_default', true)
+            .is('deleted_at', null)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async clearDefault(recruiterId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('recruiter_codes')
+            .update({ is_default: false, updated_at: new Date().toISOString() })
+            .eq('recruiter_id', recruiterId)
+            .eq('is_default', true)
+            .is('deleted_at', null);
+
+        if (error) throw error;
+    }
+
     async create(
         recruiterId: string,
-        data: { label?: string; expiry_date?: string; max_uses?: number; uses_remaining?: number }
+        data: { label?: string; is_default?: boolean; expiry_date?: string; max_uses?: number; uses_remaining?: number }
     ): Promise<RecruiterCode> {
         // Generate unique code
         let code = generateCode();
@@ -163,11 +206,17 @@ export class RecruiterCodeRepository {
             throw new Error('Failed to generate unique referral code');
         }
 
+        // If setting as default, clear existing default first
+        if (data.is_default) {
+            await this.clearDefault(recruiterId);
+        }
+
         const insertData = {
             recruiter_id: recruiterId,
             code,
             label: data.label || null,
             status: 'active' as const,
+            is_default: data.is_default ?? false,
             expiry_date: data.expiry_date ?? null,
             max_uses: data.max_uses ?? null,
             uses_remaining: data.uses_remaining ?? null,
@@ -319,6 +368,17 @@ export class RecruiterCodeRepository {
             .eq('user_id', userId);
 
         if (error) throw error;
+    }
+
+    async countActiveByRecruiterId(recruiterId: string): Promise<number> {
+        const { count, error } = await this.supabase
+            .from('recruiter_codes')
+            .select('*', { count: 'exact', head: true })
+            .eq('recruiter_id', recruiterId)
+            .is('deleted_at', null);
+
+        if (error) throw error;
+        return count || 0;
     }
 
     async getUsageCount(recruiterCodeId: string): Promise<number> {

@@ -14,8 +14,10 @@ export function getApplicationStageBadge(stage: string | null | undefined): { cl
     }
 
     const styles: Record<string, { className: string; label: string }> = {
-        draft: { className: 'badge-neutral', label: 'Draft' },
+        draft: { className: 'badge-primary', label: 'Draft' },
         ai_review: { className: 'badge-warning', label: 'AI Review' },
+        gpt_review: { className: 'badge-warning', label: 'GPT Review' },
+        ai_failed: { className: 'badge-error', label: 'Review Failed' },
         ai_reviewed: { className: 'badge-warning', label: 'AI Reviewed' },
         recruiter_request: { className: 'badge-info', label: 'Recruiter Request' },
         recruiter_proposed: { className: 'badge-primary', label: 'Proposed by Recruiter' },
@@ -28,7 +30,7 @@ export function getApplicationStageBadge(stage: string | null | undefined): { cl
         offer: { className: 'badge-success', label: 'Offer' },
         hired: { className: 'badge-success', label: 'Hired' },
         rejected: { className: 'badge-error', label: 'Rejected' },
-        withdrawn: { className: 'badge-neutral badge-soft badge-outline', label: 'Withdrawn' },
+        withdrawn: { className: 'badge-primary badge-soft badge-outline', label: 'Withdrawn' },
         expired: { className: 'badge-error', label: 'Expired' },
     };
 
@@ -55,10 +57,10 @@ export function getJobStatusBadge(status: string): string {
         priority: 'badge-primary',
         paused: 'badge-warning',
         filled: 'badge-info',
-        closed: 'badge-neutral',
+        closed: 'badge-primary',
         open: 'badge-success',
     };
-    return styles[status] || 'badge-neutral';
+    return styles[status] || 'badge-primary';
 }
 
 /**
@@ -98,7 +100,7 @@ export function getVerificationStatusBadge(status: string): string {
     const styles: Record<string, string> = {
         verified: 'badge-success',
         pending: 'badge-warning',
-        unverified: 'badge-neutral',
+        unverified: 'badge-primary',
         rejected: 'badge-error',
     };
     return styles[status] || 'badge-ghost';
@@ -140,7 +142,7 @@ export function getSyncStatusBadge(status: string): string {
         pending: 'badge-warning',
         skipped: 'badge-ghost',
     };
-    return styles[status] || 'badge-neutral';
+    return styles[status] || 'badge-primary';
 }
 
 /**
@@ -177,7 +179,7 @@ export function getPlatformBadge(platform: string): string {
         lever: 'badge-primary',
         workable: 'badge-info',
         ashby: 'badge-warning',
-        generic: 'badge-neutral',
+        generic: 'badge-primary',
     };
-    return colors[platform] || 'badge-neutral';
+    return colors[platform] || 'badge-primary';
 }

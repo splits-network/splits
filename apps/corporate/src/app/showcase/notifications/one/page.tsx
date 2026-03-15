@@ -196,7 +196,7 @@ export default function NotificationsOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Header */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -217,7 +217,7 @@ export default function NotificationsOne() {
                                     notifications.
                                 </span>
                             </h1>
-                            <p className="notif-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
+                            <p className="notif-desc text-base text-base-content/50 max-w-xl scroll-reveal fade-up">
                                 Stay on top of placements, messages, and
                                 marketplace activity.
                             </p>
@@ -229,7 +229,7 @@ export default function NotificationsOne() {
                                 </div>
                                 <button
                                     onClick={markAllRead}
-                                    className="btn btn-sm btn-ghost border-neutral-content/20 text-neutral-content"
+                                    className="btn btn-sm btn-ghost border-neutral-content/20 text-base-content"
                                 >
                                     <i className="fa-duotone fa-regular fa-check-double" />{" "}
                                     Mark all read

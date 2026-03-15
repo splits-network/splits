@@ -1,609 +1,266 @@
-# Feature Landscape: Custom GPT Actions Backend (Applicant.Network)
-
-**Domain:** Custom GPT with Actions for a recruiting/job marketplace (candidate-facing)
-**Researched:** 2026-02-13
-**Confidence:** MEDIUM-HIGH (based on codebase analysis + training knowledge of OpenAI GPT Actions; WebSearch/WebFetch unavailable for verification of latest GPT Actions API changes)
-
-## Executive Summary
-
-This document maps the feature landscape for a gpt-service microservice that powers a Custom GPT in the OpenAI GPT Store. The GPT is candidate-facing (Applicant.Network), allowing job seekers to search jobs, analyze resumes, check application status, and submit applications through natural language in ChatGPT.
-
-The existing platform provides all underlying capabilities (job search, AI fit analysis, application management, document storage, RBAC). The gpt-service is a **translation layer** that bridges OpenAI's GPT Actions protocol with these existing services.
-
-**Key insight:** The GPT does not need new domain logic. It needs (1) an OAuth2 provider flow to authenticate candidates, (2) GPT-optimized API endpoints that accept natural language parameters and return GPT-friendly responses, and (3) a confirmation safety pattern for all write operations.
-
----
-
-## Table Stakes
-
-Features users expect. Missing any of these means the GPT is non-functional or unusable in the GPT Store.
-
-### TS-1: OpenAPI 3.0 Action Schema
-
-**What:** A complete OpenAPI 3.0.1 YAML specification defining all GPT Actions, their parameters, response schemas, and authentication requirements.
-**Why Expected:** OpenAI requires a valid OpenAPI spec to register Actions. Without it, the GPT cannot call any endpoints. This is the literal contract between ChatGPT and the backend.
-**Complexity:** Medium
-**Dependencies:** All endpoint designs must be finalized first
-**Notes:**
-- Must use OpenAPI 3.0.1 (not 3.1 -- GPT Actions parser has historically been strict about this)
-- Each action needs an `operationId` that GPT uses to select which action to call
-- `description` fields on operations and parameters are critical -- GPT reads these to decide when and how to call actions
-- Existing starter at `docs/gpt/04_OpenAPI_Starter.yaml` is skeletal; needs full expansion
-- Response schemas must be fully specified (GPT needs them to format answers)
-- Maximum ~30 actions per GPT (practical limit, not hard limit)
-- Parameters should use descriptive names and enums where possible to help GPT map natural language correctly
-
-**Confidence:** HIGH for OpenAPI 3.0.1 requirement. MEDIUM for 3.0 vs 3.1 strictness (based on training data, could not verify current state).
-
----
-
-### TS-2: OAuth2 Provider Flow (Account Linking)
-
-**What:** Backend acts as an OAuth2 authorization code provider. GPT initiates OAuth flow, backend redirects to Clerk login, validates session, issues short-lived GPT access token and refresh token.
-**Why Expected:** GPT Actions require OAuth2 for authenticated endpoints. Without this, the GPT can only access public data (active job listings). All personalized features (my applications, submit application, resume analysis linked to profile) require authentication.
-**Complexity:** High
-**Dependencies:** Clerk authentication infrastructure (existing)
-**Notes:**
-- **Flow:** GPT sends user to `/oauth/authorize` -> backend redirects to Clerk Hosted Login -> Clerk returns session -> backend issues GPT-specific JWT tokens
-- **Token format:** Short-lived access tokens (15-30 min), longer refresh tokens (7-30 days)
-- **Token storage:** `gpt_tokens` table in Supabase with columns: token_id, clerk_user_id, candidate_id, access_token_hash, refresh_token_hash, scopes, expires_at, created_at, revoked_at
-- **Scopes:** `candidate:read` (view jobs, applications), `candidate:write` (submit applications), `candidate:resume` (upload/analyze resumes)
-- **Required endpoints:** `GET /oauth/authorize`, `POST /oauth/token` (grant_type=authorization_code and grant_type=refresh_token), `POST /oauth/revoke`
-- **Per-user isolation:** Every token is linked to a specific candidate_id. All data queries are scoped to that candidate's data only.
-- OpenAI GPT Actions OAuth requires specific callback URL format: `https://chat.openai.com/aip/<plugin_id>/oauth/callback`
-
-**Confidence:** HIGH that OAuth2 authorization code flow is required. MEDIUM on exact callback URL format (based on training knowledge, could not verify latest OpenAI docs).
-
----
-
-### TS-3: Job Search via Natural Language
-
-**What:** GPT Action endpoint that accepts natural language search parameters and returns structured job listings. Maps free-text queries ("remote React jobs in Austin paying over $120k") to structured filters against existing job search infrastructure.
-**Why Expected:** Job search is the primary use case for a candidate-facing GPT. This is the reason a candidate would install the GPT.
-**Complexity:** Medium
-**Dependencies:** Existing `GET /api/v2/jobs` endpoint with search, commute_type, job_level, location, employment_type filters
-**Notes:**
-- **Endpoint:** `GET /api/v1/gpt/jobs`
-- **Parameters the GPT can extract and send:**
-  - `keywords` (string) -- free text search terms, maps to `search` parameter on jobs endpoint (uses PostgreSQL full-text search via `search_vector` column)
-  - `location` (string) -- city, state, or "remote"
-  - `commute_type` (enum: remote, hybrid_1, hybrid_2, hybrid_3, hybrid_4, in_office) -- maps directly to existing `commute_type` filter
-  - `job_level` (enum: entry, mid, senior, lead, manager, director, vp, c_suite) -- maps directly to existing `job_level` filter
-  - `employment_type` (string) -- full_time, part_time, contract, etc.
-  - `salary_min` (number) -- minimum salary filter (requires post-query filtering since salary fields are on the job record, not indexed for range queries in current implementation)
-  - `page` (number), `limit` (number) -- pagination
-- **Response format:** GPT-optimized (condensed) job listings with: title, company name, location, salary range, commute type, job level, short description snippet, job_id for follow-up actions
-- **Key design:** Do NOT try to parse natural language server-side. Let GPT do the NLP work -- it will extract structured parameters from the user's natural language and send them as query parameters. The OpenAPI schema descriptions guide GPT on what to extract.
-- **Unauthenticated access:** Job search should work without OAuth (public data). Jobs with `status: 'active'` are already publicly visible in the existing endpoint when no clerkUserId is provided.
-
-**Existing infrastructure to leverage:**
-- `JobRepository.findJobs()` already supports: full-text search, location ilike, employment_type, commute_type overlaps, job_level, pagination, sorting
-- `search_vector` tsvector column with websearch config
-- Company join for company name/logo
-
-**Confidence:** HIGH. Fully verified through codebase analysis.
-
----
-
-### TS-4: Application Status Lookup
-
-**What:** GPT Action endpoint that lets authenticated candidates check their application statuses. Returns current stage, job details, and recent activity for their applications.
-**Why Expected:** Candidates asking "what's the status of my applications?" or "did I hear back from [company]?" is a core use case. Without this, the GPT cannot provide personalized value.
-**Complexity:** Low
-**Dependencies:** Existing `GET /api/v2/applications` endpoint, OAuth2 authentication (TS-2)
-**Notes:**
-- **Endpoint:** `GET /api/v1/gpt/applications`
-- **Parameters:**
-  - `status` (enum: active, all) -- "active" filters out terminal stages (rejected, withdrawn, expired, hired)
-  - `job_id` (string, optional) -- filter to specific job
-  - `page`, `limit` -- pagination
-- **Response format:** Application list with: job_title, company_name, current_stage (human-readable), applied_date, last_updated, ai_review_summary (if exists)
-- **Stage mapping:** Map internal stages to human-readable labels:
-  - `draft` -> "Draft (not submitted)"
-  - `ai_review` -> "Under AI review"
-  - `ai_reviewed` -> "AI review complete - ready to submit"
-  - `recruiter_proposed` -> "Proposed by recruiter (pending your response)"
-  - `recruiter_review` -> "Under recruiter review"
-  - `screen` -> "Screening"
-  - `submitted` -> "Submitted to company"
-  - `company_review` -> "Under company review"
-  - `company_feedback` -> "Company provided feedback"
-  - `interview` -> "Interview stage"
-  - `offer` -> "Offer received"
-  - `hired` -> "Hired"
-  - `rejected` -> "Not selected"
-  - `withdrawn` -> "Withdrawn"
-  - `expired` -> "Expired"
-- **Data scoping:** Query MUST be scoped to the authenticated candidate's applications only. Use `candidateId` from the GPT token to filter.
-
-**Existing infrastructure to leverage:**
-- `ApplicationServiceV2.getApplications()` with role-based scoping
-- `ApplicationFilters.candidate_id` for per-candidate filtering
-- Application includes: `ai_review`, `documents` via include parameter
-
-**Confidence:** HIGH. Fully verified through codebase analysis.
-
----
-
-### TS-5: Application Submission with Confirmation Safety
-
-**What:** GPT Action endpoint that creates a new application for a job. MUST require explicit `confirmed: true` flag. First call without confirmation returns a summary for user review; second call with `confirmed: true` executes the submission.
-**Why Expected:** This is the core write action. Without the confirmation pattern, OpenAI would likely reject the GPT for safety reasons, and candidates could accidentally apply to jobs. The confirmation pattern is a standard requirement for Custom GPTs with consequential actions.
-**Complexity:** Medium
-**Dependencies:** Existing `POST /api/v2/applications` endpoint, OAuth2 authentication (TS-2), candidate profile with resume
-**Notes:**
-- **Endpoint:** `POST /api/v1/gpt/applications`
-- **Request body:**
-  - `job_id` (string, required) -- the job to apply for
-  - `cover_letter` (string, optional) -- cover letter text
-  - `resume_id` (string, optional) -- specific resume to use (defaults to primary resume)
-  - `confirmed` (boolean, required) -- safety flag
-- **Two-phase flow:**
-  1. **Phase 1 (confirmed=false or missing):** Return HTTP 200 with `action_required: "confirmation"` response containing: job title, company name, candidate's resume being used, cover letter preview, list of pre-screen questions (if any). GPT presents this to the user.
-  2. **Phase 2 (confirmed=true):** Execute the application creation. Return the created application with status.
-- **Error contract:**
-  ```json
-  {
-    "error_code": "CONFIRMATION_REQUIRED",
-    "message": "Please confirm you want to apply to [Job Title] at [Company].",
-    "summary": {
-      "job_title": "...",
-      "company": "...",
-      "resume": "...",
-      "has_pre_screen_questions": true
-    }
-  }
-  ```
-- **Pre-screen questions:** If the job has pre-screen questions, the confirmation summary must include them so the GPT can collect answers from the candidate before final submission.
-- **Duplicate prevention:** Check for existing active application for this candidate-job pair before creating.
-- **Initial stage:** Applications created via GPT should start at `draft` or `ai_review` stage (following existing flow where direct candidates go to ai_review).
-
-**Existing infrastructure to leverage:**
-- `ApplicationServiceV2.createApplication()` already handles: candidate_id resolution, recruiter auto-lookup, document linking, pre-screen answer saving, audit logging, event publishing
-- `ApplicationServiceV2.triggerAIReview()` for kicking off AI review after creation
-- Duplicate check logic already exists in `proposeJobToCandidate`
-
-**Confidence:** HIGH for two-phase confirmation pattern. MEDIUM on exact OpenAI `x-openai-isConsequential` header behavior (training knowledge, could not verify current spec).
-
-**Important note on consequential flag:** OpenAI's GPT Actions support an `x-openai-isConsequential` extension in the OpenAPI spec. When set to `true` on a POST/PUT/DELETE operation, GPT will always ask the user for confirmation before calling the endpoint. When set to `false`, GPT may skip confirmation. For application submission, this MUST be `true`. However, the backend should ALSO enforce the `confirmed` flag as defense-in-depth -- do not rely solely on GPT-side confirmation.
-
----
-
-### TS-6: GPT Instructions Document
-
-**What:** A carefully crafted system prompt (instructions) for the Custom GPT that defines its personality, capabilities, rules, and behavioral constraints.
-**Why Expected:** Without instructions, the GPT will not know how to use the actions effectively, when to ask for confirmation, how to present data, or what not to do. This is the "brain" configuration.
-**Complexity:** Medium (writing, iteration, testing)
-**Dependencies:** All endpoint designs finalized
-**Notes:**
-- Existing template at `docs/gpt/05_GPT_Instructions_Template.md` is minimal; needs full expansion
-- Must cover:
-  - Identity: "You are the Applicant.Network AI Assistant"
-  - Capabilities: What actions are available and when to use them
-  - Authentication guidance: When to prompt for account linking
-  - Confirmation rules: Always summarize before write actions, never assume confirmation
-  - Data presentation: How to format job listings, application status, fit scores
-  - Limitations: What the GPT cannot do (modify existing applications, access recruiter data, process payments)
-  - Privacy: Never expose internal IDs, never share data between different users
-  - Error handling: How to respond when actions fail
-  - Tone: Professional but approachable, recruiting-domain appropriate
-- **Token budget:** GPT instructions count against context window. Keep under ~2000 tokens while being comprehensive.
-
-**Confidence:** HIGH. This is standard Custom GPT configuration.
-
----
-
-### TS-7: GPT-Friendly Error Responses
-
-**What:** Standardized error response format that GPT can interpret and present to users in natural language. Different from the existing API error format.
-**Why Expected:** GPT reads error responses and converts them to conversational text. If errors are machine-oriented (stack traces, internal codes), the GPT will present confusing messages to users.
-**Complexity:** Low
-**Dependencies:** None
-**Notes:**
-- **Error format:**
-  ```json
-  {
-    "error_code": "HUMAN_READABLE_CODE",
-    "message": "A sentence the GPT can relay to the user",
-    "details": { ... }  // Optional structured data
-  }
-  ```
-- **Standard error codes:**
-  - `AUTHENTICATION_REQUIRED` -- OAuth not connected
-  - `CONFIRMATION_REQUIRED` -- Write action needs confirmation
-  - `NOT_FOUND` -- Resource not found
-  - `ALREADY_EXISTS` -- Duplicate application
-  - `VALIDATION_ERROR` -- Invalid input
-  - `RATE_LIMITED` -- Too many requests
-  - `INTERNAL_ERROR` -- Server error (hide details)
-- **Key principle:** Error `message` should be a complete sentence that GPT can present directly. No jargon, no UUIDs, no stack traces.
-
-**Confidence:** HIGH. Standard API design practice.
-
----
-
-### TS-8: Per-User Data Isolation
-
-**What:** Every GPT request is scoped to the authenticated candidate's data only. A candidate cannot see another candidate's applications, resumes, or personal information through the GPT.
-**Why Expected:** Security fundamental. Multi-tenant data isolation is non-negotiable for a recruiting platform.
-**Complexity:** Low (leverage existing RBAC)
-**Dependencies:** OAuth2 authentication (TS-2), existing `resolveAccessContext`
-**Notes:**
-- GPT tokens contain `candidate_id` claim (set during OAuth flow)
-- Every gpt-service endpoint extracts `candidate_id` from the token and passes it to downstream queries
-- **No admin or recruiter scope:** GPT tokens are scoped to `candidate` role only. Even if the Clerk user has recruiter/admin roles on the portal, the GPT token should only grant candidate-level access.
-- Leverage existing `resolveAccessContext()` for RBAC, but the gpt-service should additionally enforce `candidateId` scoping as defense-in-depth
-- **Audit logging:** All GPT-originated actions should be tagged with `source: 'gpt'` in audit logs for forensics
-
-**Existing infrastructure to leverage:**
-- `resolveAccessContext()` already returns `candidateId` and scopes queries per role
-- `ApplicationRepository.findApplications()` already filters by `candidate_id`
-- `JobRepository.findJobs()` already scopes job visibility by role
-
-**Confidence:** HIGH. Fully verified through codebase analysis.
-
----
-
-### TS-9: Rate Limiting (GPT-Specific)
-
-**What:** Per-user throttle policies specifically for GPT Action endpoints, separate from portal rate limits.
-**Why Expected:** GPTs can make rapid sequential calls. Without GPT-specific rate limiting, a single user (or abuse pattern) could overload backend services. OpenAI also expects backends to handle rate limiting gracefully.
-**Complexity:** Low
-**Dependencies:** Existing rate limiting infrastructure (if any in api-gateway)
-**Notes:**
-- **Suggested limits:**
-  - Job search: 30 requests/minute per user
-  - Application status: 20 requests/minute per user
-  - Application submission: 5 requests/minute per user
-  - Resume analysis: 10 requests/minute per user
-- Return HTTP 429 with `Retry-After` header and GPT-friendly error message
-- Rate limits keyed on `candidate_id` from GPT token, not IP address
-- Consider separate rate limit buckets for read vs write operations
-
-**Confidence:** HIGH. Standard API practice.
-
----
-
-## Differentiators
-
-Features that set the GPT apart from competitors. Not expected, but provide significant value.
-
-### DIFF-1: Resume Analysis and Job Fit Scoring
-
-**What:** GPT Action endpoint that analyzes a candidate's resume against specific job postings, returning fit scores, matched/missing skills, strengths, and concerns. Leverages existing ai-service.
-**Why Valuable:** This is the "killer feature" that makes the GPT more than a search tool. Candidates can ask "how well does my resume match this job?" and get detailed, actionable feedback. Most job board GPTs only do search.
-**Complexity:** Medium
-**Dependencies:** Existing ai-service with AI review capabilities, document-service for resume access, OAuth2 authentication (TS-2)
-**Notes:**
-- **Endpoint:** `POST /api/v1/gpt/resume/analyze`
-- **Request body:**
-  - `job_id` (string, required) -- job to analyze fit against
-  - `resume_id` (string, optional) -- specific resume (defaults to primary)
-- **Response:** Fit score (0-100), recommendation (strong_fit/good_fit/fair_fit/poor_fit), strengths array, concerns array, matched_skills, missing_skills, overall_summary
-- **Implementation:** Create a lightweight wrapper around `AIReviewServiceV2.createReview()` that:
-  1. Resolves candidate's primary resume from document-service
-  2. Fetches job details with requirements
-  3. Calls the existing AI analysis pipeline
-  4. Returns GPT-formatted results
-- **NOT an application submission:** This is purely advisory. The candidate reviews the analysis and then separately decides to apply.
-- **Cost consideration:** Each analysis calls OpenAI API (gpt-4o-mini). Should track per-candidate analysis count and potentially limit to prevent abuse.
-
-**Existing infrastructure to leverage:**
-- `AIReviewServiceV2.createReview()` -- full AI analysis pipeline
-- `AIReviewServiceV2.enrichApplicationData()` -- fetches job requirements, candidate resume text
-- `CandidateServiceV2.getCandidatePrimaryResume()` -- finds candidate's primary resume
-- Document metadata includes `extracted_text` for resume text extraction
-
-**Confidence:** HIGH. Fully verified through codebase -- this infrastructure already exists and works.
-
----
-
-### DIFF-2: Job Detail Deep Dive
-
-**What:** GPT Action endpoint that returns comprehensive details about a specific job, including requirements, pre-screen questions, company info, and candidate fit analysis (if authenticated).
-**Why Valuable:** Candidates can ask "tell me more about this job" after seeing search results. Provides the full picture without leaving ChatGPT.
-**Complexity:** Low
-**Dependencies:** Existing `GET /api/v2/jobs/:id` with include parameters
-**Notes:**
-- **Endpoint:** `GET /api/v1/gpt/jobs/{job_id}`
-- **Response includes:**
-  - Full job description and responsibilities
-  - Requirements (mandatory and preferred, from `job_requirements` table)
-  - Pre-screen questions (from `job_pre_screen_questions` table)
-  - Company info (name, industry, location, description, website)
-  - Salary range (if available)
-  - Commute type, job level, employment type
-  - Whether the candidate has already applied (if authenticated)
-- **Unauthenticated:** Returns job details without candidate-specific info
-- **Authenticated:** Additionally checks for existing application
-
-**Existing infrastructure to leverage:**
-- `JobRepository.findJob()` with `include` parameter supports: requirements, pre_screen_questions, applications
-
-**Confidence:** HIGH. Straightforward wrapper around existing functionality.
-
----
-
-### DIFF-3: Smart Job Recommendations
-
-**What:** GPT endpoint that recommends jobs based on the candidate's profile and resume, without requiring a specific search query. "Show me jobs I'd be a good fit for."
-**Why Valuable:** Proactive recommendations are higher engagement than reactive search. Differentiates from simple search GPTs.
-**Complexity:** High
-**Dependencies:** Candidate profile, primary resume, ai-service
-**Notes:**
-- **Endpoint:** `GET /api/v1/gpt/jobs/recommended`
-- **Implementation approach:**
-  1. Fetch candidate's primary resume extracted text
-  2. Extract key skills, experience level, location preferences from resume
-  3. Use these as search parameters against the jobs endpoint
-  4. Optionally run lightweight fit scoring on top N results
-- **Simpler V1 approach:** Extract keywords from resume text, use them as search terms against the full-text search index. No AI required for basic version.
-- **Future V2:** Use embedding similarity between resume and job descriptions for semantic matching.
-- **Performance:** Must be fast enough for GPT (< 10 seconds). Pre-computing candidate profiles/embeddings would help but adds complexity.
-
-**Confidence:** MEDIUM. The concept is sound but implementation complexity varies significantly based on approach chosen. The simpler keyword-extraction approach is feasible with existing infrastructure.
-
----
-
-### DIFF-4: Conversational Application Builder
-
-**What:** Multi-turn conversation flow where the GPT helps the candidate build their application step by step: select resume, answer pre-screen questions, write cover letter, review, and submit.
-**Why Valuable:** Transforms the GPT from a "single action" tool to a guided workflow assistant. Significantly better UX than the portal form for candidates who prefer conversation.
-**Complexity:** Low (from backend perspective -- GPT handles the multi-turn logic)
-**Dependencies:** TS-3 (job search), TS-5 (application submission), DIFF-2 (job details)
-**Notes:**
-- This is primarily a **GPT Instructions** feature, not a backend feature. The backend provides:
-  1. Job details with pre-screen questions (DIFF-2)
-  2. Candidate's available resumes (`GET /api/v1/gpt/resumes`)
-  3. Application submission with confirmation (TS-5)
-- The GPT instructions guide the conversation:
-  1. "Which job?" -> Search and select
-  2. "Here are the pre-screen questions" -> Collect answers
-  3. "Would you like to add a cover letter?" -> Optional
-  4. "Here's your application summary" -> Review
-  5. "Confirm to submit" -> Execute
-- **Backend endpoint needed:** `GET /api/v1/gpt/resumes` -- lists candidate's uploaded resumes (name, date, size) so GPT can ask which to use
-- This differentiator is "free" if the other table-stakes features are built correctly
-
-**Confidence:** HIGH. This is a GPT Instructions design pattern that the backend naturally supports.
-
----
-
-### DIFF-5: Application Progress Notifications via GPT
-
-**What:** When a candidate starts a conversation, the GPT proactively mentions any recent application status changes ("Since we last spoke, your application to [Company] moved to Interview stage").
-**Why Valuable:** Makes the GPT feel like a personal recruiting assistant, not just a query tool.
-**Complexity:** Medium
-**Dependencies:** TS-4 (application status), application audit log
-**Notes:**
-- **Endpoint:** `GET /api/v1/gpt/notifications`
-- **Implementation:** Query `application_audit_log` for recent stage changes for this candidate's applications since last GPT interaction
-- **Tracking "last interaction":** Store `last_gpt_interaction_at` on the GPT token record. Update on each authenticated request.
-- **Response:** Array of recent changes: `{ job_title, company, old_stage, new_stage, changed_at }`
-- GPT instructions: "At the start of each conversation, call getNotifications. If there are updates, mention them before asking how to help."
-
-**Confidence:** MEDIUM. Implementation is straightforward but "last interaction" tracking adds state management complexity.
-
----
-
-### DIFF-6: Pre-Screen Question Answering via GPT
-
-**What:** GPT collects pre-screen question answers conversationally and includes them in the application submission.
-**Why Valuable:** Pre-screen questions are a common friction point in job applications. Answering them in a conversation feels more natural than filling out a form.
-**Complexity:** Low
-**Dependencies:** TS-5 (application submission), DIFF-2 (job details with pre-screen questions)
-**Notes:**
-- No separate endpoint needed. Pre-screen questions come from the job details endpoint (DIFF-2). Answers are submitted with the application (TS-5).
-- Application submission body includes: `pre_screen_answers: [{ question_id, answer }]`
-- GPT instructions handle the conversational flow of asking questions one by one
-- Existing `ApplicationServiceV2.createApplication()` already saves pre-screen answers
-
-**Confidence:** HIGH. Existing infrastructure fully supports this.
-
----
-
-## Anti-Features
-
-Features to explicitly NOT build. Common mistakes in GPT backend development.
-
-### ANTI-1: Server-Side Natural Language Processing
-
-**What:** Building NLP/intent parsing on the backend to convert natural language queries to structured filters.
-**Why Avoid:** The GPT itself IS the NLP layer. ChatGPT excels at extracting structured data from natural language. Adding a second NLP layer on the backend creates confusion, latency, and maintenance burden.
-**What to Do Instead:** Design the OpenAPI schema with clear parameter descriptions and enums. Let GPT extract structured parameters from user input. The backend receives clean, typed parameters.
-**Consequences if Built:** Double interpretation errors (GPT misunderstands AND backend misunderstands), increased latency, wasted development time, harder debugging.
-
----
-
-### ANTI-2: Exposing Raw Internal API Responses
-
-**What:** Returning the exact same response format from gpt-service as the internal V2 endpoints return.
-**Why Avoid:** Internal API responses contain UUIDs, internal status codes, database column names, and nested objects that are meaningless to GPT. The GPT will attempt to present all of this to the user, creating confusing output.
-**What to Do Instead:** Create GPT-optimized response DTOs that contain only human-meaningful data. Map internal fields to user-friendly names. Truncate long descriptions. Exclude internal IDs (or move them to a separate `_metadata` field).
-**Consequences if Built:** GPT outputs like "Your application with ID 550e8400-e29b-41d4-a716-446655440000 is in stage recruiter_review for job_id 123..." instead of "Your application to Senior React Developer at TechCorp is under recruiter review."
-
----
-
-### ANTI-3: Recruiter/Admin Features in V1
-
-**What:** Building recruiter search, candidate search, split opportunities, outreach drafting in the Applicant.Network GPT.
-**Why Avoid:** The v5.0 milestone scope is explicitly candidate-facing (Applicant.Network). Recruiter features (Splits.Network) are a separate future milestone. Mixing audiences in one GPT creates confused UX and complex authorization.
-**What to Do Instead:** Build candidate features only. Recruiter features get their own GPT in a future milestone.
-**Consequences if Built:** Scope creep, delayed launch, confused GPT behavior (is it helping candidates or recruiters?), complex token scoping.
-
----
-
-### ANTI-4: File Upload Through GPT Actions
-
-**What:** Building resume upload functionality through GPT Actions (having GPT send a file to the backend).
-**Why Avoid:** GPT Actions have limited support for file uploads. The standard GPT Actions protocol sends JSON payloads, not multipart form data. While GPT can read files a user uploads to the chat, passing file content through an Action is unreliable and may hit size limits.
-**What to Do Instead:** For V1, use the candidate's already-uploaded resumes from the document-service. Provide a `GET /api/v1/gpt/resumes` endpoint to list available resumes. If no resume exists, instruct the GPT to direct the candidate to upload one on Applicant.Network web portal.
-**Consequences if Built:** Unreliable file transfer, size limit failures, complex multipart handling in the OpenAPI spec, potential rejection from GPT Store review.
-
-**Confidence:** MEDIUM. GPT Actions file handling capabilities may have evolved since training cutoff. Flag for verification before implementation.
-
----
-
-### ANTI-5: Autonomous Multi-Step Workflows
-
-**What:** GPT automatically chains actions without user input (e.g., search jobs -> analyze fit -> submit application in one turn).
-**Why Avoid:** Violates the confirmation safety pattern. Each write action must have explicit user confirmation. Autonomous workflows bypass this safety net and could result in unwanted applications.
-**What to Do Instead:** Design the GPT instructions to pause for user input between steps. The GPT presents options, the user chooses, the GPT executes (with confirmation for writes).
-**Consequences if Built:** Candidates accidentally applying to jobs, potential GPT Store rejection for unsafe write behavior, user trust erosion.
-
----
-
-### ANTI-6: Caching GPT Responses
-
-**What:** Building a response cache layer in gpt-service to cache job search results or application status.
-**Why Avoid:** Job data and application statuses change frequently. Cached responses lead to stale data, which is worse than slightly slower responses. The existing Supabase queries are already fast enough.
-**What to Do Instead:** Rely on database query performance (which is already good -- full-text search with tsvector, indexed columns). If performance becomes an issue, add Redis caching at the repository layer, not the GPT layer.
-**Consequences if Built:** Stale job listings (job already filled), wrong application status, cache invalidation complexity, debugging nightmare ("why does the GPT show different data than the portal?").
-
----
-
-### ANTI-7: Custom Chat History/Memory
-
-**What:** Building a server-side conversation history system for the GPT to remember past interactions.
-**Why Avoid:** ChatGPT already manages conversation context within a session. Cross-session memory is handled by ChatGPT's memory feature. Building a parallel system is redundant and creates consistency issues.
-**What to Do Instead:** Use the `last_gpt_interaction_at` timestamp (DIFF-5) for "since last time" notifications only. Do not store conversation content.
-**Consequences if Built:** Privacy concerns (storing conversation content), GDPR complications, redundant with ChatGPT's built-in memory, storage costs, sync issues.
-
----
+# Feature Research: Video Interviewing for Recruiting Platform
+
+**Domain:** In-app video interviewing for split-fee recruiting marketplace
+**Researched:** 2026-03-07
+**Confidence:** HIGH (well-understood domain, extensive industry precedent)
+
+## Feature Landscape
+
+### Table Stakes (Users Expect These)
+
+Features users assume exist. Missing these = product feels incomplete.
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| 1:1 video calls | Core function of video interviewing | HIGH | WebRTC or provider SDK required; this is the hardest single feature. Use a managed provider, not DIY. |
+| Join via magic link (no account required) | Candidates should never need to create an account just to interview | MEDIUM | Token-based auth separate from Clerk. Candidate portal already exists but magic links serve external/new candidates. |
+| Join from within the app (authenticated) | Recruiters, hiring managers expect seamless in-app join | LOW | Wraps the same video room in an authenticated context. |
+| Calendar event creation with video link | Scheduling must produce a calendar event with a join URL | LOW | Already partially built via `schedule-interview-modal.tsx` and Google Calendar integration. Enhance to also create interview DB record. |
+| Email notifications for scheduled interviews | Participants need confirmation emails with join links and times | LOW | Resend infrastructure already exists. Add interview-specific templates. |
+| Interview recording | Recruiters expect to record for review; candidates expect to be notified of recording | MEDIUM | Requires server-side recording via provider API. Storage costs are real -- plan for them. |
+| Recording playback | Useless to record if you cannot play it back | LOW | Video player component pointing at stored recording URL. |
+| Interview status tracking | Users need to see: scheduled, in-progress, completed, cancelled, no-show | LOW | New `interviews` table with status enum. Mirrors existing stage patterns in the codebase. |
+| Time zone handling | Participants are often in different time zones; scheduling must display correctly | LOW | Already handled in calendar context via `Intl.DateTimeFormat`. Extend to interview display. |
+| Duration selection | Interviews have standard durations (30m, 45m, 60m, 90m) | LOW | Already built in `schedule-interview-modal.tsx`. |
+| Cancellation and rescheduling | Interviews get moved constantly; must support cancel + reschedule flows | MEDIUM | Calendar event update/delete + notification cascade + status update. |
+| Multiple attendees (panel interviews) | Panel interviews are standard in recruiting (hiring manager + team members) | MEDIUM | Room must support 3-6+ simultaneous video streams. Scales complexity of both UI and provider costs. |
+| Waiting room / lobby | Interviewers often join late or need prep time; candidates should not see an empty room | LOW | Most managed video providers support this natively. |
+| Microphone and camera controls | Mute, camera off, device selection | LOW | Standard WebRTC controls. Every video provider SDK includes these out of the box. |
+| Screen sharing | Interviewers present job details; candidates may demo work | MEDIUM | Requires `getDisplayMedia` API. Provider-dependent complexity. |
+| Connection quality indicator | Users need to know if their connection is degrading before it drops | LOW | Most video SDKs expose connection stats. Display as simple icon/indicator. |
+| Pre-call device check | "Test your camera and mic" before entering the room | MEDIUM | Standalone component that tests media devices before joining. Prevents "can you hear me?" loops. |
+
+### Differentiators (Competitive Advantage)
+
+Features that set the product apart in recruiting context. Not required but highly valued.
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| AI transcription of interviews | Eliminates manual note-taking. Creates searchable record. Enables AI summary. | HIGH | Requires speech-to-text pipeline (Deepgram, AssemblyAI, or OpenAI Whisper). Process async from recording for accuracy and cost. |
+| AI interview summary | Distills 60-minute interview into structured summary: key points, concerns, strengths, overall impression | MEDIUM | Depends on transcription. Use GPT/Claude to summarize transcript. `ai-service` already exists with similar patterns. |
+| Summary auto-posted as application note | Summary flows into existing workflow without extra clicks. Reviewers see it in context alongside other notes. | LOW | Write to `application_notes` with new `note_type` value (e.g., `interview_summary`). Existing table and creation flow. Requires migration to add enum value. |
+| Dedicated interviews tab on application detail | All interview history in one place: scheduled, completed, recordings, transcripts, summaries | MEDIUM | New UI tab + backend endpoint. Aggregates interview records for an application. |
+| Stage-triggered scheduling | Moving an application to "interview" stage automatically prompts scheduling | LOW | Hook into existing stage transition flow in `actions-toolbar.tsx`. Show schedule modal when stage changes to `interview`. |
+| Interviewer notes during call | Real-time note-taking panel alongside video, saved to application on call end | MEDIUM | Textarea synced to backend. Auto-saved periodically. Posted as application note when call ends. |
+| Interview scorecard / structured rating | Configurable evaluation form (communication, technical, culture fit) with numeric ratings | MEDIUM | Configurable per-company or per-job. Stored alongside interview record. Enables comparison across candidates. |
+| Automated reminder emails | 24h and 1h reminders before interview with join link and prep details | LOW | Scheduled jobs via existing aftercare reminder pattern. Resend templates. |
+| Interview feedback request | After interview completes, prompt interviewer(s) to submit structured feedback | LOW | RabbitMQ event on interview completion triggers notification to interviewers. |
+| Calendar availability checking | Show interviewer's free/busy slots when scheduling to avoid double-booking | MEDIUM | Already have calendar read access via Google combo provider. Surface busy times in scheduling UI. |
+| Multi-round interview tracking | Track Interview 1 (Phone Screen), Interview 2 (Technical), etc. as separate records under same application | LOW | Multiple interview records per application_id. UI shows chronological list with round labels. |
+| Candidate interview prep page | Landing page for candidates with job details, interviewer info, company overview, what to expect | LOW | Candidate portal (`apps/candidate`) already exists. Add interview prep route accessible via magic link. |
+
+### Anti-Features (Commonly Requested, Often Problematic)
+
+Features that seem good but create problems. Explicitly do NOT build these in v1.
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Custom-built video infrastructure (DIY WebRTC) | "We want full control over the video stack" | WebRTC at scale is enormously complex: TURN/STUN servers, SFU architecture, codec negotiation, NAT traversal, bandwidth adaptation, cross-browser compatibility. Companies like Daily, Twilio, and Vonage have 50+ engineers working on this full-time. Building in-house is a multi-year undertaking. | Use a managed video provider (Daily.co, LiveKit Cloud, Twilio Video, 100ms). Pay per-minute, get reliability, scalability, and cross-platform support for free. |
+| One-way / async video interviews | "Candidates record answers to preset questions on their own time" | Universally disliked by candidates. Creates impersonal experience. Increases application drop-off rates by 30-50% (widely reported in recruiting industry). Major ATS platforms have deprioritized or removed these features. Damages employer brand. | Stick to live video interviews. If async feedback is needed, use the existing application notes system. If async video is demanded later, build as a clearly separate, optional feature -- never as the default. |
+| Real-time AI coaching during interview | "Give the interviewer live suggestions or talking points" | Ethically questionable. Legally risky in jurisdictions with recording/monitoring laws. Creates distraction for interviewer. Candidates would be uncomfortable if they knew. Undermines the human element of interviewing. | Provide AI summary AFTER the interview is completed. Keep the live interaction authentically human. |
+| Custom video quality / 4K streaming | "We want crystal clear 4K video" | Diminishing returns past 720p for talking-head interviews. Bandwidth costs explode (4K is ~16x the data of 720p). Mobile users on cellular data suffer. Forces minimum bandwidth requirements that exclude candidates with poor internet. | Let the managed video provider handle adaptive bitrate. 720p default with automatic quality adjustment is the industry standard. |
+| Scheduling without calendar integration | "Just let users pick a time slot from a list" | Creates calendar conflicts and double-bookings. Interviewers already live in Google Calendar or Outlook. Disconnected scheduling means they check two systems. Every standalone scheduler eventually gets abandoned for "just send a calendar invite." | Always create calendar events. If no calendar connected, prompt to connect before scheduling. Already enforced in current `schedule-interview-modal.tsx` design. |
+| Unlimited recording storage | "Store all recordings forever" | Video storage costs grow unboundedly. A 60-minute 720p recording is ~500MB-1GB. 1,000 interviews = 500GB-1TB. At cloud storage rates ($0.02-0.03/GB/month), this reaches $10-30/month per 1,000 interviews, compounding monthly. Compliance risk: storing candidate video indefinitely creates GDPR/CCPA exposure. | Set retention policy: 90 days default (configurable per company). Archive to cold storage after retention period. Auto-delete after 1 year unless specifically flagged for retention. Warn users before deletion. |
+| Live transcription displayed to all participants | "Show real-time captions during the interview" | Latency and accuracy issues create distraction. Misheard words displayed live undermine conversational flow. Real-time STT is significantly more expensive than async processing. Accuracy at ~85-90% real-time vs ~95-98% async creates a worse experience. | Transcribe asynchronously from the recording after the interview ends. Much higher accuracy, lower cost. Offer live captions ONLY as an opt-in accessibility feature if needed. |
+| Built-in whiteboard or code editor | "Technical interviews need collaborative coding" | Massive scope increase. Collaborative code editors are their own product category (CoderPad, HackerRank, CodeSandbox). Quality expectations are set by these dedicated tools. Building even a basic version takes months. | Support screen sharing as the low-cost alternative for technical discussions. For structured coding interviews, link to or integrate with existing tools (CoderPad, HackerRank) in the interview description. Revisit in v2+ only if clear demand. |
 
 ## Feature Dependencies
 
 ```
-Authentication Foundation:
-  TS-2 (OAuth2 Provider) -- all authenticated features depend on this
+[Google Calendar Integration] (EXISTING)
+    |
+    v
+[Interview Scheduling] (enhance schedule-interview-modal)
+    |
+    +---> [Calendar Event Creation] (EXISTING, add interview DB record)
+    +---> [Email Notifications] (EXISTING Resend infra, new templates)
+    +---> [Automated Reminders] (scheduled jobs)
+    |
+    v
+[Video Room Infrastructure] (managed provider SDK integration)
+    |
+    +---> [Magic Link Join] (token-based, no-auth access)
+    +---> [In-App Join] (authenticated access)
+    +---> [Panel Support] (multi-participant rooms)
+    +---> [Waiting Room / Lobby]
+    +---> [Screen Sharing]
+    +---> [Pre-Call Device Check]
+    +---> [Basic Controls] (mute, camera, leave)
+    |
+    v
+[Recording] (server-side via provider API)
+    |
+    v
+[Recording Storage] (S3/GCS + retention policy)
+    |
+    v
+[AI Transcription] (async speech-to-text processing)
+    |
+    v
+[AI Summary Generation] (transcript -> structured summary)
+    |
+    v
+[Application Note Integration] (EXISTING table, new note_type)
 
-Read Operations (can parallelize):
-  TS-3 (Job Search) -- independent, works without auth too
-  TS-4 (Application Status) -- requires TS-2
-  DIFF-2 (Job Details) -- independent, works without auth too
+[Application Stage Management] (EXISTING)
+    |
+    +---> [Stage-Triggered Scheduling] (hook into 'interview' stage transition)
 
-Write Operations (require auth + read features):
-  TS-5 (Application Submission) -- requires TS-2, TS-3 (find job), DIFF-2 (job details for confirmation)
-
-AI Features (require auth + existing services):
-  DIFF-1 (Resume Analysis) -- requires TS-2, existing ai-service + document-service
-
-Configuration (requires all endpoints):
-  TS-1 (OpenAPI Schema) -- requires all endpoint designs finalized
-  TS-6 (GPT Instructions) -- requires all endpoints + understanding of flows
-
-Cross-cutting:
-  TS-7 (Error Responses) -- implement alongside each endpoint
-  TS-8 (Data Isolation) -- implement in auth middleware
-  TS-9 (Rate Limiting) -- implement in api-gateway routing
-
-Conversational Features (require table stakes):
-  DIFF-4 (Application Builder) -- requires TS-3, TS-5, DIFF-2, DIFF-6
-  DIFF-5 (Notifications) -- requires TS-4
-  DIFF-6 (Pre-Screen Q&A) -- requires DIFF-2, TS-5
-
-Recommendations (require AI + search):
-  DIFF-3 (Smart Recommendations) -- requires TS-2, TS-3, document-service
+[Interview Status Tracking] (new interviews table)
+    +---> [Dedicated Interviews Tab on Application]
+    +---> [Multi-Round Interview Tracking]
 ```
 
-**Critical path:** TS-2 (OAuth) -> TS-3 + TS-4 + DIFF-2 (read endpoints) -> TS-5 + DIFF-1 (write + AI endpoints) -> TS-1 + TS-6 (schema + instructions)
+### Dependency Notes
 
----
+- **Interview Scheduling requires Calendar Integration:** Already built. The `schedule-interview-modal.tsx` creates Google Calendar events with video conference links. Enhancement needed: also create an `interviews` record in the Splits DB alongside the calendar event, linking interview to application.
+- **AI Transcription requires Recording:** Cannot transcribe without recorded audio. Recording is a hard prerequisite. The transcription pipeline should be triggered by a RabbitMQ event when recording becomes available.
+- **AI Summary requires Transcription:** Summary is generated from transcript text, not directly from audio. This is a sequential dependency.
+- **Application Note Integration requires AI Summary:** The summary text is what gets posted as a note. Low complexity because `application_notes` table and creation flow already exist. Requires adding `interview_summary` to the `ApplicationNoteType` enum (migration + shared-types update).
+- **Stage-Triggered Scheduling requires Stage Management:** Already built. When an application moves to the `interview` stage via `actions-toolbar.tsx`, trigger the schedule-interview modal or display a prompt. The stage transition machinery is established.
+- **Magic Link Join requires Video Room:** The magic link resolves to a video room. Room must exist first.
+- **Panel Support requires Video Room:** Multi-participant is a room capacity configuration, not a fundamentally separate feature.
+- **Interviews Tab requires Interview Status Tracking:** Need interview records with statuses before you can render a meaningful tab.
 
-## MVP Recommendation
+## MVP Definition
 
-For MVP (minimum viable GPT Store listing), prioritize:
+### Launch With (v1)
 
-### Must Ship (Table Stakes)
+Minimum viable product -- what's needed for "we have video interviewing."
 
-1. **TS-2: OAuth2 Provider** -- Foundation for all authenticated features
-2. **TS-3: Job Search** -- Primary use case, works without auth too
-3. **TS-4: Application Status** -- Core personalized feature
-4. **TS-5: Application Submission** -- Core write action with confirmation
-5. **TS-1: OpenAPI Schema** -- Required for GPT Store listing
-6. **TS-6: GPT Instructions** -- Required for GPT to function correctly
-7. **TS-7: Error Responses** -- Required for usable GPT
-8. **TS-8: Data Isolation** -- Security fundamental
-9. **TS-9: Rate Limiting** -- Protection against abuse
+- [ ] **Interview scheduling with calendar sync** -- Enhance existing `schedule-interview-modal.tsx` to also create an `interviews` table record. Link interview to application via `application_id`.
+- [ ] **Video room (1:1)** -- Integrate a managed video provider. Room creation via backend service, join via frontend SDK component.
+- [ ] **Magic link join (no account)** -- Token-based URL that grants room access without Clerk authentication. Embedded in calendar invite and confirmation email.
+- [ ] **In-app join (authenticated)** -- "Join Interview" button on application detail page and calendar event. Authenticated via Clerk.
+- [ ] **Basic controls** -- Mute, camera toggle, leave call, device selection. All provided by video provider SDK.
+- [ ] **Waiting room** -- Candidate waits until interviewer admits them. Prevents awkward empty-room experience.
+- [ ] **Recording** -- Server-side recording via provider API. Store in cloud storage (S3 or GCS). Save recording URL to interview record.
+- [ ] **Recording playback** -- Video player on interview detail showing the recording.
+- [ ] **Interview status tracking** -- New `interviews` table with status enum: `scheduled`, `in_progress`, `completed`, `cancelled`, `no_show`. Update status via webhooks from video provider.
+- [ ] **Email notifications** -- Interview scheduled confirmation, interview reminder (24h before), interview cancelled. Use existing Resend infrastructure with new templates.
+- [ ] **Interview section on application detail** -- Show interview info (date/time, status, join link, recording) on application detail page. Can be a section rather than a full tab for v1.
+- [ ] **Stage-triggered scheduling** -- When application moves to `interview` stage, prompt the user to schedule an interview. Integrate with existing `actions-toolbar.tsx` flow.
 
-### Should Ship (High-Value Differentiators)
+### Add After Validation (v1.x)
 
-10. **DIFF-1: Resume Analysis** -- Killer feature, leverages existing AI infrastructure
-11. **DIFF-2: Job Detail Deep Dive** -- Very low complexity, high value
-12. **DIFF-6: Pre-Screen Q&A** -- Free if DIFF-2 and TS-5 are built
+Features to add once core video interviewing is working and seeing adoption.
 
-### Defer to Post-MVP
+- [ ] **Panel interviews (3+ participants)** -- Upgrade room capacity. Add multi-attendee scheduling UI with multiple email inputs. Trigger: users request panel support for hiring committee interviews.
+- [ ] **AI transcription** -- Process recordings through speech-to-text service (Deepgram or AssemblyAI). Store transcript alongside interview record. Trigger: recordings are being actively used and users want searchable content.
+- [ ] **AI summary + application note posting** -- Summarize transcript into structured format, auto-post as `interview_summary` note type to `application_notes`. Trigger: transcription is working.
+- [ ] **Dedicated interviews tab** -- Full tab on application detail showing all interviews chronologically with recordings, transcripts, summaries. Trigger: multiple interviews per application becoming common.
+- [ ] **Screen sharing** -- Enable display sharing in video rooms. Trigger: user feedback requesting it for technical discussions.
+- [ ] **Pre-call device check** -- Test camera/mic/speaker before joining room. Reduces "can you hear me?" issues. Trigger: support tickets about audio/video problems.
+- [ ] **Interviewer notes during call** -- Side panel for real-time note-taking, auto-saved, posted to application notes on call end. Trigger: users requesting in-call note-taking instead of using separate tools.
+- [ ] **Calendar availability checking** -- Show interviewer's free/busy slots in the scheduling UI. Trigger: scheduling conflict complaints.
+- [ ] **Automated 1h reminders** -- Add 1-hour reminder in addition to 24h. Trigger: no-show rate data.
+- [ ] **Cancellation and rescheduling flow** -- Full cancel/reschedule workflow with calendar event update, notification cascade, and status update. Trigger: manual workarounds becoming painful.
 
-- **DIFF-3: Smart Recommendations** -- High complexity, significant design work needed
-- **DIFF-4: Conversational Application Builder** -- GPT Instructions optimization, not backend work
-- **DIFF-5: Application Notifications** -- Nice but not critical for launch
+### Future Consideration (v2+)
 
-### Estimated Complexity by Phase
+Features to defer until video interviewing product-market fit is established.
 
-| Phase | Features | Complexity | Notes |
-|-------|----------|------------|-------|
-| Phase 1: Auth | TS-2, TS-8 | High | OAuth2 provider is the hardest part |
-| Phase 2: Read | TS-3, TS-4, DIFF-2 | Low-Medium | Thin wrappers around existing endpoints |
-| Phase 3: Write + AI | TS-5, DIFF-1 | Medium | Confirmation pattern, AI integration |
-| Phase 4: Schema + Config | TS-1, TS-6, TS-7, TS-9 | Medium | Finalize OpenAPI spec and instructions |
+- [ ] **Interview scorecard / structured evaluation** -- Configurable rating forms per job or company. Defer: requires company-specific customization, significant UI design, and scoring system.
+- [ ] **Multi-round interview tracking with labels** -- Named interview rounds (Phone Screen, Technical, Cultural Fit). Defer: v1 can track multiple interviews per application without formal round naming.
+- [ ] **Candidate interview prep page** -- Landing page with job details, interviewer bios, company info, tips. Defer: nice-to-have, not blocking adoption.
+- [ ] **Interview feedback request automation** -- Auto-prompt interviewers for structured feedback after call ends. Defer: more valuable with scorecard system.
+- [ ] **Interview analytics dashboard** -- Average interview duration, time-to-schedule, no-show rates, interviews-per-hire. Defer: need data volume first.
+- [ ] **Live captions (accessibility)** -- Real-time speech-to-text displayed as captions during call. Defer: requires real-time STT which is more complex and expensive than async processing.
+- [ ] **Interview scheduling links (self-service)** -- Recruiter shares a link, candidate picks from available slots. Defer: Calendly-like functionality is a significant product in itself.
 
-**MVP timeline estimate:** 2-3 weeks for a single developer, assuming all underlying services are stable.
+## Feature Prioritization Matrix
 
----
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Video room (1:1) | HIGH | HIGH | P1 |
+| Interview scheduling + calendar | HIGH | LOW | P1 |
+| Magic link join | HIGH | MEDIUM | P1 |
+| In-app join | HIGH | LOW | P1 |
+| Recording | HIGH | MEDIUM | P1 |
+| Recording playback | MEDIUM | LOW | P1 |
+| Interview status tracking | HIGH | LOW | P1 |
+| Email notifications (scheduled, reminder, cancelled) | HIGH | LOW | P1 |
+| Waiting room | MEDIUM | LOW | P1 |
+| Basic controls (mute, camera, leave) | HIGH | LOW | P1 |
+| Stage-triggered scheduling | MEDIUM | LOW | P1 |
+| Interview section on application detail | MEDIUM | LOW | P1 |
+| Panel interviews | HIGH | MEDIUM | P2 |
+| AI transcription | HIGH | HIGH | P2 |
+| AI summary + app note | HIGH | MEDIUM | P2 |
+| Screen sharing | MEDIUM | LOW | P2 |
+| Pre-call device check | MEDIUM | MEDIUM | P2 |
+| Cancel/reschedule flow | MEDIUM | MEDIUM | P2 |
+| Automated reminders (1h) | MEDIUM | LOW | P2 |
+| Interviewer notes during call | MEDIUM | MEDIUM | P2 |
+| Dedicated interviews tab | MEDIUM | MEDIUM | P2 |
+| Calendar availability | MEDIUM | MEDIUM | P2 |
+| Interview scorecard | MEDIUM | HIGH | P3 |
+| Multi-round tracking with labels | LOW | LOW | P3 |
+| Candidate prep page | LOW | LOW | P3 |
+| Interview analytics | LOW | MEDIUM | P3 |
+| Live captions | LOW | HIGH | P3 |
+| Self-service scheduling links | MEDIUM | HIGH | P3 |
 
-## OpenAI GPT Actions: Key Constraints and Capabilities
+**Priority key:**
+- P1: Must have for launch -- core video interviewing loop
+- P2: Should have, add once core is adopted -- enhances value significantly
+- P3: Nice to have, future consideration -- valuable but not blocking adoption
 
-Summary of GPT Actions platform constraints that affect feature design.
+## Competitor Feature Analysis
 
-| Constraint | Impact | Mitigation |
-|------------|--------|------------|
-| OpenAPI 3.0.1 required | Must author valid spec | Use existing starter, expand incrementally |
-| ~30 actions practical limit | Cannot expose every endpoint | Group related operations, prioritize |
-| JSON request/response only | No file upload via actions | Use existing uploaded resumes |
-| OAuth2 authorization code only | Must implement full OAuth provider | Backend-as-OAuth-provider pattern |
-| GPT reads operation descriptions | Descriptions are critical for correct action selection | Write detailed, unambiguous descriptions |
-| Consequential flag (x-openai-isConsequential) | Controls whether GPT asks confirmation | Set true for all POST endpoints, defense-in-depth with confirmed flag |
-| Response size practical limit ~100KB | Large responses may be truncated | Paginate, summarize, limit response size |
-| GPT may call actions multiple times | Idempotent design important | Duplicate checks on write operations |
-| No server-sent events/streaming | Cannot push updates to GPT | Polling-based design only |
-| No webhook callbacks | GPT cannot receive async notifications | All operations must be synchronous |
+| Feature | Greenhouse | Lever | BreezyHR | Spark Hire | Our Approach |
+|---------|-----------|-------|----------|-----------|--------------|
+| Live video interviews | Via Zoom/Teams integration (no native) | Via integrations only | Native in-app video | Native video (live + one-way) | Native in-app video rooms via managed provider |
+| Calendar sync | Google + Outlook | Google + Outlook | Google + Outlook | Google + Outlook | Google (built), Outlook (future) |
+| Interview scheduling | Self-scheduling links, coordinator workflows | Coordinator workflows | Built-in scheduler | Built-in scheduler | Calendar-integrated scheduling with stage triggers |
+| Recording | Depends on Zoom/Teams | Depends on integration | Yes (native) | Yes (native) | Server-side via provider API |
+| AI transcription | Via add-ons (Metaview, BrightHire) | Via add-ons | No native | No native | Built-in async transcription |
+| AI summary | Via add-ons (BrightHire, Metaview) | Via add-ons | No | No | Built-in, auto-posted as application note |
+| Scorecards | Yes (structured, configurable) | Yes (structured) | Yes (basic) | Yes (basic) | Deferred to v2 |
+| Panel support | Via Zoom/Teams | Via integrations | Yes | Limited | v1.x (post-launch) |
+| Magic link (no account needed) | N/A (uses Zoom/Teams links) | N/A | Yes | Yes | Yes -- core feature |
+| Candidate prep | Limited | Limited | No | No | Deferred to v2 |
+| One-way (async) video | No | No | No | Yes (core feature) | Explicitly not building (anti-feature) |
 
-**Confidence:** MEDIUM overall. These constraints are based on training knowledge (pre-May 2025). OpenAI frequently updates GPT Actions capabilities. Flag for verification against current documentation before implementation.
+**Key competitive insight:** Most enterprise ATS platforms (Greenhouse, Lever) do NOT have native video. They rely on Zoom/Teams integrations, which means the video experience is fragmented -- users leave the ATS to conduct interviews, then manually sync notes back. Building native video with integrated recording, AI transcription, and automatic application note posting is a genuine differentiator. The user never leaves Splits Network. BreezyHR is the closest competitor with native video but lacks AI features. Spark Hire has native video but focuses heavily on one-way interviews (which candidates dislike).
 
----
+## Integration Points with Existing Splits Network Features
+
+These existing features directly support or are impacted by video interviewing:
+
+| Existing Feature | How It Integrates | Dependencies |
+|-----------------|-------------------|--------------|
+| Application stages (`interview` stage) | Stage transition to `interview` triggers scheduling prompt | `actions-toolbar.tsx`, stage management |
+| Google Calendar combo provider | Calendar event creation already works. Enhance to create interview DB record alongside calendar event. | `schedule-interview-modal.tsx`, integration service |
+| `application_notes` table | AI summaries post here as new `interview_summary` note type | Migration to add enum value, `ApplicationNoteType` in shared-types |
+| RabbitMQ event system | Interview lifecycle events (scheduled, started, completed, recording_ready) flow through existing event infrastructure | Event publisher/consumer patterns |
+| Resend email infrastructure | Interview notification templates use existing email pipeline | Notification service, email templates |
+| `ai-service` | Transcription processing and summary generation extend existing AI service | New consumer for `interview.recording_ready` events |
+| `actions-toolbar.tsx` | "Schedule Interview" action button, "Join Interview" button | Application detail page |
+| Candidate portal (`apps/candidate`) | Magic link interview join routes through candidate app (or standalone route) | Candidate app routing |
+| In-app notifications | Interview reminders, status updates via existing notification system | Notification service |
+| `CalendarProvider` context | Interview events appear in calendar views alongside other events | Calendar components |
 
 ## Sources
 
-**PRIMARY SOURCES (codebase analysis -- HIGH confidence):**
+**Codebase analysis (HIGH confidence):**
+- `apps/portal/src/components/basel/scheduling/schedule-interview-modal.tsx` -- existing scheduling wizard
+- `apps/portal/src/components/basel/calendar/calendar-context.tsx` -- calendar integration patterns
+- `packages/shared-types/src/models.ts` -- `ApplicationStage`, `ApplicationNoteType` enums
+- `services/ai-service/src/index.ts` -- AI service architecture and capabilities
+- `apps/portal/src/app/portal/applications/components/shared/actions-toolbar.tsx` -- stage transition UI
 
-- `services/ats-service/src/v2/jobs/` -- Job service, repository, routes, types
-- `services/ats-service/src/v2/applications/` -- Application service, repository, routes, types
-- `services/ats-service/src/v2/candidates/` -- Candidate service with resume management
-- `services/ai-service/src/v2/reviews/` -- AI review service with fit analysis
-- `services/document-service/src/v2/documents/` -- Document storage and metadata
-- `services/search-service/src/v2/search/` -- Search service with typeahead
-- `services/api-gateway/src/auth.ts` -- Clerk multi-app authentication
-- `services/api-gateway/src/middleware/auth.ts` -- Auth middleware patterns
-- `packages/shared-access-context/` -- resolveAccessContext for RBAC
-- `packages/shared-types/` -- Shared type definitions
-- `docs/gpt/` -- Existing GPT documentation (PRD, architecture, tech spec, OpenAPI starter, instructions template)
-- `.planning/PROJECT.md` -- v5.0 milestone context and constraints
+**Domain expertise (HIGH confidence):**
+- Video interviewing in recruiting is a well-established domain with clear feature expectations
+- Managed video provider integration patterns are well-documented
+- AI transcription and summarization are proven patterns in recruiting tools
 
-**TRAINING KNOWLEDGE (MEDIUM confidence -- could not verify with WebSearch/WebFetch):**
+**Industry knowledge (MEDIUM confidence -- based on training data, not verified against current product pages):**
+- Greenhouse, Lever, BreezyHR, Spark Hire feature sets
+- Candidate preferences regarding one-way vs live video interviews
+- Recording storage cost estimates
+- Drop-off rates for one-way video interviews
 
-- OpenAI GPT Actions OAuth2 flow specifics
-- OpenAPI 3.0.1 vs 3.1 strictness
-- `x-openai-isConsequential` extension behavior
-- GPT Actions file upload capabilities
-- GPT Store listing requirements
-- Practical limits on action count and response size
-- OAuth callback URL format
-
-**GAPS (need verification before implementation):**
-
-- Current GPT Actions API documentation (may have changed since training cutoff)
-- Exact OAuth callback URL format OpenAI expects
-- Whether GPT Actions now support file uploads natively
-- Whether OpenAPI 3.1 is now accepted
-- Latest rate limiting best practices from OpenAI
-- GPT Store review criteria for consequential actions
+---
+*Feature research for: Video Interviewing in Recruiting Platform*
+*Researched: 2026-03-07*

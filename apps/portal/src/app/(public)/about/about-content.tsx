@@ -108,9 +108,7 @@ export function AboutContent() {
     return (
         <div ref={containerRef}>
             {/* Hero Section */}
-            <section
-                className="hero bg-gradient-to-r from-primary to-accent text-primary-content py-20 overflow-hidden"
-            >
+            <section className="hero bg-gradient-to-r from-primary to-accent text-primary-content py-20 overflow-hidden">
                 <div className="scroll-reveal fade-up text-center max-w-5xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
@@ -127,17 +125,11 @@ export function AboutContent() {
             </section>
 
             {/* Mission & Vision */}
-            <section
-
-                className="py-20 bg-base-100 overflow-hidden"
-            >
+            <section className="py-20 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
                         <div className="grid md:grid-cols-2 gap-12 mb-16">
-                            <div
-                                className="scroll-reveal fade-up card bg-primary text-primary-content shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
-
-                            >
+                            <div className="scroll-reveal fade-up card bg-primary text-primary-content shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
                                         <i className="mission-icon fa-duotone fa-regular fa-bullseye"></i>
@@ -153,10 +145,7 @@ export function AboutContent() {
                                     </p>
                                 </div>
                             </div>
-                            <div
-                                className="scroll-reveal fade-up card bg-secondary text-secondary-content shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
-
-                            >
+                            <div className="scroll-reveal fade-up card bg-secondary text-secondary-content shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
                                         <i className="mission-icon fa-duotone fa-regular fa-telescope"></i>
@@ -209,10 +198,7 @@ export function AboutContent() {
             </section>
 
             {/* Core Values */}
-            <section
-
-                className="py-20 bg-base-200 overflow-hidden"
-            >
+            <section className="py-20 bg-base-200 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="scroll-reveal fade-up text-center mb-16">
                         <h2 className="text-4xl font-bold mb-4">
@@ -227,7 +213,6 @@ export function AboutContent() {
                             <div
                                 key={index}
                                 className="scroll-reveal fade-up card bg-base-100 shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
-
                             >
                                 <div className="card-body text-center">
                                     <div
@@ -251,10 +236,7 @@ export function AboutContent() {
             </section>
 
             {/* Why We're Different */}
-            <section
-
-                className="py-20 bg-base-100 overflow-hidden"
-            >
+            <section className="py-20 bg-base-100 overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
                         <h2 className="scroll-reveal fade-up text-4xl font-bold text-center mb-12">
@@ -265,7 +247,6 @@ export function AboutContent() {
                                 <div
                                     key={index}
                                     className="scroll-reveal fade-up card bg-base-200 shadow cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
-
                                 >
                                     <div className="card-body">
                                         <h3 className="card-title text-xl">
@@ -286,10 +267,7 @@ export function AboutContent() {
             </section>
 
             {/* Team Section */}
-            <section
-
-                className="py-20 bg-neutral text-neutral-content overflow-hidden"
-            >
+            <section className="py-20 bg-base-300 text-base-content overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="scroll-reveal fade-up text-center mb-12">
                         <h2 className="text-4xl font-bold mb-4">
@@ -332,7 +310,6 @@ export function AboutContent() {
                         <Link
                             href="/careers"
                             className="btn btn-primary btn-lg"
-
                         >
                             <i className="fa-duotone fa-regular fa-user-plus"></i>
                             Join Our Team
@@ -342,10 +319,7 @@ export function AboutContent() {
             </section>
 
             {/* CTA Section */}
-            <section
-
-                className="py-20 bg-primary text-primary-content overflow-hidden"
-            >
+            <section className="py-20 bg-primary text-primary-content overflow-hidden">
                 <AuthenticatedCTAWrapper>
                     <div className="container mx-auto px-4 text-center">
                         <div className="scroll-reveal fade-up">
@@ -361,7 +335,6 @@ export function AboutContent() {
                             <Link
                                 href="/sign-up"
                                 className="scroll-reveal pop-in btn btn-lg btn-neutral transition-transform duration-200 hover:scale-105"
-
                             >
                                 <i className="fa-duotone fa-regular fa-user-tie"></i>
                                 Join as a Recruiter
@@ -369,7 +342,6 @@ export function AboutContent() {
                             <Link
                                 href="/sign-up"
                                 className="scroll-reveal pop-in btn btn-lg btn-secondary transition-transform duration-200 hover:scale-105"
-
                             >
                                 <i className="fa-duotone fa-regular fa-building"></i>
                                 Post Roles as a Company

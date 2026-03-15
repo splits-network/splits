@@ -73,7 +73,7 @@ export default function InvitationsBaselPage() {
             try {
                 const client = createAuthenticatedClient(token);
                 const response = await client.get("/recruiter-candidates", {
-                    params: { limit: 1000 },
+                    params: { limit: 100 },
                 });
 
                 const invitations: StatsInvitation[] = response.data || [];
@@ -170,13 +170,16 @@ export default function InvitationsBaselPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Invitation, InvitationFilters>({
         endpoint: "/recruiter-candidates",
-        include: "candidate",
         defaultFilters,
         defaultSortBy: "invited_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
     });
 
@@ -187,6 +190,11 @@ export default function InvitationsBaselPage() {
     const handleViewModeChange = useCallback((mode: ViewMode) => {
         setViewMode(mode);
     }, []);
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     if (error) {
         return <ErrorState message={error} onRetry={refresh} />;
@@ -209,6 +217,9 @@ export default function InvitationsBaselPage() {
                     totalCount={pagination?.total ?? invitations.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
                 />
 
                 {/* Content Area */}

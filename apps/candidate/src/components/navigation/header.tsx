@@ -9,6 +9,7 @@ import type { NavItem } from "@splits-network/shared-types";
 import UserDropdown from "./user-dropdown";
 import NotificationBell from "./notification-bell";
 import Image from "next/image";
+import { SupportTrigger } from "@splits-network/support-widget";
 
 // ─── Default Nav Data (fallback when CMS is unavailable) ────────────────────
 
@@ -229,6 +230,9 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
                 <>
                     {/* Theme toggle */}
                     <ThemeToggle />
+
+                    {/* Support */}
+                    <SupportTrigger />
 
                     {isSignedIn ? (
                         <>

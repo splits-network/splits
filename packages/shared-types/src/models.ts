@@ -8,6 +8,7 @@ export interface User {
     onboarding_step?: number;
     onboarding_completed_at?: Date;
     onboarding_metadata?: OnboardingMetadata; // New persistent state
+    last_active_at?: Date | null;
     created_at: Date;
     updated_at: Date;
 }
@@ -174,7 +175,7 @@ export interface Company {
     updated_at: Date;
 }
 
-export type JobStatus = 'draft' | 'pending' | 'early' | 'active' | 'priority' | 'paused' | 'filled' | 'closed';
+export type JobStatus = 'draft' | 'pending' | 'active' | 'paused' | 'filled' | 'closed';
 
 export type EmploymentType = 'full_time' | 'contract' | 'temporary';
 
@@ -202,12 +203,11 @@ export interface Job {
     job_level?: JobLevel;
     show_salary_range: boolean;
     guarantee_days?: number; // Placement guarantee period in days (default 90)
-    job_owner_id?: string; // Splits Network or recruiting partner GUID
-    recruiter_id?: string; // Legacy: company recruiter (Client/Hiring Facilitator role) - use company_recruiter_id
-    company_recruiter_id?: string; // Company recruiter (Client/Hiring Facilitator role) - represents company
     job_owner_recruiter_id?: string; // Job owner (Specs Owner role) - recruiter who posted job (recruiter-only, external postings only)
     source_firm_id?: string | null; // Recruiting firm that owns this job (firm jobs have no company_id)
     status: JobStatus;
+    is_early_access: boolean;
+    is_priority: boolean;
     activates_at?: string | null;
     closes_at?: string | null;
     created_at: Date;
@@ -459,8 +459,10 @@ export interface MaskedCandidate {
 export type ApplicationStage =
     // Candidate self-service stages
     | 'draft'              // Candidate working on application
-    | 'ai_review'          // AI analyzing fit
+    | 'ai_review'          // AI analyzing fit (user-submitted)
+    | 'gpt_review'         // AI analyzing fit (GPT-submitted)
     | 'ai_reviewed'        // AI review complete, awaiting candidate action
+    | 'ai_failed'          // AI review failed — candidate can resubmit
 
     // Recruiter involvement stages
     | 'recruiter_request'  // Recruiter requested more details from candidate (should also contain notes that are appended to recruiter_notes)
@@ -492,7 +494,9 @@ export type ApplicationNoteType =
     | 'stage_transition'   // Notes during stage changes
     | 'interview_feedback' // Company interview notes
     | 'general'            // Catch-all type
-    | 'pitch';             // Recruiter pitch when submitting candidate
+    | 'pitch'              // Recruiter pitch when submitting candidate
+    | 'interview_summary' // AI-generated interview summary
+    | 'interview_note';   // Auto-posted from in-call interview notes
 
 export type ApplicationNoteCreatorType =
     | 'candidate'
@@ -581,6 +585,8 @@ export interface AIReview {
     skills_match_percentage?: number | null;
     matched_skills?: string[];
     missing_skills?: string[];
+    matched_requirements?: string[];
+    missing_requirements?: string[];
 
     // Experience Analysis
     experience_analysis: AIExperienceAnalysis;

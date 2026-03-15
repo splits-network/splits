@@ -36,7 +36,7 @@ export function ApplicationNotesTab({ applicationId }: NotesTabProps) {
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
             const client = createAuthenticatedClient(token);
-            const response = await client.get(`/applications/${appId}/notes`);
+            const response = await client.get(`/application-notes`, { params: { application_id: appId } });
             return response.data || [];
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,7 +48,7 @@ export function ApplicationNotesTab({ applicationId }: NotesTabProps) {
             const token = await getToken();
             if (!token) throw new Error("Not authenticated");
             const client = createAuthenticatedClient(token);
-            const response = await client.post(`/applications/${data.application_id}/notes`, data);
+            const response = await client.post(`/application-notes`, data);
             return response.data;
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps

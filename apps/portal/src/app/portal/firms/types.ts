@@ -97,6 +97,11 @@ export interface SplitConfiguration {
 
 export interface FirmFilters {
     status?: string;
+    team_size_range?: string;
+    is_candidate_firm?: string;
+    is_company_firm?: string;
+    is_marketplace_visible?: string;
+    placement_type?: string;
 }
 
 // ===== Formatting Helpers =====
@@ -154,3 +159,26 @@ export const PLACEMENT_TYPE_LABELS: Record<PlacementType, string> = {
     contract_to_hire: 'Contract-to-Hire',
     executive_search: 'Executive Search',
 };
+
+export const CANDIDATE_FIRM_LABELS: Record<string, string> = {
+    yes: "Candidate Firm",
+    no: "Not Candidate Firm",
+};
+
+export const COMPANY_FIRM_LABELS: Record<string, string> = {
+    yes: "Company Firm",
+    no: "Not Company Firm",
+};
+
+export const MARKETPLACE_VISIBLE_LABELS: Record<string, string> = {
+    yes: "Marketplace Listed",
+    no: "Not Listed",
+};
+
+import type { BaselSortOption } from "@splits-network/basel-ui";
+
+export const FIRM_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "name", label: "Firm Name" },
+    { value: "member_count", label: "Team Size" },
+];

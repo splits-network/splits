@@ -12,8 +12,11 @@ export function stageColor(stage: string): string {
         case "draft":
             return "bg-neutral/10 text-neutral";
         case "ai_review":
+        case "gpt_review":
         case "ai_reviewed":
             return "bg-info/15 text-info";
+        case "ai_failed":
+            return "bg-error/15 text-error";
         case "submitted":
         case "recruiter_review":
         case "company_review":
@@ -47,8 +50,11 @@ export function stageColorName(stage: string): BaselSemanticColor {
         case "draft":
             return "neutral";
         case "ai_review":
+        case "gpt_review":
         case "ai_reviewed":
             return "info";
+        case "ai_failed":
+            return "error";
         case "submitted":
         case "recruiter_review":
         case "company_review":

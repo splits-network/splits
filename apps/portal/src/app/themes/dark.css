@@ -46,7 +46,7 @@
 
     --color-error: #ef4444;
     /* red-500 */
-    --color-error-content: #09090b;
+    --color-error-content: #e5e7eb;
 
     /* Radii / sizing (same as light for consistency) */
     --radius-selector: 0rem;

@@ -174,3 +174,5 @@ interface EntityRoleRow {
     role_entity_id: string | null;
 }
 
+export { EntitlementChecker } from './entitlement-checker';
+

@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applicant Network — Your Career Has Entered the Chat</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #3b5ccc;
+    --secondary: #14b8a6;
+    --accent: #ec4899;
+    --bg: #09090b;
+    --surface: #18181b;
+    --text: #fafafa;
+    --text-dim: #a1a1aa;
+    --glow-primary: rgba(59, 92, 204, 0.6);
+    --glow-accent: rgba(236, 72, 153, 0.6);
+    --glow-secondary: rgba(20, 184, 166, 0.6);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--accent);
+    pointer-events: none;
+    z-index: 99999;
+    mix-blend-mode: difference;
+    transition: transform 0.1s;
+  }
+  .cursor-dot {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    pointer-events: none;
+    z-index: 99999;
+  }
+
+  /* Scene container */
+  .scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+  .scene.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Particle canvas */
+  #particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Scanlines overlay */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* Vignette */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  /* Glitch effect */
+  @keyframes glitch1 {
+    0%, 100% { clip-path: inset(0 0 95% 0); transform: translate(-2px, 0); }
+    20% { clip-path: inset(30% 0 40% 0); transform: translate(3px, 0); }
+    40% { clip-path: inset(60% 0 10% 0); transform: translate(-1px, 0); }
+    60% { clip-path: inset(10% 0 70% 0); transform: translate(4px, 0); }
+    80% { clip-path: inset(80% 0 5% 0); transform: translate(-3px, 0); }
+  }
+  @keyframes glitch2 {
+    0%, 100% { clip-path: inset(95% 0 0 0); transform: translate(2px, 0); }
+    20% { clip-path: inset(40% 0 30% 0); transform: translate(-3px, 0); }
+    40% { clip-path: inset(10% 0 60% 0); transform: translate(1px, 0); }
+    60% { clip-path: inset(70% 0 10% 0); transform: translate(-4px, 0); }
+    80% { clip-path: inset(5% 0 80% 0); transform: translate(3px, 0); }
+  }
+
+  .glitch-text {
+    position: relative;
+  }
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+  }
+  .glitch-text::before {
+    color: var(--accent);
+    animation: glitch1 0.3s infinite linear;
+    z-index: -1;
+  }
+  .glitch-text::after {
+    color: var(--secondary);
+    animation: glitch2 0.3s infinite linear;
+    z-index: -1;
+  }
+
+  /* Typing cursor */
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  .typing-cursor::after {
+    content: '|';
+    animation: blink 0.7s infinite;
+    color: var(--accent);
+  }
+
+  /* Scene 0: Boot sequence */
+  .boot-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--secondary);
+    text-align: left;
+    white-space: pre-line;
+    line-height: 1.8;
+    max-width: 700px;
+  }
+  .boot-text span {
+    opacity: 0;
+  }
+
+  /* Scene 1: Problem statement */
+  .problem-word {
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    transform: scale(3) rotate(-10deg);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .problem-word.visible {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+  .problem-word.red { color: #ef4444; text-shadow: 0 0 60px rgba(239,68,68,0.5); }
+  .problem-word.shake {
+    animation: shake 0.5s ease-in-out;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+  }
+
+  /* Scene 2: Stats explosion */
+  .stat-card {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 2rem 3rem;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0) rotate(var(--rot, 0deg));
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .stat-card.visible {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rot, 0deg));
+  }
+  .stat-number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-top: 0.5rem;
+  }
+
+  /* Scene 3: Feature showcase */
+  .feature-panel {
+    position: absolute;
+    width: 320px;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 2rem;
+    opacity: 0;
+    transform: translateY(100px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .feature-panel.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .feature-panel .icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  .feature-panel h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .feature-panel p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  /* Scene 4: Ghost kill */
+  .ghost-emoji {
+    font-size: 8rem;
+    position: absolute;
+    transition: all 0.3s;
+  }
+  .ghost-emoji.dead {
+    filter: grayscale(1) brightness(0.3);
+    transform: scale(0) rotate(720deg) !important;
+  }
+  .crosshair {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 2px solid var(--accent);
+    opacity: 0;
+  }
+  .crosshair::before, .crosshair::after {
+    content: '';
+    position: absolute;
+    background: var(--accent);
+  }
+  .crosshair::before {
+    width: 2px;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .crosshair::after {
+    width: 100%;
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* Scene 5: The flip */
+  .flip-container {
+    perspective: 1500px;
+  }
+  .flip-card {
+    width: 600px;
+    height: 350px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .flip-card.flipped {
+    transform: rotateY(180deg);
+  }
+  .flip-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .flip-front {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .flip-back {
+    background: linear-gradient(135deg, var(--primary), #1a2d6d);
+    border: 2px solid var(--primary);
+    transform: rotateY(180deg);
+  }
+
+  /* Scene 6: Testimonials rapid fire */
+  .testimonial {
+    position: absolute;
+    max-width: 500px;
+    padding: 2rem;
+    background: var(--surface);
+    border-left: 4px solid var(--accent);
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0;
+    transform: translateX(100vw);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .testimonial.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .testimonial.exit {
+    transform: translateX(-100vw);
+    opacity: 0;
+  }
+  .testimonial cite {
+    display: block;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--secondary);
+    font-style: normal;
+  }
+
+  /* Scene 7: CTA finale */
+  .cta-container {
+    text-align: center;
+  }
+  .cta-title {
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .cta-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+  }
+  .cta-btn {
+    display: inline-block;
+    padding: 1.2rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: white;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cta-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px var(--glow-accent), 0 0 80px var(--glow-primary);
+  }
+  .cta-btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, var(--accent), var(--primary), var(--secondary), var(--accent));
+    background-size: 400% 400%;
+    animation: gradientShift 2s ease infinite;
+    z-index: -1;
+    filter: blur(10px);
+  }
+  .cta-free {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: var(--secondary);
+    font-weight: 600;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+    z-index: 99999;
+    transition: width 0.3s;
+  }
+
+  /* Screen flash */
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 99990;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .flash.bang {
+    animation: flashBang 0.3s ease-out;
+  }
+  @keyframes flashBang {
+    0% { opacity: 0.8; }
+    100% { opacity: 0; }
+  }
+
+  /* Floating emojis */
+  .float-emoji {
+    position: fixed;
+    font-size: 2rem;
+    pointer-events: none;
+    z-index: 9990;
+    animation: floatUp 3s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(-400px) rotate(720deg) scale(0); }
+  }
+
+  /* Matrix rain */
+  .matrix-char {
+    position: fixed;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--secondary);
+    opacity: 0.3;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1;
+    animation: matrixFall linear forwards;
+  }
+  @keyframes matrixFall {
+    0% { transform: translateY(-20px); opacity: 0.5; }
+    100% { transform: translateY(100vh); opacity: 0; }
+  }
+
+  /* Explosion particles */
+  .explosion-particle {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: explode 1s ease-out forwards;
+  }
+  @keyframes explode {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+  }
+
+  /* Countdown */
+  .countdown {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(6rem, 15vw, 12rem);
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 60px var(--glow-accent), 0 0 120px var(--glow-accent);
+    animation: pulse 0.5s ease-in-out;
+  }
+  @keyframes pulse {
+    0% { transform: scale(2); opacity: 0; }
+    50% { transform: scale(0.9); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Logo scene */
+  .logo-text {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .logo-text.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .logo-text .highlight {
+    color: var(--accent);
+  }
+  .logo-tagline {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.5s 0.3s;
+  }
+  .logo-tagline.visible {
+    opacity: 1;
+  }
+
+  /* Notification toast stack */
+  .toast-stack {
+    position: absolute;
+    right: 10%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .notif-toast {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-left: 4px solid var(--secondary);
+    padding: 1rem 1.5rem;
+    min-width: 300px;
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .notif-toast.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .notif-toast .notif-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+  .notif-toast .notif-body {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+  .notif-toast .notif-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--secondary);
+    margin-right: 8px;
+    animation: blink 1s infinite;
+  }
+
+  /* Sound wave visualizer */
+  .sound-wave {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    height: 60px;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9990;
+  }
+  .wave-bar {
+    width: 3px;
+    background: var(--primary);
+    animation: waveAnim var(--dur, 0.5s) ease-in-out infinite alternate;
+    opacity: 0.6;
+  }
+  @keyframes waveAnim {
+    0% { height: 5px; }
+    100% { height: var(--h, 40px); }
+  }
+
+  /* Play button */
+  .play-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    cursor: pointer;
+  }
+  .play-overlay.hidden { display: none; }
+  .play-btn {
+    width: 100px;
+    height: 100px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .play-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 60px var(--glow-accent);
+  }
+  .play-btn svg {
+    width: 40px;
+    height: 40px;
+    fill: white;
+    margin-left: 5px;
+  }
+  .play-label {
+    margin-top: 1.5rem;
+    font-size: 1rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* Skip button */
+  .skip-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100001;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--text-dim);
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+    display: none;
+  }
+  .skip-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+  .skip-btn.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Play overlay -->
+<div class="play-overlay" id="playOverlay">
+  <div class="play-btn">
+    <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+  </div>
+  <div class="play-label">Click to experience</div>
+</div>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- Overlays -->
+<div class="scanlines"></div>
+<div class="vignette"></div>
+<div class="flash" id="flash"></div>
+<canvas id="particles"></canvas>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progress" style="width: 0%"></div>
+
+<!-- Skip -->
+<button class="skip-btn" id="skipBtn">Skip &raquo;</button>
+
+<!-- Sound wave viz -->
+<div class="sound-wave" id="soundWave" style="display:none"></div>
+
+<!-- ===================== SCENES ===================== -->
+
+<!-- Scene 0: Boot -->
+<div class="scene" id="scene-boot">
+  <div class="boot-text" id="bootText"></div>
+</div>
+
+<!-- Scene 1: Problem -->
+<div class="scene" id="scene-problem">
+  <div style="text-align:center">
+    <div class="problem-word red" id="pw1" data-text="JOB SEARCHING">JOB SEARCHING</div>
+    <div class="problem-word red" id="pw2" data-text="IS BROKEN." style="margin-top:-0.5rem">IS BROKEN.</div>
+  </div>
+</div>
+
+<!-- Scene 2: Pain points -->
+<div class="scene" id="scene-pain">
+  <div style="text-align:center; max-width:700px;">
+    <div id="painPoints" style="font-size:1.6rem; line-height:2.2; font-weight:600;"></div>
+  </div>
+</div>
+
+<!-- Scene 3: Countdown -->
+<div class="scene" id="scene-countdown">
+  <div class="countdown" id="countdownNum"></div>
+</div>
+
+<!-- Scene 4: Logo reveal -->
+<div class="scene" id="scene-logo">
+  <div style="text-align:center">
+    <div class="logo-text" id="logoText">
+      applicant<span class="highlight">.network</span>
+    </div>
+    <div class="logo-tagline" id="logoTagline">Your career, powered by experts.</div>
+  </div>
+</div>
+
+<!-- Scene 5: Ghost kill -->
+<div class="scene" id="scene-ghost">
+  <div style="text-align:center; position:relative; width:100vw; height:100vh;">
+    <div style="position:absolute; top:10%; left:50%; transform:translateX(-50%); font-size:1.5rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.2em;">
+      No more ghosting.
+    </div>
+    <div class="ghost-emoji" id="ghost1" style="top:30%; left:20%;">&#x1F47B;</div>
+    <div class="ghost-emoji" id="ghost2" style="top:50%; left:55%;">&#x1F47B;</div>
+    <div class="ghost-emoji" id="ghost3" style="top:35%; left:75%;">&#x1F47B;</div>
+    <div class="ghost-emoji" id="ghost4" style="top:60%; left:35%;">&#x1F47B;</div>
+    <div class="crosshair" id="crosshair"></div>
+  </div>
+</div>
+
+<!-- Scene 6: Stats -->
+<div class="scene" id="scene-stats">
+  <div style="position:relative; width:100vw; height:100vh;">
+    <div class="stat-card" id="stat1" style="top:15%; left:10%; --rot:-3deg;">
+      <div class="stat-number" id="statNum1">0</div>
+      <div class="stat-label">Active Roles</div>
+    </div>
+    <div class="stat-card" id="stat2" style="top:10%; right:15%; --rot:2deg;">
+      <div class="stat-number" id="statNum2">0</div>
+      <div class="stat-label">Companies Hiring</div>
+    </div>
+    <div class="stat-card" id="stat3" style="bottom:20%; left:20%; --rot:-1deg;">
+      <div class="stat-number" id="statNum3">0</div>
+      <div class="stat-label">Expert Recruiters</div>
+    </div>
+    <div class="stat-card" id="stat4" style="bottom:15%; right:10%; --rot:3deg;">
+      <div class="stat-number" id="statNum4">0</div>
+      <div class="stat-label">48hr Response</div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 7: Features -->
+<div class="scene" id="scene-features">
+  <div style="position:relative; width:100vw; height:100vh;">
+    <div class="feature-panel" id="feat1" style="top:15%; left:5%;">
+      <div class="icon">&#x1F3AF;</div>
+      <h3>Smart Matching</h3>
+      <p>Matched with recruiters who specialize in YOUR field. Not algorithms. Real humans.</p>
+    </div>
+    <div class="feature-panel" id="feat2" style="top:10%; right:5%;">
+      <div class="icon">&#x1F4AC;</div>
+      <h3>Real Communication</h3>
+      <p>48-hour response guarantee. Your recruiter keeps you in the loop. Always.</p>
+    </div>
+    <div class="feature-panel" id="feat3" style="bottom:15%; left:25%;">
+      <div class="icon">&#x1F6E1;&#xFE0F;</div>
+      <h3>You're In Control</h3>
+      <p>Approve who sees your profile. Go passive. Set your terms. Your data, your rules.</p>
+    </div>
+    <div class="feature-panel" id="feat4" style="bottom:10%; right:20%;">
+      <div class="icon">&#x1F4B0;</div>
+      <h3>Free. Forever.</h3>
+      <p>Companies pay recruiters. You pay nothing. Not now. Not ever. No credit card. No catch.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 8: Notification demo -->
+<div class="scene" id="scene-notifs">
+  <div style="position:relative; width:100vw; height:100vh; display:flex; align-items:center;">
+    <div style="margin-left:10%; max-width:400px;">
+      <div style="font-size:2rem; font-weight:900; margin-bottom:0.5rem;">Real-time updates.</div>
+      <div style="font-size:2rem; font-weight:900; color:var(--secondary);">Zero guessing.</div>
+      <div style="margin-top:1rem; color:var(--text-dim); font-size:1.1rem; line-height:1.6;">
+        Know exactly where your application stands. Every. Single. Time.
+      </div>
+    </div>
+    <div class="toast-stack" id="toastStack">
+      <div class="notif-toast" id="notif1">
+        <div class="notif-title"><span class="notif-dot"></span>Application Received</div>
+        <div class="notif-body">Google - Senior Software Engineer</div>
+      </div>
+      <div class="notif-toast" id="notif2">
+        <div class="notif-title"><span class="notif-dot" style="background:var(--accent)"></span>Interview Scheduled</div>
+        <div class="notif-body">Your recruiter booked you for Round 1</div>
+      </div>
+      <div class="notif-toast" id="notif3">
+        <div class="notif-title"><span class="notif-dot" style="background:var(--primary)"></span>Offer Extended!</div>
+        <div class="notif-body">$185,000 + equity package</div>
+      </div>
+      <div class="notif-toast" id="notif4">
+        <div class="notif-title"><span class="notif-dot" style="background:#22c55e"></span>YOU'RE HIRED</div>
+        <div class="notif-body">Congratulations! Welcome to the team.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 9: Flip card -->
+<div class="scene" id="scene-flip">
+  <div class="flip-container">
+    <div class="flip-card" id="flipCard">
+      <div class="flip-face flip-front">
+        <div style="font-size:3rem; margin-bottom:1rem;">&#x1F4E4;</div>
+        <div style="font-size:1.5rem; font-weight:700;">Old Way</div>
+        <div style="color:var(--text-dim); margin-top:0.5rem;">Spray and pray. 200 applications. Zero callbacks.</div>
+      </div>
+      <div class="flip-face flip-back">
+        <div style="font-size:3rem; margin-bottom:1rem;">&#x1F680;</div>
+        <div style="font-size:1.5rem; font-weight:700;">The Applicant Network Way</div>
+        <div style="color:rgba(255,255,255,0.8); margin-top:0.5rem;">One profile. Expert recruiter. Real advocacy. Actual results.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 10: CTA -->
+<div class="scene" id="scene-cta">
+  <div class="cta-container">
+    <div class="cta-title" id="ctaTitle">Your Next<br>Chapter Starts<br>Now.</div>
+    <div class="cta-subtitle">Like having an agent for your career.</div>
+    <a href="https://applicant.network" target="_blank" class="cta-btn">Join Free Today</a>
+    <div class="cta-free">Free forever. No credit card required.</div>
+  </div>
+</div>
+
+<script>
+// ==================== ENGINE ====================
+const $ = id => document.getElementById(id);
+const scenes = {};
+let currentScene = null;
+
+function showScene(id) {
+  if (currentScene) currentScene.classList.remove('active');
+  const scene = $(id);
+  scene.classList.add('active');
+  currentScene = scene;
+}
+
+function hideAllScenes() {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  currentScene = null;
+}
+
+function flash() {
+  const f = $('flash');
+  f.classList.remove('bang');
+  void f.offsetWidth;
+  f.classList.add('bang');
+}
+
+function explosion(x, y, count = 30) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'explosion-particle';
+    const angle = (Math.PI * 2 * i) / count;
+    const dist = 100 + Math.random() * 200;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    p.style.cssText = `left:${x}px; top:${y}px; --dx:${dx}px; --dy:${dy}px; background:hsl(${Math.random()*360},80%,60%);`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  }
+}
+
+function spawnEmoji(emoji, x, y) {
+  const el = document.createElement('div');
+  el.className = 'float-emoji';
+  el.textContent = emoji;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function matrixRain(duration = 3000) {
+  const chars = 'APPLICANT.NETWORK01'.split('');
+  const interval = setInterval(() => {
+    const c = document.createElement('div');
+    c.className = 'matrix-char';
+    c.textContent = chars[Math.floor(Math.random() * chars.length)];
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.animationDuration = (1 + Math.random() * 2) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3000);
+  }, 50);
+  setTimeout(() => clearInterval(interval), duration);
+}
+
+function animateNumber(el, target, suffix = '', duration = 1500) {
+  const start = performance.now();
+  const numTarget = parseInt(target.replace(/,/g, ''));
+  function update(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const val = Math.round(numTarget * ease);
+    el.textContent = val.toLocaleString() + suffix;
+    if (t < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function setProgress(pct) {
+  $('progress').style.width = pct + '%';
+}
+
+// Sound wave bars
+function initSoundWave() {
+  const sw = $('soundWave');
+  for (let i = 0; i < 20; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'wave-bar';
+    bar.style.setProperty('--h', (10 + Math.random() * 40) + 'px');
+    bar.style.setProperty('--dur', (0.3 + Math.random() * 0.5) + 's');
+    sw.appendChild(bar);
+  }
+}
+initSoundWave();
+
+// Custom cursor
+document.addEventListener('mousemove', e => {
+  $('cursor').style.left = (e.clientX - 10) + 'px';
+  $('cursor').style.top = (e.clientY - 10) + 'px';
+  $('cursorDot').style.left = (e.clientX - 3) + 'px';
+  $('cursorDot').style.top = (e.clientY - 3) + 'px';
+});
+
+// Particle background
+const canvas = $('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function createParticles(count = 80) {
+  particles = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      size: Math.random() * 2 + 0.5,
+      color: ['#3b5ccc', '#14b8a6', '#ec4899'][Math.floor(Math.random() * 3)]
+    });
+  }
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = 0.4;
+    ctx.fill();
+  });
+  // Draw lines between close particles
+  ctx.globalAlpha = 0.05;
+  ctx.strokeStyle = '#3b5ccc';
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      if (dx * dx + dy * dy < 15000) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+createParticles();
+drawParticles();
+
+// ==================== TIMELINE ====================
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function typeLine(container, text, speed = 30) {
+  const span = document.createElement('span');
+  container.appendChild(span);
+  for (let i = 0; i < text.length; i++) {
+    span.textContent += text[i];
+    await sleep(speed);
+  }
+  span.style.opacity = 1;
+  return span;
+}
+
+async function runShow() {
+  $('skipBtn').classList.add('visible');
+  $('soundWave').style.display = 'flex';
+
+  // ---- BOOT SEQUENCE ----
+  setProgress(0);
+  showScene('scene-boot');
+  const bootLines = [
+    '> initializing career_engine v4.2.0...',
+    '> loading recruiter_network... [OK]',
+    '> scanning 10,247 active roles... [OK]',
+    '> connecting 2,000+ expert recruiters... [OK]',
+    '> disabling_ghosting_protocol... [ENABLED]',
+    '> calibrating advocacy_engine... [OK]',
+    '> status: READY',
+    '',
+    '> LAUNCHING applicant.network_'
+  ];
+  matrixRain(4000);
+  for (const line of bootLines) {
+    await typeLine($('bootText'), line + '\n', 20);
+    await sleep(200);
+  }
+  await sleep(800);
+  flash();
+
+  // ---- PROBLEM ----
+  setProgress(10);
+  showScene('scene-problem');
+  await sleep(300);
+  $('pw1').classList.add('visible');
+  await sleep(200);
+  $('pw2').classList.add('visible');
+  await sleep(500);
+  $('pw1').classList.add('shake');
+  $('pw2').classList.add('shake');
+  await sleep(600);
+  // Add glitch
+  $('pw1').classList.add('glitch-text');
+  $('pw2').classList.add('glitch-text');
+  await sleep(1500);
+
+  // ---- PAIN POINTS ----
+  setProgress(20);
+  flash();
+  showScene('scene-pain');
+  const pains = [
+    { text: '&#x274C; Applications vanish into a black hole', delay: 800 },
+    { text: '&#x274C; Recruiters ghost after phone screens', delay: 800 },
+    { text: '&#x274C; Zero visibility into your status', delay: 800 },
+    { text: '&#x274C; You feel like a number, not a person', delay: 800 },
+  ];
+  for (const pain of pains) {
+    const div = document.createElement('div');
+    div.innerHTML = pain.text;
+    div.style.opacity = '0';
+    div.style.transform = 'translateX(-50px)';
+    div.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+    div.style.color = '#ef4444';
+    $('painPoints').appendChild(div);
+    await sleep(100);
+    div.style.opacity = '1';
+    div.style.transform = 'translateX(0)';
+    await sleep(pain.delay);
+  }
+  await sleep(1000);
+
+  // ---- COUNTDOWN ----
+  setProgress(30);
+  flash();
+  showScene('scene-countdown');
+  for (let i = 3; i >= 1; i--) {
+    $('countdownNum').textContent = i;
+    $('countdownNum').style.animation = 'none';
+    void $('countdownNum').offsetWidth;
+    $('countdownNum').style.animation = 'pulse 0.5s ease-in-out';
+    explosion(window.innerWidth/2, window.innerHeight/2, 15);
+    await sleep(800);
+  }
+  $('countdownNum').textContent = '';
+  flash();
+
+  // ---- LOGO REVEAL ----
+  setProgress(40);
+  showScene('scene-logo');
+  await sleep(300);
+  $('logoText').classList.add('visible');
+  explosion(window.innerWidth/2, window.innerHeight/2, 50);
+  for (let i = 0; i < 20; i++) {
+    spawnEmoji(['&#x1F680;','&#x2728;','&#x1F4AB;','&#x1F525;','&#x26A1;'][Math.floor(Math.random()*5)],
+      Math.random() * window.innerWidth, Math.random() * window.innerHeight);
+  }
+  await sleep(500);
+  $('logoTagline').classList.add('visible');
+  await sleep(2000);
+
+  // ---- GHOST KILL ----
+  setProgress(50);
+  flash();
+  showScene('scene-ghost');
+  const ghosts = ['ghost1','ghost2','ghost3','ghost4'];
+  const crosshair = $('crosshair');
+  crosshair.style.opacity = '1';
+  for (const gid of ghosts) {
+    const ghost = $(gid);
+    const rect = ghost.getBoundingClientRect();
+    crosshair.style.left = (rect.left + rect.width/2 - 50) + 'px';
+    crosshair.style.top = (rect.top + rect.height/2 - 50) + 'px';
+    await sleep(400);
+    ghost.classList.add('dead');
+    explosion(rect.left + rect.width/2, rect.top + rect.height/2, 20);
+    flash();
+    await sleep(300);
+  }
+  crosshair.style.opacity = '0';
+  await sleep(800);
+
+  // ---- STATS EXPLOSION ----
+  setProgress(60);
+  flash();
+  showScene('scene-stats');
+  await sleep(200);
+  $('stat1').classList.add('visible');
+  animateNumber($('statNum1'), '10000', '+');
+  explosion(window.innerWidth*0.2, window.innerHeight*0.25, 15);
+  await sleep(400);
+  $('stat2').classList.add('visible');
+  animateNumber($('statNum2'), '500', '+');
+  explosion(window.innerWidth*0.75, window.innerHeight*0.2, 15);
+  await sleep(400);
+  $('stat3').classList.add('visible');
+  animateNumber($('statNum3'), '2000', '+');
+  explosion(window.innerWidth*0.3, window.innerHeight*0.7, 15);
+  await sleep(400);
+  $('stat4').classList.add('visible');
+  animateNumber($('statNum4'), '95', '%');
+  explosion(window.innerWidth*0.8, window.innerHeight*0.75, 15);
+  await sleep(2000);
+
+  // ---- FEATURES ----
+  setProgress(70);
+  flash();
+  showScene('scene-features');
+  const feats = ['feat1','feat2','feat3','feat4'];
+  for (const fid of feats) {
+    $(fid).classList.add('visible');
+    await sleep(500);
+  }
+  await sleep(2500);
+
+  // ---- NOTIFICATIONS ----
+  setProgress(80);
+  flash();
+  showScene('scene-notifs');
+  const notifs = ['notif1','notif2','notif3','notif4'];
+  for (const nid of notifs) {
+    $(nid).classList.add('visible');
+    await sleep(700);
+  }
+  // Emoji explosion on hire
+  for (let i = 0; i < 30; i++) {
+    spawnEmoji(['&#x1F389;','&#x1F38A;','&#x1F973;','&#x2728;','&#x1F4B0;'][Math.floor(Math.random()*5)],
+      Math.random() * window.innerWidth, window.innerHeight * 0.5 + Math.random() * 200);
+  }
+  await sleep(2000);
+
+  // ---- FLIP ----
+  setProgress(90);
+  flash();
+  showScene('scene-flip');
+  await sleep(1500);
+  $('flipCard').classList.add('flipped');
+  await sleep(500);
+  explosion(window.innerWidth/2, window.innerHeight/2, 40);
+  await sleep(2000);
+
+  // ---- CTA FINALE ----
+  setProgress(100);
+  flash();
+  flash();
+  showScene('scene-cta');
+  matrixRain(5000);
+  // Continuous emoji rain
+  const emojiInterval = setInterval(() => {
+    spawnEmoji(['&#x1F680;','&#x2728;','&#x1F525;','&#x26A1;','&#x1F4AB;','&#x1F389;'][Math.floor(Math.random()*6)],
+      Math.random() * window.innerWidth, window.innerHeight);
+  }, 200);
+
+  // Continuous mini explosions
+  const explosionInterval = setInterval(() => {
+    explosion(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 5);
+  }, 1500);
+
+  $('skipBtn').classList.remove('visible');
+
+  // Clean up after a while
+  setTimeout(() => {
+    clearInterval(emojiInterval);
+    clearInterval(explosionInterval);
+  }, 10000);
+}
+
+// ==================== START ====================
+$('playOverlay').addEventListener('click', () => {
+  $('playOverlay').classList.add('hidden');
+  runShow();
+});
+
+$('skipBtn').addEventListener('click', () => {
+  // Jump to CTA
+  hideAllScenes();
+  setProgress(100);
+  showScene('scene-cta');
+  $('skipBtn').classList.remove('visible');
+});
+</script>
+</body>
+</html>

@@ -96,6 +96,7 @@ export class ConnectionService {
         // LinkedIn uses defaults — no extra params needed
 
         const authUrl = `${provider.oauth_auth_url}?${params.toString()}`;
+        this.logger.info({ authUrl, redirectUri, clientId: getOAuthClientId(providerSlug) }, 'OAuth initiation — authorization URL built');
 
         return {
             authorization_url: authUrl,

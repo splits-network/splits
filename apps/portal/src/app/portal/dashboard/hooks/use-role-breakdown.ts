@@ -16,6 +16,10 @@ export interface RoleBreakdown {
     days_open: number;
 }
 
+/**
+ * Fetches pre-computed role breakdown from analytics service.
+ * Server-side aggregation — no client-side cross-join or limit issues.
+ */
 export function useRoleBreakdown() {
     const { getToken } = useAuth();
     const [roles, setRoles] = useState<RoleBreakdown[]>([]);
@@ -29,41 +33,12 @@ export function useRoleBreakdown() {
             if (!token) return;
 
             const api = createAuthenticatedClient(token);
-
-            // Fetch active roles - backend filters to company via access context
-            const rolesResponse: any = await api.get('/jobs', {
-                params: {
-                    status: 'active',
-                    limit: 20,
-                    sort_by: 'created_at',
-                    sort_order: 'desc',
-                },
+            const response: any = await api.get('/views/role-breakdown', {
+                params: { limit: 20 },
             });
 
-            const rolesData = rolesResponse?.data || [];
-
-            // Map roles with basic info (stage counts come from stats, not client-side pagination)
-            const breakdown: RoleBreakdown[] = rolesData.map((job: any) => {
-                const createdDate = new Date(job.created_at);
-                const now = new Date();
-                const daysOpen = Math.floor(
-                    (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
-                );
-
-                return {
-                    id: job.id,
-                    title: job.title,
-                    location: job.location || 'Remote',
-                    status: job.status,
-                    applications_count: job.applications_count || 0,
-                    interview_count: job.interview_count || 0,
-                    offer_count: job.offer_count || 0,
-                    hire_count: job.hire_count || 0,
-                    days_open: daysOpen,
-                };
-            });
-
-            setRoles(breakdown);
+            const rows = response?.data || [];
+            setRoles(rows);
         } catch (err: any) {
             console.error('[RoleBreakdown] Failed to load:', err);
             setError(err.message || 'Failed to load roles');

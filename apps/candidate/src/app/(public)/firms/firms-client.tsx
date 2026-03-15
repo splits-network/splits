@@ -42,7 +42,7 @@ function FirmsClientInner({
     } = useStandardList<PublicFirm, PublicFirmFilters>({
         endpoint: "/public/firms",
         requireAuth: false,
-        defaultLimit: 24,
+        defaultLimit: 25,
         defaultSortBy: "name",
         defaultSortOrder: "asc",
         syncToUrl: true,

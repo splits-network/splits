@@ -44,7 +44,7 @@ export function useApplicationActions(
         try {
             const client = await getClient();
             await client.post(`/applications/${id}/trigger-ai-review`, {});
-            toast.success("Application submitted for AI review");
+            toast.success("Application submitted for AI review.");
             options?.onSuccess?.();
         } catch (err: any) {
             const msg = err?.message || "Failed to submit for AI review";
@@ -80,7 +80,7 @@ export function useApplicationActions(
         try {
             const client = await getClient();
             await client.post(`/applications/${id}/return-to-draft`, {});
-            toast.success("Application returned to draft");
+            toast.success("Application returned to draft.");
             options?.onSuccess?.();
         } catch (err: any) {
             const msg = err?.message || "Failed to return to draft";
@@ -106,7 +106,7 @@ export function useApplicationActions(
                 visibility: "shared",
                 message_text: "Candidate moved application back to draft for edits",
             });
-            toast.success("Application moved to draft");
+            toast.success("Application moved to draft.");
             options?.onSuccess?.();
         } catch (err: any) {
             const msg = err?.message || "Failed to move to draft";
@@ -132,7 +132,7 @@ export function useApplicationActions(
                 visibility: "shared",
                 message_text: "Candidate withdrew application",
             });
-            toast.success("Application withdrawn");
+            toast.success("Application withdrawn.");
             options?.onSuccess?.();
         } catch (err: any) {
             const msg = err?.message || "Failed to withdraw application";
@@ -186,7 +186,7 @@ export function useApplicationActions(
                 }
             }
 
-            toast.success("Proposal declined");
+            toast.success("Proposal declined.");
             options?.onSuccess?.();
         } catch (err: any) {
             const msg = err?.message || "Failed to decline proposal";

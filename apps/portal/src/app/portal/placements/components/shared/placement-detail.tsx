@@ -29,8 +29,7 @@ export function DetailLoader({
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Placement }>(
-                    `/placements/${id}`,
-                    { params: { include: "candidate,job,company,splits" } },
+                    `/placements/${id}/view/detail`,
                 );
                 if (!signal?.cancelled) setPlacement(res.data);
             } catch (err) {
@@ -61,7 +60,7 @@ export function DetailLoader({
 
     if (loading) {
         return (
-            <div className="h-full flex items-center justify-center p-12">
+            <div className="h-full w-full flex items-center justify-center p-12">
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
                     <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">

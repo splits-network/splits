@@ -18,6 +18,7 @@ export function SettingsTab({
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
 
+    const [isDefault, setIsDefault] = useState(code.is_default);
     const [expiryDate, setExpiryDate] = useState(
         code.expiry_date ? code.expiry_date.slice(0, 16) : "",
     );
@@ -36,6 +37,7 @@ export function SettingsTab({
 
             const client = createAuthenticatedClient(token);
             await client.patch(`/recruiter-codes/${code.id}`, {
+                is_default: isDefault,
                 expiry_date: expiryDate
                     ? new Date(expiryDate).toISOString()
                     : null,
@@ -52,13 +54,19 @@ export function SettingsTab({
             setSaving(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [code.id, expiryDate, maxUses, usesRemaining, onRefresh]);
+    }, [code.id, isDefault, expiryDate, maxUses, usesRemaining, onRefresh]);
 
     if (!editing) {
         return (
             <div className="p-6 space-y-6">
                 <div className="border-l-4 border-l-primary bg-base-200/50 border border-base-300">
                     <div className="p-5 space-y-4">
+                        <SettingRow
+                            label="Default Code"
+                            icon="fa-duotone fa-regular fa-star"
+                            value={code.is_default ? "Yes" : "No"}
+                        />
+                        <div className="border-t border-base-300" />
                         <SettingRow
                             label="Expiry Date"
                             icon="fa-duotone fa-regular fa-calendar-xmark"
@@ -105,6 +113,20 @@ export function SettingsTab({
 
     return (
         <div className="p-6 space-y-5">
+            <BaselFormField label="Default Code">
+                <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        className="toggle toggle-primary"
+                        checked={isDefault}
+                        onChange={(e) => setIsDefault(e.target.checked)}
+                    />
+                    <span className="text-sm text-base-content/70">
+                        Auto-attach this code when sharing jobs
+                    </span>
+                </label>
+            </BaselFormField>
+
             <BaselFormField label="Expiry Date">
                 <input
                     type="datetime-local"

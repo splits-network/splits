@@ -59,7 +59,7 @@ export function GridCard({
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col h-full bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-lg",
+                "group cursor-pointer flex flex-col h-full bg-base-100 border border-base-300 border-l-4 transition-shadow hover:shadow-lg",
                 isSelected
                     ? "border-l-primary border-primary"
                     : "border-l-primary hover:border-primary/40",
@@ -270,13 +270,17 @@ export function GridCard({
                 className="mt-auto flex items-center justify-between gap-3 px-6 py-4 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
-                <Link
-                    href={`/firms/${firm.slug}`}
-                    className="btn btn-sm btn-link gap-1"
-                >
-                    View Profile
-                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
-                </Link>
+                {firm.slug ? (
+                    <Link
+                        href={`/firms/${firm.slug}`}
+                        className="btn btn-sm btn-link gap-1"
+                    >
+                        View Profile
+                        <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
+                    </Link>
+                ) : (
+                    <span className="text-sm text-base-content/40">No slug provided</span>
+                )}
                 <FirmActionsToolbar
                     firm={firm}
                     variant="icon-only"

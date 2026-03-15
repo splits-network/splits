@@ -24,7 +24,7 @@ interface ContentListResponse {
 export async function getContentPage(slug: string): Promise<ContentPage | null> {
     try {
         const res = await fetch(
-            `${API_BASE}/api/v2/pages/by-slug/${encodeURIComponent(slug)}?app=${APP_NAME}`,
+            `${API_BASE}/api/v3/pages/by-slug/${encodeURIComponent(slug)}?app=${APP_NAME}`,
             { next: { revalidate: 300 } }
         );
         if (!res.ok) return null;
@@ -47,7 +47,7 @@ export async function getContentPages(
         });
         if (category) params.set('category', category);
 
-        const res = await fetch(`${API_BASE}/api/v2/pages?${params}`, {
+        const res = await fetch(`${API_BASE}/api/v3/pages?${params}`, {
             next: { revalidate: 300 },
         });
         if (!res.ok) return [];
@@ -61,7 +61,7 @@ export async function getContentPages(
 export async function getHeaderNav(): Promise<HeaderNavConfig | null> {
     try {
         const res = await fetch(
-            `${API_BASE}/api/v2/navigation?app=${APP_NAME}&location=header`,
+            `${API_BASE}/api/v3/navigation?app=${APP_NAME}&location=header`,
             { next: { revalidate: 300 } }
         );
         if (!res.ok) return null;
@@ -75,7 +75,7 @@ export async function getHeaderNav(): Promise<HeaderNavConfig | null> {
 export async function getFooterNav(): Promise<FooterNavConfig | null> {
     try {
         const res = await fetch(
-            `${API_BASE}/api/v2/navigation?app=${APP_NAME}&location=footer`,
+            `${API_BASE}/api/v3/navigation?app=${APP_NAME}&location=footer`,
             { next: { revalidate: 300 } }
         );
         if (!res.ok) return null;

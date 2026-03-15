@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
     try {
         const apiGatewayUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
 
-        // Forward to API Gateway V2 endpoint
-        const response = await fetch(`${apiGatewayUrl}/api/v2/status-contact`, {
+        // Forward to API Gateway V3 endpoint
+        const response = await fetch(`${apiGatewayUrl}/api/v3/status-contact`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

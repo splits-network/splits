@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -11,10 +11,13 @@ import RoleWizardModal from "../modals/role-wizard-modal";
 import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 import PipelineModal from "../modals/pipeline-modal";
 import type { Job } from "../../types";
+import { useBillingReadiness } from "../../hooks/billing-readiness-context";
+import { useStatusActions } from "../../hooks/use-status-actions";
+import { StatusDropdown } from "./status-dropdown";
+import { StatusModals } from "./status-modals";
 import {
     Button,
     SpeedMenu,
-    BaselConfirmModal,
     type SpeedDialAction,
 } from "@splits-network/basel-ui";
 
@@ -32,10 +35,9 @@ export interface RoleActionsToolbarProps {
         edit?: boolean;
         statusActions?: boolean;
         share?: boolean;
+        save?: boolean;
     };
     onRefresh?: () => void;
-    /** Synchronously patches the item in the React Query cache so every view
-     *  using the same query key re-renders immediately on mutation success. */
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
     onViewDetails?: (jobId: string) => void;
     onViewPipeline?: (jobId: string) => void;
@@ -58,18 +60,19 @@ export default function RoleActionsToolbar({
 }: RoleActionsToolbarProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isRecruiter, hasPermissionForCompany } =
+    const { profile, isAdmin, isRecruiter, isCompanyUser, hasPermissionForCompany } =
         useUserProfile();
+    const { isBillingReady } = useBillingReadiness();
+    const billingReady = isBillingReady(job);
     const refresh = onRefresh ?? (() => {});
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [showPipelineModal, setShowPipelineModal] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
-    const [updatingStatus, setUpdatingStatus] = useState(false);
-    const [statusAction, setStatusAction] = useState<string | null>(null);
-    const [pendingStatus, setPendingStatus] = useState<"draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed" | null>(null);
-    const [activatesAtInput, setActivatesAtInput] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
+
+    const status = useStatusActions({ job, onRefresh, onUpdateItem });
 
     /* ── Permissions ── */
 
@@ -88,53 +91,11 @@ export default function RoleActionsToolbar({
 
     const canSubmitCandidate = useMemo(() => {
         if (isAdmin) return true;
+        if (isCompanyUser) return true;
         if (!isRecruiter) return false;
-        if (!job.company_id) return true; // Firm job — recruiter has full access
+        if (!job.company_id) return true;
         return hasPermissionForCompany(job.company_id, "can_submit_candidates");
-    }, [isRecruiter, isAdmin, job.company_id, hasPermissionForCompany]);
-
-    /* ── Status Change ── */
-
-    const handleStatusChange = (
-        newStatus: "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed",
-    ) => {
-        if (newStatus === "early") setActivatesAtInput("");
-        setPendingStatus(newStatus);
-    };
-
-    const confirmStatusChange = async () => {
-        if (!pendingStatus) return;
-        const newStatus = pendingStatus;
-
-        // Validate activates_at for early status
-        if (newStatus === "early" && !activatesAtInput) {
-            toast.error("An activation date is required for Early Access status");
-            return;
-        }
-
-        setPendingStatus(null);
-        setUpdatingStatus(true);
-        setStatusAction(newStatus);
-        try {
-            const token = await getToken();
-            if (!token) throw new Error("No auth token");
-            const client = createAuthenticatedClient(token);
-            const payload: Record<string, any> = { status: newStatus };
-            if (newStatus === "early" && activatesAtInput) {
-                payload.activates_at = new Date(activatesAtInput).toISOString();
-            }
-            await client.patch(`/jobs/${job.id}`, payload);
-            toast.success(`Role status updated to ${newStatus}!`);
-            onUpdateItem?.(job.id, { status: newStatus });
-            refresh();
-        } catch (error: any) {
-            console.error("Failed to update status:", error);
-            toast.error(`Failed to update status: ${error.message}`);
-        } finally {
-            setUpdatingStatus(false);
-            setStatusAction(null);
-        }
-    };
+    }, [isRecruiter, isCompanyUser, isAdmin, job.company_id, hasPermissionForCompany]);
 
     /* ── Share ── */
 
@@ -144,7 +105,25 @@ export default function RoleActionsToolbar({
         const candidateAppUrl =
             process.env.NEXT_PUBLIC_CANDIDATE_APP_URL ||
             "https://staging.applicant.network";
-        const shareUrl = `${candidateAppUrl}/jobs/${job.id}`;
+
+        let recCodeParam = "";
+        if (isRecruiter) {
+            try {
+                const token = await getToken();
+                if (token) {
+                    const client = createAuthenticatedClient(token);
+                    const res = await client.get("/recruiter-codes/default");
+                    const defaultCode = res?.data?.code;
+                    if (defaultCode) {
+                        recCodeParam = `?rec_code=${defaultCode}`;
+                    }
+                }
+            } catch {
+                // Share without rec_code if fetch fails
+            }
+        }
+
+        const shareUrl = `${candidateAppUrl}/jobs/${job.id}${recCodeParam}`;
         const shareText = `Check out this job: ${job.title || "Job Opportunity"} at ${job.company?.name || "Company"}`;
         const clipboardText = `${shareText}\n${shareUrl}`;
         try {
@@ -156,19 +135,49 @@ export default function RoleActionsToolbar({
                 });
             } else {
                 await navigator.clipboard.writeText(clipboardText);
-                toast.success("Job link copied to clipboard!");
+                toast.info("Link copied to clipboard.");
             }
         } catch (error: any) {
             if (error.name !== "AbortError") {
                 try {
                     await navigator.clipboard.writeText(clipboardText);
-                    toast.success("Job link copied to clipboard!");
+                    toast.info("Link copied to clipboard.");
                 } catch {
-                    toast.error("Failed to share job link");
+                    toast.error("Link couldn't be copied. Try again.");
                 }
             }
         } finally {
             setIsSharing(false);
+        }
+    };
+
+    /* ── Save/Bookmark ── */
+
+    const handleToggleSave = async () => {
+        setIsSaving(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token");
+            const client = createAuthenticatedClient(token);
+
+            if (job.is_saved && job.saved_record_id) {
+                await client.delete(`/recruiter-saved-jobs/${job.saved_record_id}`);
+                onUpdateItem?.(job.id, { is_saved: false, saved_record_id: null });
+                toast.info("Role removed from saved.");
+            } else {
+                const res = await client.post("/recruiter-saved-jobs", { job_id: job.id });
+                onUpdateItem?.(job.id, { is_saved: true, saved_record_id: res?.data?.id });
+                toast.success("Role saved.");
+            }
+        } catch (error: any) {
+            console.error("Failed to toggle save:", error);
+            if (error?.response?.status === 403 && error?.response?.data?.entitlement) {
+                toast.error(`You've reached your saved roles limit. Upgrade your plan for more.`);
+            } else {
+                toast.error("Failed to update saved status.");
+            }
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -197,206 +206,29 @@ export default function RoleActionsToolbar({
         edit: showActions.edit !== false && canManageRole,
         statusActions: showActions.statusActions !== false && canManageRole,
         share: showActions.share !== false,
+        save: showActions.save !== false && isRecruiter,
     };
 
     const getSizeClass = () => `btn-${size}`;
     const getLayoutClass = () =>
         layout === "horizontal" ? "gap-1" : "flex-col gap-2";
 
-    /* ── Quick Status Button (icon-only) ── */
-
-    const isLiveStatus = ["early", "active", "priority"].includes(job.status);
-
-    const renderQuickStatusButton = () => {
-        if (variant !== "icon-only" || !actions.statusActions) return null;
-        if (isLiveStatus) {
-            return (
-                <Button
-                    icon="fa-duotone fa-regular fa-pause"
-                    variant="btn-secondary"
-                    size={size}
-                    onClick={() => handleStatusChange("paused")}
-                    disabled={updatingStatus}
-                    loading={updatingStatus && statusAction === "paused"}
-                    title="Pause Role"
-                />
-            );
-        }
-        if (job.status === "paused") {
-            return (
-                <Button
-                    icon="fa-duotone fa-regular fa-play"
-                    variant="btn-success"
-                    size={size}
-                    onClick={() => handleStatusChange("active")}
-                    disabled={updatingStatus}
-                    loading={updatingStatus && statusAction === "active"}
-                    title="Activate Role"
-                />
-            );
-        }
-        if (job.status === "draft") {
-            return (
-                <Button
-                    icon="fa-duotone fa-regular fa-play"
-                    variant="btn-success"
-                    size={size}
-                    onClick={() => handleStatusChange("active")}
-                    disabled={updatingStatus}
-                    loading={updatingStatus && statusAction === "active"}
-                    title="Publish Role"
-                />
-            );
-        }
-        return null;
-    };
-
-    /* ── Status Dropdown ── */
-
-    const statusDropdownRef = useRef<HTMLDetailsElement>(null);
-
-    useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (
-                statusDropdownRef.current &&
-                !statusDropdownRef.current.contains(e.target as Node)
-            ) {
-                statusDropdownRef.current.removeAttribute("open");
-            }
-        };
-        document.addEventListener("click", handleClick);
-        return () => document.removeEventListener("click", handleClick);
-    }, []);
-
-    type StatusItem = {
-        key: string;
-        status: "draft" | "pending" | "early" | "active" | "priority" | "paused" | "filled" | "closed";
-        label: string;
-        icon: string;
-        btnClass: string;
-    };
-
-    const statusItems = useMemo(() => {
-        const items: StatusItem[] = [];
-
-        if (job.status === "draft") {
-            items.push({ key: "early", status: "early", label: "Publish (Early Access)", icon: "fa-duotone fa-regular fa-lock-open", btnClass: "text-accent" });
-            items.push({ key: "active", status: "active", label: "Publish Live", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
-            items.push({ key: "pending", status: "pending", label: "Submit for Approval", icon: "fa-duotone fa-regular fa-paper-plane", btnClass: "text-warning" });
-        }
-        if (job.status === "pending") {
-            items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
-            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
-        }
-        if (job.status === "early") {
-            items.push({ key: "active", status: "active", label: "Go Live", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
-            items.push({ key: "priority", status: "priority", label: "Promote", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
-            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
-        }
-        if (job.status === "active") {
-            items.push({ key: "priority", status: "priority", label: "Promote to Priority", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
-            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
-        }
-        if (job.status === "priority") {
-            items.push({ key: "active", status: "active", label: "Demote to Active", icon: "fa-duotone fa-regular fa-arrow-down", btnClass: "text-success" });
-            items.push({ key: "paused", status: "paused", label: "Pause", icon: "fa-duotone fa-regular fa-pause", btnClass: "text-warning" });
-        }
-        if (job.status === "paused") {
-            items.push({ key: "active", status: "active", label: "Activate", icon: "fa-duotone fa-regular fa-play", btnClass: "text-success" });
-            items.push({ key: "priority", status: "priority", label: "Promote", icon: "fa-duotone fa-regular fa-star", btnClass: "text-primary" });
-        }
-        if (job.status === "filled" || job.status === "closed") {
-            items.push({ key: "active", status: "active", label: "Reopen", icon: "fa-duotone fa-regular fa-rotate-left", btnClass: "text-success" });
-        }
-
-        // Terminal options — always available unless already in that state
-        if (job.status !== "filled" && !["draft", "pending"].includes(job.status)) {
-            items.push({ key: "filled", status: "filled", label: "Mark Filled", icon: "fa-duotone fa-regular fa-check", btnClass: "text-info" });
-        }
-        if (job.status !== "closed") {
-            items.push({ key: "closed", status: "closed", label: "Close", icon: "fa-duotone fa-regular fa-xmark", btnClass: "text-error" });
-        }
-
-        return items;
-    }, [job.status]);
-
-    const renderStatusDropdown = () => {
-        if (!actions.statusActions || statusItems.length === 0) return null;
-        return (
-            <details ref={statusDropdownRef} className="dropdown dropdown-end">
-                <summary
-                    className={`btn ${getSizeClass()} btn-ghost gap-2 list-none`}
-                    style={{ borderRadius: 0 }}
-                    title="Change Status"
-                >
-                    {updatingStatus ? (
-                        <span className="loading loading-spinner loading-xs" />
-                    ) : (
-                        <i className="fa-duotone fa-regular fa-ellipsis-vertical" />
-                    )}
-                    <span className="hidden md:inline">Status</span>
-                </summary>
-                <ul
-                    className="dropdown-content menu bg-base-100 border-2 border-base-300 shadow-md p-2 w-48 mt-1"
-                    style={{ borderRadius: 0 }}
-                >
-                    {statusItems.map((item) => (
-                        <li key={item.key}>
-                            <button
-                                onClick={() => {
-                                    statusDropdownRef.current?.removeAttribute(
-                                        "open",
-                                    );
-                                    handleStatusChange(item.status);
-                                }}
-                                className={`${item.btnClass} font-bold`}
-                                disabled={updatingStatus}
-                            >
-                                {updatingStatus &&
-                                statusAction === item.status ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                ) : (
-                                    <i className={item.icon} />
-                                )}
-                                {item.label}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </details>
-        );
-    };
+    const isLiveStatus = job.status === "active";
 
     /* ── Modals ── */
 
     const modals = (
         <>
-            <BaselConfirmModal
-                isOpen={!!pendingStatus}
-                onClose={() => setPendingStatus(null)}
-                onConfirm={confirmStatusChange}
-                title="Change Role Status"
-                icon="fa-triangle-exclamation"
-                confirmColor={pendingStatus === "closed" ? "btn-error" : pendingStatus === "paused" ? "btn-warning" : "btn-primary"}
-            >
-                <p>Are you sure you want to change the status to {pendingStatus}?</p>
-                {pendingStatus === "early" && (
-                    <fieldset className="fieldset mt-4">
-                        <legend className="fieldset-legend">Activation Date</legend>
-                        <input
-                            type="datetime-local"
-                            className="input input-bordered w-full"
-                            value={activatesAtInput}
-                            onChange={(e) => setActivatesAtInput(e.target.value)}
-                            min={new Date().toISOString().slice(0, 16)}
-                            required
-                        />
-                        <p className="label text-sm text-base-content/60">
-                            The role will automatically go live on this date.
-                        </p>
-                    </fieldset>
-                )}
-            </BaselConfirmModal>
+            <StatusModals
+                pendingStatus={status.pendingStatus}
+                pendingEarlyAccess={status.pendingEarlyAccess}
+                activatesAtInput={status.activatesAtInput}
+                onActivatesAtChange={status.setActivatesAtInput}
+                onConfirmStatus={status.confirmStatusChange}
+                onCancelStatus={status.cancelStatusChange}
+                onConfirmEarlyAccess={status.confirmEarlyAccess}
+                onCancelEarlyAccess={status.cancelEarlyAccess}
+            />
             <ModalPortal>
                 {showEditModal && (
                     <RoleWizardModal
@@ -458,6 +290,17 @@ export default function RoleActionsToolbar({
                 onClick: () => setShowEditModal(true),
             });
         }
+        if (actions.save) {
+            speedDialActions.push({
+                key: "save",
+                icon: job.is_saved ? "fa-solid fa-bookmark" : "fa-regular fa-bookmark",
+                label: job.is_saved ? "Unsave Role" : "Save Role",
+                variant: job.is_saved ? "btn-warning" : "btn-ghost",
+                loading: isSaving,
+                disabled: isSaving,
+                onClick: handleToggleSave,
+            });
+        }
         if (actions.share) {
             speedDialActions.push({
                 key: "share",
@@ -475,29 +318,29 @@ export default function RoleActionsToolbar({
                     icon: "fa-duotone fa-regular fa-pause",
                     label: "Pause Role",
                     variant: "btn-secondary",
-                    loading: updatingStatus && statusAction === "paused",
-                    disabled: updatingStatus,
-                    onClick: () => handleStatusChange("paused"),
+                    loading: status.updatingStatus && status.statusAction === "paused",
+                    disabled: status.updatingStatus,
+                    onClick: () => status.handleStatusChange("paused"),
                 });
-            } else if (job.status === "paused") {
+            } else if (job.status === "paused" && billingReady) {
                 speedDialActions.push({
                     key: "status",
                     icon: "fa-duotone fa-regular fa-play",
                     label: "Activate Role",
                     variant: "btn-success",
-                    loading: updatingStatus && statusAction === "active",
-                    disabled: updatingStatus,
-                    onClick: () => handleStatusChange("active"),
+                    loading: status.updatingStatus && status.statusAction === "active",
+                    disabled: status.updatingStatus,
+                    onClick: () => status.handleStatusChange("active"),
                 });
-            } else if (job.status === "draft") {
+            } else if (job.status === "draft" && billingReady) {
                 speedDialActions.push({
                     key: "status",
                     icon: "fa-duotone fa-regular fa-play",
                     label: "Publish Role",
                     variant: "btn-success",
-                    loading: updatingStatus && statusAction === "active",
-                    disabled: updatingStatus,
-                    onClick: () => handleStatusChange("active"),
+                    loading: status.updatingStatus && status.statusAction === "active",
+                    disabled: status.updatingStatus,
+                    onClick: () => status.handleStatusChange("active"),
                 });
             }
         }
@@ -558,7 +401,7 @@ export default function RoleActionsToolbar({
                 {actions.edit && (
                     <button
                         onClick={() => setShowEditModal(true)}
-                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        className={`btn ${getSizeClass()} btn-secondary gap-2`}
                         style={{ borderRadius: 0 }}
                         title="Edit Role"
                     >
@@ -566,10 +409,26 @@ export default function RoleActionsToolbar({
                         <span className="hidden md:inline">Edit</span>
                     </button>
                 )}
+                {actions.save && (
+                    <button
+                        onClick={handleToggleSave}
+                        className={`btn ${getSizeClass()} ${job.is_saved ? "btn-warning" : "btn-primary"} gap-2`}
+                        style={{ borderRadius: 0 }}
+                        title={job.is_saved ? "Unsave Role" : "Save Role"}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <i className={job.is_saved ? "fa-solid fa-bookmark" : "fa-regular fa-bookmark"} />
+                        )}
+                        <span className="hidden md:inline">{job.is_saved ? "Saved" : "Save"}</span>
+                    </button>
+                )}
                 {actions.share && (
                     <button
                         onClick={handleShare}
-                        className={`btn ${getSizeClass()} btn-ghost gap-2`}
+                        className={`btn ${getSizeClass()} btn-primary gap-2`}
                         style={{ borderRadius: 0 }}
                         title="Share Job"
                         disabled={isSharing}
@@ -582,18 +441,29 @@ export default function RoleActionsToolbar({
                         <span className="hidden md:inline">Share</span>
                     </button>
                 )}
-                {renderStatusDropdown()}
+                {actions.statusActions && (
+                    <StatusDropdown
+                        job={job}
+                        billingReady={billingReady}
+                        size={size}
+                        updatingStatus={status.updatingStatus}
+                        statusAction={status.statusAction}
+                        onStatusChange={status.handleStatusChange}
+                        onToggleEarlyAccess={status.handleToggleEarlyAccess}
+                        onTogglePriority={status.handleTogglePriority}
+                    />
+                )}
                 {actions.viewPipeline &&
                     (actions.submitCandidate ||
                         actions.edit ||
                         actions.share ||
                         actions.statusActions) && (
-                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                     )}
                 {actions.viewPipeline && (
                     <button
                         onClick={handleViewPipeline}
-                        className={`btn ${getSizeClass()} btn-outline gap-2`}
+                        className={`btn ${getSizeClass()} btn-accent gap-2`}
                         style={{ borderRadius: 0 }}
                         title="View Pipeline"
                     >
@@ -603,11 +473,11 @@ export default function RoleActionsToolbar({
                 )}
                 {actions.viewDetails && (
                     <>
-                        <div className="hidden sm:block w-px self-stretch bg-base-300 mx-1" />
+                        <div className="hidden sm:block w-px self-stretch bg-neutral-content/20 mx-1" />
                         {onViewDetails ? (
                             <button
                                 onClick={handleViewDetails}
-                                className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                className={`btn ${getSizeClass()} btn-primary gap-2`}
                                 style={{ borderRadius: 0 }}
                                 title="View Details"
                             >
@@ -619,7 +489,7 @@ export default function RoleActionsToolbar({
                         ) : (
                             <Link
                                 href={`/portal/roles?roleId=${job.id}`}
-                                className={`btn ${getSizeClass()} btn-outline gap-2`}
+                                className={`btn ${getSizeClass()} btn-primary gap-2`}
                                 style={{ borderRadius: 0 }}
                                 title="View Details"
                             >

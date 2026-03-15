@@ -5,7 +5,7 @@
 
 /* ─── Provider Catalog ───────────────────────────────────────────────────── */
 
-export type IntegrationCategory = 'calendar' | 'email' | 'ats' | 'linkedin';
+export type IntegrationCategory = 'calendar' | 'email' | 'ats' | 'linkedin' | 'combo';
 
 export interface IntegrationProvider {
     id: string;
@@ -161,8 +161,18 @@ export interface SendEmailRequest {
     thread_id?: string;
 }
 
+export interface EmailListItem {
+    id: string;
+    threadId: string;
+    subject?: string;
+    snippet?: string;
+    from?: { name?: string; email: string };
+    date?: string;
+    isRead?: boolean;
+}
+
 export interface EmailListResponse {
-    messages: Array<{ id: string; threadId: string }>;
+    messages: EmailListItem[];
     next_page_token?: string;
 }
 

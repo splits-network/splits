@@ -95,7 +95,7 @@ export function CreatePageModal({
                 status: "draft",
             });
 
-            toast.success("Page created");
+            toast.success("Page created.");
             resetForm();
             onCreated(result.data.id);
         } catch (err: any) {

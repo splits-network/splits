@@ -114,11 +114,11 @@ export default function ContentPagesAdminPage() {
             if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
             await apiClient.delete(`/pages/${page.id}`);
-            toast.success("Page deleted");
+            toast.success("Page deleted.");
             refresh();
         } catch (err) {
             console.error("Failed to delete page:", err);
-            toast.error("Failed to delete page");
+            toast.error("Page couldn't be deleted. Try again.");
         } finally {
             setDeletingId(null);
         }

@@ -15,6 +15,7 @@ import type { Candidate, CandidateFilters, CandidateScope } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { isNew } from "./components/shared/helpers";
 import { useGamification } from "@splits-network/shared-gamification";
+import { PresenceProvider, useRegisterPresence } from "@/contexts";
 import { CandidatesAnimator } from "./candidates-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -49,7 +50,7 @@ export default function CandidatesPage() {
             const savedScope = localStorage.getItem(
                 SCOPE_KEY,
             ) as CandidateScope | null;
-            if (savedScope === "mine" || savedScope === "all") {
+            if (savedScope === "mine" || savedScope === "saved" || savedScope === "all") {
                 setScopeState(savedScope);
             }
             setScopeLoaded(true);
@@ -111,14 +112,18 @@ export default function CandidatesPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
+        updateItem,
     } = useStandardList<Candidate, CandidateFilters>({
-        endpoint: "/candidates",
+        endpoint: "/candidates/views/enriched",
         defaultFilters: { scope: scopeLoaded ? scope : "mine" },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
-        include: "skills",
     });
 
     // Sync scope changes into the filter
@@ -146,6 +151,14 @@ export default function CandidatesPage() {
         [setScope],
     );
 
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            setSortBy(field);
+            setSortOrder(order);
+        },
+        [setSortBy, setSortOrder],
+    );
+
     // Register candidate IDs with gamification context for batch fetching
     const { registerEntities } = useGamification();
     useEffect(() => {
@@ -153,6 +166,15 @@ export default function CandidatesPage() {
             registerEntities("candidate", candidates.map(c => c.id));
         }
     }, [candidates, registerEntities]);
+
+    // Register user IDs with presence context for batch fetching
+    const registerPresence = useRegisterPresence();
+    useEffect(() => {
+        const userIds = candidates.map(c => c.user_id).filter(Boolean) as string[];
+        if (userIds.length > 0) {
+            registerPresence(userIds);
+        }
+    }, [candidates, registerPresence]);
 
     const stats = useMemo(
         () => ({
@@ -173,7 +195,7 @@ export default function CandidatesPage() {
     }
 
     return (
-        <>
+        <PresenceProvider>
             <CandidatesAnimator>
                 <HeaderSection stats={stats} />
 
@@ -191,6 +213,10 @@ export default function CandidatesPage() {
                     totalCount={pagination?.total ?? candidates.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
+                    isRecruiter={isRecruiter}
                 />
 
                 {/* Content Area */}
@@ -199,30 +225,32 @@ export default function CandidatesPage() {
                         {loading && candidates.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                <p className="text-sm uppercase tracking-[0.15em] font-bold text-base-content/40">
                                     Loading candidates...
                                 </p>
                             </div>
                         ) : candidates.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
-                                <i className="fa-duotone fa-regular fa-magnifying-glass text-5xl text-base-content/15 mb-6 block" />
+                                <i className={`fa-duotone fa-regular ${scope === "saved" ? "fa-bookmark" : "fa-magnifying-glass"} text-5xl text-base-content/15 mb-6 block`} />
                                 <h3 className="text-2xl font-black tracking-tight mb-2">
-                                    No candidates found
+                                    {scope === "saved" ? "No saved candidates yet" : "No candidates found"}
                                 </h3>
                                 <p className="text-base-content/50 mb-6">
-                                    No candidates match your current filters.
-                                    Clear them to see your full pipeline.
+                                    {scope === "saved"
+                                        ? "Browse candidates and use the bookmark icon to save them for quick access."
+                                        : "No candidates match your current filters. Clear them to see your full pipeline."}
                                 </p>
-                                <button
-                                    onClick={() => {
-                                        clearSearch();
-                                        clearFilters();
-                                    }}
-                                    className="btn btn-outline btn-sm"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    Clear Filters
-                                </button>
+                                {scope !== "saved" && (
+                                    <button
+                                        onClick={() => {
+                                            clearSearch();
+                                            clearFilters();
+                                        }}
+                                        className="btn btn-outline btn-sm rounded-none"
+                                    >
+                                        Clear Filters
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <>
@@ -232,6 +260,7 @@ export default function CandidatesPage() {
                                         onSelect={handleSelect}
                                         selectedId={selectedCandidateId}
                                         onRefresh={refresh}
+                                        onUpdateItem={updateItem}
                                     />
                                 )}
                                 {viewMode === "grid" && (
@@ -240,6 +269,7 @@ export default function CandidatesPage() {
                                         onSelect={handleSelect}
                                         selectedId={selectedCandidateId}
                                         onRefresh={refresh}
+                                        onUpdateItem={updateItem}
                                     />
                                 )}
                                 {viewMode === "split" && (
@@ -248,6 +278,7 @@ export default function CandidatesPage() {
                                         onSelect={handleSelect}
                                         selectedId={selectedCandidateId}
                                         onRefresh={refresh}
+                                        onUpdateItem={updateItem}
                                     />
                                 )}
                             </>
@@ -281,6 +312,6 @@ export default function CandidatesPage() {
                     />
                 )}
             </ModalPortal>
-        </>
+        </PresenceProvider>
     );
 }

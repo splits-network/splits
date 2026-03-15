@@ -2,12 +2,16 @@ import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
 import { collaboratorAddedEmail } from '../../templates/candidates';
+import type { EmailSource } from '../../templates/base';
+
+const { PORTAL_URL: _PORTAL_URL } = require('../../helpers/urls');
 
 export class CollaborationEmailService {
     constructor(
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -22,8 +26,12 @@ export class CollaborationEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId ?? null,
@@ -31,7 +39,7 @@ export class CollaborationEmailService {
             subject,
             template: 'custom',
             payload: options.payload ?? null,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,
@@ -40,7 +48,7 @@ export class CollaborationEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -128,6 +136,7 @@ export class CollaborationEmailService {
             actionLabel?: string;
             priority?: 'low' | 'normal' | 'high' | 'urgent';
             category?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         // Send email first (primary channel)
@@ -135,6 +144,7 @@ export class CollaborationEmailService {
             eventType: options.eventType,
             userId: options.userId,
             payload: options.payload,
+            source: options.source,
         });
 
         // Create in-app notification (secondary channel)
@@ -166,7 +176,7 @@ export class CollaborationEmailService {
         }
     ): Promise<void> {
         const subject = `Added to Placement Team: ${data.candidateName}`;
-        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements`;
+        const placementUrl = `${_PORTAL_URL}/portal/placements`;
         const actionUrl = data.roleId ? `/portal/roles?roleId=${data.roleId}` : '/portal/roles';
 
         const html = collaboratorAddedEmail({

@@ -90,7 +90,7 @@ export default function PageEditorPage({ params }: PageEditorProps) {
             setIsDirty(false);
         } catch (err) {
             console.error("Failed to load page:", err);
-            toast.error("Failed to load page");
+            toast.error("Page couldn't be loaded. Refresh to retry.");
         } finally {
             setLoading(false);
         }
@@ -193,14 +193,14 @@ export default function PageEditorPage({ params }: PageEditorProps) {
                 blocks: draftBlocks,
             });
 
-            toast.success("Draft saved");
+            toast.success("Draft saved.");
             setIsDirty(false);
             setPage((prev) =>
                 prev ? { ...prev, blocks: draftBlocks, ...pageMeta } : prev,
             );
         } catch (err) {
             console.error("Failed to save:", err);
-            toast.error("Failed to save");
+            toast.error("Couldn't save. Check the form and try again.");
         } finally {
             setSaving(false);
         }
@@ -237,12 +237,12 @@ export default function PageEditorPage({ params }: PageEditorProps) {
                 read_time: pageMeta.read_time || undefined,
             });
 
-            toast.success(isPublishing ? "Page published" : "Page unpublished");
+            toast.success(isPublishing ? "Page published." : "Page unpublished.");
             setIsDirty(false);
             await loadPage();
         } catch (err) {
             console.error("Failed to update status:", err);
-            toast.error("Failed to update status");
+            toast.error("Status couldn't be updated. Try again.");
         } finally {
             setPublishing(false);
         }

@@ -87,7 +87,7 @@ export function BaselInvoiceSection({
 
             const client = createAuthenticatedClient(token);
             const response = await client.get(
-                `/company-billing-profiles/${companyId}/invoices`,
+                `/company-billing/${companyId}/invoices`,
                 { params: { page: String(page), limit: String(limit) } },
             );
 

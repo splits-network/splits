@@ -4,7 +4,7 @@ metadata:
     name: analytics-gateway
     namespace: splits-network
 spec:
-    replicas: 2
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: analytics-gateway
@@ -13,6 +13,13 @@ spec:
             labels:
                 app: analytics-gateway
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: analytics-gateway
                   image: ${ACR_SERVER}/analytics-gateway:${IMAGE_TAG}

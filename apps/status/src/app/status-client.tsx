@@ -152,7 +152,7 @@ export default function StatusClient({
         setFormFeedback(null);
 
         try {
-            const response = await fetch("/api/v2/status-contact", {
+            const response = await fetch("/api/v3/status-contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -195,7 +195,7 @@ export default function StatusClient({
             {/* ══════════════════════════════════════════════════════════
                 HERO
                ══════════════════════════════════════════════════════════ */}
-            <section className="bs-hero py-28 bg-neutral text-neutral-content">
+            <section className="bs-hero py-28 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
                         <div className="bs-hero-badge mb-6 scroll-reveal fade-up">
@@ -219,8 +219,7 @@ export default function StatusClient({
                                 className="text-sm font-semibold opacity-70"
                                 suppressHydrationWarning
                             >
-                                Last checked{" "}
-                                {lastChecked.toLocaleTimeString()}
+                                Last checked {lastChecked.toLocaleTimeString()}
                             </span>
                         </div>
                     </div>
@@ -248,7 +247,10 @@ export default function StatusClient({
                             },
                             { value: "30s", label: "Refresh Interval" },
                         ].map((m, i) => (
-                            <div key={i} className="bs-metric-item scroll-reveal fade-up">
+                            <div
+                                key={i}
+                                className="bs-metric-item scroll-reveal fade-up"
+                            >
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {m.value}
                                 </div>
@@ -264,10 +266,7 @@ export default function StatusClient({
             {/* ══════════════════════════════════════════════════════════
                 EDITORIAL SPLIT — SERVICES (2/3) + INCIDENTS (1/3)
                ══════════════════════════════════════════════════════════ */}
-            <section
-                id="incidents"
-                className="bs-editorial py-20 bg-base-100"
-            >
+            <section id="incidents" className="bs-editorial py-20 bg-base-100">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-7xl mx-auto">
                         {/* Section kicker + heading spans full width */}
@@ -507,10 +506,7 @@ export default function StatusClient({
                                 </div>
                             )}
 
-                            <form
-                                className="space-y-5"
-                                onSubmit={handleSubmit}
-                            >
+                            <form className="space-y-5" onSubmit={handleSubmit}>
                                 <div className="grid gap-5 md:grid-cols-2">
                                     <fieldset className="fieldset">
                                         <legend className="fieldset-legend">
@@ -693,7 +689,13 @@ export default function StatusClient({
                                     <i className="fa-duotone fa-regular fa-clock-rotate-left mr-1 text-secondary" />
                                     Incident History
                                     <span className="text-sm font-normal text-base-content/50 ml-2">
-                                        ({incidents.filter((i) => i.resolved_at).length})
+                                        (
+                                        {
+                                            incidents.filter(
+                                                (i) => i.resolved_at,
+                                            ).length
+                                        }
+                                        )
                                     </span>
                                 </summary>
                                 <div className="space-y-8 mt-6">

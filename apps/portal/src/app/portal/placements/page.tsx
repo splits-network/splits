@@ -80,9 +80,12 @@ export default function PlacementsBaselPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Placement, PlacementFilters>({
-        endpoint: "/placements",
-        include: "candidate,job,company,splits",
+        endpoint: "/placements/views/enriched",
         defaultFilters: { status: undefined },
         defaultSortBy: "hired_at",
         defaultSortOrder: "desc",
@@ -99,6 +102,11 @@ export default function PlacementsBaselPage() {
     const handleViewModeChange = useCallback((mode: ViewMode) => {
         setViewMode(mode);
     }, []);
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     const stats = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -146,6 +154,9 @@ export default function PlacementsBaselPage() {
                 totalCount={pagination?.total ?? placements.length}
                 loading={loading}
                 refresh={refresh}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
             />
 
             {/* Content Area */}
@@ -174,7 +185,6 @@ export default function PlacementsBaselPage() {
                                     clearFilters();
                                 }}
                                 className="btn btn-outline btn-sm"
-                                style={{ borderRadius: 0 }}
                             >
                                 Reset Filters
                             </button>

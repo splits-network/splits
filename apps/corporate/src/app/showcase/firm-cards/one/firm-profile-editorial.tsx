@@ -11,21 +11,37 @@ function HeroHeader({ firm }: { firm: FirmProfileData }) {
 
     const stats = [
         firm.teamSizeRange
-            ? { label: "Team Size", value: `${firm.teamSizeRange.replace("-", "\u2013")}`, icon: "fa-duotone fa-regular fa-users" }
+            ? {
+                  label: "Team Size",
+                  value: `${firm.teamSizeRange.replace("-", "\u2013")}`,
+                  icon: "fa-duotone fa-regular fa-users",
+              }
             : null,
         firm.showMemberCount && firm.activeMemberCount != null
-            ? { label: "Active", value: String(firm.activeMemberCount), icon: "fa-duotone fa-regular fa-user-check" }
+            ? {
+                  label: "Active",
+                  value: String(firm.activeMemberCount),
+                  icon: "fa-duotone fa-regular fa-user-check",
+              }
             : null,
         firm.foundedYear
-            ? { label: "Founded", value: String(firm.foundedYear), icon: "fa-duotone fa-regular fa-calendar" }
+            ? {
+                  label: "Founded",
+                  value: String(firm.foundedYear),
+                  icon: "fa-duotone fa-regular fa-calendar",
+              }
             : null,
         firm.placementTypes.length > 0
-            ? { label: "Placement Types", value: String(firm.placementTypes.length), icon: "fa-duotone fa-regular fa-briefcase" }
+            ? {
+                  label: "Placement Types",
+                  value: String(firm.placementTypes.length),
+                  icon: "fa-duotone fa-regular fa-briefcase",
+              }
             : null,
     ].filter(Boolean) as { label: string; value: string; icon: string }[];
 
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                 style={{ clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)" }}
@@ -33,7 +49,7 @@ function HeroHeader({ firm }: { firm: FirmProfileData }) {
             <div className="relative px-8 pt-10 pb-0">
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-8">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                         {firm.industries.join(" \u00B7 ")}
                     </p>
                     <div className="flex items-center gap-4">
@@ -70,10 +86,10 @@ function HeroHeader({ firm }: { firm: FirmProfileData }) {
                             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1">
                                 Recruiting Firm
                             </p>
-                            <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-none text-neutral-content mb-3">
+                            <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-none text-base-content mb-3">
                                 {firm.name}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                 {firm.location && (
                                     <span className="flex items-center gap-1.5">
                                         <i className="fa-duotone fa-regular fa-location-dot text-xs" />
@@ -82,7 +98,9 @@ function HeroHeader({ firm }: { firm: FirmProfileData }) {
                                 )}
                                 {firm.foundedYear && (
                                     <>
-                                        <span className="text-neutral-content/20">|</span>
+                                        <span className="text-base-content/20">
+                                            |
+                                        </span>
                                         <span className="flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-calendar text-xs" />
                                             Est. {firm.foundedYear}
@@ -91,7 +109,9 @@ function HeroHeader({ firm }: { firm: FirmProfileData }) {
                                 )}
                                 {firm.websiteUrl && (
                                     <>
-                                        <span className="text-neutral-content/20">|</span>
+                                        <span className="text-base-content/20">
+                                            |
+                                        </span>
                                         <span className="flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-globe text-xs" />
                                             {extractDomain(firm.websiteUrl)}
@@ -132,13 +152,22 @@ function HeroHeader({ firm }: { firm: FirmProfileData }) {
                         ];
                         const iconStyle = iconStyles[i % iconStyles.length];
                         return (
-                            <div key={stat.label} className="flex items-center gap-3 px-4 py-4">
-                                <div className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}>
+                            <div
+                                key={stat.label}
+                                className="flex items-center gap-3 px-4 py-4"
+                            >
+                                <div
+                                    className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}
+                                >
                                     <i className={`${stat.icon} text-base`} />
                                 </div>
                                 <div>
-                                    <span className="text-xl font-black text-neutral-content leading-none block">{stat.value}</span>
-                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">{stat.label}</span>
+                                    <span className="text-xl font-black text-base-content leading-none block">
+                                        {stat.value}
+                                    </span>
+                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
+                                        {stat.label}
+                                    </span>
                                 </div>
                             </div>
                         );
@@ -163,12 +192,22 @@ type TabKey = "about" | "specialties" | "team" | "reviews";
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "about", label: "About", icon: "fa-duotone fa-regular fa-building" },
-    { key: "specialties", label: "Specialties", icon: "fa-duotone fa-regular fa-bullseye" },
+    {
+        key: "specialties",
+        label: "Specialties",
+        icon: "fa-duotone fa-regular fa-bullseye",
+    },
     { key: "team", label: "Team", icon: "fa-duotone fa-regular fa-users" },
     { key: "reviews", label: "Reviews", icon: "fa-duotone fa-regular fa-star" },
 ];
 
-function TabNav({ active, onChange }: { active: TabKey; onChange: (t: TabKey) => void }) {
+function TabNav({
+    active,
+    onChange,
+}: {
+    active: TabKey;
+    onChange: (t: TabKey) => void;
+}) {
     return (
         <nav className="bg-base-100 border-b border-base-300">
             <div className="max-w-6xl mx-auto px-8">
@@ -230,13 +269,21 @@ function AboutPanel({ firm }: { firm: FirmProfileData }) {
                     Partnership
                 </p>
                 <div className="flex flex-wrap gap-2">
-                    <span className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider ${firm.seekingSplitPartners ? "bg-primary text-primary-content" : "bg-base-200 border border-base-300 text-base-content/30"}`}>
+                    <span
+                        className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider ${firm.seekingSplitPartners ? "bg-primary text-primary-content" : "bg-base-200 border border-base-300 text-base-content/30"}`}
+                    >
                         <i className="fa-duotone fa-regular fa-handshake text-sm" />
-                        {firm.seekingSplitPartners ? "Seeking Split Partners" : "Not Seeking Partners"}
+                        {firm.seekingSplitPartners
+                            ? "Seeking Split Partners"
+                            : "Not Seeking Partners"}
                     </span>
-                    <span className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider ${firm.acceptsCandidateSubmissions ? "bg-secondary text-secondary-content" : "bg-base-200 border border-base-300 text-base-content/30"}`}>
+                    <span
+                        className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider ${firm.acceptsCandidateSubmissions ? "bg-secondary text-secondary-content" : "bg-base-200 border border-base-300 text-base-content/30"}`}
+                    >
                         <i className="fa-duotone fa-regular fa-paper-plane text-sm" />
-                        {firm.acceptsCandidateSubmissions ? "Accepts Submissions" : "Not Accepting Submissions"}
+                        {firm.acceptsCandidateSubmissions
+                            ? "Accepts Submissions"
+                            : "Not Accepting Submissions"}
                     </span>
                 </div>
             </div>
@@ -249,10 +296,15 @@ function AboutPanel({ firm }: { firm: FirmProfileData }) {
                     </p>
                     <div className="divide-y divide-base-300 border border-base-300">
                         {firm.recentPlacements.map((p, i) => (
-                            <div key={i} className="flex items-center gap-4 px-5 py-4">
+                            <div
+                                key={i}
+                                className="flex items-center gap-4 px-5 py-4"
+                            >
                                 <i className="fa-duotone fa-regular fa-trophy text-primary text-base w-4 text-center shrink-0" />
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-base-content/80 font-semibold">{p.role}</p>
+                                    <p className="text-sm text-base-content/80 font-semibold">
+                                        {p.role}
+                                    </p>
                                 </div>
                                 <span className="px-2 py-0.5 bg-base-200 text-xs font-bold uppercase tracking-wider text-base-content/40 shrink-0">
                                     {p.level}
@@ -290,7 +342,10 @@ function SpecialtiesPanel({ firm }: { firm: FirmProfileData }) {
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {firm.industries.map((ind) => (
-                            <span key={ind} className="px-3 py-1.5 bg-primary text-primary-content text-xs font-bold uppercase tracking-wider">
+                            <span
+                                key={ind}
+                                className="px-3 py-1.5 bg-primary text-primary-content text-xs font-bold uppercase tracking-wider"
+                            >
                                 {ind}
                             </span>
                         ))}
@@ -306,7 +361,10 @@ function SpecialtiesPanel({ firm }: { firm: FirmProfileData }) {
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {firm.specialties.map((spec) => (
-                            <span key={spec} className="px-3 py-1.5 bg-secondary/10 border border-secondary/20 text-secondary text-xs font-bold uppercase tracking-wider">
+                            <span
+                                key={spec}
+                                className="px-3 py-1.5 bg-secondary/10 border border-secondary/20 text-secondary text-xs font-bold uppercase tracking-wider"
+                            >
                                 {spec}
                             </span>
                         ))}
@@ -326,7 +384,12 @@ function SpecialtiesPanel({ firm }: { firm: FirmProfileData }) {
                                 key={pt}
                                 className="px-3 py-1.5 bg-accent/10 text-accent text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2"
                             >
-                                <i className={PLACEMENT_ICONS[pt] || "fa-duotone fa-regular fa-tag"} />
+                                <i
+                                    className={
+                                        PLACEMENT_ICONS[pt] ||
+                                        "fa-duotone fa-regular fa-tag"
+                                    }
+                                />
                                 {pt}
                             </span>
                         ))}
@@ -367,13 +430,20 @@ function TeamPanel({ firm }: { firm: FirmProfileData }) {
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
                 {firm.teamHighlights.map((member) => (
-                    <div key={member.name} className="flex items-center gap-4 bg-base-200 border border-base-300 px-5 py-4">
+                    <div
+                        key={member.name}
+                        className="flex items-center gap-4 bg-base-200 border border-base-300 px-5 py-4"
+                    >
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-sm shrink-0">
                             {member.initials}
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-black text-base-content leading-tight">{member.name}</p>
-                            <p className="text-xs font-semibold text-primary">{member.title}</p>
+                            <p className="text-sm font-black text-base-content leading-tight">
+                                {member.name}
+                            </p>
+                            <p className="text-xs font-semibold text-primary">
+                                {member.title}
+                            </p>
                             <p className="text-xs font-bold uppercase tracking-wider text-base-content/30 mt-0.5">
                                 {member.specialization}
                             </p>
@@ -395,7 +465,10 @@ function ReviewsPanel({ firm }: { firm: FirmProfileData }) {
             </p>
             <div className="space-y-6">
                 {firm.testimonials.map((t, i) => (
-                    <blockquote key={i} className="bg-base-200 border-l-4 border-l-primary px-7 py-6">
+                    <blockquote
+                        key={i}
+                        className="bg-base-200 border-l-4 border-l-primary px-7 py-6"
+                    >
                         <i className="fa-duotone fa-regular fa-quote-left text-2xl text-primary/20 mb-4 block" />
                         <p className="text-base text-base-content/70 leading-relaxed italic mb-5">
                             &ldquo;{t.text}&rdquo;
@@ -405,7 +478,9 @@ function ReviewsPanel({ firm }: { firm: FirmProfileData }) {
                                 {t.initials}
                             </div>
                             <div>
-                                <p className="text-sm font-black text-base-content">{t.author}</p>
+                                <p className="text-sm font-black text-base-content">
+                                    {t.author}
+                                </p>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40">
                                     {t.role}
                                 </p>
@@ -422,10 +497,34 @@ function ReviewsPanel({ firm }: { firm: FirmProfileData }) {
 
 function Sidebar({ firm }: { firm: FirmProfileData }) {
     const contactItems = [
-        firm.showContactInfo && firm.contactEmail ? { icon: "fa-duotone fa-regular fa-envelope", label: "Email", value: firm.contactEmail } : null,
-        firm.showContactInfo && firm.contactPhone ? { icon: "fa-duotone fa-regular fa-phone", label: "Phone", value: firm.contactPhone } : null,
-        firm.websiteUrl ? { icon: "fa-duotone fa-regular fa-globe", label: "Website", value: extractDomain(firm.websiteUrl) } : null,
-        firm.linkedinUrl ? { icon: "fa-brands fa-linkedin-in", label: "LinkedIn", value: "LinkedIn" } : null,
+        firm.showContactInfo && firm.contactEmail
+            ? {
+                  icon: "fa-duotone fa-regular fa-envelope",
+                  label: "Email",
+                  value: firm.contactEmail,
+              }
+            : null,
+        firm.showContactInfo && firm.contactPhone
+            ? {
+                  icon: "fa-duotone fa-regular fa-phone",
+                  label: "Phone",
+                  value: firm.contactPhone,
+              }
+            : null,
+        firm.websiteUrl
+            ? {
+                  icon: "fa-duotone fa-regular fa-globe",
+                  label: "Website",
+                  value: extractDomain(firm.websiteUrl),
+              }
+            : null,
+        firm.linkedinUrl
+            ? {
+                  icon: "fa-brands fa-linkedin-in",
+                  label: "LinkedIn",
+                  value: "LinkedIn",
+              }
+            : null,
     ].filter(Boolean) as { icon: string; label: string; value: string }[];
 
     return (
@@ -440,9 +539,14 @@ function Sidebar({ firm }: { firm: FirmProfileData }) {
                     </div>
                     <div className="divide-y divide-base-300">
                         {contactItems.map((c) => (
-                            <div key={c.label} className="flex items-center gap-4 px-6 py-4">
+                            <div
+                                key={c.label}
+                                className="flex items-center gap-4 px-6 py-4"
+                            >
                                 <div className="w-8 h-8 bg-primary/10 flex items-center justify-center shrink-0">
-                                    <i className={`${c.icon} text-primary text-xs`} />
+                                    <i
+                                        className={`${c.icon} text-primary text-xs`}
+                                    />
                                 </div>
                                 <div className="min-w-0">
                                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-0.5">
@@ -474,11 +578,16 @@ function Sidebar({ firm }: { firm: FirmProfileData }) {
                     </div>
                     <div className="divide-y divide-base-300">
                         {firm.milestones.map((m, i) => (
-                            <div key={i} className="flex items-start gap-4 px-6 py-3.5">
+                            <div
+                                key={i}
+                                className="flex items-start gap-4 px-6 py-3.5"
+                            >
                                 <span className="text-sm font-black text-primary tabular-nums shrink-0 mt-0.5">
                                     {m.year}
                                 </span>
-                                <p className="text-sm text-base-content/60">{m.event}</p>
+                                <p className="text-sm text-base-content/60">
+                                    {m.event}
+                                </p>
                             </div>
                         ))}
                     </div>
@@ -495,9 +604,14 @@ function Sidebar({ firm }: { firm: FirmProfileData }) {
                     </div>
                     <div className="divide-y divide-base-300">
                         {firm.geoFocus.map((geo) => (
-                            <div key={geo} className="flex items-center gap-3 px-6 py-3.5">
+                            <div
+                                key={geo}
+                                className="flex items-center gap-3 px-6 py-3.5"
+                            >
                                 <i className="fa-duotone fa-regular fa-globe text-xs text-accent" />
-                                <span className="text-sm text-base-content/60">{geo}</span>
+                                <span className="text-sm text-base-content/60">
+                                    {geo}
+                                </span>
                             </div>
                         ))}
                     </div>
@@ -523,9 +637,13 @@ export default function FirmProfileEditorial() {
                     {/* Main content */}
                     <div className="lg:col-span-3">
                         {activeTab === "about" && <AboutPanel firm={firm} />}
-                        {activeTab === "specialties" && <SpecialtiesPanel firm={firm} />}
+                        {activeTab === "specialties" && (
+                            <SpecialtiesPanel firm={firm} />
+                        )}
                         {activeTab === "team" && <TeamPanel firm={firm} />}
-                        {activeTab === "reviews" && <ReviewsPanel firm={firm} />}
+                        {activeTab === "reviews" && (
+                            <ReviewsPanel firm={firm} />
+                        )}
                     </div>
 
                     {/* Sidebar */}

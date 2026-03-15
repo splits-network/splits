@@ -49,11 +49,9 @@ export default function PreScreenRequestModal({
 
             const client = createAuthenticatedClient(token);
 
-            const jobResponse: any = await client.get(`/jobs/${jobId}`);
-            const job = jobResponse.data;
-
-            if (job?.company_recruiter_id && job?.company_recruiter) {
-                setJobCompanyRecruiter(job.company_recruiter);
+            // Check if application already has a company recruiter assigned
+            if (application?.company_recruiter_id && application?.company_recruiter) {
+                setJobCompanyRecruiter(application.company_recruiter);
             } else {
                 const rcResponse: any = await client.get(
                     `/recruiter-companies?company_id=${companyId}&status=active`,

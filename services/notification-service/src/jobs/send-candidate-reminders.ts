@@ -20,7 +20,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Splits Network <notifications@splits.network>';
-const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
+const CANDIDATE_FROM_EMAIL = process.env.RESEND_CANDIDATE_FROM_EMAIL || 'notifications@updates.applicant.network';
+const { PORTAL_URL } = require('../helpers/urls');
 const INACTIVITY_DAYS = 30;
 
 if (!SUPABASE_URL || !SUPABASE_KEY || !RESEND_API_KEY) {
@@ -44,7 +45,7 @@ async function main() {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_KEY!);
     const repository = new NotificationRepository(SUPABASE_URL!, SUPABASE_KEY!);
     const resend = new Resend(RESEND_API_KEY!);
-    const emailService = new EngagementEmailService(resend, repository, FROM_EMAIL, logger);
+    const emailService = new EngagementEmailService(resend, repository, FROM_EMAIL, CANDIDATE_FROM_EMAIL, logger);
 
     const inactivityThreshold = new Date();
     inactivityThreshold.setDate(inactivityThreshold.getDate() - INACTIVITY_DAYS);

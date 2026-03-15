@@ -8,7 +8,7 @@ import {
 } from "./types";
 
 const WINDOW_SIZE = 5;
-const FAILURE_THRESHOLD = 3;
+const CONSECUTIVE_THRESHOLD = 5; // require N failures IN A ROW before alerting
 const REDIS_PREFIX = "health-monitor";
 const AGGREGATED_KEY = `${REDIS_PREFIX}:aggregated`;
 
@@ -58,17 +58,20 @@ export class SlidingWindowManager {
             })
             .filter(Boolean);
 
-        const unhealthyCount = recentResults.filter(
-            (r: any) => r.status === "unhealthy",
-        ).length;
-        const degradedCount = recentResults.filter(
-            (r: any) => r.status === "degraded",
-        ).length;
+        // Require CONSECUTIVE_THRESHOLD failures in a row (not just N out of M).
+        // This prevents noisy alerts from intermittent blips.
+        const lastN = recentResults.slice(-CONSECUTIVE_THRESHOLD);
+        const consecutiveUnhealthy =
+            lastN.length >= CONSECUTIVE_THRESHOLD &&
+            lastN.every((r: any) => r.status === "unhealthy");
+        const consecutiveDegraded =
+            lastN.length >= CONSECUTIVE_THRESHOLD &&
+            lastN.every((r: any) => r.status !== "healthy");
 
         let status: ServiceStatus = "healthy";
-        if (unhealthyCount >= FAILURE_THRESHOLD) {
+        if (consecutiveUnhealthy) {
             status = "unhealthy";
-        } else if (degradedCount >= FAILURE_THRESHOLD) {
+        } else if (consecutiveDegraded) {
             status = "degraded";
         }
 
@@ -108,7 +111,12 @@ export class SlidingWindowManager {
             checkIntervalMs: 15000,
         };
 
-        await this.redis.set(AGGREGATED_KEY, JSON.stringify(aggregated), "EX", 60);
+        await this.redis.set(
+            AGGREGATED_KEY,
+            JSON.stringify(aggregated),
+            "EX",
+            60,
+        );
 
         return statuses;
     }

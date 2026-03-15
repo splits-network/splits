@@ -125,6 +125,20 @@ export class UserRepository {
         return data;
     }
 
+    /**
+     * Update last_active_at timestamp, throttled to avoid excessive writes.
+     * Only updates if current value is NULL or older than 5 minutes.
+     */
+    async updateLastActive(userId: string): Promise<void> {
+        const threshold = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const { error } = await this.supabase
+            .from('users')
+            .update({ last_active_at: new Date().toISOString() })
+            .eq('id', userId)
+            .or(`last_active_at.is.null,last_active_at.lt.${threshold}`);
+        if (error) throw error;
+    }
+
     async deleteUser(id: string): Promise<void> {
         const { error } = await this.supabase
             .from('users')

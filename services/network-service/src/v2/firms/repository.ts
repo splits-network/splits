@@ -85,6 +85,29 @@ export class FirmRepository {
             query = query.overlaps('geo_focus', filters.geo_focus);
         }
 
+        // Single-value filters (from frontend query params)
+        if (filters.team_size_range) {
+            query = query.eq('team_size_range', filters.team_size_range);
+        }
+        if (filters.is_candidate_firm === 'yes') {
+            query = query.eq('candidate_firm', true);
+        } else if (filters.is_candidate_firm === 'no') {
+            query = query.eq('candidate_firm', false);
+        }
+        if (filters.is_company_firm === 'yes') {
+            query = query.eq('company_firm', true);
+        } else if (filters.is_company_firm === 'no') {
+            query = query.eq('company_firm', false);
+        }
+        if (filters.is_marketplace_visible === 'yes') {
+            query = query.eq('marketplace_visible', true).not('marketplace_approved_at', 'is', null);
+        } else if (filters.is_marketplace_visible === 'no') {
+            query = query.or('marketplace_visible.eq.false,marketplace_approved_at.is.null');
+        }
+        if (filters.placement_type) {
+            query = query.contains('placement_types', [filters.placement_type]);
+        }
+
         // Apply sorting
         const sortBy = filters.sort_by || 'created_at';
         const sortOrder = filters.sort_order?.toLowerCase() === 'asc' ? true : false;
@@ -160,33 +183,6 @@ export class FirmRepository {
             throw { statusCode: 400, message: 'User not found' };
         }
         return accessContext.identityUserId;
-    }
-
-    async hasPartnerSubscription(clerkUserId: string): Promise<boolean> {
-        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        if (!accessContext.identityUserId) return false;
-
-        const { data } = await this.supabase
-            .from('subscriptions')
-            .select('id, plan:plans(tier)')
-            .eq('user_id', accessContext.identityUserId)
-            .eq('status', 'active')
-            .limit(1)
-            .maybeSingle();
-
-        return (data as any)?.plan?.tier === 'partner';
-    }
-
-    async hasPartnerSubscriptionByUserId(internalUserId: string): Promise<boolean> {
-        const { data } = await this.supabase
-            .from('subscriptions')
-            .select('id, plan:plans(tier)')
-            .eq('user_id', internalUserId)
-            .eq('status', 'active')
-            .limit(1)
-            .maybeSingle();
-
-        return (data as any)?.plan?.tier === 'partner';
     }
 
     async getRecruiterUserId(recruiterId: string): Promise<string | null> {

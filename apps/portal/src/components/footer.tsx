@@ -166,7 +166,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                     ) : undefined
                 }
                 newsletter={
-                    <div>
+                    <div className="text-neutral-content">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-envelope text-primary-content" />
@@ -206,7 +206,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="you@company.com"
                                     required
-                                    className="input input-sm flex-1 min-w-0 bg-neutral-content/5 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-primary focus:outline-none"
+                                    className="input input-sm flex-1 min-w-0 bg-neutral-content/5 border-neutral-content/10 text-base-content placeholder:text-base-content/30 focus:border-primary focus:outline-none"
                                 />
                                 <button
                                     type="submit"
@@ -235,7 +235,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                 className="h-12 w-auto brightness-0 invert"
                             />
                         </div>
-                        <p className="text-sm opacity-50 leading-relaxed mb-4">
+                        <p className="text-sm opacity-50 leading-relaxed mb-4 text-neutral-content/70">
                             The split-fee recruiting marketplace that connects
                             recruiters, companies, and candidates in a single
                             transparent ecosystem.
@@ -263,7 +263,7 @@ export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
                                 key={section.title}
                                 className="footer-col scroll-reveal fade-up"
                             >
-                                <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
+                                <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
                                     <span className="w-4 h-0.5 bg-primary" />
                                     {section.title}
                                 </h4>

@@ -1,13 +1,55 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NotificationLog, NotificationLogInsert } from '@splits-network/shared-types';
+import { Logger } from '@splits-network/shared-logging';
+import { EmailEntitlementGate, type NotificationChannel } from './helpers/email-entitlement-gate';
+import { PreferenceGate } from './helpers/preference-gate';
 
 export class NotificationRepository {
     private supabase: SupabaseClient;
+    private _emailGate: EmailEntitlementGate | null = null;
+    private _preferenceGate: PreferenceGate | null = null;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey, {
             db: { schema: 'public' }
         });
+    }
+
+    /** Initialize the email entitlement gate (called once at startup) */
+    initEmailGate(logger: Logger): void {
+        this._emailGate = new EmailEntitlementGate(this.supabase, logger);
+    }
+
+    /** Initialize the user preference gate (called once at startup) */
+    initPreferenceGate(logger: Logger): void {
+        this._preferenceGate = new PreferenceGate(this.supabase, logger);
+    }
+
+    /** Check whether email is allowed for a user and resolve the effective channel */
+    async resolveChannel(
+        recipientUserId: string | null | undefined,
+        requestedChannel: NotificationChannel,
+    ): Promise<NotificationChannel | null> {
+        if (!this._emailGate) return requestedChannel;
+        return this._emailGate.resolveChannel(recipientUserId, requestedChannel);
+    }
+
+    /**
+     * Resolve channel with both entitlement gating and user preference gating.
+     * Chain: requested channel -> entitlement gate -> preference gate -> send
+     */
+    async resolveChannelWithPreferences(
+        recipientUserId: string | null | undefined,
+        requestedChannel: NotificationChannel,
+        category: string | null | undefined,
+    ): Promise<NotificationChannel | null> {
+        // Step 1: Entitlement gating
+        const afterEntitlement = await this.resolveChannel(recipientUserId, requestedChannel);
+        if (!afterEntitlement) return null;
+
+        // Step 2: User preference gating
+        if (!this._preferenceGate) return afterEntitlement;
+        return this._preferenceGate.resolveChannel(recipientUserId, afterEntitlement, category);
     }
 
     // Expose Supabase client for cross-schema queries

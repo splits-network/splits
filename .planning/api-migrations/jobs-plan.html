@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 Migration Plan: Jobs Resource - Splits Network</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a25;
+    --border: #2a2a3a;
+    --text: #e0e0e8;
+    --text-muted: #8888a0;
+    --accent: #6c63ff;
+    --accent-light: #8b83ff;
+    --recruiter: #10b981;
+    --company: #3b82f6;
+    --candidate: #f59e0b;
+    --public: #8b5cf6;
+    --admin: #ef4444;
+    --action: #ec4899;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+    --info: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+  h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; }
+
+  .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+  .date { color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.8rem; }
+
+  section { margin-bottom: 3rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--surface2);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  tr:hover { background: var(--surface2); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .badge-recruiter { background: rgba(16, 185, 129, 0.15); color: var(--recruiter); }
+  .badge-company { background: rgba(59, 130, 246, 0.15); color: var(--company); }
+  .badge-candidate { background: rgba(245, 158, 11, 0.15); color: var(--candidate); }
+  .badge-public { background: rgba(139, 92, 246, 0.15); color: var(--public); }
+  .badge-admin { background: rgba(239, 68, 68, 0.15); color: var(--admin); }
+  .badge-action { background: rgba(236, 72, 153, 0.15); color: var(--action); }
+  .badge-crud { background: rgba(108, 99, 255, 0.15); color: var(--accent); }
+  .badge-view { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+  .method {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    font-family: monospace;
+  }
+  .method-get { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+  .method-post { background: rgba(59, 130, 246, 0.2); color: var(--info); }
+  .method-patch { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+  .method-put { background: rgba(236, 72, 153, 0.2); color: var(--action); }
+  .method-delete { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    background: var(--surface2);
+    padding: 0.1rem 0.35rem;
+    font-size: 0.8rem;
+    color: var(--accent-light);
+  }
+
+  .path { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .file-tree {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    line-height: 1.8;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .file-new { color: var(--success); }
+  .file-update { color: var(--warning); }
+  .file-folder { color: var(--accent-light); }
+  .file-comment { color: var(--text-muted); }
+
+  .role-section {
+    border-left: 3px solid;
+    padding-left: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .role-recruiter { border-color: var(--recruiter); }
+  .role-company { border-color: var(--company); }
+  .role-candidate { border-color: var(--candidate); }
+  .role-public { border-color: var(--public); }
+  .role-admin { border-color: var(--admin); }
+
+  .warning-box {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .correction-box {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.4);
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .correction-box h3 {
+    color: var(--danger);
+  }
+
+  .join-tag {
+    display: inline-block;
+    padding: 0.1rem 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: rgba(108, 99, 255, 0.15);
+    color: var(--accent-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 0.25rem;
+  }
+
+  .columns-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+  }
+
+  .col-tag {
+    display: inline-block;
+    padding: 0.1rem 0.35rem;
+    font-size: 0.7rem;
+    font-family: monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .col-tag.primary { color: var(--text); border-color: var(--accent); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .toc a {
+    color: var(--accent-light);
+    text-decoration: none;
+    display: block;
+    padding: 0.3rem 0;
+    font-weight: 500;
+  }
+
+  .toc a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ================================================================ -->
+<!-- HEADER                                                            -->
+<!-- ================================================================ -->
+
+<header style="margin-bottom: 3rem;">
+  <p class="date">Migration Plan - March 9, 2026</p>
+  <h1>Jobs V2 &rarr; V3 Migration</h1>
+  <p class="subtitle">
+    Comprehensive migration plan for <code>jobs</code>, <code>job-requirements</code>,
+    <code>job-skills</code>, and <code>saved-jobs</code> resources in ats-service.
+    Includes role-based view design for recruiter, company, candidate, and public consumers.
+  </p>
+
+  <div class="correction-box">
+    <h3>Critical Correction from Previous Plan</h3>
+    <p style="margin-top: 0.5rem;">
+      The previous plan concluded that "different roles see different rows but the same columns."
+      This is <strong>incorrect</strong>. V2 returns identical columns to everyone because it
+      lacked a pattern for role-specific views &mdash; not because it is correct. V3 must design
+      proper role-based views with tailored data shapes, joins, and aggregations for each role.
+    </p>
+  </div>
+</header>
+
+<!-- ================================================================ -->
+<!-- TABLE OF CONTENTS                                                 -->
+<!-- ================================================================ -->
+
+<div class="toc">
+  <h3>Contents</h3>
+  <a href="#s1">1. Scope Summary</a>
+  <a href="#s2">2. Database Schema</a>
+  <a href="#s3">3. V2 API Surface</a>
+  <a href="#s4">4. Consumer Map</a>
+  <a href="#s5">5. V3 Migration Classification</a>
+  <a href="#s6">6. Role-Based View Design</a>
+  <a href="#s7">7. Action Endpoints Design</a>
+  <a href="#s8">8. Sub-Resources (job-requirements, job-skills, saved-jobs)</a>
+  <a href="#s9">9. V3 File Plan</a>
+  <a href="#s10">10. Frontend Impact</a>
+  <a href="#s11">11. Estimated Scope</a>
+  <a href="#s12">12. Commit Plan</a>
+</div>
+
+
+<!-- ================================================================ -->
+<!-- 1. SCOPE SUMMARY                                                  -->
+<!-- ================================================================ -->
+
+<section id="s1">
+  <h2>1. Scope Summary</h2>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-number">4</div>
+      <div class="stat-label">V2 Resources</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">21</div>
+      <div class="stat-label">V2 Routes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">~54</div>
+      <div class="stat-label">V3 Files to Create</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">~29</div>
+      <div class="stat-label">Frontend Files to Update</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 1rem;">
+    <h3>Resources in scope</h3>
+    <table>
+      <tr><th>V2 Resource</th><th>Table</th><th>V2 Routes</th><th>V3 Strategy</th></tr>
+      <tr>
+        <td><code>jobs</code></td>
+        <td><code>jobs</code></td>
+        <td>7 routes</td>
+        <td>Core CRUD (5) + 8 views + 1 action</td>
+      </tr>
+      <tr>
+        <td><code>job-requirements</code></td>
+        <td><code>job_requirements</code></td>
+        <td>6 routes</td>
+        <td>Core CRUD (5) + 1 action (bulk-replace)</td>
+      </tr>
+      <tr>
+        <td><code>job-skills</code></td>
+        <td><code>job_skills</code></td>
+        <td>4 routes</td>
+        <td>Partial CRUD (3) + 1 action (bulk-replace)</td>
+      </tr>
+      <tr>
+        <td><code>saved-jobs</code></td>
+        <td><code>candidate_saved_jobs</code></td>
+        <td>4 routes</td>
+        <td>Partial CRUD (4) + 1 view (enriched)</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 2. DATABASE SCHEMA                                                -->
+<!-- ================================================================ -->
+
+<section id="s2">
+  <h2>2. Database Schema</h2>
+
+  <div class="card">
+    <h3>jobs table</h3>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">Current schema after all migrations applied</p>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+      <tr><td><code>id</code></td><td>uuid PK</td><td>gen_random_uuid()</td></tr>
+      <tr><td><code>company_id</code></td><td>uuid FK &rarr; companies</td><td>NULL for off-platform/firm jobs</td></tr>
+      <tr><td><code>source_firm_id</code></td><td>uuid FK &rarr; firms</td><td>Set for firm-sourced jobs</td></tr>
+      <tr><td><code>title</code></td><td>text</td><td></td></tr>
+      <tr><td><code>department</code></td><td>text</td><td></td></tr>
+      <tr><td><code>location</code></td><td>text</td><td></td></tr>
+      <tr><td><code>salary_min</code></td><td>numeric</td><td></td></tr>
+      <tr><td><code>salary_max</code></td><td>numeric</td><td></td></tr>
+      <tr><td><code>fee_percentage</code></td><td>numeric</td><td>0-100, recruiter fee</td></tr>
+      <tr><td><code>guarantee_days</code></td><td>integer</td><td>Default 90</td></tr>
+      <tr><td><code>description</code></td><td>text</td><td>Internal / general</td></tr>
+      <tr><td><code>recruiter_description</code></td><td>text</td><td>Recruiter-facing brief</td></tr>
+      <tr><td><code>candidate_description</code></td><td>text</td><td>Candidate-facing description</td></tr>
+      <tr><td><code>employment_type</code></td><td>text</td><td>full_time, part_time, contract, temporary</td></tr>
+      <tr><td><code>open_to_relocation</code></td><td>boolean</td><td></td></tr>
+      <tr><td><code>show_salary_range</code></td><td>boolean</td><td>Controls candidate salary visibility</td></tr>
+      <tr><td><code>commute_types</code></td><td>text[]</td><td>remote, hybrid_*, in_office</td></tr>
+      <tr><td><code>job_level</code></td><td>text</td><td>entry, mid, senior, lead, manager, director, vp, c_suite</td></tr>
+      <tr><td><code>status</code></td><td>text</td><td>draft, pending, early, active, priority, paused, filled, closed</td></tr>
+      <tr><td><code>job_owner_id</code></td><td>uuid FK &rarr; identity_users</td><td>User who created the job</td></tr>
+      <tr><td><code>job_owner_recruiter_id</code></td><td>uuid FK &rarr; recruiters</td><td>Specs Owner recruiter (earns commission)</td></tr>
+      <tr><td><code>company_recruiter_id</code></td><td>uuid FK &rarr; recruiters</td><td>Company-side recruiter representative</td></tr>
+      <tr><td><code>pre_screen_questions</code></td><td>jsonb</td><td>Array of question objects</td></tr>
+      <tr><td><code>activates_at</code></td><td>timestamptz</td><td>When early-access goes live</td></tr>
+      <tr><td><code>closes_at</code></td><td>timestamptz</td><td>When job auto-closes</td></tr>
+      <tr><td><code>search_vector</code></td><td>tsvector</td><td>Full-text search index</td></tr>
+      <tr><td><code>created_at</code></td><td>timestamptz</td><td></td></tr>
+      <tr><td><code>updated_at</code></td><td>timestamptz</td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="grid-3" style="margin-top: 1rem;">
+    <div class="card">
+      <h3>job_requirements</h3>
+      <table>
+        <tr><th>Column</th><th>Type</th></tr>
+        <tr><td><code>id</code></td><td>uuid PK</td></tr>
+        <tr><td><code>job_id</code></td><td>uuid FK</td></tr>
+        <tr><td><code>requirement_type</code></td><td>mandatory | preferred</td></tr>
+        <tr><td><code>description</code></td><td>text</td></tr>
+        <tr><td><code>sort_order</code></td><td>integer</td></tr>
+        <tr><td><code>created_at</code></td><td>timestamptz</td></tr>
+        <tr><td><code>updated_at</code></td><td>timestamptz</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>job_skills</h3>
+      <table>
+        <tr><th>Column</th><th>Type</th></tr>
+        <tr><td><code>job_id</code></td><td>uuid (composite PK)</td></tr>
+        <tr><td><code>skill_id</code></td><td>uuid (composite PK)</td></tr>
+        <tr><td><code>is_required</code></td><td>boolean</td></tr>
+        <tr><td><code>created_at</code></td><td>timestamptz</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>candidate_saved_jobs</h3>
+      <table>
+        <tr><th>Column</th><th>Type</th></tr>
+        <tr><td><code>id</code></td><td>uuid PK</td></tr>
+        <tr><td><code>candidate_id</code></td><td>uuid FK</td></tr>
+        <tr><td><code>job_id</code></td><td>uuid FK</td></tr>
+        <tr><td><code>created_at</code></td><td>timestamptz</td></tr>
+        <tr><td><code>updated_at</code></td><td>timestamptz</td></tr>
+      </table>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">UNIQUE(candidate_id, job_id)</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 1rem;">
+    <h3>Related tables (join targets for views)</h3>
+    <table>
+      <tr><th>Table</th><th>Relationship</th><th>Used By Views</th></tr>
+      <tr><td><code>companies</code></td><td>jobs.company_id &rarr; companies.id</td><td>All list/detail views</td></tr>
+      <tr><td><code>firms</code></td><td>jobs.source_firm_id &rarr; firms.id</td><td>Recruiter views (firm name for off-platform jobs)</td></tr>
+      <tr><td><code>applications</code></td><td>applications.job_id &rarr; jobs.id</td><td>Recruiter board (pipeline counts), company board (applicant counts)</td></tr>
+      <tr><td><code>placements</code></td><td>placements.job_id &rarr; jobs.id</td><td>Recruiter board (assigned filter), company board (filled status)</td></tr>
+      <tr><td><code>recruiters</code></td><td>jobs.job_owner_recruiter_id, company_recruiter_id</td><td>Company detail (who posted the job)</td></tr>
+      <tr><td><code>skills</code></td><td>via job_skills junction</td><td>Candidate listing, editor view, recruiter board</td></tr>
+      <tr><td><code>subscriptions / plans</code></td><td>recruiter subscription tier</td><td>Recruiter board (early-access visibility gating)</td></tr>
+      <tr><td><code>recruiter_companies</code></td><td>permissions check</td><td>Write authorization in service layer</td></tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 3. V2 API SURFACE                                                 -->
+<!-- ================================================================ -->
+
+<section id="s3">
+  <h2>3. V2 API Surface</h2>
+
+  <div class="card">
+    <h3>jobs (7 routes)</h3>
+    <table>
+      <tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th><th>V3 Category</th></tr>
+      <tr>
+        <td><span class="method method-get">GET</span></td>
+        <td class="path">/api/v2/jobs</td>
+        <td>Optional</td>
+        <td>List jobs with role-based scoping, search, filters, pagination. Joins companies. Optional <code>?include=skills</code>. Complex role logic: admin sees all, recruiter sees active/priority/early (tier-gated), company sees org jobs, candidate sees active/priority, unauthenticated sees active/priority.</td>
+        <td><span class="badge badge-view">VIEW</span> 4 role-specific list views</td>
+      </tr>
+      <tr>
+        <td><span class="method method-get">GET</span></td>
+        <td class="path">/api/v2/jobs/:id</td>
+        <td>Optional</td>
+        <td>Get single job. Joins companies. Optional <code>?include=requirements,skills,applications</code>. Unauthenticated only sees active/priority.</td>
+        <td><span class="badge badge-view">VIEW</span> 4 role-specific detail views</td>
+      </tr>
+      <tr>
+        <td><span class="method method-post">POST</span></td>
+        <td class="path">/api/v2/jobs</td>
+        <td>Required</td>
+        <td>Create job. Complex auth: admin (any), recruiter (firm membership or company permissions), company user (own org). Sets ownership fields. Publishes <code>job.created</code>.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-patch">PATCH</span></td>
+        <td class="path">/api/v2/jobs/:id</td>
+        <td>Required</td>
+        <td>Update job. Status transition validation. Off-platform vs platform auth. Publishes <code>job.updated</code>, <code>job.status_changed</code>.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="path">/api/v2/jobs/:id</td>
+        <td>Required</td>
+        <td>Soft delete (sets deleted_at). Role-based auth. Publishes <code>job.deleted</code>.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-get">GET</span></td>
+        <td class="path">/api/v2/jobs/affected-by-termination</td>
+        <td>Required</td>
+        <td>List jobs affected by recruiter-company relationship termination. Returns job + aggregated application counts. Params: <code>?recruiter_id=&amp;company_id=</code>.</td>
+        <td><span class="badge badge-view">VIEW</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-post">POST</span></td>
+        <td class="path">/api/v2/jobs/termination-decisions</td>
+        <td>Required</td>
+        <td>Process per-job keep/pause/close decisions during termination. Bulk status update + recruiter field nulling.</td>
+        <td><span class="badge badge-action">ACTION</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>job-requirements (6 routes)</h3>
+    <table>
+      <tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th><th>V3 Category</th></tr>
+      <tr>
+        <td><span class="method method-get">GET</span></td>
+        <td class="path">/api/v2/job-requirements?job_id=</td>
+        <td>Required</td>
+        <td>List requirements for a job, ordered by sort_order.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-get">GET</span></td>
+        <td class="path">/api/v2/job-requirements/:id</td>
+        <td>Required</td>
+        <td>Get single requirement.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-post">POST</span></td>
+        <td class="path">/api/v2/job-requirements</td>
+        <td>Required</td>
+        <td>Create requirement.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-patch">PATCH</span></td>
+        <td class="path">/api/v2/job-requirements/:id</td>
+        <td>Required</td>
+        <td>Update requirement.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="path">/api/v2/job-requirements/:id</td>
+        <td>Required</td>
+        <td>Delete requirement (hard delete, returns 204).</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-put">PUT</span></td>
+        <td class="path">/api/v2/job-requirements/job/:jobId/bulk-replace</td>
+        <td>Required</td>
+        <td>Atomic delete+insert via stored procedure <code>bulk_replace_job_requirements</code>.</td>
+        <td><span class="badge badge-action">ACTION</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>job-skills (4 routes)</h3>
+    <table>
+      <tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th><th>V3 Category</th></tr>
+      <tr>
+        <td><span class="method method-get">GET</span></td>
+        <td class="path">/api/v2/job-skills?job_id=</td>
+        <td>Required</td>
+        <td>List skills for a job. Joins skills table for name/slug.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-post">POST</span></td>
+        <td class="path">/api/v2/job-skills</td>
+        <td>Required</td>
+        <td>Add skill to job (upsert). Returns joined skill data.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="path">/api/v2/job-skills/:jobId/:skillId</td>
+        <td>Required</td>
+        <td>Remove skill from job (returns 204).</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-put">PUT</span></td>
+        <td class="path">/api/v2/job-skills/job/:jobId/bulk-replace</td>
+        <td>Required</td>
+        <td>Atomic delete all + insert new skills for a job.</td>
+        <td><span class="badge badge-action">ACTION</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>saved-jobs (4 routes)</h3>
+    <table>
+      <tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th><th>V3 Category</th></tr>
+      <tr>
+        <td><span class="method method-get">GET</span></td>
+        <td class="path">/api/v2/saved-jobs</td>
+        <td>Required</td>
+        <td>List saved jobs. Joins jobs &rarr; companies. Candidate-only access.</td>
+        <td><span class="badge badge-view">VIEW</span> (has joins)</td>
+      </tr>
+      <tr>
+        <td><span class="method method-get">GET</span></td>
+        <td class="path">/api/v2/saved-jobs/:id</td>
+        <td>Required</td>
+        <td>Get single saved job. Joins jobs &rarr; companies.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-post">POST</span></td>
+        <td class="path">/api/v2/saved-jobs</td>
+        <td>Required</td>
+        <td>Save a job. Idempotent (returns existing if duplicate). Publishes <code>candidate_saved_job.created</code>.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+      <tr>
+        <td><span class="method method-delete">DELETE</span></td>
+        <td class="path">/api/v2/saved-jobs/:id</td>
+        <td>Required</td>
+        <td>Unsave a job (hard delete). Publishes <code>candidate_saved_job.deleted</code>.</td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Events Published (V2)</h3>
+    <table>
+      <tr><th>Event</th><th>Trigger</th><th>Payload</th></tr>
+      <tr><td><code>job.created</code></td><td>POST /jobs</td><td>jobId, companyId, status, createdBy</td></tr>
+      <tr><td><code>job.updated</code></td><td>PATCH /jobs/:id</td><td>jobId, updatedFields, updatedBy</td></tr>
+      <tr><td><code>job.status_changed</code></td><td>PATCH /jobs/:id (when status changes)</td><td>jobId, previousStatus, newStatus, changedBy</td></tr>
+      <tr><td><code>job.deleted</code></td><td>DELETE /jobs/:id</td><td>jobId, deletedBy</td></tr>
+      <tr><td><code>candidate_saved_job.created</code></td><td>POST /saved-jobs</td><td>savedJobId, candidateId, jobId</td></tr>
+      <tr><td><code>candidate_saved_job.deleted</code></td><td>DELETE /saved-jobs/:id</td><td>savedJobId, candidateId, jobId</td></tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 4. CONSUMER MAP                                                   -->
+<!-- ================================================================ -->
+
+<section id="s4">
+  <h2>4. Consumer Map</h2>
+
+  <div class="card">
+    <h3>apps/portal/ &mdash; Recruiter + Company + Admin users</h3>
+    <table>
+      <tr><th>File</th><th>API Calls</th><th>Role</th></tr>
+      <tr>
+        <td class="path">roles/page.tsx</td>
+        <td><code>GET /jobs</code> (include=company,skills, job_owner_filter, status filters)</td>
+        <td><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span></td>
+      </tr>
+      <tr>
+        <td class="path">roles/components/shared/job-detail.tsx</td>
+        <td><code>GET /jobs/:id</code> (include=company,requirements,skills)</td>
+        <td><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span></td>
+      </tr>
+      <tr>
+        <td class="path">roles/components/modals/role-wizard-modal.tsx</td>
+        <td><code>GET /jobs/:id</code>, <code>POST /jobs</code>, <code>PATCH /jobs/:id</code>, <code>GET /job-skills</code>, <code>PUT /job-requirements/job/:id/bulk-replace</code>, <code>PUT /job-skills/job/:id/bulk-replace</code>, <code>POST /job-requirements</code></td>
+        <td><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span> <span class="badge badge-admin">Admin</span></td>
+      </tr>
+      <tr>
+        <td class="path">roles/components/shared/actions-toolbar.tsx</td>
+        <td><code>PATCH /jobs/:id</code> (status changes)</td>
+        <td><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span></td>
+      </tr>
+      <tr>
+        <td class="path">companies/.../terminate-company-modal.tsx</td>
+        <td><code>GET /jobs/affected-by-termination</code>, <code>POST /jobs/termination-decisions</code></td>
+        <td><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span></td>
+      </tr>
+      <tr>
+        <td class="path">dashboard/hooks/use-role-breakdown.ts</td>
+        <td><code>GET /jobs</code> (limit=100 for dashboard aggregation)</td>
+        <td><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span></td>
+      </tr>
+      <tr>
+        <td class="path">dashboard/hooks/use-top-roles.ts</td>
+        <td><code>GET /jobs</code> (limited, sorted)</td>
+        <td><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span></td>
+      </tr>
+      <tr>
+        <td class="path">admin/jobs/page.tsx</td>
+        <td><code>GET /jobs</code> (all statuses), <code>PATCH /jobs/:id</code></td>
+        <td><span class="badge badge-admin">Admin</span></td>
+      </tr>
+      <tr>
+        <td class="path">admin/jobs/[id]/job-detail-client.tsx</td>
+        <td><code>GET /jobs/:id</code> (include=company,requirements)</td>
+        <td><span class="badge badge-admin">Admin</span></td>
+      </tr>
+      <tr>
+        <td class="path">admin/assignments/page.tsx</td>
+        <td><code>GET /jobs?status=active</code></td>
+        <td><span class="badge badge-admin">Admin</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>apps/candidate/ &mdash; Candidates + Public</h3>
+    <table>
+      <tr><th>File</th><th>API Calls</th><th>Role</th></tr>
+      <tr>
+        <td class="path">(public)/jobs/page.tsx</td>
+        <td><code>GET /jobs</code> (include=company,skills, no auth required)</td>
+        <td><span class="badge badge-public">Public</span> <span class="badge badge-candidate">Candidate</span></td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/[id]/page.tsx</td>
+        <td><code>GET /jobs/:id</code> (include=company,requirements), <code>GET /saved-jobs?job_id=</code></td>
+        <td><span class="badge badge-public">Public</span> <span class="badge badge-candidate">Candidate</span></td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/[id]/components/job-detail-client.tsx</td>
+        <td><code>POST /saved-jobs</code>, <code>DELETE /saved-jobs/:id</code></td>
+        <td><span class="badge badge-candidate">Candidate</span></td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/[id]/opengraph-image.tsx</td>
+        <td><code>GET /jobs/:id</code> (for OG image generation)</td>
+        <td><span class="badge badge-public">Public</span></td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/rss.xml/route.ts</td>
+        <td><code>GET /jobs</code> (limit=50)</td>
+        <td><span class="badge badge-public">Public</span></td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/atom.xml/route.ts</td>
+        <td><code>GET /jobs</code> (limit=50)</td>
+        <td><span class="badge badge-public">Public</span></td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/components/shared/job-detail.tsx</td>
+        <td><code>POST /saved-jobs</code>, <code>DELETE /saved-jobs/:id</code></td>
+        <td><span class="badge badge-candidate">Candidate</span></td>
+      </tr>
+      <tr>
+        <td class="path">portal/jobs/saved/saved-jobs-content.tsx</td>
+        <td><code>GET /saved-jobs</code>, <code>DELETE /saved-jobs/:id</code></td>
+        <td><span class="badge badge-candidate">Candidate</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>services/ &mdash; Backend consumers</h3>
+    <table>
+      <tr><th>Service</th><th>File</th><th>Usage</th></tr>
+      <tr>
+        <td>api-gateway</td>
+        <td class="path">routes/v2/ats.ts</td>
+        <td>Proxies all /api/v2/jobs*, job-requirements*, job-skills*, saved-jobs*. Special handlers for bulk-replace (PUT), termination routes, and compound delete path (/job-skills/:jobId/:skillId).</td>
+      </tr>
+      <tr>
+        <td>gpt-service</td>
+        <td class="path">v2/actions/routes.ts</td>
+        <td>Own <code>GET /api/v2/jobs/search</code> and <code>GET /api/v2/jobs/:id</code> for GPT function calling. Direct DB access. <strong>Out of scope for this migration.</strong></td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 5. V3 MIGRATION CLASSIFICATION                                    -->
+<!-- ================================================================ -->
+
+<section id="s5">
+  <h2>5. V3 Migration Classification</h2>
+
+  <div class="card">
+    <h3>jobs: V2 Route &rarr; V3 Destination</h3>
+    <table>
+      <tr><th>V2 Route</th><th>V3 Category</th><th>V3 Path(s)</th><th>Reason</th></tr>
+      <tr>
+        <td><code>GET /v2/jobs</code></td>
+        <td><span class="badge badge-crud">CRUD</span> + <span class="badge badge-view">VIEW x4</span></td>
+        <td>
+          <code>GET /v3/jobs</code> (flat, no joins)<br>
+          <code>GET /v3/jobs/views/recruiter-board</code><br>
+          <code>GET /v3/jobs/views/company-board</code><br>
+          <code>GET /v3/jobs/views/candidate-listing</code><br>
+          <code>GET /v3/jobs/views/admin-board</code>
+        </td>
+        <td>V2 mixes role scoping, joins, and aggregations in one endpoint. Each role needs fundamentally different data.</td>
+      </tr>
+      <tr>
+        <td><code>GET /v2/jobs/:id</code></td>
+        <td><span class="badge badge-crud">CRUD</span> + <span class="badge badge-view">VIEW x4</span></td>
+        <td>
+          <code>GET /v3/jobs/:id</code> (flat, no joins)<br>
+          <code>GET /v3/jobs/:id/view/recruiter-detail</code><br>
+          <code>GET /v3/jobs/:id/view/company-detail</code><br>
+          <code>GET /v3/jobs/:id/view/candidate-detail</code><br>
+          <code>GET /v3/jobs/:id/view/editor</code>
+        </td>
+        <td>V2 uses <code>?include=</code> for dynamic joins. V3 uses named views with fixed shapes per use case.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/jobs</code></td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+        <td><code>POST /v3/jobs</code></td>
+        <td>Standard create.</td>
+      </tr>
+      <tr>
+        <td><code>PATCH /v2/jobs/:id</code></td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+        <td><code>PATCH /v3/jobs/:id</code></td>
+        <td>Standard update with status transition validation.</td>
+      </tr>
+      <tr>
+        <td><code>DELETE /v2/jobs/:id</code></td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+        <td><code>DELETE /v3/jobs/:id</code></td>
+        <td>Standard soft delete.</td>
+      </tr>
+      <tr>
+        <td><code>GET /v2/jobs/affected-by-termination</code></td>
+        <td><span class="badge badge-view">VIEW</span></td>
+        <td><code>GET /v3/jobs/views/termination-impact</code></td>
+        <td>Specialized query with application count aggregation.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/jobs/termination-decisions</code></td>
+        <td><span class="badge badge-action">ACTION</span></td>
+        <td><code>POST /v3/jobs/actions/process-termination</code></td>
+        <td>Bulk state mutation with side effects.</td>
+      </tr>
+    </table>
+
+    <div class="warning-box" style="margin-top: 1rem;">
+      <strong>Core CRUD GET routes still exist.</strong> <code>GET /v3/jobs</code> and
+      <code>GET /v3/jobs/:id</code> return flat job data with NO joins. They serve internal/admin
+      use and as the baseline resource. All frontend consumers should use the role-specific views.
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 6. ROLE-BASED VIEW DESIGN                                         -->
+<!-- ================================================================ -->
+
+<section id="s6">
+  <h2>6. Role-Based View Design</h2>
+
+  <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+    Each role gets purpose-built views returning only the data they need, with tailored joins,
+    aggregations, and column exclusions. This is the core improvement over V2.
+  </p>
+
+  <!-- RECRUITER BOARD -->
+  <div class="role-section role-recruiter">
+    <h3><span class="badge badge-recruiter">Recruiter</span> jobs/views/recruiter-board</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/views/recruiter-board</code></td></tr>
+      <tr><td>Auth</td><td>Required (recruiter role)</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs</code> when called by recruiter</td></tr>
+      <tr><td>Frontend</td><td><code>apps/portal/src/app/portal/roles/page.tsx</code> (recruiter context)</td></tr>
+      <tr>
+        <td>Columns Returned</td>
+        <td>
+          <div class="columns-list">
+            <span class="col-tag primary">id</span>
+            <span class="col-tag primary">title</span>
+            <span class="col-tag primary">status</span>
+            <span class="col-tag primary">fee_percentage</span>
+            <span class="col-tag primary">guarantee_days</span>
+            <span class="col-tag">location</span>
+            <span class="col-tag">department</span>
+            <span class="col-tag">employment_type</span>
+            <span class="col-tag">commute_types</span>
+            <span class="col-tag">job_level</span>
+            <span class="col-tag">salary_min</span>
+            <span class="col-tag">salary_max</span>
+            <span class="col-tag">source_firm_id</span>
+            <span class="col-tag">company_id</span>
+            <span class="col-tag">activates_at</span>
+            <span class="col-tag">closes_at</span>
+            <span class="col-tag">created_at</span>
+            <span class="col-tag">updated_at</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>Joins</td>
+        <td>
+          <span class="join-tag">companies</span> id, name, logo_url, industry, headquarters_location<br>
+          <span class="join-tag">job_skills &rarr; skills</span> skill name, is_required (batch-fetched by job IDs)
+        </td>
+      </tr>
+      <tr>
+        <td>Aggregations</td>
+        <td>Application count per job (batch-fetched from applications for returned job IDs)</td>
+      </tr>
+      <tr>
+        <td>Filters</td>
+        <td><code>status</code>, <code>job_owner_filter</code> (all|assigned), <code>employment_type</code>, <code>commute_type</code>, <code>job_level</code>, <code>company_id</code>, <code>search</code></td>
+      </tr>
+      <tr>
+        <td>Row Scoping</td>
+        <td>Subscription tier gating: partner tier sees early-access jobs. <code>assigned</code> filter checks job_owner_recruiter_id, company_recruiter_id, applications where recruiter is candidate_recruiter_id, and placements.</td>
+      </tr>
+      <tr>
+        <td>Why Separate</td>
+        <td>Recruiters need <strong>fee_percentage</strong>, <strong>guarantee_days</strong>, <strong>source_firm_id</strong>, and subscription-gated visibility. Company users and candidates never see these.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- RECRUITER DETAIL -->
+  <div class="role-section role-recruiter">
+    <h3><span class="badge badge-recruiter">Recruiter</span> jobs/:id/view/recruiter-detail</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/:id/view/recruiter-detail</code></td></tr>
+      <tr><td>Auth</td><td>Required (recruiter role)</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs/:id?include=company,requirements,skills</code> (recruiter)</td></tr>
+      <tr><td>Frontend</td><td><code>apps/portal/.../shared/job-detail.tsx</code> (DetailLoader)</td></tr>
+      <tr>
+        <td>Data Shape</td>
+        <td>
+          All job columns including <code>recruiter_description</code> (the primary brief for recruiters), <code>fee_percentage</code>, <code>guarantee_days</code>, <code>source_firm_id</code>
+          <br><span class="join-tag">companies</span> id, name, logo_url, industry, headquarters_location, description, website
+          <br><span class="join-tag">job_requirements</span> full list (type, description, sort_order)
+          <br><span class="join-tag">job_skills &rarr; skills</span> id, name, slug, is_required
+          <br><span class="join-tag">firms</span> name (if source_firm_id is set, for off-platform label)
+        </td>
+      </tr>
+      <tr>
+        <td>Why Separate</td>
+        <td>Recruiter sees <code>recruiter_description</code> as the primary description tab and needs fee/guarantee data. Candidates must never see these fields.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- COMPANY BOARD -->
+  <div class="role-section role-company">
+    <h3><span class="badge badge-company">Company</span> jobs/views/company-board</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/views/company-board</code></td></tr>
+      <tr><td>Auth</td><td>Required (company_admin or hiring_manager)</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs</code> when called by company user</td></tr>
+      <tr><td>Frontend</td><td><code>apps/portal/src/app/portal/roles/page.tsx</code> (company context)</td></tr>
+      <tr>
+        <td>Columns Returned</td>
+        <td>
+          <div class="columns-list">
+            <span class="col-tag primary">id</span>
+            <span class="col-tag primary">title</span>
+            <span class="col-tag primary">status</span>
+            <span class="col-tag">location</span>
+            <span class="col-tag">department</span>
+            <span class="col-tag">employment_type</span>
+            <span class="col-tag">salary_min</span>
+            <span class="col-tag">salary_max</span>
+            <span class="col-tag">fee_percentage</span>
+            <span class="col-tag">guarantee_days</span>
+            <span class="col-tag">job_owner_id</span>
+            <span class="col-tag">activates_at</span>
+            <span class="col-tag">closes_at</span>
+            <span class="col-tag">created_at</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>Joins</td>
+        <td><span class="join-tag">companies</span> id, name, logo_url (for multi-company orgs)</td>
+      </tr>
+      <tr>
+        <td>Aggregations</td>
+        <td>
+          Total application count per job<br>
+          Active pipeline count (non-terminal stages)
+        </td>
+      </tr>
+      <tr>
+        <td>Excludes</td>
+        <td><code>source_firm_id</code>, <code>recruiter_description</code>, <code>job_owner_recruiter_id</code>, <code>company_recruiter_id</code> (recruiter-internal fields)</td>
+      </tr>
+      <tr>
+        <td>Row Scoping</td>
+        <td>Only jobs where company.identity_organization_id matches user's org. Optional job_owner_filter for "my jobs" vs "all jobs".</td>
+      </tr>
+      <tr>
+        <td>Why Separate</td>
+        <td>Company users care about <strong>applicant pipeline metrics</strong> and <strong>budget</strong> (salary + fee). They do not need source_firm_id, recruiter_description, or subscription tier logic.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- COMPANY DETAIL -->
+  <div class="role-section role-company">
+    <h3><span class="badge badge-company">Company</span> jobs/:id/view/company-detail</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/:id/view/company-detail</code></td></tr>
+      <tr><td>Auth</td><td>Required (company_admin or hiring_manager)</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs/:id?include=company,requirements</code> (company user)</td></tr>
+      <tr>
+        <td>Data Shape</td>
+        <td>
+          Job columns (no recruiter_description, no source_firm_id)
+          <br><span class="join-tag">companies</span> full company info
+          <br><span class="join-tag">job_requirements</span> full list
+          <br><span class="join-tag">job_skills &rarr; skills</span> name, is_required
+          <br><span class="join-tag">recruiters</span> job_owner_recruiter name/avatar (who posted this role)
+          <br>Application count + stage breakdown aggregation
+        </td>
+      </tr>
+      <tr>
+        <td>Why Separate</td>
+        <td>Company users need to know which recruiter posted the job and see applicant stage breakdowns. Recruiters do not need stage breakdowns on the detail page (they view that in the applications pipeline).</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- CANDIDATE LISTING -->
+  <div class="role-section role-candidate">
+    <h3><span class="badge badge-candidate">Candidate</span> <span class="badge badge-public">Public</span> jobs/views/candidate-listing</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/views/candidate-listing</code></td></tr>
+      <tr><td>Auth</td><td>Optional (unauthenticated = public listing)</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs</code> from candidate app and unauthenticated callers</td></tr>
+      <tr><td>Frontend</td><td><code>apps/candidate/(public)/jobs/page.tsx</code>, RSS/Atom feeds, sitemap</td></tr>
+      <tr>
+        <td>Columns Returned</td>
+        <td>
+          <div class="columns-list">
+            <span class="col-tag primary">id</span>
+            <span class="col-tag primary">title</span>
+            <span class="col-tag">candidate_description</span>
+            <span class="col-tag">location</span>
+            <span class="col-tag">department</span>
+            <span class="col-tag">employment_type</span>
+            <span class="col-tag">commute_types</span>
+            <span class="col-tag">job_level</span>
+            <span class="col-tag">open_to_relocation</span>
+            <span class="col-tag">show_salary_range</span>
+            <span class="col-tag">salary_min *</span>
+            <span class="col-tag">salary_max *</span>
+            <span class="col-tag">status</span>
+            <span class="col-tag">created_at</span>
+            <span class="col-tag">updated_at</span>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+            * salary_min/max only included when show_salary_range = true (enforced in repository)
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>Joins</td>
+        <td>
+          <span class="join-tag">companies</span> id, name, logo_url, industry, headquarters_location<br>
+          <span class="join-tag">job_skills &rarr; skills</span> name, is_required (batch-fetched)
+        </td>
+      </tr>
+      <tr>
+        <td>Excludes</td>
+        <td>
+          <code>fee_percentage</code>, <code>guarantee_days</code>, <code>recruiter_description</code>,
+          <code>description</code> (internal), <code>job_owner_id</code>, <code>job_owner_recruiter_id</code>,
+          <code>company_recruiter_id</code>, <code>source_firm_id</code>, <code>pre_screen_questions</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Row Scoping</td>
+        <td>Only <code>active</code> + <code>priority</code> status jobs. No per-user filtering.</td>
+      </tr>
+      <tr>
+        <td>Filters</td>
+        <td><code>employment_type</code>, <code>commute_type</code>, <code>job_level</code>, <code>search</code></td>
+      </tr>
+      <tr>
+        <td>Why Separate</td>
+        <td>Candidates should <strong>never see</strong> fee percentages, guarantee terms, recruiter briefs, ownership IDs, or internal descriptions. Salary is conditionally hidden based on company preference. The response is a clean, public-safe shape.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- CANDIDATE DETAIL -->
+  <div class="role-section role-candidate">
+    <h3><span class="badge badge-candidate">Candidate</span> <span class="badge badge-public">Public</span> jobs/:id/view/candidate-detail</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/:id/view/candidate-detail</code></td></tr>
+      <tr><td>Auth</td><td>Optional</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs/:id?include=company,requirements</code> (candidate/public)</td></tr>
+      <tr><td>Frontend</td><td><code>apps/candidate/(public)/jobs/[id]/page.tsx</code>, OG image</td></tr>
+      <tr>
+        <td>Data Shape</td>
+        <td>
+          Same columns as candidate-listing, plus:
+          <br><span class="join-tag">companies</span> id, name, logo_url, industry, headquarters_location, description, website
+          <br><span class="join-tag">job_requirements</span> full list (mandatory + preferred)
+          <br><span class="join-tag">job_skills &rarr; skills</span> name, is_required
+          <br>Salary fields conditionally included per <code>show_salary_range</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Row Scoping</td>
+        <td>Only active + priority. Returns 404 for other statuses.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- EDITOR VIEW -->
+  <div class="role-section role-recruiter">
+    <h3><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span> <span class="badge badge-admin">Admin</span> jobs/:id/view/editor</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/:id/view/editor</code></td></tr>
+      <tr><td>Auth</td><td>Required (must have edit permission for this job)</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs/:id?include=requirements,pre_screen_questions</code> + separate <code>GET /v2/job-skills?job_id=</code></td></tr>
+      <tr><td>Frontend</td><td><code>apps/portal/.../role-wizard-modal.tsx</code> (edit mode load)</td></tr>
+      <tr>
+        <td>Data Shape</td>
+        <td>
+          All editable job columns (title, location, department, salary, status, descriptions, commute, level, activates_at, closes_at, etc.)
+          <br><span class="join-tag">job_requirements</span> full list
+          <br><span class="join-tag">job_skills &rarr; skills</span> id, name, slug, is_required
+          <br><code>pre_screen_questions</code> (JSONB column)
+          <br><strong>Single call replaces 2 V2 calls.</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>Why Separate</td>
+        <td>The edit wizard needs all editable fields + requirements + skills + pre-screen questions in one fetch. This is a form-ready payload that does not match any read view.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ADMIN BOARD -->
+  <div class="role-section role-admin">
+    <h3><span class="badge badge-admin">Admin</span> jobs/views/admin-board</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/views/admin-board</code></td></tr>
+      <tr><td>Auth</td><td>Required (platform admin only)</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs</code> from admin pages</td></tr>
+      <tr><td>Frontend</td><td><code>apps/portal/.../admin/jobs/page.tsx</code>, admin dashboard hooks</td></tr>
+      <tr>
+        <td>Data Shape</td>
+        <td>
+          All job columns (full access, no exclusions)
+          <br><span class="join-tag">companies</span> id, name
+          <br>No row scoping &mdash; admin sees all jobs including draft, closed, deleted
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- TERMINATION IMPACT -->
+  <div class="role-section role-company">
+    <h3><span class="badge badge-recruiter">Recruiter</span> <span class="badge badge-company">Company</span> jobs/views/termination-impact</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>GET /api/v3/jobs/views/termination-impact</code></td></tr>
+      <tr><td>Auth</td><td>Required</td></tr>
+      <tr><td>Replaces</td><td><code>GET /v2/jobs/affected-by-termination</code></td></tr>
+      <tr><td>Frontend</td><td><code>apps/portal/.../terminate-company-modal.tsx</code></td></tr>
+      <tr><td>Query Params</td><td><code>?recruiter_id=&amp;company_id=</code> (both required)</td></tr>
+      <tr>
+        <td>Data Shape</td>
+        <td>
+          <code>id</code>, <code>title</code>, <code>status</code>, <code>created_at</code>, <code>application_count</code> (aggregated non-terminal applications)
+        </td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 7. ACTION ENDPOINTS DESIGN                                        -->
+<!-- ================================================================ -->
+
+<section id="s7">
+  <h2>7. Action Endpoints Design</h2>
+
+  <div class="card">
+    <h3>jobs/actions/process-termination</h3>
+    <table>
+      <tr><th style="width: 160px;">Property</th><th>Value</th></tr>
+      <tr><td>URL</td><td><code>POST /api/v3/jobs/actions/process-termination</code></td></tr>
+      <tr><td>Auth</td><td>Required</td></tr>
+      <tr><td>Replaces</td><td><code>POST /v2/jobs/termination-decisions</code></td></tr>
+      <tr>
+        <td>Request Body</td>
+        <td><code>{ recruiter_id: string, decisions: [{ job_id: string, action: "keep" | "pause" | "close" }] }</code></td>
+      </tr>
+      <tr>
+        <td>Response</td>
+        <td><code>{ data: { message: "Termination decisions processed" } }</code></td>
+      </tr>
+      <tr>
+        <td>Side Effects</td>
+        <td>Updates job statuses, nulls recruiter ownership fields. Publishes <code>job.termination_processed</code> event per job.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <strong>Status changes use PATCH, not actions.</strong>
+    Job status transitions (activate, pause, close, etc.) go through <code>PATCH /v3/jobs/:id</code>
+    with <code>{ status: "active" }</code>. The service layer validates the transition. No separate action endpoint per status.
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 8. SUB-RESOURCES                                                  -->
+<!-- ================================================================ -->
+
+<section id="s8">
+  <h2>8. Sub-Resources</h2>
+
+  <div class="card">
+    <h3>job-requirements</h3>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+      Stays as a separate V3 resource (not nested under jobs) because it has its own CRUD lifecycle.
+    </p>
+    <table>
+      <tr><th>V3 Route</th><th>Method</th><th>Notes</th></tr>
+      <tr><td><code>/api/v3/job-requirements</code></td><td>GET, POST</td><td>GET requires <code>?job_id=</code>. No joins needed. Single table.</td></tr>
+      <tr><td><code>/api/v3/job-requirements/:id</code></td><td>GET, PATCH, DELETE</td><td>DELETE returns 200 with message (V3 standard). V2 returned 204.</td></tr>
+      <tr><td><code>/api/v3/job-requirements/actions/bulk-replace</code></td><td>POST</td><td>Replaces V2 PUT. Body: <code>{ job_id, requirements[] }</code>. Uses stored procedure.</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>job-skills</h3>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+      Junction table resource with composite PK. Only 3 of the Core 5 apply.
+    </p>
+    <table>
+      <tr><th>V3 Route</th><th>Method</th><th>Notes</th></tr>
+      <tr><td><code>/api/v3/job-skills</code></td><td>GET, POST</td><td>GET requires <code>?job_id=</code>. Joins skills table for name/slug (junction table exception).</td></tr>
+      <tr><td><code>/api/v3/job-skills/:jobId/:skillId</code></td><td>DELETE</td><td>Composite key delete.</td></tr>
+      <tr><td><code>/api/v3/job-skills/actions/bulk-replace</code></td><td>POST</td><td>Replaces V2 PUT. Body: <code>{ job_id, skills[] }</code>.</td></tr>
+    </table>
+    <div class="warning-box" style="margin-top: 0.75rem;">
+      No GET/:id or PATCH/:id &mdash; composite PK means no single-row operations by UUID.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>saved-jobs</h3>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+      Candidate-only resource. Core CRUD + one view for the enriched list.
+    </p>
+    <table>
+      <tr><th>V3 Route</th><th>Method</th><th>Notes</th></tr>
+      <tr><td><code>/api/v3/saved-jobs</code></td><td>GET, POST</td><td>Core GET returns flat rows (no joins). POST is idempotent. Publishes event.</td></tr>
+      <tr><td><code>/api/v3/saved-jobs/:id</code></td><td>GET, DELETE</td><td>No PATCH (no editable fields). Hard delete. Publishes event.</td></tr>
+      <tr><td><code>/api/v3/saved-jobs/views/enriched</code></td><td>GET</td><td>Joins jobs &rarr; companies. Replaces <code>GET /v2/saved-jobs</code> list for candidate UI.</td></tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 9. V3 FILE PLAN                                                   -->
+<!-- ================================================================ -->
+
+<section id="s9">
+  <h2>9. V3 File Plan</h2>
+
+  <div class="file-tree"><span class="file-folder">services/ats-service/src/v3/</span>
+<span class="file-new">  routes.ts</span>                                            <span class="file-comment">-- V3 route registration hub</span>
+
+<span class="file-folder">  jobs/</span>
+<span class="file-new">    types.ts</span>                                            <span class="file-comment">-- Interfaces + JSON schemas for create/update/filters</span>
+<span class="file-new">    repository.ts</span>                                       <span class="file-comment">-- Core CRUD: single table, NO joins</span>
+<span class="file-new">    service.ts</span>                                          <span class="file-comment">-- Business logic, status validation, events</span>
+<span class="file-new">    routes.ts</span>                                           <span class="file-comment">-- Core 5 + view/action route registration</span>
+
+<span class="file-folder">    views/</span>
+<span class="file-new">      recruiter-board.route.ts</span>                          <span class="file-comment">-- GET /jobs/views/recruiter-board</span>
+<span class="file-new">      recruiter-board.service.ts</span>                        <span class="file-comment">-- Tier gating, assigned filter logic</span>
+<span class="file-new">      recruiter-board.repository.ts</span>                    <span class="file-comment">-- Join companies, batch skills + app counts</span>
+<span class="file-new">      company-board.route.ts</span>                            <span class="file-comment">-- GET /jobs/views/company-board</span>
+<span class="file-new">      company-board.service.ts</span>                          <span class="file-comment">-- Org scoping</span>
+<span class="file-new">      company-board.repository.ts</span>                      <span class="file-comment">-- Join companies, batch app counts</span>
+<span class="file-new">      candidate-listing.route.ts</span>                        <span class="file-comment">-- GET /jobs/views/candidate-listing</span>
+<span class="file-new">      candidate-listing.service.ts</span>                      <span class="file-comment">-- Salary visibility enforcement</span>
+<span class="file-new">      candidate-listing.repository.ts</span>                  <span class="file-comment">-- Select safe columns only, join companies + skills</span>
+<span class="file-new">      admin-board.route.ts</span>                              <span class="file-comment">-- GET /jobs/views/admin-board</span>
+<span class="file-new">      admin-board.service.ts</span>
+<span class="file-new">      admin-board.repository.ts</span>                        <span class="file-comment">-- No row scoping, all statuses</span>
+<span class="file-new">      termination-impact.route.ts</span>                      <span class="file-comment">-- GET /jobs/views/termination-impact</span>
+<span class="file-new">      termination-impact.service.ts</span>
+<span class="file-new">      termination-impact.repository.ts</span>                <span class="file-comment">-- Recruiter/company filter + app count agg</span>
+<span class="file-new">      recruiter-detail.route.ts</span>                        <span class="file-comment">-- GET /jobs/:id/view/recruiter-detail</span>
+<span class="file-new">      recruiter-detail.service.ts</span>
+<span class="file-new">      recruiter-detail.repository.ts</span>                  <span class="file-comment">-- Full joins: company, reqs, skills, firm</span>
+<span class="file-new">      company-detail.route.ts</span>                          <span class="file-comment">-- GET /jobs/:id/view/company-detail</span>
+<span class="file-new">      company-detail.service.ts</span>
+<span class="file-new">      company-detail.repository.ts</span>                    <span class="file-comment">-- Join company, reqs, skills, recruiter name</span>
+<span class="file-new">      candidate-detail.route.ts</span>                        <span class="file-comment">-- GET /jobs/:id/view/candidate-detail</span>
+<span class="file-new">      candidate-detail.service.ts</span>                      <span class="file-comment">-- Salary visibility, status gating</span>
+<span class="file-new">      candidate-detail.repository.ts</span>                  <span class="file-comment">-- Safe columns, company, reqs, skills</span>
+<span class="file-new">      editor.route.ts</span>                                  <span class="file-comment">-- GET /jobs/:id/view/editor</span>
+<span class="file-new">      editor.service.ts</span>                                <span class="file-comment">-- Permission check</span>
+<span class="file-new">      editor.repository.ts</span>                            <span class="file-comment">-- All editable fields + reqs + skills + pre-screen</span>
+
+<span class="file-folder">    actions/</span>
+<span class="file-new">      process-termination.route.ts</span>                     <span class="file-comment">-- POST /jobs/actions/process-termination</span>
+<span class="file-new">      process-termination.service.ts</span>                   <span class="file-comment">-- Validate decisions, publish events</span>
+<span class="file-new">      process-termination.repository.ts</span>               <span class="file-comment">-- Status updates + recruiter field nulling</span>
+
+<span class="file-folder">  job-requirements/</span>
+<span class="file-new">    types.ts</span>                                            <span class="file-comment">-- Create/update schemas</span>
+<span class="file-new">    repository.ts</span>                                       <span class="file-comment">-- Single table CRUD</span>
+<span class="file-new">    service.ts</span>                                          <span class="file-comment">-- Validation</span>
+<span class="file-new">    routes.ts</span>                                           <span class="file-comment">-- Core 5</span>
+<span class="file-folder">    actions/</span>
+<span class="file-new">      bulk-replace.route.ts</span>                             <span class="file-comment">-- POST /job-requirements/actions/bulk-replace</span>
+<span class="file-new">      bulk-replace.service.ts</span>                           <span class="file-comment">-- Validate array items</span>
+<span class="file-new">      bulk-replace.repository.ts</span>                       <span class="file-comment">-- Calls stored procedure</span>
+
+<span class="file-folder">  job-skills/</span>
+<span class="file-new">    types.ts</span>
+<span class="file-new">    repository.ts</span>                                       <span class="file-comment">-- Joins skills for name (junction exception)</span>
+<span class="file-new">    service.ts</span>
+<span class="file-new">    routes.ts</span>                                           <span class="file-comment">-- GET list, POST, DELETE (3 routes)</span>
+<span class="file-folder">    actions/</span>
+<span class="file-new">      bulk-replace.route.ts</span>                             <span class="file-comment">-- POST /job-skills/actions/bulk-replace</span>
+<span class="file-new">      bulk-replace.service.ts</span>
+<span class="file-new">      bulk-replace.repository.ts</span>
+
+<span class="file-folder">  saved-jobs/</span>
+<span class="file-new">    types.ts</span>
+<span class="file-new">    repository.ts</span>                                       <span class="file-comment">-- Single table CRUD</span>
+<span class="file-new">    service.ts</span>                                          <span class="file-comment">-- Idempotency, events</span>
+<span class="file-new">    routes.ts</span>                                           <span class="file-comment">-- GET, GET/:id, POST, DELETE (4 routes)</span>
+<span class="file-folder">    views/</span>
+<span class="file-new">      enriched.route.ts</span>                                <span class="file-comment">-- GET /saved-jobs/views/enriched</span>
+<span class="file-new">      enriched.service.ts</span>
+<span class="file-new">      enriched.repository.ts</span>                          <span class="file-comment">-- Join jobs + companies</span></div>
+
+  <div class="card" style="margin-top: 1rem;">
+    <h3>Gateway + Service registration</h3>
+    <div class="file-tree"><span class="file-folder">services/api-gateway/src/routes/v3/</span>
+<span class="file-new">  ats.ts</span>                                                <span class="file-comment">-- V3RouteConfig[] for all 4 resources</span>
+<span class="file-update">  routes.ts</span>                                            <span class="file-comment">-- Import + register ats V3 routes</span>
+
+<span class="file-folder">services/ats-service/src/</span>
+<span class="file-update">  index.ts</span>                                             <span class="file-comment">-- Register v3/routes.ts alongside v2/routes.ts</span></div>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 10. FRONTEND IMPACT                                               -->
+<!-- ================================================================ -->
+
+<section id="s10">
+  <h2>10. Frontend Impact</h2>
+
+  <div class="card">
+    <h3>apps/portal/ (~15 files)</h3>
+    <table>
+      <tr><th>File</th><th>Change Required</th></tr>
+      <tr>
+        <td class="path">roles/page.tsx</td>
+        <td>Switch endpoint from <code>/jobs</code> to role-aware view: recruiter uses <code>/v3/jobs/views/recruiter-board</code>, company uses <code>/v3/jobs/views/company-board</code>. Remove <code>include=</code> param.</td>
+      </tr>
+      <tr>
+        <td class="path">roles/components/shared/job-detail.tsx</td>
+        <td>Switch from <code>/jobs/:id?include=</code> to <code>/v3/jobs/:id/view/recruiter-detail</code> or <code>/v3/jobs/:id/view/company-detail</code>.</td>
+      </tr>
+      <tr>
+        <td class="path">roles/components/modals/role-wizard-modal.tsx</td>
+        <td>Edit load: single call to <code>/v3/jobs/:id/view/editor</code>. Save: <code>POST|PATCH /v3/jobs</code>. Requirements: <code>POST /v3/job-requirements/actions/bulk-replace</code>. Skills: <code>POST /v3/job-skills/actions/bulk-replace</code>.</td>
+      </tr>
+      <tr>
+        <td class="path">roles/components/shared/actions-toolbar.tsx</td>
+        <td>Switch <code>PATCH /jobs/:id</code> to <code>PATCH /v3/jobs/:id</code>.</td>
+      </tr>
+      <tr>
+        <td class="path">companies/.../terminate-company-modal.tsx</td>
+        <td>Switch to <code>/v3/jobs/views/termination-impact</code> + <code>/v3/jobs/actions/process-termination</code>.</td>
+      </tr>
+      <tr>
+        <td class="path">dashboard/hooks/use-role-breakdown.ts</td>
+        <td>Switch to appropriate board view.</td>
+      </tr>
+      <tr>
+        <td class="path">dashboard/hooks/use-top-roles.ts</td>
+        <td>Switch to appropriate board view.</td>
+      </tr>
+      <tr>
+        <td class="path">admin/jobs/page.tsx</td>
+        <td>Switch to <code>/v3/jobs/views/admin-board</code>.</td>
+      </tr>
+      <tr>
+        <td class="path">admin/jobs/[id]/job-detail-client.tsx</td>
+        <td>Switch to admin/recruiter detail view.</td>
+      </tr>
+      <tr>
+        <td class="path">admin/assignments/page.tsx</td>
+        <td>Switch to <code>/v3/jobs/views/admin-board?status=active</code>.</td>
+      </tr>
+      <tr>
+        <td class="path">companies/.../company-roles-tab.tsx</td>
+        <td>Switch job list to company-board view.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>apps/candidate/ (~10 files)</h3>
+    <table>
+      <tr><th>File</th><th>Change Required</th></tr>
+      <tr>
+        <td class="path">(public)/jobs/page.tsx</td>
+        <td>Switch to <code>/v3/jobs/views/candidate-listing</code>. Remove include param. Update type.</td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/[id]/page.tsx</td>
+        <td>Switch to <code>/v3/jobs/:id/view/candidate-detail</code>. Update saved-jobs calls to V3.</td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/[id]/components/job-detail-client.tsx</td>
+        <td>Update save/unsave to <code>/v3/saved-jobs</code>.</td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/[id]/opengraph-image.tsx</td>
+        <td>Switch to candidate-detail view.</td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/rss.xml/route.ts</td>
+        <td>Switch to candidate-listing view.</td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/atom.xml/route.ts</td>
+        <td>Switch to candidate-listing view.</td>
+      </tr>
+      <tr>
+        <td class="path">(public)/jobs/components/shared/job-detail.tsx</td>
+        <td>Update save/unsave to V3.</td>
+      </tr>
+      <tr>
+        <td class="path">portal/jobs/saved/saved-jobs-content.tsx</td>
+        <td>Switch to <code>/v3/saved-jobs/views/enriched</code>.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>services/ (3 files)</h3>
+    <table>
+      <tr><th>File</th><th>Change Required</th></tr>
+      <tr>
+        <td class="path">api-gateway/src/routes/v3/ats.ts</td>
+        <td>New file: V3RouteConfig array for all resources + views + actions.</td>
+      </tr>
+      <tr>
+        <td class="path">api-gateway/src/routes/v3/routes.ts</td>
+        <td>Import and register ats V3 routes.</td>
+      </tr>
+      <tr>
+        <td class="path">ats-service/src/index.ts</td>
+        <td>Import and register v3/routes.ts alongside v2/routes.ts.</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 11. ESTIMATED SCOPE                                               -->
+<!-- ================================================================ -->
+
+<section id="s11">
+  <h2>11. Estimated Scope</h2>
+
+  <div class="grid-3">
+    <div class="stat-card">
+      <div class="stat-number">54</div>
+      <div class="stat-label">New Backend Files</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">~28</div>
+      <div class="stat-label">Frontend Updates</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">3</div>
+      <div class="stat-label">Service/Gateway Updates</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 1rem;">
+    <h3>File count breakdown</h3>
+    <table>
+      <tr><th>Category</th><th>New Files</th><th>Updated Files</th></tr>
+      <tr><td>v3/routes.ts (hub)</td><td>1</td><td>0</td></tr>
+      <tr><td>jobs/ core (types, repo, service, routes)</td><td>4</td><td>0</td></tr>
+      <tr><td>jobs/views/ (8 views x 3 files each)</td><td>24</td><td>0</td></tr>
+      <tr><td>jobs/actions/ (1 action x 3 files)</td><td>3</td><td>0</td></tr>
+      <tr><td>job-requirements/ core (4) + action (3)</td><td>7</td><td>0</td></tr>
+      <tr><td>job-skills/ core (4) + action (3)</td><td>7</td><td>0</td></tr>
+      <tr><td>saved-jobs/ core (4) + view (3)</td><td>7</td><td>0</td></tr>
+      <tr><td>ats-service index.ts</td><td>0</td><td>1</td></tr>
+      <tr><td>Gateway (new ats.ts + update routes.ts)</td><td>1</td><td>1</td></tr>
+      <tr><td>apps/portal/ frontend</td><td>0</td><td>~15</td></tr>
+      <tr><td>apps/candidate/ frontend</td><td>0</td><td>~10</td></tr>
+      <tr><td style="font-weight: 700;">Totals</td><td style="font-weight: 700;">54 new</td><td style="font-weight: 700;">~27 updated</td></tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- 12. COMMIT PLAN                                                   -->
+<!-- ================================================================ -->
+
+<section id="s12">
+  <h2>12. Commit Plan</h2>
+
+  <div class="card">
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+      Following the migration safety rule: "Commit after each step." Each commit is independently deployable.
+      V2 and V3 coexist &mdash; V2 is never modified.
+    </p>
+    <table>
+      <tr><th>#</th><th>Commit Message</th><th>Scope</th><th>Files</th></tr>
+      <tr>
+        <td>1</td>
+        <td><code>feat(ats): scaffold V3 jobs core CRUD</code></td>
+        <td>types.ts, repository.ts, service.ts, routes.ts + v3/routes.ts</td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><code>feat(ats): add V3 jobs recruiter views</code></td>
+        <td>recruiter-board + recruiter-detail (6 files)</td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><code>feat(ats): add V3 jobs company views</code></td>
+        <td>company-board + company-detail (6 files)</td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><code>feat(ats): add V3 jobs candidate views</code></td>
+        <td>candidate-listing + candidate-detail (6 files)</td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><code>feat(ats): add V3 jobs admin + utility views</code></td>
+        <td>admin-board + termination-impact + editor (9 files)</td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td><code>feat(ats): add V3 jobs process-termination action</code></td>
+        <td>process-termination action (3 files)</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td><code>feat(ats): scaffold V3 job-requirements core + bulk-replace</code></td>
+        <td>Core 4 + action 3 files</td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td><code>feat(ats): scaffold V3 job-skills core + bulk-replace</code></td>
+        <td>Core 4 + action 3 files</td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td><code>feat(ats): scaffold V3 saved-jobs core + enriched view</code></td>
+        <td>Core 4 + view 3 files</td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td><code>feat(gateway): add V3 ats route proxies for jobs resources</code></td>
+        <td>Gateway ats.ts (new) + routes.ts (update) + ats-service index.ts</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>11+</td>
+        <td><code>feat(portal): migrate roles pages to V3 jobs API</code></td>
+        <td>Portal frontend migration (can split by page)</td>
+        <td>~15</td>
+      </tr>
+      <tr>
+        <td>12+</td>
+        <td><code>feat(candidate): migrate job pages to V3 API</code></td>
+        <td>Candidate app frontend migration</td>
+        <td>~10</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- FOOTER                                                            -->
+<!-- ================================================================ -->
+
+<hr>
+<footer style="text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.8rem;">
+  <p>Generated by <code>/api:plan ats-service jobs</code> &mdash; API Agent, Splits Network</p>
+  <p style="margin-top: 0.25rem;">This report is the migration spec. Review and approve before running <code>/api:migrate</code>.</p>
+  <p style="margin-top: 0.25rem;">V2 code is never modified. V2 and V3 coexist until all consumers migrate.</p>
+</footer>
+
+</div>
+</body>
+</html>

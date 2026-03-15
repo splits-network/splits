@@ -6,6 +6,7 @@
 **Completion Date**: January 11, 2026
 
 ### Progress Summary
+
 - **Section 1**: Admin Dashboards - ✅ COMPLETE (3/3 dashboards)
 - **Section 2**: Navigation Updates - ✅ COMPLETE
 
@@ -14,18 +15,20 @@
 ## Section 1: Admin Dashboards
 
 ### 1.1 Payout Schedules Dashboard ✅ COMPLETE
+
 **File**: `apps/portal/src/app/portal/admin/payouts/schedules/page.tsx`
 
 **Implemented Features**:
+
 - ✅ Stats cards showing pending, processed today, failed counts, total amount
 - ✅ Status filter dropdown (all/pending/processing/completed/failed/cancelled)
 - ✅ Trigger event filter dropdown (all/manual/guarantee_period_end/milestone_reached/contract_signed)
 - ✅ Search functionality with URL sync
 - ✅ Table displaying all schedule details with color-coded status badges
 - ✅ Action buttons:
-  - Trigger button for pending schedules (POST /payout-schedules/:id/trigger)
-  - Cancel button for pending schedules (DELETE /payout-schedules/:id)
-  - Error tooltip for failed schedules showing last_error message
+    - Trigger button for pending schedules (POST /payout-schedules/:id/trigger)
+    - Cancel button for pending schedules (DELETE /payout-schedules/:id)
+    - Error tooltip for failed schedules showing last_error message
 - ✅ Retry count display with warning styling when > 0
 - ✅ Server-side pagination with PaginationControls
 - ✅ Loading states for trigger/cancel operations
@@ -33,77 +36,124 @@
 - ✅ Responsive design with mobile-friendly layout
 
 **API Integrations**:
+
 - GET /payout-schedules (with pagination, filtering, search, sort)
 - POST /payout-schedules/:id/trigger (manual trigger)
 - DELETE /payout-schedules/:id (cancel schedule)
 
 ### 1.2 Escrow Holds Dashboard ✅ COMPLETE
+
 **File**: `apps/portal/src/app/portal/admin/payouts/escrow/page.tsx`
 
 **Implemented Features**:
+
 - ✅ Stats cards showing active holds, total held amount, due for release, released today
 - ✅ Status filter dropdown (all/active/released/cancelled)
 - ✅ Hold reason filter dropdown (all/guarantee_period/dispute/verification/other)
 - ✅ Search functionality with URL sync
 - ✅ Table displaying escrow hold details:
-  - Color-coded status badges (active=warning, released=success, cancelled=neutral)
-  - Hold reason badges with appropriate icons
-  - Hold amount with currency formatting
-  - Release date with "Due now" warning for overdue active holds
-  - Created date
+    - Color-coded status badges (active=warning, released=success, cancelled=neutral)
+    - Hold reason badges with appropriate icons
+    - Hold amount with currency formatting
+    - Release date with "Due now" warning for overdue active holds
+    - Created date
 - ✅ Action buttons:
-  - Release button for active holds (POST /escrow-holds/:id/release)
-  - Cancel button for active holds (POST /escrow-holds/:id/cancel)
-  - Display release/cancel timestamps for completed actions
+    - Release button for active holds (POST /escrow-holds/:id/release)
+    - Cancel button for active holds (POST /escrow-holds/:id/cancel)
+    - Display release/cancel timestamps for completed actions
 - ✅ Server-side pagination
 - ✅ Loading states for release/cancel operations
 - ✅ Responsive design
 
 **API Integrations**:
+
 - GET /escrow-holds (with pagination, filtering, search, sort)
 - POST /escrow-holds/:id/release (release escrow hold)
 - POST /escrow-holds/:id/cancel (cancel escrow hold)
 
 ### 1.3 Audit Log Viewer ✅ COMPLETE
+
 **File**: `apps/portal/src/app/portal/admin/payouts/audit/page.tsx`
 
 **Implemented Features**:
+
 - ✅ Timeline view of audit events (chronological order, newest first)
 - ✅ Filter dropdowns:
-  - Action type (create_schedule, update_schedule, trigger_processing, retry_schedule, cancel_schedule, create_hold, release_hold, cancel_hold, process_batch)
-  - Entity type (payout_schedule, escrow_hold)
-  - Date range (from/to date pickers)
+    - Action type (create_schedule, update_schedule, trigger_processing, retry_schedule, cancel_schedule, create_hold, release_hold, cancel_hold, process_batch)
+    - Entity type (payout_schedule, escrow_hold)
+    - Date range (from/to date pickers)
 - ✅ Search by entity ID
 - ✅ Timeline design with:
-  - Visual timeline connector line between events
-  - Action-specific icons and color-coded badges
-  - Timestamp display (formatted as "MMM DD, YYYY HH:MM")
-  - User attribution (changed_by + role)
-  - Action descriptions built from metadata
+    - Visual timeline connector line between events
+    - Action-specific icons and color-coded badges
+    - Timestamp display (formatted as "MMM DD, YYYY HH:MM")
+    - User attribution (changed_by + role)
+    - Action descriptions built from metadata
 - ✅ Expandable event details:
-  - Before state (JSON display)
-  - After state (JSON display)
-  - Full metadata (JSON display)
-  - Entry ID for reference
+    - Before state (JSON display)
+    - After state (JSON display)
+    - Full metadata (JSON display)
+    - Entry ID for reference
 - ✅ Server-side pagination
 - ✅ Navigation links to schedules and escrow holds dashboards
 - ✅ Responsive design
 
 **API Integrations**:
+
 - GET /payout-audit-log (with pagination, filtering, search, date range, sort)
 
 **Action Labels Configuration**:
+
 ```typescript
-const ACTION_LABELS: Record<string, { label: string; color: string; icon: string }> = {
-    create_schedule: { label: 'Schedule Created', color: 'badge-success', icon: 'fa-plus' },
-    update_schedule: { label: 'Schedule Updated', color: 'badge-info', icon: 'fa-pen' },
-    trigger_processing: { label: 'Processing Triggered', color: 'badge-warning', icon: 'fa-play' },
-    retry_schedule: { label: 'Schedule Retried', color: 'badge-warning', icon: 'fa-rotate' },
-    cancel_schedule: { label: 'Schedule Cancelled', color: 'badge-error', icon: 'fa-xmark' },
-    create_hold: { label: 'Hold Created', color: 'badge-success', icon: 'fa-lock' },
-    release_hold: { label: 'Hold Released', color: 'badge-success', icon: 'fa-lock-open' },
-    cancel_hold: { label: 'Hold Cancelled', color: 'badge-error', icon: 'fa-xmark' },
-    process_batch: { label: 'Batch Processed', color: 'badge-info', icon: 'fa-list' },
+const ACTION_LABELS: Record<
+    string,
+    { label: string; color: string; icon: string }
+> = {
+    create_schedule: {
+        label: "Schedule Created",
+        color: "badge-success",
+        icon: "fa-plus",
+    },
+    update_schedule: {
+        label: "Schedule Updated",
+        color: "badge-info",
+        icon: "fa-pen",
+    },
+    trigger_processing: {
+        label: "Processing Triggered",
+        color: "badge-warning",
+        icon: "fa-play",
+    },
+    retry_schedule: {
+        label: "Schedule Retried",
+        color: "badge-warning",
+        icon: "fa-rotate",
+    },
+    cancel_schedule: {
+        label: "Schedule Cancelled",
+        color: "badge-error",
+        icon: "fa-xmark",
+    },
+    create_hold: {
+        label: "Hold Created",
+        color: "badge-success",
+        icon: "fa-lock",
+    },
+    release_hold: {
+        label: "Hold Released",
+        color: "badge-success",
+        icon: "fa-lock-open",
+    },
+    cancel_hold: {
+        label: "Hold Cancelled",
+        color: "badge-error",
+        icon: "fa-xmark",
+    },
+    process_batch: {
+        label: "Batch Processed",
+        color: "badge-info",
+        icon: "fa-list",
+    },
 };
 ```
 
@@ -112,25 +162,28 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: string
 ## Section 2: Navigation Updates ✅ COMPLETE
 
 ### 2.1 Payouts Admin Page Navigation ✅ COMPLETE
+
 **File**: `apps/portal/src/app/portal/admin/payouts/page.tsx`
 
 **Implemented Changes**:
+
 - ✅ Added three navigation cards linking to automation dashboards:
-  1. **Payout Schedules** (`/portal/admin/payouts/schedules`)
-     - Primary color icon (calendar)
-     - Description: "Automated payout scheduling"
-  2. **Escrow Holds** (`/portal/admin/payouts/escrow`)
-     - Warning color icon (lock)
-     - Description: "Guarantee period fund holds"
-  3. **Audit Log** (`/portal/admin/payouts/audit`)
-     - Info color icon (clock-rotate-left)
-     - Description: "Track all payout actions"
+    1. **Payout Schedules** (`/portal/admin/payouts/schedules`)
+        - Primary color icon (calendar)
+        - Description: "Automated payout scheduling"
+    2. **Escrow Holds** (`/portal/admin/payouts/escrow`)
+        - Warning color icon (lock)
+        - Description: "Guarantee period fund holds"
+    3. **Audit Log** (`/portal/admin/payouts/audit`)
+        - Info color icon (clock-rotate-left)
+        - Description: "Track all payout actions"
 - ✅ Cards display above existing payout processing table
 - ✅ Hover effects for better UX
 - ✅ Icon-driven design matching admin portal style
 - ✅ Responsive grid layout (1 column mobile, 3 columns desktop)
 
 **Navigation Card Design**:
+
 ```typescript
 <Link href="/portal/admin/payouts/schedules" className="card bg-base-200 hover:bg-base-300 transition-colors">
     <div className="card-body">
@@ -153,7 +206,9 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: string
 ## Design Patterns Used
 
 ### Data Fetching Pattern
+
 All dashboards use the `useStandardList` hook from `@/hooks/use-standard-list`:
+
 ```typescript
 const {
     items,
@@ -176,23 +231,27 @@ const {
 ```
 
 **Benefits**:
+
 - Automatic URL synchronization for filters/search/pagination
 - Built-in loading/error states
 - Refresh functionality for manual updates
 - Consistent pagination controls across all dashboards
 
 ### UI Components Used
+
 - **DaisyUI Components**: cards, badges, tables, buttons, selects, inputs
 - **Font Awesome Icons**: Duotone regular icons for consistent visual style
 - **Shared Components**:
-  - `PaginationControls` - standardized pagination UI
-  - `SearchInput` - debounced search with URL sync
-  - `LoadingState` - spinner with message
-  - `ErrorState` - error display with retry button
-  - `EmptyState` - empty results with icon and message
+    - `PaginationControls` - standardized pagination UI
+    - `SearchInput` - debounced search with URL sync
+    - `LoadingState` - spinner with message
+    - `ErrorState` - error display with retry button
+    - `EmptyState` - empty results with icon and message
 
 ### Status Badge Pattern
+
 All dashboards use color-coded status badges:
+
 ```typescript
 function StatusBadge({ status }: { status: StatusType }) {
     const colors: Record<string, string> = {
@@ -200,28 +259,30 @@ function StatusBadge({ status }: { status: StatusType }) {
         processing: 'badge-info',
         completed: 'badge-success',
         failed: 'badge-error',
-        cancelled: 'badge-neutral',
+        cancelled: 'badge-primary',
     };
     return <span className={`badge ${colors[status]}`}>{status}</span>;
 }
 ```
 
 ### Action Button Pattern
+
 Action buttons include loading states and confirmation:
+
 ```typescript
 async function performAction(id: string) {
-    if (!confirm('Confirm action?')) return;
-    
+    if (!confirm("Confirm action?")) return;
+
     setProcessingId(id);
     try {
         const token = await getToken();
         const apiClient = createAuthenticatedClient(token);
         await apiClient.post(`/endpoint/${id}/action`);
-        alert('Action completed successfully');
+        alert("Action completed successfully");
         refresh();
     } catch (error) {
-        console.error('Action failed:', error);
-        alert('Action failed');
+        console.error("Action failed:", error);
+        alert("Action failed");
     } finally {
         setProcessingId(null);
     }
@@ -233,16 +294,19 @@ async function performAction(id: string) {
 ## API Endpoints Used
 
 ### Payout Schedules
+
 - **GET** `/payout-schedules` - List schedules with pagination, filtering, search
 - **POST** `/payout-schedules/:id/trigger` - Manually trigger processing
 - **DELETE** `/payout-schedules/:id` - Cancel schedule
 
 ### Escrow Holds
+
 - **GET** `/escrow-holds` - List holds with pagination, filtering, search
 - **POST** `/escrow-holds/:id/release` - Release escrow hold
 - **POST** `/escrow-holds/:id/cancel` - Cancel escrow hold
 
 ### Audit Log
+
 - **GET** `/payout-audit-log` - List audit entries with pagination, filtering, search, date range
 
 ---
@@ -250,28 +314,31 @@ async function performAction(id: string) {
 ## Next Steps
 
 ### Deployment
+
 1. **Deploy to Staging**:
-   ```bash
-   # Build and deploy frontend
-   cd apps/portal
-   pnpm build
-   kubectl apply -f infra/k8s/portal/
-   ```
+
+    ```bash
+    # Build and deploy frontend
+    cd apps/portal
+    pnpm build
+    kubectl apply -f infra/k8s/portal/
+    ```
 
 2. **Verify Functionality**:
-   - Navigate to `/portal/admin/payouts` as platform admin
-   - Click each dashboard card and verify data loads
-   - Test filtering, search, and pagination on each dashboard
-   - Test action buttons (trigger, cancel, release)
-   - Verify navigation links work between dashboards
+    - Navigate to `/portal/admin/payouts` as platform admin
+    - Click each dashboard card and verify data loads
+    - Test filtering, search, and pagination on each dashboard
+    - Test action buttons (trigger, cancel, release)
+    - Verify navigation links work between dashboards
 
 3. **Production Rollout**:
-   - Deploy CronJobs to production (see backend tracker)
-   - Deploy frontend to production
-   - Monitor Sentry for errors
-   - Verify automated processing at scheduled times (2am/3am UTC)
+    - Deploy CronJobs to production (see backend tracker)
+    - Deploy frontend to production
+    - Monitor Sentry for errors
+    - Verify automated processing at scheduled times (2am/3am UTC)
 
 ### Future Enhancements (Phase 4+)
+
 - Export CSV functionality for audit log
 - Advanced filtering (multi-select, date ranges on all pages)
 - Real-time updates via WebSocket for processing status
@@ -285,6 +352,7 @@ async function performAction(id: string) {
 ## Testing Checklist
 
 ### Functional Testing
+
 - ✅ All three dashboards load without errors
 - ✅ Navigation cards link correctly
 - ✅ Filters work and update URL params
@@ -297,6 +365,7 @@ async function performAction(id: string) {
 - ✅ Data refreshes after actions
 
 ### UI/UX Testing
+
 - ✅ Responsive design works on mobile/tablet/desktop
 - ✅ Icons display correctly
 - ✅ Status badges show appropriate colors
@@ -309,6 +378,7 @@ async function performAction(id: string) {
 - ✅ Timeline design is visually clear (audit log)
 
 ### Integration Testing
+
 - ✅ API calls use correct authentication tokens
 - ✅ Query parameters build correctly
 - ✅ Response data parses correctly
@@ -320,13 +390,16 @@ async function performAction(id: string) {
 ## Documentation
 
 ### User-Facing Documentation
+
 Location: Portal help docs (future)
+
 - Guide to payout schedules dashboard
 - Guide to escrow holds management
 - Guide to audit log interpretation
 - Action reference guide
 
 ### Developer Documentation
+
 - API endpoint contracts in backend tracker
 - Component patterns in this document
 - useStandardList hook usage examples
@@ -337,6 +410,7 @@ Location: Portal help docs (future)
 ## Success Criteria ✅
 
 All criteria met:
+
 - ✅ Three functional admin dashboards deployed
 - ✅ Navigation integrated into existing admin portal
 - ✅ All CRUD operations working via API

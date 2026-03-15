@@ -104,7 +104,7 @@ export default function DocumentViewerModal({
                 style={{ borderRadius: 0 }}
             >
                 {/* Header */}
-                <div className="bg-neutral text-neutral-content px-8 py-6 shrink-0">
+                <div className="bg-base-300 text-base-content px-8 py-6 shrink-0">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 min-w-0">
                             <div className="w-10 h-10 bg-primary text-primary-content flex items-center justify-center flex-shrink-0">
@@ -114,7 +114,7 @@ export default function DocumentViewerModal({
                                 <h3 className="text-lg font-black tracking-tight truncate">
                                     {document.file_name}
                                 </h3>
-                                <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-content/60">
+                                <div className="flex flex-wrap items-center gap-2 text-sm text-base-content/60">
                                     <span className="capitalize">
                                         {document.document_type}
                                     </span>
@@ -141,7 +141,7 @@ export default function DocumentViewerModal({
                         <div className="flex items-center gap-2 shrink-0">
                             <button
                                 onClick={handleDownloadClick}
-                                className="btn btn-ghost btn-sm text-neutral-content/60 hover:text-neutral-content"
+                                className="btn btn-ghost btn-sm text-base-content/60 hover:text-base-content"
                                 style={{ borderRadius: 0 }}
                                 title="Download"
                                 disabled={!signedUrl}
@@ -150,7 +150,7 @@ export default function DocumentViewerModal({
                             </button>
                             <button
                                 onClick={onClose}
-                                className="btn btn-ghost btn-sm btn-square text-neutral-content/60 hover:text-neutral-content"
+                                className="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
                                 style={{ borderRadius: 0 }}
                             >
                                 <i className="fa-duotone fa-regular fa-xmark text-lg"></i>
@@ -240,10 +240,7 @@ export default function DocumentViewerModal({
                     </div>
                 </div>
             </div>
-            <div
-                className="modal-backdrop bg-neutral/60"
-                onClick={onClose}
-            />
+            <div className="modal-backdrop bg-neutral/60" onClick={onClose} />
         </div>
     );
 }

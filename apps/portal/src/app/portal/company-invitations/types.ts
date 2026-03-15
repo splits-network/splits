@@ -28,7 +28,13 @@ export interface RecruiterCompanyRelationship {
 
 export interface ConnectionFilters {
     status?: string;
+    relationship_type?: string;
 }
+
+export const RELATIONSHIP_TYPE_LABELS: Record<string, string> = {
+    sourcer: "Sourcer",
+    recruiter: "Recruiter",
+};
 
 export function getStatusLabel(status: string): string {
     switch (status) {
@@ -45,33 +51,11 @@ export function getStatusLabel(status: string): string {
     }
 }
 
-export function getStatusIcon(status: string): string {
-    switch (status) {
-        case "active":
-            return "fa-check-circle";
-        case "declined":
-            return "fa-times-circle";
-        case "terminated":
-            return "fa-ban";
-        case "pending":
-            return "fa-clock";
-        default:
-            return "fa-circle";
-    }
-}
-
 export function formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
-    });
-}
-
-export function formatDateShort(dateString: string): string {
-    return new Date(dateString).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
     });
 }
 
@@ -116,26 +100,16 @@ export function getInitials(name: string): string {
     return name.slice(0, 2).toUpperCase();
 }
 
-/**
- * Check if a connection was created within the last 7 days.
- */
-export function isRecent(invitation: RecruiterCompanyRelationship): boolean {
-    if (!invitation.created_at) return false;
-    const d = new Date(invitation.created_at);
-    return (Date.now() - d.getTime()) / 86400000 <= 7;
-}
+import type { BaselSortOption } from "@splits-network/basel-ui";
 
-/**
- * Format relative time from creation date.
- */
-export function timeAgo(dateString: string): string {
-    const d = new Date(dateString);
-    const diffMs = Date.now() - d.getTime();
-    const diffDays = Math.floor(diffMs / 86400000);
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays}d ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-    return `${Math.floor(diffDays / 365)}y ago`;
-}
+export const CONNECTION_STATUS_LABELS: Record<string, string> = {
+    pending: "Pending",
+    active: "Active",
+    declined: "Declined",
+    terminated: "Terminated",
+};
+
+export const CONNECTION_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "status", label: "Status" },
+];

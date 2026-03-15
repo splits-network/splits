@@ -26,6 +26,7 @@ import {
 } from "./helpers";
 import ActionsToolbar from "./actions-toolbar";
 import AIReviewPanel from "./ai-review-panel";
+import { ApplicationCallsSection } from "./application-calls-section";
 import ApplicationTimeline from "./application-timeline";
 import DocumentViewerModal from "../modals/document-viewer-modal";
 
@@ -289,7 +290,7 @@ export function ApplicationDetail({
                                             );
                                             router.push(`/portal/messages?conversationId=${conversationId}`);
                                         } catch (err: any) {
-                                            toast.error(err?.message || "Failed to start chat");
+                                            toast.error(err?.message || "Couldn't start conversation. Try again.");
                                         } finally {
                                             setStartingChat(false);
                                         }
@@ -343,6 +344,31 @@ export function ApplicationDetail({
                             Use the toolbar buttons above to accept or decline
                             this proposal.
                         </p>
+                    </div>
+                )}
+
+                {/* Offer banner */}
+                {application.stage === "offer" && (
+                    <div className={`border-2 p-6 ${application.accepted_by_candidate ? "border-success bg-success/5" : "border-primary bg-primary/5"}`}>
+                        <p className={`text-sm font-bold uppercase tracking-[0.2em] ${application.accepted_by_candidate ? "text-success" : "text-primary"} mb-2`}>
+                            <i className={`fa-duotone fa-regular ${application.accepted_by_candidate ? "fa-check-double" : "fa-file-signature"} mr-2`} />
+                            {application.accepted_by_candidate ? "Offer Accepted" : "You Have an Offer"}
+                        </p>
+                        <h3 className="text-lg font-black tracking-tight mb-3">
+                            {application.accepted_by_candidate
+                                ? "Congratulations — you've accepted this offer!"
+                                : `${name} has extended you a formal offer`}
+                        </h3>
+                        {!application.accepted_by_candidate && (
+                            <Link
+                                href={`/portal/applications/${application.id}/offer`}
+                                className="btn btn-success btn-sm gap-2"
+                                style={{ borderRadius: 0 }}
+                            >
+                                <i className="fa-duotone fa-regular fa-file-signature" />
+                                Review & Accept Offer
+                            </Link>
+                        )}
                     </div>
                 )}
 
@@ -511,19 +537,6 @@ export function ApplicationDetail({
                             ))}
                         </div>
 
-                        {/* Company documents highlight for offer stage */}
-                        {application.stage === "offer" &&
-                            documents.some((d) =>
-                                companyDocTypes.includes(d.document_type || ""),
-                            ) && (
-                                <div className="bg-success/5 border-l-4 border-success p-4 mt-3">
-                                    <p className="font-bold text-sm">
-                                        <i className="fa-duotone fa-regular fa-party-horn mr-2" />
-                                        You have documents from the company to
-                                        review!
-                                    </p>
-                                </div>
-                            )}
                     </div>
                 )}
 
@@ -591,6 +604,9 @@ export function ApplicationDetail({
                     </div>
                 )}
 
+                {/* Calls */}
+                <ApplicationCallsSection applicationId={application.id} />
+
                 {/* Timeline */}
                 {auditLogs.length > 0 && (
                     <div>
@@ -641,11 +657,11 @@ export function DetailLoader({
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Application }>(
-                    `/applications/${id}`,
+                    `/applications/${id}/view/detail`,
                     {
                         params: {
                             include:
-                                "job,company,recruiter,ai_review,documents,audit_log,job_requirements",
+                                "recruiter,ai_review,documents,audit_log",
                         },
                     },
                 );

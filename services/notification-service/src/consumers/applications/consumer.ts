@@ -1,14 +1,12 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { ApplicationsEmailService } from '../../services/applications/service';
-import { ServiceRegistry } from '../../clients';
 import { DataLookupHelper } from '../../helpers/data-lookup';
 import { ContactLookupHelper } from '../../helpers/contact-lookup';
 
 export class ApplicationsEventConsumer {
     constructor(
         private emailService: ApplicationsEmailService,
-        private services: ServiceRegistry,
         private logger: Logger,
         private dataLookup: DataLookupHelper,
         private contactLookup: ContactLookupHelper
@@ -461,6 +459,10 @@ export class ApplicationsEventConsumer {
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
+                            const salary = event.payload.salary;
+                            const feePercentage = event.payload.fee_percentage;
+                            const estimatedFee = salary && feePercentage ? Math.round((salary * feePercentage) / 100) : undefined;
+
                             await this.emailService.sendRecruiterOfferExtended(recruiterContact.email, {
                                 recruiterName: recruiterContact.name,
                                 candidateName: candidate.full_name,
@@ -468,6 +470,9 @@ export class ApplicationsEventConsumer {
                                 companyName: job.company?.name || 'Unknown Company',
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
+                                salary,
+                                feePercentage,
+                                estimatedFee,
                             });
                         }
                     }
@@ -490,6 +495,13 @@ export class ApplicationsEventConsumer {
 
                 case 'hired':
 
+                    const salary = event.payload.salary;
+                    const startDate = event.payload.start_date;
+                    const feePercentage = event.payload.fee_percentage;
+                    const placementFee = event.payload.placement_fee;
+                    const guaranteeDays = event.payload.guarantee_days;
+                    const guaranteeExpiresAt = event.payload.guarantee_expires_at;
+
                     if (candidateEmail) {
                         let recruiterName = undefined;
                         if (effectiveRecruiterId) {
@@ -506,6 +518,7 @@ export class ApplicationsEventConsumer {
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
+                            startDate,
                         });
                     }
 
@@ -519,6 +532,12 @@ export class ApplicationsEventConsumer {
                                 companyName: job.company?.name || 'Unknown Company',
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
+                                salary,
+                                placementFee,
+                                feePercentage,
+                                guaranteeDays,
+                                guaranteeExpiresAt,
+                                startDate,
                             });
                         }
                     }
@@ -868,8 +887,8 @@ export class ApplicationsEventConsumer {
                 return;
             }
 
-            // Scenario 5: Application submitted for AI review
-            if (stage === 'ai_review') {
+            // Scenario 5: Application submitted for AI review (user or GPT)
+            if (stage === 'ai_review' || stage === 'gpt_review') {
 
                 const nextSteps = has_recruiter
                     ? 'Your application is being reviewed by our AI system. Once complete, your recruiter will review and submit it to the company.'

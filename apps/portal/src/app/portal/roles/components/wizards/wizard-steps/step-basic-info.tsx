@@ -5,9 +5,7 @@ import type { FormData, Company } from "./types";
 const STATUS_OPTIONS = [
     { value: "draft", label: "Draft" },
     { value: "pending", label: "Pending" },
-    { value: "early", label: "Early Access" },
     { value: "active", label: "Active" },
-    { value: "priority", label: "Priority" },
     { value: "paused", label: "Paused" },
     { value: "filled", label: "Filled" },
     { value: "closed", label: "Closed" },
@@ -25,6 +23,7 @@ interface StepBasicInfoProps {
     showCompanySelect: boolean;
     mode: "create" | "edit";
     isRecruiter: boolean;
+    billingReady?: boolean;
 }
 
 export function StepBasicInfo({
@@ -39,6 +38,7 @@ export function StepBasicInfo({
     showCompanySelect,
     mode,
     isRecruiter,
+    billingReady = true,
 }: StepBasicInfoProps) {
     return (
         <div className="space-y-4">
@@ -178,21 +178,29 @@ export function StepBasicInfo({
                     </legend>
                     <select
                         className="select w-full"
-                        value={formData.status}
+                        value={!billingReady ? "draft" : formData.status}
                         onChange={(e) => onChange({ status: e.target.value as FormData["status"] })}
+                        disabled={!billingReady}
                     >
-                        {(isRecruiter && roleSource === "company"
-                            ? STATUS_OPTIONS.filter((opt) => opt.value === "draft" || opt.value === "pending")
-                            : STATUS_OPTIONS
+                        {(!billingReady
+                            ? STATUS_OPTIONS.filter((opt) => opt.value === "draft")
+                            : isRecruiter && roleSource === "company"
+                                ? STATUS_OPTIONS.filter((opt) => opt.value === "draft" || opt.value === "pending")
+                                : STATUS_OPTIONS
                         ).map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
+                    {!billingReady && (
+                        <p className="text-sm text-warning mt-1">
+                            Billing setup required to change status. This role will be saved as a draft.
+                        </p>
+                    )}
                 </fieldset>
 
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend text-sm uppercase tracking-[0.2em] font-bold">
-                        Activation Date{formData.status === "early" ? " *" : ""}
+                        Activation Date{formData.is_early_access ? " *" : ""}
                     </legend>
                     <input
                         type="datetime-local"
@@ -200,10 +208,12 @@ export function StepBasicInfo({
                         value={formData.activates_at}
                         onChange={(e) => onChange({ activates_at: e.target.value })}
                         min={new Date().toISOString().slice(0, 16)}
-                        required={formData.status === "early"}
+                        required={formData.is_early_access}
                     />
                     <p className="text-sm text-base-content/50 mt-1">
-                        The role will automatically go live on this date.
+                        {formData.is_early_access
+                            ? "Required. The role will go live to all recruiters on this date."
+                            : "Optional. The role will automatically go live on this date."}
                     </p>
                 </fieldset>
 
@@ -222,6 +232,53 @@ export function StepBasicInfo({
                         Optional. The role will automatically close on this date.
                     </p>
                 </fieldset>
+            </div>
+
+            {/* Visibility modifiers */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className={`flex items-center gap-3 cursor-pointer border-2 p-4 transition-colors ${
+                    formData.is_early_access
+                        ? "border-accent bg-accent/5"
+                        : "border-base-300"
+                }`}>
+                    <input
+                        type="checkbox"
+                        className="toggle toggle-accent toggle-sm"
+                        checked={formData.is_early_access}
+                        onChange={(e) => onChange({ is_early_access: e.target.checked })}
+                    />
+                    <div>
+                        <span className="text-sm font-bold flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-lock text-accent" />
+                            Early Access
+                        </span>
+                        <p className="text-sm text-base-content/50">
+                            Only partner-tier recruiters can see this role until the activation date.
+                        </p>
+                    </div>
+                </label>
+
+                <label className={`flex items-center gap-3 cursor-pointer border-2 p-4 transition-colors ${
+                    formData.is_priority
+                        ? "border-primary bg-primary/5"
+                        : "border-base-300"
+                }`}>
+                    <input
+                        type="checkbox"
+                        className="toggle toggle-primary toggle-sm"
+                        checked={formData.is_priority}
+                        onChange={(e) => onChange({ is_priority: e.target.checked })}
+                    />
+                    <div>
+                        <span className="text-sm font-bold flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-bolt text-primary" />
+                            Priority
+                        </span>
+                        <p className="text-sm text-base-content/50">
+                            Boost this role with featured placement and higher visibility.
+                        </p>
+                    </div>
+                </label>
             </div>
         </div>
     );

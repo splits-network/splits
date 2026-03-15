@@ -24,6 +24,21 @@ export function addedAgo(candidate: Candidate): string {
     return formatRelativeTime(candidate.created_at);
 }
 
+/**
+ * Format "last online" display.
+ * Prefers real-time Redis presence (lastSeenAt) if available,
+ * falls back to persistent DB timestamp (lastActiveAt).
+ * Returns "Never" if neither is available.
+ */
+export function lastSeenAgo(
+    lastSeenAt: string | null | undefined,
+    lastActiveAt?: string | null,
+): string {
+    if (lastSeenAt) return formatRelativeTime(lastSeenAt);
+    if (lastActiveAt) return formatRelativeTime(lastActiveAt);
+    return "Never";
+}
+
 export function candidateName(candidate: Candidate): string {
     return candidate.full_name || "Name not provided";
 }

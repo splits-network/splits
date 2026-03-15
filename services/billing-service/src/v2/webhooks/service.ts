@@ -74,6 +74,22 @@ export class WebhookServiceV2 {
                 await this.handleInvoiceVoided(event.data.object as Stripe.Invoice);
                 break;
 
+            case 'payment_method.attached':
+                await this.handlePaymentMethodAttached(event.data.object as Stripe.PaymentMethod);
+                break;
+
+            case 'payment_method.updated':
+                await this.handlePaymentMethodUpdated(event.data.object as Stripe.PaymentMethod);
+                break;
+
+            case 'payment_method.detached':
+                await this.handlePaymentMethodDetached(event.data.object as Stripe.PaymentMethod);
+                break;
+
+            case 'customer.deleted':
+                await this.handleCustomerDeleted(event.data.object as Stripe.Customer);
+                break;
+
             default:
                 this.logger.debug({ type: event.type }, 'Unhandled webhook event type');
         }
@@ -633,6 +649,274 @@ export class WebhookServiceV2 {
 
         if (error) {
             this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice to voided');
+        }
+    }
+
+    // ========================================================================
+    // Payment method / customer removal events
+    // ========================================================================
+
+    /**
+     * Handle payment_method.attached — a payment method was added to a customer.
+     * If the billing profile has no default payment method, auto-sets it.
+     */
+    private async handlePaymentMethodAttached(paymentMethod: Stripe.PaymentMethod): Promise<void> {
+        if (!paymentMethod.id || !paymentMethod.customer) return;
+
+        const pmId = paymentMethod.id;
+        const customerId = typeof paymentMethod.customer === 'string'
+            ? paymentMethod.customer
+            : paymentMethod.customer.id;
+        const now = new Date().toISOString();
+
+        // Check company billing profiles — auto-set if no default PM
+        const { data: companyProfile } = await this.supabase
+            .from('company_billing_profiles')
+            .select('company_id, stripe_default_payment_method_id')
+            .eq('stripe_customer_id', customerId)
+            .maybeSingle();
+
+        if (companyProfile && !companyProfile.stripe_default_payment_method_id) {
+            await this.supabase
+                .from('company_billing_profiles')
+                .update({ stripe_default_payment_method_id: pmId, updated_at: now })
+                .eq('company_id', companyProfile.company_id);
+
+            this.logger.info(
+                { company_id: companyProfile.company_id, payment_method_id: pmId },
+                'Auto-set default payment method for company from payment_method.attached'
+            );
+
+            await this.eventPublisher.publish('company.billing_payment_method_attached', {
+                company_id: companyProfile.company_id,
+                payment_method_id: pmId,
+            });
+        }
+
+        // Check firm billing profiles — auto-set if no default PM
+        const { data: firmProfile } = await this.supabase
+            .from('firm_billing_profiles')
+            .select('firm_id, stripe_default_payment_method_id')
+            .eq('stripe_customer_id', customerId)
+            .maybeSingle();
+
+        if (firmProfile && !firmProfile.stripe_default_payment_method_id) {
+            await this.supabase
+                .from('firm_billing_profiles')
+                .update({ stripe_default_payment_method_id: pmId, updated_at: now })
+                .eq('firm_id', firmProfile.firm_id);
+
+            this.logger.info(
+                { firm_id: firmProfile.firm_id, payment_method_id: pmId },
+                'Auto-set default payment method for firm from payment_method.attached'
+            );
+
+            await this.eventPublisher.publish('firm.billing_payment_method_attached', {
+                firm_id: firmProfile.firm_id,
+                payment_method_id: pmId,
+            });
+        }
+    }
+
+    /**
+     * Handle payment_method.updated — card details changed (new expiry, issuer replacement, etc.).
+     * Logs for audit. No job status changes needed since the PM ID remains valid.
+     */
+    private async handlePaymentMethodUpdated(paymentMethod: Stripe.PaymentMethod): Promise<void> {
+        if (!paymentMethod.id) return;
+
+        const pmId = paymentMethod.id;
+        const customerId = typeof paymentMethod.customer === 'string'
+            ? paymentMethod.customer
+            : paymentMethod.customer?.id;
+
+        this.logger.info(
+            { payment_method_id: pmId, customer_id: customerId, type: paymentMethod.type },
+            'Payment method updated — no action required, PM ID unchanged'
+        );
+
+        // Publish event so downstream consumers (e.g., notifications) can react if needed
+        if (customerId) {
+            await this.eventPublisher.publish('billing.payment_method_updated', {
+                payment_method_id: pmId,
+                customer_id: customerId,
+                type: paymentMethod.type,
+            });
+        }
+    }
+
+    /**
+     * Handle payment_method.detached — a payment method was removed from a customer.
+     * Clears the default payment method from the matching billing profile and
+     * reverts all non-draft jobs for that company/firm to draft status.
+     */
+    private async handlePaymentMethodDetached(paymentMethod: Stripe.PaymentMethod): Promise<void> {
+        if (!paymentMethod.id) return;
+
+        const pmId = paymentMethod.id;
+        const now = new Date().toISOString();
+
+        // Check company billing profiles
+        const { data: companyProfile } = await this.supabase
+            .from('company_billing_profiles')
+            .select('company_id')
+            .eq('stripe_default_payment_method_id', pmId)
+            .maybeSingle();
+
+        if (companyProfile) {
+            await this.supabase
+                .from('company_billing_profiles')
+                .update({ stripe_default_payment_method_id: null, updated_at: now })
+                .eq('stripe_default_payment_method_id', pmId);
+
+            this.logger.info({ company_id: companyProfile.company_id, payment_method_id: pmId }, 'Cleared detached payment method from company billing profile');
+
+            await this.revertJobsToDraft({ companyId: companyProfile.company_id });
+
+            await this.eventPublisher.publish('company.billing_payment_method_removed', {
+                company_id: companyProfile.company_id,
+                payment_method_id: pmId,
+            });
+        }
+
+        // Check firm billing profiles
+        const { data: firmProfile } = await this.supabase
+            .from('firm_billing_profiles')
+            .select('firm_id')
+            .eq('stripe_default_payment_method_id', pmId)
+            .maybeSingle();
+
+        if (firmProfile) {
+            await this.supabase
+                .from('firm_billing_profiles')
+                .update({ stripe_default_payment_method_id: null, updated_at: now })
+                .eq('stripe_default_payment_method_id', pmId);
+
+            this.logger.info({ firm_id: firmProfile.firm_id, payment_method_id: pmId }, 'Cleared detached payment method from firm billing profile');
+
+            await this.revertJobsToDraft({ firmId: firmProfile.firm_id });
+
+            await this.eventPublisher.publish('firm.billing_payment_method_removed', {
+                firm_id: firmProfile.firm_id,
+                payment_method_id: pmId,
+            });
+        }
+    }
+
+    /**
+     * Handle customer.deleted — a Stripe customer was deleted entirely.
+     * Clears all Stripe fields from the matching billing profile and
+     * reverts all non-draft jobs for that company/firm to draft status.
+     */
+    private async handleCustomerDeleted(customer: Stripe.Customer): Promise<void> {
+        if (!customer.id) return;
+
+        const customerId = customer.id;
+        const now = new Date().toISOString();
+
+        // Check company billing profiles
+        const { data: companyProfile } = await this.supabase
+            .from('company_billing_profiles')
+            .select('company_id')
+            .eq('stripe_customer_id', customerId)
+            .maybeSingle();
+
+        if (companyProfile) {
+            await this.supabase
+                .from('company_billing_profiles')
+                .update({
+                    stripe_customer_id: null,
+                    stripe_default_payment_method_id: null,
+                    updated_at: now,
+                })
+                .eq('stripe_customer_id', customerId);
+
+            this.logger.info({ company_id: companyProfile.company_id, customer_id: customerId }, 'Cleared deleted Stripe customer from company billing profile');
+
+            await this.revertJobsToDraft({ companyId: companyProfile.company_id });
+
+            await this.eventPublisher.publish('company.billing_customer_deleted', {
+                company_id: companyProfile.company_id,
+                stripe_customer_id: customerId,
+            });
+        }
+
+        // Check firm billing profiles
+        const { data: firmProfile } = await this.supabase
+            .from('firm_billing_profiles')
+            .select('firm_id')
+            .eq('stripe_customer_id', customerId)
+            .maybeSingle();
+
+        if (firmProfile) {
+            await this.supabase
+                .from('firm_billing_profiles')
+                .update({
+                    stripe_customer_id: null,
+                    stripe_default_payment_method_id: null,
+                    updated_at: now,
+                })
+                .eq('stripe_customer_id', customerId);
+
+            this.logger.info({ firm_id: firmProfile.firm_id, customer_id: customerId }, 'Cleared deleted Stripe customer from firm billing profile');
+
+            await this.revertJobsToDraft({ firmId: firmProfile.firm_id });
+
+            await this.eventPublisher.publish('firm.billing_customer_deleted', {
+                firm_id: firmProfile.firm_id,
+                stripe_customer_id: customerId,
+            });
+        }
+    }
+
+    /**
+     * Revert all non-draft jobs for a company or firm to draft status.
+     * Called when billing is invalidated (payment method removed, customer deleted).
+     */
+    private async revertJobsToDraft(params: { companyId?: string; firmId?: string }): Promise<void> {
+        const { companyId, firmId } = params;
+        const now = new Date().toISOString();
+        const activeStatuses = ['pending', 'active', 'paused'];
+
+        try {
+            let query = this.supabase
+                .from('jobs')
+                .update({ status: 'draft', updated_at: now })
+                .in('status', activeStatuses);
+
+            if (companyId) {
+                query = query.eq('company_id', companyId);
+            } else if (firmId) {
+                query = query.eq('source_firm_id', firmId);
+            } else {
+                return;
+            }
+
+            const { data, error } = await query.select('id');
+
+            if (error) {
+                this.logger.error({ err: error, companyId, firmId }, 'Failed to revert jobs to draft after billing invalidation');
+                return;
+            }
+
+            const revertedCount = data?.length || 0;
+            if (revertedCount > 0) {
+                const entityType = companyId ? 'company' : 'firm';
+                const entityId = companyId || firmId;
+                this.logger.info(
+                    { entityType, entityId, revertedCount, jobIds: data?.map(j => j.id) },
+                    `Reverted ${revertedCount} jobs to draft: billing invalidated`
+                );
+
+                await this.eventPublisher.publish('jobs.billing_reverted_to_draft', {
+                    entity_type: entityType,
+                    entity_id: entityId,
+                    reverted_count: revertedCount,
+                    job_ids: data?.map(j => j.id) || [],
+                });
+            }
+        } catch (err) {
+            this.logger.error({ err, companyId, firmId }, 'Failed to revert jobs to draft');
         }
     }
 

@@ -20,8 +20,8 @@ export async function registerEmailRoutes(app: FastifyInstance, config: Register
     const tokenRefresh = new TokenRefreshService(connectionRepo, config.eventPublisher, config.logger, config.crypto);
     const service = new EmailService(connectionRepo, tokenRefresh, config.logger);
 
-    // GET /api/v2/integrations/email/:connectionId/messages
-    app.get('/api/v2/integrations/email/:connectionId/messages', async (request, reply) => {
+    // GET /api/v3/integrations/email/:connectionId/messages
+    app.get('/api/v3/integrations/email/:connectionId/messages', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
         const query = request.query as {
@@ -47,8 +47,8 @@ export async function registerEmailRoutes(app: FastifyInstance, config: Register
         }
     });
 
-    // GET /api/v2/integrations/email/:connectionId/messages/:messageId
-    app.get('/api/v2/integrations/email/:connectionId/messages/:messageId', async (request, reply) => {
+    // GET /api/v3/integrations/email/:connectionId/messages/:messageId
+    app.get('/api/v3/integrations/email/:connectionId/messages/:messageId', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId, messageId } = request.params as { connectionId: string; messageId: string };
 
@@ -65,8 +65,8 @@ export async function registerEmailRoutes(app: FastifyInstance, config: Register
         }
     });
 
-    // GET /api/v2/integrations/email/:connectionId/threads/:threadId
-    app.get('/api/v2/integrations/email/:connectionId/threads/:threadId', async (request, reply) => {
+    // GET /api/v3/integrations/email/:connectionId/threads/:threadId
+    app.get('/api/v3/integrations/email/:connectionId/threads/:threadId', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId, threadId } = request.params as { connectionId: string; threadId: string };
 
@@ -83,8 +83,8 @@ export async function registerEmailRoutes(app: FastifyInstance, config: Register
         }
     });
 
-    // POST /api/v2/integrations/email/:connectionId/messages/send
-    app.post('/api/v2/integrations/email/:connectionId/messages/send', async (request, reply) => {
+    // POST /api/v3/integrations/email/:connectionId/messages/send
+    app.post('/api/v3/integrations/email/:connectionId/messages/send', async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
         const { connectionId } = request.params as { connectionId: string };
         const body = request.body as {

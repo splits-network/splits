@@ -58,11 +58,11 @@ export class PlacementServiceV2 {
 
     /**
      * Gather all 5 attribution role IDs for commission calculation:
-     * 1. Candidate Recruiter (from application)
-     * 2. Company Recruiter (from job)
-     * 3. Job Owner (from job)
+     * 1. Candidate Recruiter (from application — chosen by candidate)
+     * 2. Company Recruiter (from application — set when company recruiter submits)
+     * 3. Job Owner (from job — set at creation)
      * 4. Candidate Sourcer (if active)
-     * 5. Company Sourcer (if active)
+     * 5. Company Sourcer (if active — from dedicated company_sourcers table)
      */
     private async gatherAttribution(
         candidateId: string,
@@ -75,10 +75,10 @@ export class PlacementServiceV2 {
         candidate_sourcer_recruiter_id: string | null;
         company_sourcer_recruiter_id: string | null;
     }> {
-        // 1: Get candidate_recruiter_id from application
+        // 1 & 2: Get candidate_recruiter_id and company_recruiter_id from application
         const { data: application } = await this.supabase
             .from('applications')
-            .select('candidate_recruiter_id')
+            .select('candidate_recruiter_id, company_recruiter_id')
             .eq('id', applicationId)
             .single();
 
@@ -87,11 +87,12 @@ export class PlacementServiceV2 {
         }
 
         const candidateRecruiterId = application.candidate_recruiter_id || null;
+        const companyRecruiterId = application.company_recruiter_id || null;
 
-        // 2 & 3: Get job for company_recruiter_id, job_owner_recruiter_id and company_id
+        // 3: Get job for job_owner_recruiter_id and company_id
         const { data: job } = await this.supabase
             .from('jobs')
-            .select('company_recruiter_id, job_owner_recruiter_id, company_id, source_firm_id')
+            .select('job_owner_recruiter_id, company_id, source_firm_id')
             .eq('id', jobId)
             .single();
 
@@ -100,7 +101,6 @@ export class PlacementServiceV2 {
         }
 
         const isOffPlatform = job.source_firm_id && !job.company_id;
-        const companyRecruiterId = job.company_recruiter_id || null;
         // Off-platform jobs have no job_owner commission
         const jobOwnerRecruiterId = isOffPlatform ? null : (job.job_owner_recruiter_id || null);
 
@@ -112,7 +112,7 @@ export class PlacementServiceV2 {
             candidateSourcerRecruiterId = isActive ? candidateSourcer.sourcer_recruiter_id : null;
         }
 
-        // 5: Get company sourcer (check if active) — skip for off-platform jobs
+        // 5: Get company sourcer from dedicated company_sourcers table (check if active)
         let companySourcerRecruiterId: string | null = null;
         if (job.company_id) {
             const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
@@ -353,7 +353,7 @@ export class PlacementServiceV2 {
         // Get job data with company_id, job owner, and off-platform fields
         const { data: job } = await this.supabase
             .from('jobs')
-            .select('id, title, company_id, company_recruiter_id, job_owner_recruiter_id, fee_percentage, guarantee_days, source_firm_id, company_name')
+            .select('id, title, company_id, job_owner_recruiter_id, fee_percentage, guarantee_days, source_firm_id, company_name')
             .eq('id', application.job_id)
             .single();
 
@@ -385,7 +385,7 @@ export class PlacementServiceV2 {
 
         // Get all 5 recruiter role IDs from referential data (all nullable)
         const candidateRecruiterId = application.candidate_recruiter_id;  // From application
-        const companyRecruiterId = job.company_recruiter_id;              // From job
+        const companyRecruiterId = application.company_recruiter_id;     // From application (per-application attribution)
         // Off-platform jobs have no job_owner commission
         const jobOwnerRecruiterId = isOffPlatform ? null : job.job_owner_recruiter_id;
 

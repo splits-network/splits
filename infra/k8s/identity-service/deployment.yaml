@@ -4,7 +4,7 @@ metadata:
     name: identity-service
     namespace: splits-network
 spec:
-    replicas: 2
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: identity-service
@@ -13,6 +13,13 @@ spec:
             labels:
                 app: identity-service
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: identity-service
                   image: ${ACR_SERVER}/identity-service:${IMAGE_TAG}
@@ -71,7 +78,7 @@ spec:
                       httpGet:
                           path: /health
                           port: 3001
-                      initialDelaySeconds: 30
+                      initialDelaySeconds: 60
                       periodSeconds: 10
                       timeoutSeconds: 5
                       failureThreshold: 3
@@ -79,7 +86,7 @@ spec:
                       httpGet:
                           path: /health
                           port: 3001
-                      initialDelaySeconds: 10
+                      initialDelaySeconds: 15
                       periodSeconds: 5
                       timeoutSeconds: 5
                       failureThreshold: 2

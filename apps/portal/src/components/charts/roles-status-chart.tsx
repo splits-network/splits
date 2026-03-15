@@ -12,7 +12,41 @@ import { Doughnut } from "react-chartjs-2";
 import { registerChart } from "./chart-options";
 import type { Job } from "../../app/portal/roles/types";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors, hexWithAlpha } from "../basel/dashboard/charts/use-basel-chart-colors";
+
+/** Resolve DaisyUI v5 CSS variable to computed color string. */
+function resolveCssColor(varName: string, fallback: string): string {
+    if (typeof window === "undefined") return fallback;
+    const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    return val || fallback;
+}
+
+/** Convert a color to rgba with alpha. Handles hex and oklch formats. */
+function hexWithAlpha(color: string, alpha: number): string {
+    if (color.startsWith("#")) {
+        const hex = color.slice(1);
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    if (color.includes(")")) {
+        return color.replace(")", ` / ${alpha})`);
+    }
+    return color;
+}
+
+function useBaselChartColors() {
+    return {
+        primary: resolveCssColor("--color-primary", "#233876"),
+        success: resolveCssColor("--color-success", "#16a34a"),
+        warning: resolveCssColor("--color-warning", "#d97706"),
+        info: resolveCssColor("--color-info", "#0ea5e9"),
+        neutral: resolveCssColor("--color-neutral", "#18181b"),
+        baseContent: resolveCssColor("--color-base-content", "#18181b"),
+        base200: resolveCssColor("--color-base-200", "#f4f4f5"),
+        base300: resolveCssColor("--color-base-300", "#e4e4e7"),
+    };
+}
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);

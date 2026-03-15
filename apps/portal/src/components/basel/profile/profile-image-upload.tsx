@@ -31,11 +31,11 @@ export function BaselProfileImageUpload({
         const file = event.target.files?.[0];
         if (!file) return;
         if (!file.type.startsWith("image/")) {
-            toast.error("Please select an image file");
+            toast.error("Select an image file to upload.");
             return;
         }
         if (file.size > 5 * 1024 * 1024) {
-            toast.error("Image must be less than 5MB");
+            toast.error("File too large. Maximum size is 5MB.");
             return;
         }
         setUploading(true);
@@ -52,18 +52,15 @@ export function BaselProfileImageUpload({
             const document = uploadResponse?.data;
             if (!document?.public_url)
                 throw new Error("Invalid response from upload service");
-            const updateResponse = await client.patch(
-                "/users/profile-image",
-                {
-                    profile_image_url: document.public_url,
-                    profile_image_path: document.file_path,
-                },
-            );
+            const updateResponse = await client.patch("/users/profile-image", {
+                profile_image_url: document.public_url,
+                profile_image_path: document.file_path,
+            });
             if (updateResponse?.data) {
                 const newImageUrl = updateResponse.data.profile_image_url;
                 setImageUrl(newImageUrl);
                 onImageUpdate(newImageUrl);
-                toast.success("Profile photo updated");
+                toast.success("Profile photo updated.");
             } else {
                 throw new Error("Failed to update profile image");
             }
@@ -90,10 +87,10 @@ export function BaselProfileImageUpload({
             await client.delete("/users/profile-image");
             setImageUrl(undefined);
             onImageUpdate(null);
-            toast.success("Profile photo removed");
+            toast.success("Profile photo removed.");
         } catch (error) {
             console.error("Error deleting profile image:", error);
-            toast.error("Failed to remove profile photo");
+            toast.error("Photo couldn't be removed. Try again.");
         } finally {
             setDeleting(false);
         }
@@ -120,12 +117,12 @@ export function BaselProfileImageUpload({
                 )}
                 {!isLoading && (
                     <div className="absolute inset-0 bg-neutral/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <i className="fa-duotone fa-regular fa-camera text-neutral-content text-xl" />
+                        <i className="fa-duotone fa-regular fa-camera text-base-content text-xl" />
                     </div>
                 )}
                 {isLoading && (
                     <div className="absolute inset-0 bg-neutral/80 flex items-center justify-center">
-                        <span className="loading loading-spinner loading-sm text-neutral-content" />
+                        <span className="loading loading-spinner loading-sm text-base-content" />
                     </div>
                 )}
             </label>

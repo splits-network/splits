@@ -44,6 +44,9 @@ import { firmBillingProfileRoutes } from './firm-billing/routes';
 import { FirmStripeConnectRepository } from './firm-connect/repository';
 import { FirmStripeConnectService } from './firm-connect/service';
 import { firmStripeConnectRoutes } from './firm-connect/routes';
+import { EntitlementRepository } from './entitlements/repository';
+import { EntitlementService } from './entitlements/service';
+import { registerEntitlementRoutes } from './entitlements/routes';
 
 interface BillingV2Config {
     supabaseUrl: string;
@@ -158,9 +161,14 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     // Enrich plan responses with active splits rates
     planService.setSplitsRateService(splitsRateService);
 
+    // Initialize entitlements service
+    const entitlementRepository = new EntitlementRepository(accessClient);
+    const entitlementService = new EntitlementService(entitlementRepository, accessResolver);
+
     registerPlanRoutes(app, { planService });
     registerSplitsRateRoutes(app, { splitsRateService });
     registerSubscriptionRoutes(app, { subscriptionService });
+    registerEntitlementRoutes(app, { entitlementService });
     registerPayoutRoutes(app, { payoutService });
     discountRoutes(app, discountService);
     stripeConnectRoutes(app, connectService);
@@ -183,6 +191,7 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     return {
         planService,
         subscriptionService,
+        entitlementService,
         payoutService,
         payoutScheduleService,
         escrowHoldService,

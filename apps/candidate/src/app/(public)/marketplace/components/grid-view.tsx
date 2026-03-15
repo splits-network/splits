@@ -15,7 +15,7 @@ export default function GridView({
     onSelect,
 }: GridViewProps) {
     return (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {recruiters.map((recruiter) => (
                 <GridCard
                     key={recruiter.id}

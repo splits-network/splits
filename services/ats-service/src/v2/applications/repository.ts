@@ -62,12 +62,13 @@ export class ApplicationRepository {
         } else if (accessContext.recruiterId) {
             // Recruiters can access applications where they are:
             // 1. candidate_recruiter_id on the application (always — their own submissions)
-            // 2. company_recruiter_id or job_owner_recruiter_id on the related job
+            // 2. company_recruiter_id on the application (company recruiter submissions)
+            // 3. job_owner_recruiter_id on the related job
             //    BUT only for companies where they have can_view_applications permission
             const { data: recruiterJobs } = await this.supabase
                 .from('jobs')
                 .select('id, company_id')
-                .or(`company_recruiter_id.eq.${accessContext.recruiterId},job_owner_recruiter_id.eq.${accessContext.recruiterId}`);
+                .eq('job_owner_recruiter_id', accessContext.recruiterId);
 
             // Filter assigned jobs to only those where recruiter has can_view_applications
             let viewableJobIds: string[] = [];
@@ -91,11 +92,13 @@ export class ApplicationRepository {
 
             if (viewableJobIds.length > 0) {
                 query = query.or(
-                    `candidate_recruiter_id.eq.${accessContext.recruiterId},job_id.in.(${viewableJobIds.join(',')})`
+                    `candidate_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId},job_id.in.(${viewableJobIds.join(',')})`
                 );
             } else {
-                // Only show their own submissions
-                query = query.eq('candidate_recruiter_id', accessContext.recruiterId);
+                // Show their own submissions (as candidate recruiter or company recruiter)
+                query = query.or(
+                    `candidate_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId}`
+                );
             }
         } else if (!accessContext.isPlatformAdmin) {
             if (accessContext.organizationIds.length > 0) {
@@ -183,6 +186,92 @@ export class ApplicationRepository {
             query = query.eq('candidate_id', filters.candidate_id);
         }
 
+        // Application source filter (direct vs recruiter)
+        if (filters.application_source) {
+            query = query.eq('application_source', filters.application_source);
+        }
+
+        // AI reviewed filter (boolean column)
+        if (filters.ai_reviewed === 'yes') {
+            query = query.eq('ai_reviewed', true);
+        } else if (filters.ai_reviewed === 'no') {
+            query = query.eq('ai_reviewed', false);
+        }
+
+        // Company accepted filter (boolean + null for pending)
+        if (filters.company_accepted === 'yes') {
+            query = query.eq('accepted_by_company', true);
+        } else if (filters.company_accepted === 'no') {
+            query = query.eq('accepted_by_company', false);
+        } else if (filters.company_accepted === 'pending') {
+            query = query.is('accepted_by_company', null);
+        }
+
+        // Candidate accepted filter (boolean + null for pending)
+        if (filters.candidate_accepted === 'yes') {
+            query = query.eq('accepted_by_candidate', true);
+        } else if (filters.candidate_accepted === 'no') {
+            query = query.eq('accepted_by_candidate', false);
+        } else if (filters.candidate_accepted === 'pending') {
+            query = query.is('accepted_by_candidate', null);
+        }
+
+        // Has cover letter filter
+        if (filters.has_cover_letter === 'yes') {
+            query = query.not('cover_letter', 'is', null);
+        } else if (filters.has_cover_letter === 'no') {
+            query = query.is('cover_letter', null);
+        }
+
+        // Has pre-screen answers filter
+        if (filters.has_pre_screen === 'yes') {
+            query = query.not('pre_screen_answers', 'is', null);
+        } else if (filters.has_pre_screen === 'no') {
+            query = query.is('pre_screen_answers', null);
+        }
+
+        // AI score filter (subquery on ai_reviews table)
+        if (filters.ai_score_filter) {
+            const scoreQuery = this.supabase.from('ai_reviews').select('application_id, fit_score');
+
+            if (filters.ai_score_filter === 'not_reviewed') {
+                // Get application IDs that have NO ai_review
+                const { data: reviewedApps } = await this.supabase
+                    .from('ai_reviews')
+                    .select('application_id');
+                const reviewedIds = [...new Set((reviewedApps || []).map((r: any) => r.application_id))];
+                if (reviewedIds.length > 0) {
+                    query = query.not('id', 'in', `(${reviewedIds.join(',')})`);
+                }
+            } else {
+                let minScore = 0;
+                let maxScore = 100;
+                if (filters.ai_score_filter === 'high') {
+                    minScore = 80;
+                } else if (filters.ai_score_filter === 'medium') {
+                    minScore = 50; maxScore = 79;
+                } else if (filters.ai_score_filter === 'low') {
+                    maxScore = 49;
+                }
+
+                const { data: matchingReviews } = await this.supabase
+                    .from('ai_reviews')
+                    .select('application_id')
+                    .gte('fit_score', minScore)
+                    .lte('fit_score', maxScore);
+
+                const matchingIds = [...new Set((matchingReviews || []).map((r: any) => r.application_id))];
+                if (matchingIds.length > 0) {
+                    query = query.in('id', matchingIds);
+                } else {
+                    return {
+                        data: [],
+                        pagination: { page, limit, total: 0, total_pages: Math.ceil(0 / limit) }
+                    };
+                }
+            }
+        }
+
         // Apply sorting
         const sortBy = filters.sort_by || 'created_at';
         const sortOrder = filters.sort_order?.toLowerCase() === 'asc' ? true : false;
@@ -239,22 +328,22 @@ export class ApplicationRepository {
             return data;
         }
 
-        if (accessContext.recruiterId && (data as any).candidate_recruiter_id === accessContext.recruiterId) {
+        if (accessContext.recruiterId && (
+            (data as any).candidate_recruiter_id === accessContext.recruiterId ||
+            (data as any).company_recruiter_id === accessContext.recruiterId
+        )) {
             return data;
         }
 
-        // Check if recruiter is assigned to the job as company_recruiter or job_owner
+        // Check if recruiter is the job owner
         if (accessContext.recruiterId && (data as any).job_id) {
             const { data: job } = await this.supabase
                 .from('jobs')
-                .select('company_recruiter_id, job_owner_recruiter_id')
+                .select('job_owner_recruiter_id')
                 .eq('id', (data as any).job_id)
                 .single();
 
-            if (job && (
-                job.company_recruiter_id === accessContext.recruiterId ||
-                job.job_owner_recruiter_id === accessContext.recruiterId
-            )) {
+            if (job && job.job_owner_recruiter_id === accessContext.recruiterId) {
                 return data;
             }
         }
@@ -387,7 +476,8 @@ export class ApplicationRepository {
         // Note: company_sourcers table no longer exists — company sourcer data not joined here
         const baseFields = `*,
             candidate:candidates(id, full_name, email, phone, location, user_id, candidate_sourcer:candidate_sourcers(sourcer_recruiter_id, recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))),
-            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id), job_requirements:job_requirements(*), company_recruiter:recruiters!fk_jobs_company_recruiter_id(id, bio, phone, status, user_id, user:users!recruiters_user_id_fkey(name, email)))`;
+            company_recruiter:recruiters!applications_company_recruiter_id_fkey(id, bio, phone, status, user_id, user:users!recruiters_user_id_fkey(name, email)),
+            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id), job_requirements:job_requirements(*))`;
 
         if (!include) {
             return baseFields;

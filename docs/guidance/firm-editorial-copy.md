@@ -10,17 +10,17 @@ The two boolean fields `candidate_firm` and `company_firm` describe what side of
 
 ### Definitions
 
-| Field | Meaning | Old Column |
-|---|---|---|
-| `candidate_firm` | This firm represents candidates. They have talent to place. | `seeking_split_partners` |
-| `company_firm` | This firm represents companies. They have jobs to fill. | `accepts_candidate_submissions` |
+| Field            | Meaning                                                     | Old Column                      |
+| ---------------- | ----------------------------------------------------------- | ------------------------------- |
+| `candidate_firm` | This firm represents candidates. They have talent to place. | `seeking_split_partners`        |
+| `company_firm`   | This firm represents companies. They have jobs to fill.     | `accepts_candidate_submissions` |
 
 ### Badge Copy (Short — Cards & Compact UI)
 
-| Field | Active Badge | Inactive Badge |
-|---|---|---|
-| `candidate_firm` | **Has Candidates** | *Not shown* |
-| `company_firm` | **Has Jobs** | *Not shown* |
+| Field            | Active Badge       | Inactive Badge |
+| ---------------- | ------------------ | -------------- |
+| `candidate_firm` | **Has Candidates** | _Not shown_    |
+| `company_firm`   | **Has Jobs**       | _Not shown_    |
 
 - Icon for `candidate_firm`: `fa-duotone fa-regular fa-user-tie`
 - Icon for `company_firm`: `fa-duotone fa-regular fa-building`
@@ -32,10 +32,10 @@ The two boolean fields `candidate_firm` and `company_firm` describe what side of
 
 These appear in the hero header kicker row, right-aligned, as compact status indicators.
 
-| Field | Active | Inactive |
-|---|---|---|
-| `candidate_firm` | **Candidate Firm** | *Not shown* |
-| `company_firm` | **Company Firm** | *Not shown* |
+| Field            | Active             | Inactive    |
+| ---------------- | ------------------ | ----------- |
+| `candidate_firm` | **Candidate Firm** | _Not shown_ |
+| `company_firm`   | **Company Firm**   | _Not shown_ |
 
 - Icon for `candidate_firm`: `fa-duotone fa-regular fa-user-tie`
 - Icon for `company_firm`: `fa-duotone fa-regular fa-building`
@@ -46,10 +46,10 @@ These appear in the hero header kicker row, right-aligned, as compact status ind
 
 Full badge treatment with both active and inactive states visible so recruiters can see what the firm does and doesn't do.
 
-| Field | Active | Inactive |
-|---|---|---|
+| Field            | Active                    | Inactive                          |
+| ---------------- | ------------------------- | --------------------------------- |
 | `candidate_firm` | **Represents Candidates** | **Does Not Represent Candidates** |
-| `company_firm` | **Represents Companies** | **Does Not Represent Companies** |
+| `company_firm`   | **Represents Companies**  | **Does Not Represent Companies**  |
 
 - Active badges: filled semantic color (`bg-primary text-primary-content` / `bg-secondary text-secondary-content`)
 - Inactive badges: muted ghost (`bg-base-200 border border-base-300 text-base-content/30`)
@@ -58,10 +58,10 @@ Full badge treatment with both active and inactive states visible so recruiters 
 
 When candidates see firm cards or profiles, the language shifts slightly to be candidate-facing.
 
-| Field | Active Badge (Card) | Active Badge (Profile) |
-|---|---|---|
-| `candidate_firm` | **Represents Talent** | **Represents Talent** |
-| `company_firm` | **Direct Employer Access** | **Direct Employer Access** |
+| Field            | Active Badge (Card)        | Active Badge (Profile)     |
+| ---------------- | -------------------------- | -------------------------- |
+| `candidate_firm` | **Represents Talent**      | **Represents Talent**      |
+| `company_firm`   | **Direct Employer Access** | **Direct Employer Access** |
 
 ---
 
@@ -90,29 +90,29 @@ Same label. Candidates interact with firms as firms regardless of orientation.
 All section headers use the editorial kicker pattern:
 `text-xs font-bold uppercase tracking-[0.22em] text-base-content/30`
 
-| Section | Kicker Text | Notes |
-|---|---|---|
-| About | `ABOUT {FIRM_NAME}` | Dynamic — includes firm name |
-| Specialties — Industries | `INDUSTRIES` | Sub-section within Specialties tab |
-| Specialties — Skills | `SPECIALTIES` | Sub-section within Specialties tab |
-| Specialties — Placement Types | `PLACEMENT TYPES` | Sub-section within Specialties tab |
-| Specialties — Geography | `GEOGRAPHIC FOCUS` | Sub-section within Specialties tab |
-| Team | `TEAM MEMBERS` | |
-| Reviews | `CLIENT TESTIMONIALS` | Placeholder until feature ships |
-| Milestones | `MILESTONES` | Sidebar card header |
-| Markets Served | `MARKETS SERVED` | Sidebar card header |
-| Contact | `CONTACT` | Sidebar card header |
-| Recent Placements | `RECENT PLACEMENTS` | About tab, below description |
-| Partnership | `PARTNERSHIP` | About tab or card section |
+| Section                       | Kicker Text           | Notes                              |
+| ----------------------------- | --------------------- | ---------------------------------- |
+| About                         | `ABOUT {FIRM_NAME}`   | Dynamic — includes firm name       |
+| Specialties — Industries      | `INDUSTRIES`          | Sub-section within Specialties tab |
+| Specialties — Skills          | `SPECIALTIES`         | Sub-section within Specialties tab |
+| Specialties — Placement Types | `PLACEMENT TYPES`     | Sub-section within Specialties tab |
+| Specialties — Geography       | `GEOGRAPHIC FOCUS`    | Sub-section within Specialties tab |
+| Team                          | `TEAM MEMBERS`        |                                    |
+| Reviews                       | `CLIENT TESTIMONIALS` | Placeholder until feature ships    |
+| Milestones                    | `MILESTONES`          | Sidebar card header                |
+| Markets Served                | `MARKETS SERVED`      | Sidebar card header                |
+| Contact                       | `CONTACT`             | Sidebar card header                |
+| Recent Placements             | `RECENT PLACEMENTS`   | About tab, below description       |
+| Partnership                   | `PARTNERSHIP`         | About tab or card section          |
 
 ### Tab Labels
 
-| Tab Key | Label | Icon |
-|---|---|---|
-| `about` | About | `fa-duotone fa-regular fa-building` |
+| Tab Key       | Label       | Icon                                |
+| ------------- | ----------- | ----------------------------------- |
+| `about`       | About       | `fa-duotone fa-regular fa-building` |
 | `specialties` | Specialties | `fa-duotone fa-regular fa-bullseye` |
-| `team` | Team | `fa-duotone fa-regular fa-users` |
-| `reviews` | Reviews | `fa-duotone fa-regular fa-star` |
+| `team`        | Team        | `fa-duotone fa-regular fa-users`    |
+| `reviews`     | Reviews     | `fa-duotone fa-regular fa-star`     |
 
 ---
 
@@ -122,18 +122,18 @@ Follow the pattern: **[What's missing]. [What to do or what to expect.]**
 
 Use `text-base text-base-content/40 italic` for empty state text.
 
-| Section | Copy |
-|---|---|
-| No description | This firm hasn't added a description yet. |
-| No specialties | No specialties listed. Check back as the firm builds out their profile. |
-| No team members visible | Team members are not publicly visible for this firm. |
-| No recent placements | No recent placements to show. |
-| No industries | No industries specified. |
-| No placement types | No placement types listed. |
-| No geographic focus | No geographic focus specified. |
-| Reviews coming soon | Reviews are coming soon. |
-| Milestones coming soon | Milestones are coming soon. |
-| No contact info | Contact information is not publicly available for this firm. |
+| Section                 | Copy                                                                    |
+| ----------------------- | ----------------------------------------------------------------------- |
+| No description          | This firm hasn't added a description yet.                               |
+| No specialties          | No specialties listed. Check back as the firm builds out their profile. |
+| No team members visible | Team members are not publicly visible for this firm.                    |
+| No recent placements    | No recent placements to show.                                           |
+| No industries           | No industries specified.                                                |
+| No placement types      | No placement types listed.                                              |
+| No geographic focus     | No geographic focus specified.                                          |
+| Reviews coming soon     | Reviews are coming soon.                                                |
+| Milestones coming soon  | Milestones are coming soon.                                             |
+| No contact info         | Contact information is not publicly available for this firm.            |
 
 ---
 
@@ -143,36 +143,36 @@ All CTAs use `font-bold uppercase tracking-wider`. Action verb first, max 3 word
 
 ### Firm Card Footer
 
-| Context | Primary CTA | Style |
-|---|---|---|
-| Portal (recruiter viewing) | **View Firm** | `btn btn-sm btn-link` |
+| Context                       | Primary CTA   | Style                 |
+| ----------------------------- | ------------- | --------------------- |
+| Portal (recruiter viewing)    | **View Firm** | `btn btn-sm btn-link` |
 | Candidate (candidate viewing) | **View Firm** | `btn btn-sm btn-link` |
 
 The card itself is clickable. The link CTA is a secondary affordance.
 
 ### Firm Profile Hero
 
-| Context | Primary CTA | Secondary CTAs |
-|---|---|---|
-| Portal (recruiter viewing) | **Request Partnership** | **Website** / **Share** |
-| Candidate (candidate viewing) | **Submit Resume** | **Website** / **Share** |
+| Context                       | Primary CTA             | Secondary CTAs          |
+| ----------------------------- | ----------------------- | ----------------------- |
+| Portal (recruiter viewing)    | **Request Partnership** | **Website** / **Share** |
+| Candidate (candidate viewing) | **Submit Resume**       | **Website** / **Share** |
 
 ### Firm Profile Sidebar
 
-| Context | CTA | Style |
-|---|---|---|
-| Portal | **Request Partnership** | `btn btn-primary btn-sm w-full` |
-| Candidate | **Submit Resume** | `btn btn-primary btn-sm w-full` |
+| Context   | CTA                     | Style                           |
+| --------- | ----------------------- | ------------------------------- |
+| Portal    | **Request Partnership** | `btn btn-primary btn-sm w-full` |
+| Candidate | **Submit Resume**       | `btn btn-primary btn-sm w-full` |
 
 ### CTA Icons
 
-| CTA | Icon |
-|---|---|
-| Request Partnership | `fa-duotone fa-regular fa-handshake` |
-| Submit Resume | `fa-duotone fa-regular fa-paper-plane` |
-| Website | `fa-duotone fa-regular fa-arrow-up-right-from-square` |
-| Share | `fa-duotone fa-regular fa-share-nodes` |
-| View Firm | `fa-duotone fa-regular fa-arrow-up-right-from-square` |
+| CTA                 | Icon                                                  |
+| ------------------- | ----------------------------------------------------- |
+| Request Partnership | `fa-duotone fa-regular fa-handshake`                  |
+| Submit Resume       | `fa-duotone fa-regular fa-paper-plane`                |
+| Website             | `fa-duotone fa-regular fa-arrow-up-right-from-square` |
+| Share               | `fa-duotone fa-regular fa-share-nodes`                |
+| View Firm           | `fa-duotone fa-regular fa-arrow-up-right-from-square` |
 
 ---
 
@@ -182,10 +182,10 @@ For the firm directory filters and header stats.
 
 ### Filter Options
 
-| Field | Filter Label | Filter Description |
-|---|---|---|
+| Field                   | Filter Label       | Filter Description                                       |
+| ----------------------- | ------------------ | -------------------------------------------------------- |
 | `candidate_firm = true` | **Has Candidates** | Firms that represent candidates and have talent to place |
-| `company_firm = true` | **Has Jobs** | Firms that represent companies and have roles to fill |
+| `company_firm = true`   | **Has Jobs**       | Firms that represent companies and have roles to fill    |
 
 These appear as filter checkboxes or toggle badges in the directory sidebar/toolbar.
 
@@ -193,12 +193,12 @@ These appear as filter checkboxes or toggle badges in the directory sidebar/tool
 
 Stats bar above the directory grid, following the standard pattern of big number + short label.
 
-| Stat | Label |
-|---|---|
-| Total firms | **Firms** |
-| Firms with `candidate_firm = true` | **With Candidates** |
-| Firms with `company_firm = true` | **With Jobs** |
-| Average team size or total recruiters | **Recruiters** |
+| Stat                                  | Label               |
+| ------------------------------------- | ------------------- |
+| Total firms                           | **Firms**           |
+| Firms with `candidate_firm = true`    | **With Candidates** |
+| Firms with `company_firm = true`      | **With Jobs**       |
+| Average team size or total recruiters | **Recruiters**      |
 
 ---
 
@@ -208,23 +208,23 @@ Stats bar above the directory grid, following the standard pattern of big number
 
 Compact format. Labels should be short — one word preferred.
 
-| Stat | Label | Value Format | Icon |
-|---|---|---|---|
-| Team size range | **Team** | `10–25` (en-dash) | `fa-duotone fa-regular fa-users` |
-| Founded year | **Est.** | `2018` | `fa-duotone fa-regular fa-calendar` |
-| Active member count | **Active** | `12` | `fa-duotone fa-regular fa-user-check` |
-| Placement types count | **Types** | `3` | `fa-duotone fa-regular fa-briefcase` |
+| Stat                  | Label      | Value Format      | Icon                                  |
+| --------------------- | ---------- | ----------------- | ------------------------------------- |
+| Team size range       | **Team**   | `10–25` (en-dash) | `fa-duotone fa-regular fa-users`      |
+| Founded year          | **Est.**   | `2018`            | `fa-duotone fa-regular fa-calendar`   |
+| Active member count   | **Active** | `12`              | `fa-duotone fa-regular fa-user-check` |
+| Placement types count | **Types**  | `3`               | `fa-duotone fa-regular fa-briefcase`  |
 
 ### Profile Hero Stats Strip
 
 Expanded format. Labels can be slightly longer.
 
-| Stat | Label | Value Format | Icon |
-|---|---|---|---|
-| Team size range | **Team Size** | `10–25` (en-dash) | `fa-duotone fa-regular fa-users` |
-| Active member count | **Active** | `12` | `fa-duotone fa-regular fa-user-check` |
-| Founded year | **Founded** | `2018` | `fa-duotone fa-regular fa-calendar` |
-| Placement types count | **Placement Types** | `3` | `fa-duotone fa-regular fa-briefcase` |
+| Stat                  | Label               | Value Format      | Icon                                  |
+| --------------------- | ------------------- | ----------------- | ------------------------------------- |
+| Team size range       | **Team Size**       | `10–25` (en-dash) | `fa-duotone fa-regular fa-users`      |
+| Active member count   | **Active**          | `12`              | `fa-duotone fa-regular fa-user-check` |
+| Founded year          | **Founded**         | `2018`            | `fa-duotone fa-regular fa-calendar`   |
+| Placement types count | **Placement Types** | `3`               | `fa-duotone fa-regular fa-briefcase`  |
 
 ### Stat Display Rules
 
@@ -241,30 +241,37 @@ Expanded format. Labels can be slightly longer.
 All copy in this guide assumes the Basel typographic system.
 
 ### Kicker
+
 ```
 text-xs font-bold uppercase tracking-[0.18em] text-base-content/30
 ```
+
 Profile sections use `tracking-[0.22em]`.
 
 ### Section Kicker (Sidebar Card Header)
+
 ```
 text-xs font-bold uppercase tracking-[0.22em] text-base-content/40
 ```
 
 ### Badge (Partnership)
+
 ```
 text-xs font-bold uppercase tracking-wider
 ```
+
 Card badges: `flex items-center gap-2 px-3 py-1.5`
 Profile badges: `flex items-center gap-2 px-4 py-2`
 
 ### Stat Value
+
 ```
 Card: text-lg font-black text-base-content leading-none
-Profile: text-xl font-black text-neutral-content leading-none
+Profile: text-xl font-black text-base-content leading-none
 ```
 
 ### Stat Label
+
 ```
 text-xs font-bold uppercase tracking-[0.16em] text-base-content/30
 ```

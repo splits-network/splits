@@ -32,7 +32,7 @@ const colorClass: Record<BaselSemanticColor, string> = {
     error: "badge-error",
     warning: "badge-warning",
     info: "badge-info",
-    neutral: "badge-neutral",
+    neutral: "badge-primary",
 };
 
 const variantClass: Record<BaselBadgeVariant, string> = {
@@ -78,9 +78,7 @@ export function BaselBadge({
                 .filter(Boolean)
                 .join(" ")}
         >
-            {icon && (
-                <i className={`fa-duotone fa-regular ${icon}`} />
-            )}
+            {icon && <i className={`fa-duotone fa-regular ${icon}`} />}
             {children}
         </span>
     );

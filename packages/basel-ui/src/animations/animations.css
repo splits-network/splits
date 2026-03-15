@@ -194,6 +194,24 @@
 }
 
 /* ============================================================
+   STACKING CONTEXT — CONTROLS BAR vs CONTENT
+   Sticky controls bars must paint above animated content.
+   A single z-index on .controls-bar and .content-area avoids
+   per-element z-classes throughout the project.
+   ============================================================ */
+
+.controls-bar {
+    position: sticky;
+    z-index: 30;
+}
+
+.content-area {
+    position: relative;
+    isolation: isolate;
+}
+
+
+/* ============================================================
    CSS PARALLAX
    Pure CSS parallax via perspective + translateZ.
    No JavaScript required.
@@ -244,6 +262,32 @@
    Elements appear immediately with no animation.
    ============================================================ */
 
+/* ============================================================
+   TOAST ANIMATIONS
+   Entrance, exit, and progress bar for BaselToastItem.
+   ============================================================ */
+
+@keyframes toast-enter {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toast-exit {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100%); }
+}
+
+@keyframes toast-progress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   Respects user preference automatically.
+   Elements appear immediately with no animation.
+   ============================================================ */
+
 @media (prefers-reduced-motion: reduce) {
     .scroll-reveal {
         opacity: 1;
@@ -257,5 +301,14 @@
     .parallax-slower,
     .parallax-img-wrap img {
         transform: none;
+    }
+
+    /* Toast animations: appear immediately, no slide */
+    [role="alert"] {
+        animation: none !important;
+    }
+
+    [role="alert"] .h-0\.5 > div {
+        animation: none !important;
     }
 }

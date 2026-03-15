@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import {
@@ -59,10 +59,39 @@ export function FirmBillingSetupWizard({
     // Step 2 state
     const [paymentMethodSaved, setPaymentMethodSaved] = useState(false);
     const [skippedPayment, setSkippedPayment] = useState(false);
+    const [loadingProfile, setLoadingProfile] = useState(false);
 
     const isImmediateBilling = billingTerms === "immediate";
 
-    // Reset form when modal opens
+    // Fetch full profile from API when modal opens
+    const loadProfile = useCallback(async () => {
+        try {
+            setLoadingProfile(true);
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            const res = await client.get<{ data: any }>(`/firm-billing-profiles/${firmId}`);
+            const p = res?.data;
+            if (p) {
+                setBillingEmail(p.billing_email || "");
+                setBillingContactName(p.billing_contact_name || "");
+                setBillingTerms(p.billing_terms || "net_30");
+                setStreet(p.billing_address?.street || "");
+                setCity(p.billing_address?.city || "");
+                setState(p.billing_address?.state || "");
+                setZip(p.billing_address?.zip || "");
+                setCountry(p.billing_address?.country || "United States");
+                setTaxId(p.stripe_tax_id || "");
+            }
+        } catch {
+            // If profile doesn't exist yet, keep defaults
+        } finally {
+            setLoadingProfile(false);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [firmId]);
+
+    // Reset form when modal opens, then fetch latest from API
     useEffect(() => {
         if (!open) return;
         setStep(0);
@@ -78,7 +107,8 @@ export function FirmBillingSetupWizard({
         setZip(existingProfile?.billing_address?.zip || "");
         setCountry(existingProfile?.billing_address?.country || "United States");
         setTaxId(existingProfile?.stripe_tax_id || "");
-    }, [open, existingProfile]);
+        loadProfile();
+    }, [open, existingProfile, loadProfile]);
 
     const handleSaveBillingDetails = async () => {
         if (!billingEmail.trim()) {
@@ -137,17 +167,52 @@ export function FirmBillingSetupWizard({
         if (step > 0) setStep((step - 1) as Step);
     };
 
+    const detailsFooter = step === 0 ? (
+        <div className="flex justify-between w-full">
+            <button className="btn btn-ghost" onClick={onClose}>
+                Cancel
+            </button>
+            <button
+                className="btn btn-primary"
+                onClick={handleNext}
+                disabled={!billingEmail.trim() || saving}
+            >
+                {saving ? (
+                    <>
+                        <span className="loading loading-spinner loading-sm" />
+                        Saving...
+                    </>
+                ) : (
+                    <>
+                        Continue
+                        <i className="fa-duotone fa-regular fa-arrow-right" />
+                    </>
+                )}
+            </button>
+        </div>
+    ) : undefined;
+
     const paymentFooter = step === 1 ? (
         <div className="flex justify-between w-full">
-            <button className="btn btn-ghost" onClick={handleBack}>
-                <i className="fa-duotone fa-regular fa-arrow-left" />
-                Back
-            </button>
-            {!isImmediateBilling && (
-                <button className="btn btn-ghost" onClick={handleSkipPayment}>
-                    Skip for now
+            <div className="flex gap-2">
+                <button className="btn btn-ghost" onClick={handleBack}>
+                    <i className="fa-duotone fa-regular fa-arrow-left" />
+                    Back
                 </button>
-            )}
+                {!isImmediateBilling && (
+                    <button className="btn btn-ghost" onClick={handleSkipPayment}>
+                        Skip for now
+                    </button>
+                )}
+            </div>
+            <button
+                type="submit"
+                form="firm-billing-payment-form"
+                className="btn btn-primary"
+            >
+                <i className="fa-duotone fa-regular fa-credit-card" />
+                Save Payment Method
+            </button>
         </div>
     ) : undefined;
 
@@ -176,10 +241,17 @@ export function FirmBillingSetupWizard({
                 nextDisabled={!billingEmail.trim()}
                 nextLabel="Continue"
                 submitLabel="Done"
-                footer={paymentFooter || doneFooter}
+                footer={detailsFooter || paymentFooter || doneFooter}
                 maxWidth="max-w-2xl"
             >
-                {error && (
+                {loadingProfile && (
+                    <div className="flex items-center justify-center py-8">
+                        <span className="loading loading-spinner loading-md" />
+                        <span className="ml-3 text-sm text-base-content/40">Loading billing details...</span>
+                    </div>
+                )}
+
+                {!loadingProfile && error && (
                     <BaselAlertBox variant="error" className="mb-4">
                         {error}
                         <button className="text-xs underline ml-2" onClick={() => setError(null)}>
@@ -189,7 +261,7 @@ export function FirmBillingSetupWizard({
                 )}
 
                 {/* Step 1: Billing Details */}
-                {step === 0 && (
+                {!loadingProfile && step === 0 && (
                     <div className="space-y-4">
                         <p className="text-sm text-base-content/50">
                             Enter your firm&apos;s billing information for placement commissions.
@@ -311,10 +383,20 @@ export function FirmBillingSetupWizard({
                         <FirmPaymentForm
                             firmId={firmId}
                             onSuccess={handlePaymentSuccess}
-                            onCancel={() => setStep(0)}
-                            allowSkip={!isImmediateBilling}
-                            onSkip={handleSkipPayment}
                             submitButtonText="Save Payment Method"
+                            formId="firm-billing-payment-form"
+                            hideActions
+                            billingDetails={{
+                                name: billingContactName || undefined,
+                                email: billingEmail || undefined,
+                                address: {
+                                    line1: street || undefined,
+                                    city: city || undefined,
+                                    state: state || undefined,
+                                    postal_code: zip || undefined,
+                                    country: country || undefined,
+                                },
+                            }}
                         />
                     </div>
                 )}

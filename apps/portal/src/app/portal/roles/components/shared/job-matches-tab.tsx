@@ -4,7 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { startChatConversation, sendChatMessage } from "@/lib/chat-start";
-import { TrueScoreUpsell } from "@/components/matches/true-score-upsell";
+import { UpgradePrompt } from "@/components/entitlements/upgrade-prompt";
+import { useUserProfile } from "@/contexts/user-profile-context";
+import { BaselEmptyState } from "@splits-network/basel-ui";
 import { MatchCard } from "./match-card";
 import { useMatchActions } from "../../hooks/use-match-actions";
 import type { EnrichedMatch } from "@splits-network/shared-types";
@@ -36,14 +38,13 @@ function buildInviteMessage(match: EnrichedMatch, job: Job): string {
 
 export function JobMatchesTab({
     job,
-    isPartner,
     isRecruiter,
 }: {
     job: Job;
-    isPartner: boolean;
     isRecruiter: boolean;
 }) {
     const { getToken } = useAuth();
+    const { hasEntitlement } = useUserProfile();
     const { inviteCandidate, dismissMatch } = useMatchActions();
     const [matches, setMatches] = useState<EnrichedMatch[]>([]);
     const [loading, setLoading] = useState(true);
@@ -58,7 +59,7 @@ export function JobMatchesTab({
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: EnrichedMatch[] }>(
-                    "/matches",
+                    "/matches/views/enriched",
                     {
                         params: {
                             job_id: job.id,
@@ -141,26 +142,25 @@ export function JobMatchesTab({
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center py-12">
+            <div className="py-12 text-center">
                 <span className="loading loading-spinner loading-lg text-primary mb-4 block" />
-                <span className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
                     Loading matches...
-                </span>
+                </p>
             </div>
         );
     }
 
     return (
         <div className="space-y-6">
-            {isRecruiter && !isPartner && <TrueScoreUpsell />}
+            {isRecruiter && !hasEntitlement("ai_match_scoring") && <UpgradePrompt entitlement="ai_match_scoring" variant="card" />}
 
             {matches.length === 0 ? (
-                <div className="text-center py-12 text-base-content/40">
-                    <i className="fa-duotone fa-regular fa-bullseye text-3xl mb-3 block" />
-                    <p className="text-sm font-semibold">
-                        No matched candidates yet
-                    </p>
-                </div>
+                <BaselEmptyState
+                    icon="fa-duotone fa-regular fa-bullseye"
+                    title="No Matches Yet"
+                    description="Candidate matching will surface relevant profiles as they become available."
+                />
             ) : (
                 <>
                     <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">

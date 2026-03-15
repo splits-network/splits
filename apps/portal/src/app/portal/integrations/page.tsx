@@ -16,6 +16,7 @@ import { MarketplaceProviderCard } from "@/components/basel/integrations/marketp
 import { InstalledIntegrations } from "@/components/basel/integrations/installed-integrations";
 import { ProviderDetailModal } from "@/components/basel/integrations/provider-detail-modal";
 import ATSConfigPanel from "@/components/basel/ats/ats-config-panel";
+import CalendarPreferencesPanel from "./components/calendar-preferences-panel";
 
 type Tab = "browse" | "installed";
 
@@ -129,7 +130,11 @@ export default function IntegrationsMarketplacePage() {
     /* ── Derived data ────────────────────────────────────────────────── */
 
     const filteredProviders = providers.filter(
-        (p) => category === "all" || p.category === category,
+        (p) =>
+            category === "all" ||
+            p.category === category ||
+            (p.category === "combo" &&
+                (category === "calendar" || category === "email")),
     );
 
     const getConnectionForProvider = (slug: string) =>
@@ -154,13 +159,13 @@ export default function IntegrationsMarketplacePage() {
             value: "calendar",
             label: "Calendar",
             icon: "fa-duotone fa-regular fa-calendar",
-            count: providers.filter((p) => p.category === "calendar").length,
+            count: providers.filter((p) => p.category === "calendar" || p.category === "combo").length,
         },
         {
             value: "email",
             label: "Email",
             icon: "fa-duotone fa-regular fa-envelope",
-            count: providers.filter((p) => p.category === "email").length,
+            count: providers.filter((p) => p.category === "email" || p.category === "combo").length,
         },
         {
             value: "ats",
@@ -302,6 +307,12 @@ export default function IntegrationsMarketplacePage() {
                         onDisconnect={handleDisconnect}
                     />
                 )}
+
+                {/* Calendar preferences (shown when calendar is connected) */}
+                <CalendarPreferencesPanel
+                    connections={connections}
+                    providers={providers}
+                />
             </section>
 
             {/* Provider detail modal */}

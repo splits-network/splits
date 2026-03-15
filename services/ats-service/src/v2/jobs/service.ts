@@ -12,15 +12,18 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 const VALID_COMMUTE_TYPES = ['remote', 'hybrid_1', 'hybrid_2', 'hybrid_3', 'hybrid_4', 'in_office'];
 const VALID_JOB_LEVELS = ['entry', 'mid', 'senior', 'lead', 'manager', 'director', 'vp', 'c_suite'];
+const NON_DRAFT_STATUSES = ['pending', 'active', 'paused', 'filled', 'closed'];
 
 export class JobServiceV2 {
     private accessResolver: AccessContextResolver;
+    private supabase: SupabaseClient;
 
     constructor(
         private repository: JobRepository,
         supabase: SupabaseClient,
         private eventPublisher?: IEventPublisher
     ) {
+        this.supabase = supabase;
         this.accessResolver = new AccessContextResolver(supabase);
     }
 
@@ -100,14 +103,16 @@ export class JobServiceV2 {
 
         const status = data.status || 'draft';
 
-        // Early status requires an activates_at date
-        if (status === 'early' && !data.activates_at) {
-            throw new Error('activates_at is required when setting status to early');
+        // Early access requires an activates_at date
+        if (data.is_early_access && !data.activates_at) {
+            throw new Error('activates_at is required when enabling early access');
         }
+
+        // Billing readiness gate — non-draft jobs require billing to be configured
+        await this.enforceBillingReadiness(status, data.company_id, data.source_firm_id);
 
         const job = await this.repository.createJob({
             ...data,
-            job_owner_id: userContext.identityUserId,
             status,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -157,11 +162,18 @@ export class JobServiceV2 {
                 userRole
             );
 
-            // Early status requires an activates_at date
-            if (updates.status === 'early') {
+            // Billing readiness gate — block activation if billing not configured
+            await this.enforceBillingReadiness(
+                updates.status,
+                currentJob.company_id,
+                currentJob.source_firm_id
+            );
+
+            // Early access requires an activates_at date
+            if (updates.is_early_access === true) {
                 const activatesAt = updates.activates_at ?? currentJob.activates_at;
                 if (!activatesAt) {
-                    throw new Error('activates_at is required when setting status to early');
+                    throw new Error('activates_at is required when enabling early access');
                 }
             }
         }
@@ -264,6 +276,54 @@ export class JobServiceV2 {
     }
 
     /**
+     * Check billing readiness for a company or firm.
+     * Queries billing profile tables directly (no cross-service HTTP calls).
+     * Returns true if billing is ready (has profile, stripe customer, and payment method).
+     */
+    private async checkBillingReady(companyId?: string, firmId?: string): Promise<boolean> {
+        if (companyId) {
+            const { data } = await this.supabase
+                .from('company_billing_profiles')
+                .select('billing_email, stripe_customer_id, stripe_default_payment_method_id')
+                .eq('company_id', companyId)
+                .maybeSingle();
+
+            return !!(data?.billing_email && data?.stripe_customer_id && data?.stripe_default_payment_method_id);
+        }
+
+        if (firmId) {
+            const { data } = await this.supabase
+                .from('firm_billing_profiles')
+                .select('billing_email, stripe_customer_id, stripe_default_payment_method_id')
+                .eq('firm_id', firmId)
+                .maybeSingle();
+
+            return !!(data?.billing_email && data?.stripe_customer_id && data?.stripe_default_payment_method_id);
+        }
+
+        return false;
+    }
+
+    /**
+     * Enforce billing readiness for non-draft job statuses.
+     * Throws a descriptive error if billing is not configured.
+     */
+    private async enforceBillingReadiness(status: string, companyId?: string, firmId?: string): Promise<void> {
+        if (status === 'draft') return;
+
+        const isReady = await this.checkBillingReady(companyId, firmId);
+        if (!isReady) {
+            const entity = companyId ? 'company' : 'firm';
+            throw new Error(
+                `Billing setup is required before activating a role. ` +
+                `Please complete your payment setup in ${entity} settings. ` +
+                `Splits Network is commission-based — you are only charged when a recruiter successfully fills your role. ` +
+                `You can save this role as a draft and activate it after billing is configured.`
+            );
+        }
+    }
+
+    /**
      * Private helper for status transition validation
      */
     private async validateStatusTransition(
@@ -273,14 +333,12 @@ export class JobServiceV2 {
     ): Promise<void> {
         // Define allowed transitions
         const allowedTransitions: Record<string, string[]> = {
-            draft:    ['early', 'pending', 'active', 'closed'],
-            pending:  ['active', 'paused', 'closed'],
-            early:    ['active', 'priority', 'paused', 'closed'],
-            active:   ['priority', 'early', 'paused', 'filled', 'closed'],
-            priority: ['active', 'paused', 'filled', 'closed'],
-            paused:   ['active', 'early', 'priority', 'filled', 'closed'],
-            filled:   ['active', 'closed'],
-            closed:   ['active', 'draft'],
+            draft:   ['pending', 'active', 'closed'],
+            pending: ['active', 'paused', 'closed'],
+            active:  ['paused', 'filled', 'closed'],
+            paused:  ['active', 'filled', 'closed'],
+            filled:  ['active', 'closed'],
+            closed:  ['active', 'draft'],
         };
 
         if (!allowedTransitions[fromStatus]?.includes(toStatus)) {

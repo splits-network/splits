@@ -16,7 +16,7 @@ export function SearchInput({
     className = "",
 }: SearchInputProps) {
     return (
-        <label className={`input ${className}`}>
+        <label className={`input w-full ${className}`}>
             <i className="fa-duotone fa-regular fa-search opacity-50"></i>
             <input
                 type="text"

@@ -279,7 +279,7 @@ export default function InvitationWizardClient({ token }: { token: string }) {
     return (
         <main ref={mainRef}>
             {/* ── Hero Header ── */}
-            <section className="relative bg-neutral text-neutral-content py-12 lg:py-16">
+            <section className="relative bg-base-300 text-base-content py-12 lg:py-16">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -302,7 +302,7 @@ export default function InvitationWizardClient({ token }: { token: string }) {
                                 agreement
                             </span>
                         </h1>
-                        <p className="scroll-reveal fade-up wizard-subtitle text-base text-neutral-content/50 max-w-xl">
+                        <p className="scroll-reveal fade-up wizard-subtitle text-base text-base-content/50 max-w-xl">
                             {invitation.recruiter_name} has invited you to join
                             their network. Walk through the details below and
                             decide how you would like to respond.

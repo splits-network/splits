@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+    name: doc-reconcile-resume-metadata
+    namespace: splits-network
+    labels:
+        app: document-processing-service
+        component: cron
+spec:
+    # Every 6 hours
+    schedule: "0 */6 * * *"
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid
+    jobTemplate:
+        spec:
+            activeDeadlineSeconds: 600
+            backoffLimit: 0
+            template:
+                metadata:
+                    labels:
+                        app: document-processing-service
+                        component: cron-job
+                spec:
+                    nodeSelector:
+                        agentpool: userpool
+                    tolerations:
+                        - key: "kubernetes.azure.com/scalesetpriority"
+                          operator: "Equal"
+                          value: "spot"
+                          effect: "NoSchedule"
+                    restartPolicy: Never
+                    containers:
+                        - name: doc-reconcile-resume-metadata
+                          image: ${ACR_SERVER}/document-processing-service:${IMAGE_TAG}
+                          imagePullPolicy: Always
+                          command: ["node"]
+                          args:
+                              [
+                                  "services/document-processing-service/dist/jobs/reconcile-resume-metadata.js",
+                              ]
+                          env:
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-url
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-service-role-key
+                              - name: RABBITMQ_URL
+                                value: "amqp://splits:splits_production@rabbitmq:5672"
+                              - name: NODE_ENV
+                                value: "production"
+                              - name: LOG_LEVEL
+                                value: "info"

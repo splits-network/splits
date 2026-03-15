@@ -9,7 +9,7 @@ import { z, ZodTypeAny } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { GptActionRepository } from '../../actions/repository';
 import { formatStageLabel } from '../../actions/helpers';
-import { McpAuthContext, toolError } from '../types';
+import { McpAuthContext, toolError, safeTool } from '../types';
 import { requireMcpScope } from '../auth';
 
 // Extracted to avoid TS2589 deep type inference in registerTool generics
@@ -36,7 +36,7 @@ export function registerGetApplicationsTool(
             },
             _meta: { 'ui/resourceUri': 'ui://career-copilot/applications.html' },
         },
-        async ({ include_inactive, page: pageArg }) => {
+        safeTool('get_applications', async ({ include_inactive, page: pageArg }) => {
             const auth = getAuth();
             requireMcpScope(auth, 'applications:read');
 
@@ -85,6 +85,6 @@ export function registerGetApplicationsTool(
                     },
                 ],
             };
-        },
+        }),
     );
 }

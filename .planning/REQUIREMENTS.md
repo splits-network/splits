@@ -1,63 +1,103 @@
-# Requirements: Splits Network v8.0 — Company Experience Enhancement
+# Requirements: Splits Network v11.0 — Candidate Call Experience
 
-**Defined:** 2026-03-04
+**Defined:** 2026-03-09
 **Core Value:** Connecting recruiters and companies through a marketplace model with transparent split-fee arrangements
 
-## v8.0 Requirements
+## v11.0 Requirements
 
-Requirements for company experience enhancement. Each maps to roadmap phases.
+Requirements for surfacing video calls in the candidate app so candidates on the platform can see upcoming calls, receive notifications, and join calls directly.
 
-### Invite to Apply (Backend)
+### Candidate Call Visibility
 
-- [ ] **INVITE-01**: `invited` match status added to candidate_role_matches CHECK constraint (migration)
-- [ ] **INVITE-02**: `invited_by` (user_id) and `invited_at` (timestamp) columns on candidate_role_matches
-- [ ] **INVITE-03**: `PATCH /api/v2/matches/:id/invite` endpoint — company users only, must own the job's company
-- [ ] **INVITE-04**: `match.invited` RabbitMQ event published on invite with match, job, candidate, and inviter context
+- [x] **CAND-01**: Candidate dashboard shows upcoming scheduled calls with title, time, participants, and a "Join Call" button
+- [x] **CAND-02**: Application detail page shows entity-linked calls in a Calls tab matching the portal's application call tab
+- [x] **CAND-03**: Clicking "Join Call" generates a token and redirects to `video.applicant.network/join/{token}`
 
-### Notifications
+### Candidate Call Notifications
 
-- [ ] **NOTIF-01**: Notification-service consumer for `match.invited` creates in-app notification for candidate
-- [ ] **NOTIF-02**: Notification-service consumer for `match.invited` creates in-app notification for recruiter (job_owner_recruiter_id)
-- [ ] **NOTIF-03**: Email sent to candidate on invite via Resend (role details + CTA to view match)
-- [ ] **NOTIF-04**: Email sent to recruiter on invite via Resend (match details + candidate info)
+- [x] **CAND-04**: Candidates receive in-app notifications when a call is scheduled, rescheduled, or cancelled involving them
+- [x] **CAND-05**: Candidates receive email notifications for call scheduling, reminders, and cancellation
 
-### Portal UI (Company)
+## v10.0 Requirements (Complete)
 
-- [ ] **CUI-01**: "Invite to Apply" button on match rows in role detail Matches tab (company users only)
-- [ ] **CUI-02**: Invited matches show "Invited" badge with timestamp in Matches tab
-- [ ] **CUI-03**: Role detail tabs adapted for company users (hide Recruiter Brief tab, hide fee percentages in Financials)
-- [ ] **CUI-04**: Company dashboard "Top Matches" widget showing highest-scored matches across company roles
+Requirements for generalizing video from interview-only to platform-wide recruiting conversations, with dedicated full-screen video apps on branded subdomains. Each maps to roadmap phases.
 
-### Candidate UI
+### Data Model
 
-- [ ] **CAND-01**: Candidate match cards show "Invited" badge when match status is `invited`
-- [ ] **CAND-02**: Candidate matches page sorts invited matches to the top
+- [x] **DATA-01**: New `calls` table as universal video session entity with `call_type` enum (`interview`, `client_meeting`), polymorphic entity linking (`entity_type` + `entity_id`), and room/scheduling fields
+- [x] **DATA-02**: Existing `interviews` table references `calls` via `call_id` FK — interviews become a specialized call type with `application_id` context
+- [x] **DATA-03**: All call artifacts (recordings, transcripts, AI summaries, in-call notes) are owned by the call record, not posted to entity note tables
+
+### Video App
+
+- [x] **APP-01**: Dedicated `apps/video/` Next.js app with full-screen video experience (no portal navigation chrome)
+- [x] **APP-02**: Single app serves both `video.splits.network` and `video.applicant.network` — brand detection via Host header switches logo, colors, and copy per domain
+- [x] **APP-03**: Magic-link-only auth for all participants in the video app (Clerk-authenticated users receive a magic link token before redirect)
+- [x] **APP-04**: K8s deployment with ingress rules for both `video.splits.network` and `video.applicant.network` subdomains with TLS
+
+### Recruiter-Company Calls
+
+- [x] **CALL-01**: Recruiter can initiate a video call with a company contact, linked to a job, company, or general relationship
+- [x] **CALL-02**: Both participants are authenticated portal users with equal peer-to-peer roles (no host/candidate hierarchy)
+- [x] **CALL-03**: User can schedule a recruiter-company call with Google Calendar integration, selecting entity to link
+- [x] **CALL-04**: Participants receive email confirmation, reminders (24h, 1h), and cancellation/reschedule notifications for recruiting calls
+
+### Call History
+
+- [x] **HIST-01**: Portal has a "Calls" section listing all calls (interviews and recruiting calls) with filtering by type, date, entity
+- [x] **HIST-02**: Call detail view shows recording, transcript, AI summary, and in-call notes — all from the call record
+
+### AI Pipeline
+
+- [x] **AI-04**: AI summaries are stored on the call record and linked to the associated entity — not posted to entity note tables
+- [x] **AI-05**: Per-call-type summarizer prompts: interview summaries focus on candidate assessment, recruiting call summaries focus on business outcomes and action items
+- [x] **AI-06**: AI summary includes entity context (job title, company name, candidate names) in the prompt for better output
+
+### In-Call Experience
+
+- [x] **EXP-01**: In-call context panel shows entity data alongside notes (job details, candidate profiles, company info) based on what the call is linked to
+
+### Migration
+
+- [ ] **MIG-01**: Existing interview video flows redirect from portal/candidate apps to `video.splits.network` / `video.applicant.network`
+- [ ] **MIG-02**: Existing magic link URLs continue to work (redirect to new video app domain)
+- [ ] **MIG-03**: Existing v9.0 interview data (recordings, transcripts, summaries) migrated to call-owned artifact pattern
 
 ## Future Requirements
 
 Deferred to future milestone. Tracked but not in current roadmap.
 
-### Match Actions v2
+### Real-Time & Intelligence
 
-- **MATCH-01**: Shortlist/save matches for later review
-- **MATCH-02**: Match notes — company users can leave internal notes on matches
-- **MATCH-03**: Bulk invite — invite multiple matched candidates at once
+- **QUICK-01**: Quick/instant unscheduled calls — "Start Call" button creates instant room with push notification
+- **SMART-01**: AI-suggested entity linking — transcript analysis suggests related jobs, candidates, companies
+- **CLIP-01**: Recording highlights and clips — AI-generated timestamp markers for key moments
 
-### Company Experience v2
+### Interview Experience v2
 
-- **CEXP-01**: Company activity feed (who applied, who was invited, stage changes)
-- **CEXP-02**: Company-specific analytics dashboard (time-to-fill, match conversion rates)
-- **CEXP-03**: Company notification preferences (email frequency, notification types)
+- **SCORE-01**: Configurable interview scorecard with structured ratings per company/job
+- **SCORE-02**: Interview feedback request automation after call completion
+- **ANALYTICS-01**: Interview analytics dashboard (duration, time-to-schedule, no-show rates)
+
+### Accessibility & Advanced
+
+- **A11Y-01**: Live captions during calls (real-time speech-to-text, opt-in)
+- **SELF-01**: Self-service scheduling links (Calendly-style candidate self-booking)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| New recruiter invite action | Recruiters already propose candidates through the existing application flow |
-| Application pipeline changes | Company users can already advance stages in their portion of the flow |
-| Real-time match notifications (WebSocket) | Email + in-app polling is sufficient for v1; real-time is future enhancement |
-| Candidate auto-apply on invite | Candidate must actively choose to apply — keeps recruiters in the loop |
-| Match messaging/chat | Too complex for v1; invite is a signal, not a conversation |
+| Quick/instant unscheduled calls | Requires real-time push notification infrastructure not yet built |
+| AI-suggested entity linking | High complexity, defer to post-v10.0 |
+| Recording highlights and clips | High complexity AI pipeline extension, defer |
+| Custom branding per company | Two brand modes only (Splits Network + Applicant Network) — avoids massive UI/testing complexity |
+| Video voicemail / async messages | Anti-feature in recruiting context — candidates dislike async video |
+| Separate services per call type | Single video-service with call_type enum — avoid fragmenting infrastructure |
+| Video analytics dashboard | Need usage data before building dashboards — defer to post-v10.0 |
+| Built-in virtual backgrounds | Let OS/browser handle this — building well requires specialized ML engineering |
+| Real-time collaborative document editing | Own product category (CRDT/OT infrastructure) — screen share + notes panel sufficient |
+| One-way / async video interviews | Universally disliked by candidates, increases drop-off 30-50%. Anti-feature. |
 
 ## Traceability
 
@@ -65,26 +105,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INVITE-01 | Phase 28 | Pending |
-| INVITE-02 | Phase 28 | Pending |
-| INVITE-03 | Phase 29 | Pending |
-| INVITE-04 | Phase 29 | Pending |
-| NOTIF-01 | Phase 30 | Pending |
-| NOTIF-02 | Phase 30 | Pending |
-| NOTIF-03 | Phase 30 | Pending |
-| NOTIF-04 | Phase 30 | Pending |
-| CUI-01 | Phase 31 | Pending |
-| CUI-02 | Phase 31 | Pending |
-| CUI-03 | Phase 31 | Pending |
-| CUI-04 | Phase 31 | Pending |
-| CAND-01 | Phase 32 | Pending |
-| CAND-02 | Phase 32 | Pending |
+| DATA-01 | Phase 42 | Complete |
+| DATA-02 | Phase 42 | Complete |
+| DATA-03 | Phase 42 | Complete |
+| APP-01 | Phase 43 | Complete |
+| APP-02 | Phase 43 | Complete |
+| APP-03 | Phase 43 | Complete |
+| APP-04 | Phase 43 | Complete |
+| CALL-01 | Phase 44 | Complete |
+| CALL-02 | Phase 44 | Complete |
+| CALL-03 | Phase 44 | Complete |
+| CALL-04 | Phase 44 | Complete |
+| HIST-01 | Phase 44 | Complete |
+| HIST-02 | Phase 44 | Complete |
+| EXP-01 | Phase 44 | Complete |
+| AI-04 | Phase 45 | Complete |
+| AI-05 | Phase 45 | Complete |
+| AI-06 | Phase 45 | Complete |
+| MIG-01 | Phase 46 | Complete |
+| MIG-02 | Phase 46 | Complete |
+| MIG-03 | Phase 46 | Complete |
+
+| CAND-01 | Phase 52 | Pending |
+| CAND-02 | Phase 52 | Pending |
+| CAND-03 | Phase 52 | Pending |
+| CAND-04 | Phase 52 | Pending |
+| CAND-05 | Phase 52 | Pending |
 
 **Coverage:**
-- v8.0 requirements: 14 total
-- Mapped to phases: 14
+- v11.0 requirements: 5 total
+- Mapped to phases: 5
 - Unmapped: 0
+- v10.0 requirements: 20 total (all complete)
 
 ---
-*Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after roadmap creation*
+*Requirements defined: 2026-03-08*
+*Last updated: 2026-03-09 after v11.0 milestone creation (5 new requirements mapped to Phase 52)*

@@ -2,7 +2,8 @@
 
 import { Fragment } from "react";
 import type { Placement } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     candidateName,
     jobTitle,
@@ -57,7 +58,7 @@ export function TableView({
                         const state = placement.state || "unknown";
                         const rowBase = isSelected
                             ? "bg-primary/5 border-l-4 border-l-primary"
-                            : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
+                            : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"} hover:bg-primary/5`;
 
                         return (
                             <Fragment key={placement.id}>
@@ -76,10 +77,9 @@ export function TableView({
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
                                             {isNew(placement) && (
-                                                <i
-                                                    className="fa-duotone fa-regular fa-sparkles text-sm text-warning"
-                                                    title="Placed in the last 7 days"
-                                                />
+                                                <span className="tooltip tooltip-bottom" data-tip="Placed in the last 7 days">
+                                                    <i className="fa-duotone fa-regular fa-sparkles text-sm text-warning" />
+                                                </span>
                                             )}
                                             <span className="font-bold text-sm text-base-content">
                                                 {candidateName(placement)}
@@ -88,38 +88,34 @@ export function TableView({
                                     </td>
 
                                     {/* Job */}
-                                    <td className="px-4 py-3 text-sm font-semibold text-base-content/70">
+                                    <td className={`px-4 py-3 text-sm font-semibold ${placement.job?.title ? "text-base-content/70" : "text-base-content/30"}`}>
                                         {jobTitle(placement)}
                                     </td>
 
                                     {/* Company */}
-                                    <td className="px-4 py-3 text-sm font-semibold text-base-content/70">
+                                    <td className={`px-4 py-3 text-sm font-semibold ${placement.job?.company?.name ? "text-base-content/70" : "text-base-content/30"}`}>
                                         {companyName(placement)}
                                     </td>
 
                                     {/* Salary */}
-                                    <td className="px-4 py-3 text-sm font-bold text-base-content">
-                                        {formatCurrency(placement.salary || 0)}
+                                    <td className={`px-4 py-3 text-sm font-bold ${placement.salary ? "text-base-content" : "text-base-content/30"}`}>
+                                        {placement.salary ? formatCurrency(placement.salary) : "\u2014"}
                                     </td>
 
                                     {/* Your Share */}
-                                    <td className="px-4 py-3 text-sm font-bold text-primary">
-                                        {formatCurrency(
-                                            placement.recruiter_share || 0,
-                                        )}
+                                    <td className={`px-4 py-3 text-sm font-bold ${placement.recruiter_share ? "text-primary" : "text-base-content/30"}`}>
+                                        {placement.recruiter_share ? formatCurrency(placement.recruiter_share) : "\u2014"}
                                     </td>
 
                                     {/* Status */}
                                     <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(state)}`}
-                                        >
+                                        <BaselBadge color={statusColorName(state)} size="xs" variant="soft">
                                             {formatStatus(state)}
-                                        </span>
+                                        </BaselBadge>
                                     </td>
 
                                     {/* Hired date */}
-                                    <td className="px-4 py-3 text-sm text-base-content/50">
+                                    <td className={`px-4 py-3 text-sm ${placement.hired_at ? "text-base-content/50" : "text-base-content/30"}`}>
                                         {formatDate(placement.hired_at)}
                                     </td>
                                 </tr>

@@ -5,6 +5,13 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { OAuthConnectionPublic } from "@splits-network/shared-types";
 import { ModalPortal } from "@splits-network/shared-ui";
+import {
+    BaselModal,
+    BaselModalHeader,
+    BaselModalBody,
+    BaselModalFooter,
+    BaselAlertBox,
+} from "@splits-network/basel-ui";
 
 /* ─── Types ────────────────────────────────────────────────────────────── */
 
@@ -64,7 +71,8 @@ export default function ComposeEmailModal({
             const emailConns = (res.data ?? []).filter(
                 (c) =>
                     (c.provider_slug.includes("email") ||
-                        c.provider_slug.includes("gmail")) &&
+                        c.provider_slug.includes("gmail") ||
+                        c.provider_slug.includes("combo")) &&
                     c.status === "active",
             );
             setConnections(emailConns);
@@ -129,53 +137,36 @@ export default function ComposeEmailModal({
     const noConnections =
         !loading && connections.length === 0 && !presetConnectionId;
 
+    const canSend = selectedConnectionId && to && subject && body && !sending;
+
     return (
         <ModalPortal>
-            {/* Backdrop */}
-            <div
-                className="fixed inset-0 z-50 bg-black/40 animate-[fadeIn_0.3s_ease-out]"
-                onClick={onClose}
-            />
+            <BaselModal isOpen onClose={onClose} maxWidth="max-w-2xl">
+                <BaselModalHeader
+                    title={inReplyTo ? "Reply to Email" : "New Email"}
+                    subtitle={inReplyTo ? "Reply" : "Compose"}
+                    icon="fa-envelope"
+                    iconColor="primary"
+                    onClose={onClose}
+                    closeDisabled={sending}
+                />
 
-            {/* Slide-over panel */}
-            <div
-                className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-base-100 shadow-2xl flex flex-col animate-[slideInRight_0.4s_ease-out]"
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Header */}
-                <div className="bg-primary px-6 py-5 flex items-center justify-between">
-                    <div>
-                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-primary-content/60">
-                            {inReplyTo ? "Reply" : "Compose"}
-                        </p>
-                        <h2 className="text-lg font-black text-primary-content mt-0.5">
-                            {inReplyTo ? "Reply to Email" : "New Email"}
-                        </h2>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="btn btn-ghost btn-sm btn-circle text-primary-content hover:bg-primary-content/10"
-                    >
-                        <i className="fa-solid fa-xmark text-lg" />
-                    </button>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto px-6 py-5">
+                <BaselModalBody>
+                    {/* Error */}
                     {error && (
-                        <div className="bg-error/5 border-l-4 border-error px-4 py-3 mb-4">
-                            <p className="text-sm font-semibold text-error">
-                                {error}
-                            </p>
-                        </div>
+                        <BaselAlertBox variant="error" className="mb-4">
+                            {error}
+                        </BaselAlertBox>
                     )}
 
+                    {/* Loading */}
                     {loading && (
                         <div className="flex items-center justify-center py-16">
                             <span className="loading loading-spinner loading-md" />
                         </div>
                     )}
 
+                    {/* No connections */}
                     {noConnections && (
                         <div className="text-center py-12">
                             <div className="w-16 h-16 bg-base-200 border border-base-300 flex items-center justify-center mx-auto mb-4">
@@ -184,27 +175,27 @@ export default function ComposeEmailModal({
                             <p className="text-sm font-bold text-base-content/50 mb-2">
                                 No email connected
                             </p>
-                            <p className="text-xs text-base-content/40 mb-4">
+                            <p className="text-sm text-base-content/40 mb-4">
                                 Connect Gmail or Outlook to send emails from
                                 Splits.
                             </p>
                             <a
                                 href="/portal/integrations"
-                                className="btn btn-primary btn-sm"
-                                style={{ borderRadius: 0 }}
+                                className="btn btn-primary btn-sm rounded-none"
                             >
-                                <i className="fa-duotone fa-regular fa-plug mr-2" />
+                                <i className="fa-duotone fa-regular fa-plug" />
                                 Connect Email
                             </a>
                         </div>
                     )}
 
+                    {/* Form */}
                     {!loading && !noConnections && (
                         <div className="space-y-4">
                             {/* Connection selector */}
                             {connections.length > 1 && (
                                 <fieldset>
-                                    <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                    <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
                                         Send From
                                     </legend>
                                     <select
@@ -214,8 +205,7 @@ export default function ComposeEmailModal({
                                                 e.target.value,
                                             )
                                         }
-                                        className="select w-full"
-                                        style={{ borderRadius: 0 }}
+                                        className="select w-full rounded-none"
                                     >
                                         <option value="">
                                             Select account...
@@ -236,7 +226,7 @@ export default function ComposeEmailModal({
 
                             {/* To */}
                             <fieldset>
-                                <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
                                     To
                                 </legend>
                                 <input
@@ -244,14 +234,13 @@ export default function ComposeEmailModal({
                                     value={to}
                                     onChange={(e) => setTo(e.target.value)}
                                     placeholder="recipient@example.com"
-                                    className="input input-bordered w-full"
-                                    style={{ borderRadius: 0 }}
+                                    className="input w-full rounded-none"
                                 />
                             </fieldset>
 
                             {/* CC */}
                             <fieldset>
-                                <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
                                     CC
                                 </legend>
                                 <input
@@ -259,14 +248,13 @@ export default function ComposeEmailModal({
                                     value={cc}
                                     onChange={(e) => setCc(e.target.value)}
                                     placeholder="cc@example.com (optional)"
-                                    className="input input-bordered w-full"
-                                    style={{ borderRadius: 0 }}
+                                    className="input w-full rounded-none"
                                 />
                             </fieldset>
 
                             {/* Subject */}
                             <fieldset>
-                                <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
                                     Subject
                                 </legend>
                                 <input
@@ -274,14 +262,13 @@ export default function ComposeEmailModal({
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
                                     placeholder="Email subject"
-                                    className="input input-bordered w-full"
-                                    style={{ borderRadius: 0 }}
+                                    className="input w-full rounded-none"
                                 />
                             </fieldset>
 
                             {/* Body */}
                             <fieldset>
-                                <legend className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+                                <legend className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-2">
                                     Message
                                 </legend>
                                 <textarea
@@ -289,49 +276,40 @@ export default function ComposeEmailModal({
                                     onChange={(e) => setBody(e.target.value)}
                                     placeholder="Type your message..."
                                     rows={8}
-                                    className="textarea textarea-bordered w-full"
-                                    style={{ borderRadius: 0 }}
+                                    className="textarea w-full rounded-none"
                                 />
                             </fieldset>
                         </div>
                     )}
-                </div>
+                </BaselModalBody>
 
                 {/* Footer */}
                 {!loading && !noConnections && (
-                    <div className="px-6 py-4 border-t border-base-300 flex items-center justify-between">
+                    <BaselModalFooter align="between">
                         <button
                             onClick={onClose}
-                            className="btn btn-ghost btn-sm"
-                            style={{ borderRadius: 0 }}
+                            className="btn btn-ghost"
+                            disabled={sending}
                         >
                             Cancel
                         </button>
-
                         <button
                             onClick={handleSend}
-                            disabled={
-                                sending ||
-                                !selectedConnectionId ||
-                                !to ||
-                                !subject ||
-                                !body
-                            }
-                            className="btn btn-primary btn-sm"
-                            style={{ borderRadius: 0 }}
+                            disabled={!canSend}
+                            className="btn btn-primary"
                         >
                             {sending ? (
-                                <span className="loading loading-spinner loading-xs" />
+                                <span className="loading loading-spinner loading-sm" />
                             ) : (
                                 <>
-                                    <i className="fa-duotone fa-regular fa-paper-plane mr-2" />
+                                    <i className="fa-duotone fa-regular fa-paper-plane" />
                                     Send
                                 </>
                             )}
                         </button>
-                    </div>
+                    </BaselModalFooter>
                 )}
-            </div>
+            </BaselModal>
         </ModalPortal>
     );
 }

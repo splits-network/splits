@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 
 export interface ChatMessageEmailData {
     recipient: string;
@@ -16,6 +17,7 @@ export class ChatEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) {}
 
@@ -40,6 +42,9 @@ export class ChatEmailService {
     async sendNewMessageEmail(data: ChatMessageEmailData): Promise<void> {
         const subject = `New message from ${data.senderName}`;
 
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(data.recipientUserId, 'email', 'chat');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: 'chat.message.created',
             recipient_user_id: data.recipientUserId,
@@ -51,7 +56,7 @@ export class ChatEmailService {
                 preview: data.preview,
                 url: data.conversationUrl,
             },
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,

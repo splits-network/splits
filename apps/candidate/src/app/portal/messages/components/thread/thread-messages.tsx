@@ -67,27 +67,33 @@ export function ThreadMessages({
         <div className="flex-1 min-h-0 flex flex-col gap-4 p-4">
             {/* Context card */}
             {hasContext && (
-                <div className="border border-base-200 bg-base-100 p-4 text-sm">
-                    <div className="font-semibold mb-2">Context</div>
+                <div className="border-l-4 border-l-info border border-base-200 bg-info/5 p-4 text-sm">
+                    <div className="font-semibold mb-2 flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-link text-info" />
+                        Context
+                    </div>
                     <div className="flex flex-wrap gap-3 text-base-content/70">
                         {data.conversation.application_id && (
                             <Link
-                                className="link link-hover"
+                                className="link link-hover flex items-center gap-1.5"
                                 href={`/portal/applications?applicationId=${data.conversation.application_id}`}
                             >
+                                <i className="fa-duotone fa-regular fa-file-lines text-primary" />
                                 Application:{" "}
                                 {applicationTitle ||
                                     data.conversation.application_id}
                             </Link>
                         )}
                         {data.conversation.job_id && (
-                            <span>
+                            <span className="flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-briefcase text-secondary" />
                                 Role:{" "}
                                 {jobTitle || data.conversation.job_id}
                             </span>
                         )}
                         {data.conversation.company_id && (
-                            <span>
+                            <span className="flex items-center gap-1.5">
+                                <i className="fa-duotone fa-regular fa-building text-secondary" />
                                 Company: {data.conversation.company_id}
                             </span>
                         )}
@@ -107,7 +113,8 @@ export function ThreadMessages({
                     </div>
                 )}
                 {data.messages.length === 0 ? (
-                    <div className="text-center text-base-content/50">
+                    <div className="text-center text-base-content/50 py-12">
+                        <i className="fa-duotone fa-regular fa-messages text-4xl mb-3 text-primary/20 block" />
                         No messages yet.
                     </div>
                 ) : (

@@ -9,6 +9,7 @@ import { useChatSidebarOptional } from "@splits-network/chat-ui";
 import type { NavItem } from "@splits-network/shared-types";
 import { UserDropdown } from "./user-dropdown";
 import NotificationBell from "./notification-bell";
+import { SupportTrigger } from "@splits-network/support-widget";
 
 /* ─── Default Navigation Data (fallback when CMS is unavailable) ─────────── */
 
@@ -478,6 +479,9 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
 
                     {/* Theme toggle */}
                     <ThemeToggle className="header-right-item" />
+
+                    {/* Support */}
+                    <SupportTrigger />
 
                     {/* Auth actions */}
                     <div className="header-right-item flex items-center gap-2">

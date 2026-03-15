@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { useDrawer } from "@/contexts";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
 import { CompanyDetailLoader } from "../shared/company-detail";
-import { companyId } from "../shared/helpers";
+import { companyId, rowId } from "../shared/helpers";
 import { GridCard } from "./grid-card";
 
 type TagMap = Record<
@@ -29,17 +30,27 @@ export function GridView({
     const isMarketplace = activeTab === "marketplace";
     const { getToken } = useAuth();
     const [tagMap, setTagMap] = useState<TagMap>({});
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
 
     const selectedItem = items.find(
-        (item) => companyId(item, isMarketplace) === selectedId,
+        (item) => rowId(item, isMarketplace) === selectedId,
     );
 
     useEffect(() => {
-        if (!isMarketplace || items.length === 0) return;
+        if (wasOpen.current && !isOpen && selectedItem) {
+            onSelectAction(selectedItem);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
-        const companyIds = items
-            .map((item) => companyId(item, true))
-            .filter(Boolean);
+    useEffect(() => {
+        if (items.length === 0) return;
+
+        const companyIds = [...new Set(
+            items.map((item) => companyId(item, isMarketplace)).filter(Boolean),
+        )];
 
         if (companyIds.length === 0) return;
 
@@ -97,55 +108,40 @@ export function GridView({
         };
     }, [items, isMarketplace]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    useEffect(() => {
+        if (selectedItem && selectedId) {
+            open(
+                <CompanyDetailLoader
+                    companyId={companyId(selectedItem, isMarketplace)}
+                    onClose={() => onSelectAction(selectedItem)}
+                    onRefresh={onRefreshAction}
+                />,
+            );
+        } else {
+            close();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedId]);
+
     return (
-        <div className="drawer drawer-end">
-            <input
-                type="checkbox"
-                className="drawer-toggle"
-                checked={!!(selectedItem && selectedId)}
-                readOnly
-            />
-            <div className="drawer-content">
-                {/* Grid */}
-                <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                    {items.map((item) => {
-                        const cId = companyId(item, isMarketplace);
-                        return (
-                            <GridCard
-                                key={
-                                    isMarketplace
-                                        ? (item as Company).id
-                                        : (item as CompanyRelationship).id
-                                }
-                                item={item}
-                                activeTab={activeTab}
-                                isSelected={selectedId === cId}
-                                onSelect={() => onSelectAction(item)}
-                                onRefresh={onRefreshAction}
-                                techStack={tagMap[cId]?.skills ?? []}
-                                perks={tagMap[cId]?.perks ?? []}
-                                cultureTags={tagMap[cId]?.cultureTags ?? []}
-                            />
-                        );
-                    })}
-                </div>
-            </div>
-            <div className="drawer-side z-50">
-                <div
-                    className="drawer-overlay"
-                    onClick={() => selectedItem && onSelectAction(selectedItem)}
-                    aria-label="close drawer"
-                />
-                <div className="bg-base-100 w-full md:w-1/2 min-h-full overflow-y-auto shadow-2xl">
-                    {selectedItem && selectedId && (
-                        <CompanyDetailLoader
-                            companyId={selectedId}
-                            onClose={() => onSelectAction(selectedItem)}
-                            onRefresh={onRefreshAction}
-                        />
-                    )}
-                </div>
-            </div>
+        <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
+            {items.map((item) => {
+                const rId = rowId(item, isMarketplace);
+                const cId = companyId(item, isMarketplace);
+                return (
+                    <GridCard
+                        key={rId}
+                        item={item}
+                        activeTab={activeTab}
+                        isSelected={selectedId === rId}
+                        onSelect={() => onSelectAction(item)}
+                        onRefresh={onRefreshAction}
+                        techStack={tagMap[cId]?.skills ?? []}
+                        perks={tagMap[cId]?.perks ?? []}
+                        cultureTags={tagMap[cId]?.cultureTags ?? []}
+                    />
+                );
+            })}
         </div>
     );
 }

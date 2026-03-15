@@ -57,6 +57,8 @@ export interface CompanyInvitationFilters {
     recruiter_id?: string;
     status?: 'pending' | 'accepted' | 'expired' | 'revoked';
     invited_email?: string;
+    has_email?: string;
+    expiry_status?: string;
     search?: string;
     page?: number;
     limit?: number;

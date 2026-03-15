@@ -66,9 +66,7 @@ export function JobHeroHeader({
     /* Build meta items */
     const meta = [
         { icon: "fa-duotone fa-regular fa-building", text: name },
-        ...(job.location
-            ? [{ icon: "fa-duotone fa-regular fa-location-dot", text: job.location }]
-            : []),
+        { icon: "fa-duotone fa-regular fa-location-dot", text: job.location || "Location not specified" },
     ];
 
     /* Build stats */

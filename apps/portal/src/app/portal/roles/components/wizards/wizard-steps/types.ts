@@ -25,7 +25,9 @@ export interface FormData {
     source_firm_id?: string;
     location: string;
     department: string;
-    status: 'draft' | 'pending' | 'early' | 'active' | 'priority' | 'paused' | 'filled' | 'closed';
+    status: 'draft' | 'pending' | 'active' | 'paused' | 'filled' | 'closed';
+    is_early_access: boolean;
+    is_priority: boolean;
     activates_at: string;
     closes_at: string;
 

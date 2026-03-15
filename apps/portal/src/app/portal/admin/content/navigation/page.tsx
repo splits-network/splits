@@ -7,6 +7,7 @@ import { useToast } from "@/lib/toast-context";
 import { AdminPageHeader } from "../../components";
 import { BaselTabBar, BaselConfirmModal } from "@splits-network/basel-ui";
 import { ButtonLoading, LoadingState } from "@splits-network/shared-ui";
+import { FeatureGate } from "@/components/entitlements/feature-gate";
 import type {
     ContentNavigation,
     HeaderNavConfig,
@@ -112,10 +113,10 @@ export default function NavigationAdminPage() {
 
             setServerConfig(draftConfig);
             setIsDirty(false);
-            toast.success("Navigation saved");
+            toast.success("Navigation saved.");
         } catch (err) {
             console.error("Failed to save navigation:", err);
-            toast.error("Failed to save navigation");
+            toast.error("Navigation couldn't be saved. Try again.");
         } finally {
             setSaving(false);
         }
@@ -139,7 +140,7 @@ export default function NavigationAdminPage() {
         setDraftConfig(config);
         setIsDirty(true);
         setShowImportModal(false);
-        toast.success("Config imported — review and save when ready");
+        toast.success("Config imported. Review and save when ready.");
     }
 
     function handleExportConfig() {
@@ -199,15 +200,17 @@ export default function NavigationAdminPage() {
                             <i className="fa-duotone fa-regular fa-file-arrow-down"></i>
                             Schema
                         </a>
-                        <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={handleExportConfig}
-                            disabled={loading}
-                            title="Export current config as JSON"
-                        >
-                            <i className="fa-duotone fa-regular fa-download"></i>
-                            Export
-                        </button>
+                        <FeatureGate entitlement="data_export" variant="inline">
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={handleExportConfig}
+                                disabled={loading}
+                                title="Export current config as JSON"
+                            >
+                                <i className="fa-duotone fa-regular fa-download"></i>
+                                Export
+                            </button>
+                        </FeatureGate>
                         <button
                             className="btn btn-ghost btn-sm"
                             onClick={() => setShowImportModal(true)}

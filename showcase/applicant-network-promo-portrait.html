@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Applicant Network Promo - Portrait</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #3b5ccc;
+    --secondary: #14b8a6;
+    --accent: #ec4899;
+    --bg: #09090b;
+    --surface: #18181b;
+    --text: #fafafa;
+    --text-dim: #a1a1aa;
+    --glow-primary: rgba(59, 92, 204, 0.6);
+    --glow-accent: rgba(236, 72, 153, 0.6);
+    --glow-secondary: rgba(20, 184, 166, 0.6);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    width: 1080px;
+    height: 1920px;
+  }
+
+  /* Particle canvas */
+  #particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Scanlines overlay */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* Vignette */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  /* Scene container */
+  .scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .scene.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Glitch effect */
+  @keyframes glitch1 {
+    0%, 100% { clip-path: inset(0 0 95% 0); transform: translate(-3px, 0); }
+    20% { clip-path: inset(30% 0 40% 0); transform: translate(4px, 0); }
+    40% { clip-path: inset(60% 0 10% 0); transform: translate(-2px, 0); }
+    60% { clip-path: inset(10% 0 70% 0); transform: translate(5px, 0); }
+    80% { clip-path: inset(80% 0 5% 0); transform: translate(-4px, 0); }
+  }
+  @keyframes glitch2 {
+    0%, 100% { clip-path: inset(95% 0 0 0); transform: translate(3px, 0); }
+    20% { clip-path: inset(40% 0 30% 0); transform: translate(-4px, 0); }
+    40% { clip-path: inset(10% 0 60% 0); transform: translate(2px, 0); }
+    60% { clip-path: inset(70% 0 10% 0); transform: translate(-5px, 0); }
+    80% { clip-path: inset(5% 0 80% 0); transform: translate(4px, 0); }
+  }
+
+  .glitch-text {
+    position: relative;
+  }
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+  }
+  .glitch-text::before {
+    color: var(--accent);
+    animation: glitch1 0.3s infinite linear;
+    z-index: -1;
+  }
+  .glitch-text::after {
+    color: var(--secondary);
+    animation: glitch2 0.3s infinite linear;
+    z-index: -1;
+  }
+
+  /* Screen flash */
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 99990;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .flash.bang {
+    animation: flashBang 0.25s ease-out;
+  }
+  @keyframes flashBang {
+    0% { opacity: 0.9; }
+    100% { opacity: 0; }
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+    z-index: 99999;
+    transition: width 0.3s;
+  }
+
+  /* ===== SCENE: Boot ===== */
+  .boot-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    color: var(--secondary);
+    text-align: left;
+    white-space: pre-line;
+    line-height: 2;
+    max-width: 900px;
+    padding: 60px;
+  }
+  .boot-text span { opacity: 0; }
+
+  /* ===== SCENE: Problem ===== */
+  .problem-word {
+    font-size: 100px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    transform: scale(3) rotate(-10deg);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .problem-word.visible {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+  .problem-word.red { color: #ef4444; text-shadow: 0 0 80px rgba(239,68,68,0.5); }
+  .problem-word.shake { animation: shake 0.5s ease-in-out; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-15px); }
+    20%, 40%, 60%, 80% { transform: translateX(15px); }
+  }
+
+  /* ===== SCENE: Pain Points ===== */
+  .pain-item {
+    font-size: 36px;
+    font-weight: 700;
+    color: #ef4444;
+    padding: 20px 60px;
+    opacity: 0;
+    transform: translateX(-80px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    line-height: 1.4;
+  }
+  .pain-item.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ===== SCENE: Countdown ===== */
+  .countdown {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 300px;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 80px var(--glow-accent), 0 0 160px var(--glow-accent);
+  }
+  @keyframes pulse {
+    0% { transform: scale(2.5); opacity: 0; }
+    50% { transform: scale(0.9); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ===== SCENE: Logo ===== */
+  .logo-text {
+    font-size: 80px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .logo-text.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .logo-text .highlight { color: var(--accent); }
+  .logo-tagline {
+    font-size: 32px;
+    color: var(--text-dim);
+    margin-top: 20px;
+    opacity: 0;
+    transition: opacity 0.5s 0.3s;
+  }
+  .logo-tagline.visible { opacity: 1; }
+
+  /* ===== SCENE: Ghost Kill ===== */
+  .ghost-emoji {
+    font-size: 140px;
+    position: absolute;
+    transition: all 0.3s;
+  }
+  .ghost-emoji.dead {
+    filter: grayscale(1) brightness(0.3);
+    transform: scale(0) rotate(720deg) !important;
+  }
+  .crosshair {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 3px solid var(--accent);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  .crosshair::before, .crosshair::after {
+    content: '';
+    position: absolute;
+    background: var(--accent);
+  }
+  .crosshair::before {
+    width: 3px;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .crosshair::after {
+    width: 100%;
+    height: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .ghost-title {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+  }
+
+  /* ===== SCENE: Advocate ===== */
+  .advocate-line {
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .advocate-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .advocate-line .em {
+    color: var(--secondary);
+    font-weight: 900;
+  }
+  .advocate-line .em-accent {
+    color: var(--accent);
+    font-weight: 900;
+  }
+  .advocate-big {
+    font-size: 72px;
+    font-weight: 900;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .advocate-big.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* ===== SCENE: Features ===== */
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 50px;
+    width: 860px;
+    opacity: 0;
+    transform: translateY(80px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 30px;
+  }
+  .feature-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .feature-card .icon { font-size: 60px; margin-bottom: 16px; }
+  .feature-card h3 { font-size: 36px; font-weight: 700; margin-bottom: 10px; }
+  .feature-card p { color: var(--text-dim); font-size: 24px; line-height: 1.5; }
+
+  /* ===== SCENE: Notifications ===== */
+  .notif-toast {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-left: 5px solid var(--secondary);
+    padding: 30px 40px;
+    width: 800px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateX(200px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .notif-toast.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .notif-title {
+    font-weight: 700;
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+  .notif-body {
+    color: var(--text-dim);
+    font-size: 20px;
+  }
+  .notif-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: var(--secondary);
+    margin-right: 12px;
+    animation: blink 1s infinite;
+  }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* ===== SCENE: Flip Card ===== */
+  .flip-container { perspective: 2000px; }
+  .flip-card {
+    width: 800px;
+    height: 500px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .flip-card.flipped { transform: rotateY(180deg); }
+  .flip-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  .flip-front {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 3px solid rgba(255,255,255,0.1);
+  }
+  .flip-back {
+    background: linear-gradient(135deg, var(--primary), #1a2d6d);
+    border: 3px solid var(--primary);
+    transform: rotateY(180deg);
+  }
+  .flip-face .emoji { font-size: 80px; margin-bottom: 20px; }
+  .flip-face .title { font-size: 40px; font-weight: 700; }
+  .flip-face .desc { color: rgba(255,255,255,0.7); margin-top: 16px; font-size: 24px; text-align: center; line-height: 1.4; }
+
+  /* ===== SCENE: CTA ===== */
+  .cta-container { text-align: center; padding: 60px; }
+  .cta-title {
+    font-size: 110px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .cta-subtitle {
+    font-size: 36px;
+    color: var(--text-dim);
+    margin-bottom: 50px;
+  }
+  .cta-btn {
+    display: inline-block;
+    padding: 30px 70px;
+    font-size: 32px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: white;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    border: none;
+    text-decoration: none;
+    position: relative;
+  }
+  .cta-btn::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(135deg, var(--accent), var(--primary), var(--secondary), var(--accent));
+    background-size: 400% 400%;
+    animation: gradientShift 2s ease infinite;
+    z-index: -1;
+    filter: blur(15px);
+  }
+  .cta-free {
+    margin-top: 24px;
+    font-size: 28px;
+    color: var(--secondary);
+    font-weight: 600;
+  }
+  .cta-url {
+    margin-top: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 36px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  /* Floating emojis */
+  .float-emoji {
+    position: fixed;
+    font-size: 50px;
+    pointer-events: none;
+    z-index: 9990;
+    animation: floatUp 2.5s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(-500px) rotate(720deg) scale(0); }
+  }
+
+  /* Matrix rain */
+  .matrix-char {
+    position: fixed;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--secondary);
+    opacity: 0.3;
+    font-size: 20px;
+    pointer-events: none;
+    z-index: 1;
+    animation: matrixFall linear forwards;
+  }
+  @keyframes matrixFall {
+    0% { transform: translateY(-30px); opacity: 0.5; }
+    100% { transform: translateY(1920px); opacity: 0; }
+  }
+
+  /* Explosion particles */
+  .explosion-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: explode 0.8s ease-out forwards;
+  }
+  @keyframes explode {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+<div class="vignette"></div>
+<div class="flash" id="flash"></div>
+<canvas id="particles"></canvas>
+<div class="progress-bar" id="progress" style="width: 0%"></div>
+
+<!-- SCENES -->
+<div class="scene" id="scene-boot">
+  <div class="boot-text" id="bootText"></div>
+</div>
+
+<div class="scene" id="scene-problem">
+  <div style="text-align:center">
+    <div class="problem-word red" id="pw1" data-text="JOB SEARCHING">JOB SEARCHING</div>
+    <div class="problem-word red" id="pw2" data-text="IS BROKEN." style="margin-top:-10px">IS BROKEN.</div>
+  </div>
+</div>
+
+<div class="scene" id="scene-pain">
+  <div style="display:flex; flex-direction:column; align-items:flex-start; gap:20px;">
+    <div class="pain-item" id="pain1">&#x274C;  Applications vanish into a black hole</div>
+    <div class="pain-item" id="pain2">&#x274C;  Recruiters ghost after phone screens</div>
+    <div class="pain-item" id="pain3">&#x274C;  Zero visibility into your status</div>
+    <div class="pain-item" id="pain4">&#x274C;  You feel like a number, not a person</div>
+  </div>
+</div>
+
+<div class="scene" id="scene-countdown">
+  <div class="countdown" id="countdownNum"></div>
+</div>
+
+<div class="scene" id="scene-logo">
+  <div style="text-align:center">
+    <div class="logo-text" id="logoText">applicant<span class="highlight">.network</span></div>
+    <div class="logo-tagline" id="logoTagline">Your career, powered by experts.</div>
+  </div>
+</div>
+
+<div class="scene" id="scene-ghost">
+  <div style="position:relative; width:1080px; height:1920px;">
+    <div class="ghost-title">No more ghosting.</div>
+    <div class="ghost-emoji" id="ghost1" style="top:400px; left:150px;">&#x1F47B;</div>
+    <div class="ghost-emoji" id="ghost2" style="top:700px; left:600px;">&#x1F47B;</div>
+    <div class="ghost-emoji" id="ghost3" style="top:1000px; left:250px;">&#x1F47B;</div>
+    <div class="ghost-emoji" id="ghost4" style="top:1300px; left:550px;">&#x1F47B;</div>
+    <div class="crosshair" id="crosshair"></div>
+  </div>
+</div>
+
+<div class="scene" id="scene-advocate">
+  <div style="display:flex; flex-direction:column; align-items:center; padding:80px 60px; text-align:center;">
+    <div class="advocate-big" id="advBig">You deserve an advocate.</div>
+    <div class="advocate-line" id="adv1">Someone who <span class="em">knows your industry</span></div>
+    <div class="advocate-line" id="adv2">Who <span class="em-accent">preps you</span> for interviews</div>
+    <div class="advocate-line" id="adv3">Who <span class="em">negotiates</span> on your behalf</div>
+    <div class="advocate-line" id="adv4">Who <span class="em-accent">never ghosts</span> you</div>
+    <div class="advocate-line" id="adv5" style="margin-top:40px; font-size:36px; color:var(--text-dim);">Like having an agent for your career.</div>
+  </div>
+</div>
+
+<div class="scene" id="scene-features">
+  <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+    <div class="feature-card" id="feat1">
+      <div class="icon">&#x1F3AF;</div>
+      <h3>Smart Matching</h3>
+      <p>Real recruiters who specialize in YOUR field. Not algorithms. Humans who advocate for you.</p>
+    </div>
+    <div class="feature-card" id="feat2">
+      <div class="icon">&#x1F4AC;</div>
+      <h3>Real Communication</h3>
+      <p>48-hour response guarantee. Your recruiter keeps you in the loop. Always.</p>
+    </div>
+    <div class="feature-card" id="feat3">
+      <div class="icon">&#x1F6E1;&#xFE0F;</div>
+      <h3>You're In Control</h3>
+      <p>Approve who sees your profile. Go passive. Set your terms. Your data, your rules.</p>
+    </div>
+  </div>
+</div>
+
+<div class="scene" id="scene-notifs">
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <div style="text-align:center; margin-bottom:60px;">
+      <div style="font-size:52px; font-weight:900;">Real-time updates.</div>
+      <div style="font-size:52px; font-weight:900; color:var(--secondary);">Zero guessing.</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <div class="notif-toast" id="notif1">
+        <div class="notif-title"><span class="notif-dot"></span>Application Received</div>
+        <div class="notif-body">Google - Senior Software Engineer</div>
+      </div>
+      <div class="notif-toast" id="notif2">
+        <div class="notif-title"><span class="notif-dot" style="background:var(--accent)"></span>Interview Scheduled</div>
+        <div class="notif-body">Your recruiter booked you for Round 1</div>
+      </div>
+      <div class="notif-toast" id="notif3">
+        <div class="notif-title"><span class="notif-dot" style="background:var(--primary)"></span>Offer Extended!</div>
+        <div class="notif-body">$185,000 + equity package</div>
+      </div>
+      <div class="notif-toast" id="notif4" style="border-left-color:#22c55e;">
+        <div class="notif-title"><span class="notif-dot" style="background:#22c55e"></span>YOU'RE HIRED</div>
+        <div class="notif-body">Congratulations! Welcome to the team.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scene" id="scene-flip">
+  <div class="flip-container">
+    <div class="flip-card" id="flipCard">
+      <div class="flip-face flip-front">
+        <div class="emoji">&#x1F4E4;</div>
+        <div class="title">Old Way</div>
+        <div class="desc">Spray and pray. 200 applications.<br>Zero callbacks.</div>
+      </div>
+      <div class="flip-face flip-back">
+        <div class="emoji">&#x1F680;</div>
+        <div class="title">The New Way</div>
+        <div class="desc">One profile. Expert recruiter.<br>Real advocacy. Actual results.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scene" id="scene-cta">
+  <div class="cta-container">
+    <div class="cta-title">Your Next<br>Chapter<br>Starts Now.</div>
+    <div class="cta-subtitle">Like having an agent for your career.</div>
+    <div class="cta-btn">Join Free Today</div>
+    <div class="cta-free">Free forever. No credit card required.</div>
+    <div class="cta-url">applicant.network</div>
+  </div>
+</div>
+
+<script>
+const W = 1080, H = 1920;
+const $ = id => document.getElementById(id);
+
+let currentScene = null;
+function showScene(id) {
+  if (currentScene) currentScene.classList.remove('active');
+  const scene = $(id);
+  scene.classList.add('active');
+  currentScene = scene;
+}
+
+function flash() {
+  const f = $('flash');
+  f.classList.remove('bang');
+  void f.offsetWidth;
+  f.classList.add('bang');
+}
+
+function explosion(x, y, count = 30) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'explosion-particle';
+    const angle = (Math.PI * 2 * i) / count;
+    const dist = 150 + Math.random() * 300;
+    p.style.cssText = `left:${x}px; top:${y}px; --dx:${Math.cos(angle)*dist}px; --dy:${Math.sin(angle)*dist}px; background:hsl(${Math.random()*360},80%,60%);`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
+}
+
+function spawnEmoji(emoji, x, y) {
+  const el = document.createElement('div');
+  el.className = 'float-emoji';
+  el.innerHTML = emoji;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2500);
+}
+
+function matrixRain(duration = 3000) {
+  const chars = 'APPLICANT.NETWORK01'.split('');
+  const iv = setInterval(() => {
+    const c = document.createElement('div');
+    c.className = 'matrix-char';
+    c.textContent = chars[Math.floor(Math.random() * chars.length)];
+    c.style.left = Math.random() * W + 'px';
+    c.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }, 40);
+  setTimeout(() => clearInterval(iv), duration);
+}
+
+function setProgress(pct) { $('progress').style.width = pct + '%'; }
+
+// Particle background
+const canvas = $('particles');
+const ctx = canvas.getContext('2d');
+canvas.width = W;
+canvas.height = H;
+let particles = [];
+for (let i = 0; i < 100; i++) {
+  particles.push({
+    x: Math.random() * W, y: Math.random() * H,
+    vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
+    size: Math.random() * 2.5 + 0.5,
+    color: ['#3b5ccc', '#14b8a6', '#ec4899'][Math.floor(Math.random() * 3)]
+  });
+}
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = 0.4;
+    ctx.fill();
+  });
+  ctx.globalAlpha = 0.04;
+  ctx.strokeStyle = '#3b5ccc';
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      if (dx*dx + dy*dy < 20000) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// Timeline
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function typeLine(container, text, speed = 25) {
+  const span = document.createElement('span');
+  container.appendChild(span);
+  for (let i = 0; i < text.length; i++) {
+    span.textContent += text[i];
+    await sleep(speed);
+  }
+  span.style.opacity = 1;
+}
+
+async function runShow() {
+  window.__showStarted = true;
+
+  // BOOT
+  setProgress(0);
+  showScene('scene-boot');
+  matrixRain(6000);
+  const lines = [
+    '> initializing career_engine v4.2.0...',
+    '> loading recruiter_network... [OK]',
+    '> scanning active roles... [OK]',
+    '> connecting expert recruiters... [OK]',
+    '> disabling_ghosting_protocol... [ON]',
+    '> calibrating advocacy_engine... [OK]',
+    '> status: READY',
+    '',
+    '> LAUNCHING applicant.network_'
+  ];
+  for (const line of lines) {
+    await typeLine($('bootText'), line + '\n', 22);
+    await sleep(250);
+  }
+  await sleep(1000);
+  flash();
+
+  // PROBLEM
+  setProgress(10);
+  showScene('scene-problem');
+  await sleep(500);
+  $('pw1').classList.add('visible');
+  await sleep(400);
+  $('pw2').classList.add('visible');
+  await sleep(700);
+  $('pw1').classList.add('shake');
+  $('pw2').classList.add('shake');
+  await sleep(600);
+  $('pw1').classList.add('glitch-text');
+  $('pw2').classList.add('glitch-text');
+  await sleep(2000);
+
+  // PAIN POINTS
+  setProgress(20);
+  flash();
+  showScene('scene-pain');
+  await sleep(400);
+  for (let i = 1; i <= 4; i++) {
+    $('pain' + i).classList.add('visible');
+    await sleep(1000);
+  }
+  await sleep(1500);
+
+  // COUNTDOWN
+  setProgress(32);
+  flash();
+  showScene('scene-countdown');
+  for (let i = 3; i >= 1; i--) {
+    $('countdownNum').textContent = i;
+    $('countdownNum').style.animation = 'none';
+    void $('countdownNum').offsetWidth;
+    $('countdownNum').style.animation = 'pulse 0.5s ease-in-out';
+    explosion(W/2, H/2, 20);
+    await sleep(900);
+  }
+  flash();
+
+  // LOGO REVEAL
+  setProgress(40);
+  showScene('scene-logo');
+  await sleep(400);
+  $('logoText').classList.add('visible');
+  explosion(W/2, H/2, 50);
+  for (let i = 0; i < 15; i++) {
+    spawnEmoji(['&#x1F680;','&#x2728;','&#x1F4AB;','&#x1F525;','&#x26A1;'][Math.floor(Math.random()*5)],
+      Math.random() * W, Math.random() * H * 0.7);
+  }
+  await sleep(800);
+  $('logoTagline').classList.add('visible');
+  await sleep(2500);
+
+  // GHOST KILL
+  setProgress(50);
+  flash();
+  showScene('scene-ghost');
+  await sleep(500);
+  const ghosts = ['ghost1','ghost2','ghost3','ghost4'];
+  const ch = $('crosshair');
+  ch.style.opacity = '1';
+  for (const gid of ghosts) {
+    const g = $(gid);
+    const r = g.getBoundingClientRect();
+    ch.style.left = (r.left + r.width/2 - 75) + 'px';
+    ch.style.top = (r.top + r.height/2 - 75) + 'px';
+    await sleep(500);
+    g.classList.add('dead');
+    explosion(r.left + r.width/2, r.top + r.height/2, 25);
+    flash();
+    await sleep(400);
+  }
+  ch.style.opacity = '0';
+  await sleep(1000);
+
+  // ADVOCATE (replaces stats)
+  setProgress(60);
+  flash();
+  showScene('scene-advocate');
+  await sleep(400);
+  $('advBig').classList.add('visible');
+  await sleep(1200);
+  $('adv1').classList.add('visible');
+  await sleep(1000);
+  $('adv2').classList.add('visible');
+  await sleep(1000);
+  $('adv3').classList.add('visible');
+  await sleep(1000);
+  $('adv4').classList.add('visible');
+  await sleep(1200);
+  $('adv5').classList.add('visible');
+  await sleep(2000);
+
+  // FEATURES
+  setProgress(72);
+  flash();
+  showScene('scene-features');
+  await sleep(400);
+  for (let i = 1; i <= 3; i++) {
+    $('feat' + i).classList.add('visible');
+    await sleep(1200);
+  }
+  await sleep(2500);
+
+  // NOTIFICATIONS
+  setProgress(82);
+  flash();
+  showScene('scene-notifs');
+  await sleep(400);
+  for (let i = 1; i <= 4; i++) {
+    $('notif' + i).classList.add('visible');
+    await sleep(1000);
+  }
+  for (let i = 0; i < 25; i++) {
+    spawnEmoji(['&#x1F389;','&#x1F38A;','&#x1F973;','&#x2728;','&#x1F4B0;'][Math.floor(Math.random()*5)],
+      Math.random() * W, H * 0.4 + Math.random() * 400);
+  }
+  await sleep(2500);
+
+  // FLIP
+  setProgress(90);
+  flash();
+  showScene('scene-flip');
+  await sleep(2000);
+  $('flipCard').classList.add('flipped');
+  await sleep(600);
+  explosion(W/2, H/2, 40);
+  await sleep(2500);
+
+  // CTA FINALE
+  setProgress(100);
+  flash();
+  flash();
+  showScene('scene-cta');
+  matrixRain(8000);
+
+  const emojiIv = setInterval(() => {
+    spawnEmoji(['&#x1F680;','&#x2728;','&#x1F525;','&#x26A1;','&#x1F4AB;','&#x1F389;'][Math.floor(Math.random()*6)],
+      Math.random() * W, H);
+  }, 200);
+
+  const expIv = setInterval(() => {
+    explosion(Math.random() * W, Math.random() * H, 8);
+  }, 1200);
+
+  await sleep(6000);
+  clearInterval(emojiIv);
+  clearInterval(expIv);
+
+  // Signal done
+  window.__showDone = true;
+}
+
+// Auto-start (no click needed for recording)
+if (new URLSearchParams(window.location.search).get('autoplay') === '1') {
+  runShow();
+} else {
+  // Show a brief "loading" then auto-start anyway for the recording
+  setTimeout(() => runShow(), 500);
+}
+</script>
+</body>
+</html>

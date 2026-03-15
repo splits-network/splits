@@ -10,12 +10,16 @@ import {
     consentGivenEmail,
     consentDeclinedEmail,
 } from '../../templates/candidates';
+import type { EmailSource } from '../../templates/base';
+
+const { PORTAL_URL: _PORTAL_URL, CANDIDATE_URL: _CANDIDATE_URL } = require('../../helpers/urls');
 
 export class CandidatesEmailService {
     constructor(
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -30,6 +34,7 @@ export class CandidatesEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
         // Validate email address
@@ -52,6 +57,9 @@ export class CandidatesEmailService {
             html_length: html?.length
         }, 'Creating notification log and sending email');
 
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId ?? null,
@@ -59,7 +67,7 @@ export class CandidatesEmailService {
             subject,
             template: 'custom',
             payload: options.payload ?? null,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,
@@ -70,7 +78,7 @@ export class CandidatesEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -171,6 +179,7 @@ export class CandidatesEmailService {
             actionLabel?: string;
             priority?: 'low' | 'normal' | 'high' | 'urgent';
             category?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         // Send email first (primary channel)
@@ -178,6 +187,7 @@ export class CandidatesEmailService {
             eventType: options.eventType,
             userId: options.userId,
             payload: options.payload,
+            source: options.source,
         });
 
         // Create in-app notification (secondary channel)
@@ -207,7 +217,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Sourced: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidatesUrl = `${_PORTAL_URL}/portal/candidates`;
 
         const html = candidateSourcedEmail({
             candidateName: data.candidateName,
@@ -238,7 +248,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Sourced: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidatesUrl = `${_PORTAL_URL}/portal/candidates`;
 
         const html = candidateSourcedEmail({
             candidateName: data.candidateName,
@@ -267,7 +277,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = "You've Been Added to a Recruiter's Network";
-        const portalUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/profile`;
+        const portalUrl = `${_CANDIDATE_URL}/portal/profile`;
 
         const html = candidateAddedToNetworkEmail({
             candidateName: data.candidateName,
@@ -283,6 +293,7 @@ export class CandidatesEmailService {
             actionLabel: 'View Profile',
             priority: 'normal',
             category: 'candidate',
+            source: 'candidate',
         });
     }
 
@@ -296,7 +307,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Ownership Conflict Detected: ${data.candidateName}`;
-        const candidateUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidateUrl = `${_PORTAL_URL}/portal/candidates`;
 
         const html = ownershipConflictEmail({
             candidateName: data.candidateName,
@@ -325,7 +336,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Already Claimed: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidatesUrl = `${_PORTAL_URL}/portal/candidates`;
 
         const html = ownershipConflictRejectionEmail({
             candidateName: data.candidateName,
@@ -358,8 +369,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `${data.recruiter_name} wants to represent you`;
-        const candidateWebsiteUrl = process.env.CANDIDATE_WEBSITE_URL || 'https://applicant.network';
-        const invitationUrl = `${candidateWebsiteUrl}/invitation/${data.invitation_token}`;
+        const invitationUrl = `${_CANDIDATE_URL}/invitation/${data.invitation_token}`;
 
         const expiryDate = new Date(data.invitation_expires_at).toLocaleDateString('en-US', {
             month: 'long',
@@ -379,6 +389,7 @@ export class CandidatesEmailService {
         await this.sendEmail(candidateEmail, subject, html, {
             eventType: 'candidate.invited',
             payload: data,
+            source: 'candidate',
         });
     }
 
@@ -404,8 +415,8 @@ export class CandidatesEmailService {
         });
 
         const candidatesUrl = data.candidateId
-            ? `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates?candidateId=${data.candidateId}`
-            : `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+            ? `${_PORTAL_URL}/portal/candidates?candidateId=${data.candidateId}`
+            : `${_PORTAL_URL}/portal/candidates`;
 
         const html = consentGivenEmail({
             recruiterName: data.recruiter_name,
@@ -447,7 +458,7 @@ export class CandidatesEmailService {
             minute: '2-digit',
         });
 
-        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidatesUrl = `${_PORTAL_URL}/portal/candidates`;
 
         const html = consentDeclinedEmail({
             recruiterName: data.recruiter_name,

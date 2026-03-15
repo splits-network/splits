@@ -93,7 +93,7 @@ export default function RoleAssignmentsPage() {
 
     async function assignRecruiter() {
         if (!selectedJob || !selectedRecruiter) {
-            toast.error("Please select both a job and a recruiter");
+            toast.error("Select a job and a recruiter.");
             return;
         }
 
@@ -122,10 +122,10 @@ export default function RoleAssignmentsPage() {
 
             // Reset selection
             setSelectedRecruiter("");
-            toast.success("Recruiter assigned successfully!");
+            toast.success("Recruiter assigned.");
         } catch (error) {
             console.error("Failed to assign recruiter:", error);
-            toast.error("Failed to assign recruiter");
+            toast.error("Recruiter couldn't be assigned. Try again.");
         } finally {
             setAssigning(false);
         }
@@ -161,10 +161,10 @@ export default function RoleAssignmentsPage() {
                 return newMap;
             });
 
-            toast.success("Assignment removed successfully!");
+            toast.success("Assignment removed.");
         } catch (error) {
             console.error("Failed to remove assignment:", error);
-            toast.error("Failed to remove assignment");
+            toast.error("Assignment couldn't be removed. Try again.");
         }
     }
 
@@ -369,7 +369,7 @@ export default function RoleAssignmentsPage() {
                                             <td>{job.location || "Remote"}</td>
                                             <td>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="badge badge-neutral">
+                                                    <span className="badge badge-primary">
                                                         {count} recruiter
                                                         {count !== 1 ? "s" : ""}
                                                     </span>

@@ -357,7 +357,7 @@ useEffect(() => {
                                                 className={`badge badge-sm ${
                                                     item.status === "active"
                                                         ? "badge-success"
-                                                        : "badge-neutral"
+                                                        : "badge-primary"
                                                 }`}
                                             >
                                                 {item.status}

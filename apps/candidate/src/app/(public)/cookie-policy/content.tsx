@@ -307,7 +307,7 @@ export default function CookiePolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 1
                ═══════════════════════════════════════════════════════ */}
-            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-neutral text-neutral-content">
+            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -316,7 +316,7 @@ export default function CookiePolicyContent() {
                                 &ldquo;We use cookies to make your experience
                                 better, not to track you across the web.&rdquo;
                             </blockquote>
-                            <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
+                            <cite className="text-sm uppercase tracking-[0.2em] text-base-content/50 not-italic">
                                 -- Applicant Network Privacy Principles
                             </cite>
                         </div>
@@ -757,7 +757,7 @@ export default function CookiePolicyContent() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 3
                ═══════════════════════════════════════════════════════ */}
-            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-neutral text-neutral-content">
+            <section className="scroll-reveal scale-in pull-quote-block py-20 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -766,7 +766,7 @@ export default function CookiePolicyContent() {
                                 &ldquo;Transparency builds trust. We believe you
                                 should always know how your data is used.&rdquo;
                             </blockquote>
-                            <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
+                            <cite className="text-sm uppercase tracking-[0.2em] text-base-content/50 not-italic">
                                 -- Applicant Network Data Principles
                             </cite>
                         </div>

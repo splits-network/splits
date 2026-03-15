@@ -163,22 +163,50 @@ export function registerOnboardingRoutes(
                                 createErr.jsonBody?.error?.code === '23505';
 
                             if (isDuplicate) {
-                                // Wait briefly for claim to propagate, then retry
-                                await new Promise(r => setTimeout(r, 500));
-                                try {
-                                    const retryResponse = await atsService().get<any>(
-                                        '/api/v2/candidates/me', undefined, correlationId, authHeaders
-                                    );
-                                    candidate = retryResponse?.data ?? retryResponse;
-                                    candidateWasExisting = true;
-                                } catch {
-                                    request.log.error('Failed to fetch candidate after duplicate error');
+                                // Retry GET with backoff — webhook may still be committing the claim
+                                let claimed = false;
+                                for (let attempt = 1; attempt <= 3; attempt++) {
+                                    await new Promise(r => setTimeout(r, attempt * 500));
+                                    try {
+                                        const retryResponse = await atsService().get<any>(
+                                            '/api/v2/candidates/me', undefined, correlationId, authHeaders
+                                        );
+                                        candidate = retryResponse?.data ?? retryResponse;
+                                        candidateWasExisting = true;
+                                        claimed = true;
+                                        break;
+                                    } catch (retryErr: any) {
+                                        request.log.warn(
+                                            { attempt, error: retryErr.message },
+                                            'Retry GET /candidates/me after duplicate — attempt failed'
+                                        );
+                                    }
+                                }
+                                if (!claimed) {
+                                    request.log.error('All retries exhausted: could not link candidate after duplicate email error');
+                                    return reply.code(409).send({
+                                        error: {
+                                            code: 'CANDIDATE_LINK_FAILED',
+                                            message: 'A candidate profile exists for this email but could not be linked to your account. Please try again.',
+                                        },
+                                    });
                                 }
                             } else {
                                 throw createErr;
                             }
                         }
                     }
+                }
+
+                // Guard: candidate app must always have a candidate or we return an error
+                if (body.source_app === 'candidate' && !candidate) {
+                    request.log.error({ correlationId }, 'Onboarding init: candidate path completed but candidate is null');
+                    return reply.code(500).send({
+                        error: {
+                            code: 'CANDIDATE_CREATION_FAILED',
+                            message: 'Failed to create or link candidate profile. Please try again.',
+                        },
+                    });
                 }
 
                 const statusCode = userWasExisting ? 200 : 201;

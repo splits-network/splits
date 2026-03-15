@@ -12,6 +12,13 @@ const NOTIFICATION_RESOURCES: ResourceDefinition[] = [
         serviceBasePath: '/api/v2/notifications',
         tag: 'notifications',
     },
+    {
+        name: 'notification-preferences',
+        service: 'notification',
+        basePath: '/notification-preferences',
+        serviceBasePath: '/api/v2/notification-preferences',
+        tag: 'notification-preferences',
+    },
 ];
 
 export function registerNotificationRoutes(app: FastifyInstance, services: ServiceRegistry) {
@@ -68,6 +75,23 @@ function registerNotificationActions(app: FastifyInstance, services: ServiceRegi
             const data = await notificationService().get(
                 '/api/v2/notifications/counts-by-category',
                 undefined,
+                correlationId,
+                authHeaders
+            );
+            return reply.send(data);
+        }
+    );
+
+    // Notification preferences: bulk update (PUT)
+    app.put(
+        '/api/v2/notification-preferences',
+        {},
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await notificationService().put(
+                '/api/v2/notification-preferences',
+                request.body,
                 correlationId,
                 authHeaders
             );

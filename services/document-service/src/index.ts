@@ -7,6 +7,7 @@ import {
 } from "@splits-network/shared-config";
 import { StorageClient } from "./storage.js";
 import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events.js";
 
 async function start() {
@@ -92,6 +93,12 @@ async function start() {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey,
             storage,
+            eventPublisher: outboxPublisher,
+        });
+
+        // Register V3 routes (coexist with V2)
+        registerV3Routes(fastify, {
+            supabase: supabaseClient,
             eventPublisher: outboxPublisher,
         });
 

@@ -170,7 +170,7 @@ export {
     type ConsentPreferences,
 } from './consent';
 
-// List components (controls-bar, view mode, results count)
+// List components (controls-bar, view mode, results count, filters)
 export {
     type BaselViewMode,
     BaselControlsBarShell,
@@ -181,6 +181,18 @@ export {
     type BaselResultsCountProps,
     BaselRefreshButton,
     type BaselRefreshButtonProps,
+    BaselScopeToggle,
+    type BaselScopeToggleProps,
+    BaselFilterSelect,
+    type BaselFilterSelectProps,
+    BaselSortSelect,
+    type BaselSortSelectProps,
+    type BaselSortOption,
+    BaselExpandToggle,
+    type BaselExpandToggleProps,
+    BaselPageHeader,
+    type BaselPageHeaderProps,
+    type BaselPageHeaderStat,
 } from './lists';
 
 // Panel components (detail panel header, tabs)
@@ -194,6 +206,17 @@ export {
     type PanelTabsProps,
     type PanelTab,
 } from './panels';
+
+// Toast components
+export {
+    BaselToastProvider,
+    useBaselToast,
+    BaselToastItem,
+    type BaselToastType,
+    type BaselToastOptions,
+    type BaselToastData,
+    type BaselToastAction,
+} from './toast';
 
 // Color utilities
 export {

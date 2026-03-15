@@ -4,24 +4,6 @@
 
 import type { BaselSemanticColor } from "@splits-network/basel-ui";
 
-export type ViewMode = "table" | "grid" | "split";
-
-/** Verification status → DaisyUI semantic badge/text classes */
-export function statusColor(status?: string | null): string {
-    switch (status) {
-        case "verified":
-            return "bg-success/15 text-success";
-        case "pending":
-            return "bg-warning/15 text-warning";
-        case "unverified":
-            return "bg-info/15 text-info";
-        case "rejected":
-            return "bg-error/15 text-error";
-        default:
-            return "bg-base-content/15 text-base-content/50";
-    }
-}
-
 /** Verification status → BaselSemanticColor name for use with BaselBadge */
 export function statusColorName(status?: string | null): BaselSemanticColor {
     switch (status) {

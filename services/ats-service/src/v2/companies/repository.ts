@@ -71,6 +71,48 @@ export class CompanyRepository {
             query = query.eq('status', filters.status);
         }
 
+        if (filters.industry) {
+            query = query.eq('industry', filters.industry);
+        }
+
+        if (filters.company_size) {
+            query = query.eq('company_size', filters.company_size);
+        }
+
+        if (filters.stage) {
+            query = query.eq('stage', filters.stage);
+        }
+
+        // Founded year range buckets
+        if (filters.founded_year_range) {
+            switch (filters.founded_year_range) {
+                case 'pre_2000': query = query.lt('founded_year', 2000); break;
+                case '2000_2010': query = query.gte('founded_year', 2000).lt('founded_year', 2010); break;
+                case '2010_2020': query = query.gte('founded_year', 2010).lt('founded_year', 2020); break;
+                case '2020_plus': query = query.gte('founded_year', 2020); break;
+            }
+        }
+
+        // Has open roles — subquery on jobs table
+        if (filters.has_open_roles) {
+            const { data: activeJobCompanies } = await this.supabase
+                .from('jobs')
+                .select('company_id')
+                .eq('status', 'active');
+            const companyIdsWithJobs = [...new Set((activeJobCompanies || []).map((j: any) => j.company_id))];
+            if (filters.has_open_roles === 'yes') {
+                if (companyIdsWithJobs.length > 0) {
+                    query = query.in('id', companyIdsWithJobs);
+                } else {
+                    return { data: [], total: 0 };
+                }
+            } else if (filters.has_open_roles === 'no') {
+                if (companyIdsWithJobs.length > 0) {
+                    query = query.not('id', 'in', `(${companyIdsWithJobs.join(',')})`);
+                }
+            }
+        }
+
         // Apply sorting
         const sortBy = filters.sort_by || 'name';
         const sortOrder = filters.sort_order?.toLowerCase() === 'asc' ? true : false;

@@ -14,6 +14,8 @@ type Filters = {
 const STAGE_OPTIONS: { label: string; value: string }[] = [
     { label: 'All', value: '' },
     { label: 'AI Review', value: 'ai_review' },
+    { label: 'GPT Review', value: 'gpt_review' },
+    { label: 'Review Failed', value: 'ai_failed' },
     { label: 'AI Reviewed', value: 'ai_reviewed' },
     { label: 'Recruiter Request', value: 'recruiter_request' },
     { label: 'Recruiter Proposed', value: 'recruiter_proposed' },

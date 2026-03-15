@@ -62,7 +62,7 @@ export default function CardsOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Hero Header */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -82,7 +82,7 @@ export default function CardsOne() {
                                 showcase.
                             </span>
                         </h1>
-                        <p className="cards-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
+                        <p className="cards-desc text-base text-base-content/50 max-w-xl scroll-reveal fade-up">
                             The complete editorial card library for the Splits
                             Network platform. Each card follows Basel design
                             principles — sharp corners, typography-driven
@@ -207,9 +207,9 @@ export default function CardsOne() {
                         </h2>
                         <p className="text-sm text-base-content/30 max-w-xl">
                             Lightweight card variants from the original design.
-                            These compact cards are suitable for dense list views
-                            and quick-scan layouts where full editorial detail is
-                            not needed.
+                            These compact cards are suitable for dense list
+                            views and quick-scan layouts where full editorial
+                            detail is not needed.
                         </p>
                     </div>
                 </div>

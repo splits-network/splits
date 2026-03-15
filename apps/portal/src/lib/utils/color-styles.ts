@@ -26,6 +26,8 @@ export function getApplicationStageBorderColor(stage: string): string {
         recruiter_proposed: 'border-coral',
         recruiter_request: 'border-info',
         ai_review: 'border-warning',
+        gpt_review: 'border-warning',
+        ai_failed: 'border-error',
         screen: 'border-coral',
         submitted: 'border-info',
         interview: 'border-warning',
@@ -42,6 +44,8 @@ export function getApplicationStageBgColor(stage: string): string {
         recruiter_proposed: 'border-coral',
         recruiter_request: 'border-info',
         ai_review: 'border-warning',
+        gpt_review: 'border-warning',
+        ai_failed: 'border-error',
         screen: 'border-coral',
         submitted: 'border-info',
         interview: 'border-warning',
@@ -112,7 +116,7 @@ const ROLE_STYLES: Record<string, RoleStyle> = {
     'Company Admin': { bg: 'bg-secondary', text: 'text-secondary-content', badgeBg: 'bg-secondary/10 text-secondary' },
     'Hiring Manager': { bg: 'bg-secondary', text: 'text-secondary-content', badgeBg: 'bg-secondary/10 text-secondary' },
     Candidate: { bg: 'bg-accent', text: 'text-accent-content', badgeBg: 'bg-accent/10 text-accent' },
-    User: { bg: 'bg-neutral', text: 'text-neutral-content', badgeBg: 'bg-neutral/10 text-neutral' },
+    User: { bg: 'bg-neutral', text: 'text-base-content', badgeBg: 'bg-neutral/10 text-neutral' },
 };
 
 /**

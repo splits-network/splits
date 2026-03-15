@@ -42,7 +42,7 @@ const baselColors = [
         hex: "#18181b",
         usage: "Dark surfaces, footers, contrast",
         swatch: "bg-neutral",
-        text: "text-neutral-content",
+        text: "text-base-content",
     },
 ];
 
@@ -253,7 +253,7 @@ export default function BrandBaselPage() {
                                 <h3 className="text-xl font-bold text-base-content mb-4">
                                     Press Boilerplate
                                 </h3>
-                                <div className="bg-neutral text-neutral-content p-6 shadow-md">
+                                <div className="bg-base-300 text-base-content p-6 shadow-md">
                                     <p className="italic leading-relaxed">
                                         Splits Network is a split-fee recruiting
                                         marketplace where companies post open
@@ -302,7 +302,7 @@ export default function BrandBaselPage() {
             {/* ═══════════════════════════════════════════════════════════════
                 3. BRAND ASSETS — LOGO MARK
             ═══════════════════════════════════════════════════════════════ */}
-            <section className="logo-section py-24 bg-neutral text-neutral-content">
+            <section className="logo-section py-24 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="scroll-reveal fade-up max-w-3xl mb-16 ">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
@@ -311,7 +311,7 @@ export default function BrandBaselPage() {
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight">
                             Logo System
                         </h2>
-                        <p className="text-lg text-neutral-content/60 mt-4 leading-relaxed">
+                        <p className="text-lg text-base-content/60 mt-4 leading-relaxed">
                             Brand mark, wordmark, and approved usage contexts
                         </p>
                     </div>
@@ -334,7 +334,7 @@ export default function BrandBaselPage() {
                                     className="h-12 w-auto"
                                 />
                             </div>
-                            <p className="text-sm text-neutral-content/50">
+                            <p className="text-sm text-base-content/50">
                                 Standard version for white and light surfaces
                             </p>
                         </div>
@@ -355,7 +355,7 @@ export default function BrandBaselPage() {
                                     className="h-12 w-auto invert"
                                 />
                             </div>
-                            <p className="text-sm text-neutral-content/50">
+                            <p className="text-sm text-base-content/50">
                                 Inverted variant for dark and neutral surfaces
                             </p>
                         </div>
@@ -371,7 +371,7 @@ export default function BrandBaselPage() {
                                 <div className="w-8 h-8 bg-success/20 flex items-center justify-center flex-shrink-0">
                                     <i className="fa-duotone fa-regular fa-check text-success text-sm"></i>
                                 </div>
-                                <p className="text-neutral-content/70 text-base">
+                                <p className="text-base-content/70 text-base">
                                     Place on solid backgrounds with sufficient
                                     contrast ratio
                                 </p>
@@ -380,7 +380,7 @@ export default function BrandBaselPage() {
                                 <div className="w-8 h-8 bg-success/20 flex items-center justify-center flex-shrink-0">
                                     <i className="fa-duotone fa-regular fa-check text-success text-sm"></i>
                                 </div>
-                                <p className="text-neutral-content/70 text-base">
+                                <p className="text-base-content/70 text-base">
                                     Preserve minimum clear space equal to the
                                     height of the brand mark
                                 </p>
@@ -389,7 +389,7 @@ export default function BrandBaselPage() {
                                 <div className="w-8 h-8 bg-error/20 flex items-center justify-center flex-shrink-0">
                                     <i className="fa-duotone fa-regular fa-xmark text-error text-sm"></i>
                                 </div>
-                                <p className="text-neutral-content/70 text-base">
+                                <p className="text-base-content/70 text-base">
                                     Never distort, rotate, recolor, or add
                                     effects to the logo
                                 </p>
@@ -403,7 +403,7 @@ export default function BrandBaselPage() {
                             <h4 className="text-base font-bold mb-1">
                                 Vector Logo
                             </h4>
-                            <p className="text-sm text-neutral-content/40">
+                            <p className="text-sm text-base-content/40">
                                 SVG format for print, editorial, and digital
                                 media
                             </p>
@@ -821,7 +821,7 @@ export default function BrandBaselPage() {
                                     Secondary + Content
                                 </span>
                             </div>
-                            <div className="bg-neutral text-neutral-content p-6 text-center shadow-sm">
+                            <div className="bg-base-300 text-base-content p-6 text-center shadow-sm">
                                 <span className="font-bold text-sm uppercase tracking-wider">
                                     Neutral + Content
                                 </span>
@@ -839,7 +839,7 @@ export default function BrandBaselPage() {
             {/* ═══════════════════════════════════════════════════════════════
                 6. PRODUCT SCREENSHOTS
             ═══════════════════════════════════════════════════════════════ */}
-            <section className="screenshot-section py-24 bg-neutral text-neutral-content">
+            <section className="screenshot-section py-24 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="scroll-reveal fade-up max-w-3xl mb-16 ">
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">
@@ -848,7 +848,7 @@ export default function BrandBaselPage() {
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight">
                             Interface
                         </h2>
-                        <p className="text-lg text-neutral-content/60 mt-4 leading-relaxed">
+                        <p className="text-lg text-base-content/60 mt-4 leading-relaxed">
                             High-resolution screenshots available for editorial
                             use on request
                         </p>
@@ -881,8 +881,8 @@ export default function BrandBaselPage() {
                             </div>
                             <div className="border border-neutral-content/10 aspect-video flex items-center justify-center bg-neutral">
                                 <div className="text-center">
-                                    <i className="fa-duotone fa-regular fa-image text-5xl text-neutral-content/20 mb-3"></i>
-                                    <p className="text-sm text-neutral-content/40 font-medium">
+                                    <i className="fa-duotone fa-regular fa-image text-5xl text-base-content/20 mb-3"></i>
+                                    <p className="text-sm text-base-content/40 font-medium">
                                         Available on Request
                                     </p>
                                 </div>

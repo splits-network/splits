@@ -92,7 +92,7 @@ export default function NotificationsPage() {
             if (!token) throw new Error("User not authenticated");
 
             const client = createAuthenticatedClient(token);
-            await client.post("/notifications/mark-all-read", {});
+            await client.post("/notifications/actions/mark-all-read", {});
             setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         } catch (err) {
             console.error("Failed to mark all as read:", err);

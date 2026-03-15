@@ -30,6 +30,9 @@ export function ReferralCodeDetail({
 
     const badges = [
         { label: code.status, className: statusBadgeClass(code) },
+        ...(code.is_default
+            ? [{ label: "Default", className: "badge-primary" }]
+            : []),
         ...(isExpired
             ? [{ label: "Expired", className: "badge-warning badge-outline" }]
             : []),

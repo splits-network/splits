@@ -140,12 +140,16 @@ export default function CompanyInvitationsBaselPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<RecruiterCompanyRelationship, ConnectionFilters>({
-        endpoint: "/recruiter-companies",
+        endpoint: "/recruiter-companies/views/list",
         defaultFilters: { status: undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
     });
 
@@ -157,6 +161,14 @@ export default function CompanyInvitationsBaselPage() {
             registerEntities("company", [...new Set(companyIds)]);
         }
     }, [invitations, registerEntities]);
+
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            setSortBy(field);
+            setSortOrder(order);
+        },
+        [setSortBy, setSortOrder],
+    );
 
     const handleSelect = useCallback((inv: RecruiterCompanyRelationship) => {
         setSelectedId((prev) => (prev === inv.id ? null : inv.id));
@@ -185,6 +197,9 @@ export default function CompanyInvitationsBaselPage() {
                 totalCount={pagination?.total ?? invitations.length}
                 loading={loading}
                 refresh={refresh}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
             />
 
             {/* Content Area */}
@@ -193,7 +208,7 @@ export default function CompanyInvitationsBaselPage() {
                     {loading && invitations.length === 0 ? (
                         <div className="py-28 text-center">
                             <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                            <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                            <p className="text-sm uppercase tracking-[0.15em] font-bold text-base-content/40">
                                 Loading connections...
                             </p>
                         </div>
@@ -212,8 +227,7 @@ export default function CompanyInvitationsBaselPage() {
                                     clearSearch();
                                     clearFilters();
                                 }}
-                                className="btn btn-outline btn-sm"
-                                style={{ borderRadius: 0 }}
+                                className="btn btn-outline btn-sm rounded-none"
                             >
                                 Reset Filters
                             </button>

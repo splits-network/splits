@@ -38,6 +38,7 @@ export interface Application {
     stage: string;
     accepted_by_company: boolean;
     accepted_by_candidate?: boolean;
+    salary?: number;
     created_at: string;
     updated_at: string;
     submitted_at?: string | null;
@@ -130,6 +131,8 @@ export interface ApplicationFilters {
 export const APPLICATION_STAGES = [
     { value: "draft", label: "Draft" },
     { value: "ai_review", label: "AI Review" },
+    { value: "gpt_review", label: "GPT Review" },
+    { value: "ai_failed", label: "Review Failed" },
     { value: "ai_reviewed", label: "AI Reviewed" },
     { value: "recruiter_proposed", label: "Recruiter Proposed" },
     { value: "recruiter_request", label: "Recruiter Request" },
@@ -149,6 +152,8 @@ export const APPLICATION_STAGES = [
 // Every non-terminal stage (terminal = draft, withdrawn, hired, rejected, expired)
 export const WITHDRAWABLE_STAGES = [
     "ai_review",
+    "gpt_review",
+    "ai_failed",
     "ai_reviewed",
     "recruiter_proposed",
     "recruiter_request",

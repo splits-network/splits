@@ -11,27 +11,6 @@ export type ConnectStatus =
     | "action_required"
     | "ready";
 
-export type ConnectAccountType = "express" | "custom" | null;
-
-export interface UpdateDetailsPayload {
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string;
-    dob: { day: number; month: number; year: number };
-    ssn_last_4: string;
-    address: {
-        line1: string;
-        city: string;
-        state: string;
-        postal_code: string;
-    };
-}
-
-export interface AddBankAccountPayload {
-    token: string; // Stripe.js bank_account token (btok_xxx)
-}
-
 export interface StripeConnectStatusState {
     loading: boolean;
     error: string | null;
@@ -39,50 +18,22 @@ export interface StripeConnectStatusState {
     // Account existence
     hasAccount: boolean;
     accountId: string | null;
-    accountType: ConnectAccountType;
 
     // Onboarding flags
-    chargesEnabled: boolean;
-    payoutsEnabled: boolean;
-    detailsSubmitted: boolean;
     onboarded: boolean;
-
-    // Requirements
-    currentlyDue: string[];
-    eventuallyDue: string[];
-    pastDue: string[];
-    pendingVerification: string[];
-    disabledReason: string | null;
-
-    // Identity verification
-    needsIdentityVerification: boolean;
 
     // Bank account & payout details
     bankAccount: { bank_name: string; last4: string; account_type: string } | null;
     payoutSchedule: { interval: string; weekly_anchor?: string; monthly_anchor?: number; delay_days?: number } | null;
     pendingBalance: number;
 
-    // Individual details (for pre-populating edit form)
-    individual: {
-        first_name?: string;
-        last_name?: string;
-        email?: string;
-        phone?: string;
-        dob?: { day?: number; month?: number; year?: number };
-        address?: { line1?: string; city?: string; state?: string; postal_code?: string };
-        ssn_last_4_provided?: boolean;
-    } | null;
-
     // Computed state for UI
     status: ConnectStatus;
 
     // Actions
     refresh: () => Promise<void>;
-    createAccount: () => Promise<void>;
-    updateDetails: (data: UpdateDetailsPayload) => Promise<void>;
-    addBankAccount: (data: AddBankAccountPayload) => Promise<void>;
-    acceptTos: () => Promise<{ needs_identity_verification: boolean }>;
-    createVerificationSession: () => Promise<{ client_secret: string }>;
+    createAccountAndRedirect: () => Promise<void>;
+    openStripeOnboarding: () => Promise<void>;
 }
 
 function deriveStatus(data: {
@@ -113,45 +64,25 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
     const [accountData, setAccountData] = useState<{
         hasAccount: boolean;
         accountId: string | null;
-        accountType: ConnectAccountType;
-        chargesEnabled: boolean;
-        payoutsEnabled: boolean;
-        detailsSubmitted: boolean;
         onboarded: boolean;
+        detailsSubmitted: boolean;
         currentlyDue: string[];
-        eventuallyDue: string[];
         pastDue: string[];
         pendingVerification: string[];
-        disabledReason: string | null;
         bankAccount: { bank_name: string; last4: string; account_type: string } | null;
         payoutSchedule: { interval: string; weekly_anchor?: string; monthly_anchor?: number; delay_days?: number } | null;
         pendingBalance: number;
-        individual: {
-            first_name?: string;
-            last_name?: string;
-            email?: string;
-            phone?: string;
-            dob?: { day?: number; month?: number; year?: number };
-            address?: { line1?: string; city?: string; state?: string; postal_code?: string };
-            ssn_last_4_provided?: boolean;
-        } | null;
     }>({
         hasAccount: false,
         accountId: null,
-        accountType: null,
-        chargesEnabled: false,
-        payoutsEnabled: false,
-        detailsSubmitted: false,
         onboarded: false,
+        detailsSubmitted: false,
         currentlyDue: [],
-        eventuallyDue: [],
         pastDue: [],
         pendingVerification: [],
-        disabledReason: null,
         bankAccount: null,
         payoutSchedule: null,
         pendingBalance: 0,
-        individual: null,
     });
 
     const fetchStatus = useCallback(async () => {
@@ -163,9 +94,7 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
             if (!token) return;
 
             const api = createAuthenticatedClient(token);
-            const response: any = await api.get(
-                "/stripe/connect/account"
-            );
+            const response: any = await api.get("/stripe/connect/account");
             const data = response?.data;
 
             if (data) {
@@ -173,26 +102,17 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
                 setAccountData({
                     hasAccount: true,
                     accountId: data.account_id,
-                    accountType: data.account_type || null,
-                    chargesEnabled: !!data.charges_enabled,
-                    payoutsEnabled: !!data.payouts_enabled,
-                    detailsSubmitted: !!data.details_submitted,
                     onboarded: !!data.onboarded,
+                    detailsSubmitted: !!data.details_submitted,
                     currentlyDue: requirements.currently_due || [],
-                    eventuallyDue: requirements.eventually_due || [],
                     pastDue: requirements.past_due || [],
-                    pendingVerification:
-                        requirements.pending_verification || [],
-                    disabledReason:
-                        requirements.disabled_reason || null,
+                    pendingVerification: requirements.pending_verification || [],
                     bankAccount: data.bank_account || null,
                     payoutSchedule: data.payout_schedule || null,
                     pendingBalance: data.pending_balance || 0,
-                    individual: data.individual || null,
                 });
             }
         } catch (err: any) {
-            // 400 with "Stripe Connect account not found" means no account yet
             if (
                 err?.message?.includes("not found") ||
                 err?.status === 404
@@ -201,12 +121,9 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
                     ...prev,
                     hasAccount: false,
                     accountId: null,
-                    accountType: null,
                 }));
             } else {
-                setError(
-                    err?.message || "Failed to load payout status"
-                );
+                setError(err?.message || "Failed to load payout status");
             }
         } finally {
             setLoading(false);
@@ -214,7 +131,12 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const createAccount = useCallback(async () => {
+    const getReturnUrl = () => {
+        if (typeof window === "undefined") return "";
+        return `${window.location.origin}/portal/profile?section=payouts`;
+    };
+
+    const createAccountAndRedirect = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -223,57 +145,43 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
             if (!token) return;
 
             const api = createAuthenticatedClient(token);
+            // Create the account
             await api.post("/stripe/connect/account");
+            // Get an onboarding link and redirect
+            const returnUrl = getReturnUrl();
+            const response: any = await api.post("/stripe/connect/onboarding-link", {
+                return_url: returnUrl,
+                refresh_url: returnUrl,
+            });
+            if (response?.data?.url) {
+                window.open(response.data.url, "_blank");
+            }
             await fetchStatus();
         } catch (err: any) {
-            setError(
-                err?.message || "Failed to create payout account"
-            );
+            setError(err?.message || "Failed to create payout account");
+        } finally {
             setLoading(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchStatus]);
 
-    const updateDetails = useCallback(async (data: UpdateDetailsPayload) => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
+    const openStripeOnboarding = useCallback(async () => {
+        try {
+            const token = await getToken();
+            if (!token) return;
 
-        const api = createAuthenticatedClient(token);
-        await api.patch("/stripe/connect/account", data);
-        await fetchStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchStatus]);
-
-    const addBankAccount = useCallback(async (data: AddBankAccountPayload) => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-
-        const api = createAuthenticatedClient(token);
-        await api.post("/stripe/connect/bank-account", data);
-        await fetchStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchStatus]);
-
-    const acceptTos = useCallback(async (): Promise<{ needs_identity_verification: boolean }> => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-
-        const api = createAuthenticatedClient(token);
-        const response: any = await api.post("/stripe/connect/accept-tos");
-        await fetchStatus();
-        return {
-            needs_identity_verification: !!response?.data?.needs_identity_verification,
-        };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchStatus]);
-
-    const createVerificationSession = useCallback(async (): Promise<{ client_secret: string }> => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-
-        const api = createAuthenticatedClient(token);
-        const response: any = await api.post("/stripe/connect/verification-session");
-        return { client_secret: response?.data?.client_secret };
+            const api = createAuthenticatedClient(token);
+            const returnUrl = getReturnUrl();
+            const response: any = await api.post("/stripe/connect/onboarding-link", {
+                return_url: returnUrl,
+                refresh_url: returnUrl,
+            });
+            if (response?.data?.url) {
+                window.open(response.data.url, "_blank");
+            }
+        } catch (err: any) {
+            setError(err?.message || "Failed to open Stripe onboarding");
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -283,24 +191,18 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
 
     const status = deriveStatus(accountData);
 
-    // Check if identity verification is needed based on Stripe requirements
-    const needsIdentityVerification =
-        accountData.hasAccount &&
-        !accountData.onboarded &&
-        (accountData.currentlyDue.some((r) => r.includes("verification.document")) ||
-         accountData.eventuallyDue.some((r) => r.includes("verification.document")));
-
     return {
         loading,
         error,
-        ...accountData,
-        needsIdentityVerification,
+        hasAccount: accountData.hasAccount,
+        accountId: accountData.accountId,
+        onboarded: accountData.onboarded,
+        bankAccount: accountData.bankAccount,
+        payoutSchedule: accountData.payoutSchedule,
+        pendingBalance: accountData.pendingBalance,
         status,
         refresh: fetchStatus,
-        createAccount,
-        updateDetails,
-        addBankAccount,
-        acceptTos,
-        createVerificationSession,
+        createAccountAndRedirect,
+        openStripeOnboarding,
     };
 }

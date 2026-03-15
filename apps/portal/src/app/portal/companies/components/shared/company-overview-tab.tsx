@@ -5,6 +5,7 @@ import { formatDate, formatCompanySize } from "../../types";
 import { statusColorName } from "./status-color";
 import { formatStatus, formatSalary } from "./helpers";
 import { BaselBadge } from "@splits-network/basel-ui";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
 import { BadgeGrid, useGamification } from "@splits-network/shared-gamification";
 
 export function CompanyOverviewTab({
@@ -25,21 +26,87 @@ export function CompanyOverviewTab({
 
     return (
         <div className="space-y-8 p-6">
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Location</p>
+                    {company.headquarters_location ? (
+                        <p className="font-bold text-sm">
+                            <i className="fa-duotone fa-regular fa-location-dot mr-1" />
+                            {company.headquarters_location}
+                        </p>
+                    ) : (
+                        <p className="text-sm text-base-content/30">---</p>
+                    )}
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Website</p>
+                    {company.website ? (
+                        <a
+                            href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-bold text-primary hover:underline"
+                        >
+                            {company.website}
+                        </a>
+                    ) : (
+                        <p className="text-sm text-base-content/30">---</p>
+                    )}
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Industry</p>
+                    {company.industry ? (
+                        <p className="font-bold text-sm">{company.industry}</p>
+                    ) : (
+                        <p className="text-sm text-base-content/30">---</p>
+                    )}
+                </div>
+                <div className="bg-base-100 p-4">
+                    <p className="text-sm uppercase tracking-[0.15em] text-base-content/40 mb-1">Company Size</p>
+                    {company.company_size ? (
+                        <p className="font-bold text-sm">{formatCompanySize(company.company_size)}</p>
+                    ) : (
+                        <p className="text-sm text-base-content/30">---</p>
+                    )}
+                </div>
+            </div>
+
+            {/* Relationship Summary */}
+            {relationship && (
+                <div className="flex items-center gap-3 bg-base-200 border border-base-300 p-4">
+                    <i className="fa-duotone fa-regular fa-handshake text-base-content/40" />
+                    <div className="flex items-center gap-2">
+                        <BaselBadge color={statusColorName(relationship.status)} size="sm">
+                            {formatStatus(relationship.status)}
+                        </BaselBadge>
+                        <span className="text-sm text-base-content/60 capitalize">
+                            {relationship.relationship_type}
+                        </span>
+                        {relationship.relationship_start_date && (
+                            <span className="text-sm text-base-content/40">
+                                since {formatDate(relationship.relationship_start_date)}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Avg Salary (not in header stats strip) */}
             {company.avg_salary != null && (
                 <div className="bg-base-200 border border-base-300 border-l-4 border-l-primary p-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-1">Avg Salary</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-1">Avg Salary</p>
                     <p className="text-lg font-black tracking-tight">{formatSalary(company.avg_salary)}</p>
                 </div>
             )}
 
             {/* Tagline */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">Tagline</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-3">Tagline</p>
                 {company.tagline ? (
-                    <p className="text-lg italic text-base-content/70 border-l-4 border-l-primary pl-4">
-                        {company.tagline}
-                    </p>
+                    <div className="text-lg italic text-base-content/70 border-l-4 border-l-primary pl-4">
+                        <MarkdownRenderer content={company.tagline} />
+                    </div>
                 ) : (
                     <p className="text-sm text-base-content/30 italic">No tagline provided</p>
                 )}
@@ -47,7 +114,7 @@ export function CompanyOverviewTab({
 
             {/* About */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">About</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-3">About</p>
                 {company.description ? (
                     <p className="text-sm text-base-content/70 leading-relaxed">{company.description}</p>
                 ) : (
@@ -57,7 +124,7 @@ export function CompanyOverviewTab({
 
             {/* Social Links */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">Social</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-3">Social</p>
                 {company.linkedin_url || company.twitter_url || company.glassdoor_url ? (
                     <div className="flex items-center gap-4">
                         {company.linkedin_url && (
@@ -83,7 +150,7 @@ export function CompanyOverviewTab({
 
             {/* Tech Stack */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Tech Stack</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Tech Stack</p>
                 {techStack.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {techStack.map((skill) => (
@@ -97,7 +164,7 @@ export function CompanyOverviewTab({
 
             {/* Perks & Benefits */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Perks & Benefits</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Perks & Benefits</p>
                 {perks.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {perks.map((perk) => (
@@ -111,7 +178,7 @@ export function CompanyOverviewTab({
 
             {/* Culture & Values */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Culture & Values</p>
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Culture & Values</p>
                 {cultureTags.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {cultureTags.map((tag) => (
@@ -123,97 +190,10 @@ export function CompanyOverviewTab({
                 )}
             </div>
 
-            {/* Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                {company.headquarters_location && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Location</p>
-                        <p className="font-bold text-sm">
-                            <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                            {company.headquarters_location}
-                        </p>
-                    </div>
-                )}
-                {company.website && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Website</p>
-                        <a
-                            href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-bold text-primary hover:underline"
-                        >
-                            {company.website}
-                        </a>
-                    </div>
-                )}
-                {company.industry && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Industry</p>
-                        <p className="font-bold text-sm">{company.industry}</p>
-                    </div>
-                )}
-                {company.company_size && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Company Size</p>
-                        <p className="font-bold text-sm">{formatCompanySize(company.company_size)}</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Relationship */}
-            {relationship && (
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Relationship</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Status</p>
-                            <BaselBadge color={statusColorName(relationship.status)} size="sm">
-                                {formatStatus(relationship.status)}
-                            </BaselBadge>
-                        </div>
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Type</p>
-                            <p className="font-bold text-sm capitalize">{relationship.relationship_type}</p>
-                        </div>
-                        {relationship.relationship_start_date && (
-                            <div className="bg-base-100 p-4">
-                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Start Date</p>
-                                <p className="font-bold text-sm">{formatDate(relationship.relationship_start_date)}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Granular Permissions */}
-                    {relationship.permissions && (
-                        <div className="mt-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-3">Permissions</p>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                {([
-                                    { key: "can_view_jobs" as const, label: "View Jobs" },
-                                    { key: "can_create_jobs" as const, label: "Create Jobs" },
-                                    { key: "can_edit_jobs" as const, label: "Edit Jobs" },
-                                    { key: "can_submit_candidates" as const, label: "Submit Candidates" },
-                                    { key: "can_view_applications" as const, label: "View Applications" },
-                                    { key: "can_advance_candidates" as const, label: "Advance Candidates" },
-                                ]).map(({ key, label }) => (
-                                    <div key={key} className="flex items-center gap-2">
-                                        <i className={`fa-solid ${relationship.permissions![key] ? "fa-check text-success" : "fa-xmark text-base-content/30"} text-sm`} />
-                                        <span className={`text-sm ${relationship.permissions![key] ? "text-base-content" : "text-base-content/40"}`}>
-                                            {label}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
             {/* Achievements */}
             {badges.length > 0 && (
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Achievements</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">Achievements</p>
                     <BadgeGrid badges={badges} maxVisible={6} />
                 </div>
             )}

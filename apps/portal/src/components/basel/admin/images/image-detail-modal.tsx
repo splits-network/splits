@@ -71,7 +71,7 @@ export function ImageDetailModal({
                 filename: filename.trim() || image.filename,
             });
 
-            toast.success("Image updated");
+            toast.success("Image updated.");
             onUpdated();
         } catch (err: any) {
             console.error("Failed to update image:", err);
@@ -96,7 +96,7 @@ export function ImageDetailModal({
             const apiClient = createAuthenticatedClient(token);
             await apiClient.delete(`/content-images/${image.id}`);
 
-            toast.success("Image deleted");
+            toast.success("Image deleted.");
             onDeleted();
         } catch (err: any) {
             console.error("Failed to delete image:", err);
@@ -109,7 +109,7 @@ export function ImageDetailModal({
     function handleCopyUrl() {
         if (!image) return;
         navigator.clipboard.writeText(image.public_url);
-        toast.success("URL copied to clipboard");
+        toast.info("URL copied to clipboard.");
     }
 
     if (!image) return null;

@@ -57,6 +57,28 @@ export function truncateDescription(
         : stripped;
 }
 
+/** Match score → semantic color (mirrors portal's getAIScoreBadgeColor) */
+export function matchScoreColor(score: number | null | undefined): string {
+    if (score == null) return "neutral";
+    if (score >= 90) return "success";
+    if (score >= 70) return "primary";
+    if (score >= 50) return "warning";
+    return "error";
+}
+
+/** Match score text color class */
+const SCORE_TEXT_COLORS: Record<string, string> = {
+    success: "text-success",
+    primary: "text-primary",
+    warning: "text-warning",
+    error: "text-error",
+    neutral: "text-base-content/20",
+};
+
+export function matchScoreTextColor(score: number | null | undefined): string {
+    return SCORE_TEXT_COLORS[matchScoreColor(score)] || "text-base-content/20";
+}
+
 export function requiredSkillNames(job: Job): string[] {
     return (job.skills || [])
         .filter((js) => js.is_required && js.skill)

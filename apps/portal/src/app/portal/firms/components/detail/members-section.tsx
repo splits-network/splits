@@ -102,7 +102,7 @@ export function MembersSection({
             toast.success(`Resent invitation to ${invitation.email}`);
             onRefresh();
         } catch (err: any) {
-            toast.error(err.message || "Failed to resend invitation");
+            toast.error(err.message || "Invitation couldn't be resent. Try again.");
         } finally {
             setResendingId(null);
         }

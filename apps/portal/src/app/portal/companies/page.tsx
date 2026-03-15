@@ -15,7 +15,7 @@ import type {
     CompanyTab,
 } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
-import { companyId as getCompanyId } from "./components/shared/helpers";
+import { rowId as getRowId } from "./components/shared/helpers";
 import { CompaniesAnimator } from "./companies-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -85,7 +85,7 @@ export default function CompaniesBaselPage() {
         defaultFilters: { browse_all: "true" },
         defaultSortBy: "name",
         defaultSortOrder: "asc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: false,
     });
 
@@ -94,7 +94,7 @@ export default function CompaniesBaselPage() {
         defaultFilters: { status: undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: false,
     });
 
@@ -113,10 +113,19 @@ export default function CompaniesBaselPage() {
 
     const active = isMarketplace ? marketplace : myCompanies;
 
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            active.setSortBy(field);
+            active.setSortOrder(order);
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [active.setSortBy, active.setSortOrder],
+    );
+
     const handleSelect = useCallback(
         (item: Company | CompanyRelationship) => {
-            const cId = getCompanyId(item, isMarketplace);
-            setSelectedCompanyId((prev) => (prev === cId ? null : cId));
+            const rId = getRowId(item, isMarketplace);
+            setSelectedCompanyId((prev) => (prev === rId ? null : rId));
         },
         [isMarketplace],
     );
@@ -173,6 +182,9 @@ export default function CompaniesBaselPage() {
                 totalCount={active.pagination?.total ?? active.data.length}
                 loading={marketplace.loading || myCompanies.loading}
                 refresh={handleRefresh}
+                sortBy={active.sortBy}
+                sortOrder={active.sortOrder}
+                onSortChange={handleSortChange}
             />
 
             {/* Content Area */}
@@ -181,7 +193,7 @@ export default function CompaniesBaselPage() {
                     {active.loading && active.data.length === 0 ? (
                         <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
                             <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                            <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                            <p className="text-sm uppercase tracking-[0.15em] font-bold text-base-content/40">
                                 Loading companies...
                             </p>
                         </div>

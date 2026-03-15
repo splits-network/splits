@@ -1,31 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useStripeConnectStatus } from "@/hooks/use-stripe-connect-status";
 import { BaselAlertBox, BaselStatusPill } from "@splits-network/basel-ui";
-import { ConnectModal } from "@/components/basel/profile/connect-modal";
-import { EditConnectModal } from "@/components/basel/profile/edit-connect-modal";
 import { PayoutAccountCard } from "./payout-account-card";
 import { PayoutHistoryList } from "./payout-history-list";
 
-/* ─── Component ──────────────────────────────────────────────────────────── */
-
 export function PayoutsTab() {
     const connectStatus = useStripeConnectStatus();
-    const [connectModalOpen, setConnectModalOpen] = useState(false);
-    const [connectOpenCount, setConnectOpenCount] = useState(0);
-    const [editModalOpen, setEditModalOpen] = useState(false);
-    const [editOpenCount, setEditOpenCount] = useState(0);
-
-    const openConnectModal = () => {
-        setConnectOpenCount((c) => c + 1);
-        setConnectModalOpen(true);
-    };
-
-    const openEditModal = () => {
-        setEditOpenCount((c) => c + 1);
-        setEditModalOpen(true);
-    };
 
     if (connectStatus.loading) {
         return (
@@ -71,9 +52,10 @@ export function PayoutsTab() {
                                 Start Receiving Payouts
                             </h3>
                             <p className="text-sm text-base-content/50 max-w-md mx-auto mb-6">
-                                Connect your bank account to receive placement commissions directly. Setup takes about 5 minutes.
+                                Connect your bank account to receive placement commissions directly.
+                                You&apos;ll be redirected to Stripe to securely set up your account.
                             </p>
-                            <button className="btn btn-primary" onClick={openConnectModal}>
+                            <button className="btn btn-primary" onClick={connectStatus.createAccountAndRedirect}>
                                 <i className="fa-duotone fa-regular fa-rocket" />
                                 Set Up Payouts
                             </button>
@@ -82,13 +64,13 @@ export function PayoutsTab() {
                     <div className="lg:col-span-2">
                         <div className="bg-base-200 border border-base-300 border-l-4 border-l-info p-6">
                             <h4 className="text-sm font-black uppercase tracking-wider text-base-content/50 mb-3">
-                                What You&apos;ll Need
+                                How It Works
                             </h4>
                             <div className="space-y-3">
                                 {[
-                                    { icon: "fa-user", text: "Personal identification details" },
-                                    { icon: "fa-building-columns", text: "US bank routing & account numbers" },
-                                    { icon: "fa-id-card", text: "Government-issued photo ID" },
+                                    { icon: "fa-shield-check", text: "Securely set up via Stripe's trusted platform" },
+                                    { icon: "fa-building-columns", text: "Connect your bank account for direct deposits" },
+                                    { icon: "fa-id-card", text: "Stripe handles identity verification" },
                                 ].map((item) => (
                                     <div key={item.text} className="flex items-center gap-3">
                                         <i className={`fa-duotone fa-regular ${item.icon} text-info w-4 text-center`} />
@@ -111,13 +93,14 @@ export function PayoutsTab() {
                         <div>
                             <div className="font-bold text-base-content">Setup Incomplete</div>
                             <div className="text-sm text-base-content/60">
-                                You started setting up your payout account but didn&apos;t finish. Pick up where you left off.
+                                You started setting up your payout account but didn&apos;t finish.
+                                Continue on Stripe to complete setup.
                             </div>
                         </div>
                     </div>
-                    <button className="btn btn-warning btn-sm" onClick={openConnectModal}>
-                        <i className="fa-duotone fa-regular fa-arrow-right" />
-                        Continue Setup
+                    <button className="btn btn-warning btn-sm" onClick={connectStatus.openStripeOnboarding}>
+                        <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
+                        Continue on Stripe
                     </button>
                 </div>
             )}
@@ -151,13 +134,12 @@ export function PayoutsTab() {
                 <div>
                     <BaselAlertBox variant="error" className="mb-6">
                         <span className="font-bold">Action Required</span> — Stripe needs additional information to keep your payouts active.
-                        <button className="btn btn-error btn-sm ml-4" onClick={openConnectModal}>
-                            <i className="fa-duotone fa-regular fa-pen-to-square" />
-                            Update Information
+                        <button className="btn btn-error btn-sm ml-4" onClick={connectStatus.openStripeOnboarding}>
+                            <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
+                            Update on Stripe
                         </button>
                     </BaselAlertBox>
 
-                    {/* Still show account details if available */}
                     {connectStatus.bankAccount && (
                         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-10">
                             <div className="lg:col-span-3">
@@ -179,22 +161,11 @@ export function PayoutsTab() {
                         {/* Left: Account status (60%) */}
                         <div className="lg:col-span-3">
                             {connectStatus.bankAccount ? (
-                                <div>
-                                    <PayoutAccountCard
-                                        bankAccount={connectStatus.bankAccount}
-                                        payoutSchedule={connectStatus.payoutSchedule}
-                                        pendingBalance={connectStatus.pendingBalance}
-                                    />
-                                    {connectStatus.accountType === "custom" && (
-                                        <button
-                                            className="btn btn-ghost btn-sm mt-3"
-                                            onClick={openEditModal}
-                                        >
-                                            <i className="fa-duotone fa-regular fa-pen-to-square" />
-                                            Edit Payout Details
-                                        </button>
-                                    )}
-                                </div>
+                                <PayoutAccountCard
+                                    bankAccount={connectStatus.bankAccount}
+                                    payoutSchedule={connectStatus.payoutSchedule}
+                                    pendingBalance={connectStatus.pendingBalance}
+                                />
                             ) : (
                                 <div className="bg-base-200 border border-base-300 border-l-4 border-l-success p-6">
                                     <div className="flex items-center gap-3">
@@ -210,6 +181,13 @@ export function PayoutsTab() {
                                     </div>
                                 </div>
                             )}
+                            <button
+                                className="btn btn-ghost btn-sm mt-3"
+                                onClick={connectStatus.openStripeOnboarding}
+                            >
+                                <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
+                                Manage on Stripe
+                            </button>
                         </div>
 
                         {/* Right: Status pills (40%) */}
@@ -243,21 +221,6 @@ export function PayoutsTab() {
                     </div>
                 </>
             )}
-
-            {/* Setup Modal — status-routed flow for new accounts */}
-            <ConnectModal
-                key={`connect-${connectOpenCount}`}
-                isOpen={connectModalOpen}
-                onClose={() => setConnectModalOpen(false)}
-            />
-
-            {/* Edit Modal — direct wizard, no status routing */}
-            <EditConnectModal
-                key={`edit-${editOpenCount}`}
-                isOpen={editModalOpen}
-                onClose={() => setEditModalOpen(false)}
-                connectStatus={connectStatus}
-            />
         </div>
     );
 }

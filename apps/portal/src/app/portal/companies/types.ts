@@ -57,6 +57,14 @@ export interface CompanyRelationship {
         name: string;
         industry?: string;
         headquarters_location?: string;
+        description?: string;
+        website?: string;
+        company_size?: string;
+        stage?: string;
+        logo_url?: string;
+        founded_year?: number;
+        tagline?: string;
+        open_roles_count?: number;
     };
 }
 
@@ -74,6 +82,10 @@ export interface CompanyFilters {
     industry?: string;
     company_size?: string;
     browse_all?: string;
+    stage?: string;
+    founded_year_range?: string;
+    has_open_roles?: string;
+    relationship_type?: string;
 }
 
 export const COMPANY_SIZE_LABELS: Record<string, string> = {
@@ -116,3 +128,55 @@ export function getCompanySizeLabel(size?: string): string {
     if (!size) return "Unknown";
     return size;
 }
+
+import type { BaselSortOption } from "@splits-network/basel-ui";
+
+export const INDUSTRY_LABELS: Record<string, string> = {
+    Technology: "Technology",
+    Healthcare: "Healthcare",
+    Finance: "Finance",
+    Education: "Education",
+    Manufacturing: "Manufacturing",
+    Retail: "Retail",
+    Consulting: "Consulting",
+};
+
+export const RELATIONSHIP_STATUS_LABELS: Record<string, string> = {
+    active: "Active",
+    pending: "Pending",
+    declined: "Declined",
+    terminated: "Terminated",
+};
+
+export const STAGE_LABELS: Record<string, string> = {
+    Seed: "Seed",
+    "Series A": "Series A",
+    "Series B": "Series B",
+    "Series C": "Series C",
+    Growth: "Growth",
+    Public: "Public",
+    Bootstrapped: "Bootstrapped",
+    "Non-Profit": "Non-Profit",
+};
+
+export const FOUNDED_YEAR_RANGE_LABELS: Record<string, string> = {
+    pre_2000: "Before 2000",
+    "2000_2010": "2000 – 2010",
+    "2010_2020": "2010 – 2020",
+    "2020_plus": "2020+",
+};
+
+export const HAS_OPEN_ROLES_LABELS: Record<string, string> = {
+    yes: "Has Open Roles",
+    no: "No Open Roles",
+};
+
+export const RELATIONSHIP_TYPE_LABELS: Record<string, string> = {
+    sourcer: "Sourcer",
+    recruiter: "Recruiter",
+};
+
+export const COMPANY_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Added" },
+    { value: "name", label: "Company Name" },
+];

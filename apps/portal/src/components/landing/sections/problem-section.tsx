@@ -38,7 +38,7 @@ export function ProblemSection() {
     return (
         <section
             ref={sectionRef}
-            className="py-24 bg-neutral text-neutral-content"
+            className="py-24 bg-base-300 text-base-content"
         >
             <div className="container mx-auto px-4">
                 {/* Heading */}
@@ -64,9 +64,7 @@ export function ProblemSection() {
                         >
                             <div className="card-body text-center">
                                 <div className="mb-4">
-                                    <i
-                                        className={`${point.icon} text-4xl`}
-                                    ></i>
+                                    <i className={`${point.icon} text-4xl`}></i>
                                 </div>
                                 <h3 className="card-title justify-center text-lg">
                                     {point.title}

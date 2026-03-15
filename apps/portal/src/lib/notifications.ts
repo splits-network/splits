@@ -63,6 +63,7 @@ export function getNotificationIcon(category?: string): string {
         case 'candidate': return 'fa-user';
         case 'collaboration': return 'fa-users';
         case 'invitation': return 'fa-envelope';
+        case 'interview': return 'fa-video';
         case 'system': return 'fa-cog';
         default: return 'fa-bell';
     }

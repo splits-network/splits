@@ -76,7 +76,7 @@ export default function ContentImagesAdminPage() {
     function handleCopyUrl(image: ContentImage, e: React.MouseEvent) {
         e.stopPropagation();
         navigator.clipboard.writeText(image.public_url);
-        toast.success("URL copied to clipboard");
+        toast.info("URL copied to clipboard.");
     }
 
     const totalSize = images.reduce((sum, img) => sum + img.file_size, 0);

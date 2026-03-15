@@ -71,7 +71,7 @@ const ConnectModal = forwardRef<ConnectModalHandle, ConnectModalProps>(
                 );
 
                 toast.success(
-                    "Message sent! The recruiter will see your request.",
+                    "Message sent. The recruiter will review your request.",
                 );
                 dialogRef.current?.close();
                 onConnected();
@@ -83,7 +83,7 @@ const ConnectModal = forwardRef<ConnectModalHandle, ConnectModalProps>(
                     dialogRef.current?.close();
                     onConnected();
                 } else {
-                    toast.error("Failed to send message. Please try again.");
+                    toast.error("Message couldn't be sent. Try again.");
                 }
             } finally {
                 setSending(false);

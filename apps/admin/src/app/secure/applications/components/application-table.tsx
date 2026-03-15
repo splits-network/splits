@@ -27,6 +27,8 @@ type ApplicationTableProps = {
 
 const STAGE_BADGE: Record<string, string> = {
     ai_review: 'badge-info',
+    gpt_review: 'badge-info',
+    ai_failed: 'badge-error',
     ai_reviewed: 'badge-info',
     recruiter_request: 'badge-warning',
     recruiter_proposed: 'badge-warning',

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { LeaderboardEntryInfo } from "../types";
 import { LeaderboardRow } from "./leaderboard-row";
 
@@ -47,16 +47,10 @@ export function MiniLeaderboard({
     const [myRank, setMyRank] = useState<LeaderboardEntryInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [filterMode, setFilterMode] = useState<"overall" | "specialization">("overall");
-    const prevKeyRef = useRef<string>("");
-
     const effectiveSpecialization = filterMode === "specialization" ? specialization : undefined;
 
     useEffect(() => {
         if (!client) return;
-
-        const fetchKey = `${entityType}:${period}:${metric}:${filterMode}:${entityId}`;
-        if (fetchKey === prevKeyRef.current) return;
-        prevKeyRef.current = fetchKey;
 
         let cancelled = false;
         setLoading(true);

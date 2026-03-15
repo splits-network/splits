@@ -84,6 +84,10 @@ export default function ApplicationsBaselPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Application, ApplicationFilters>({
         endpoint: "/applications",
         include: "candidate,job,company,ai_review",
@@ -94,7 +98,7 @@ export default function ApplicationsBaselPage() {
         },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
     });
 
@@ -118,6 +122,14 @@ export default function ApplicationsBaselPage() {
     const handleViewModeChange = useCallback((mode: ViewMode) => {
         setViewMode(mode);
     }, []);
+
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            setSortBy(field);
+            setSortOrder(order);
+        },
+        [setSortBy, setSortOrder],
+    );
 
     const stats = useMemo(
         () => ({
@@ -149,15 +161,12 @@ export default function ApplicationsBaselPage() {
                 loading={loading}
                 refresh={refresh}
                 onSubmitCandidate={() => setShowSubmitWizard(true)}
+                applicationCount={applications.length}
+                totalCount={pagination?.total ?? applications.length}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
             />
-
-            {/* Results count */}
-            <div className="mx-auto px-6 lg:px-12 py-2">
-                <p className="text-sm uppercase tracking-wider text-base-content/40 font-bold">
-                    {applications.length} of{" "}
-                    {pagination?.total ?? applications.length} applications
-                </p>
-            </div>
 
             {/* Content area */}
             <section className="content-area scroll-reveal fade-in p-4">

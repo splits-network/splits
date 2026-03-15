@@ -158,7 +158,7 @@ export default function CompanyDocumentUpload({
         event.preventDefault();
 
         if (!selectedFile || !documentType) {
-            toast.error("Please select a file and document type");
+            toast.error("Select a file and document type.");
             return;
         }
 
@@ -197,7 +197,7 @@ export default function CompanyDocumentUpload({
             };
             setUploadedDocuments((prev) => [...prev, newDocument]);
 
-            toast.success("Document uploaded successfully");
+            toast.success("Document uploaded.");
 
             // Reset form for next upload
             setSelectedFile(null);

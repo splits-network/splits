@@ -25,7 +25,7 @@ export interface ChatSidebarState {
     isMinimized: boolean;
     view: "list" | "thread";
     activeConversationId: string | null;
-    activeConversationMeta: { otherUserName: string | null } | null;
+    activeConversationMeta: { otherUserName: string | null; otherUserId: string | null } | null;
     unreadTotalCount: number;
     conversations: ConversationRow[];
     conversationsLoading: boolean;
@@ -35,7 +35,7 @@ export interface ChatSidebarActions {
     openToList: () => void;
     openToThread: (
         conversationId: string,
-        meta?: { otherUserName?: string },
+        meta?: { otherUserName?: string; otherUserId?: string },
     ) => void;
     close: () => void;
     minimize: () => void;
@@ -94,7 +94,7 @@ type PersistedState = {
     isMinimized: boolean;
     view: "list" | "thread";
     activeConversationId: string | null;
-    activeConversationMeta: { otherUserName: string | null } | null;
+    activeConversationMeta: { otherUserName: string | null; otherUserId: string | null } | null;
 };
 
 function loadPersistedState(): PersistedState | null {
@@ -145,6 +145,7 @@ export function ChatSidebarProvider({
     >(null);
     const [activeConversationMeta, setActiveConversationMeta] = useState<{
         otherUserName: string | null;
+        otherUserId: string | null;
     } | null>(null);
 
     // Restore persisted state after mount (post-hydration) to avoid SSR/client mismatch
@@ -210,10 +211,10 @@ export function ChatSidebarProvider({
     }, []);
 
     const openToThread = useCallback(
-        (conversationId: string, meta?: { otherUserName?: string }) => {
+        (conversationId: string, meta?: { otherUserName?: string; otherUserId?: string }) => {
             setActiveConversationId(conversationId);
             setActiveConversationMeta(
-                meta ? { otherUserName: meta.otherUserName ?? null } : null,
+                meta ? { otherUserName: meta.otherUserName ?? null, otherUserId: meta.otherUserId ?? null } : null,
             );
             setView("thread");
             setIsMinimized(false);

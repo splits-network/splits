@@ -28,6 +28,11 @@ export function companyId(item: Company | CompanyRelationship, isMarketplace: bo
     return (item as CompanyRelationship).company_id || (item as CompanyRelationship).company?.id;
 }
 
+/** Unique per row — uses relationship ID for my-companies (avoids duplicate company matches) */
+export function rowId(item: Company | CompanyRelationship, isMarketplace: boolean): string {
+    return item.id;
+}
+
 export function extractCompany(item: Company | CompanyRelationship, isMarketplace: boolean): Company {
     if (isMarketplace) return item as Company;
     const rel = item as CompanyRelationship;
@@ -36,6 +41,12 @@ export function extractCompany(item: Company | CompanyRelationship, isMarketplac
         name: rel.company?.name || "Company",
         industry: rel.company?.industry,
         headquarters_location: rel.company?.headquarters_location,
+        company_size: rel.company?.company_size,
+        stage: rel.company?.stage,
+        logo_url: rel.company?.logo_url,
+        founded_year: rel.company?.founded_year,
+        tagline: rel.company?.tagline,
+        open_roles_count: rel.company?.open_roles_count,
         created_at: rel.created_at,
         updated_at: rel.updated_at,
     } as Company;
@@ -57,12 +68,12 @@ export function addedAgo(item: Company | CompanyRelationship): string {
 
 export function companyFoundedYear(item: Company | CompanyRelationship, isMarketplace: boolean): number | undefined {
     if (isMarketplace) return (item as Company).founded_year;
-    return undefined;
+    return (item as CompanyRelationship).company?.founded_year;
 }
 
 export function companyTagline(item: Company | CompanyRelationship, isMarketplace: boolean): string | undefined {
     if (isMarketplace) return (item as Company).tagline;
-    return undefined;
+    return (item as CompanyRelationship).company?.tagline;
 }
 
 export function formatSalary(avgSalary: number | null | undefined): string {

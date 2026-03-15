@@ -153,7 +153,7 @@ export default function StepFindRole({
                                         </td>
                                         <td>
                                             <span
-                                                className={`badge ${STATUS_BADGE_MAP[job.status] || "badge-neutral"}`}
+                                                className={`badge ${STATUS_BADGE_MAP[job.status] || "badge-primary"}`}
                                                 style={{ borderRadius: 0 }}
                                             >
                                                 {job.status}

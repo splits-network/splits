@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import {
     jobCreatedConfirmationEmail,
     JobCreatedConfirmationData,
@@ -10,6 +11,12 @@ import {
     JobExpiredData,
     firstJobPostedEmail,
     FirstJobPostedData,
+    jobFieldsUpdatedEmail,
+    JobFieldsUpdatedData,
+    jobDeletedEmail,
+    JobDeletedData,
+    jobRecommendationEmail,
+    JobRecommendationData,
 } from '../../templates/jobs';
 
 export class JobsEmailService {
@@ -17,6 +24,7 @@ export class JobsEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -33,8 +41,13 @@ export class JobsEmailService {
             category?: string;
             actionUrl?: string;
             actionLabel?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const requestedChannel = options.channel || 'email';
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, requestedChannel, options.category || null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId,
@@ -42,8 +55,8 @@ export class JobsEmailService {
             subject,
             template: 'custom',
             payload: options.payload,
-            status: 'pending',
-            channel: options.channel || 'email',
+            status: effectiveChannel === 'in_app' ? 'sent' : 'pending',
+            channel: effectiveChannel,
             read: false,
             dismissed: false,
             priority: options.priority || 'normal',
@@ -52,9 +65,12 @@ export class JobsEmailService {
             action_label: options.actionLabel,
         });
 
+        // Skip actual email send if downgraded to in-app only
+        if (effectiveChannel === 'in_app') return;
+
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -134,6 +150,58 @@ export class JobsEmailService {
             category: 'milestone',
             actionUrl: data.jobUrl,
             actionLabel: 'View Job Listing',
+        });
+    }
+
+    async sendJobFieldsUpdated(
+        email: string,
+        data: JobFieldsUpdatedData & { userId?: string }
+    ): Promise<void> {
+        const html = jobFieldsUpdatedEmail(data);
+
+        await this.sendEmail(email, `Job updated: ${data.jobTitle}`, html, {
+            eventType: 'job.updated',
+            userId: data.userId,
+            payload: { jobTitle: data.jobTitle, updatedFields: data.updatedFields },
+            channel: 'in_app',
+            category: 'jobs',
+            actionUrl: data.jobUrl,
+            actionLabel: 'View Job Details',
+        });
+    }
+
+    async sendJobDeleted(
+        email: string,
+        data: JobDeletedData & { userId?: string }
+    ): Promise<void> {
+        const html = jobDeletedEmail(data);
+
+        await this.sendEmail(email, `Job deleted: ${data.jobTitle}`, html, {
+            eventType: 'job.deleted',
+            userId: data.userId,
+            payload: { jobTitle: data.jobTitle, companyName: data.companyName },
+            priority: 'high',
+            channel: 'both',
+            category: 'jobs',
+        });
+    }
+
+    async sendJobRecommendation(
+        email: string,
+        data: JobRecommendationData & { userId?: string }
+    ): Promise<void> {
+        const html = jobRecommendationEmail(data);
+
+        await this.sendEmail(email, `A job was recommended for you: ${data.jobTitle}`, html, {
+            eventType: 'job_recommendation.created',
+            userId: data.userId,
+            payload: { jobTitle: data.jobTitle, companyName: data.companyName },
+            priority: 'normal',
+            channel: 'both',
+            category: 'jobs',
+            actionUrl: data.jobUrl,
+            actionLabel: 'View Job',
+            source: 'candidate',
         });
     }
 

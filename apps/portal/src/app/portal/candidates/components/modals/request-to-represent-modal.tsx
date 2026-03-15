@@ -28,6 +28,7 @@ export default function RequestToRepresentModal({
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [alreadyExists, setAlreadyExists] = useState(false);
 
     const handleSubmit = async () => {
         if (!profile?.recruiter_id) {
@@ -56,6 +57,11 @@ export default function RequestToRepresentModal({
 
             if (message.includes("Not authenticated")) {
                 setError("Session expired. Refresh the page and try again.");
+            } else if (
+                message.includes("already exists") ||
+                message.includes("CONFLICT")
+            ) {
+                setAlreadyExists(true);
             } else {
                 setError(
                     message ||
@@ -74,6 +80,7 @@ export default function RequestToRepresentModal({
         }
         setError(null);
         setSuccess(false);
+        setAlreadyExists(false);
         onClose();
     };
 
@@ -82,14 +89,17 @@ export default function RequestToRepresentModal({
     return (
         <dialog className="modal modal-open modal-bottom sm:modal-middle">
             <div
-                className="modal-box max-w-md w-full p-0"
-                style={{ borderRadius: 0 }}
+                className="modal-box max-w-md w-full p-0 rounded-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="bg-primary px-6 py-4 flex items-center justify-between">
                     <h2 className="text-xl font-black uppercase tracking-tight text-primary-content">
-                        {success ? "Request Sent" : "Request to Represent"}
+                        {success
+                            ? "Request Sent"
+                            : alreadyExists
+                              ? "Already Representing"
+                              : "Request to Represent"}
                     </h2>
                     <button
                         type="button"
@@ -124,8 +134,37 @@ export default function RequestToRepresentModal({
                             <div className="flex justify-end">
                                 <button
                                     type="button"
-                                    className="btn btn-primary"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-primary rounded-none"
+                                    onClick={handleClose}
+                                >
+                                    Done
+                                </button>
+                            </div>
+                        </div>
+                    ) : alreadyExists ? (
+                        <div className="space-y-6">
+                            <div className="bg-info/10 border-l-4 border-info p-4">
+                                <div className="flex gap-3 items-start">
+                                    <i className="fa-duotone fa-regular fa-handshake text-info text-xl mt-0.5" />
+                                    <div className="text-sm">
+                                        <p className="font-black text-base-content uppercase tracking-wider text-xs mb-1">
+                                            Relationship exists
+                                        </p>
+                                        <p className="text-base-content/70 font-medium leading-relaxed">
+                                            You already have an active
+                                            representation agreement with{" "}
+                                            <strong>{candidateName}</strong>.
+                                            You can manage this relationship from
+                                            your candidates list.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary rounded-none"
                                     onClick={handleClose}
                                 >
                                     Done
@@ -191,8 +230,7 @@ export default function RequestToRepresentModal({
                             <div className="flex gap-3 justify-end pt-2">
                                 <button
                                     type="button"
-                                    className="btn btn-outline"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-outline rounded-none"
                                     onClick={handleClose}
                                     disabled={submitting}
                                 >
@@ -200,8 +238,7 @@ export default function RequestToRepresentModal({
                                 </button>
                                 <button
                                     type="button"
-                                    className="btn btn-primary"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-primary rounded-none"
                                     onClick={handleSubmit}
                                     disabled={submitting}
                                 >

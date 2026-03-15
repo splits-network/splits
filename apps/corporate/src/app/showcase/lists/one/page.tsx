@@ -346,14 +346,16 @@ export default function ListsOnePage() {
             }
 
             const el = contentRef.current;
-            el.style.transition = "opacity 0.2s cubic-bezier(0.55, 0, 1, 0.45), transform 0.2s cubic-bezier(0.55, 0, 1, 0.45)";
+            el.style.transition =
+                "opacity 0.2s cubic-bezier(0.55, 0, 1, 0.45), transform 0.2s cubic-bezier(0.55, 0, 1, 0.45)";
             el.style.opacity = "0";
             el.style.transform = "translateY(15px)";
             setTimeout(() => {
                 setViewMode(newMode);
                 setSelectedJob(null);
                 requestAnimationFrame(() => {
-                    el.style.transition = "opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)";
+                    el.style.transition =
+                        "opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)";
                     el.style.opacity = "1";
                     el.style.transform = "translateY(0)";
                 });
@@ -375,7 +377,7 @@ export default function ListsOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 HERO — Compact split-screen header
                ═══════════════════════════════════════════════════════ */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
@@ -395,7 +397,7 @@ export default function ListsOnePage() {
                             </span>
                         </h1>
 
-                        <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
+                        <p className="hero-subtitle text-lg text-base-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                             Browse open roles from top companies. Transparent
                             splits, real communication, and a single connected
                             marketplace.
@@ -428,11 +430,14 @@ export default function ListsOnePage() {
                                     label: "Remote",
                                 },
                             ].map((stat, i) => (
-                                <div key={i} className="hero-stat scroll-reveal fade-up">
+                                <div
+                                    key={i}
+                                    className="hero-stat scroll-reveal fade-up"
+                                >
                                     <div className="text-2xl font-black tracking-tight text-primary">
                                         {stat.value}
                                     </div>
-                                    <div className="text-xs uppercase tracking-wider text-neutral-content/40">
+                                    <div className="text-xs uppercase tracking-wider text-base-content/40">
                                         {stat.label}
                                     </div>
                                 </div>

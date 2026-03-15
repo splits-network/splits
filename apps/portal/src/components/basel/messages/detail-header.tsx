@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useFilter } from "@/app/portal/messages/contexts/filter-context";
+import { requestChatRefresh } from "@/lib/chat-refresh-queue";
 import type { ConversationRow } from "@/app/portal/messages/types";
 import { getOtherParticipant, getInitials } from "@/app/portal/messages/types";
 import { ActionsToolbar } from "./actions-toolbar";
@@ -41,7 +42,7 @@ const roleMeta: Record<
     },
     admin: {
         label: "Admin",
-        bgClass: "bg-neutral text-neutral-content",
+        bgClass: "bg-base-300 text-base-content",
         textClass: "text-neutral",
         icon: "fa-duotone fa-regular fa-shield-halved",
     },
@@ -92,6 +93,7 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
         const client = createAuthenticatedClient(token);
         await client.post(`/chat/conversations/${item.conversation.id}/accept`);
         refresh();
+        requestChatRefresh();
     };
 
     const handleDecline = async () => {
@@ -103,6 +105,7 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
             `/chat/conversations/${item.conversation.id}/decline`,
         );
         refresh();
+        requestChatRefresh();
     };
 
     return (
@@ -152,11 +155,11 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                                 Online
                             </span>
                         ) : presenceMap[otherId ?? ""]?.status === "offline" ? (
-                            <span className="badge badge-sm badge-neutral badge-soft badge-outline">
+                            <span className="badge badge-sm badge-primary badge-soft badge-outline">
                                 Offline
                             </span>
                         ) : (
-                            <span className="badge badge-sm badge-neutral badge-soft badge-outline">
+                            <span className="badge badge-sm badge-primary badge-soft badge-outline">
                                 Unknown
                             </span>
                         )}

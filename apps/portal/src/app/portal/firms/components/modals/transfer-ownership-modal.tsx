@@ -61,7 +61,7 @@ export default function TransferOwnershipModal({
                 newOwnerRecruiterId: selectedRecruiterId,
             });
 
-            toast.success("Ownership transferred successfully");
+            toast.success("Ownership transferred.");
             onSuccess();
         } catch (err: any) {
             const message =

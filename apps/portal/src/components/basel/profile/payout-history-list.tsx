@@ -38,7 +38,7 @@ function formatPayoutStatus(status: string): string {
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 export function PayoutHistoryList() {
-    const { payouts, hasMore, loading, error, loadMore } = usePayoutHistory();
+    const { payouts, loading, error } = usePayoutHistory();
 
     if (loading && payouts.length === 0) {
         return (
@@ -61,7 +61,8 @@ export function PayoutHistoryList() {
             <div className="bg-base-200 border border-base-300 p-6 text-center">
                 <i className="fa-duotone fa-regular fa-money-bill-transfer text-2xl text-base-content/20 mb-2" />
                 <p className="text-sm text-base-content/50">
-                    Your payout history will appear here once Stripe processes your first payout.
+                    Your payout history will appear here once Stripe processes
+                    your first payout.
                 </p>
             </div>
         );
@@ -72,11 +73,19 @@ export function PayoutHistoryList() {
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-neutral text-neutral-content">
-                            <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Date</th>
-                            <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Amount</th>
-                            <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Status</th>
-                            <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Arrival</th>
+                        <tr className="bg-base-300 text-base-content">
+                            <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                Amount
+                            </th>
+                            <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                Arrival
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -84,17 +93,24 @@ export function PayoutHistoryList() {
                             <tr
                                 key={payout.id}
                                 className={`border-b border-base-300 ${
-                                    i % 2 === 0 ? "bg-base-100" : "bg-base-200/50"
+                                    i % 2 === 0
+                                        ? "bg-base-100"
+                                        : "bg-base-200/50"
                                 }`}
                             >
                                 <td className="px-4 py-3 text-sm font-bold text-base-content whitespace-nowrap">
                                     {formatDateShort(payout.created)}
                                 </td>
                                 <td className="px-4 py-3 text-sm font-black text-base-content">
-                                    {formatAmount(payout.amount, payout.currency)}
+                                    {formatAmount(
+                                        payout.amount,
+                                        payout.currency,
+                                    )}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <BaselStatusPill color={payoutStatusColor(payout.status)}>
+                                    <BaselStatusPill
+                                        color={payoutStatusColor(payout.status)}
+                                    >
                                         {formatPayoutStatus(payout.status)}
                                     </BaselStatusPill>
                                 </td>
@@ -106,28 +122,6 @@ export function PayoutHistoryList() {
                     </tbody>
                 </table>
             </div>
-
-            {hasMore && (
-                <div className="text-center mt-4">
-                    <button
-                        className="btn btn-sm btn-outline"
-                        onClick={loadMore}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <span className="loading loading-spinner loading-xs" />
-                                Loading...
-                            </>
-                        ) : (
-                            <>
-                                <i className="fa-duotone fa-regular fa-chevron-down" />
-                                Load More
-                            </>
-                        )}
-                    </button>
-                </div>
-            )}
         </div>
     );
 }

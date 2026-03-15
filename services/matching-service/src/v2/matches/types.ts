@@ -46,6 +46,12 @@ export interface MatchListFilters {
     match_tier?: MatchTier;
     status?: MatchStatus;
     min_score?: number;
+    salary_overlap?: string;
+    location_compatible?: string;
+    employment_type_match?: string;
+    job_level_match?: string;
+    availability_compatible?: string;
+    invite_status?: string;
     page?: number;
     limit?: number;
 }

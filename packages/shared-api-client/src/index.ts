@@ -1,8 +1,8 @@
 /**
  * Unified API Client for Splits Network Frontend Applications
- * 
+ *
  * Key Features:
- * - V2 API only (no legacy V1 support)
+ * - V3 API (migrated from V2)
  * - Automatic response unwrapping ({ data } envelope)
  * - Consistent error handling
  * - Type-safe with shared types
@@ -64,7 +64,7 @@ export interface ApiClientConfig {
     authToken?: string;
     /** Base URL override (defaults to environment-based detection) */
     baseUrl?: string;
-    /** Path prefix prepended to all endpoints (defaults to '/api/v2') */
+    /** Path prefix prepended to all endpoints (defaults to '/api/v3') */
     pathPrefix?: string;
 }
 
@@ -135,7 +135,7 @@ export class SplitsApiClient {
 
     constructor(config: ApiClientConfig = {}) {
         this.baseUrl = config.baseUrl || getApiBaseUrl();
-        this.pathPrefix = config.pathPrefix ?? '/api/v2';
+        this.pathPrefix = config.pathPrefix ?? '/api/v3';
         this.authToken = config.authToken;
     }
 
@@ -160,7 +160,10 @@ export class SplitsApiClient {
         endpoint: string,
         options: RequestInit = {}
     ): Promise<T> {
-        const url = `${this.baseUrl}${this.pathPrefix}${endpoint}`;
+        const hasVersionPrefix = endpoint.startsWith('/api/v');
+        const url = hasVersionPrefix
+            ? `${this.baseUrl}${endpoint}`
+            : `${this.baseUrl}${this.pathPrefix}${endpoint}`;
 
         const headers: Record<string, string> = {
             ...options.headers as Record<string, string>,
@@ -239,8 +242,18 @@ export class SplitsApiClient {
             const searchParams = new URLSearchParams();
             Object.entries(params).forEach(([key, value]) => {
                 if (value !== undefined && value !== null) {
-                    // JSON stringify objects (like filters) but keep primitives as strings
-                    if (typeof value === 'object' && value !== null) {
+                    // Flatten filters object as top-level query params (V3 expects flat params)
+                    if (key === 'filters' && typeof value === 'object' && !Array.isArray(value)) {
+                        Object.entries(value).forEach(([filterKey, filterValue]) => {
+                            if (filterValue !== undefined && filterValue !== null) {
+                                if (Array.isArray(filterValue)) {
+                                    searchParams.append(filterKey, JSON.stringify(filterValue));
+                                } else {
+                                    searchParams.append(filterKey, String(filterValue));
+                                }
+                            }
+                        });
+                    } else if (typeof value === 'object' && value !== null) {
                         searchParams.append(key, JSON.stringify(value));
                     } else {
                         searchParams.append(key, String(value));

@@ -17,7 +17,7 @@ export default function NotFound() {
     return (
         <div ref={mainRef} className="min-h-screen bg-base-100">
             {/* ── Hero Section ──────────────────────────────────────── */}
-            <section className="relative min-h-[70vh] flex items-center bg-neutral text-neutral-content overflow-hidden">
+            <section className="relative min-h-[70vh] flex items-center bg-base-300 text-base-content overflow-hidden">
                 {/* Diagonal clip-path panel */}
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -52,7 +52,7 @@ export default function NotFound() {
                         </h1>
 
                         {/* Body */}
-                        <p className="scroll-reveal fade-up text-lg leading-relaxed text-neutral-content/70 max-w-xl mb-8">
+                        <p className="scroll-reveal fade-up text-lg leading-relaxed text-base-content/70 max-w-xl mb-8">
                             The URL you followed doesn&apos;t match any page in
                             Splits Network. This usually means the link is
                             outdated, the resource was moved, or the address was
@@ -71,7 +71,7 @@ export default function NotFound() {
                             </Link>
                             <Link
                                 href="/portal/roles"
-                                className="btn btn-ghost btn-md w-full sm:w-auto gap-2 text-neutral-content"
+                                className="btn btn-ghost btn-md w-full sm:w-auto gap-2 text-base-content"
                             >
                                 <i className="fa-duotone fa-regular fa-briefcase" />
                                 Browse Roles

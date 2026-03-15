@@ -26,9 +26,7 @@ function truncateText(value: string, maxLength = 155) {
 
 const fetchJob = cache(async (id: string): Promise<Job | null> => {
     try {
-        const response = await apiClient.get<{ data: Job }>(`/jobs/${id}`, {
-            params: { include: "company,requirements" },
-        });
+        const response = await apiClient.get<{ data: Job }>(`/jobs/${id}/view/candidate-detail`);
         return response.data;
     } catch (error) {
         console.error("Failed to fetch job:", error);
@@ -86,7 +84,23 @@ export default async function JobDetailPage({ params }: PageProps) {
     const { id } = await params;
     const { userId, getToken } = await auth();
 
-    const job = await fetchJob(id);
+    // Use authenticated fetch when logged in for personalized enrichment (e.g. match scores)
+    let job: Job | null = null;
+    if (userId) {
+        try {
+            const token = await getToken();
+            if (token) {
+                const authClient = createAuthenticatedClient(token);
+                const res = await authClient.get<{ data: Job }>(`/jobs/${id}/view/candidate-detail`);
+                job = res.data;
+            }
+        } catch {
+            // Fall back to unauthenticated fetch
+        }
+    }
+    if (!job) {
+        job = await fetchJob(id);
+    }
     let hasActiveRecruiter = false;
     let existingApplication: any = null;
     let initialSavedJobId: string | null = null;

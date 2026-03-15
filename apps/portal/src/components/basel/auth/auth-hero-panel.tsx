@@ -30,7 +30,8 @@ export function AuthHeroPanel() {
     const headlineIndex = useRef(0);
 
     useEffect(() => {
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+            return;
 
         const interval = setInterval(() => {
             setTransitioning(true);
@@ -46,9 +47,7 @@ export function AuthHeroPanel() {
     }, []);
 
     return (
-        <div
-            className="hidden lg:flex lg:w-2/5 bg-neutral text-neutral-content flex-col items-start justify-center px-12 xl:px-16 relative"
-        >
+        <div className="hidden lg:flex lg:w-2/5 bg-base-300 text-base-content flex-col items-start justify-center px-12 xl:px-16 relative">
             {/* Kicker */}
             <p className="animate-[fadeIn_0.5s_ease-out_0.3s_both] text-md font-semibold uppercase tracking-[0.25em] text-secondary mb-5">
                 The Recruiting Marketplace
@@ -66,14 +65,17 @@ export function AuthHeroPanel() {
                             ? "opacity-0 -translate-y-3"
                             : "opacity-100 translate-y-0"
                     }`}
-                    style={{ animationDelay: "0.5s", animationFillMode: "both" }}
+                    style={{
+                        animationDelay: "0.5s",
+                        animationFillMode: "both",
+                    }}
                 >
                     {headlineText}
                 </span>
             </h2>
 
             {/* Subtitle */}
-            <p className="animate-[fadeIn_0.45s_ease-out_0.55s_both] text-md text-neutral-content/50 leading-relaxed max-w-sm">
+            <p className="animate-[fadeIn_0.45s_ease-out_0.55s_both] text-md text-base-content/50 leading-relaxed max-w-sm">
                 Connect with hiring companies, submit candidates against pre-set
                 terms, and earn your split on every verified placement. One
                 pipeline. Full visibility. No guesswork.

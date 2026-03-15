@@ -82,11 +82,9 @@ interface SourceMeta {
 }
 
 function getSourceMeta(source?: EmailSource): SourceMeta {
-    // homeUrl uses env vars so footer links resolve in each environment.
+    // homeUrl uses centralized URL helper so links always resolve correctly per environment.
     // logoUrl is a fixed public URL — the file must exist at that path in each app.
-    const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
-    const candidateUrl = process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network';
-    const corporateUrl = process.env.NEXT_PUBLIC_CORPORATE_URL || 'https://employment-networks.com';
+    const { PORTAL_URL: portalUrl, CANDIDATE_URL: candidateUrl, CORPORATE_URL: corporateUrl } = require('../helpers/urls');
 
     switch (source) {
         case 'candidate':
@@ -134,8 +132,7 @@ function getSourceMeta(source?: EmailSource): SourceMeta {
 export function baseEmailTemplate({ preheader, content, source, theme }: BaseEmailProps): string {
     const t = { ...defaultTheme, ...theme };
     const meta = getSourceMeta(source);
-    const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
-
+    const { PORTAL_URL: portalUrl } = require('../helpers/urls');
     return `
 <!DOCTYPE html>
 <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">

@@ -14,7 +14,6 @@ import { ApplicationDetailsEmbed } from "@/app/portal/applications/components/sh
 import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
 import { DetailLoader as PlacementDetailLoader } from "@/app/portal/placements/components/shared/placement-detail";
 import { JobDetail } from "@/app/portal/roles/components/shared/job-detail";
-
 interface DetailPanelProps {
     id: string;
     onClose: () => void;
@@ -55,6 +54,7 @@ const CATEGORY_LABELS: Record<string, string> = {
     placement: "Placement",
     proposal: "Role",
     collaboration: "Role",
+    interview: "Interview",
 };
 
 export default function NotificationDetailPanel({
@@ -299,12 +299,23 @@ function RoleDetailsLoader({ roleId }: { roleId: string }) {
  * Fallback for notifications without a mapped feature detail view
  * (e.g., invitations, chat, system notifications).
  */
+function isInterviewNotification(eventType: string): boolean {
+    return (
+        eventType.startsWith("interview.reminder") ||
+        eventType.startsWith("interview.scheduled")
+    );
+}
+
 function NotificationFallback({
     notification,
 }: {
     notification: InAppNotification;
 }) {
     const router = useRouter();
+    const isInterview = isInterviewNotification(notification.event_type);
+    const icon = isInterview
+        ? "fa-video"
+        : getNotificationIcon(notification.category);
 
     return (
         <div className="p-6 space-y-6">
@@ -317,7 +328,7 @@ function NotificationFallback({
                     }`}
                 >
                     <i
-                        className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)} text-lg`}
+                        className={`fa-duotone fa-regular ${icon} text-lg`}
                     ></i>
                 </div>
                 <div>
@@ -330,16 +341,23 @@ function NotificationFallback({
                 </div>
             </div>
 
-            {notification.category && (
-                <div className="flex flex-wrap gap-2">
-                    <span className="badge badge-ghost capitalize">
-                        <i
-                            className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)} mr-1`}
-                        ></i>
-                        {notification.category}
+            <div className="flex flex-wrap gap-2">
+                {isInterview ? (
+                    <span className="badge badge-accent">
+                        <i className="fa-duotone fa-regular fa-video mr-1"></i>
+                        Interview
                     </span>
-                </div>
-            )}
+                ) : (
+                    notification.category && (
+                        <span className="badge badge-ghost capitalize">
+                            <i
+                                className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)} mr-1`}
+                            ></i>
+                            {notification.category}
+                        </span>
+                    )
+                )}
+            </div>
 
             {notification.action_url && (
                 <button

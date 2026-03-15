@@ -13,6 +13,8 @@ interface StepBuildCaseProps {
     resumeFile: File | null;
     onResumeFileChange: (file: File | null) => void;
     onFileError: (message: string) => void;
+    /** Company users sending a recommendation — no documents, optional message */
+    isRecommendation?: boolean;
 }
 
 export default function StepBuildCase({
@@ -26,6 +28,7 @@ export default function StepBuildCase({
     resumeFile,
     onResumeFileChange,
     onFileError,
+    isRecommendation,
 }: StepBuildCaseProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -80,23 +83,28 @@ export default function StepBuildCase({
                 </div>
             </div>
 
-            {/* Pitch */}
+            {/* Message / Pitch */}
             <div>
                 <label className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-2 block">
-                    Your Pitch <span className="text-error">*</span>
+                    {isRecommendation ? "Message to Candidate" : "Your Pitch"}{" "}
+                    {!isRecommendation && <span className="text-error">*</span>}
                 </label>
                 <MarkdownEditor
                     value={pitch}
                     onChange={onPitchChange}
-                    placeholder="Explain why this candidate is positioned for this specific role. Speak to their background, their fit, and what sets them apart."
-                    height={220}
-                    maxLength={500}
+                    placeholder={
+                        isRecommendation
+                            ? "Optional — add a note about why this role is a good fit for them."
+                            : "Explain why this candidate is positioned for this specific role. Speak to their background, their fit, and what sets them apart."
+                    }
+                    height={isRecommendation ? 150 : 220}
+                    maxLength={isRecommendation ? 2000 : 500}
                     showCount
                 />
             </div>
 
-            {/* Documents from profile */}
-            {candidateDocuments.length > 0 && (
+            {/* Documents from profile — recruiters only */}
+            {!isRecommendation && candidateDocuments.length > 0 && (
                 <fieldset>
                     <label className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-3 block">
                         Supporting Documents
@@ -130,7 +138,7 @@ export default function StepBuildCase({
                                 />
                                 <i className="fa-duotone fa-regular fa-file text-base-content/40" />
                                 <span className="text-sm font-medium">
-                                    {doc.filename}
+                                    {doc.file_name || doc.filename || "Document"}
                                 </span>
                             </label>
                         ))}
@@ -138,45 +146,47 @@ export default function StepBuildCase({
                 </fieldset>
             )}
 
-            {/* Resume upload */}
-            <fieldset>
-                <label className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-2 block">
-                    Attach Additional Resume
-                </label>
-                <p className="text-sm text-base-content/40 mb-3">
-                    Optional — attach a current version or one tailored to this
-                    role.
-                </p>
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="file-input w-full"
-                    style={{ borderRadius: 0 }}
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileChange}
-                />
-                {resumeFile && (
-                    <div className="mt-3 flex items-center gap-3 bg-base-200 p-3">
-                        <i className="fa-duotone fa-regular fa-file text-primary" />
-                        <span className="text-sm font-medium flex-1">
-                            {resumeFile.name}
-                        </span>
-                        <button
-                            type="button"
-                            className="btn btn-ghost btn-sm"
-                            style={{ borderRadius: 0 }}
-                            onClick={() => {
-                                onResumeFileChange(null);
-                                if (fileInputRef.current) {
-                                    fileInputRef.current.value = "";
-                                }
-                            }}
-                        >
-                            <i className="fa-duotone fa-regular fa-xmark" />
-                        </button>
-                    </div>
-                )}
-            </fieldset>
+            {/* Resume upload — recruiters only */}
+            {!isRecommendation && (
+                <fieldset>
+                    <label className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-2 block">
+                        Attach Additional Resume
+                    </label>
+                    <p className="text-sm text-base-content/40 mb-3">
+                        Optional — attach a current version or one tailored to this
+                        role.
+                    </p>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="file-input w-full"
+                        style={{ borderRadius: 0 }}
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleFileChange}
+                    />
+                    {resumeFile && (
+                        <div className="mt-3 flex items-center gap-3 bg-base-200 p-3">
+                            <i className="fa-duotone fa-regular fa-file text-primary" />
+                            <span className="text-sm font-medium flex-1">
+                                {resumeFile.name}
+                            </span>
+                            <button
+                                type="button"
+                                className="btn btn-ghost btn-sm"
+                                style={{ borderRadius: 0 }}
+                                onClick={() => {
+                                    onResumeFileChange(null);
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.value = "";
+                                    }
+                                }}
+                            >
+                                <i className="fa-duotone fa-regular fa-xmark" />
+                            </button>
+                        </div>
+                    )}
+                </fieldset>
+            )}
         </div>
     );
 }

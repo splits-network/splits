@@ -1,78 +1,89 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: network-service
-  namespace: splits-network
+    name: network-service
+    namespace: splits-network
 spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: network-service
-  template:
-    metadata:
-      labels:
-        app: network-service
-    spec:
-      containers:
-        - name: network-service
-          image: ${ACR_SERVER}/network-service:${IMAGE_TAG}
-          ports:
-            - containerPort: 3003
-              name: http
-          env:
-            - name: NODE_ENV
-              value: "production"
-            - name: PORT
-              value: "3003"
-            - name: SENTRY_DSN
-              value: "https://f0d0e207a81919e1b8ce8e47ca0adb2a@o4510570789732352.ingest.us.sentry.io/4510570905403392"
-            - name: SUPABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-url
-            - name: SUPABASE_ANON_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-anon-key
-            - name: SUPABASE_SERVICE_ROLE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: supabase-service-role-key
-            - name: RABBITMQ_URL
-              value: "amqp://splits:splits_production@rabbitmq:5672"
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 3003
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 3003
-            initialDelaySeconds: 10
-            periodSeconds: 5
+    replicas: ${REPLICAS:-2}
+    selector:
+        matchLabels:
+            app: network-service
+    template:
+        metadata:
+            labels:
+                app: network-service
+        spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
+            containers:
+                - name: network-service
+                  image: ${ACR_SERVER}/network-service:${IMAGE_TAG}
+                  ports:
+                      - containerPort: 3003
+                        name: http
+                  env:
+                      - name: NODE_ENV
+                        value: "production"
+                      - name: PORT
+                        value: "3003"
+                      - name: SENTRY_DSN
+                        value: "https://f0d0e207a81919e1b8ce8e47ca0adb2a@o4510570789732352.ingest.us.sentry.io/4510570905403392"
+                      - name: SUPABASE_URL
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-url
+                      - name: SUPABASE_ANON_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-anon-key
+                      - name: SUPABASE_SERVICE_ROLE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-service-role-key
+                      - name: RABBITMQ_URL
+                        value: "amqp://splits:splits_production@rabbitmq:5672"
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 128Mi
+                      limits:
+                          cpu: 500m
+                          memory: 512Mi
+                  livenessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3003
+                      initialDelaySeconds: 60
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
+                  readinessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3003
+                      initialDelaySeconds: 15
+                      periodSeconds: 5
+                      timeoutSeconds: 5
+                      failureThreshold: 2
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: network-service
-  namespace: splits-network
+    name: network-service
+    namespace: splits-network
 spec:
-  type: ClusterIP
-  ports:
-    - port: 3003
-      targetPort: 3003
-      name: http
-  selector:
-    app: network-service
+    type: ClusterIP
+    ports:
+        - port: 3003
+          targetPort: 3003
+          name: http
+    selector:
+        app: network-service

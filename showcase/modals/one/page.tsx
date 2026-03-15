@@ -78,9 +78,11 @@ function animateModalOpen(
 ) {
     if (!backdropEl || !boxEl) return;
     requestAnimationFrame(() => {
-        backdropEl.style.transition = "opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1)";
+        backdropEl.style.transition =
+            "opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1)";
         backdropEl.style.opacity = "1";
-        boxEl.style.transition = "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
+        boxEl.style.transition =
+            "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
         boxEl.style.opacity = "1";
         boxEl.style.transform = "translateY(0) scale(1)";
     });
@@ -95,7 +97,8 @@ function animateModalClose(
         onComplete();
         return;
     }
-    boxEl.style.transition = "opacity 0.25s cubic-bezier(0.55, 0, 1, 0.45), transform 0.25s cubic-bezier(0.55, 0, 1, 0.45)";
+    boxEl.style.transition =
+        "opacity 0.25s cubic-bezier(0.55, 0, 1, 0.45), transform 0.25s cubic-bezier(0.55, 0, 1, 0.45)";
     boxEl.style.opacity = "0";
     boxEl.style.transform = "translateY(30px) scale(0.97)";
     backdropEl.style.transition = "opacity 0.2s cubic-bezier(0.55, 0, 1, 0.45)";
@@ -165,7 +168,8 @@ export default function ModalsOne() {
             el.style.opacity = "0";
             el.style.transform = "translateX(20px)";
             requestAnimationFrame(() => {
-                el.style.transition = "opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1), transform 0.3s cubic-bezier(0.33, 1, 0.68, 1)";
+                el.style.transition =
+                    "opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1), transform 0.3s cubic-bezier(0.33, 1, 0.68, 1)";
                 el.style.opacity = "1";
                 el.style.transform = "translateX(0)";
             });
@@ -263,7 +267,7 @@ export default function ModalsOne() {
             {/* ═══════════════════════════════════════════════════════
                 HERO — Split-screen editorial header
                ═══════════════════════════════════════════════════════ */}
-            <div className="py-28 bg-neutral text-neutral-content">
+            <div className="py-28 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-3xl">
                         <p className="page-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
@@ -285,7 +289,7 @@ export default function ModalsOne() {
                             </span>
                         </h1>
 
-                        <p className="page-body text-lg md:text-xl text-neutral-content/70 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
+                        <p className="page-body text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
                             Standard forms, multi-step wizards, and confirmation
                             dialogs. Built with DaisyUI, animated with GSAP, and
                             designed for the real world.
@@ -382,10 +386,13 @@ export default function ModalsOne() {
                     <div
                         ref={standardBoxRef}
                         className="modal-box max-w-2xl bg-base-100 p-0 overflow-hidden"
-                        style={{ opacity: 0, transform: "translateY(40px) scale(0.96)" }}
+                        style={{
+                            opacity: 0,
+                            transform: "translateY(40px) scale(0.96)",
+                        }}
                     >
                         {/* Header */}
-                        <div className="bg-neutral text-neutral-content px-8 py-6">
+                        <div className="bg-base-300 text-base-content px-8 py-6">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-primary flex items-center justify-center">
@@ -395,14 +402,14 @@ export default function ModalsOne() {
                                         <h3 className="text-lg font-black">
                                             Create Job Listing
                                         </h3>
-                                        <p className="text-xs text-neutral-content/60 uppercase tracking-wider">
+                                        <p className="text-xs text-base-content/60 uppercase tracking-wider">
                                             New Position
                                         </p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={closeStandard}
-                                    className="btn btn-ghost btn-sm btn-square text-neutral-content/60 hover:text-neutral-content"
+                                    className="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark text-lg"></i>
                                 </button>
@@ -660,10 +667,13 @@ export default function ModalsOne() {
                     <div
                         ref={wizardBoxRef}
                         className="modal-box max-w-2xl bg-base-100 p-0 overflow-hidden"
-                        style={{ opacity: 0, transform: "translateY(40px) scale(0.96)" }}
+                        style={{
+                            opacity: 0,
+                            transform: "translateY(40px) scale(0.96)",
+                        }}
                     >
                         {/* Header */}
-                        <div className="bg-neutral text-neutral-content px-8 py-6">
+                        <div className="bg-base-300 text-base-content px-8 py-6">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-secondary flex items-center justify-center">
@@ -673,7 +683,7 @@ export default function ModalsOne() {
                                         <h3 className="text-lg font-black">
                                             Post a Job
                                         </h3>
-                                        <p className="text-xs text-neutral-content/60 uppercase tracking-wider">
+                                        <p className="text-xs text-base-content/60 uppercase tracking-wider">
                                             Step {wizardStep + 1} of 4 &mdash;{" "}
                                             {wizardSteps[wizardStep]}
                                         </p>
@@ -681,7 +691,7 @@ export default function ModalsOne() {
                                 </div>
                                 <button
                                     onClick={closeWizard}
-                                    className="btn btn-ghost btn-sm btn-square text-neutral-content/60 hover:text-neutral-content"
+                                    className="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark text-lg"></i>
                                 </button>
@@ -1156,7 +1166,10 @@ export default function ModalsOne() {
                     <div
                         ref={confirmBoxRef}
                         className="modal-box max-w-md bg-base-100 p-0 overflow-hidden"
-                        style={{ opacity: 0, transform: "translateY(40px) scale(0.96)" }}
+                        style={{
+                            opacity: 0,
+                            transform: "translateY(40px) scale(0.96)",
+                        }}
                     >
                         {confirmDeleted ? (
                             /* Deleted state */

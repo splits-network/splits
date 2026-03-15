@@ -15,11 +15,14 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { DomainEventConsumer } from "./domain-consumer";
 import { AIReviewRepository } from "./v2/reviews/repository";
 import { AIReviewServiceV2 } from "./v2/reviews/service";
 import { ResumeExtractionService } from "./v2/resume-extraction/service";
 import { ResumeExtractionRepository } from "./v2/resume-extraction/repository";
+import { CallPipelineRepository } from "./v2/call-pipeline/repository";
+import { CallPipelineService } from "./v2/call-pipeline/service";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -165,11 +168,24 @@ async function main() {
         aiReviewService, // Pass the service instance so routes use the same one
     });
 
+    registerV3Routes(app, {
+        supabase: supabaseClient,
+        eventPublisher: outboxPublisher || undefined,
+    });
+
     // Initialize resume extraction service and repository
     const resumeExtractionService = new ResumeExtractionService(logger);
     const resumeExtractionRepository = new ResumeExtractionRepository(supabaseClient, logger);
 
-    // Initialize domain event consumer (listens for application + document events)
+    // Initialize generalized call pipeline
+    const callPipelineRepository = new CallPipelineRepository(supabaseClient, logger);
+    const callPipelineService = new CallPipelineService(
+        callPipelineRepository,
+        outboxPublisher || undefined,
+        logger,
+    );
+
+    // Initialize domain event consumer (listens for application + document + call recording events)
     let domainConsumer: DomainEventConsumer | null = null;
     try {
         domainConsumer = new DomainEventConsumer(
@@ -177,6 +193,7 @@ async function main() {
             aiReviewService,
             resumeExtractionService,
             resumeExtractionRepository,
+            callPipelineService,
             outboxPublisher || undefined,
             logger,
         );

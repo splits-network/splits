@@ -9,15 +9,11 @@ import {
     isNewMatch,
     formatMatchDate,
     tierLabel,
+    tierBadgeColor,
 } from "../../types";
-import type { MatchTier } from "../../types";
 import { MatchScoreBadge } from "@/components/matches/match-score-badge";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
-
-function tierBadgeColor(tier: MatchTier): "primary" | "neutral" {
-    return tier === "true" ? "primary" : "neutral";
-}
 
 function companyInitials(match: EnrichedMatch): string {
     const name = companyDisplayName(match);
@@ -53,7 +49,7 @@ export function GridCard({
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-shadow",
                 isSelected
                     ? "border-l-primary shadow-md"
                     : "border-l-base-300 shadow-sm hover:shadow-md hover:border-l-primary/50",

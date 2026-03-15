@@ -42,7 +42,7 @@ const roleMeta: Record<
     },
     admin: {
         label: "Admin",
-        bgClass: "bg-neutral text-neutral-content",
+        bgClass: "bg-base-300 text-base-content",
         textClass: "text-neutral",
         icon: "fa-duotone fa-regular fa-shield-halved",
     },
@@ -140,11 +140,11 @@ export default function SplitItem({
                                     Online
                                 </span>
                             ) : presenceStatus === "offline" ? (
-                                <span className="badge badge-xs badge-neutral badge-soft badge-outline">
+                                <span className="badge badge-xs badge-primary badge-soft badge-outline">
                                     Offline
                                 </span>
                             ) : (
-                                <span className="badge badge-xs badge-neutral badge-soft badge-outline">
+                                <span className="badge badge-xs badge-primary badge-soft badge-outline">
                                     Unknown
                                 </span>
                             )}

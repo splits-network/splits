@@ -233,7 +233,7 @@ export default function TablesOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Header */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -253,7 +253,7 @@ export default function TablesOne() {
                                 pipeline.
                             </span>
                         </h1>
-                        <p className="table-desc text-base text-neutral-content/50 max-w-xl scroll-reveal fade-up">
+                        <p className="table-desc text-base text-base-content/50 max-w-xl scroll-reveal fade-up">
                             Track, sort, and manage every candidate across your
                             active placements.
                         </p>

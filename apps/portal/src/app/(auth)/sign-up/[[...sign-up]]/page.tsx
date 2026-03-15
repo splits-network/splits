@@ -20,7 +20,22 @@ export default function SignUpPage() {
 
     const redirectUrl = searchParams.get("redirect_url");
     const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
-    const recCode = searchParams.get("rec_code") || getRecCodeFromCookie();
+    const isFromJoinLink =
+        redirectUrl?.includes("/join") &&
+        redirectUrl?.includes("code=SPLITS-");
+
+    // Clear stale referral cookie when arriving via recruiter invitation/join link
+    // so it doesn't pre-populate over the invitation context
+    const recCode = (() => {
+        if (isFromInvitation || isFromJoinLink) {
+            if (typeof document !== "undefined") {
+                document.cookie =
+                    "rec_code=; path=/; max-age=0; samesite=lax";
+            }
+            return null;
+        }
+        return searchParams.get("rec_code") || getRecCodeFromCookie();
+    })();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -402,7 +417,7 @@ export default function SignUpPage() {
                     </span>
                 </button>
 
-                <button
+                {/* <button
                     type="button"
                     className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
                     onClick={() => signUpWithOAuth("oauth_microsoft")}
@@ -410,6 +425,16 @@ export default function SignUpPage() {
                     <i className="fa-brands fa-microsoft text-lg" />
                     <span className="text-sm font-semibold">
                         Continue with Microsoft
+                    </span>
+                </button> */}
+                <button
+                    type="button"
+                    className="btn btn-ghost w-full border border-base-300 justify-start gap-3"
+                    disabled
+                >
+                    <i className="fa-brands fa-microsoft text-lg" />
+                    <span className="text-sm font-semibold">
+                        Microsoft Coming Soon
                     </span>
                 </button>
 
@@ -562,19 +587,21 @@ export default function SignUpPage() {
                     )}
                     {referralError === "invitation_code" && (
                         <p className="text-sm text-warning mt-1.5">
-                            This looks like a company invitation code. Please use the{" "}
+                            This looks like a company invitation code. Please
+                            use the{" "}
                             <Link href="/join" className="link link-primary">
                                 Join page
                             </Link>{" "}
                             to accept your invitation.
                         </p>
                     )}
-                    {referralStatus === "invalid" && referralError !== "invitation_code" && (
-                        <p className="text-xs text-error mt-1.5 flex items-center gap-1">
-                            <i className="fa-duotone fa-regular fa-circle-xmark" />
-                            {referralError}
-                        </p>
-                    )}
+                    {referralStatus === "invalid" &&
+                        referralError !== "invitation_code" && (
+                            <p className="text-xs text-error mt-1.5 flex items-center gap-1">
+                                <i className="fa-duotone fa-regular fa-circle-xmark" />
+                                {referralError}
+                            </p>
+                        )}
                 </fieldset>
                 <div className="flex justify-center">
                     <div id="clerk-captcha" />

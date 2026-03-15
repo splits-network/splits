@@ -3,11 +3,17 @@ import {
     formatNotificationTime,
     getNotificationIcon,
 } from "@/lib/notifications";
-
 interface NotificationListItemProps {
     item: InAppNotification;
     isSelected: boolean;
     onSelect: (id: string) => void;
+}
+
+function isInterviewNotification(eventType: string): boolean {
+    return (
+        eventType.startsWith("interview.reminder") ||
+        eventType.startsWith("interview.scheduled")
+    );
 }
 
 export default function NotificationListItem({
@@ -15,6 +21,11 @@ export default function NotificationListItem({
     isSelected,
     onSelect,
 }: NotificationListItemProps) {
+    const isInterview = isInterviewNotification(item.event_type);
+    const icon = isInterview
+        ? "fa-video"
+        : getNotificationIcon(item.category);
+
     return (
         <div
             onClick={() => onSelect(item.id)}
@@ -39,7 +50,7 @@ export default function NotificationListItem({
                 `}
                 >
                     <i
-                        className={`fa-duotone fa-regular ${getNotificationIcon(item.category)}`}
+                        className={`fa-duotone fa-regular ${icon}`}
                     ></i>
                 </div>
             </div>
@@ -48,7 +59,7 @@ export default function NotificationListItem({
             <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                     <p
-                        className={`text-xs leading-snug line-clamp-2 ${!item.read ? "font-semibold" : "text-base-content/80"}`}
+                        className={`text-sm leading-snug line-clamp-2 ${!item.read ? "font-semibold" : "text-base-content/80"}`}
                     >
                         {item.subject}
                     </p>
@@ -56,14 +67,21 @@ export default function NotificationListItem({
                         <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1"></div>
                     )}
                 </div>
+
                 <div className="flex items-center gap-2 mt-1">
                     <span className="text-sm text-base-content/50">
                         {formatNotificationTime(item.created_at)}
                     </span>
-                    {item.category && (
-                        <span className="badge badge-xs badge-ghost">
-                            {item.category}
+                    {isInterview ? (
+                        <span className="badge badge-xs badge-accent">
+                            Interview
                         </span>
+                    ) : (
+                        item.category && (
+                            <span className="badge badge-xs badge-ghost">
+                                {item.category}
+                            </span>
+                        )
                     )}
                 </div>
             </div>

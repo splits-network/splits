@@ -53,7 +53,7 @@ export default function InvitationCompanyClient({
                 if (!token) return;
 
                 const client = createAuthenticatedClient(token);
-                const res = await client.get(`/recruiter-companies/${relationshipId}`);
+                const res = await client.get(`/recruiter-companies/${relationshipId}/view/detail`);
                 const data = res.data;
 
                 if (data.status !== "pending") {
@@ -477,7 +477,7 @@ function Sidebar({
             });
         } catch (err: any) {
             console.error("Failed to start chat:", err);
-            toast.error(err?.message || "Failed to start chat");
+            toast.error(err?.message || "Couldn't start conversation. Try again.");
         } finally {
             setStartingChat(false);
         }

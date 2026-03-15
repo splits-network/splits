@@ -228,7 +228,7 @@ export default function BlogPage() {
                 </section>
 
                 {/* In the Meantime */}
-                <section className="py-20 bg-neutral text-neutral-content overflow-hidden">
+                <section className="py-20 bg-base-300 text-base-content overflow-hidden">
                     <div className="container mx-auto px-4">
                         <div className="max-w-5xl mx-auto text-center">
                             <div>

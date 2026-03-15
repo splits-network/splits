@@ -8,9 +8,9 @@ const COLUMNS = [
     "Title",
     "Company",
     "Location",
+    "Info",
     "Salary",
     "Fee %",
-    "Status",
     "Apps",
     "Posted",
     "", // actions

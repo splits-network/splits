@@ -150,6 +150,124 @@ ${paragraph('Welcome to the Splits Network recruiting marketplace. We\'re excite
     });
 }
 
+// ─── Job Fields Updated ─────────────────────────────────────────────────────
+
+export interface JobFieldsUpdatedData {
+    jobTitle: string;
+    companyName: string;
+    updatedFields: string[];
+    jobUrl: string;
+    source?: EmailSource;
+}
+
+export function jobFieldsUpdatedEmail(data: JobFieldsUpdatedData): string {
+    const fieldLabels: Record<string, string> = {
+        title: 'Title', location: 'Location', salary_min: 'Minimum salary',
+        salary_max: 'Maximum salary', fee_percentage: 'Fee percentage', status: 'Status',
+    };
+    const labels = data.updatedFields.map(f => fieldLabels[f] || f).join(', ');
+
+    const content = `
+${heading({ level: 1, text: 'Job posting updated' })}
+
+${paragraph(`<strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has been updated.`)}
+
+${alert({
+        type: 'info',
+        title: 'Fields changed',
+        message: labels,
+    })}
+
+${button({
+        href: data.jobUrl,
+        text: 'View Job Details →',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph('Visit the job details page to review the latest changes.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        content,
+        preheader: `${data.jobTitle} at ${data.companyName} has been updated.`,
+        source: data.source || 'portal',
+    });
+}
+
+// ─── Job Deleted ────────────────────────────────────────────────────────────
+
+export interface JobDeletedData {
+    jobTitle: string;
+    companyName: string;
+    source?: EmailSource;
+}
+
+export function jobDeletedEmail(data: JobDeletedData): string {
+    const content = `
+${heading({ level: 1, text: 'Job posting removed' })}
+
+${paragraph(`<strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has been deleted.`)}
+
+${alert({
+        type: 'error',
+        title: 'Job removed',
+        message: 'This job posting has been removed and is no longer accepting applications. Any active applications will be handled separately.',
+    })}
+
+${divider()}
+
+${paragraph('If this was unexpected, please contact the job owner for more information.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        content,
+        preheader: `${data.jobTitle} at ${data.companyName} has been removed.`,
+        source: data.source || 'portal',
+    });
+}
+
+// ─── Job Recommendation ──────────────────────────────────────────────────────
+
+export interface JobRecommendationData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    message?: string;
+    jobUrl: string;
+    source?: EmailSource;
+}
+
+export function jobRecommendationEmail(data: JobRecommendationData): string {
+    const messageBlock = data.message
+        ? alert({ type: 'info', title: 'Message from the hiring team', message: data.message })
+        : '';
+
+    const content = [
+        heading({ level: 1, text: 'A job was recommended for you' }),
+        paragraph(`Hi <strong>${data.candidateName}</strong>,`),
+        paragraph(`The team at <strong>${data.companyName}</strong> thinks you'd be a great fit for <strong>${data.jobTitle}</strong>.`),
+        messageBlock,
+        infoCard({
+            title: 'Recommended Position',
+            items: [
+                { label: 'Position', value: data.jobTitle },
+                { label: 'Company', value: data.companyName },
+            ],
+        }),
+        button({ href: data.jobUrl, text: 'View Job Details', variant: 'primary' }),
+        divider(),
+        paragraph('This recommendation was sent because a member of the hiring team thought your profile was a strong match. You can view, apply, or dismiss it from your dashboard.'),
+    ].filter(Boolean).join('\n\n');
+
+    return baseEmailTemplate({
+        content,
+        preheader: `${data.companyName} recommended you for ${data.jobTitle}.`,
+        source: data.source || 'candidate',
+    });
+}
+
 // ─── Job Expired ─────────────────────────────────────────────────────────────
 
 export interface JobExpiredData {
