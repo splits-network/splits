@@ -30,8 +30,7 @@ export class CompanyService {
     if (context.isPlatformAdmin) {
       // Admins see everything
     } else if (context.recruiterId && context.roles.includes('recruiter')) {
-      // Recruiters see all active companies (marketplace browse)
-      scopeFilters.status_override = 'active';
+      // Recruiters see all companies (marketplace browse)
     } else if (context.organizationIds.length > 0) {
       // Company users see only their org's companies
       scopeFilters.organization_ids = context.organizationIds;

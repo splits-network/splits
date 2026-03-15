@@ -13,7 +13,7 @@ export class CompanyRepository {
 
   async findAll(
     params: CompanyListParams,
-    scopeFilters?: { organization_ids?: string[]; status_override?: string }
+    scopeFilters?: { organization_ids?: string[] }
   ): Promise<{ data: any[]; total: number }> {
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
@@ -27,10 +27,6 @@ export class CompanyRepository {
     if (scopeFilters?.organization_ids && scopeFilters.organization_ids.length > 0) {
       query = query.in('identity_organization_id', scopeFilters.organization_ids);
     }
-    if (scopeFilters?.status_override) {
-      query = query.eq('status', scopeFilters.status_override);
-    }
-
     // User-supplied filters
     if (params.identity_organization_id) {
       query = query.eq('identity_organization_id', params.identity_organization_id);
@@ -47,7 +43,6 @@ export class CompanyRepository {
         config: 'english',
       });
     }
-    if (params.status) query = query.eq('status', params.status);
     if (params.industry) query = query.eq('industry', params.industry);
     if (params.company_size) query = query.eq('company_size', params.company_size);
     if (params.stage) query = query.eq('stage', params.stage);
@@ -131,10 +126,9 @@ export class CompanyRepository {
   }
 
   async delete(id: string): Promise<void> {
-    // Soft delete — set status to inactive
     const { error } = await this.supabase
       .from('companies')
-      .update({ status: 'inactive', updated_at: new Date().toISOString() })
+      .delete()
       .eq('id', id);
 
     if (error) throw error;

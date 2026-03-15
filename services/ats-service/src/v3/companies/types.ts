@@ -21,7 +21,6 @@ export interface UpdateCompanyInput {
   name?: string;
   description?: string;
   website?: string;
-  status?: string;
   industry?: string;
   company_size?: string;
   stage?: string;
@@ -36,7 +35,6 @@ export interface CompanyListParams {
   page?: number;
   limit?: number;
   search?: string;
-  status?: string;
   industry?: string;
   company_size?: string;
   stage?: string;
@@ -54,7 +52,6 @@ export const listQuerySchema = {
     page: { type: 'integer', minimum: 1, default: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
     search: { type: 'string' },
-    status: { type: 'string' },
     industry: { type: 'string' },
     company_size: { type: 'string' },
     stage: { type: 'string' },
@@ -92,7 +89,6 @@ export const updateSchema = {
     name: { type: 'string', minLength: 1, maxLength: 255 },
     description: { type: 'string', maxLength: 5000 },
     website: { type: 'string', maxLength: 500 },
-    status: { type: 'string' },
     industry: { type: 'string', maxLength: 100 },
     company_size: { type: 'string', maxLength: 50 },
     stage: { type: 'string', maxLength: 50 },
