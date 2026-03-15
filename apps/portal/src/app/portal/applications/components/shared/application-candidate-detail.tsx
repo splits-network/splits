@@ -37,11 +37,11 @@ const TABS = [
         label: "Applications",
         icon: "fa-duotone fa-regular fa-briefcase",
     },
-    {
-        value: "documents",
-        label: "Documents",
-        icon: "fa-duotone fa-regular fa-file-lines",
-    },
+    // {
+    //     value: "documents",
+    //     label: "Documents",
+    //     icon: "fa-duotone fa-regular fa-file-lines",
+    // },
 ];
 
 /* ─── Application Candidate Detail ─────────────────────────────────────── */
@@ -71,7 +71,9 @@ export function ApplicationCandidateDetail({
                 // Fall back to initial candidate data
             }
         })();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialCandidate.id]);
 

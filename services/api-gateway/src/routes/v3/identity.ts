@@ -39,7 +39,7 @@ const identityV3Routes: V3RouteConfig[] = [
 
   // ── Invitations Actions ─────────────────────────────────────────
   { path: '/invitations/:id/preview', method: 'GET', auth: 'none' },
-  { path: '/invitations/:id/accept', method: 'POST', auth: 'none' },
+  { path: '/invitations/:id/accept', method: 'POST', auth: 'required' },
   { path: '/invitations/:id/resend', method: 'POST', auth: 'required' },
 
   // ── Consent ─────────────────────────────────────────────────────
