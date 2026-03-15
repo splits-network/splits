@@ -727,33 +727,7 @@ export async function registerChatRoutes(
         }
     });
 
-    // ── V3 aliases — same handlers, V3 paths for frontend migration ────────
-
-    app.get(
-        "/api/v3/chat/conversations/:id/messages",
-        async (request, reply) => {
-            try {
-                const { clerkUserId } = requireUserContext(request);
-                const { id } = request.params as { id: string };
-                const query = request.query as any;
-                const after = query.after as string | undefined;
-                const before = query.before as string | undefined;
-                const limit = Math.min(parseInt(query.limit || "50", 10), 100);
-                const messages = await service.listMessages(
-                    clerkUserId,
-                    id,
-                    after,
-                    before,
-                    limit,
-                );
-                return reply.send({ data: messages });
-            } catch (error: any) {
-                return reply
-                    .code(error.statusCode || 400)
-                    .send({ error: error.message });
-            }
-        },
-    );
+    // ── V3 aliases — handlers not yet migrated to V3 ────────
 
     app.get("/api/v3/chat/conversations/:id/resync", async (request, reply) => {
         try {
@@ -777,27 +751,6 @@ export async function registerChatRoutes(
                 .send({ error: error.message });
         }
     });
-
-    app.post(
-        "/api/v3/chat/conversations/:id/messages",
-        async (request, reply) => {
-            try {
-                const { clerkUserId } = requireUserContext(request);
-                const { id } = request.params as { id: string };
-                const body = request.body as any;
-                const message = await service.sendMessage(clerkUserId, id, {
-                    clientMessageId: body.clientMessageId,
-                    body: body.body,
-                    attachments: body.attachments || [],
-                });
-                return reply.code(201).send({ data: message });
-            } catch (error: any) {
-                return reply
-                    .code(error.statusCode || 400)
-                    .send({ error: error.message });
-            }
-        },
-    );
 
     app.post(
         "/api/v3/chat/conversations/:id/accept",
