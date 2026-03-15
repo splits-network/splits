@@ -14,6 +14,7 @@ import { CompanyOverviewTab } from "./company-overview-tab";
 import { CompanyRolesTab } from "./company-roles-tab";
 import { CompanyContactsTab } from "./company-contacts-tab";
 import { CompanyCallsTab } from "./company-calls-tab";
+import { CompanyRelationshipTab } from "./company-relationship-tab";
 
 /* ─── Detail Panel ─────────────────────────────────────────────────────── */
 
@@ -102,6 +103,7 @@ export function CompanyDetail({
                     { label: "Overview", value: "overview", icon: "fa-duotone fa-regular fa-building" },
                     { label: "Roles", value: "roles", icon: "fa-duotone fa-regular fa-briefcase" },
                     { label: "Contacts", value: "contacts", icon: "fa-duotone fa-regular fa-address-book" },
+                    { label: "Relationship", value: "relationship", icon: "fa-duotone fa-regular fa-handshake" },
                     { label: "Calls", value: "calls", icon: "fa-duotone fa-regular fa-video" },
                 ]}
                 defaultTab="overview"
@@ -120,6 +122,7 @@ export function CompanyDetail({
                     }
                     if (tab === "roles") return <CompanyRolesTab companyId={company.id} />;
                     if (tab === "contacts") return <CompanyContactsTab companyId={company.id} />;
+                    if (tab === "relationship") return <CompanyRelationshipTab relationship={relationship} />;
                     return <CompanyCallsTab companyId={company.id} companyName={company.name} />;
                 }}
             </PanelTabs>

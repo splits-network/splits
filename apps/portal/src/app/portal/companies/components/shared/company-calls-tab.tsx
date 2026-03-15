@@ -103,7 +103,7 @@ export function CompanyCallsTab({ companyId, companyName }: CompanyCallsTabProps
     }, [fetchMeta]);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 p-6">
             {/* Header + New Call button */}
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold">Calls</h3>

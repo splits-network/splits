@@ -25,6 +25,64 @@ export function CompanyOverviewTab({
 
     return (
         <div className="space-y-8 p-6">
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
+                {company.headquarters_location && (
+                    <div className="bg-base-100 p-4">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Location</p>
+                        <p className="font-bold text-sm">
+                            <i className="fa-duotone fa-regular fa-location-dot mr-1" />
+                            {company.headquarters_location}
+                        </p>
+                    </div>
+                )}
+                {company.website && (
+                    <div className="bg-base-100 p-4">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Website</p>
+                        <a
+                            href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-bold text-primary hover:underline"
+                        >
+                            {company.website}
+                        </a>
+                    </div>
+                )}
+                {company.industry && (
+                    <div className="bg-base-100 p-4">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Industry</p>
+                        <p className="font-bold text-sm">{company.industry}</p>
+                    </div>
+                )}
+                {company.company_size && (
+                    <div className="bg-base-100 p-4">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Company Size</p>
+                        <p className="font-bold text-sm">{formatCompanySize(company.company_size)}</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Relationship Summary */}
+            {relationship && (
+                <div className="flex items-center gap-3 bg-base-200 border border-base-300 p-4">
+                    <i className="fa-duotone fa-regular fa-handshake text-base-content/40" />
+                    <div className="flex items-center gap-2">
+                        <BaselBadge color={statusColorName(relationship.status)} size="sm">
+                            {formatStatus(relationship.status)}
+                        </BaselBadge>
+                        <span className="text-sm text-base-content/60 capitalize">
+                            {relationship.relationship_type}
+                        </span>
+                        {relationship.relationship_start_date && (
+                            <span className="text-sm text-base-content/40">
+                                since {formatDate(relationship.relationship_start_date)}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Avg Salary (not in header stats strip) */}
             {company.avg_salary != null && (
                 <div className="bg-base-200 border border-base-300 border-l-4 border-l-primary p-4">
@@ -122,93 +180,6 @@ export function CompanyOverviewTab({
                     <p className="text-sm text-base-content/30 italic">No culture or values provided</p>
                 )}
             </div>
-
-            {/* Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                {company.headquarters_location && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Location</p>
-                        <p className="font-bold text-sm">
-                            <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                            {company.headquarters_location}
-                        </p>
-                    </div>
-                )}
-                {company.website && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Website</p>
-                        <a
-                            href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-bold text-primary hover:underline"
-                        >
-                            {company.website}
-                        </a>
-                    </div>
-                )}
-                {company.industry && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Industry</p>
-                        <p className="font-bold text-sm">{company.industry}</p>
-                    </div>
-                )}
-                {company.company_size && (
-                    <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Company Size</p>
-                        <p className="font-bold text-sm">{formatCompanySize(company.company_size)}</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Relationship */}
-            {relationship && (
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">Relationship</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Status</p>
-                            <BaselBadge color={statusColorName(relationship.status)} size="sm">
-                                {formatStatus(relationship.status)}
-                            </BaselBadge>
-                        </div>
-                        <div className="bg-base-100 p-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Type</p>
-                            <p className="font-bold text-sm capitalize">{relationship.relationship_type}</p>
-                        </div>
-                        {relationship.relationship_start_date && (
-                            <div className="bg-base-100 p-4">
-                                <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">Start Date</p>
-                                <p className="font-bold text-sm">{formatDate(relationship.relationship_start_date)}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Granular Permissions */}
-                    {relationship.permissions && (
-                        <div className="mt-4">
-                            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-3">Permissions</p>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                {([
-                                    { key: "can_view_jobs" as const, label: "View Jobs" },
-                                    { key: "can_create_jobs" as const, label: "Create Jobs" },
-                                    { key: "can_edit_jobs" as const, label: "Edit Jobs" },
-                                    { key: "can_submit_candidates" as const, label: "Submit Candidates" },
-                                    { key: "can_view_applications" as const, label: "View Applications" },
-                                    { key: "can_advance_candidates" as const, label: "Advance Candidates" },
-                                ]).map(({ key, label }) => (
-                                    <div key={key} className="flex items-center gap-2">
-                                        <i className={`fa-solid ${relationship.permissions![key] ? "fa-check text-success" : "fa-xmark text-base-content/30"} text-sm`} />
-                                        <span className={`text-sm ${relationship.permissions![key] ? "text-base-content" : "text-base-content/40"}`}>
-                                            {label}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
 
             {/* Achievements */}
             {badges.length > 0 && (

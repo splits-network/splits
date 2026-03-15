@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
 interface CompanyRole {
@@ -24,6 +25,7 @@ function formatRoleSalary(min?: number, max?: number): string | null {
 
 export function CompanyRolesTab({ companyId }: { companyId: string }) {
     const { getToken } = useAuth();
+    const router = useRouter();
     const [roles, setRoles] = useState<CompanyRole[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -74,7 +76,11 @@ export function CompanyRolesTab({ companyId }: { companyId: string }) {
     return (
         <div className="p-6 space-y-3">
             {roles.map((role) => (
-                <div key={role.id} className="bg-base-200 border border-base-300 border-l-4 border-l-primary p-4">
+                <div
+                    key={role.id}
+                    className="bg-base-200 border border-base-300 border-l-4 border-l-primary p-4 cursor-pointer hover:bg-base-300/50 transition-colors"
+                    onClick={() => router.push(`/portal/roles?roleId=${role.id}`)}
+                >
                     <div className="flex items-start justify-between gap-3">
                         <div>
                             <p className="text-sm font-bold mb-1">{role.title}</p>
@@ -91,11 +97,14 @@ export function CompanyRolesTab({ companyId }: { companyId: string }) {
                                 )}
                             </div>
                         </div>
-                        {formatRoleSalary(role.salary_min, role.salary_max) && (
-                            <span className="text-sm font-bold text-primary whitespace-nowrap">
-                                {formatRoleSalary(role.salary_min, role.salary_max)}
-                            </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {formatRoleSalary(role.salary_min, role.salary_max) && (
+                                <span className="text-sm font-bold text-primary whitespace-nowrap">
+                                    {formatRoleSalary(role.salary_min, role.salary_max)}
+                                </span>
+                            )}
+                            <i className="fa-duotone fa-regular fa-arrow-right text-base-content/30 text-sm" />
+                        </div>
                     </div>
                 </div>
             ))}
