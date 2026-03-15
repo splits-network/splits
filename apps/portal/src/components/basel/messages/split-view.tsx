@@ -155,9 +155,9 @@ export default function SplitView() {
                             </p>
                         </div>
                     ) : data.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full opacity-40">
-                            <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3" />
-                            <p className="text-sm">No conversations found</p>
+                        <div className="flex flex-col items-center justify-center h-full">
+                            <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3 text-primary/20" />
+                            <p className="text-sm text-base-content/50">No conversations found</p>
                         </div>
                     ) : (
                         data.map((row) => {

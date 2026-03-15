@@ -182,7 +182,7 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                     <div className="p-8 text-center text-error">{error}</div>
                 ) : filteredRows.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 p-4 text-center text-base-content/50">
-                        <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3 opacity-50" />
+                        <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3 text-primary/20" />
                         <p>No conversations found</p>
                     </div>
                 ) : (

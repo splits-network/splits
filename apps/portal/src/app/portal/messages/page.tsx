@@ -72,17 +72,17 @@ function MessagesContent() {
                             </div>
                         </div>
 
-                        <div className="flex gap-6 text-xs opacity-50">
-                            <span className="flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-lock" />
+                        <div className="flex gap-6 text-xs">
+                            <span className="flex items-center gap-1.5 text-base-content/50">
+                                <i className="fa-duotone fa-regular fa-lock text-success" />
                                 End-to-end encrypted
                             </span>
-                            <span className="flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-bolt" />
+                            <span className="flex items-center gap-1.5 text-base-content/50">
+                                <i className="fa-duotone fa-regular fa-bolt text-warning" />
                                 Real-time delivery
                             </span>
-                            <span className="flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-shield-check" />
+                            <span className="flex items-center gap-1.5 text-base-content/50">
+                                <i className="fa-duotone fa-regular fa-shield-check text-info" />
                                 GDPR compliant
                             </span>
                         </div>

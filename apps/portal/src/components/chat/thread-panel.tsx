@@ -406,15 +406,18 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                     data.conversation.job_id ||
                     data.conversation.company_id ||
                     data.conversation.candidate_id) && (
-                    <div className="rounded-lg border border-base-200 bg-base-100 p-4 text-sm">
-                        <div className="font-semibold mb-2">Context</div>
-                        <div className="flex flex-wrap gap-3 text-base-content/70">
+                    <div className="border-l-4 border-l-info border border-base-200 bg-info/5 p-4 text-sm">
+                        <div className="font-semibold mb-2 flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-link text-info" />
+                            Context
+                        </div>
+                        <div className="flex flex-wrap gap-4 text-base-content/70">
                             {data.conversation.candidate_id && (
                                 <Link
-                                    className="link link-hover"
+                                    className="link link-hover flex items-center gap-1.5"
                                     href={`/portal/candidates?candidateId=${data.conversation.candidate_id}`}
                                 >
-                                    <i className="fa-duotone fa-regular fa-user-shield mr-1" />
+                                    <i className="fa-duotone fa-regular fa-user-shield text-accent" />
                                     Regarding:{" "}
                                     {candidateName ||
                                         data.conversation.candidate_id}
@@ -422,9 +425,10 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                             )}
                             {data.conversation.application_id && (
                                 <Link
-                                    className="link link-hover"
+                                    className="link link-hover flex items-center gap-1.5"
                                     href={`/portal/applications?applicationId=${data.conversation.application_id}`}
                                 >
+                                    <i className="fa-duotone fa-regular fa-file-lines text-primary" />
                                     Application:{" "}
                                     {applicationTitle ||
                                         data.conversation.application_id}
@@ -432,14 +436,16 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                             )}
                             {data.conversation.job_id && (
                                 <Link
-                                    className="link link-hover"
+                                    className="link link-hover flex items-center gap-1.5"
                                     href={`/portal/roles?roleId=${data.conversation.job_id}`}
                                 >
+                                    <i className="fa-duotone fa-regular fa-briefcase text-secondary" />
                                     Role: {jobTitle || data.conversation.job_id}
                                 </Link>
                             )}
                             {data.conversation.company_id && (
-                                <span>
+                                <span className="flex items-center gap-1.5">
+                                    <i className="fa-duotone fa-regular fa-building text-secondary" />
                                     Company:{" "}
                                     {companyName ||
                                         data.conversation.company_id}
@@ -463,7 +469,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                     {data.messages.length === 0 ? (
                         <div className="flex items-center justify-center h-full text-center text-base-content/50">
                             <div>
-                                <i className="fa-duotone fa-regular fa-messages text-4xl mb-3 opacity-30" />
+                                <i className="fa-duotone fa-regular fa-messages text-4xl mb-3 text-primary/20 block" />
                                 <p>No messages yet.</p>
                                 <p className="text-sm mt-1 opacity-60">
                                     Start the conversation!
@@ -478,8 +484,8 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                                         key={msg.id}
                                         className="flex justify-center my-4"
                                     >
-                                        <div className="bg-base-200 rounded-lg px-4 py-2 text-sm text-base-content/70 max-w-md text-center">
-                                            <i className="fa-duotone fa-regular fa-route mr-2" />
+                                        <div className="bg-info/5 border border-info/10 rounded-lg px-4 py-2 text-sm text-base-content/70 max-w-md text-center">
+                                            <i className="fa-duotone fa-regular fa-route mr-2 text-info" />
                                             {msg.body || "System message"}
                                         </div>
                                     </div>
