@@ -53,9 +53,10 @@ export class ApplicationDetailService {
 
     if (context.recruiterId && application.job_id) {
       const { data: job } = await this.supabase
-        .from('jobs').select('job_owner_recruiter_id')
+        .from('jobs').select('job_owner_recruiter_id, source_firm_id')
         .eq('id', application.job_id).single();
       if (job?.job_owner_recruiter_id === context.recruiterId) return;
+      if (job?.source_firm_id && context.firmIds?.includes(job.source_firm_id)) return;
     }
 
     const orgId = application.job?.company?.identity_organization_id;
