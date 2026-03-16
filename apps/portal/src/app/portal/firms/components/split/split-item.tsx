@@ -2,7 +2,7 @@
 
 import type { Firm } from "../../types";
 import { formatCurrency } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { firmStatusBadgeColor } from "../shared/status-color";
 import {
     formatStatus,
     createdAgo,
@@ -10,6 +10,7 @@ import {
 } from "../shared/helpers";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 export function SplitItem({
     firm,
@@ -52,11 +53,13 @@ export function SplitItem({
 
             {/* Row 3: status pill + revenue */}
             <div className="flex items-center justify-between gap-2 mb-1">
-                <span
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(firm.status)}`}
+                <BaselBadge
+                    color={firmStatusBadgeColor(firm.status)}
+                    variant="soft"
+                    size="sm"
                 >
                     {formatStatus(firm.status)}
-                </span>
+                </BaselBadge>
                 <span className="text-sm font-bold text-primary">
                     {formatCurrency(firm.total_revenue)}
                 </span>

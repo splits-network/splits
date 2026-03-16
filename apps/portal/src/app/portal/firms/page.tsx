@@ -176,7 +176,7 @@ export default function FirmsPage() {
                         {loading && firms.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40">
                                     Loading your firms...
                                 </p>
                             </div>
@@ -196,7 +196,7 @@ export default function FirmsPage() {
                                         clearFilters();
                                     }}
                                     className="btn btn-outline btn-sm"
-                                    style={{ borderRadius: 0 }}
+
                                 >
                                     Reset Filters
                                 </button>

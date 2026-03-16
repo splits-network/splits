@@ -144,7 +144,7 @@ function ConfiguredState({
             </div>
             <button
                 className="btn btn-sm btn-ghost"
-                style={{ borderRadius: 0 }}
+
                 onClick={onEdit}
             >
                 <i className="fa-duotone fa-regular fa-pen mr-1" />
@@ -163,7 +163,7 @@ function NotConfiguredState({ onSetup }: { onSetup: () => void }) {
             </p>
             <button
                 className="btn btn-sm btn-primary"
-                style={{ borderRadius: 0 }}
+
                 onClick={onSetup}
             >
                 <i className="fa-duotone fa-regular fa-credit-card mr-1" />

@@ -124,7 +124,7 @@ function ConfiguredState({
             {!connectStatus.onboarded ? (
                 <button
                     className="btn btn-sm btn-warning btn-outline"
-                    style={{ borderRadius: 0 }}
+
                     onClick={onManage}
                 >
                     <i className="fa-duotone fa-regular fa-arrow-up-right-from-square mr-1" />
@@ -133,7 +133,7 @@ function ConfiguredState({
             ) : (
                 <button
                     className="btn btn-sm btn-ghost"
-                    style={{ borderRadius: 0 }}
+
                     onClick={onManage}
                 >
                     <i className="fa-duotone fa-regular fa-arrow-up-right-from-square mr-1" />
@@ -153,7 +153,7 @@ function NotConfiguredState({ onSetup }: { onSetup: () => void }) {
             </p>
             <button
                 className="btn btn-sm btn-secondary"
-                style={{ borderRadius: 0 }}
+
                 onClick={onSetup}
             >
                 <i className="fa-duotone fa-regular fa-building-columns mr-1" />

@@ -136,7 +136,7 @@ export default function SuspendFirmModal({
                     <button
                         type="button"
                         className="btn btn-ghost"
-                        style={{ borderRadius: 0 }}
+
                         onClick={handleClose}
                         disabled={loading}
                     >
@@ -145,7 +145,7 @@ export default function SuspendFirmModal({
                     <button
                         type="submit"
                         className={`btn ${isSuspending ? "btn-error" : "btn-success"}`}
-                        style={{ borderRadius: 0 }}
+
                         disabled={loading || !confirmed}
                     >
                         <ButtonLoading

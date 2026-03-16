@@ -30,7 +30,7 @@ export function StepMarketplace({ form, onChange, errors }: StepMarketplaceProps
     return (
         <div className="space-y-2">
             {/* Section A: Marketplace Presence */}
-            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/30 pb-1">
+            <p className="text-sm font-semibold uppercase tracking-widest text-base-content/30 pb-1">
                 Marketplace Presence
             </p>
 
@@ -68,7 +68,7 @@ export function StepMarketplace({ form, onChange, errors }: StepMarketplaceProps
             <div className="border-t border-base-300 mt-4 mb-2" />
 
             {/* Section B: Profile Visibility */}
-            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/30 pb-1">
+            <p className="text-sm font-semibold uppercase tracking-widest text-base-content/30 pb-1">
                 Profile Visibility
             </p>
 

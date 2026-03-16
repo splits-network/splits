@@ -49,7 +49,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                     </div>
                     <button
                         className="btn btn-sm btn-primary"
-                        style={{ borderRadius: 0 }}
+
                         onClick={() => setShowEditWizard(true)}
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square mr-2" />
@@ -65,7 +65,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Firm ID
                         </p>
                         <p className="font-bold text-sm font-mono truncate">
@@ -73,7 +73,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
                         </p>
                         <BaselBadge color={firmStatusBadgeColor(firm.status)} variant="soft" size="sm">
@@ -81,7 +81,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </BaselBadge>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Created
                         </p>
                         <p className="font-bold text-sm">
@@ -89,7 +89,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Members
                         </p>
                         <p className="font-bold text-sm">
@@ -97,7 +97,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Total Placements
                         </p>
                         <p className="font-bold text-sm">
@@ -105,7 +105,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Total Revenue
                         </p>
                         <p className="font-bold text-sm">
@@ -135,7 +135,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                     </p>
                     <button
                         className="btn btn-sm btn-warning btn-outline"
-                        style={{ borderRadius: 0 }}
+
                         onClick={() => setShowTransferModal(true)}
                     >
                         <i className="fa-duotone fa-regular fa-arrow-right-arrow-left mr-2" />
@@ -157,7 +157,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                     </p>
                     <button
                         className={`btn btn-sm ${firm.status === "active" ? "btn-error btn-outline" : "btn-success btn-outline"}`}
-                        style={{ borderRadius: 0 }}
+
                         onClick={() => setShowSuspendModal(true)}
                     >
                         <i
@@ -304,7 +304,7 @@ function AdminTakeRateSection({
                         <button
                             type="submit"
                             className="btn btn-sm btn-primary"
-                            style={{ borderRadius: 0 }}
+    
                             disabled={saving || !hasChanges}
                         >
                             <ButtonLoading

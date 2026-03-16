@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
@@ -106,21 +106,6 @@ export function FirmActionsToolbar({
 
     /* -- Status Dropdown -- */
 
-    const statusDropdownRef = useRef<HTMLDetailsElement>(null);
-
-    useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (
-                statusDropdownRef.current &&
-                !statusDropdownRef.current.contains(e.target as Node)
-            ) {
-                statusDropdownRef.current.removeAttribute("open");
-            }
-        };
-        document.addEventListener("click", handleClick);
-        return () => document.removeEventListener("click", handleClick);
-    }, []);
-
     const statusItems = useMemo(() => {
         const items: {
             key: string;
@@ -151,10 +136,10 @@ export function FirmActionsToolbar({
     const renderStatusDropdown = () => {
         if (!actions.statusActions || statusItems.length === 0) return null;
         return (
-            <details ref={statusDropdownRef} className="dropdown dropdown-end">
+            <details className="dropdown dropdown-end">
                 <summary
                     className={`btn ${getSizeClass()} btn-primary gap-2 list-none`}
-                    style={{ borderRadius: 0 }}
+
                     title="Change Status"
                 >
                     {updatingStatus ? (
@@ -166,15 +151,13 @@ export function FirmActionsToolbar({
                 </summary>
                 <ul
                     className="dropdown-content menu bg-base-100 border-2 border-base-300 shadow-md p-2 w-48 mt-1"
-                    style={{ borderRadius: 0 }}
+
                 >
                     {statusItems.map((item) => (
                         <li key={item.key}>
                             <button
-                                onClick={() => {
-                                    statusDropdownRef.current?.removeAttribute(
-                                        "open",
-                                    );
+                                onClick={(e) => {
+                                    (e.currentTarget.closest("details") as HTMLDetailsElement)?.removeAttribute("open");
                                     handleStatusChange(item.status);
                                 }}
                                 className={`${item.btnClass} font-bold`}
@@ -300,7 +283,7 @@ export function FirmActionsToolbar({
                     <button
                         onClick={() => setShowEditWizard(true)}
                         className={`btn ${getSizeClass()} btn-secondary gap-2`}
-                        style={{ borderRadius: 0 }}
+    
                         title="Edit Profile"
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square" />
@@ -311,7 +294,7 @@ export function FirmActionsToolbar({
                     <button
                         onClick={() => setShowInviteModal(true)}
                         className={`btn ${getSizeClass()} btn-primary gap-2`}
-                        style={{ borderRadius: 0 }}
+    
                         title="Invite Member"
                     >
                         <i className="fa-duotone fa-regular fa-user-plus" />

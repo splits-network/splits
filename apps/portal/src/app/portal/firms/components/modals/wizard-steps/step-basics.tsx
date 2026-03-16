@@ -76,7 +76,7 @@ export function StepBasics({ form, onChange, isEditMode, errors }: StepBasicsPro
             {/* Tagline — custom label with character counter */}
             <fieldset>
                 <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                    <label className="text-sm font-semibold uppercase tracking-widest text-base-content/50">
                         Tagline
                     </label>
                     <span

@@ -35,8 +35,6 @@ export function GridCard({
             .filter(Boolean)
             .join(", ") || null;
 
-    const hasPartnerSignal = firm.candidate_firm || firm.company_firm;
-
     const stats = [
         {
             label: "Members",
@@ -69,7 +67,7 @@ export function GridCard({
             <div className="bg-base-300 border-b border-base-300 px-6 pt-5 pb-4">
                 {/* Kicker row: industries on left, status on right */}
                 <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 truncate mr-2">
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 truncate mr-2">
                         {(firm.industries || []).slice(0, 2).join(" · ") ||
                             "Recruiting Firm"}
                     </p>
@@ -89,10 +87,10 @@ export function GridCard({
                             <img
                                 src={firm.logo_url}
                                 alt={`${firm.name} logo`}
-                                className="w-16 h-16 object-contain bg-base-100"
+                                className="w-14 h-14 object-contain bg-base-100"
                             />
                         ) : (
-                            <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none">
+                            <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center text-lg font-black tracking-tight select-none">
                                 {initials}
                             </div>
                         )}
@@ -103,171 +101,66 @@ export function GridCard({
                         )}
                     </div>
                     <div className="min-w-0">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
                             Recruiting Firm
                         </p>
-                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                        <h3 className="text-xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
                             {firm.name}
                         </h3>
                     </div>
                 </div>
 
                 {/* Location meta */}
-                {location && (
-                    <div className="flex items-center gap-1.5 mt-3 text-sm text-base-content/40">
-                        <i className="fa-duotone fa-regular fa-location-dot text-xs" />
-                        {location}
-                    </div>
-                )}
+                <div className="flex items-center gap-1.5 mt-3 text-sm text-base-content/40">
+                    <i className="fa-duotone fa-regular fa-location-dot" />
+                    {location || (
+                        <span className="text-base-content/30 italic">No location</span>
+                    )}
+                </div>
             </div>
 
-            {/* Card Body */}
-            <div className="flex-1 flex flex-col justify-between">
-                {/* Tagline */}
-                {firm.tagline && (
-                    <div className="px-6 py-5 border-b border-base-300">
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                            About
-                        </p>
-                        <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                            {firm.tagline}
-                        </p>
-                    </div>
-                )}
-
-                {/* Stats Row */}
-                <div className="border-b border-base-300">
-                    <div
-                        className="grid divide-x divide-base-300"
-                        style={{
-                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
-                        }}
-                    >
-                        {stats.map((stat, i) => {
-                            const iconStyles = [
-                                "bg-primary text-primary-content",
-                                "bg-secondary text-secondary-content",
-                                "bg-accent text-accent-content",
-                            ];
-                            const iconStyle = iconStyles[i % iconStyles.length];
-                            return (
+            {/* Stats Row */}
+            <div className="border-b border-base-300">
+                <div
+                    className="grid divide-x divide-base-300"
+                    style={{
+                        gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                    }}
+                >
+                    {stats.map((stat, i) => {
+                        const iconStyles = [
+                            "bg-primary text-primary-content",
+                            "bg-secondary text-secondary-content",
+                            "bg-accent text-accent-content",
+                        ];
+                        const iconStyle = iconStyles[i % iconStyles.length];
+                        return (
+                            <div
+                                key={stat.label}
+                                className="flex items-center gap-2.5 px-3 py-3"
+                            >
                                 <div
-                                    key={stat.label}
-                                    className="flex items-center gap-2.5 px-3 py-4"
+                                    className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyle}`}
                                 >
-                                    <div
-                                        className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyle}`}
-                                    >
-                                        <i className={`${stat.icon} text-xs`} />
-                                    </div>
-                                    <div>
-                                        <span className="text-sm font-black text-base-content leading-none block">
-                                            {stat.value}
-                                        </span>
-                                        <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
-                                            {stat.label}
-                                        </span>
-                                    </div>
+                                    <i className={`${stat.icon} text-xs`} />
                                 </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Specialties + Industries */}
-                <div className="px-6 py-5 border-b border-base-300 space-y-4">
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                            Specialties
-                        </p>
-                        {(firm.specialties || []).length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                                {(firm.specialties || [])
-                                    .slice(0, 4)
-                                    .map((spec) => (
-                                        <BaselBadge
-                                            key={spec}
-                                            color="primary"
-                                            variant="soft"
-                                            size="sm"
-                                        >
-                                            {spec}
-                                        </BaselBadge>
-                                    ))}
-                                {(firm.specialties || []).length > 4 && (
-                                    <span className="px-2 py-0.5 text-xs font-bold text-base-content/40">
-                                        +{(firm.specialties || []).length - 4}
+                                <div>
+                                    <span className="text-sm font-black text-base-content leading-none block">
+                                        {stat.value}
                                     </span>
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-base-content/30 italic">
-                                Not provided
-                            </p>
-                        )}
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                            Industries
-                        </p>
-                        {(firm.industries || []).length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                                {(firm.industries || [])
-                                    .slice(0, 3)
-                                    .map((ind) => (
-                                        <BaselBadge
-                                            key={ind}
-                                            variant="outline"
-                                            size="sm"
-                                        >
-                                            {ind}
-                                        </BaselBadge>
-                                    ))}
-                                {(firm.industries || []).length > 3 && (
-                                    <span className="px-2 py-0.5 text-xs font-bold text-base-content/40">
-                                        +{(firm.industries || []).length - 3}
+                                    <span className="text-sm font-semibold uppercase tracking-wider text-base-content/30 leading-none">
+                                        {stat.label}
                                     </span>
-                                )}
+                                </div>
                             </div>
-                        ) : (
-                            <p className="text-sm text-base-content/30 italic">
-                                Not provided
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Partnership Badges */}
-                <div className="px-6 py-5 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                        Partnership
-                    </p>
-                    {hasPartnerSignal ? (
-                        <div className="flex flex-wrap gap-2">
-                            {firm.candidate_firm && (
-                                <span className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-content">
-                                    <i className="fa-duotone fa-regular fa-handshake text-sm" />
-                                    Candidate Partners
-                                </span>
-                            )}
-                            {firm.company_firm && (
-                                <span className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-secondary text-secondary-content">
-                                    <i className="fa-duotone fa-regular fa-paper-plane text-sm" />
-                                    Company Partners
-                                </span>
-                            )}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-base-content/30 italic">
-                            No partnerships
-                        </p>
-                    )}
+                        );
+                    })}
                 </div>
             </div>
 
             {/* Footer: actions */}
             <div
-                className="mt-auto flex items-center justify-between gap-3 px-6 py-4 border-t border-base-300"
+                className="mt-auto flex items-center justify-between gap-3 px-6 py-3 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
                 {firm.slug ? (

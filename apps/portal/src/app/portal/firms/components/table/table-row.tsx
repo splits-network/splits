@@ -3,7 +3,7 @@
 import { Fragment } from "react";
 import type { Firm } from "../../types";
 import { formatCurrency } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { firmStatusBadgeColor } from "../shared/status-color";
 import {
     formatStatus,
     createdAgo,
@@ -12,6 +12,7 @@ import {
 import { FirmDetailLoader } from "../shared/firm-detail-loader";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 export function TableRow({
     firm,
@@ -59,11 +60,13 @@ export function TableRow({
 
                 {/* Status */}
                 <td className="px-4 py-3">
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(firm.status)}`}
+                    <BaselBadge
+                        color={firmStatusBadgeColor(firm.status)}
+                        variant="soft"
+                        size="sm"
                     >
                         {formatStatus(firm.status)}
-                    </span>
+                    </BaselBadge>
                 </td>
 
                 {/* Members */}

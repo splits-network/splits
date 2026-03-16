@@ -270,7 +270,7 @@ export function FirmBillingSetupWizard({
                         <BaselFormField label="Billing Email" required>
                             <input
                                 type="email"
-                                className="input input-bordered w-full"
+                                className="input w-full"
                                 value={billingEmail}
                                 onChange={(e) => setBillingEmail(e.target.value)}
                                 placeholder="billing@firm.com"
@@ -281,7 +281,7 @@ export function FirmBillingSetupWizard({
                         <BaselFormField label="Billing Contact Name">
                             <input
                                 type="text"
-                                className="input input-bordered w-full"
+                                className="input w-full"
                                 value={billingContactName}
                                 onChange={(e) => setBillingContactName(e.target.value)}
                                 placeholder="Jane Smith"
@@ -310,7 +310,7 @@ export function FirmBillingSetupWizard({
                         <BaselFormField label="Street Address">
                             <input
                                 type="text"
-                                className="input input-bordered w-full"
+                                className="input w-full"
                                 value={street}
                                 onChange={(e) => setStreet(e.target.value)}
                                 placeholder="123 Main Street"
@@ -321,7 +321,7 @@ export function FirmBillingSetupWizard({
                             <BaselFormField label="City">
                                 <input
                                     type="text"
-                                    className="input input-bordered w-full"
+                                    className="input w-full"
                                     value={city}
                                     onChange={(e) => setCity(e.target.value)}
                                     placeholder="New York"
@@ -330,7 +330,7 @@ export function FirmBillingSetupWizard({
                             <BaselFormField label="State">
                                 <input
                                     type="text"
-                                    className="input input-bordered w-full"
+                                    className="input w-full"
                                     value={state}
                                     onChange={(e) => setState(e.target.value)}
                                     placeholder="NY"
@@ -342,7 +342,7 @@ export function FirmBillingSetupWizard({
                             <BaselFormField label="ZIP">
                                 <input
                                     type="text"
-                                    className="input input-bordered w-full"
+                                    className="input w-full"
                                     value={zip}
                                     onChange={(e) => setZip(e.target.value)}
                                     placeholder="10001"
@@ -351,7 +351,7 @@ export function FirmBillingSetupWizard({
                             <BaselFormField label="Country">
                                 <input
                                     type="text"
-                                    className="input input-bordered w-full"
+                                    className="input w-full"
                                     value={country}
                                     onChange={(e) => setCountry(e.target.value)}
                                     placeholder="United States"
@@ -362,7 +362,7 @@ export function FirmBillingSetupWizard({
                         <BaselFormField label="Tax ID (EIN)" hint="Optional">
                             <input
                                 type="text"
-                                className="input input-bordered w-full"
+                                className="input w-full"
                                 value={taxId}
                                 onChange={(e) => setTaxId(e.target.value)}
                                 placeholder="12-3456789"

@@ -40,7 +40,7 @@ export function FirmDetail({
     onClose?: () => void;
     onRefresh?: () => void;
 }) {
-    const [activeTab, setActiveTab] = useState<DetailTab>("settings");
+    const [activeTab, setActiveTab] = useState<DetailTab>("members");
     const { registerEntities, getLevel, getBadges } = useGamification();
 
     useEffect(() => {
@@ -91,7 +91,7 @@ export function FirmDetail({
                 <div className="relative px-6 pt-6 pb-0">
                     {/* Kicker row: member count left, status + close right */}
                     <div className="flex items-center justify-between mb-6">
-                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40 truncate">
+                        <p className="text-sm font-bold uppercase tracking-[0.22em] text-base-content/40 truncate">
                             {memberCountDisplay(firm)}
                         </p>
                         <div className="flex items-center gap-2 shrink-0">
@@ -134,7 +134,7 @@ export function FirmDetail({
                             )}
                         </div>
                         <div className="min-w-0 pb-1">
-                            <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1 truncate">
+                            <p className="text-sm font-bold uppercase tracking-[0.22em] text-primary mb-1 truncate">
                                 Recruiting Firm
                             </p>
                             <h2 className="text-3xl font-black tracking-tight leading-none text-base-content mb-2 truncate">
@@ -187,7 +187,7 @@ export function FirmDetail({
                                     <span className="text-lg font-black text-base-content leading-none block">
                                         {stat.value}
                                     </span>
-                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
+                                    <span className="text-sm font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                         {stat.label}
                                     </span>
                                 </div>
@@ -210,9 +210,9 @@ export function FirmDetail({
             {/* Tab bar */}
             <BaselTabBar
                 tabs={[
-                    { label: "Settings", value: "settings" },
-                    { label: "Billing", value: "billing" },
                     { label: "Members", value: "members" },
+                    { label: "Billing", value: "billing" },
+                    { label: "Settings", value: "settings" },
                 ]}
                 active={activeTab}
                 onChange={(v) => setActiveTab(v as DetailTab)}

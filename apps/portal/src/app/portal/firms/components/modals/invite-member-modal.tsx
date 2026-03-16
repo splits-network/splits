@@ -83,8 +83,8 @@ export function InviteMemberModal({
                         <BaselFormField label="Email Address" required>
                             <input
                                 type="email"
-                                className="input input-bordered w-full bg-base-200 border-base-300"
-                                style={{ borderRadius: 0 }}
+                                className="input w-full bg-base-200 border-base-300"
+
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="recruiter@example.com"
@@ -96,7 +96,7 @@ export function InviteMemberModal({
                         <BaselFormField label="Role" required>
                             <select
                                 className="select w-full"
-                                style={{ borderRadius: 0 }}
+
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
                                 disabled={loading}
@@ -115,7 +115,7 @@ export function InviteMemberModal({
                     <button
                         type="button"
                         className="btn btn-ghost"
-                        style={{ borderRadius: 0 }}
+
                         onClick={onClose}
                         disabled={loading}
                     >
@@ -124,7 +124,7 @@ export function InviteMemberModal({
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        style={{ borderRadius: 0 }}
+
                         disabled={loading || !email.trim()}
                     >
                         <ButtonLoading

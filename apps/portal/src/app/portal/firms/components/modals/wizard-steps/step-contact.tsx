@@ -26,7 +26,7 @@ export function StepContact({ form, onChange, errors }: StepContactProps) {
     return (
         <div className="space-y-5">
             {/* Section: Online Presence */}
-            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/30">
+            <p className="text-sm font-semibold uppercase tracking-widest text-base-content/30">
                 Online Presence
             </p>
 
@@ -71,7 +71,7 @@ export function StepContact({ form, onChange, errors }: StepContactProps) {
             <div className="border-t border-base-300" />
 
             {/* Section: Direct Contact */}
-            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/30">
+            <p className="text-sm font-semibold uppercase tracking-widest text-base-content/30">
                 Direct Contact
             </p>
 
