@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 import {
     useStandardList,
     PaginationControls,
@@ -12,7 +11,6 @@ import {
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
 import { useGamification } from "@splits-network/shared-gamification";
-import { createAuthenticatedClient } from "@/lib/api-client";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Job, UnifiedJobFilters } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
@@ -76,8 +74,8 @@ export default function RolesPage() {
         isRecruiter,
         isCompanyUser,
         getCompanyIdsWithPermission,
+        firmIds,
     } = useUserProfile();
-    const { getToken } = useAuth();
 
     /* ── Role-based endpoint selection ── */
     const boardEndpoint = isAdmin
@@ -85,31 +83,13 @@ export default function RolesPage() {
         : isCompanyUser
             ? "/jobs/views/company-board"
             : "/jobs/views/recruiter-board";
-    const [isFirmMember, setIsFirmMember] = useState(false);
-
-    useEffect(() => {
-        if (!isRecruiter) return;
-        let cancelled = false;
-        async function checkFirm() {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: any[] }>("/firms/my-firms");
-                if (!cancelled && res.data?.length > 0) setIsFirmMember(true);
-            } catch { /* not a firm member */ }
-        }
-        checkFirm();
-        return () => { cancelled = true; };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isRecruiter]);
 
     const canCreateRole =
         isAdmin ||
         isCompanyUser ||
         (isRecruiter &&
             getCompanyIdsWithPermission("can_create_jobs").length > 0) ||
-        (isRecruiter && isFirmMember);
+        (isRecruiter && firmIds.length > 0);
 
     /* ── Data ── */
     const {

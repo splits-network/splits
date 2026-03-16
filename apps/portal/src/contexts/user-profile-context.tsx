@@ -24,6 +24,7 @@ import {
     getCurrentUserProfile,
     getCachedSubscription,
 } from "@/lib/current-user-profile";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import {
     useRecruiterPermissions,
     type CompanyPermissionEntry,
@@ -169,6 +170,12 @@ interface UserProfileContextValue {
     isWithinLimit: (key: NumericEntitlement, current: number) => boolean;
     /** The user's marketplace priority level */
     marketplacePriority: MarketplacePriority;
+    /** Firm IDs the recruiter belongs to */
+    firmIds: string[];
+    /** Whether firm membership is loading */
+    isFirmIdsLoading: boolean;
+    /** Check if recruiter belongs to a specific firm */
+    isFirmMember: (firmId: string) => boolean;
     /** All company permissions for the recruiter */
     companyPermissions: CompanyPermissionEntry[];
     /** Whether permissions are loading */
@@ -297,6 +304,41 @@ export function UserProfileProvider({
         refresh: refreshPermissions,
     } = useRecruiterPermissions(profile?.recruiter_id ?? null);
 
+    // Firm membership
+    const [firmIds, setFirmIds] = useState<string[]>([]);
+    const [isFirmIdsLoading, setIsFirmIdsLoading] = useState(false);
+
+    useEffect(() => {
+        if (!profile?.recruiter_id) {
+            setFirmIds([]);
+            return;
+        }
+        let cancelled = false;
+        async function fetchFirms() {
+            try {
+                setIsFirmIdsLoading(true);
+                const token = await getToken();
+                if (!token || cancelled) return;
+                const client = createAuthenticatedClient(token);
+                const res = await client.get<{ data: Array<{ id: string }> }>("/firms/my-firms");
+                if (!cancelled) {
+                    setFirmIds((res.data || []).map((f: any) => f.id));
+                }
+            } catch {
+                if (!cancelled) setFirmIds([]);
+            } finally {
+                if (!cancelled) setIsFirmIdsLoading(false);
+            }
+        }
+        fetchFirms();
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profile?.recruiter_id]);
+
+    const isFirmMember = useCallback(
+        (firmId: string) => firmIds.includes(firmId),
+        [firmIds],
+    );
 
     // Derived role checks
     const roles = profile?.roles || [];
@@ -419,6 +461,9 @@ export function UserProfileProvider({
         getLimit,
         isWithinLimit,
         marketplacePriority,
+        firmIds,
+        isFirmIdsLoading,
+        isFirmMember,
         companyPermissions,
         isPermissionsLoading,
         hasPermissionForCompany,

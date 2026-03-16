@@ -129,6 +129,16 @@ export class AIReviewService {
       job_id: application.job_id, submittedBy: context.identityUserId,
     }, 'ats-service');
 
+    await this.eventPublisher?.publish('application.stage_changed', {
+      application_id: id,
+      candidate_id: application.candidate_id,
+      job_id: application.job_id,
+      old_stage: application.stage,
+      new_stage: nextStage,
+      changed_by: context.identityUserId,
+      candidate_recruiter_id: application.candidate_recruiter_id,
+    }, 'ats-service');
+
     return { application: updated };
   }
 

@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
-import { createAuthenticatedClient } from "@/lib/api-client";
 import { ModalPortal } from "@splits-network/shared-ui";
 import RoleWizardModal from "@/app/portal/roles/components/modals/role-wizard-modal";
 import { useRecruiterStats } from "@/app/portal/dashboard/hooks/use-recruiter-stats";
@@ -26,37 +25,13 @@ import { RecruiterSpeedCard } from "@/components/basel/dashboard/recruiter/recru
 import { RecruiterActivityFeed } from "@/components/basel/dashboard/recruiter/recruiter-activity-feed";
 
 export default function RecruiterView() {
-    const { userId, getToken } = useAuth();
-    const { profile, getCompanyIdsWithPermission } = useUserProfile();
+    const { userId } = useAuth();
+    const { profile, getCompanyIdsWithPermission, firmIds } = useUserProfile();
     const [trendPeriod, setTrendPeriod] = useState(6);
     const [showAddRoleModal, setShowAddRoleModal] = useState(false);
-    const [canCreateRole, setCanCreateRole] = useState(false);
-
-    useEffect(() => {
-        if (getCompanyIdsWithPermission("can_create_jobs").length > 0) {
-            setCanCreateRole(true);
-            return;
-        }
-        let cancelled = false;
-        async function checkFirm() {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: any[] }>(
-                    "/firms/my-firms",
-                );
-                if (!cancelled && res.data?.length > 0) setCanCreateRole(true);
-            } catch {
-                /* not a firm member */
-            }
-        }
-        checkFirm();
-        return () => {
-            cancelled = true;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [getCompanyIdsWithPermission]);
+    const canCreateRole =
+        getCompanyIdsWithPermission("can_create_jobs").length > 0 ||
+        firmIds.length > 0;
 
     /* Data hooks */
     const {

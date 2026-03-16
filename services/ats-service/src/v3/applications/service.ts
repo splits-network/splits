@@ -95,8 +95,11 @@ export class ApplicationService {
     }
 
     const { document_ids, ...appData } = input;
+    const isRecruiterCreated = !!context.recruiterId;
     const hasRecruiter = !!candidateRecruiterId || !!companyRecruiterId;
-    const initialStage = hasRecruiter ? 'recruiter_proposed' : 'draft';
+    // Only use recruiter_proposed when a recruiter creates the application.
+    // When a candidate creates and selects their recruiter, start as draft.
+    const initialStage = isRecruiterCreated && hasRecruiter ? 'recruiter_proposed' : 'draft';
 
     const application = await this.repository.create({
       ...appData, candidate_id: candidateId,
@@ -117,7 +120,7 @@ export class ApplicationService {
     await this.repository.createAuditLog({
       application_id: application.id, action: 'created',
       performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
-      performed_by_role: hasRecruiter ? 'recruiter' : 'candidate',
+      performed_by_role: isRecruiterCreated ? 'recruiter' : 'candidate',
       new_value: { stage: initialStage, job_id: input.job_id, candidate_id: candidateId },
       metadata: { has_recruiter: hasRecruiter, document_count: document_ids?.length || 0 },
     });
