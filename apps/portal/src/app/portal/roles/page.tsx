@@ -190,7 +190,7 @@ export default function RolesPage() {
                     isRecruiter={isRecruiter}
                 />
 
-                <BillingReadinessProvider jobs={jobs} checkCompanyBilling={isCompanyUser || isAdmin}>
+                <BillingReadinessProvider jobs={jobs} checkCompanyBilling={isCompanyUser || isAdmin} ownFirmIds={isRecruiter ? firmIds : undefined}>
                     <RolesBillingBanner isCompanyUser={isCompanyUser} />
 
                     {/* Content Area */}
