@@ -221,7 +221,7 @@ export class ApplicationService {
     if (context.candidateId) return { candidate_id: context.candidateId };
 
     if (context.recruiterId) {
-      const viewableJobIds = await this.getViewableJobIds(context.recruiterId);
+      const viewableJobIds = await this.getViewableJobIds(context.recruiterId, context.firmIds);
       return { recruiter_id: context.recruiterId, viewable_job_ids: viewableJobIds };
     }
 
@@ -237,11 +237,11 @@ export class ApplicationService {
     return {};
   }
 
-  private async getViewableJobIds(recruiterId: string): Promise<string[]> {
-    const { data: jobs } = await this.supabase
+  private async getViewableJobIds(recruiterId: string, firmIds: string[] = []): Promise<string[]> {
+    // Jobs where this recruiter is the owner
+    const { data: ownedJobs } = await this.supabase
       .from('jobs').select('id, company_id')
       .eq('job_owner_recruiter_id', recruiterId);
-    if (!jobs?.length) return [];
 
     const { data: perms } = await this.supabase
       .from('recruiter_companies').select('company_id, permissions')
@@ -251,9 +251,20 @@ export class ApplicationService {
       .filter(r => r.permissions?.can_view_applications === true)
       .map(r => r.company_id);
 
-    return jobs
+    const ownedJobIds = (ownedJobs || [])
       .filter(j => !j.company_id || viewableCompanyIds.includes(j.company_id))
       .map(j => j.id);
+
+    // Jobs belonging to the recruiter's firm(s)
+    let firmJobIds: string[] = [];
+    if (firmIds.length > 0) {
+      const { data: firmJobs } = await this.supabase
+        .from('jobs').select('id')
+        .in('source_firm_id', firmIds);
+      firmJobIds = (firmJobs || []).map(j => j.id);
+    }
+
+    return [...new Set([...ownedJobIds, ...firmJobIds])];
   }
 
   private async getCompanyJobIds(orgIds: string[]): Promise<string[]> {
