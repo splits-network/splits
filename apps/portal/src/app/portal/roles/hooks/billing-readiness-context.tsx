@@ -23,11 +23,13 @@ export function useBillingReadiness() {
 export function BillingReadinessProvider({
     jobs,
     children,
+    checkCompanyBilling,
 }: {
     jobs: Job[];
     children: ReactNode;
+    checkCompanyBilling?: boolean;
 }) {
-    const value = useJobBillingReadiness(jobs);
+    const value = useJobBillingReadiness(jobs, { checkCompanyBilling });
     return (
         <BillingReadinessContext.Provider value={value}>
             {children}

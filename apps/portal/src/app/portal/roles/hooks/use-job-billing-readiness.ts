@@ -10,22 +10,27 @@ type BillingStatus = "not_started" | "incomplete" | "ready";
 /**
  * Batch-fetches billing readiness for all unique company/firm IDs
  * across the current page of jobs. Returns a per-job checker.
+ *
+ * When checkCompanyBilling is false (default for recruiters), company
+ * billing is skipped — recruiters have no access to company billing
+ * endpoints and are not responsible for company billing setup.
  */
-export function useJobBillingReadiness(jobs: Job[]) {
+export function useJobBillingReadiness(jobs: Job[], options?: { checkCompanyBilling?: boolean }) {
     const { getToken } = useAuth();
     const [statusMap, setStatusMap] = useState<Record<string, BillingStatus>>({});
     const [loading, setLoading] = useState(true);
+    const checkCompanyBilling = options?.checkCompanyBilling ?? true;
 
     // Extract unique company and firm IDs
     const { companyIds, firmIds } = useMemo(() => {
         const cIds = new Set<string>();
         const fIds = new Set<string>();
         for (const job of jobs) {
-            if (job.company_id) cIds.add(job.company_id);
+            if (checkCompanyBilling && job.company_id) cIds.add(job.company_id);
             if (job.source_firm_id && !job.company_id) fIds.add(job.source_firm_id);
         }
         return { companyIds: [...cIds], firmIds: [...fIds] };
-    }, [jobs]);
+    }, [jobs, checkCompanyBilling]);
 
     const fetchReadiness = useCallback(async () => {
         if (companyIds.length === 0 && firmIds.length === 0) {
