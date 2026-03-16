@@ -65,20 +65,29 @@ export default function ActionsToolbar({
     // Decline modal state
     const [showDeclineModal, setShowDeclineModal] = useState(false);
 
+    // Optimistic stage override — hides buttons immediately after action succeeds
+    const [optimisticStage, setOptimisticStage] = useState<string | null>(null);
+    const stage = optimisticStage ?? item.stage;
+
+    // Reset optimistic stage when item.stage changes (parent re-fetched)
+    useEffect(() => {
+        setOptimisticStage(null);
+    }, [item.stage]);
+
     // Application actions hook
     const actions = useApplicationActions({ onSuccess: onStageChange });
 
     // Derived state
     const recruiterUserId = item.recruiter?.user?.id;
-    const canEdit = item.stage === "draft" || item.stage === "ai_failed";
-    const canBackToDraft = BACK_TO_DRAFT_STAGES.includes(item.stage);
-    const canSubmit = SUBMITTABLE_STAGES.includes(item.stage);
-    const canWithdraw = WITHDRAWABLE_STAGES.includes(item.stage);
-    const isProposal = item.stage === "recruiter_proposed";
+    const canEdit = stage === "draft" || stage === "ai_failed";
+    const canBackToDraft = BACK_TO_DRAFT_STAGES.includes(stage);
+    const canSubmit = SUBMITTABLE_STAGES.includes(stage);
+    const canWithdraw = WITHDRAWABLE_STAGES.includes(stage);
+    const isProposal = stage === "recruiter_proposed";
     const isOffer =
-        item.stage === "offer" && !item.accepted_by_candidate;
+        stage === "offer" && !item.accepted_by_candidate;
     const hasAcceptedOffer =
-        item.stage === "offer" && !!item.accepted_by_candidate;
+        stage === "offer" && !!item.accepted_by_candidate;
     const isJobClosed = ["closed", "filled", "cancelled"].includes(
         item.job?.status || "",
     );
@@ -148,25 +157,30 @@ export default function ActionsToolbar({
 
     // Submit handler
     const handleSubmit = async () => {
-        if (item.stage === "draft" || item.stage === "ai_failed") {
-            await actions.submitToAiReview(item.id);
-        } else if (item.stage === "ai_reviewed") {
-            await actions.submitApplication(item.id);
+        if (stage === "draft" || stage === "ai_failed") {
+            const ok = await actions.submitToAiReview(item.id);
+            if (ok) setOptimisticStage("ai_review");
+        } else if (stage === "ai_reviewed") {
+            const ok = await actions.submitApplication(item.id);
+            if (ok) setOptimisticStage("recruiter_review");
         }
     };
 
     // Back to draft handler
     const handleBackToDraft = async () => {
-        if (item.stage === "ai_reviewed") {
-            await actions.returnToDraft(item.id);
+        let ok: boolean;
+        if (stage === "ai_reviewed") {
+            ok = await actions.returnToDraft(item.id);
         } else {
-            await actions.backToDraft(item.id);
+            ok = await actions.backToDraft(item.id);
         }
+        if (ok) setOptimisticStage("draft");
     };
 
     // Withdraw handler
     const handleWithdraw = async () => {
-        await actions.withdraw(item.id);
+        const ok = await actions.withdraw(item.id);
+        if (ok) setOptimisticStage("withdrawn");
     };
 
     // Decline proposal handler
@@ -176,9 +190,9 @@ export default function ActionsToolbar({
 
     // Get submit button label based on stage
     const getSubmitLabel = () => {
-        if (item.stage === "draft") return "Submit for Review";
-        if (item.stage === "ai_failed") return "Resubmit for Review";
-        if (item.stage === "ai_reviewed") return "Submit";
+        if (stage === "draft") return "Submit for Review";
+        if (stage === "ai_failed") return "Resubmit for Review";
+        if (stage === "ai_reviewed") return "Submit";
         return "Submit";
     };
 

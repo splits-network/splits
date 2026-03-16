@@ -103,11 +103,12 @@ export default function StepReview({
                     Final Step
                 </p>
                 <h3 className="text-xl font-black tracking-tight mb-2">
-                    Review and submit
+                    Review and submit for AI review
                 </h3>
                 <p className="text-sm text-base-content/60 leading-relaxed">
-                    Take a moment to make sure everything looks right before
-                    sending your application.
+                    Take a moment to make sure everything looks right. Your
+                    application will go through an AI review before being
+                    sent to the hiring team.
                 </p>
             </div>
 
@@ -289,9 +290,10 @@ export default function StepReview({
                             What happens next?
                         </p>
                         <p>
-                            Your application will be reviewed by our system and
-                            then forwarded to the hiring team. You can track its
-                            status anytime from your dashboard.
+                            Your application will first be reviewed by our AI
+                            system for completeness and quality. Once it passes,
+                            it will be forwarded to the hiring team. You can
+                            track its status anytime from your dashboard.
                         </p>
                     </div>
                 </div>
@@ -336,12 +338,12 @@ export default function StepReview({
                         {submitting ? (
                             <>
                                 <span className="loading loading-spinner loading-sm" />
-                                Submitting...
+                                Submitting for Review...
                             </>
                         ) : (
                             <>
                                 <i className="fa-duotone fa-regular fa-paper-plane" />
-                                Submit Application
+                                Submit for AI Review
                             </>
                         )}
                     </button>
