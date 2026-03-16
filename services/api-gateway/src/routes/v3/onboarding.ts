@@ -438,7 +438,7 @@ export function registerOnboardingV3Routes(
 
       try {
         const response = await onboardingService().post<any>(
-          '/api/v3/onboarding/business',
+          '/api/v3/onboarding/actions/business',
           request.body,
           correlationId,
           authHeaders

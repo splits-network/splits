@@ -443,9 +443,9 @@ export function registerOnboardingRoutes(
             const authHeaders = buildAuthHeaders(request);
 
             try {
-                // Route to onboarding-service V3 endpoint (handles both V2 and V3)
+                // Route to onboarding-service V3 action endpoint (handles both V2 and V3)
                 const response = await onboardingService().post<any>(
-                    '/api/v3/onboarding/business',
+                    '/api/v3/onboarding/actions/business',
                     request.body,
                     correlationId,
                     authHeaders

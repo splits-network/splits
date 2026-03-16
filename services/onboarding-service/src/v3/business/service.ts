@@ -4,16 +4,21 @@
  * Creates organization + membership + company via direct Supabase inserts.
  * Since all queries go through the same client, there's no cross-service
  * race condition — the data is visible immediately for subsequent queries.
+ *
+ * NOTE: This service does NOT use AccessContextResolver because the user
+ * is being bootstrapped — they have no org/membership/role context yet.
+ * Authorization is handled by verifying the clerkUserId matches the user
+ * record, and the gateway's requireAuth() ensures a valid Clerk session.
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
 import { BadRequestError, ConflictError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../shared/events';
+import { BusinessOnboardingRepository } from './repository';
 import { BusinessOnboardingInput, BusinessOnboardingResult } from './types';
 
 export class BusinessOnboardingService {
     constructor(
-        private supabase: SupabaseClient,
+        private repository: BusinessOnboardingRepository,
         private eventPublisher?: IEventPublisher,
     ) {}
 
@@ -31,13 +36,7 @@ export class BusinessOnboardingService {
         const now = new Date().toISOString();
 
         // Step 1: Get current user
-        const { data: user, error: userError } = await this.supabase
-            .from('users')
-            .select('*')
-            .eq('clerk_user_id', clerkUserId)
-            .maybeSingle();
-
-        if (userError) throw userError;
+        const user = await this.repository.findUserByClerkId(clerkUserId);
         if (!user) throw new BadRequestError('User not found');
 
         if (user.onboarding_status === 'completed') {
@@ -50,132 +49,59 @@ export class BusinessOnboardingService {
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '');
 
-        const { data: organization, error: orgError } = await this.supabase
-            .from('organizations')
-            .insert({
-                name: input.company.name,
-                type: 'company',
-                slug: orgSlug,
-                created_at: now,
-                updated_at: now,
-            })
-            .select()
-            .single();
-
-        if (orgError) throw new Error(`Failed to create organization: ${orgError.message}`);
+        const organization = await this.repository.createOrganization({
+            name: input.company.name,
+            slug: orgSlug,
+            now,
+        });
 
         // Step 3: Create membership
-        const { data: membership, error: membershipError } = await this.supabase
-            .from('memberships')
-            .insert({
-                user_id: user.id,
-                organization_id: organization.id,
-                role_name: 'company_admin',
-                created_at: now,
-                updated_at: now,
-            })
-            .select()
-            .single();
-
-        if (membershipError) throw new Error(`Failed to create membership: ${membershipError.message}`);
+        const membership = await this.repository.createMembership({
+            userId: user.id,
+            organizationId: organization.id,
+            now,
+        });
 
         // Step 4: Create company
-        const { data: company, error: companyError } = await this.supabase
-            .from('companies')
-            .insert({
-                identity_organization_id: organization.id,
-                name: input.company.name,
-                website: input.company.website || null,
-                industry: input.company.industry || null,
-                company_size: input.company.size || null,
-                description: input.company.description || null,
-                headquarters_location: input.company.headquarters_location || null,
-                logo_url: input.company.logo_url || null,
-                status: 'active',
-                created_at: now,
-                updated_at: now,
-            })
-            .select()
-            .single();
-
-        if (companyError) throw new Error(`Failed to create company: ${companyError.message}`);
+        const company = await this.repository.createCompany({
+            organizationId: organization.id,
+            name: input.company.name,
+            website: input.company.website || null,
+            industry: input.company.industry || null,
+            companySize: input.company.size || null,
+            description: input.company.description || null,
+            headquartersLocation: input.company.headquarters_location || null,
+            logoUrl: input.company.logo_url || null,
+            now,
+        });
 
         // Step 5: Create billing profile (non-blocking)
-        let billingProfile: any = null;
-        try {
-            const { data: billing, error: billingError } = await this.supabase
-                .from('company_billing_profiles')
-                .insert({
-                    company_id: company.id,
-                    billing_terms: input.billing.billing_terms || 'net_30',
-                    billing_email: input.billing.billing_email,
-                    invoice_delivery_method: input.billing.invoice_delivery_method || 'email',
-                    created_at: now,
-                    updated_at: now,
-                })
-                .select()
-                .single();
-
-            if (!billingError) billingProfile = billing;
-        } catch {
-            // Non-blocking
-        }
+        const billingProfile = await this.repository.createBillingProfile({
+            companyId: company.id,
+            billingTerms: input.billing.billing_terms || 'net_30',
+            billingEmail: input.billing.billing_email,
+            invoiceDeliveryMethod: input.billing.invoice_delivery_method || 'email',
+            now,
+        });
 
         // Step 6: Non-blocking relationship completions
         let invitationCompleted = false;
         let sourcerConnectionCreated = false;
 
         if (input.from_invitation?.id) {
-            try {
-                const { error: invError } = await this.supabase
-                    .from('company_invitations')
-                    .update({
-                        status: 'completed',
-                        company_id: company.id,
-                        completed_at: now,
-                    })
-                    .eq('id', input.from_invitation.id);
-
-                if (!invError) invitationCompleted = true;
-            } catch {
-                // Non-blocking
-            }
+            invitationCompleted = await this.repository.completeInvitation(
+                input.from_invitation.id, company.id, now,
+            );
         }
 
         if (input.referred_by_recruiter_id && !input.from_invitation?.id) {
-            try {
-                const { error: relError } = await this.supabase
-                    .from('recruiter_companies')
-                    .insert({
-                        recruiter_id: input.referred_by_recruiter_id,
-                        company_id: company.id,
-                        relationship_type: 'sourcer',
-                        status: 'pending',
-                        created_at: now,
-                        updated_at: now,
-                    });
-
-                if (!relError) sourcerConnectionCreated = true;
-            } catch {
-                // Non-blocking
-            }
+            sourcerConnectionCreated = await this.repository.createSourcerConnection(
+                input.referred_by_recruiter_id, company.id, now,
+            );
         }
 
         // Step 7: Mark onboarding complete
-        const { data: updatedUser, error: completeError } = await this.supabase
-            .from('users')
-            .update({
-                onboarding_status: 'completed',
-                onboarding_step: 4,
-                onboarding_completed_at: now,
-            })
-            .eq('id', user.id)
-            .select()
-            .single();
-
-        if (completeError) {
-            throw new Error(`Failed to mark onboarding complete: ${completeError.message}`);
-        }
+        const updatedUser = await this.repository.markOnboardingComplete(user.id, now);
 
         // Publish events
         await this.eventPublisher?.publish('onboarding.business.completed', {

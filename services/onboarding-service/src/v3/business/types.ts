@@ -14,7 +14,7 @@ export interface BusinessOnboardingInput {
         logo_url?: string;
     };
     billing: {
-        billing_terms: string;
+        billing_terms?: string;
         billing_email: string;
         invoice_delivery_method?: string;
     };
@@ -22,12 +22,67 @@ export interface BusinessOnboardingInput {
     referred_by_recruiter_id?: string;
 }
 
+export interface OnboardingUser {
+    id: string;
+    clerk_user_id: string;
+    email: string;
+    name: string;
+    onboarding_status: string;
+    onboarding_step: number;
+    onboarding_completed_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface OnboardingOrganization {
+    id: string;
+    name: string;
+    type: string;
+    slug: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface OnboardingMembership {
+    id: string;
+    user_id: string;
+    organization_id: string;
+    role_name: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface OnboardingCompany {
+    id: string;
+    identity_organization_id: string;
+    name: string;
+    website: string | null;
+    industry: string | null;
+    company_size: string | null;
+    description: string | null;
+    headquarters_location: string | null;
+    logo_url: string | null;
+    status: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface OnboardingBillingProfile {
+    id: string;
+    company_id: string;
+    billing_terms: string;
+    billing_email: string;
+    invoice_delivery_method: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface BusinessOnboardingResult {
-    user: any;
-    organization: any;
-    company: any;
-    membership: any;
-    billing_profile: any | null;
+    user: OnboardingUser;
+    organization: OnboardingOrganization;
+    company: OnboardingCompany;
+    membership: OnboardingMembership;
+    billing_profile: OnboardingBillingProfile | null;
     invitation_completed: boolean;
     sourcer_connection_created: boolean;
 }
@@ -65,6 +120,7 @@ export const businessOnboardingSchema = {
             properties: {
                 id: { type: 'string', format: 'uuid' },
             },
+            additionalProperties: false,
         },
         referred_by_recruiter_id: { type: 'string', format: 'uuid' },
     },

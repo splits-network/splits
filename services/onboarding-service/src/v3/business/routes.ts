@@ -6,6 +6,7 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../shared/events';
+import { BusinessOnboardingRepository } from './repository';
 import { BusinessOnboardingService } from './service';
 import { BusinessOnboardingInput, businessOnboardingSchema } from './types';
 
@@ -14,9 +15,10 @@ export function registerBusinessOnboardingRoutes(
     supabase: SupabaseClient,
     eventPublisher?: IEventPublisher,
 ) {
-    const service = new BusinessOnboardingService(supabase, eventPublisher);
+    const repository = new BusinessOnboardingRepository(supabase);
+    const service = new BusinessOnboardingService(repository, eventPublisher);
 
-    app.post('/api/v3/onboarding/business', {
+    app.post('/api/v3/onboarding/actions/business', {
         schema: { body: businessOnboardingSchema },
     }, async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string;
