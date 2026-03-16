@@ -26,7 +26,7 @@ export function ApplicationDetailsEmbed({ itemId, onRefresh }: ApplicationDetail
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            const response = await client.get(`/applications/${itemId}/view/detail?include=audit,documents`);
+            const response = await client.get(`/applications/${itemId}/view/detail?include=recruiter,audit,documents`);
             setApplication(response.data || null);
         } catch (err) {
             console.error("Failed to fetch application detail:", err);
