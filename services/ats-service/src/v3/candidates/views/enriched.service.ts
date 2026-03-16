@@ -9,6 +9,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { CandidateEnrichedRepository } from './enriched.repository';
 import { CandidateRepository } from '../repository';
+import { RecruiterSavedCandidateRepository } from '../../recruiter-saved-candidates/repository';
 import { CandidateListParams } from '../types';
 
 export class CandidateEnrichedService {
@@ -17,6 +18,7 @@ export class CandidateEnrichedService {
   constructor(
     private repository: CandidateEnrichedRepository,
     private crudRepository: CandidateRepository,
+    private savedCandidateRepo: RecruiterSavedCandidateRepository,
     supabase: SupabaseClient
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
@@ -57,7 +59,17 @@ export class CandidateEnrichedService {
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
 
-    const enriched = data.map(c => this.enrichCandidate(c, context.recruiterId ?? undefined));
+    // Batch-lookup saved status for recruiters
+    const candidateIds = data.map(c => c.id);
+    const savedMap = context.recruiterId
+      ? await this.savedCandidateRepo.findSavedMapForCandidates(context.recruiterId, candidateIds)
+      : new Map<string, string>();
+
+    const enriched = data.map(c => ({
+      ...this.enrichCandidate(c, context.recruiterId ?? undefined),
+      is_saved: savedMap.has(c.id),
+      saved_record_id: savedMap.get(c.id) || null,
+    }));
 
     return {
       data: enriched,

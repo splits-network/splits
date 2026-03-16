@@ -9,12 +9,14 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
 import { CandidateDetailRepository } from './detail.repository';
+import { RecruiterSavedCandidateRepository } from '../../recruiter-saved-candidates/repository';
 
 export class CandidateDetailService {
   private accessResolver: AccessContextResolver;
 
   constructor(
     private repository: CandidateDetailRepository,
+    private savedCandidateRepo: RecruiterSavedCandidateRepository,
     supabase: SupabaseClient
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
@@ -38,8 +40,23 @@ export class CandidateDetailService {
       }
     }
 
-    // Enrich with relationship status
-    return this.enrichWithRelationshipStatus(candidate, context.recruiterId ?? undefined);
+    // Lookup saved status for recruiters
+    let is_saved = false;
+    let saved_record_id: string | null = null;
+    if (context.recruiterId) {
+      const savedRecord = await this.savedCandidateRepo.findByCandidateId(context.recruiterId, id);
+      if (savedRecord) {
+        is_saved = true;
+        saved_record_id = savedRecord.id;
+      }
+    }
+
+    // Enrich with relationship status + saved status
+    return {
+      ...this.enrichWithRelationshipStatus(candidate, context.recruiterId ?? undefined),
+      is_saved,
+      saved_record_id,
+    };
   }
 
   private enrichWithRelationshipStatus(candidate: any, currentRecruiterId?: string) {

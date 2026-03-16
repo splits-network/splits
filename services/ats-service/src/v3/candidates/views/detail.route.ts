@@ -6,11 +6,13 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CandidateDetailRepository } from './detail.repository';
 import { CandidateDetailService } from './detail.service';
+import { RecruiterSavedCandidateRepository } from '../../recruiter-saved-candidates/repository';
 import { idParamSchema } from '../types';
 
 export function registerCandidateDetailView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CandidateDetailRepository(supabase);
-  const service = new CandidateDetailService(repository, supabase);
+  const savedCandidateRepo = new RecruiterSavedCandidateRepository(supabase);
+  const service = new CandidateDetailService(repository, savedCandidateRepo, supabase);
 
   app.get('/api/v3/candidates/:id/view/detail', {
     schema: { params: idParamSchema },

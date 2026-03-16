@@ -10,12 +10,14 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { CandidateEnrichedRepository } from './enriched.repository';
 import { CandidateEnrichedService } from './enriched.service';
 import { CandidateRepository } from '../repository';
+import { RecruiterSavedCandidateRepository } from '../../recruiter-saved-candidates/repository';
 import { CandidateListParams, listQuerySchema } from '../types';
 
 export function registerCandidateEnrichedView(app: FastifyInstance, supabase: SupabaseClient) {
   const enrichedRepo = new CandidateEnrichedRepository(supabase);
   const crudRepo = new CandidateRepository(supabase);
-  const service = new CandidateEnrichedService(enrichedRepo, crudRepo, supabase);
+  const savedCandidateRepo = new RecruiterSavedCandidateRepository(supabase);
+  const service = new CandidateEnrichedService(enrichedRepo, crudRepo, savedCandidateRepo, supabase);
 
   app.get('/api/v3/candidates/views/enriched', {
     schema: { querystring: listQuerySchema },
