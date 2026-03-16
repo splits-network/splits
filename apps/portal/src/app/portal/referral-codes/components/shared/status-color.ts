@@ -11,6 +11,12 @@ export function statusBadgeClass(code: RecruiterCode): string {
     return "badge-ghost";
 }
 
+/** Code status -> BaselBadge semantic color */
+export function statusColorName(code: RecruiterCode): "success" | "neutral" {
+    if (code.status === "active") return "success";
+    return "neutral";
+}
+
 /** Code status -> border color class (left accent on cards) */
 export function statusBorder(code: RecruiterCode): string {
     if (code.status === "active") return "border-l-success";

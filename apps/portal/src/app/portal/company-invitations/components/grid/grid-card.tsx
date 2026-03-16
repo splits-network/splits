@@ -71,25 +71,6 @@ export function GridCard({
         >
             {/* Header Band */}
             <div className="bg-base-300 px-5 pt-4 pb-4">
-                {/* Kicker row: status + direction badges */}
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <BaselBadge color={statusColorName(invitation.status)} variant="soft" size="sm">
-                            {getStatusLabel(invitation.status)}
-                        </BaselBadge>
-
-                        {isNew(invitation) && invitation.status === "pending" && (
-                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                                New
-                            </BaselBadge>
-                        )}
-                    </div>
-
-                    <span className="text-sm font-bold text-base-content/40 shrink-0">
-                        {directionLabel}
-                    </span>
-                </div>
-
                 {/* Editorial block: Avatar + Role kicker → Name → Subtext */}
                 <div className="flex items-start gap-3">
                     <div className="relative shrink-0 mt-0.5">
@@ -138,22 +119,41 @@ export function GridCard({
                 ))}
             </div>
 
-            {/* Termination reason or empty content zone */}
-            {invitation.status === "terminated" && invitation.termination_reason ? (
-                <div className="px-5 py-3 border-b border-base-300">
+            {/* About snippet */}
+            <div className="px-5 py-3 border-b border-base-300">
+                {invitation.status === "terminated" && invitation.termination_reason ? (
                     <p className="text-sm text-error/70 leading-relaxed line-clamp-2">
                         {invitation.termination_reason}
                     </p>
-                </div>
-            ) : invitation.status === "declined" ? (
-                <div className="px-5 py-3 border-b border-base-300">
+                ) : invitation.status === "declined" ? (
                     <p className="text-sm text-base-content/30">Request was declined</p>
-                </div>
-            ) : null}
+                ) : invitation.status === "active" ? (
+                    <p className="text-sm text-base-content/60">Connection is active</p>
+                ) : (
+                    <p className="text-sm text-base-content/30">Awaiting response</p>
+                )}
+            </div>
 
-            {/* Footer: time + actions */}
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
+                <div className="flex flex-wrap gap-1.5">
+                    <BaselBadge color={statusColorName(invitation.status)} variant="soft-outline" size="sm">
+                        {getStatusLabel(invitation.status)}
+                    </BaselBadge>
+                    {isNew(invitation) && invitation.status === "pending" && (
+                        <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
+                    )}
+                    <BaselBadge color="neutral" variant="soft" size="sm" icon={isOutgoing ? "fa-arrow-up-right" : "fa-arrow-down-left"}>
+                        {directionLabel}
+                    </BaselBadge>
+                </div>
+            </div>
+
+            {/* Footer: date + actions */}
             <div
-                className="mt-auto flex items-center justify-between gap-3 px-5 py-3"
+                className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
                 <span className="text-sm text-base-content/40">

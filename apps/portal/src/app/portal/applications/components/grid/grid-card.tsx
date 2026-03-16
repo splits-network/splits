@@ -122,26 +122,6 @@ export function GridCard({
         >
             {/* Header */}
             <div className="bg-base-300 px-5 pt-4 pb-4">
-                {/* Status bar: Stage + New badge + time ago */}
-                <div className="flex items-center gap-2 mb-3">
-                    <BaselBadge color={stage.color} variant="soft" size="sm" icon={stage.icon}>
-                        {stage.label}
-                    </BaselBadge>
-                    {firmJob && (
-                        <BaselBadge color="secondary" variant="soft" size="sm" icon="fa-handshake">
-                            3rd Party
-                        </BaselBadge>
-                    )}
-                    {isNew(application) && (
-                        <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                            New
-                        </BaselBadge>
-                    )}
-                    <span className="text-sm text-base-content/40 ml-auto shrink-0">
-                        {addedAgo(application)}
-                    </span>
-                </div>
-
                 {/* Editorial block: Kicker → Display heading → Subtitle */}
                 <div className="flex items-start gap-3">
                     <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none shrink-0 mt-0.5">
@@ -234,8 +214,27 @@ export function GridCard({
                 ))}
             </div>
 
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
+                <div className="flex flex-wrap gap-1.5">
+                    <BaselBadge color={stage.color} variant="soft-outline" size="sm" icon={stage.icon}>
+                        {stage.label}
+                    </BaselBadge>
+                    {firmJob && (
+                        <BaselBadge color="secondary" variant="soft-outline" size="sm" icon="fa-handshake">
+                            3rd Party
+                        </BaselBadge>
+                    )}
+                    {isNew(application) && (
+                        <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
+                    )}
+                </div>
+            </div>
+
             {/* Footer: company + actions */}
-            <div className="mt-auto flex items-center justify-between gap-3 px-5 py-3">
+            <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300">
                 <div className="flex items-center gap-2 min-w-0">
                     <div className="relative shrink-0">
                         {logoUrl ? (

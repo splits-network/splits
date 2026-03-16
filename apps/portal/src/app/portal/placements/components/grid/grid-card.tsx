@@ -39,23 +39,6 @@ export function GridCard({
         >
             {/* Header Band */}
             <div className="bg-base-300 px-5 pt-4 pb-4">
-                {/* Kicker row: status + NEW badge */}
-                <div className="flex items-center justify-between mb-3 gap-2">
-                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40">
-                        Placement
-                    </p>
-                    <div className="flex items-center gap-2">
-                        {isNew(placement) && (
-                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                                New
-                            </BaselBadge>
-                        )}
-                        <BaselBadge color={statusColorName(state)} size="sm">
-                            {formatStatus(state)}
-                        </BaselBadge>
-                    </div>
-                </div>
-
                 {/* Overlapping avatars + Name block */}
                 <div className="flex items-start gap-3">
                     <div className="relative shrink-0 w-14 h-14 mt-0.5">
@@ -116,14 +99,33 @@ export function GridCard({
                 </p>
             </div>
 
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
+                <div className="flex flex-wrap gap-1.5">
+                    <BaselBadge color={statusColorName(state)} variant="soft-outline" size="sm">
+                        {formatStatus(state)}
+                    </BaselBadge>
+                    {isNew(placement) && (
+                        <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
+                    )}
+                    {placement.splits && placement.splits.length > 0 && (
+                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-arrows-split-up-and-left">
+                            {placement.splits.length} Split{placement.splits.length > 1 ? "s" : ""}
+                        </BaselBadge>
+                    )}
+                </div>
+            </div>
+
             {/* Footer: view link */}
-            <div className="mt-auto flex items-center justify-between gap-3 px-5 py-3">
+            <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300">
                 <button
                     onClick={onSelect}
                     className="text-sm font-semibold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
                 >
                     View Details
-                    <i className="fa-duotone fa-regular fa-arrow-right text-sm" />
+                    <i className="fa-duotone fa-regular fa-arrow-right text-xs" />
                 </button>
             </div>
         </article>

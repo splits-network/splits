@@ -1,7 +1,7 @@
 "use client";
 
 import type { Job } from "../../types";
-import { formatJobLevel, formatCommuteTypes } from "../../types";
+import { formatJobLevel, COMMUTE_TYPE_LABELS } from "../../types";
 import { statusBadgeColor, statusBorder } from "../shared/status-color";
 import { BaselBadge } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
@@ -43,7 +43,7 @@ export function GridCard({
     const payout = estimatedPayoutRange(job);
     const posted = postedAgo(job);
     const skills = requiredSkillNames(job);
-    const commute = formatCommuteTypes(job.commute_types);
+    const commuteTypes = (job.commute_types || []).map((t) => COMMUTE_TYPE_LABELS[t] || t);
 
     // Inline metadata — always show all 4 items, muted when empty
     const metaItems: { icon: string; color: string; value: string; muted: boolean; tooltip: string }[] = [
@@ -177,11 +177,11 @@ export function GridCard({
                             {level}
                         </BaselBadge>
                     )}
-                    {commute && (
-                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-building">
-                            {commute}
+                    {commuteTypes.map((ct) => (
+                        <BaselBadge key={ct} color="neutral" variant="soft" size="sm" icon="fa-building">
+                            {ct}
                         </BaselBadge>
-                    )}
+                    ))}
                     {skills.slice(0, 3).map((skill) => (
                         <BaselBadge key={skill} variant="soft" color="neutral" size="sm">
                             {skill}
@@ -192,7 +192,7 @@ export function GridCard({
                             +{skills.length - 3} more
                         </span>
                     )}
-                    {!job.employment_type && !level && !commute && skills.length === 0 && (
+                    {!job.employment_type && !level && commuteTypes.length === 0 && skills.length === 0 && (
                         <span className="text-sm text-base-content/30">No details listed</span>
                     )}
                 </div>
