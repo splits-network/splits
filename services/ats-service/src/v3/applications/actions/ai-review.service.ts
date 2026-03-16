@@ -44,7 +44,7 @@ export class AIReviewService {
     await this.repository.createAuditLog({
       application_id: id,
       action: isRetrigger ? 'ai_review_retriggered' : 'ai_review_started',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: this.resolveRole(context),
       old_value: { stage: application.stage },
       new_value: { stage: 'ai_review' },
@@ -80,7 +80,7 @@ export class AIReviewService {
 
     await this.repository.createAuditLog({
       application_id: id, action: 'returned_to_draft',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: context.recruiterId ? 'recruiter' : 'candidate',
       old_value: { stage: application.stage },
       new_value: { stage: 'draft' },
@@ -117,7 +117,7 @@ export class AIReviewService {
 
     await this.repository.createAuditLog({
       application_id: id, action: 'submitted',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'candidate',
       old_value: { stage: application.stage },
       new_value: { stage: nextStage },
@@ -162,7 +162,7 @@ export class AIReviewService {
     await this.repository.createAuditLog({
       application_id: data.application_id,
       action: 'ai_review_completed',
-      performed_by_user_id: 'system',
+      performed_by_user_id: '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'system',
       old_value: { stage: application.stage },
       new_value: { stage: 'ai_reviewed' },
@@ -187,7 +187,7 @@ export class AIReviewService {
       job_id: application.job_id,
       old_stage: application.stage,
       new_stage: 'ai_reviewed',
-      changed_by: 'system',
+      changed_by: '00000000-0000-0000-0000-000000000000',
     }, 'ats-service');
 
     // If poor/fair fit with concerns, publish needs_improvement
@@ -222,7 +222,7 @@ export class AIReviewService {
     await this.repository.createAuditLog({
       application_id: data.application_id,
       action: 'ai_review_failed',
-      performed_by_user_id: 'system',
+      performed_by_user_id: '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'system',
       old_value: { stage: application.stage },
       new_value: { stage: 'ai_failed' },
@@ -235,7 +235,7 @@ export class AIReviewService {
       job_id: application.job_id,
       old_stage: application.stage,
       new_stage: 'ai_failed',
-      changed_by: 'system',
+      changed_by: '00000000-0000-0000-0000-000000000000',
     }, 'ats-service');
   }
 

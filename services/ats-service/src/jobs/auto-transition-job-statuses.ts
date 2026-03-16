@@ -67,7 +67,7 @@ async function main() {
                 await eventPublisher.publish('job.updated', {
                     job_id: job.id,
                     updated_fields: ['is_early_access'],
-                    changed_by: 'system',
+                    changed_by: '00000000-0000-0000-0000-000000000000',
                 });
 
                 activated++;
@@ -103,7 +103,7 @@ async function main() {
                     job_id: job.id,
                     previous_status: job.status,
                     new_status: 'closed',
-                    changed_by: 'system',
+                    changed_by: '00000000-0000-0000-0000-000000000000',
                 });
 
                 closed++;

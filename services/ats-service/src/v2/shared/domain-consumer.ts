@@ -209,7 +209,7 @@ export class DomainEventConsumer {
             await this.applicationRepository.createAuditLog({
                 application_id,
                 action: 'stage_changed',
-                performed_by_user_id: changed_by || 'system',
+                performed_by_user_id: changed_by || '00000000-0000-0000-0000-000000000000',
                 performed_by_role: 'system',
                 old_value: { stage: old_stage },
                 new_value: { stage: new_stage },
@@ -315,7 +315,7 @@ export class DomainEventConsumer {
                 await this.applicationRepository.createAuditLog({
                     application_id: updatedApplication.id,
                     action: 'ai_review_completed',
-                    performed_by_user_id: 'system',
+                    performed_by_user_id: '00000000-0000-0000-0000-000000000000',
                     performed_by_role: 'system',
                     old_value: { stage: application.stage },
                     new_value: { stage: nextStage },
@@ -337,7 +337,7 @@ export class DomainEventConsumer {
                         recruiter_id: updatedApplication.recruiter_id,
                         old_stage: application.stage,
                         new_stage: nextStage,
-                        changed_by: 'system',
+                        changed_by: '00000000-0000-0000-0000-000000000000',
                     });
                 }
 
@@ -415,7 +415,7 @@ export class DomainEventConsumer {
             await this.applicationRepository.createAuditLog({
                 application_id: updatedApplication.id,
                 action: 'ai_review_failed',
-                performed_by_user_id: 'system',
+                performed_by_user_id: '00000000-0000-0000-0000-000000000000',
                 performed_by_role: 'system',
                 old_value: { stage: application.stage },
                 new_value: { stage: nextStage },
@@ -433,7 +433,7 @@ export class DomainEventConsumer {
                     recruiter_id: updatedApplication.recruiter_id,
                     old_stage: application.stage,
                     new_stage: nextStage,
-                    changed_by: 'system',
+                    changed_by: '00000000-0000-0000-0000-000000000000',
                 });
             }
 

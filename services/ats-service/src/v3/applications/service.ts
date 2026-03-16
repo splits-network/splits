@@ -116,7 +116,7 @@ export class ApplicationService {
 
     await this.repository.createAuditLog({
       application_id: application.id, action: 'created',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: hasRecruiter ? 'recruiter' : 'candidate',
       new_value: { stage: initialStage, job_id: input.job_id, candidate_id: candidateId },
       metadata: { has_recruiter: hasRecruiter, document_count: document_ids?.length || 0 },
@@ -168,7 +168,7 @@ export class ApplicationService {
     if (input.stage && input.stage !== current.stage) {
       await this.repository.createAuditLog({
         application_id: id, action: 'stage_changed',
-        performed_by_user_id: context.identityUserId || 'system',
+        performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
         performed_by_role: this.resolveRole(context),
         old_value: { stage: current.stage },
         new_value: { stage: input.stage },

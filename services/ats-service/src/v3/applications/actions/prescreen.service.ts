@@ -68,7 +68,7 @@ export class PrescreenService {
 
     await this.repository.createAuditLog({
       application_id: id, action: 'prescreen_requested',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'company',
       new_value: { stage: 'screen', company_recruiter_id: assignedRecruiterId, auto_assign: autoAssign },
       metadata: { company_id: body.company_id, has_message: !!body.message },
@@ -110,7 +110,7 @@ export class PrescreenService {
 
     await this.repository.createAuditLog({
       application_id: id, action: 'reactivated',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: context.isPlatformAdmin ? 'admin' : 'recruiter',
       old_value: { expired_at: application.expired_at },
       new_value: { expired_at: null },

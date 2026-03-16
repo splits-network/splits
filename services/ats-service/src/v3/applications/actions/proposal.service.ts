@@ -83,7 +83,7 @@ export class ProposalService {
     await this.repository.createAuditLog({
       application_id: application.id,
       action: 'recruiter_proposed',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'recruiter',
       new_value: { stage: 'recruiter_proposed', candidate_recruiter_id: data.candidate_recruiter_id },
       metadata: { pitch: data.pitch || null, notes: data.notes || null },
@@ -119,7 +119,7 @@ export class ProposalService {
 
     await this.repository.createAuditLog({
       application_id: id, action: 'proposal_accepted',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'candidate',
       old_value: { stage: 'recruiter_proposed' },
       new_value: { stage: 'draft' },
@@ -153,7 +153,7 @@ export class ProposalService {
 
     await this.repository.createAuditLog({
       application_id: id, action: 'proposal_declined',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'candidate',
       old_value: { stage: 'recruiter_proposed' },
       new_value: { stage: 'rejected', decline_reason: reason || null },

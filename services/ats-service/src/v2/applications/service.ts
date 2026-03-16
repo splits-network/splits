@@ -234,7 +234,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: application.id,
             action: 'created',
-            performed_by_user_id: identityUserId || 'system',
+            performed_by_user_id: identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: hasRecruiter ? 'recruiter' : 'candidate',
             new_value: {
                 stage: application.stage,
@@ -391,7 +391,7 @@ export class ApplicationServiceV2 {
             await this.repository.createAuditLog({
                 application_id: id,
                 action: 'stage_changed',
-                performed_by_user_id: userContext.identityUserId || 'system',
+                performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
                 performed_by_role: userRole || this.resolveRole(userContext),
                 old_value: { stage: currentApplication.stage },
                 new_value: { stage: updates.stage },
@@ -648,7 +648,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: data.application_id,
             action: 'ai_review_completed',
-            performed_by_user_id: 'system',
+            performed_by_user_id: '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'system',
             old_value: { stage: 'ai_review' },
             new_value: { stage: 'ai_reviewed' },
@@ -706,7 +706,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'returned_to_draft',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: userContext.recruiterId ? 'recruiter' : 'candidate',
             old_value: { stage: application.stage },
             new_value: { stage: 'draft' },
@@ -760,7 +760,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: isRetrigger ? 'ai_review_retriggered' : 'ai_review_started',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: this.resolveRole(userContext),
             old_value: { stage: application.stage },
             new_value: { stage: 'ai_review' },
@@ -826,7 +826,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'submitted',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'candidate',
             old_value: { stage: application.stage },
             new_value: { stage: nextStage },
@@ -934,7 +934,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: application.id,
             action: 'recruiter_proposed',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'recruiter',
             new_value: {
                 stage: 'recruiter_proposed',
@@ -994,7 +994,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'proposal_accepted',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'candidate',
             old_value: { stage: 'recruiter_proposed' },
             new_value: { stage: 'draft' },
@@ -1050,7 +1050,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'offer_accepted',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'candidate',
             old_value: { accepted_by_candidate: false },
             new_value: { accepted_by_candidate: true },
@@ -1111,7 +1111,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'hired',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'company',
             old_value: { stage: application.stage },
             new_value: {
@@ -1220,7 +1220,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'prescreen_requested',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'company',
             new_value: {
                 stage: 'screen',
@@ -1283,7 +1283,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'proposal_declined',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'candidate',
             old_value: { stage: 'recruiter_proposed' },
             new_value: {
@@ -1343,7 +1343,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'reactivated',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: userContext.isPlatformAdmin ? 'admin' : 'recruiter',
             old_value: { expired_at: application.expired_at },
             new_value: { expired_at: null },

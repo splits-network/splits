@@ -45,7 +45,7 @@ export class HireService {
 
     await this.repository.createAuditLog({
       application_id: id, action: 'offer_accepted',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'candidate',
       old_value: { accepted_by_candidate: false },
       new_value: { accepted_by_candidate: true },
@@ -89,7 +89,7 @@ export class HireService {
 
     await this.repository.createAuditLog({
       application_id: id, action: 'hired',
-      performed_by_user_id: context.identityUserId || 'system',
+      performed_by_user_id: context.identityUserId || '00000000-0000-0000-0000-000000000000',
       performed_by_role: 'company',
       old_value: { stage: application.stage },
       new_value: {
