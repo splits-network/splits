@@ -134,9 +134,9 @@ export default async function RootLayout({
             <body className="antialiased flex flex-col min-h-screen">
                 <ThemeProvider>
                     <SupportWidgetWrapper>
-                    <Header navItems={headerNav?.items} />
-                    <main className="flex-grow">{children}</main>
-                    <Footer />
+                        <Header navItems={headerNav?.items} />
+                        <main className="flex-grow">{children}</main>
+                        <Footer />
                     </SupportWidgetWrapper>
                     <BaselCookieConsent
                         cookiePolicyHref="/cookie-policy"

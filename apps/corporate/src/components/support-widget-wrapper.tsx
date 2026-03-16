@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
-import { SupportProvider, SupportChatWindow } from '@splits-network/support-widget';
+import {
+    SupportProvider,
+    SupportChatWindow,
+} from "@splits-network/support-widget";
 
-export function SupportWidgetWrapper({ children }: { children: React.ReactNode }) {
+export function SupportWidgetWrapper({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <SupportProvider sourceApp="corporate">
             {children}
