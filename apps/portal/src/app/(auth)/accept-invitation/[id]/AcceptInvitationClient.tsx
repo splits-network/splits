@@ -37,7 +37,7 @@ export default function AcceptInvitationClient({
     userEmail,
 }: Props) {
     const router = useRouter();
-    const { getToken } = useAuth();
+    const { getToken, isLoaded: isClerkLoaded } = useAuth();
     const { refresh: refreshProfile } = useUserProfile();
 
     const isAuthenticated = !!userId;
@@ -109,8 +109,15 @@ export default function AcceptInvitationClient({
         setAcceptError(null);
 
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Authentication token not available");
+            // After signup redirect, Clerk may need a moment to initialize.
+            // Retry getToken a few times with a short delay.
+            let token: string | null = null;
+            for (let attempt = 0; attempt < 5; attempt++) {
+                token = await getToken();
+                if (token) break;
+                await new Promise((r) => setTimeout(r, 500));
+            }
+            if (!token) throw new Error("Authentication token not available. Please refresh the page and try again.");
 
             const client = createAuthenticatedClient(token);
             await client.post(`/invitations/${invitationId}/accept`, {
@@ -465,12 +472,17 @@ export default function AcceptInvitationClient({
                     type="button"
                     className="btn btn-primary flex-1"
                     onClick={handleAccept}
-                    disabled={accepting}
+                    disabled={accepting || !isClerkLoaded}
                 >
                     {accepting ? (
                         <>
                             <span className="loading loading-spinner loading-sm" />
                             Accepting...
+                        </>
+                    ) : !isClerkLoaded ? (
+                        <>
+                            <span className="loading loading-spinner loading-sm" />
+                            Loading...
                         </>
                     ) : (
                         <>

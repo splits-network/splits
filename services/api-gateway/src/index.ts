@@ -529,7 +529,6 @@ async function main() {
             (request.method === 'GET' && request.url.startsWith('/api/v3/recruiter-codes/lookup')) ||
             (request.method === 'GET' && request.url.startsWith('/api/v3/firm-invitations/')) ||
             (request.method === 'GET' && request.url.startsWith('/api/v3/invitations/') && request.url.includes('/preview')) ||
-            (request.method === 'POST' && request.url.startsWith('/api/v3/invitations/') && request.url.includes('/accept')) ||
             (request.method === 'GET' && request.url.startsWith('/api/v3/pages/views/by-slug/'))
         ) {
             return;
