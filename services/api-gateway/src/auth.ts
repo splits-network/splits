@@ -74,8 +74,12 @@ export class AuthMiddleware {
             }, 'Profile image auth debug');
         }
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            throw new UnauthorizedError('Missing or invalid authorization header');
+        if (!authHeader) {
+            throw new UnauthorizedError('Missing authorization header', { source: 'auth_header_missing', url: request.url });
+        }
+
+        if (!authHeader.startsWith('Bearer ')) {
+            throw new UnauthorizedError('Invalid authorization header format (must be "Bearer <token>")', { source: 'auth_header_format', url: request.url });
         }
 
         const token = authHeader.substring(7);
@@ -137,9 +141,16 @@ export class AuthMiddleware {
         request.log.error({
             err: lastError,
             message: lastError?.message,
+            url: request.url,
+            method: request.method,
         }, 'Token verification failed with all Clerk clients');
 
-        throw new UnauthorizedError('Token verification failed');
+        throw new UnauthorizedError('Token verification failed with all Clerk clients', {
+            source: 'clerk_token_verification',
+            url: request.url,
+            lastError: lastError?.message,
+            clientsAttempted: this.clerkClients.map(c => c.name)
+        });
     }
 
     private getCachedUser(clerkUserId: string): CachedUser | null {

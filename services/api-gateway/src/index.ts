@@ -372,9 +372,14 @@ async function main() {
             // Try to authenticate if token is present, but don't fail if missing
             try {
                 await authMiddleware.createMiddleware()(request, reply);
-            } catch (error) {
+            } catch (error: any) {
                 // Ignore auth errors for public endpoints
-                request.log.debug('No valid auth token for public endpoint, continuing as anonymous');
+                request.log.debug({
+                    url: request.url,
+                    authError: error.message,
+                    source: error.context?.source,
+                    route_type: 'public_jobs'
+                }, 'No valid auth token for public endpoint, continuing as anonymous');
             }
             return;
         }
@@ -394,9 +399,14 @@ async function main() {
             // Try to authenticate if token is present, but don't fail if missing
             try {
                 await authMiddleware.createMiddleware()(request, reply);
-            } catch (error) {
+            } catch (error: any) {
                 // Ignore auth errors for public marketplace endpoint
-                request.log.debug('No valid auth token for public marketplace endpoint, continuing as anonymous');
+                request.log.debug({
+                    url: request.url,
+                    authError: error.message,
+                    source: error.context?.source,
+                    route_type: 'public_recruiters_marketplace'
+                }, 'No valid auth token for public marketplace endpoint, continuing as anonymous');
             }
             return;
         }
@@ -498,8 +508,13 @@ async function main() {
             // Try to authenticate if token is present, but don't fail if missing
             try {
                 await authMiddleware.createMiddleware()(request, reply);
-            } catch (error) {
-                request.log.debug('No valid auth token for support endpoint, continuing as anonymous');
+            } catch (error: any) {
+                request.log.debug({
+                    url: request.url,
+                    authError: error.message,
+                    source: error.context?.source,
+                    route_type: 'support_optional_auth'
+                }, 'No valid auth token for support endpoint, continuing as anonymous');
             }
             return;
         }
@@ -513,8 +528,12 @@ async function main() {
         )) {
             try {
                 await authMiddleware.createMiddleware()(request, reply);
-            } catch (error) {
-                request.log.debug('No valid auth token for public gamification endpoint, continuing as anonymous');
+            } catch (error: any) {
+                request.log.debug({
+                    url: request.url,
+                    authError: error.message,
+                    source: error.context?.source,
+                }, 'No valid auth token for public gamification endpoint, continuing as anonymous');
             }
             return;
         }
@@ -553,14 +572,49 @@ async function main() {
         ) {
             try {
                 await authMiddleware.createMiddleware()(request, reply);
-            } catch (error) {
-                request.log.debug('No valid auth token for V3 optional-auth route, continuing as anonymous');
+            } catch (error: any) {
+                request.log.debug({
+                    url: request.url,
+                    authError: error.message,
+                    source: error.context?.source,
+                    route_type: 'v3_optional_auth'
+                }, 'No valid auth token for V3 optional-auth route, continuing as anonymous');
             }
             return;
         }
 
         if (request.url.startsWith('/api/')) {
-            await authMiddleware.createMiddleware()(request, reply);
+            try {
+                await authMiddleware.createMiddleware()(request, reply);
+            } catch (error: any) {
+                // Enhance 401 errors with gateway context
+                if (error.statusCode === 401) {
+                    const enhancedError = {
+                        error: {
+                            code: error.code || 'AUTH_REQUIRED',
+                            message: error.message || 'Authentication required',
+                            source: error.context?.source || 'gateway_auth_required',
+                            details: {
+                                url: request.url,
+                                method: request.method,
+                                route_type: 'authenticated_api',
+                                auth_context: error.context || {},
+                                timestamp: new Date().toISOString()
+                            }
+                        }
+                    };
+
+                    request.log.info({
+                        url: request.url,
+                        method: request.method,
+                        authError: error.message,
+                        source: error.context?.source,
+                    }, 'Authentication failed - detailed context logged');
+
+                    return reply.status(401).send(enhancedError);
+                }
+                throw error;
+            }
         }
     });
 
