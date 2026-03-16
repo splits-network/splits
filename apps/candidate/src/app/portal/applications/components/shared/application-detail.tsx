@@ -15,14 +15,13 @@ import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
 import { formatDate } from "@/lib/utils";
 import type { Application, ApplicationDocument } from "../../types";
-import { stageColor } from "./status-color";
+import { getStageDisplay, semanticPill } from "@splits-network/basel-ui";
 import {
     companyName,
     companyInitials,
     recruiterName,
     appliedAgo,
     salaryDisplay,
-    formatStage,
 } from "./helpers";
 import ActionsToolbar from "./actions-toolbar";
 import AIReviewPanel from "./ai-review-panel";
@@ -145,11 +144,14 @@ export function ApplicationDetail({
                     <div className="flex-1">
                         {/* Stage pill */}
                         <div className="flex items-center gap-2 mb-2">
-                            <span
-                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${stageColor(application.stage)}`}
-                            >
-                                {formatStage(application.stage)}
-                            </span>
+                            {(() => {
+                                const s = getStageDisplay(application.stage, { acceptedByCandidate: application.accepted_by_candidate });
+                                return (
+                                    <span className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${semanticPill[s.color]}`}>
+                                        {s.label}
+                                    </span>
+                                );
+                            })()}
                         </div>
 
                         {/* Company kicker */}
@@ -214,7 +216,7 @@ export function ApplicationDetail({
                             Status
                         </p>
                         <p className="text-lg font-black tracking-tight">
-                            {formatStage(application.stage)}
+                            {getStageDisplay(application.stage, { acceptedByCandidate: application.accepted_by_candidate }).label}
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">

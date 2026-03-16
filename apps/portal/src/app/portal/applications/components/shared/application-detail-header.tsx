@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import ActionsToolbar from "./actions-toolbar";
-import { BaselBadge } from "@splits-network/basel-ui";
-import { getStageDisplay, getStageDisplayWithExpired } from "./status-color";
+import { BaselBadge, getStageDisplay } from "@splits-network/basel-ui";
 import { formatApplicationDate } from "../../types";
 import type { Application } from "../../types";
 
@@ -29,10 +28,11 @@ export function ApplicationDetailHeader({
 }: ApplicationDetailHeaderProps) {
     const candidate = application.candidate;
     const job = application.job;
-    const stageDisplay = getStageDisplayWithExpired(
-        application.stage,
-        (application as any).expired_at,
-    );
+    const stageOpts = {
+        expiredAt: (application as any).expired_at,
+        acceptedByCandidate: application.accepted_by_candidate,
+    };
+    const stageDisplay = getStageDisplay(application.stage, stageOpts);
 
     const candidateName = candidate?.full_name || "Unnamed Candidate";
     const candidateInitials = candidateName
@@ -92,7 +92,7 @@ export function ApplicationDetailHeader({
     }, [application.id, aiScoreFromApp]);
 
     const aiScore = aiScoreFromApp ?? fetchedAiScore;
-    const stageLabel = getStageDisplay(application.stage);
+    const stageLabel = getStageDisplay(application.stage, stageOpts);
     const docsCount = application.documents?.length || 0;
     const daysInPipeline = Math.floor(
         (Date.now() - new Date(application.created_at).getTime()) /

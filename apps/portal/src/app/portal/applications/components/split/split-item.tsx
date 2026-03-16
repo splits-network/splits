@@ -10,7 +10,8 @@ import {
     aiScore,
     isNew,
 } from "../shared/helpers";
-import { getStageDisplayWithExpired, getAIScoreBadgeColor } from "../shared/status-color";
+import { getStageDisplay } from "@splits-network/basel-ui";
+import { getAIScoreBadgeColor } from "../shared/status-color";
 import ActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
@@ -24,7 +25,10 @@ export function SplitItem({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const stage = getStageDisplayWithExpired(application.stage, (application as any).expired_at);
+    const stage = getStageDisplay(application.stage, {
+        expiredAt: (application as any).expired_at,
+        acceptedByCandidate: application.accepted_by_candidate,
+    });
     const score = aiScore(application);
 
     return (

@@ -6,46 +6,6 @@
  */
 
 /**
- * Get badge style and label for application stages
- */
-export function getApplicationStageBadge(stage: string | null | undefined): { className: string; label: string } {
-    if (!stage) {
-        return { className: 'badge-ghost', label: 'Unknown' };
-    }
-
-    const styles: Record<string, { className: string; label: string }> = {
-        draft: { className: 'badge-primary', label: 'Draft' },
-        ai_review: { className: 'badge-warning', label: 'AI Review' },
-        gpt_review: { className: 'badge-warning', label: 'GPT Review' },
-        ai_failed: { className: 'badge-error', label: 'Review Failed' },
-        ai_reviewed: { className: 'badge-warning', label: 'AI Reviewed' },
-        recruiter_request: { className: 'badge-info', label: 'Recruiter Request' },
-        recruiter_proposed: { className: 'badge-primary', label: 'Proposed by Recruiter' },
-        recruiter_review: { className: 'badge-info', label: 'Recruiter Review' },
-        screen: { className: 'badge-info', label: 'Screening' },
-        submitted: { className: 'badge-primary', label: 'Submitted' },
-        company_review: { className: 'badge-info', label: 'Company Review' },
-        company_feedback: { className: 'badge-info', label: 'Company Feedback' },
-        interview: { className: 'badge-warning', label: 'Interview' },
-        offer: { className: 'badge-success', label: 'Offer' },
-        hired: { className: 'badge-success', label: 'Hired' },
-        rejected: { className: 'badge-error', label: 'Rejected' },
-        withdrawn: { className: 'badge-primary badge-soft badge-outline', label: 'Withdrawn' },
-        expired: { className: 'badge-error', label: 'Expired' },
-    };
-
-    return styles[stage] || { className: 'badge-ghost', label: stage };
-}
-
-/**
- * Backward compatibility wrapper - only returns className
- * @deprecated Use getApplicationStageBadge instead for full object
- */
-export function getApplicationStageClass(stage: string | null | undefined): string {
-    return getApplicationStageBadge(stage).className;
-}
-
-/**
  * Get badge color for job/role status
  */
 export function getJobStatusBadge(status: string): string {

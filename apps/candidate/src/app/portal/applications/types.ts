@@ -1,6 +1,3 @@
-export { getStatusColor, formatStage } from "@/lib/application-utils";
-export { getApplicationStageBadge } from "@/lib/utils/badge-styles";
-
 // ===== TYPES =====
 
 export interface ApplicationDocument {

@@ -1,18 +1,16 @@
 "use client";
 
 import type { Application } from "../../types";
-import { stageColorName } from "../shared/status-color";
 import {
     companyName,
     companyInitials,
     salaryDisplay,
-    formatStage,
     recruiterName,
     appliedAgo,
 } from "../shared/helpers";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import ActionsToolbar from "../shared/actions-toolbar";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, getStageDisplay } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 
 const PIPELINE_STAGES = [
@@ -162,7 +160,7 @@ export function GridCard({
                     <span className="text-sm font-bold text-base-content/60">
                         {(() => {
                             const p = getPipelineProgress(app.stage);
-                            if (p.current === 0) return formatStage(app.stage);
+                            if (p.current === 0) return getStageDisplay(app.stage, { acceptedByCandidate: app.accepted_by_candidate }).label;
                             return <>Step {p.current} <span className="text-base-content/30">/ {p.total}</span></>;
                         })()}
                     </span>
@@ -185,9 +183,14 @@ export function GridCard({
             {/* Badge row: emphasis (soft-outline) + default (soft) */}
             <div className="px-5 py-3 flex-1">
                 <div className="flex flex-wrap gap-1.5">
-                    <BaselBadge color={stageColorName(app.stage)} variant="soft-outline" size="sm">
-                        {formatStage(app.stage)}
-                    </BaselBadge>
+                    {(() => {
+                        const s = getStageDisplay(app.stage, { acceptedByCandidate: app.accepted_by_candidate });
+                        return (
+                            <BaselBadge color={s.color} variant="soft-outline" size="sm">
+                                {s.label}
+                            </BaselBadge>
+                        );
+                    })()}
                     {employmentType && (
                         <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-briefcase">
                             {employmentType}

@@ -2,14 +2,13 @@
 
 import { Fragment } from "react";
 import type { Application } from "../../types";
-import { stageColor } from "../shared/status-color";
 import {
     companyName,
     companyInitials,
     recruiterName,
     appliedAgo,
-    formatStage,
 } from "../shared/helpers";
+import { getStageDisplay, semanticPill } from "@splits-network/basel-ui";
 import { DetailLoader } from "../shared/application-detail";
 import ActionsToolbar from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
@@ -90,11 +89,14 @@ export function TableRow({
 
                 {/* Status */}
                 <td className="px-4 py-3">
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${stageColor(app.stage)}`}
-                    >
-                        {formatStage(app.stage)}
-                    </span>
+                    {(() => {
+                        const s = getStageDisplay(app.stage, { acceptedByCandidate: app.accepted_by_candidate });
+                        return (
+                            <span className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${semanticPill[s.color]}`}>
+                                {s.label}
+                            </span>
+                        );
+                    })()}
                 </td>
 
                 {/* Recruiter */}

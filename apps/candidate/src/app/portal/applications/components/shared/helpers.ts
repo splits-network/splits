@@ -1,7 +1,4 @@
 import type { Application } from "../../types";
-import { formatStage } from "../../types";
-
-export { formatStage };
 
 export function companyName(app: Application): string {
     return app.job?.company?.name || app.job?.firm?.name || app.company?.name || "Unknown Company";

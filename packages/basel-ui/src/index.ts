@@ -234,3 +234,10 @@ export {
     semanticCheckbox,
     semanticChip,
 } from './utils/colors';
+
+// Application stage display
+export {
+    getStageDisplay,
+    type StageDisplay,
+    type StageDisplayOptions,
+} from './utils/application-stage';

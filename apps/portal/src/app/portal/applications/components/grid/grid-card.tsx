@@ -18,7 +18,8 @@ import {
     recruiterName,
     submittedDateLabel,
 } from "../shared/helpers";
-import { getStageDisplayWithExpired, getAIScoreBadgeColor } from "../shared/status-color";
+import { getStageDisplay } from "@splits-network/basel-ui";
+import { getAIScoreBadgeColor } from "../shared/status-color";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
@@ -94,7 +95,10 @@ export function GridCard({
     const company = companyName(application);
     const score = aiScore(application);
     const scoreColor = getAIScoreBadgeColor(score);
-    const stage = getStageDisplayWithExpired(application.stage, (application as any).expired_at);
+    const stage = getStageDisplay(application.stage, {
+        expiredAt: (application as any).expired_at,
+        acceptedByCandidate: application.accepted_by_candidate,
+    });
     const headline = candidateHeadline(application);
     const location = jobLocation(application);
     const salary = jobSalaryRange(application);

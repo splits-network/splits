@@ -11,7 +11,8 @@ import {
     addedAgo,
     isNew,
 } from "../shared/helpers";
-import { getStageDisplayWithExpired, getAIScoreBadgeColor } from "../shared/status-color";
+import { getStageDisplay } from "@splits-network/basel-ui";
+import { getAIScoreBadgeColor } from "../shared/status-color";
 import { DetailLoader } from "../shared/application-detail";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
 
@@ -31,7 +32,10 @@ export function TableRow({
     onRefresh?: () => void;
 }) {
     const name = candidateName(application);
-    const stage = getStageDisplayWithExpired(application.stage, (application as any).expired_at);
+    const stage = getStageDisplay(application.stage, {
+        expiredAt: (application as any).expired_at,
+        acceptedByCandidate: application.accepted_by_candidate,
+    });
     const score = aiScore(application);
 
     const rowBase = isSelected
