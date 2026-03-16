@@ -24,7 +24,7 @@ export class NavigationRepository {
     if (params.app) query = query.eq('app', params.app);
     if (params.location) query = query.eq('location', params.location);
 
-    query = query.order('created_at', { ascending: false }).range(offset, offset + limit - 1);
+    query = query.order('updated_at', { ascending: false }).range(offset, offset + limit - 1);
 
     const { data, count, error } = await query;
     if (error) throw error;
