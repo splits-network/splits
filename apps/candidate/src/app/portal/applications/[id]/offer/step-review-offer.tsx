@@ -65,6 +65,20 @@ export default function StepReviewOffer({ application }: StepReviewOfferProps) {
                         </p>
                     )}
                 </div>
+                {application.start_date && (
+                    <div className="bg-base-100 p-6">
+                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                            Start Date
+                        </p>
+                        <p className="text-lg font-bold">
+                            {new Date(application.start_date + "T00:00:00").toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                            })}
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Recruiter info */}

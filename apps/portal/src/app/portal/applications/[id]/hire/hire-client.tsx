@@ -92,10 +92,8 @@ export default function HireClient({
                 if (app.salary) {
                     setSalary(String(app.salary));
                 }
-                // start_date may be present in API response but not in base type
-                const appData = app as any;
-                if (appData.start_date) {
-                    const d = new Date(appData.start_date);
+                if (app.start_date) {
+                    const d = new Date(app.start_date);
                     setStartDate(d.toISOString().split("T")[0]);
                 }
 

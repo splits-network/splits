@@ -628,6 +628,7 @@ export interface Application {
     // Submission and hire tracking
     submitted_at?: Date | null;
     hired_at?: Date | null;
+    start_date?: string | null;    // Expected start date set when offer is extended (YYYY-MM-DD)
     placement_id?: string | null;  // Link to placement record when hired
 
     // Expiration tracking (NULL = active, NOT NULL = expired at timestamp)

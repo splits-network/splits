@@ -39,6 +39,7 @@ export interface Application {
     accepted_by_company: boolean;
     accepted_by_candidate?: boolean;
     salary?: number;
+    start_date?: string;
     created_at: string;
     updated_at: string;
     submitted_at?: string | null;

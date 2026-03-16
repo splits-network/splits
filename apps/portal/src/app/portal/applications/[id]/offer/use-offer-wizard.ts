@@ -117,6 +117,7 @@ export function useOfferWizard(applicationId: string) {
             await client.patch(`/applications/${applicationId}`, {
                 stage: "offer",
                 salary: parsedSalary,
+                ...(startDate ? { start_date: startDate } : {}),
             });
 
             if (notes.trim()) {
