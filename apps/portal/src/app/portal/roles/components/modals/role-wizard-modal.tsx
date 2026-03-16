@@ -122,9 +122,16 @@ export default function RoleWizardModal({
                 const response = await client.get<{ data: any }>(`/jobs/${jobId}/view/editor`);
                 const job = response.data;
                 const jobSkills = job.skills || [];
+                // Detect if this is a firm (off-platform) job
+                const isFirmJob = !!job.source_firm_id && !job.company_id;
+                if (isFirmJob) {
+                    setRoleSource("firm");
+                }
+
                 setFormData({
                     title: job.title || "", company_id: job.company_id || "", location: job.location || "",
                     department: job.department || "", status: job.status || "draft",
+                    source_firm_id: job.source_firm_id || undefined,
                     is_early_access: job.is_early_access || false, is_priority: job.is_priority || false,
                     activates_at: job.activates_at ? new Date(job.activates_at).toISOString().slice(0, 16) : "",
                     closes_at: job.closes_at ? new Date(job.closes_at).toISOString().slice(0, 16) : "",
@@ -185,7 +192,7 @@ export default function RoleWizardModal({
                         setCompanies(creatableCompanies);
                         hasCompanyAccess = creatableCompanies.length > 0;
                         setIsRecruiterWithCompanyAccess(hasCompanyAccess);
-                        if (creatableCompanies.length === 1) {
+                        if (creatableCompanies.length === 1 && mode !== "edit") {
                             setFormData((prev) => ({ ...prev, company_id: creatableCompanies[0].id }));
                         }
                     } catch (err: any) {
@@ -196,7 +203,7 @@ export default function RoleWizardModal({
                         const firmsResponse = await client.get<{ data: Array<{ id: string; name: string }> }>("/firms/my-firms");
                         const firms = (firmsResponse.data || []).map((f) => ({ id: f.id, name: f.name }));
                         setUserFirms(firms);
-                        if (firms.length > 0 && !hasCompanyAccess) {
+                        if (firms.length > 0 && !hasCompanyAccess && mode !== "edit") {
                             setRoleSource("firm");
                             setFormData((prev) => ({ ...prev, source_firm_id: firms[0].id }));
                         }
@@ -210,7 +217,7 @@ export default function RoleWizardModal({
                             const companyResponse = await client.get<{ data: Company[]; pagination: any }>(`/companies`, { params: { filters: { organizationId }, limit: 1 } });
                             const comps = companyResponse.data || [];
                             setCompanies(comps);
-                            if (comps.length > 0) setFormData((prev) => ({ ...prev, company_id: comps[0].id }));
+                            if (comps.length > 0 && mode !== "edit") setFormData((prev) => ({ ...prev, company_id: comps[0].id }));
                         } catch (err: any) {
                             if (err.message?.includes("404") || err.message?.includes("not found")) {
                                 setError("No company found for your organization.");
@@ -382,7 +389,7 @@ export default function RoleWizardModal({
         } finally {
             setSubmitting(false);
         }
-    }, [formData, isOffPlatform, mode, jobId, onClose, onSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [formData, isOffPlatform, billingReady, mode, jobId, onClose, onSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Render ──
 
