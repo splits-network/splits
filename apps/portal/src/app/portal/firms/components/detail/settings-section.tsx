@@ -12,6 +12,7 @@ import { firmStatusBadgeColor } from "../shared/status-color";
 import { formatStatus, memberCountDisplay } from "../shared/helpers";
 import { BaselBadge } from "@splits-network/basel-ui";
 import TransferOwnershipModal from "../modals/transfer-ownership-modal";
+import SuspendFirmModal from "../modals/suspend-firm-modal";
 import { FirmProfileWizard } from "../modals/firm-profile-wizard";
 
 interface SettingsSectionProps {
@@ -23,6 +24,7 @@ interface SettingsSectionProps {
 export function SettingsSection({ firm, members, onRefresh }: SettingsSectionProps) {
     const { profile } = useUserProfile();
     const [showTransferModal, setShowTransferModal] = useState(false);
+    const [showSuspendModal, setShowSuspendModal] = useState(false);
     const [showEditWizard, setShowEditWizard] = useState(false);
 
     // Check if current user is the firm owner or admin
@@ -142,26 +144,31 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                 </div>
             )}
 
-            {/* Section 4: Danger Zone */}
-            <div className="border-2 border-error/20 p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
-                    Danger Zone
-                </h3>
-                <p className="text-sm text-base-content/60 mb-4">
-                    Suspending a firm will disable all member access and pause
-                    active placements. This action can be reversed.
-                </p>
-                <button
-                    className="btn btn-sm btn-error btn-outline"
-                    style={{ borderRadius: 0 }}
-                    disabled
-                >
-                    <i className="fa-duotone fa-regular fa-ban mr-2" />
-                    {firm.status === "active"
-                        ? "Suspend Firm"
-                        : "Activate Firm"}
-                </button>
-            </div>
+            {/* Section 4: Danger Zone (owner only) */}
+            {isOwner && (
+                <div className="border-2 border-error/20 p-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
+                        Danger Zone
+                    </h3>
+                    <p className="text-sm text-base-content/60 mb-4">
+                        {firm.status === "active"
+                            ? "Suspending a firm will disable all member access and pause active placements. This action can be reversed."
+                            : "This firm is currently suspended. Reactivating will restore member access and resume normal operations."}
+                    </p>
+                    <button
+                        className={`btn btn-sm ${firm.status === "active" ? "btn-error btn-outline" : "btn-success btn-outline"}`}
+                        style={{ borderRadius: 0 }}
+                        onClick={() => setShowSuspendModal(true)}
+                    >
+                        <i
+                            className={`fa-duotone fa-regular ${firm.status === "active" ? "fa-ban" : "fa-check-circle"} mr-2`}
+                        />
+                        {firm.status === "active"
+                            ? "Suspend Firm"
+                            : "Activate Firm"}
+                    </button>
+                </div>
+            )}
 
             {/* Edit Profile Wizard */}
             <FirmProfileWizard
@@ -186,6 +193,23 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         }}
                         firmId={firm.id}
                         members={members}
+                    />
+                )}
+            </ModalPortal>
+
+            {/* Suspend/Activate Firm Modal */}
+            <ModalPortal>
+                {showSuspendModal && (
+                    <SuspendFirmModal
+                        isOpen={showSuspendModal}
+                        onClose={() => setShowSuspendModal(false)}
+                        onSuccess={() => {
+                            setShowSuspendModal(false);
+                            onRefresh();
+                        }}
+                        firmId={firm.id}
+                        firmName={firm.name}
+                        currentStatus={firm.status as "active" | "suspended"}
                     />
                 )}
             </ModalPortal>
