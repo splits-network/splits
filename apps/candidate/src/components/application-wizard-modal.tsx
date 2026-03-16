@@ -8,6 +8,7 @@ import StepDocuments from "@/components/application-wizard/step-documents";
 import StepCoverLetter from "@/components/application-wizard/step-cover-letter";
 import StepQuestions from "@/components/application-wizard/step-questions";
 import StepNotes from "@/components/application-wizard/step-notes";
+import StepRecruiter from "@/components/application-wizard/step-recruiter";
 import StepReview from "@/components/application-wizard/step-review";
 
 interface ApplicationWizardModalProps {
@@ -19,19 +20,14 @@ interface ApplicationWizardModalProps {
     existingApplication?: any;
 }
 
-const STEP_LABELS = [
-    "Documents",
-    "Cover Letter",
-    "Questions",
-    "Notes",
-    "Review",
-];
-const STEP_LABELS_NO_QUESTIONS = [
-    "Documents",
-    "Cover Letter",
-    "Notes",
-    "Review",
-];
+function buildStepLabels(hasQuestions: boolean, hasRecruiterChoice: boolean): string[] {
+    const steps = ["Documents", "Cover Letter"];
+    if (hasQuestions) steps.push("Questions");
+    steps.push("Notes");
+    if (hasRecruiterChoice) steps.push("Recruiter");
+    steps.push("Review");
+    return steps;
+}
 
 export default function ApplicationWizardModal({
     jobId,
@@ -53,6 +49,7 @@ export default function ApplicationWizardModal({
     const [questions, setQuestions] = useState<any[]>([]);
     const [documents, setDocuments] = useState<any[]>([]);
     const [localDocuments, setLocalDocuments] = useState<any[]>([]);
+    const [activeRecruiters, setActiveRecruiters] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         documents: {
             selected:
@@ -75,13 +72,16 @@ export default function ApplicationWizardModal({
             existingApplication?.notes ||
             existingApplication?.candidate_notes ||
             "",
+        candidate_recruiter_id:
+            existingApplication?.candidate_recruiter_id || (null as string | null),
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const hasQuestions = questions.length > 0;
-    const totalSteps = hasQuestions ? 5 : 4;
-    const stepLabels = hasQuestions ? STEP_LABELS : STEP_LABELS_NO_QUESTIONS;
+    const hasRecruiterChoice = activeRecruiters.length > 1;
+    const stepLabels = buildStepLabels(hasQuestions, hasRecruiterChoice);
+    const totalSteps = stepLabels.length;
 
     const currentStepLabel = stepLabels[currentStep - 1] || "";
 
@@ -114,11 +114,12 @@ export default function ApplicationWizardModal({
                 }
 
                 const authClient = createAuthenticatedClient(token);
-                const [jobResponse, documentsResponse] = await Promise.all([
+                const [jobResponse, documentsResponse, recruitersResponse] = await Promise.all([
                     authClient.get<{ data: any }>(
                         `/jobs/${jobId}/view/candidate-detail`,
                     ),
                     authClient.get<{ data: any[] }>("/documents"),
+                    authClient.get<{ data: any[] }>("/recruiter-candidates"),
                 ]);
 
                 const jobData = jobResponse.data;
@@ -148,6 +149,21 @@ export default function ApplicationWizardModal({
                         ...documentsData,
                         ...existingApplication.documents,
                     ];
+                }
+
+                // Filter to active recruiters with consent
+                const allRecruiters = recruitersResponse.data || [];
+                const active = allRecruiters.filter(
+                    (r: any) => r.status === "active" && r.consent_given !== false,
+                );
+                setActiveRecruiters(active);
+
+                // Auto-select if only one recruiter
+                if (active.length === 1 && !existingApplication?.candidate_recruiter_id) {
+                    setFormData((prev) => ({
+                        ...prev,
+                        candidate_recruiter_id: active[0].recruiter_id,
+                    }));
                 }
 
                 setJob(jobData);
@@ -219,14 +235,19 @@ export default function ApplicationWizardModal({
                 applicationId = existingApplication.id;
             } else {
                 // Create as draft first (ATS always creates as draft for candidates)
+                const createPayload: Record<string, any> = {
+                    job_id: jobId,
+                    document_ids: formData.documents.selected,
+                    cover_letter: formData.cover_letter,
+                    pre_screen_answers: preScreenAnswers,
+                };
+                if (formData.candidate_recruiter_id) {
+                    createPayload.candidate_recruiter_id = formData.candidate_recruiter_id;
+                    createPayload.application_source = "recruiter";
+                }
                 const result = await authClient.post<{ data: any }>(
                     "/applications",
-                    {
-                        job_id: jobId,
-                        document_ids: formData.documents.selected,
-                        cover_letter: formData.cover_letter,
-                        pre_screen_answers: preScreenAnswers,
-                    },
+                    createPayload,
                 );
                 applicationId = result.data.id;
             }
@@ -301,14 +322,19 @@ export default function ApplicationWizardModal({
                 applicationId = existingApplication.id;
             } else {
                 // ATS creates as draft by default for candidates
+                const draftPayload: Record<string, any> = {
+                    job_id: jobId,
+                    document_ids: formData.documents.selected,
+                    cover_letter: formData.cover_letter,
+                    pre_screen_answers: preScreenAnswers,
+                };
+                if (formData.candidate_recruiter_id) {
+                    draftPayload.candidate_recruiter_id = formData.candidate_recruiter_id;
+                    draftPayload.application_source = "recruiter";
+                }
                 const result = await authClient.post<{ data: any }>(
                     "/applications",
-                    {
-                        job_id: jobId,
-                        document_ids: formData.documents.selected,
-                        cover_letter: formData.cover_letter,
-                        pre_screen_answers: preScreenAnswers,
-                    },
+                    draftPayload,
                 );
                 applicationId = result.data.id;
             }
@@ -409,6 +435,21 @@ export default function ApplicationWizardModal({
                         onBack={handleBack}
                     />
                 );
+            case "Recruiter":
+                return (
+                    <StepRecruiter
+                        recruiters={activeRecruiters}
+                        selectedRecruiterId={formData.candidate_recruiter_id}
+                        onChange={(id: string) =>
+                            setFormData({
+                                ...formData,
+                                candidate_recruiter_id: id,
+                            })
+                        }
+                        onNext={handleNext}
+                        onBack={handleBack}
+                    />
+                );
             case "Review":
                 return (
                     <StepReview
@@ -419,6 +460,11 @@ export default function ApplicationWizardModal({
                         questions={questions}
                         answers={formData.pre_screen_answers}
                         additionalNotes={formData.notes}
+                        selectedRecruiter={
+                            activeRecruiters.find(
+                                (r: any) => r.recruiter_id === formData.candidate_recruiter_id,
+                            ) || null
+                        }
                         onSubmit={handleSubmit}
                         onSaveAsDraft={handleSaveAsDraft}
                         onBack={handleBack}
