@@ -60,29 +60,9 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
         >
             {/* Header */}
             <div className="bg-base-300 px-5 pt-4 pb-4">
-                {/* Status bar */}
-                <div className="flex items-center gap-2 mb-3">
-                    {firmJob && (
-                        <BaselBadge
-                            color="secondary"
-                            variant="soft"
-                            size="sm"
-                            icon="fa-handshake"
-                        >
-                            3rd Party
-                        </BaselBadge>
-                    )}
-                    {isNew(job) && (
-                        <BaselBadge
-                            color="warning"
-                            variant="soft"
-                            size="sm"
-                            icon="fa-sparkles"
-                        >
-                            New
-                        </BaselBadge>
-                    )}
-                    <span className="text-sm text-base-content/40 ml-auto shrink-0">
+                {/* Posted date */}
+                <div className="flex items-center justify-end mb-3">
+                    <span className="text-sm text-base-content/40 shrink-0">
                         {posted}
                     </span>
                 </div>
@@ -160,28 +140,37 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
                 </p>
             </div>
 
-            {/* Skills */}
-            <div className="px-5 py-3 border-b border-base-300">
-                {skills.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                        {skills.slice(0, 4).map((skill) => (
-                            <BaselBadge key={skill} variant="outline" size="sm">
-                                {skill}
-                            </BaselBadge>
-                        ))}
-                        {skills.length > 4 && (
-                            <span className="text-sm font-semibold text-base-content/40 self-center">
-                                +{skills.length - 4} more
-                            </span>
-                        )}
-                    </div>
-                ) : (
-                    <span className="text-sm text-base-content/30">No skills listed</span>
-                )}
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
+                <div className="flex flex-wrap gap-1.5">
+                    {firmJob && (
+                        <BaselBadge color="secondary" variant="soft-outline" size="sm" icon="fa-handshake">
+                            3rd Party
+                        </BaselBadge>
+                    )}
+                    {isNew(job) && (
+                        <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
+                    )}
+                    {skills.slice(0, 4).map((skill) => (
+                        <BaselBadge key={skill} variant="soft" color="neutral" size="sm">
+                            {skill}
+                        </BaselBadge>
+                    ))}
+                    {skills.length > 4 && (
+                        <span className="text-sm font-semibold text-base-content/40 self-center">
+                            +{skills.length - 4} more
+                        </span>
+                    )}
+                    {!firmJob && !isNew(job) && skills.length === 0 && (
+                        <span className="text-sm text-base-content/30">No details listed</span>
+                    )}
+                </div>
             </div>
 
             {/* Footer: industry tag */}
-            <div className="mt-auto px-5 py-3">
+            <div className="px-5 py-3 border-t border-base-300">
                 <span className={`text-sm truncate ${job.company?.industry ? "text-base-content/40" : "text-base-content/30"}`}>
                     {job.company?.industry || "Industry not specified"}
                 </span>

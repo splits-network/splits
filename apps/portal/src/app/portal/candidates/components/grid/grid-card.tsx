@@ -77,63 +77,26 @@ export function GridCard({
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 px-5 pt-4 pb-4">
-                {/* Kicker row: company + badges */}
-                <div className="flex items-center justify-between mb-3 gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <BaselBadge
-                            color={statusColorName(candidate.verification_status)}
-                            variant="soft"
+            <div className="relative bg-base-300 px-5 pt-4 pb-4">
+                {/* Utility icons: absolute top-right */}
+                <div className="absolute top-3 right-3 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    {presenceStatus === "online" && (
+                        <Presence
+                            variant="badge"
                             size="sm"
-                        >
-                            {formatVerificationStatus(candidate.verification_status)}
-                        </BaselBadge>
-                        {isNew(candidate) && (
-                            <BaselBadge
-                                color="warning"
-                                variant="soft"
-                                size="sm"
-                                icon="fa-sparkles"
-                            >
-                                New
-                            </BaselBadge>
-                        )}
-                        {(() => {
-                            const acct = accountBadge(candidate);
-                            return acct ? (
-                                <BaselBadge color={acct.color} size="sm" icon={acct.icon}>
-                                    {acct.label}
-                                </BaselBadge>
-                            ) : null;
-                        })()}
-                        {(() => {
-                            const rel = relationshipBadge(candidate);
-                            return rel ? (
-                                <BaselBadge color={rel.color} size="sm" icon={rel.icon} variant={rel.variant}>
-                                    {rel.label}
-                                </BaselBadge>
-                            ) : null;
-                        })()}
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                        {presenceStatus === "online" && (
-                            <Presence
-                                variant="badge"
-                                size="sm"
-                                status={presenceStatus}
-                            />
-                        )}
-                        {isRecruiter && (
-                            <SaveBookmark
-                                entityType="candidate"
-                                entityId={candidate.id}
-                                isSaved={!!candidate.is_saved}
-                                savedRecordId={candidate.saved_record_id ?? null}
-                                size="sm"
-                                onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
-                            />
-                        )}
-                    </div>
+                            status={presenceStatus}
+                        />
+                    )}
+                    {isRecruiter && (
+                        <SaveBookmark
+                            entityType="candidate"
+                            entityId={candidate.id}
+                            isSaved={!!candidate.is_saved}
+                            savedRecordId={candidate.saved_record_id ?? null}
+                            size="sm"
+                            onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
+                    )}
                 </div>
 
                 {/* Avatar + Name block */}
@@ -189,26 +152,54 @@ export function GridCard({
                 ))}
             </div>
 
-            {/* Skills + Preferences */}
-            <div className="px-5 py-3 border-b border-base-300">
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
                 <div className="flex flex-wrap gap-1.5">
+                    <BaselBadge
+                        color={statusColorName(candidate.verification_status)}
+                        variant="soft-outline"
+                        size="sm"
+                    >
+                        {formatVerificationStatus(candidate.verification_status)}
+                    </BaselBadge>
+                    {isNew(candidate) && (
+                        <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
+                    )}
+                    {(() => {
+                        const acct = accountBadge(candidate);
+                        return acct ? (
+                            <BaselBadge color={acct.color} variant="soft-outline" size="sm" icon={acct.icon}>
+                                {acct.label}
+                            </BaselBadge>
+                        ) : null;
+                    })()}
+                    {(() => {
+                        const rel = relationshipBadge(candidate);
+                        return rel ? (
+                            <BaselBadge color={rel.color} variant="soft-outline" size="sm" icon={rel.icon}>
+                                {rel.label}
+                            </BaselBadge>
+                        ) : null;
+                    })()}
                     {candidate.open_to_remote && (
-                        <BaselBadge color="primary" size="sm" icon="fa-house-laptop">
+                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-house-laptop">
                             Remote
                         </BaselBadge>
                     )}
                     {candidate.open_to_relocation && (
-                        <BaselBadge color="secondary" size="sm" icon="fa-truck-moving">
+                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-truck-moving">
                             Relocatable
                         </BaselBadge>
                     )}
                     {!candidate.open_to_remote && !candidate.open_to_relocation && (
-                        <BaselBadge variant="outline" size="sm" icon="fa-building">
+                        <BaselBadge variant="soft" color="neutral" size="sm" icon="fa-building">
                             On-Site Only
                         </BaselBadge>
                     )}
                     {skills.slice(0, 3).map((skill) => (
-                        <BaselBadge key={skill} variant="outline" size="sm">
+                        <BaselBadge key={skill} variant="soft" color="neutral" size="sm">
                             {skill}
                         </BaselBadge>
                     ))}
@@ -225,7 +216,7 @@ export function GridCard({
 
             {/* Footer: view link + actions */}
             <div
-                className="mt-auto flex items-center justify-between gap-3 px-5 py-3"
+                className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
                 <button

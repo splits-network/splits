@@ -334,11 +334,11 @@ export class JobServiceV2 {
         // Define allowed transitions
         const allowedTransitions: Record<string, string[]> = {
             draft:   ['pending', 'active', 'closed'],
-            pending: ['active', 'paused', 'closed'],
-            active:  ['paused', 'filled', 'closed'],
-            paused:  ['active', 'filled', 'closed'],
-            filled:  ['active', 'closed'],
-            closed:  ['active', 'draft'],
+            pending: ['draft', 'active', 'paused', 'closed'],
+            active:  ['draft', 'paused', 'filled', 'closed'],
+            paused:  ['draft', 'active', 'filled', 'closed'],
+            filled:  ['draft', 'active', 'closed'],
+            closed:  ['draft', 'active'],
         };
 
         if (!allowedTransitions[fromStatus]?.includes(toStatus)) {

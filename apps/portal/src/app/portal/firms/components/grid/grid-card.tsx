@@ -61,24 +61,6 @@ export function GridCard({
         >
             {/* Header Band */}
             <div className="bg-base-300 px-5 pt-4 pb-4">
-                {/* Kicker row: status badges */}
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <BaselBadge
-                            color={firmStatusBadgeColor(firm.status)}
-                            variant="soft"
-                            size="sm"
-                        >
-                            {formatStatus(firm.status)}
-                        </BaselBadge>
-                        {firm.marketplace_visible && (
-                            <BaselBadge color="success" variant="soft" size="sm" icon="fa-store">
-                                Listed
-                            </BaselBadge>
-                        )}
-                    </div>
-                </div>
-
                 {/* Editorial block: Avatar + Industry kicker → Name */}
                 <div className="flex items-start gap-3">
                     <div className="relative shrink-0 mt-0.5">
@@ -148,21 +130,33 @@ export function GridCard({
                 )}
             </div>
 
-            {/* Tags: partnership + specialties + industries + placement types */}
-            <div className="px-5 py-3 border-b border-base-300">
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
                 <div className="flex flex-wrap gap-1.5">
+                    <BaselBadge
+                        color={firmStatusBadgeColor(firm.status)}
+                        variant="soft-outline"
+                        size="sm"
+                    >
+                        {formatStatus(firm.status)}
+                    </BaselBadge>
+                    {firm.marketplace_visible && (
+                        <BaselBadge color="success" variant="soft-outline" size="sm" icon="fa-store">
+                            Listed
+                        </BaselBadge>
+                    )}
                     {firm.candidate_firm && (
-                        <BaselBadge color="primary" size="sm" icon="fa-handshake">
+                        <BaselBadge color="primary" variant="soft-outline" size="sm" icon="fa-handshake">
                             Split Partners
                         </BaselBadge>
                     )}
                     {firm.company_firm && (
-                        <BaselBadge color="secondary" size="sm" icon="fa-building">
+                        <BaselBadge color="secondary" variant="soft-outline" size="sm" icon="fa-building">
                             Direct Hire
                         </BaselBadge>
                     )}
                     {specialties.slice(0, 3).map((spec) => (
-                        <BaselBadge key={spec} variant="outline" size="sm">
+                        <BaselBadge key={spec} variant="soft" color="neutral" size="sm">
                             {spec}
                         </BaselBadge>
                     ))}
@@ -172,7 +166,7 @@ export function GridCard({
                         </span>
                     )}
                     {industries.slice(0, 2).map((ind) => (
-                        <BaselBadge key={ind} color="info" variant="soft" size="sm">
+                        <BaselBadge key={ind} variant="soft" color="neutral" size="sm">
                             {ind}
                         </BaselBadge>
                     ))}
@@ -182,7 +176,7 @@ export function GridCard({
                         </span>
                     )}
                     {placementTypes.slice(0, 2).map((pt) => (
-                        <BaselBadge key={pt} color="accent" variant="soft" size="sm">
+                        <BaselBadge key={pt} variant="soft" color="neutral" size="sm">
                             {PLACEMENT_TYPE_LABELS[pt] || pt}
                         </BaselBadge>
                     ))}
@@ -194,7 +188,7 @@ export function GridCard({
 
             {/* Footer: profile link + actions */}
             <div
-                className="mt-auto flex items-center justify-between gap-3 px-5 py-3"
+                className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
                 {firm.slug ? (

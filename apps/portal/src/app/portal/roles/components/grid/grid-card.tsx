@@ -65,50 +65,19 @@ export function GridCard({
         >
             {/* Header Band */}
             <div className="bg-base-300 px-5 pt-4 pb-4">
-                {/* Kicker row: status + modifier badges */}
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <BaselBadge color={statusBadgeColor(job.status)} variant="soft" size="sm">
-                            {formatStatus(job.status)}
-                        </BaselBadge>
-
-                        {job.is_early_access && (
-                            <BaselBadge color="accent" variant="soft" size="sm" icon="fa-lock-open">
-                                Early Access
-                            </BaselBadge>
-                        )}
-
-                        {job.is_priority && (
-                            <BaselBadge color="primary" variant="soft" size="sm" icon="fa-star">
-                                Priority
-                            </BaselBadge>
-                        )}
-
-                        {isNew(job) && (
-                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                                New
-                            </BaselBadge>
-                        )}
+                {/* Utility row: bookmark */}
+                {isRecruiter && (
+                    <div className="flex items-center justify-end mb-3 gap-1">
+                        <SaveBookmark
+                            entityType="job"
+                            entityId={job.id}
+                            isSaved={!!job.is_saved}
+                            savedRecordId={job.saved_record_id ?? null}
+                            size="sm"
+                            onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
                     </div>
-
-                    <div className="flex items-center gap-1">
-                        {!job.company_id && job.source_firm_id && (
-                            <BaselBadge color="secondary" variant="soft" size="sm" icon="fa-handshake">
-                                3rd Party
-                            </BaselBadge>
-                        )}
-                        {isRecruiter && (
-                            <SaveBookmark
-                                entityType="job"
-                                entityId={job.id}
-                                isSaved={!!job.is_saved}
-                                savedRecordId={job.saved_record_id ?? null}
-                                size="sm"
-                                onToggle={(saved, recordId) => onUpdateItem?.(job.id, { is_saved: saved, saved_record_id: recordId })}
-                            />
-                        )}
-                    </div>
-                </div>
+                )}
 
                 {/* Editorial block: Avatar + Company kicker → Title → Location */}
                 <div className="flex items-start gap-3">
@@ -172,26 +141,49 @@ export function GridCard({
                 )}
             </div>
 
-            {/* Skills + detail badges */}
-            <div className="px-5 py-3 border-b border-base-300">
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
                 <div className="flex flex-wrap gap-1.5">
+                    <BaselBadge color={statusBadgeColor(job.status)} variant="soft-outline" size="sm">
+                        {formatStatus(job.status)}
+                    </BaselBadge>
+                    {job.is_early_access && (
+                        <BaselBadge color="accent" variant="soft-outline" size="sm" icon="fa-lock-open">
+                            Early Access
+                        </BaselBadge>
+                    )}
+                    {job.is_priority && (
+                        <BaselBadge color="primary" variant="soft-outline" size="sm" icon="fa-star">
+                            Priority
+                        </BaselBadge>
+                    )}
+                    {isNew(job) && (
+                        <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
+                    )}
+                    {!job.company_id && job.source_firm_id && (
+                        <BaselBadge color="secondary" variant="soft-outline" size="sm" icon="fa-handshake">
+                            3rd Party
+                        </BaselBadge>
+                    )}
                     {job.employment_type && (
-                        <BaselBadge color="primary" size="sm" icon="fa-briefcase">
+                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-briefcase">
                             {formatEmploymentType(job.employment_type)}
                         </BaselBadge>
                     )}
                     {level && (
-                        <BaselBadge color="secondary" size="sm" icon="fa-layer-group">
+                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-layer-group">
                             {level}
                         </BaselBadge>
                     )}
                     {commute && (
-                        <BaselBadge color="info" size="sm" icon="fa-building">
+                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-building">
                             {commute}
                         </BaselBadge>
                     )}
                     {skills.slice(0, 3).map((skill) => (
-                        <BaselBadge key={skill} variant="outline" size="sm">
+                        <BaselBadge key={skill} variant="soft" color="neutral" size="sm">
                             {skill}
                         </BaselBadge>
                     ))}
@@ -207,7 +199,7 @@ export function GridCard({
             </div>
 
             {/* Footer: industry + actions */}
-            <div className="mt-auto flex items-center justify-between gap-3 px-5 py-3">
+            <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300">
                 <span className={`text-sm truncate ${job.company?.industry ? "text-base-content/40" : "text-base-content/30"}`}>
                     {job.company?.industry || "Industry not specified"}
                 </span>
