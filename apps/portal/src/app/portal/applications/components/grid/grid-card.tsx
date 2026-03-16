@@ -7,6 +7,7 @@ import {
     roleTitle,
     companyName,
     companyInitials,
+    isFirmJob,
     aiScore,
     isNew,
     addedAgo,
@@ -85,6 +86,8 @@ export function GridCard({
 }) {
     const { getLevel } = useGamification();
     const companyLevel = application.job?.company?.id ? getLevel(application.job.company.id) : undefined;
+    const firmJob = isFirmJob(application);
+    const logoUrl = application.job?.company?.logo_url || application.job?.firm?.logo_url;
     const name = candidateName(application);
     const initials = candidateInitials(name);
     const role = roleTitle(application);
@@ -124,6 +127,11 @@ export function GridCard({
                     <BaselBadge color={stage.color} variant="soft" size="sm" icon={stage.icon}>
                         {stage.label}
                     </BaselBadge>
+                    {firmJob && (
+                        <BaselBadge color="secondary" variant="soft" size="sm" icon="fa-handshake">
+                            3rd Party
+                        </BaselBadge>
+                    )}
                     {isNew(application) && (
                         <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
                             New
@@ -230,9 +238,9 @@ export function GridCard({
             <div className="mt-auto flex items-center justify-between gap-3 px-5 py-3">
                 <div className="flex items-center gap-2 min-w-0">
                     <div className="relative shrink-0">
-                        {application.job?.company?.logo_url ? (
+                        {logoUrl ? (
                             <img
-                                src={application.job.company.logo_url}
+                                src={logoUrl}
                                 alt={company}
                                 className="w-7 h-7 object-contain bg-base-100 border border-base-300 p-0.5"
                             />

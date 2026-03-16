@@ -1,12 +1,12 @@
 "use client";
 
 import type { Firm } from "../../types";
-import { formatCurrency } from "../../types";
 import { firmStatusBadgeColor } from "../shared/status-color";
 import {
     formatStatus,
     createdAgo,
     memberCountDisplay,
+    teamSizeDisplay,
 } from "../shared/helpers";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
@@ -51,7 +51,7 @@ export function SplitItem({
                 {memberCountDisplay(firm)}
             </div>
 
-            {/* Row 3: status pill + revenue */}
+            {/* Row 3: status pill + team size */}
             <div className="flex items-center justify-between gap-2 mb-1">
                 <BaselBadge
                     color={firmStatusBadgeColor(firm.status)}
@@ -60,17 +60,9 @@ export function SplitItem({
                 >
                     {formatStatus(firm.status)}
                 </BaselBadge>
-                <span className="text-sm font-bold text-primary">
-                    {formatCurrency(firm.total_revenue)}
-                </span>
-            </div>
-
-            {/* Row 4: placements */}
-            <div className="flex items-center gap-3">
                 <span className="text-sm text-base-content/50">
-                    <i className="fa-duotone fa-regular fa-briefcase mr-1" />
-                    {firm.total_placements} placement
-                    {firm.total_placements !== 1 ? "s" : ""}
+                    <i className="fa-duotone fa-regular fa-user-group mr-1" />
+                    {teamSizeDisplay(firm.team_size_range)}
                 </span>
             </div>
 

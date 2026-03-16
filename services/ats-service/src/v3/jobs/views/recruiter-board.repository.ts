@@ -33,7 +33,8 @@ export class RecruiterBoardRepository {
         description, recruiter_description,
         activates_at, closes_at, created_at, updated_at,
         job_owner_recruiter_id,
-        company:companies(id, name, logo_url, industry, headquarters_location)
+        company:companies(id, name, logo_url, industry, headquarters_location),
+        firm:firms(id, name, logo_url)
       `, { count: 'exact' })
       .eq('status', 'active');
 

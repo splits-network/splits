@@ -118,26 +118,35 @@ export function CompanyTab({ job }: { job: Job }) {
     const { company, members, perks, cultureTags, skills, loading } =
         useCompanyData(job.company_id);
 
-    /* ── 3rd-party company (no company_id, sourced by firm) ── */
+    /* ── 3rd-party firm job (no company_id, sourced by firm) ── */
     if (!job.company_id && job.source_firm_id) {
+        const logoUrl = job.firm?.logo_url;
         return (
             <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 flex items-center justify-center border-2 border-warning/30 bg-warning/10 font-bold text-lg text-warning">
-                        {companyInitials(name)}
-                    </div>
+                    {logoUrl ? (
+                        <img
+                            src={logoUrl}
+                            alt={name}
+                            className="w-14 h-14 object-contain border-2 border-secondary/30 bg-base-100 p-1"
+                        />
+                    ) : (
+                        <div className="w-14 h-14 flex items-center justify-center border-2 border-secondary/30 bg-secondary/10 font-bold text-lg text-secondary">
+                            {companyInitials(name)}
+                        </div>
+                    )}
                     <div>
                         <div className="flex items-center gap-2">
                             <p className="text-lg font-black">{name}</p>
-                            <BaselBadge color="warning" variant="soft" size="sm">3rd Party</BaselBadge>
+                            <BaselBadge color="secondary" variant="soft" size="sm" icon="fa-handshake">3rd Party</BaselBadge>
                         </div>
-                        <p className="text-sm text-base-content/50">Off-platform company</p>
+                        <p className="text-sm text-base-content/50">Recruiting firm</p>
                     </div>
                 </div>
                 <div className="bg-base-200 p-4">
                     <p className="text-sm text-base-content/60">
-                        This role is for a company not on the Splits Network platform.
-                        It was sourced by a firm member.
+                        This role is managed by a recruiting firm on the Splits Network.
+                        The hiring company is not directly on the platform.
                     </p>
                 </div>
             </div>

@@ -66,6 +66,11 @@ export interface Job {
         headquarters_location?: string;
         logo_url?: string;
     };
+    firm?: {
+        id: string;
+        name: string;
+        logo_url?: string | null;
+    };
     requirements?: JobRequirement[];
     pre_screen_questions?: JobPreScreenQuestion[];
     skills?: JobSkill[];

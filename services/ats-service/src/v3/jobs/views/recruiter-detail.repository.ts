@@ -14,7 +14,7 @@ export class RecruiterDetailRepository {
       .select(`
         *,
         company:companies(id, name, logo_url, industry, headquarters_location, description, website),
-        firm:firms(id, name)
+        firm:firms(id, name, logo_url)
       `)
       .eq('id', id)
       .maybeSingle();

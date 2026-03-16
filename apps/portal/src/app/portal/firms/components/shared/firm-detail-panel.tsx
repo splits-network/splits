@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import type { Firm, FirmMember, FirmInvitation } from "../../types";
 import { formatCurrency, formatDate } from "../../types";
 import { firmStatusBadgeColor } from "./status-color";
-import { formatStatus, memberCountDisplay, firmInitials } from "./helpers";
+import { formatStatus, memberCountDisplay, firmInitials, teamSizeDisplay } from "./helpers";
 import { FirmActionsToolbar } from "./actions-toolbar";
 import {
     LevelBadge,
@@ -58,6 +58,7 @@ export function FirmDetail({
         .join(", ");
     const initials = firmInitials(firm.name);
 
+    const placementStats = firm.placement_stats;
     const stats = [
         {
             label: "Members",
@@ -66,12 +67,12 @@ export function FirmDetail({
         },
         {
             label: "Placements",
-            value: String(firm.total_placements),
+            value: String(placementStats?.total_placements ?? 0),
             icon: "fa-duotone fa-regular fa-briefcase",
         },
         {
             label: "Revenue",
-            value: formatCurrency(firm.total_revenue),
+            value: formatCurrency(placementStats?.total_revenue ?? 0),
             icon: "fa-duotone fa-regular fa-dollar-sign",
         },
     ];

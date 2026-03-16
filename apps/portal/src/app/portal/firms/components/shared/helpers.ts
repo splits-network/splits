@@ -33,3 +33,29 @@ export function memberCountDisplay(firm: Firm): string {
     }
     return `${firm.active_member_count} active (${firm.member_count} total)`;
 }
+
+const TEAM_SIZE_MAP: Record<string, string> = {
+    solo: "Solo",
+    "2_5": "2–5",
+    "6_15": "6–15",
+    "16_50": "16–50",
+    "50_plus": "50+",
+};
+
+export function teamSizeDisplay(range: string | null): string {
+    if (!range) return "Not set";
+    return TEAM_SIZE_MAP[range] || range;
+}
+
+export function marketplaceSignals(firm: Firm): string[] {
+    const signals: string[] = [];
+    if (firm.marketplace_visible) signals.push("Listed");
+    if (firm.candidate_firm) signals.push("Split Partners");
+    if (firm.company_firm) signals.push("Candidate Submissions");
+    return signals;
+}
+
+export function foundedYearDisplay(year: number | null): string | null {
+    if (!year) return null;
+    return `Est. ${year}`;
+}

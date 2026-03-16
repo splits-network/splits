@@ -82,7 +82,7 @@ export function JobHeroHeader({
             badges={badges}
             avatar={{
                 initials: companyInitials(name),
-                imageUrl: job.company?.logo_url,
+                imageUrl: job.company?.logo_url || job.firm?.logo_url || undefined,
             }}
             avatarOverlay={
                 companyLevel ? (

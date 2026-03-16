@@ -3,6 +3,7 @@ import type {
     Candidate,
     Job,
     Company,
+    Firm,
     AIReview,
 } from "@splits-network/shared-types";
 import type { BaselSortOption } from "@splits-network/basel-ui";
@@ -10,7 +11,7 @@ import type { BaselSortOption } from "@splits-network/basel-ui";
 // Extend BaseApplication to include enriched fields from API
 export interface Application extends BaseApplication {
     candidate?: Candidate;
-    job?: Job & { company?: Company };
+    job?: Job & { company?: Company; firm?: Firm };
     recruiter?: {
         id: string;
         name?: string;

@@ -15,9 +15,18 @@ export interface Firm {
     status: FirmStatus;
     member_count: number;
     active_member_count: number;
-    total_placements: number;
-    total_revenue: number;
     admin_take_rate: number;
+    // Placement stats — only available from detail view, not the list endpoint
+    total_placements?: number;
+    total_revenue?: number;
+    placement_stats?: {
+        firm_id: string;
+        total_placements: number;
+        total_revenue: number;
+        avg_fee: number;
+        recent_placements: number;
+        last_placement_at: string | null;
+    } | null;
     // Profile / branding
     slug: string | null;
     tagline: string | null;

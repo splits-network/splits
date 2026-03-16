@@ -4,7 +4,7 @@ import { formatStage } from "../../types";
 export { formatStage };
 
 export function companyName(app: Application): string {
-    return app.job?.company?.name || app.company?.name || "Unknown Company";
+    return app.job?.company?.name || app.job?.firm?.name || app.company?.name || "Unknown Company";
 }
 
 export function companyInitials(name: string): string {

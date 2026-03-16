@@ -134,10 +134,7 @@ export default function FirmsPage() {
                 (sum, t) => sum + (t.active_member_count || 0),
                 0,
             ),
-            totalRevenue: firms.reduce(
-                (sum, t) => sum + (t.total_revenue || 0),
-                0,
-            ),
+            listed: firms.filter((t) => t.marketplace_visible).length,
         }),
         [firms, pagination],
     );

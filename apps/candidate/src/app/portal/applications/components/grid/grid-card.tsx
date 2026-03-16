@@ -126,9 +126,9 @@ export function GridCard({
                 {/* Avatar + Title block */}
                 <div className="flex items-end gap-3">
                     <div className="relative shrink-0">
-                        {app.job?.company?.logo_url ? (
+                        {(app.job?.company?.logo_url || app.job?.firm?.logo_url) ? (
                             <img
-                                src={app.job.company.logo_url}
+                                src={app.job?.company?.logo_url || app.job?.firm?.logo_url || ""}
                                 alt={name}
                                 className="w-14 h-14 object-contain bg-base-100 border border-base-300 p-1"
                             />

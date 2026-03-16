@@ -81,6 +81,11 @@ export interface Application {
             company_size?: string;
             description?: string;
         };
+        firm?: {
+            id: string;
+            name: string;
+            logo_url?: string | null;
+        };
         recruiter?: {
             user?: {
                 id?: string;

@@ -93,7 +93,7 @@ export function GridCard({
 
                     <div className="flex items-center gap-1">
                         {!job.company_id && job.source_firm_id && (
-                            <BaselBadge color="warning" variant="soft" size="sm">
+                            <BaselBadge color="secondary" variant="soft" size="sm" icon="fa-handshake">
                                 3rd Party
                             </BaselBadge>
                         )}
@@ -113,9 +113,9 @@ export function GridCard({
                 {/* Editorial block: Avatar + Company kicker → Title → Location */}
                 <div className="flex items-start gap-3">
                     <div className="relative shrink-0 mt-0.5">
-                        {job.company?.logo_url ? (
+                        {(job.company?.logo_url || job.firm?.logo_url) ? (
                             <img
-                                src={job.company.logo_url}
+                                src={job.company?.logo_url || job.firm?.logo_url || ""}
                                 alt={name}
                                 className="w-12 h-12 object-contain bg-base-100 border border-base-300 p-0.5"
                             />

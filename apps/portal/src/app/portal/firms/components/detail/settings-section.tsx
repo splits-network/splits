@@ -101,7 +101,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                             Total Placements
                         </p>
                         <p className="font-bold text-sm">
-                            {firm.total_placements}
+                            {firm.placement_stats?.total_placements ?? 0}
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
@@ -109,7 +109,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                             Total Revenue
                         </p>
                         <p className="font-bold text-sm">
-                            {formatCurrency(firm.total_revenue)}
+                            {formatCurrency(firm.placement_stats?.total_revenue ?? 0)}
                         </p>
                     </div>
                 </div>

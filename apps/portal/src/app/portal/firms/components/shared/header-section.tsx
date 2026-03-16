@@ -4,13 +4,7 @@ import { BaselPageHeader } from "@splits-network/basel-ui";
 import { useCompactHeaders } from "@/hooks/use-view-mode";
 
 interface HeaderSectionProps {
-    stats: { total: number; active: number; totalMembers: number; totalRevenue: number };
-}
-
-function formatRevenue(amount: number): string {
-    const value = amount || 0;
-    if (value >= 1000) return `$${Math.round(value / 1000)}k`;
-    return `$${value}`;
+    stats: { total: number; active: number; totalMembers: number; listed: number };
 }
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
@@ -26,7 +20,7 @@ export function HeaderSection({ stats }: HeaderSectionProps) {
                 { value: stats.total, label: "Firms", icon: "fa-users", color: "primary" },
                 { value: stats.active, label: "Active", icon: "fa-bolt", color: "accent" },
                 { value: stats.totalMembers, label: "Members", icon: "fa-user-group", color: "secondary" },
-                { value: formatRevenue(stats.totalRevenue), label: "Revenue", icon: "fa-dollar-sign", color: "base" },
+                { value: stats.listed, label: "Listed", icon: "fa-store", color: "base" },
             ]}
             isCompact={isCompact}
             onToggle={toggleCompact}

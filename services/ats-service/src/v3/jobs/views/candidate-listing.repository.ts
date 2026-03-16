@@ -23,7 +23,8 @@ export class CandidateListingRepository {
         employment_type, commute_types, job_level,
         open_to_relocation, show_salary_range,
         salary_min, salary_max, status, created_at, updated_at,
-        company:companies(id, name, logo_url, industry, headquarters_location)
+        company:companies(id, name, logo_url, industry, headquarters_location),
+        firm:firms(id, name, logo_url)
       `, { count: 'exact' })
       .eq('status', 'active')
       .eq('is_early_access', false);

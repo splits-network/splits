@@ -9,6 +9,7 @@ import {
     isNew,
     companyName,
     companyInitials,
+    isFirmJob,
     postedAgo,
     requiredSkillNames,
     truncateDescription,
@@ -32,6 +33,8 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
     const skills = requiredSkillNames(job);
     const { getLevel } = useGamification();
     const companyLevel = job.company?.id ? getLevel(job.company.id) : undefined;
+    const logoUrl = job.company?.logo_url || job.firm?.logo_url;
+    const firmJob = isFirmJob(job);
     const posted = postedAgo(job);
     const desc = truncateDescription(job, 140);
     const commute = formatCommuteTypes(job.commute_types);
@@ -59,6 +62,16 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
             <div className="bg-base-300 px-5 pt-4 pb-4">
                 {/* Status bar */}
                 <div className="flex items-center gap-2 mb-3">
+                    {firmJob && (
+                        <BaselBadge
+                            color="secondary"
+                            variant="soft"
+                            size="sm"
+                            icon="fa-handshake"
+                        >
+                            3rd Party
+                        </BaselBadge>
+                    )}
                     {isNew(job) && (
                         <BaselBadge
                             color="warning"
@@ -77,9 +90,9 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
                 {/* Editorial block: Kicker → Display heading → Subtitle */}
                 <div className="flex items-start gap-3">
                     <div className="relative shrink-0 mt-0.5">
-                        {job.company?.logo_url ? (
+                        {logoUrl ? (
                             <img
-                                src={job.company.logo_url}
+                                src={logoUrl}
                                 alt={name}
                                 className="w-12 h-12 object-contain bg-base-100 border border-base-300 p-0.5"
                             />

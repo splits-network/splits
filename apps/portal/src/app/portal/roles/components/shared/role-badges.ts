@@ -64,7 +64,7 @@ export function levelBadge(level?: string | null): BadgeInfo | null {
 
 export function thirdPartyBadge(job: { company_id: string | null; source_firm_id?: string | null }): BadgeInfo | null {
     if (!job.company_id && job.source_firm_id) {
-        return { label: "3rd Party", color: "warning", variant: "soft" };
+        return { label: "3rd Party", color: "secondary", variant: "soft", icon: "fa-handshake" };
     }
     return null;
 }

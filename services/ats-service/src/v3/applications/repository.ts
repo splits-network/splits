@@ -22,6 +22,7 @@ const LIST_SELECT = `*,
       recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))),
   job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location,
     description, logo_url, identity_organization_id),
+    firm:firms(id, name, logo_url),
     job_requirements:job_requirements(*))`;
 
 export class ApplicationRepository {

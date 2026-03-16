@@ -185,6 +185,12 @@ export type JobLevel = 'entry' | 'mid' | 'senior' | 'lead' | 'manager' | 'direct
 
 export type RequirementType = 'mandatory' | 'preferred';
 
+export interface Firm {
+    id: string;
+    name: string;
+    logo_url?: string | null;
+}
+
 export interface Job {
     id: string;
     company_id: string;
@@ -213,6 +219,7 @@ export interface Job {
     created_at: Date;
     updated_at: Date;
     company?: Company;  // Enriched data from service layer
+    firm?: Firm;  // Enriched data from service layer (firm jobs)
     requirements?: JobRequirement[]; // Enriched data from service layer
     pre_screen_questions?: JobPreScreenQuestion[]; // Enriched data from service layer
 }

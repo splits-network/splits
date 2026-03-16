@@ -32,6 +32,7 @@ export type {
     Candidate,
     Job,
     Company,
+    Firm,
     AIReview,
     // Other model types
     MarketplaceProfile,

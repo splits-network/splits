@@ -18,6 +18,7 @@ import {
     formatEmploymentType,
     formatStatusLabel,
     isNew,
+    isFirmJob,
     companyName,
     companyInitials,
     requiredSkillNames,
@@ -508,16 +509,23 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                     </div>
                 )}
 
-                {/* Company info */}
+                {/* Company / Firm info */}
                 <div className="border-t-2 border-base-300 pt-6">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
-                        About the Company
-                    </h3>
+                    <div className="flex items-center gap-2 mb-4">
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40">
+                            {isFirmJob(job) ? "About the Recruiting Firm" : "About the Company"}
+                        </h3>
+                        {isFirmJob(job) && (
+                            <BaselBadge color="secondary" variant="soft" size="sm" icon="fa-handshake">
+                                3rd Party
+                            </BaselBadge>
+                        )}
+                    </div>
                     <div className="flex items-center gap-4 mb-4">
                         <div className="relative shrink-0">
-                            {job.company?.logo_url ? (
+                            {(job.company?.logo_url || job.firm?.logo_url) ? (
                                 <img
-                                    src={job.company.logo_url}
+                                    src={job.company?.logo_url || job.firm?.logo_url || ""}
                                     alt={name}
                                     className="w-12 h-12 object-contain border-2 border-base-300"
                                 />
