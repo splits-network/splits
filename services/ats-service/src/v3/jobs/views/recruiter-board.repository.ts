@@ -138,9 +138,16 @@ export class RecruiterBoardRepository {
       .select('job_id')
       .or(`candidate_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`);
 
+    // Role assignments — jobs explicitly assigned to this recruiter
+    const { data: assignments } = await this.supabase
+      .from('role_assignments')
+      .select('job_id')
+      .eq('recruiter_id', recruiterId);
+
     const appIds = apps?.map(a => a.job_id) || [];
     const placementIds = placements?.map(p => p.job_id) || [];
-    return [...new Set([...appIds, ...placementIds])];
+    const assignmentIds = assignments?.map(a => a.job_id) || [];
+    return [...new Set([...appIds, ...placementIds, ...assignmentIds])];
   }
 
   async getRecruiterFirmIds(recruiterId: string): Promise<string[]> {
