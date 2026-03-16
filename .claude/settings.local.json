@@ -12,7 +12,8 @@
       "Bash(docker exec:*)",
       "Bash(ls:*)",
       "mcp__paper__write_html",
-      "mcp__paper__get_screenshot"
+      "mcp__paper__get_screenshot",
+      "mcp__paper__create_artboard"
     ]
   }
 }
