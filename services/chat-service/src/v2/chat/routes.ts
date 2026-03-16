@@ -752,6 +752,53 @@ export async function registerChatRoutes(
         }
     });
 
+    app.get(
+        "/api/v3/chat/conversations/:id/messages",
+        async (request, reply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
+                const { id } = request.params as { id: string };
+                const query = request.query as any;
+                const after = query.after as string | undefined;
+                const before = query.before as string | undefined;
+                const limit = Math.min(parseInt(query.limit || "50", 10), 100);
+                const messages = await service.listMessages(
+                    clerkUserId,
+                    id,
+                    after,
+                    before,
+                    limit,
+                );
+                return reply.send({ data: messages });
+            } catch (error: any) {
+                return reply
+                    .code(error.statusCode || 400)
+                    .send({ error: error.message });
+            }
+        },
+    );
+
+    app.post(
+        "/api/v3/chat/conversations/:id/messages",
+        async (request, reply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
+                const { id } = request.params as { id: string };
+                const body = request.body as any;
+                const message = await service.sendMessage(clerkUserId, id, {
+                    clientMessageId: body.clientMessageId,
+                    body: body.body,
+                    attachments: body.attachments || [],
+                });
+                return reply.code(201).send({ data: message });
+            } catch (error: any) {
+                return reply
+                    .code(error.statusCode || 400)
+                    .send({ error: error.message });
+            }
+        },
+    );
+
     app.post(
         "/api/v3/chat/conversations/:id/accept",
         async (request, reply) => {
