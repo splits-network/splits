@@ -74,7 +74,7 @@ export default function HireClient({
                 const client = createAuthenticatedClient(token);
 
                 const appRes: any = await client.get(
-                    `/applications/${applicationId}?include=candidate,job,company,recruiter,documents,timeline`,
+                    `/applications/${applicationId}/view/detail?include=recruiter,documents,timeline`,
                 );
                 const app = appRes.data as Application;
 
@@ -518,13 +518,13 @@ function StepReview({
             )}
 
             {/* Application Journey */}
-            {application.timeline && application.timeline.length > 0 && (
+            {(application.timeline || application.audit_log) && (application.timeline || application.audit_log)!.length > 0 && (
                 <>
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-3">
                         Application Journey
                     </p>
                     <div className="bg-base-200 p-5 space-y-3">
-                        {application.timeline.map((event: any, i: number) => (
+                        {(application.timeline || application.audit_log || []).map((event: any, i: number) => (
                             <div key={event.id || i} className="flex items-start gap-3">
                                 <div className="w-2 h-2 bg-primary mt-2 flex-shrink-0" />
                                 <div className="flex-1 min-w-0">
