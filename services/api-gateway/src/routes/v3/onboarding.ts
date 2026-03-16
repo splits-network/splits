@@ -423,179 +423,28 @@ export function registerOnboardingV3Routes(
   );
 
   // ── POST /api/v3/onboarding/business ─────────────────────────────────
+  // Proxied to onboarding-service for atomic transaction handling.
+  // The onboarding-service creates org + membership + company in a single
+  // Postgres transaction, eliminating the race condition where ats-service
+  // couldn't see a newly-created membership during org ownership checks.
+  const onboardingService = () => services.get('onboarding');
+
   app.post(
     '/api/v3/onboarding/business',
     { preHandler: requireAuth() },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const correlationId = getCorrelationId(request);
       const authHeaders = buildAuthHeaders(request);
-      const body = request.body as {
-        company: {
-          name: string;
-          website?: string;
-          industry?: string;
-          size?: string;
-          description?: string;
-          headquarters_location?: string;
-          logo_url?: string;
-        };
-        billing: {
-          billing_terms: string;
-          billing_email: string;
-          invoice_delivery_method?: string;
-        };
-        from_invitation?: { id: string };
-        referred_by_recruiter_id?: string;
-      };
-
-      if (!body.company?.name) {
-        return reply.code(400).send({ error: { message: 'company.name is required' } });
-      }
-      if (!body.billing?.billing_email) {
-        return reply.code(400).send({ error: { message: 'billing.billing_email is required' } });
-      }
 
       try {
-        // Step 1: Get current user
-        const userResponse = await identityService().get<any>(
-          '/api/v3/users/me', undefined, correlationId, authHeaders
-        );
-        const user = userResponse?.data ?? userResponse;
-
-        if (user?.onboarding_status === 'completed') {
-          return reply.code(409).send({
-            data: { user },
-            error: { message: 'Onboarding already completed' },
-          });
-        }
-
-        // Step 2: Create organization
-        const orgSlug = body.company.name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-
-        const orgResponse = await identityService().post<any>(
-          '/api/v3/organizations',
-          { name: body.company.name, type: 'company', slug: orgSlug },
+        const response = await onboardingService().post<any>(
+          '/api/v3/onboarding/business',
+          request.body,
           correlationId,
           authHeaders
         );
-        const organization = orgResponse?.data ?? orgResponse;
 
-        // Step 3: Create membership (must happen before company creation
-        // so the user passes the organization ownership check in ats-service)
-        const membershipResponse = await identityService().post<any>(
-          '/api/v3/memberships',
-          {
-            user_id: user.id,
-            role_name: 'company_admin',
-            organization_id: organization.id,
-          },
-          correlationId,
-          authHeaders
-        );
-        const membership = membershipResponse?.data ?? membershipResponse;
-
-        // Step 4: Create company
-        const companyResponse = await atsService().post<any>(
-          '/api/v3/companies',
-          {
-            identity_organization_id: organization.id,
-            name: body.company.name,
-            website: body.company.website || null,
-            industry: body.company.industry || null,
-            company_size: body.company.size || null,
-            description: body.company.description || null,
-            headquarters_location: body.company.headquarters_location || null,
-            logo_url: body.company.logo_url || null,
-          },
-          correlationId,
-          authHeaders
-        );
-        const company = companyResponse?.data ?? companyResponse;
-
-        // Step 5: Create billing profile
-        let billingProfile: any = null;
-        try {
-          const billingResponse = await billingService().post<any>(
-            `/api/v3/company-billing/${company.id}`,
-            {
-              billing_terms: body.billing.billing_terms || 'net_30',
-              billing_email: body.billing.billing_email,
-              invoice_delivery_method: body.billing.invoice_delivery_method || 'email',
-            },
-            correlationId,
-            authHeaders
-          );
-          billingProfile = billingResponse?.data ?? billingResponse;
-        } catch (billingErr: any) {
-          request.log.error({ error: billingErr.message }, 'Failed to create billing profile');
-        }
-
-        // Step 6: Non-blocking relationship completions
-        let invitationCompleted = false;
-        let sourcerConnectionCreated = false;
-
-        if (body.from_invitation?.id) {
-          try {
-            await networkService().post(
-              '/api/v3/company-invitations/complete-relationship',
-              {
-                invitation_id: body.from_invitation.id,
-                company_id: company.id,
-              },
-              correlationId,
-              authHeaders
-            );
-            invitationCompleted = true;
-          } catch (invErr: any) {
-            request.log.error({ error: invErr.message }, 'Failed to complete invitation relationship');
-          }
-        }
-
-        if (body.referred_by_recruiter_id && !body.from_invitation?.id) {
-          try {
-            await networkService().post(
-              '/api/v3/recruiter-companies/request-connection',
-              {
-                recruiter_id: body.referred_by_recruiter_id,
-                company_id: company.id,
-                relationship_type: 'sourcer',
-              },
-              correlationId,
-              authHeaders
-            );
-            sourcerConnectionCreated = true;
-          } catch (relErr: any) {
-            request.log.error({ error: relErr.message }, 'Failed to create sourcer relationship');
-          }
-        }
-
-        // Step 7: Mark onboarding complete
-        const completeResponse = await identityService().patch<any>(
-          '/api/v3/users/me',
-          {
-            onboarding_status: 'completed',
-            onboarding_step: 4,
-            onboarding_completed_at: new Date().toISOString(),
-          },
-          correlationId,
-          authHeaders
-        );
-        const updatedUser = completeResponse?.data ?? completeResponse;
-
-        return reply.code(201).send({
-          data: {
-            user: updatedUser,
-            organization,
-            company,
-            membership,
-            billing_profile: billingProfile,
-            invitation_completed: invitationCompleted,
-            sourcer_connection_created: sourcerConnectionCreated,
-          },
-        });
+        return reply.code(201).send(response);
       } catch (error: any) {
         request.log.error({ error: error.message, correlationId }, 'Business onboarding submit failed');
         return reply

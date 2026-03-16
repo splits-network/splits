@@ -152,32 +152,56 @@ export function GridCard({
                 ))}
             </div>
 
+            {/* About snippet */}
+            <div className="px-5 py-3 border-b border-base-300">
+                {candidate.description ? (
+                    <p className="text-sm text-base-content/60 leading-relaxed line-clamp-2">
+                        {candidate.description}
+                    </p>
+                ) : (
+                    <p className="text-sm text-base-content/30">No bio available</p>
+                )}
+            </div>
+
             {/* Badge row: emphasis (soft-outline) + default (soft) */}
             <div className="px-5 py-3 flex-1">
                 <div className="flex flex-wrap gap-1.5">
-                    <BaselBadge
-                        color={statusColorName(candidate.verification_status)}
-                        variant="soft-outline"
-                        size="sm"
-                    >
-                        {formatVerificationStatus(candidate.verification_status)}
-                    </BaselBadge>
-                    {isNew(candidate) && (
+                    {/* Single status badge: No Account > Pending Invite > verification status */}
+                    {(() => {
+                        const acct = accountBadge(candidate);
+                        if (acct) {
+                            return (
+                                <BaselBadge color={acct.color} variant="soft-outline" size="sm" icon={acct.icon}>
+                                    {acct.label}
+                                </BaselBadge>
+                            );
+                        }
+                        if (candidate.has_pending_invitation) {
+                            return (
+                                <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-clock">
+                                    Pending
+                                </BaselBadge>
+                            );
+                        }
+                        return (
+                            <BaselBadge
+                                color={statusColorName(candidate.verification_status)}
+                                variant="soft-outline"
+                                size="sm"
+                            >
+                                {formatVerificationStatus(candidate.verification_status)}
+                            </BaselBadge>
+                        );
+                    })()}
+                    {isNew(candidate) && !accountBadge(candidate) && !candidate.has_pending_invitation && (
                         <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-sparkles">
                             New
                         </BaselBadge>
                     )}
-                    {(() => {
-                        const acct = accountBadge(candidate);
-                        return acct ? (
-                            <BaselBadge color={acct.color} variant="soft-outline" size="sm" icon={acct.icon}>
-                                {acct.label}
-                            </BaselBadge>
-                        ) : null;
-                    })()}
+                    {/* Relationship badge: only Mine or Sourced (Pending folded into status above) */}
                     {(() => {
                         const rel = relationshipBadge(candidate);
-                        return rel ? (
+                        return rel && rel.label !== "Pending" ? (
                             <BaselBadge color={rel.color} variant="soft-outline" size="sm" icon={rel.icon}>
                                 {rel.label}
                             </BaselBadge>

@@ -64,10 +64,10 @@ export function GridCard({
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 px-5 pt-4 pb-4">
-                {/* Utility row: bookmark */}
+            <div className="relative bg-base-300 px-5 pt-4 pb-4">
+                {/* Bookmark: absolute top-right */}
                 {isRecruiter && (
-                    <div className="flex items-center justify-end mb-3 gap-1">
+                    <div className="absolute top-3 right-3" onClick={(e) => e.stopPropagation()}>
                         <SaveBookmark
                             entityType="job"
                             entityId={job.id}

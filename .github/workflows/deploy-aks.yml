@@ -79,6 +79,10 @@ jobs:
                           name: support-gateway,
                           path: services/support-gateway,
                       }
+                    - {
+                          name: onboarding-service,
+                          path: services/onboarding-service,
+                      }
                     - { name: video, path: apps/video }
                     - { name: portal, path: apps/portal }
                     - { name: candidate, path: apps/candidate }
@@ -556,6 +560,14 @@ jobs:
             - name: Wait for Admin Gateway
               run: |
                   kubectl rollout status deployment/admin-gateway --timeout=180s --namespace=splits-network
+
+            - name: Deploy Onboarding Service
+              run: |
+                  kubectl apply -f infra/k8s/onboarding-service/ --namespace=splits-network
+
+            - name: Wait for Onboarding Service
+              run: |
+                  kubectl rollout status deployment/onboarding-service --timeout=180s --namespace=splits-network
 
             - name: Deploy Admin App
               run: |

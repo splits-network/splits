@@ -642,6 +642,7 @@ async function main() {
     services.register('video', process.env.VIDEO_SERVICE_URL || 'http://localhost:3019');
     services.register('call', process.env.CALL_SERVICE_URL || 'http://localhost:3020');
     services.register('support', process.env.SUPPORT_SERVICE_URL || 'http://localhost:3021');
+    services.register('onboarding', process.env.ONBOARDING_SERVICE_URL || 'http://localhost:3023');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

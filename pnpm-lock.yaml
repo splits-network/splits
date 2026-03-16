@@ -2137,6 +2137,58 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1)
 
+  services/onboarding-service:
+    dependencies:
+      '@fastify/swagger':
+        specifier: ^9.5.0
+        version: 9.6.1
+      '@fastify/swagger-ui':
+        specifier: ^5.2.3
+        version: 5.2.3
+      '@sentry/node':
+        specifier: ^10.32.1
+        version: 10.32.1
+      '@splits-network/shared-config':
+        specifier: workspace:*
+        version: link:../../packages/shared-config
+      '@splits-network/shared-fastify':
+        specifier: workspace:*
+        version: link:../../packages/shared-fastify
+      '@splits-network/shared-logging':
+        specifier: workspace:*
+        version: link:../../packages/shared-logging
+      '@splits-network/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      '@supabase/supabase-js':
+        specifier: ^2.86.2
+        version: 2.86.2
+      amqplib:
+        specifier: ^0.10.9
+        version: 0.10.9
+      fastify:
+        specifier: ^5.6.2
+        version: 5.6.2
+    devDependencies:
+      '@types/amqplib':
+        specifier: ^0.10.5
+        version: 0.10.8
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      '@vitest/coverage-v8':
+        specifier: ^2.1.9
+        version: 2.1.9(vitest@2.1.9(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1))
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1)
+
   services/search-service:
     dependencies:
       '@fastify/cors':
@@ -4962,6 +5014,7 @@ packages:
   glob@11.1.0:
     resolution: {integrity: sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==}
     engines: {node: 20 || >=22}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   gopd@1.2.0:
