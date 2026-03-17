@@ -61,10 +61,7 @@ export function LeaderboardList({ entries, myEntityId, loading, levelMap }: Lead
                             <div className="pt-4 pb-2 px-4 flex flex-wrap gap-6">
                                 {levelMap?.get(entry.entity_id) && (
                                     <div>
-                                        <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-1">
-                                            Level
-                                        </p>
-                                        <LevelBadge level={levelMap.get(entry.entity_id)!} size="sm" />
+                                        <LevelBadge level={levelMap.get(entry.entity_id)!} size="md" />
                                     </div>
                                 )}
                                 {entry.metadata?.specialization && (

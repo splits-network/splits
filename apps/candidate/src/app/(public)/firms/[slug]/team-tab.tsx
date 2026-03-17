@@ -86,7 +86,7 @@ export default function TeamTab({ firm }: TeamTabProps) {
                                 <p className="text-sm font-black text-base-content leading-tight flex items-center gap-1.5">
                                     {name}
                                     {m.recruiter?.id && getLevel(m.recruiter.id) && (
-                                        <BaselLevelIndicator level={getLevel(m.recruiter.id)!.current_level} title={getLevel(m.recruiter.id)!.title} totalXp={getLevel(m.recruiter.id)!.total_xp} />
+                                        <BaselLevelIndicator level={getLevel(m.recruiter.id)!.current_level} title={getLevel(m.recruiter.id)!.title} totalXp={getLevel(m.recruiter.id)!.total_xp} xpToNextLevel={getLevel(m.recruiter.id)!.xp_to_next_level} />
                                     )}
                                 </p>
                                 <p className="text-xs font-bold uppercase tracking-wider text-base-content/30 mt-0.5">

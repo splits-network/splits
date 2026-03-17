@@ -138,7 +138,7 @@ export default function GridCard({
             {/* Zone 2: Inline metadata bar */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
                 {level && (
-                    <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />
+                    <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} xpToNextLevel={level.xp_to_next_level} />
                 )}
                 {metaItems.map((item, i) => (
                     <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>

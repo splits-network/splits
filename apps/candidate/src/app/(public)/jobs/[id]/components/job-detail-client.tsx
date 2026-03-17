@@ -270,7 +270,7 @@ export default function JobDetailClient({
                                 <p className="scroll-reveal fade-up detail-meta text-lg text-base-content/60 mt-2 flex items-center gap-2">
                                     {companyDisplay}
                                     {companyLevel && (
-                                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
                                     )}
                                 </p>
                             </div>
@@ -594,7 +594,7 @@ export default function JobDetailClient({
                                     <div className="font-bold flex items-center gap-2">
                                         {companyDisplay}
                                         {companyLevel && (
-                                            <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                                            <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
                                         )}
                                     </div>
                                     {companyIndustry && (

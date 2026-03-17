@@ -63,7 +63,7 @@ export function SplitItem({
             <div className="flex items-center justify-between gap-2">
                 <h4 className="font-bold text-sm tracking-tight truncate text-base-content flex items-center gap-1.5">
                     {name}
-                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />}
+                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} xpToNextLevel={level.xp_to_next_level} />}
                 </h4>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {addedAgo(item)}

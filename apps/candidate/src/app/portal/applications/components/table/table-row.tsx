@@ -69,7 +69,7 @@ export function TableRow({
                         <span className="font-bold text-sm text-base-content flex items-center gap-1.5">
                             {app.job?.title || "Untitled Position"}
                             {companyLevel && (
-                                <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                                <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
                             )}
                         </span>
                     </div>

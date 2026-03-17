@@ -159,3 +159,24 @@ export const semanticChip: Record<BaselInteractiveColor, string> = {
     warning: "bg-warning text-warning-content",
     info: "bg-info text-info-content",
 };
+
+/* ─── Tier Colors (Gamification Levels) ────────────────────────────────── */
+
+/** Level-to-color thresholds — descending so first match wins. */
+const TIER_THRESHOLDS: [number, BaselSemanticColor][] = [
+    [18, "error"],
+    [15, "warning"],
+    [13, "accent"],
+    [10, "secondary"],
+    [8, "primary"],
+    [5, "info"],
+    [1, "neutral"],
+];
+
+/** Map a gamification level (1–20) to its DaisyUI semantic color. */
+export function getTierColor(level: number): BaselSemanticColor {
+    for (const [threshold, color] of TIER_THRESHOLDS) {
+        if (level >= threshold) return color;
+    }
+    return "neutral";
+}

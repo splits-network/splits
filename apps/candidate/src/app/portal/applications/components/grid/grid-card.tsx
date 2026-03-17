@@ -119,7 +119,7 @@ export function GridCard({
             {/* Inline metadata: salary · location · type */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
                 {companyLevel && (
-                    <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                    <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
                 )}
                 {[
                     { icon: "fa-dollar-sign", color: "text-success", value: salary || "TBD", muted: !salary, tooltip: "Salary range" },

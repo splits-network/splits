@@ -170,6 +170,7 @@ export function MembersSection({
                                                 level={getLevel(member.recruiter_id)!.current_level}
                                                 title={getLevel(member.recruiter_id)!.title}
                                                 totalXp={getLevel(member.recruiter_id)!.total_xp}
+                                                xpToNextLevel={getLevel(member.recruiter_id)!.xp_to_next_level}
                                             />
                                         )}
                                     </div>

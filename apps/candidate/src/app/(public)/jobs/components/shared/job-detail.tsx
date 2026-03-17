@@ -534,7 +534,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                             <p className="font-bold flex items-center gap-2">
                                 {name}
                                 {companyGamLevel && (
-                                    <BaselLevelIndicator level={companyGamLevel.current_level} title={companyGamLevel.title} totalXp={companyGamLevel.total_xp} />
+                                    <BaselLevelIndicator level={companyGamLevel.current_level} title={companyGamLevel.title} totalXp={companyGamLevel.total_xp} xpToNextLevel={companyGamLevel.xp_to_next_level} />
                                 )}
                             </p>
                             {job.company?.industry && (

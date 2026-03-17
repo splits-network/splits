@@ -81,7 +81,7 @@ export function TableRow({
                             </div>
                             {(level || recruiter.plan_tier) && (
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />}
+                                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} xpToNextLevel={level.xp_to_next_level} />}
                                     {recruiter.plan_tier && <PlanBadge tier={recruiter.plan_tier as PlanTier} />}
                                 </div>
                             )}

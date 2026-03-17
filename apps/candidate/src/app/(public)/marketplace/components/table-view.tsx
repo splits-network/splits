@@ -76,7 +76,7 @@ export default function TableView({
                                         <div className="min-w-0">
                                             <p className="font-bold text-sm truncate">
                                                 {name}
-                                                {(() => { const lvl = getLevel(recruiter.id); return lvl ? <span className="ml-1.5 inline-block align-middle"><BaselLevelIndicator level={lvl.current_level} title={lvl.title} totalXp={lvl.total_xp} /></span> : null; })()}
+                                                {(() => { const lvl = getLevel(recruiter.id); return lvl ? <span className="ml-1.5 inline-block align-middle"><BaselLevelIndicator level={lvl.current_level} title={lvl.title} totalXp={lvl.total_xp} xpToNextLevel={lvl.xp_to_next_level} /></span> : null; })()}
                                             </p>
                                             {recruiter.tagline && (
                                                 <div className="flex gap-1 mt-0.5">

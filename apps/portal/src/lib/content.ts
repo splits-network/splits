@@ -24,7 +24,7 @@ interface ContentListResponse {
 export async function getContentPage(slug: string): Promise<ContentPage | null> {
     try {
         const res = await fetch(
-            `${API_BASE}/api/v3/pages/by-slug/${encodeURIComponent(slug)}?app=${APP_NAME}`,
+            `${API_BASE}/api/v3/pages/views/by-slug/${encodeURIComponent(slug)}?app=${APP_NAME}`,
             { next: { revalidate: 300 } }
         );
         if (!res.ok) return null;

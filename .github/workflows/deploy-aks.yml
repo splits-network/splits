@@ -71,14 +71,8 @@ jobs:
                       }
                     - { name: video-service, path: services/video-service }
                     - { name: call-service, path: services/call-service }
-                    - {
-                          name: support-service,
-                          path: services/support-service,
-                      }
-                    - {
-                          name: support-gateway,
-                          path: services/support-gateway,
-                      }
+                    - { name: support-service, path: services/support-service }
+                    - { name: support-gateway, path: services/support-gateway }
                     - {
                           name: onboarding-service,
                           path: services/onboarding-service,
@@ -484,6 +478,7 @@ jobs:
                   kubectl apply -f infra/k8s/gamification-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/video-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/call-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/onboarding-service/ --namespace=splits-network
                   kubectl delete job ats-backfill-guarantee-expires --ignore-not-found --namespace=splits-network
                   kubectl apply -f infra/k8s/ats-service/jobs/backfill-guarantee-expires.yaml --namespace=splits-network
 
@@ -512,6 +507,7 @@ jobs:
                   kubectl rollout status deployment/gamification-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/video-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/call-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/onboarding-service --timeout=180s --namespace=splits-network
 
             - name: Deploy API Gateway
               run: |
@@ -560,14 +556,6 @@ jobs:
             - name: Wait for Admin Gateway
               run: |
                   kubectl rollout status deployment/admin-gateway --timeout=180s --namespace=splits-network
-
-            - name: Deploy Onboarding Service
-              run: |
-                  kubectl apply -f infra/k8s/onboarding-service/ --namespace=splits-network
-
-            - name: Wait for Onboarding Service
-              run: |
-                  kubectl rollout status deployment/onboarding-service --timeout=180s --namespace=splits-network
 
             - name: Deploy Admin App
               run: |
