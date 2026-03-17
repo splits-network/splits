@@ -17,7 +17,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { ApiClient } from "@/lib/api-client";
 import { formatRelativeTime } from "@/lib/utils";
 import { usePresence } from "@/hooks/use-presence";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 import ConnectModal, { type ConnectModalHandle } from "./connect-modal";
 import SimilarRecruiters from "./similar-recruiters";
 

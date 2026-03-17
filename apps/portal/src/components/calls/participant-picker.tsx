@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { usePresence } from '@/hooks/use-presence';
-import { Presence } from '@/components/presense';
+import { Presence } from '@/components/presence';
 import { BaselFormField } from '@splits-network/basel-ui';
 
 /* ─── Types ────────────────────────────────────────────────────────── */

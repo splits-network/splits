@@ -19,6 +19,8 @@ import RecruiterActionsToolbar from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { PlanBadge } from "@/components/entitlements/plan-badge";
 import type { PlanTier } from "@/contexts/user-profile-context";
+import { Presence } from "@/components/presence";
+import { usePresenceStatus } from "@/contexts";
 
 export function TableRow({
     recruiter,
@@ -37,6 +39,9 @@ export function TableRow({
 }) {
     const { getLevel } = useGamification();
     const level = getLevel(recruiter.id);
+    const recruiterUserId = recruiter.users?.id;
+    const presenceData = usePresenceStatus(recruiterUserId);
+    const presenceStatus = presenceData?.status;
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
     const status = recruiter.status || "active";
@@ -78,6 +83,7 @@ export function TableRow({
                                     <i className="fa-duotone fa-regular fa-sparkles text-sm text-warning" />
                                 )}
                                 <span className="font-bold text-sm">{name}</span>
+                                <Presence variant="icon" size="xs" status={presenceStatus} />
                             </div>
                             {(level || recruiter.plan_tier) && (
                                 <div className="flex items-center gap-1.5 mt-0.5">

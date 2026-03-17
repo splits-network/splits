@@ -20,7 +20,7 @@ import {
 import Link from "next/link";
 import RecruiterActionsToolbar from "./actions-toolbar";
 import { usePresenceStatus } from "@/contexts";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 import {
     LevelBadge,
     BadgeGrid,

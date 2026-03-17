@@ -18,7 +18,7 @@ import {
 } from "../shared/helpers";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
 import { usePresenceStatus } from "@/contexts";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 import {
     LevelBadge,
     useGamification,
@@ -73,30 +73,31 @@ export function GridCard({
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 px-5 pt-4 pb-4">
+            <div className="relative bg-base-300 px-5 pt-4 pb-4">
+                {/* Utility icons: absolute top-right */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <Presence
+                        variant="icon"
+                        size="sm"
+                        status={presenceStatus}
+                    />
+                </div>
+
                 {/* Kicker row: status + modifier badges */}
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} variant="soft" size="sm">
-                            {formatStatus(status)}
+                <div className="flex items-center gap-2 flex-wrap mb-3">
+                    <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} variant="soft" size="sm">
+                        {formatStatus(status)}
+                    </BaselBadge>
+
+                    {recruiter.plan_tier && (
+                        <PlanBadge tier={recruiter.plan_tier as PlanTier} />
+                    )}
+
+                    {isNew(recruiter) && (
+                        <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
+                            New
                         </BaselBadge>
-
-                        {recruiter.plan_tier && (
-                            <PlanBadge tier={recruiter.plan_tier as PlanTier} />
-                        )}
-
-                        {isNew(recruiter) && (
-                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                                New
-                            </BaselBadge>
-                        )}
-                    </div>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                        {presenceStatus === "online" && (
-                            <Presence status={presenceStatus} variant="badge" />
-                        )}
-                    </div>
+                    )}
                 </div>
 
                 {/* Editorial block: Avatar + Firm kicker → Name → Location */}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 
 interface ApplicationListItemProps {
     application: {

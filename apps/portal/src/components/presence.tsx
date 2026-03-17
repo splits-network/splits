@@ -1,7 +1,7 @@
 type PresenceProps = {
     status?: "online" | "idle" | "offline" | null;
     size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
-    variant?: "dot" | "badge" | "both";
+    variant?: "dot" | "badge" | "both" | "icon";
     label?: string;
     className?: string;
 };
@@ -14,6 +14,8 @@ export function Presence({
     className = "",
 }: PresenceProps) {
     const isActive = status === "online" || status === "idle";
+    const isOnline = status === "online";
+    const isIdle = status === "idle";
     const statusClass = isActive ? "status status-success" : "status status-neutral";
     const sizeClass =
         size === "2xl"
@@ -27,8 +29,31 @@ export function Presence({
                   : size === "sm"
                     ? "status-sm"
                     : "status-xs";
-    const statusLabel = label ?? (isActive ? "Online" : "Offline");
+    const statusLabel = label ?? (isOnline ? "Online" : isIdle ? "Idle" : "Offline");
     const badgeSizeClass = size === "xs" ? "badge-xs" : size === "sm" ? "badge-sm" : size === "lg" ? "badge-lg" : "";
+
+    if (variant === "icon") {
+        const iconSizeClass = size === "xs" ? "text-[0.45rem]" : size === "sm" ? "text-[0.5rem]" : "text-xs";
+        const colorClass = isOnline
+            ? "text-success"
+            : isIdle
+              ? "text-warning"
+              : "text-base-content/20";
+
+        return (
+            <span
+                className={`tooltip tooltip-bottom inline-flex items-center justify-center ${className}`}
+                data-tip={statusLabel}
+                aria-label={statusLabel}
+            >
+                <i
+                    className={`fa-solid fa-circle ${iconSizeClass} ${colorClass} ${
+                        isOnline ? "animate-pulse" : ""
+                    }`}
+                />
+            </span>
+        );
+    }
 
     if (variant === "both") {
         return (
@@ -36,7 +61,7 @@ export function Presence({
                 <span className="indicator-item">
                     <span
                         className={`${statusClass} ${sizeClass} ${
-                            status === "online" ? "animate-pulse" : ""
+                            isOnline ? "animate-pulse" : ""
                         }`}
                     />
                 </span>
@@ -66,7 +91,7 @@ export function Presence({
     return (
         <span
             className={`${statusClass} ${sizeClass} ${
-                isActive ? (status === "online" ? "animate-pulse" : "") : "hidden"
+                isActive ? (isOnline ? "animate-pulse" : "") : "hidden"
             } ${className}`}
             aria-label={statusLabel}
             title={statusLabel}

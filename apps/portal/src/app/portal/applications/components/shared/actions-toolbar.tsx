@@ -8,7 +8,7 @@ import { useToast } from "@/lib/toast-context";
 import { useUserProfile } from "@/contexts";
 import { startChatConversation } from "@/lib/chat-start";
 import { usePresence } from "@/hooks/use-presence";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 import { useChatSidebar } from "@splits-network/chat-ui";
 import {
     Button,

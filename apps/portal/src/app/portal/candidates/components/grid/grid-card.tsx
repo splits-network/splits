@@ -25,7 +25,7 @@ import {
     LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 import { usePresenceStatus } from "@/contexts";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
@@ -79,14 +79,12 @@ export function GridCard({
             {/* Header Band */}
             <div className="relative bg-base-300 px-5 pt-4 pb-4">
                 {/* Utility icons: absolute top-right */}
-                <div className="absolute top-3 right-3 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                    {presenceStatus === "online" && (
-                        <Presence
-                            variant="badge"
-                            size="sm"
-                            status={presenceStatus}
-                        />
-                    )}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <Presence
+                        variant="icon"
+                        size="sm"
+                        status={presenceStatus}
+                    />
                     {isRecruiter && (
                         <SaveBookmark
                             entityType="candidate"

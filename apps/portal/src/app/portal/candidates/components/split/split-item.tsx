@@ -17,7 +17,7 @@ import {
     LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 import { usePresenceStatus } from "@/contexts";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
@@ -118,7 +118,7 @@ export function SplitItem({
                     </BaselBadge>
                 )}
                 <Presence
-                    variant="badge"
+                    variant="icon"
                     size="xs"
                     status={presenceStatus}
                 />

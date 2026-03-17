@@ -7,7 +7,7 @@ import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
 import { usePresence } from "@/hooks/use-presence";
 import { useApplicationActions } from "@/hooks/use-application-actions";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 import { ModalPortal } from "@splits-network/shared-ui";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
 import { DeclineModal } from "../modals/decline-modal";
