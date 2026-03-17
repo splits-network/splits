@@ -89,8 +89,8 @@ export default function ApplicationsBaselPage() {
         setSortBy,
         setSortOrder,
     } = useStandardList<Application, ApplicationFilters>({
-        endpoint: "/applications",
-        include: "candidate,job,company,ai_review",
+        endpoint: "/applications/views/listing",
+        include: "ai_review",
         defaultFilters: {
             stage: undefined,
             ai_score_filter: undefined,

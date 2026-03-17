@@ -101,6 +101,7 @@ const atsV3Routes: V3RouteConfig[] = [
   { resource: 'applications', auth: 'required' },
 
   // ── Applications Views ──────────────────────────────────────
+  { path: '/applications/views/listing', method: 'GET', auth: 'required' },
   { path: '/applications/:id/view/detail', method: 'GET', auth: 'required' },
 
   // ── Applications Actions ──────────────────────────────────────
