@@ -643,6 +643,7 @@ async function main() {
     services.register('call', process.env.CALL_SERVICE_URL || 'http://localhost:3020');
     services.register('support', process.env.SUPPORT_SERVICE_URL || 'http://localhost:3021');
     services.register('onboarding', process.env.ONBOARDING_SERVICE_URL || 'http://localhost:3023');
+    services.register('health-monitor', process.env.HEALTH_MONITOR_SERVICE_URL || 'http://localhost:3012');
 
     // Initialize Supabase client for system health and site notifications
     const supabase = createClient(

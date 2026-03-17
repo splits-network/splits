@@ -20,6 +20,7 @@ import { registerSearchV3Routes } from './search';
 import { registerSupportV3Routes } from './support';
 import { registerVideoV3Routes } from './video';
 import { registerOnboardingV3Routes } from './onboarding';
+import { registerStatusV3Routes } from './status';
 
 /**
  * Register all V3 gateway routes.
@@ -49,4 +50,5 @@ export function registerV3GatewayRoutes(
   registerSearchV3Routes(app, services);
   registerSupportV3Routes(app, services);
   registerVideoV3Routes(app, services);
+  registerStatusV3Routes(app, services);
 }

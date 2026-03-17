@@ -108,14 +108,20 @@ export function RecruiterActivityFeed({
                                     const style =
                                         STAGE_ICONS[app.stage] || DEFAULT_STAGE;
                                     return (
-                                        <BaselActivityItem
+                                        <Link
                                             key={app.id || i}
-                                            icon={style.icon}
-                                            iconColor={style.color}
-                                            iconBg={style.bg}
-                                            title={`${app.candidate?.full_name || "Candidate"} - ${app.job?.title || "Role"}`}
-                                            meta={`${app.job?.company?.name || ""} -- ${app.stage?.replace("_", " ")} -- ${timeAgo(app.updated_at)}`}
-                                        />
+                                            href={`/portal/applications?applicationId=${app.id}`}
+                                            className="block"
+                                        >
+                                            <BaselActivityItem
+                                                icon={style.icon}
+                                                iconColor={style.color}
+                                                iconBg={style.bg}
+                                                title={`${app.candidate?.full_name || "Candidate"} - ${app.job?.title || "Role"}`}
+                                                meta={`${app.job?.company?.name || ""} -- ${app.stage?.replace("_", " ")} -- ${timeAgo(app.updated_at)}`}
+                                                className="hover:bg-base-300/50 transition-colors"
+                                            />
+                                        </Link>
                                     );
                                 })}
                         </div>
@@ -140,7 +146,7 @@ export function RecruiterActivityFeed({
                                 {roles.slice(0, 5).map((role, i) => (
                                     <Link
                                         key={role.id}
-                                        href={`/portal/roles?roledId=${role.id}`}
+                                        href={`/portal/roles?roleId=${role.id}`}
                                         className="flex items-center gap-3 py-2 border-b border-base-300 last:border-0 hover:bg-base-300/50 transition-colors group"
                                     >
                                         <span className="w-6 h-6 bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">

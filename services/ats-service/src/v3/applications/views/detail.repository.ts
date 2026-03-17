@@ -8,9 +8,12 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const DETAIL_SELECT = `*,
-  candidate:candidates(id, full_name, email, phone, location, user_id,
+  candidate:candidates(*,
     candidate_sourcer:candidate_sourcers(sourcer_recruiter_id,
-      recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))),
+      recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email))),
+    recruiter_relationships:recruiter_candidates(
+      id, recruiter_id, status, consent_given, invitation_expires_at, declined_at),
+    candidate_skills:candidate_skills(skill:skills(id, name))),
   job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location,
     description, logo_url, identity_organization_id),
     job_requirements:job_requirements(*))`;
@@ -66,6 +69,15 @@ export class ApplicationDetailRepository {
       .maybeSingle();
     if (error) throw error;
     return data ?? null;
+  }
+
+  async getApplicationCountForJob(jobId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('applications')
+      .select('*', { count: 'exact', head: true })
+      .eq('job_id', jobId);
+    if (error) return 0;
+    return count ?? 0;
   }
 
   async getCompanySourcer(companyId: string): Promise<any | null> {

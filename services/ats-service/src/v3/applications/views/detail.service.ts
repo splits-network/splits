@@ -43,6 +43,19 @@ export class ApplicationDetailService {
       if (sourcer) application.company_sourcer = sourcer;
     }
 
+    // Enrich candidate with relationship status and flatten skills
+    if (application.candidate) {
+      application.candidate = this.enrichCandidate(application.candidate, context.recruiterId ?? undefined);
+    }
+
+    // Normalize job requirements key and add application count
+    if (application.job) {
+      if (application.job.job_requirements && !application.job.requirements) {
+        application.job.requirements = application.job.job_requirements;
+      }
+      application.job.application_count = await this.repository.getApplicationCountForJob(application.job_id);
+    }
+
     return application;
   }
 
@@ -63,5 +76,43 @@ export class ApplicationDetailService {
     if (orgId && context.organizationIds?.includes(orgId)) return;
 
     throw new ForbiddenError('You do not have access to this application');
+  }
+
+  private enrichCandidate(candidate: any, currentRecruiterId?: string) {
+    const relationships = candidate.recruiter_relationships || [];
+
+    const hasActiveRelationship = !!currentRecruiterId &&
+      relationships.some((rel: any) =>
+        rel.recruiter_id === currentRecruiterId &&
+        rel.status === 'active' &&
+        rel.consent_given
+      );
+
+    const hasPendingInvitation = !!currentRecruiterId && !hasActiveRelationship &&
+      relationships.some((rel: any) =>
+        rel.recruiter_id === currentRecruiterId &&
+        !rel.consent_given &&
+        !rel.declined_at &&
+        rel.status !== 'terminated' &&
+        new Date(rel.invitation_expires_at) > new Date()
+      );
+
+    const otherRecruiters = new Set(
+      relationships
+        .filter((rel: any) =>
+          rel.status === 'active' &&
+          rel.consent_given &&
+          (!currentRecruiterId || rel.recruiter_id !== currentRecruiterId)
+        )
+        .map((rel: any) => rel.recruiter_id)
+    );
+
+    return {
+      ...candidate,
+      recruiter_relationships: undefined,
+      has_active_relationship: hasActiveRelationship,
+      has_pending_invitation: hasPendingInvitation,
+      has_other_active_recruiters: otherRecruiters.size > 0,
+    };
   }
 }

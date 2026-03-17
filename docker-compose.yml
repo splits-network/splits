@@ -921,6 +921,7 @@ services:
       CALL_SERVICE_URL: http://call-service:3020
       SUPPORT_SERVICE_URL: http://support-service:3021
       ONBOARDING_SERVICE_URL: http://onboarding-service:3023
+      HEALTH_MONITOR_SERVICE_URL: http://health-monitor:3012
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
