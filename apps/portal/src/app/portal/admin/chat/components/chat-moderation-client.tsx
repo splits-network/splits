@@ -55,7 +55,7 @@ export default function ChatModerationClient() {
         if (!token) return;
 
         const client = createAuthenticatedClient(token);
-        const response: any = await client.get("/admin/chat/reports", {
+        const response: any = await client.get("/chat/reports", {
             params: { limit: 50 },
         });
         setReports((response?.data || []) as ReportRow[]);
@@ -66,7 +66,7 @@ export default function ChatModerationClient() {
         if (!token) return;
 
         const client = createAuthenticatedClient(token);
-        const response: any = await client.get("/admin/chat/audit", {
+        const response: any = await client.get("/moderation/audit-log", {
             params: { limit: 50 },
         });
         setAudit((response?.data || []) as AuditRow[]);
@@ -78,7 +78,7 @@ export default function ChatModerationClient() {
 
         const client = createAuthenticatedClient(token);
         const response: any = await client.get(
-            `/admin/chat/reports/${reportId}/evidence`,
+            `/chat/reports/${reportId}/view/evidence`,
         );
         setEvidence(response?.data as EvidencePayload);
     };
@@ -122,7 +122,7 @@ export default function ChatModerationClient() {
         if (!token) return;
 
         const client = createAuthenticatedClient(token);
-        await client.post(`/admin/chat/reports/${reportId}/action`, {
+        await client.post(`/chat/reports/${reportId}/actions/moderate`, {
             action,
             status,
         });

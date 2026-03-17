@@ -53,8 +53,8 @@ export default function ThreadPanel({
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        const response: any = await client.get(
-            `/chat/conversations/${conversationId}/resync`,
+        const response: any = await client.post(
+            `/chat/conversations/${conversationId}/actions/resync`,
         );
         const payload = response?.data as ResyncData;
         setData(payload);
@@ -72,7 +72,7 @@ export default function ThreadPanel({
         const client = createAuthenticatedClient(token);
         try {
             await client.post(
-                `/chat/conversations/${conversationId}/read-receipt`,
+                `/chat/conversations/${conversationId}/actions/read-receipt`,
                 { lastReadMessageId },
             );
         } catch {
@@ -209,7 +209,7 @@ export default function ThreadPanel({
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        await client.post(`/chat/conversations/${conversationId}/accept`);
+        await client.post(`/chat/conversations/${conversationId}/actions/accept`);
         await fetchResync();
         requestChatRefresh();
     };
@@ -218,7 +218,7 @@ export default function ThreadPanel({
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        await client.post(`/chat/conversations/${conversationId}/decline`);
+        await client.post(`/chat/conversations/${conversationId}/actions/decline`);
         toast.success("Conversation declined.");
         await fetchResync();
         requestChatRefresh();
@@ -229,11 +229,12 @@ export default function ThreadPanel({
         if (!token) return;
         const client = createAuthenticatedClient(token);
         if (data?.participant.archived_at) {
-            await client.delete(
-                `/chat/conversations/${conversationId}/archive`,
+            await client.post(
+                `/chat/conversations/${conversationId}/actions/archive`,
+                { archived: false },
             );
         } else {
-            await client.post(`/chat/conversations/${conversationId}/archive`);
+            await client.post(`/chat/conversations/${conversationId}/actions/archive`, { archived: true });
         }
         await fetchResync();
     };
@@ -243,9 +244,9 @@ export default function ThreadPanel({
         if (!token) return;
         const client = createAuthenticatedClient(token);
         if (data?.participant.muted_at) {
-            await client.delete(`/chat/conversations/${conversationId}/mute`);
+            await client.post(`/chat/conversations/${conversationId}/actions/mute`, { muted: false });
         } else {
-            await client.post(`/chat/conversations/${conversationId}/mute`);
+            await client.post(`/chat/conversations/${conversationId}/actions/mute`, { muted: true });
         }
         await fetchResync();
     };
@@ -255,7 +256,7 @@ export default function ThreadPanel({
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        await client.post(`/chat/blocks`, { blockedUserId: otherUserId });
+        await client.post(`/blocks`, { blocked_user_id: otherUserId });
         toast.success("User blocked.");
         await fetchResync();
         requestChatRefresh();
@@ -276,7 +277,7 @@ export default function ThreadPanel({
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        await client.post(`/chat/reports`, {
+        await client.post(`/chat/reports/actions/submit`, {
             conversationId,
             reportedUserId: otherUserId,
             category: reportCategory,

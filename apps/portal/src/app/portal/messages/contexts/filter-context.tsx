@@ -121,7 +121,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        const response: any = await client.get("/chat/conversations", {
+        const response: any = await client.get("/chat/conversations/views/list-for-user", {
             params: { filter: filters.mailbox, limit: 50 },
         });
         const data = response?.data || [];
@@ -134,7 +134,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         if (!token) return;
         const client = createAuthenticatedClient(token);
         try {
-            const response: any = await client.get("/chat/conversations", {
+            const response: any = await client.get("/chat/conversations/views/list-for-user", {
                 params: { filter: "requests", limit: 100 },
             });
             const data = response?.data || [];

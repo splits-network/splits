@@ -83,10 +83,10 @@ export function ActionsToolbar({
             if (!token) return;
             const client = createAuthenticatedClient(token);
             if (isMuted) {
-                await client.delete(`/chat/conversations/${convoId}/mute`);
+                await client.post(`/chat/conversations/${convoId}/actions/mute`, { muted: false });
                 toast.success("Conversation unmuted.");
             } else {
-                await client.post(`/chat/conversations/${convoId}/mute`);
+                await client.post(`/chat/conversations/${convoId}/actions/mute`, { muted: true });
                 toast.success("Conversation muted.");
             }
             refresh();
@@ -104,10 +104,10 @@ export function ActionsToolbar({
             if (!token) return;
             const client = createAuthenticatedClient(token);
             if (isArchived) {
-                await client.delete(`/chat/conversations/${convoId}/archive`);
+                await client.post(`/chat/conversations/${convoId}/actions/archive`, { archived: false });
                 toast.success("Conversation unarchived.");
             } else {
-                await client.post(`/chat/conversations/${convoId}/archive`);
+                await client.post(`/chat/conversations/${convoId}/actions/archive`, { archived: true });
                 toast.success("Conversation archived.");
             }
             refresh();
@@ -126,8 +126,8 @@ export function ActionsToolbar({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.post(`/chat/blocks`, {
-                blockedUserId: otherUserId,
+            await client.post(`/blocks`, {
+                blocked_user_id: otherUserId,
             });
             toast.success("User blocked.");
             refresh();
@@ -145,7 +145,7 @@ export function ActionsToolbar({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.post(`/chat/reports`, {
+            await client.post(`/chat/reports/actions/submit`, {
                 conversationId: convoId,
                 reportedUserId: otherUserId,
                 category: reportCategory,

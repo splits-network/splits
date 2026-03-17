@@ -1,19 +1,14 @@
 /**
- * Conversations V3 Service — Business Logic
+ * Conversations V3 Service -- Core CRUD Business Logic
  *
- * Core conversation CRUD with participant-based access control.
- * No HTTP concepts. Typed errors only.
+ * Participant-based access control. No HTTP concepts. Typed errors only.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError, BadRequestError } from '@splits-network/shared-fastify';
 import { ConversationRepository } from './repository';
-import {
-  ConversationListParams,
-  CreateConversationInput,
-  UpdateConversationInput,
-} from './types';
+import { ConversationListParams, UpdateConversationInput } from './types';
 import { IEventPublisher } from '../../v2/shared/events';
 import { IChatEventPublisher } from '../shared/chat-event-publisher';
 
@@ -60,37 +55,6 @@ export class ConversationService {
     return conversation;
   }
 
-  async create(input: CreateConversationInput, clerkUserId: string) {
-    const userId = await this.resolveUserId(clerkUserId);
-
-    const record = {
-      subject: input.subject || null,
-      created_by: userId,
-    };
-    const conversation = await this.repository.create(record);
-
-    // Add creator + other participants
-    const allParticipants = [...new Set([userId, ...input.participant_ids])];
-    await this.repository.addParticipants(conversation.id, allParticipants);
-
-    await this.eventPublisher?.publish('conversation.created', {
-      conversation_id: conversation.id,
-      created_by: userId,
-      participant_count: allParticipants.length,
-    }, 'chat-service');
-
-    // Notify other participants via real-time channel
-    const otherParticipants = allParticipants.filter((id) => id !== userId);
-    for (const participantId of otherParticipants) {
-      await this.chatEventPublisher?.conversationRequested(participantId, {
-        conversationId: conversation.id,
-        requestedBy: userId,
-      });
-    }
-
-    return conversation;
-  }
-
   async update(id: string, input: UpdateConversationInput, clerkUserId: string) {
     const userId = await this.resolveUserId(clerkUserId);
     const existing = await this.repository.findById(id);
@@ -111,7 +75,7 @@ export class ConversationService {
     return updated;
   }
 
-  async archive(id: string, clerkUserId: string) {
+  async delete(id: string, clerkUserId: string) {
     const userId = await this.resolveUserId(clerkUserId);
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('Conversation', id);
@@ -125,7 +89,7 @@ export class ConversationService {
 
     await this.chatEventPublisher?.conversationUpdated(userId, {
       conversationId: id,
-      archived: true,
+      deleted: true,
     });
   }
 }

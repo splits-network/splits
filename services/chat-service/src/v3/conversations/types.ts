@@ -1,20 +1,39 @@
 /**
  * Conversations V3 Types & JSON Schemas
  *
- * Table: chat_conversations + chat_conversation_participants
- * Core CRUD for conversations. Messages, blocking, reporting, etc. are actions/views.
+ * Table: chat_conversations
+ * Columns: id, participant_a_id, participant_b_id, subject, application_id,
+ *          job_id, company_id, candidate_id, last_message_at, last_message_id,
+ *          created_at, updated_at
+ *
+ * Participant table: chat_conversation_participants
+ * Columns: conversation_id, user_id, muted_at, archived_at, request_state,
+ *          last_read_at, last_read_message_id, unread_count, created_at, updated_at
  */
+
+// --- Interfaces ---
+
+export interface ChatConversation {
+  id: string;
+  participant_a_id: string;
+  participant_b_id: string;
+  subject: string | null;
+  application_id: string | null;
+  job_id: string | null;
+  company_id: string | null;
+  candidate_id: string | null;
+  last_message_at: string | null;
+  last_message_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface ConversationListParams {
   page?: number;
   limit?: number;
   search?: string;
-}
-
-export interface CreateConversationInput {
-  participant_ids: string[];
-  subject?: string;
-  initial_message?: string;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
 }
 
 export interface UpdateConversationInput {
@@ -29,22 +48,8 @@ export const listQuerySchema = {
     page: { type: 'integer', minimum: 1, default: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
     search: { type: 'string' },
-  },
-  additionalProperties: true,
-};
-
-export const createSchema = {
-  type: 'object',
-  required: ['participant_ids'],
-  properties: {
-    participant_ids: {
-      type: 'array',
-      items: { type: 'string', format: 'uuid' },
-      minItems: 1,
-      maxItems: 10,
-    },
-    subject: { type: 'string', maxLength: 200 },
-    initial_message: { type: 'string', maxLength: 5000 },
+    sort_by: { type: 'string', enum: ['created_at', 'updated_at', 'last_message_at'] },
+    sort_order: { type: 'string', enum: ['asc', 'desc'] },
   },
   additionalProperties: false,
 };
@@ -63,14 +68,4 @@ export const idParamSchema = {
   properties: {
     id: { type: 'string', format: 'uuid' },
   },
-};
-
-export const sendMessageSchema = {
-  type: 'object',
-  required: ['body'],
-  properties: {
-    body: { type: 'string', minLength: 1, maxLength: 5000 },
-    reply_to_message_id: { type: 'string', format: 'uuid' },
-  },
-  additionalProperties: false,
 };

@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 Migration Plan: Conversations Resource - Splits Network</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a25;
+    --border: #2a2a3a;
+    --text: #e0e0e8;
+    --text-muted: #8888a0;
+    --accent: #6c63ff;
+    --accent-light: #8b83ff;
+    --recruiter: #10b981;
+    --company: #3b82f6;
+    --candidate: #f59e0b;
+    --public: #8b5cf6;
+    --admin: #ef4444;
+    --action: #ec4899;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+    --info: #3b82f6;
+    --view: #8b5cf6;
+    --crud: #10b981;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+  h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; }
+
+  .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+  .date { color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.8rem; }
+
+  section { margin-bottom: 3rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--surface2);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  tr:hover { background: var(--surface2); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .badge-crud { background: rgba(16, 185, 129, 0.15); color: var(--crud); }
+  .badge-view { background: rgba(139, 92, 246, 0.15); color: var(--view); }
+  .badge-action { background: rgba(236, 72, 153, 0.15); color: var(--action); }
+  .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+  .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .badge-info { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .badge-portal { background: rgba(59, 130, 246, 0.15); color: var(--company); }
+  .badge-candidate { background: rgba(245, 158, 11, 0.15); color: var(--candidate); }
+  .badge-gateway { background: rgba(139, 92, 246, 0.15); color: var(--view); }
+  .badge-service { background: rgba(16, 185, 129, 0.15); color: var(--crud); }
+  .badge-rewrite { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+  .badge-create { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .badge-update { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .badge-get { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .badge-post { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .badge-delete { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .badge-patch { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+
+  code {
+    background: var(--surface2);
+    padding: 0.1rem 0.35rem;
+    font-size: 0.8rem;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: var(--accent-light);
+  }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .stat-value { font-size: 2.5rem; font-weight: 900; line-height: 1; margin-bottom: 0.25rem; }
+  .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+  .flow-arrow {
+    display: inline-block;
+    color: var(--accent);
+    font-weight: 900;
+    margin: 0 0.5rem;
+  }
+
+  .file-tree {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+
+  .file-tree .dir { color: var(--accent-light); font-weight: 700; }
+  .file-tree .file { color: var(--text); }
+  .file-tree .desc { color: var(--text-muted); font-style: italic; }
+  .file-tree .new { color: var(--success); }
+  .file-tree .rewrite { color: var(--warning); }
+  .file-tree .update { color: var(--info); }
+
+  .risk-card {
+    background: var(--surface);
+    border-left: 3px solid var(--warning);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .risk-card.critical { border-left-color: var(--danger); }
+  .risk-card.info { border-left-color: var(--info); }
+
+  .risk-title { font-weight: 700; margin-bottom: 0.5rem; }
+  .risk-detail { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; }
+  .risk-decision { font-size: 0.875rem; }
+  .risk-decision strong { color: var(--accent-light); }
+
+  .consumer-group { margin-bottom: 1.5rem; }
+  .consumer-group h3 { display: flex; align-items: center; gap: 0.5rem; }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--surface2);
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+
+  .legend { display: flex; gap: 1.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-muted); }
+  .legend-dot { width: 10px; height: 10px; display: inline-block; }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .toc a { color: var(--accent-light); text-decoration: none; display: block; padding: 0.25rem 0; font-size: 0.9rem; }
+  .toc a:hover { color: var(--text); }
+
+  .alias-warning {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+  }
+  .alias-warning strong { color: var(--danger); }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    h1 { font-size: 1.75rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header style="margin-bottom: 3rem;">
+    <p class="date">V3 Migration Plan &middot; March 2026</p>
+    <h1>Conversations Resource</h1>
+    <p class="subtitle">chat-service &mdash; Full V2 &rarr; V3 migration plan with consumer mapping, route classification, and file structure</p>
+  </header>
+
+  <!-- Scope Stats -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--accent);">12</div>
+      <div class="stat-label">V2 Routes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--warning);">10</div>
+      <div class="stat-label">V3 Aliases in V2</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--success);">30</div>
+      <div class="stat-label">V3 Files (Create/Rewrite)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--info);">20</div>
+      <div class="stat-label">Frontend Files to Update</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--danger);">HIGH</div>
+      <div class="stat-label">Complexity</div>
+    </div>
+  </div>
+
+  <!-- Table of Contents -->
+  <div class="toc">
+    <h4>Contents</h4>
+    <a href="#v2-surface">1. V2 API Surface</a>
+    <a href="#v3-aliases">2. V3 Alias Problem</a>
+    <a href="#existing-skeleton">3. Existing V3 Skeleton Issues</a>
+    <a href="#classification">4. V3 Route Classification</a>
+    <a href="#consumers">5. Consumer Map</a>
+    <a href="#role-auth">6. Role-Based Authorization</a>
+    <a href="#frontend-impact">7. Frontend Impact</a>
+    <a href="#v3-file-plan">8. V3 File Plan</a>
+    <a href="#risks">9. Key Risks &amp; Decisions</a>
+    <a href="#scope">10. Migration Scope Summary</a>
+  </div>
+
+  <!-- V2 API Surface -->
+  <section id="v2-surface">
+    <h2>1. V2 API Surface</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">All conversation-related routes in <code>services/chat-service/src/v2/chat/routes.ts</code>. Excludes presence, blocks, reports, attachments, admin, and messages (separate resources).</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Handler</th>
+          <th>Request Shape</th>
+          <th>Response</th>
+          <th>V3 Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/v2/chat/conversations</code></td>
+          <td>createOrFindConversation</td>
+          <td><code>{ participantUserId, context? }</code></td>
+          <td><code>{ data: Conversation }</code> 201</td>
+          <td><span class="badge badge-action">Action</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/api/v2/chat/conversations</code></td>
+          <td>listConversationsWithParticipants</td>
+          <td><code>?filter=inbox|requests|archived&amp;limit&amp;cursor</code></td>
+          <td><code>{ data: [...], pagination }</code></td>
+          <td><span class="badge badge-view">View</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/api/v2/chat/conversations/:id/resync</code></td>
+          <td>resyncConversationWithParticipants</td>
+          <td><code>?after&amp;before&amp;limit</code></td>
+          <td><code>{ data: { conversation, participant, messages } }</code></td>
+          <td><span class="badge badge-view">View</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/api/v2/chat/conversations/:id/messages</code></td>
+          <td>listMessages</td>
+          <td><code>?after&amp;before&amp;limit</code></td>
+          <td><code>{ data: Message[] }</code></td>
+          <td><span class="badge badge-info" style="font-size:0.6rem;">Messages Resource</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/v2/chat/conversations/:id/messages</code></td>
+          <td>sendMessage</td>
+          <td><code>{ body?, clientMessageId?, attachments? }</code></td>
+          <td><code>{ data: Message }</code> 201</td>
+          <td><span class="badge badge-info" style="font-size:0.6rem;">Messages Resource</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/v2/chat/conversations/:id/accept</code></td>
+          <td>acceptConversation</td>
+          <td><code>params: { id }</code></td>
+          <td>204</td>
+          <td><span class="badge badge-action">Action</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/v2/chat/conversations/:id/decline</code></td>
+          <td>declineConversation</td>
+          <td><code>params: { id }</code></td>
+          <td>204</td>
+          <td><span class="badge badge-action">Action</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/v2/chat/conversations/:id/mute</code></td>
+          <td>muteConversation(true)</td>
+          <td><code>params: { id }</code></td>
+          <td>204</td>
+          <td><span class="badge badge-action">Action</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-delete">DELETE</span></td>
+          <td><code>/api/v2/chat/conversations/:id/mute</code></td>
+          <td>muteConversation(false)</td>
+          <td><code>params: { id }</code></td>
+          <td>204</td>
+          <td><span class="badge badge-action">Action</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/v2/chat/conversations/:id/archive</code></td>
+          <td>archiveConversation(true)</td>
+          <td><code>params: { id }</code></td>
+          <td>204</td>
+          <td><span class="badge badge-action">Action</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-delete">DELETE</span></td>
+          <td><code>/api/v2/chat/conversations/:id/archive</code></td>
+          <td>archiveConversation(false)</td>
+          <td><code>params: { id }</code></td>
+          <td>204</td>
+          <td><span class="badge badge-action">Action</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/v2/chat/conversations/:id/read-receipt</code></td>
+          <td>updateReadReceipt</td>
+          <td><code>{ lastReadMessageId? }</code></td>
+          <td>204</td>
+          <td><span class="badge badge-action">Action</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:var(--view);"></span> View (joins/enrichment)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--action);"></span> Action (state transitions/side effects)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--info);"></span> Out of scope (messages resource)</div>
+    </div>
+  </section>
+
+  <!-- V3 Alias Problem -->
+  <section id="v3-aliases">
+    <h2>2. V3 Alias Problem</h2>
+    <div class="alias-warning">
+      <strong>CRITICAL: 10 V3 routes are registered inside the V2 routes file.</strong>
+      <p style="margin-top:0.5rem;">The V2 monolith <code>v2/chat/routes.ts</code> registers fake "V3" routes &mdash; these are copy-pasted V2 handlers behind <code>/api/v3/</code> URLs. This violates the V2 read-only rule and prevents proper V3 migration. All 10 aliases must be removed when proper V3 handlers are ready.</p>
+    </div>
+    <table>
+      <thead>
+        <tr><th>V3 Alias Path</th><th>V2 File Location</th><th>V3 Replacement</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>GET /api/v3/chat/conversations</code></td>
+          <td>v2/chat/routes.ts line 310</td>
+          <td><code>GET /v3/chat/conversations/views/inbox</code></td>
+        </tr>
+        <tr>
+          <td><code>POST /api/v3/chat/conversations</code></td>
+          <td>v2/chat/routes.ts line 290</td>
+          <td><code>POST /v3/chat/conversations/actions/start</code></td>
+        </tr>
+        <tr>
+          <td><code>GET /api/v3/chat/conversations/:id/resync</code></td>
+          <td>v2/chat/routes.ts line 733</td>
+          <td><code>GET /v3/chat/conversations/:id/view/resync</code></td>
+        </tr>
+        <tr>
+          <td><code>POST /api/v3/chat/conversations/:id/accept</code></td>
+          <td>v2/chat/routes.ts line 757</td>
+          <td><code>POST /v3/chat/conversations/:id/actions/accept</code></td>
+        </tr>
+        <tr>
+          <td><code>POST /api/v3/chat/conversations/:id/decline</code></td>
+          <td>v2/chat/routes.ts line 772</td>
+          <td><code>POST /v3/chat/conversations/:id/actions/decline</code></td>
+        </tr>
+        <tr>
+          <td><code>POST /api/v3/chat/conversations/:id/mute</code></td>
+          <td>v2/chat/routes.ts line 788</td>
+          <td><code>POST /v3/chat/conversations/:id/actions/mute</code></td>
+        </tr>
+        <tr>
+          <td><code>DELETE /api/v3/chat/conversations/:id/mute</code></td>
+          <td>v2/chat/routes.ts line 801</td>
+          <td>Merged into POST actions/mute</td>
+        </tr>
+        <tr>
+          <td><code>POST /api/v3/chat/conversations/:id/archive</code></td>
+          <td>v2/chat/routes.ts line 817</td>
+          <td><code>POST /v3/chat/conversations/:id/actions/archive</code></td>
+        </tr>
+        <tr>
+          <td><code>DELETE /api/v3/chat/conversations/:id/archive</code></td>
+          <td>v2/chat/routes.ts line 833</td>
+          <td>Merged into POST actions/archive</td>
+        </tr>
+        <tr>
+          <td><code>POST /api/v3/chat/conversations/:id/read-receipt</code></td>
+          <td>v2/chat/routes.ts line 849</td>
+          <td><code>POST /v3/chat/conversations/:id/actions/mark-read</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Existing V3 Skeleton Issues -->
+  <section id="existing-skeleton">
+    <h2>3. Existing V3 Skeleton Issues</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">4 files exist at <code>services/chat-service/src/v3/conversations/</code> but have significant mismatches with V2 behavior. All require full rewrite.</p>
+    <div class="grid-2">
+      <div class="risk-card critical">
+        <div class="risk-title">types.ts &mdash; Wrong data model</div>
+        <div class="risk-detail"><code>CreateConversationInput</code> uses <code>participant_ids[]</code> for generic multi-party conversations, but V2 is strictly 1:1 with <code>participantUserId</code> + context + representation routing.</div>
+      </div>
+      <div class="risk-card critical">
+        <div class="risk-title">repository.ts &mdash; Missing enrichment path</div>
+        <div class="risk-detail"><code>findAll</code> does a 2-step query (get participant IDs then filter conversations) but returns flat data. Frontend needs participant names/roles. This belongs in an inbox view, not core CRUD.</div>
+      </div>
+      <div class="risk-card critical">
+        <div class="risk-title">service.ts &mdash; Wrong create/delete semantics</div>
+        <div class="risk-detail"><code>create()</code> is generic insert, not find-or-create with routing. <code>archive()</code> sets <code>archived: true</code> on <code>chat_conversations</code>, but V2 archives per-participant via <code>archived_at</code> on <code>chat_conversation_participants</code>.</div>
+      </div>
+      <div class="risk-card critical">
+        <div class="risk-title">routes.ts &mdash; Missing core routes</div>
+        <div class="risk-detail">Only registers GET :id, PATCH :id, DELETE :id. GET list and POST create are missing &mdash; comments say "handled by V3 alias in V2 routes." No views/ or actions/ directories exist.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Route Classification -->
+  <section id="classification">
+    <h2>4. V3 Route Classification</h2>
+    <table>
+      <thead>
+        <tr><th>V2 Route</th><th>V3 Category</th><th>V3 Path</th><th>Reason</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>GET /v2/chat/conversations</code></td>
+          <td><span class="badge badge-view">View</span></td>
+          <td><code>GET /v3/chat/conversations/views/inbox</code></td>
+          <td>Joins 6+ tables for enriched participant data (names, emails, roles)</td>
+        </tr>
+        <tr>
+          <td><code>GET /v2/chat/conversations/:id/resync</code></td>
+          <td><span class="badge badge-view">View</span></td>
+          <td><code>GET /v3/chat/conversations/:id/view/resync</code></td>
+          <td>Multi-table join: conversation + enriched participants + messages</td>
+        </tr>
+        <tr>
+          <td><code>POST /v2/chat/conversations</code></td>
+          <td><span class="badge badge-action">Action</span></td>
+          <td><code>POST /v3/chat/conversations/actions/start</code></td>
+          <td>Find-or-create with context validation, representation routing, system message, events</td>
+        </tr>
+        <tr>
+          <td><code>POST /v2/.../accept</code></td>
+          <td><span class="badge badge-action">Action</span></td>
+          <td><code>POST /v3/chat/conversations/:id/actions/accept</code></td>
+          <td>State transition: request_state &rarr; accepted + event</td>
+        </tr>
+        <tr>
+          <td><code>POST /v2/.../decline</code></td>
+          <td><span class="badge badge-action">Action</span></td>
+          <td><code>POST /v3/chat/conversations/:id/actions/decline</code></td>
+          <td>State transition: request_state &rarr; declined + archive + event</td>
+        </tr>
+        <tr>
+          <td><code>POST+DELETE /v2/.../mute</code></td>
+          <td><span class="badge badge-action">Action</span></td>
+          <td><code>POST /v3/chat/conversations/:id/actions/mute</code></td>
+          <td>Merged: <code>{ muted: boolean }</code> body replaces POST/DELETE split</td>
+        </tr>
+        <tr>
+          <td><code>POST+DELETE /v2/.../archive</code></td>
+          <td><span class="badge badge-action">Action</span></td>
+          <td><code>POST /v3/chat/conversations/:id/actions/archive</code></td>
+          <td>Merged: <code>{ archived: boolean }</code> body replaces POST/DELETE split</td>
+        </tr>
+        <tr>
+          <td><code>POST /v2/.../read-receipt</code></td>
+          <td><span class="badge badge-action">Action</span></td>
+          <td><code>POST /v3/chat/conversations/:id/actions/mark-read</code></td>
+          <td>State mutation via RPC + event publishing</td>
+        </tr>
+        <tr style="opacity: 0.5;">
+          <td><code>GET /v2/.../messages</code></td>
+          <td><span class="badge badge-info" style="font-size:0.6rem;">Out of scope</span></td>
+          <td>V3 messages resource</td>
+          <td>Already handled by separate V3 messages resource</td>
+        </tr>
+        <tr style="opacity: 0.5;">
+          <td><code>POST /v2/.../messages</code></td>
+          <td><span class="badge badge-info" style="font-size:0.6rem;">Out of scope</span></td>
+          <td>V3 messages resource</td>
+          <td>Already handled by separate V3 messages resource</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="grid-3" style="margin-top: 1rem;">
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 2rem; font-weight: 900; color: var(--crud);">5</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Core CRUD Routes</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">LIST, GET, CREATE, PATCH, DELETE</div>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 2rem; font-weight: 900; color: var(--view);">2</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Views</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Inbox, Resync</div>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 2rem; font-weight: 900; color: var(--action);">6</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Actions</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Start, Accept, Decline, Mute, Archive, Mark-Read</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Consumer Map -->
+  <section id="consumers">
+    <h2>5. Consumer Map</h2>
+
+    <div class="consumer-group">
+      <h3><span class="badge badge-portal">Portal</span> apps/portal/ &mdash; 10 files</h3>
+      <table>
+        <thead><tr><th>File</th><th>Endpoint</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>src/lib/chat-start.ts</code></td>
+            <td><code>POST /chat/conversations</code></td>
+            <td>startChatConversation() &mdash; creates/finds conversation with participantUserId + context</td>
+          </tr>
+          <tr>
+            <td><code>src/lib/chat-start.ts</code></td>
+            <td><code>POST /chat/conversations/:id/messages</code></td>
+            <td>sendChatMessage() &mdash; sends initial message after starting</td>
+          </tr>
+          <tr>
+            <td><code>src/components/portal-chat-sidebar.tsx</code></td>
+            <td><code>GET /chat/conversations</code></td>
+            <td>fetchConversations() &mdash; sidebar inbox/requests list</td>
+          </tr>
+          <tr>
+            <td><code>src/components/chat/thread-panel.tsx</code></td>
+            <td><code>GET /chat/conversations/:id/resync</code></td>
+            <td>fetchResync() &mdash; full conversation load when thread opens</td>
+          </tr>
+          <tr>
+            <td><code>src/components/chat/thread-panel.tsx</code></td>
+            <td><code>POST /:id/read-receipt</code></td>
+            <td>markRead() after loading messages</td>
+          </tr>
+          <tr>
+            <td><code>src/components/chat/thread-panel.tsx</code></td>
+            <td><code>POST+GET /:id/messages</code></td>
+            <td>Send messages + infinite scroll pagination</td>
+          </tr>
+          <tr>
+            <td><code>src/components/basel/messages/detail-header.tsx</code></td>
+            <td><code>POST /:id/accept, /:id/decline</code></td>
+            <td>Accept/Decline buttons for pending requests</td>
+          </tr>
+          <tr>
+            <td><code>src/components/basel/messages/actions-toolbar.tsx</code></td>
+            <td><code>POST+DEL /:id/mute, /:id/archive</code></td>
+            <td>Speed menu toggle actions</td>
+          </tr>
+          <tr>
+            <td><code>src/app/portal/messages/contexts/filter-context.tsx</code></td>
+            <td><code>GET /chat/conversations</code></td>
+            <td>Full-page messages &mdash; conversations by mailbox filter</td>
+          </tr>
+          <tr>
+            <td><code>src/components/basel/messages/stats.tsx</code></td>
+            <td><code>GET /chat/conversations</code></td>
+            <td>Message stats &mdash; inbox/requests/archived counts</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="consumer-group">
+      <h3><span class="badge badge-candidate">Candidate</span> apps/candidate/ &mdash; 9 files</h3>
+      <table>
+        <thead><tr><th>File</th><th>Endpoint</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>src/lib/chat-start.ts</code></td>
+            <td><code>POST /chat/conversations</code></td>
+            <td>startChatConversation() &mdash; creates/finds conversation with recruiter</td>
+          </tr>
+          <tr>
+            <td><code>src/components/candidate-chat-sidebar.tsx</code></td>
+            <td><code>GET /chat/conversations</code></td>
+            <td>fetchConversations() &mdash; sidebar inbox/requests list</td>
+          </tr>
+          <tr>
+            <td><code>src/app/portal/messages/components/browse/list-panel.tsx</code></td>
+            <td><code>GET /chat/conversations</code></td>
+            <td>Full-page messages list with filter</td>
+          </tr>
+          <tr>
+            <td><code>src/app/portal/messages/components/thread/thread-panel.tsx</code></td>
+            <td><code>GET /:id/resync, POST /:id/read-receipt, POST+GET /:id/messages</code></td>
+            <td>Thread: resync, mark-read, send, infinite scroll</td>
+          </tr>
+          <tr>
+            <td><code>src/app/portal/messages/components/thread/thread-panel.tsx</code></td>
+            <td><code>POST /:id/accept, /:id/decline, /:id/mute, /:id/archive</code></td>
+            <td>Inline action buttons (accept, decline, mute, archive)</td>
+          </tr>
+          <tr>
+            <td><code>src/app/(public)/marketplace/[slug]/recruiter-profile-client.tsx</code></td>
+            <td><code>GET /chat/conversations</code></td>
+            <td>Check existing conversations with recruiter</td>
+          </tr>
+          <tr>
+            <td><code>src/app/(public)/marketplace/[slug]/connect-modal.tsx</code></td>
+            <td><code>POST /:id/messages</code></td>
+            <td>Send initial message after connecting</td>
+          </tr>
+          <tr>
+            <td><code>src/app/(public)/firms/[slug]/firm-connect-modal.tsx</code></td>
+            <td><code>POST /:id/messages</code></td>
+            <td>Send initial message to firm member</td>
+          </tr>
+          <tr>
+            <td><code>src/app/portal/dashboard/hooks/use-candidate-notifications.ts</code></td>
+            <td><code>GET /chat/conversations</code></td>
+            <td>Dashboard unread message counts</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="consumer-group">
+      <h3><span class="badge badge-gateway">Gateway</span> api-gateway &mdash; 2 files</h3>
+      <table>
+        <thead><tr><th>File</th><th>Endpoint</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>src/routes/v3/chat.ts</code></td>
+            <td><code>ALL /api/v3/chat/conversations/*</code></td>
+            <td>V3 declarative proxy routes &mdash; needs URL updates for views/actions</td>
+          </tr>
+          <tr>
+            <td><code>src/routes/v2/chat.ts</code></td>
+            <td><code>/api/v2/chat/*</code></td>
+            <td>V2 wildcard proxy &mdash; no changes needed</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="consumer-group">
+      <h3><span class="badge badge-service">Cross-Service</span></h3>
+      <table>
+        <thead><tr><th>File</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>services/notification-service/src/consumers/chat/consumer.ts</code></td>
+            <td>Consumes <code>chat.message.created</code> RabbitMQ events for email notifications &mdash; no change needed</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Role-Based Authorization -->
+  <section id="role-auth">
+    <h2>6. Role-Based Authorization</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">Authorization is <strong>participant-based</strong>, not role-based. All roles (recruiter, candidate, company_user) use the same endpoints. No role-specific views needed.</p>
+    <div class="grid-2">
+      <div class="card">
+        <h4>Access Model</h4>
+        <p style="font-size: 0.875rem;">The service resolves <code>clerkUserId</code> &rarr; <code>identityUserId</code> via AccessContextResolver, then checks <code>chat_conversation_participants</code> for membership. You must be a participant to access any conversation endpoint.</p>
+      </div>
+      <div class="card">
+        <h4>Context Access (Start Action Only)</h4>
+        <p style="font-size: 0.875rem;">Context access validation differs by role when <em>starting</em> a conversation:<br>
+        &bull; Candidates: check <code>application.candidate_id</code><br>
+        &bull; Recruiters: check <code>application.recruiter_id</code> or job owner/assignee<br>
+        &bull; Company users: check org membership<br>
+        The branching is internal to <code>assertContextAccess</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Frontend Impact -->
+  <section id="frontend-impact">
+    <h2>7. Frontend Impact</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">Frontend already calls <code>/api/v3</code> paths (SplitsApiClient defaults pathPrefix to <code>/api/v3</code>). Changes are URL path updates to views/actions namespace + body shape changes for mute/archive.</p>
+
+    <h3 style="margin-top: 1.5rem;">URL Changes Required</h3>
+    <table>
+      <thead>
+        <tr><th>Current Frontend Call</th><th>New V3 Path</th><th>Change Type</th><th>Files Affected</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>GET /chat/conversations</code></td>
+          <td><code>GET /chat/conversations/views/inbox</code></td>
+          <td>URL change</td>
+          <td>9 files (5 portal, 4 candidate)</td>
+        </tr>
+        <tr>
+          <td><code>POST /chat/conversations</code></td>
+          <td><code>POST /chat/conversations/actions/start</code></td>
+          <td>URL change</td>
+          <td>2 files (portal + candidate chat-start.ts)</td>
+        </tr>
+        <tr>
+          <td><code>GET /chat/conversations/:id/resync</code></td>
+          <td><code>GET /chat/conversations/:id/view/resync</code></td>
+          <td>URL change</td>
+          <td>2 files (portal + candidate thread-panel.tsx)</td>
+        </tr>
+        <tr>
+          <td><code>POST /:id/accept</code></td>
+          <td><code>POST /:id/actions/accept</code></td>
+          <td>URL change</td>
+          <td>2 files (detail-header + candidate thread-panel)</td>
+        </tr>
+        <tr>
+          <td><code>POST /:id/decline</code></td>
+          <td><code>POST /:id/actions/decline</code></td>
+          <td>URL change</td>
+          <td>2 files</td>
+        </tr>
+        <tr>
+          <td><code>POST+DELETE /:id/mute</code></td>
+          <td><code>POST /:id/actions/mute</code></td>
+          <td>URL + body change: <code>{ muted: boolean }</code></td>
+          <td>2 files (actions-toolbar + candidate thread-panel)</td>
+        </tr>
+        <tr>
+          <td><code>POST+DELETE /:id/archive</code></td>
+          <td><code>POST /:id/actions/archive</code></td>
+          <td>URL + body change: <code>{ archived: boolean }</code></td>
+          <td>2 files</td>
+        </tr>
+        <tr>
+          <td><code>POST /:id/read-receipt</code></td>
+          <td><code>POST /:id/actions/mark-read</code></td>
+          <td>URL change</td>
+          <td>2 files (portal + candidate thread-panel)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card" style="margin-top: 1rem;">
+      <h4>No change needed</h4>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">
+        <code>POST/GET /chat/conversations/:id/messages</code> &mdash; already handled by V3 messages resource.<br>
+        <code>notification-service</code> &mdash; RabbitMQ consumer, no HTTP dependency.
+      </p>
+    </div>
+  </section>
+
+  <!-- V3 File Plan -->
+  <section id="v3-file-plan">
+    <h2>8. V3 File Plan</h2>
+    <div class="file-tree">
+<span class="dir">services/chat-service/src/v3/conversations/</span>
+├── <span class="rewrite">types.ts</span> <span class="desc">REWRITE &mdash; Match V2 data model, add all JSON schemas</span>
+├── <span class="rewrite">repository.ts</span> <span class="desc">REWRITE &mdash; Flat select('*') CRUD on chat_conversations</span>
+├── <span class="rewrite">service.ts</span> <span class="desc">REWRITE &mdash; Core CRUD service with participant checks</span>
+├── <span class="rewrite">routes.ts</span> <span class="desc">REWRITE &mdash; Core 5 CRUD + register views/actions</span>
+│
+├── <span class="dir">views/</span>
+│   ├── <span class="new">inbox.repository.ts</span> <span class="desc">NEW &mdash; Enriched conversation list (6-table join, batch user fetch)</span>
+│   ├── <span class="new">inbox.service.ts</span> <span class="desc">NEW &mdash; Resolve userId, delegate to enriched repo</span>
+│   ├── <span class="new">inbox.route.ts</span> <span class="desc">NEW &mdash; GET /views/inbox with query schema</span>
+│   ├── <span class="new">resync.repository.ts</span> <span class="desc">NEW &mdash; Conversation + enriched participants + messages</span>
+│   ├── <span class="new">resync.service.ts</span> <span class="desc">NEW &mdash; Verify participant, fetch composite response</span>
+│   └── <span class="new">resync.route.ts</span> <span class="desc">NEW &mdash; GET /:id/view/resync with query schema</span>
+│
+└── <span class="dir">actions/</span>
+    ├── <span class="new">start.repository.ts</span> <span class="desc">NEW &mdash; Find-or-create, representation routing queries (6 tables)</span>
+    ├── <span class="new">start.service.ts</span> <span class="desc">NEW &mdash; Full createOrFindConversation business logic (~165 lines)</span>
+    ├── <span class="new">start.route.ts</span> <span class="desc">NEW &mdash; POST /actions/start { participantUserId, context? }</span>
+    ├── <span class="new">accept.repository.ts</span> <span class="desc">NEW &mdash; Update participant state to accepted</span>
+    ├── <span class="new">accept.service.ts</span> <span class="desc">NEW &mdash; Verify participant, update state, publish event</span>
+    ├── <span class="new">accept.route.ts</span> <span class="desc">NEW &mdash; POST /:id/actions/accept</span>
+    ├── <span class="new">decline.repository.ts</span> <span class="desc">NEW &mdash; Update state to declined + archive</span>
+    ├── <span class="new">decline.service.ts</span> <span class="desc">NEW &mdash; Verify, set declined + archived, publish event</span>
+    ├── <span class="new">decline.route.ts</span> <span class="desc">NEW &mdash; POST /:id/actions/decline</span>
+    ├── <span class="new">mute.repository.ts</span> <span class="desc">NEW &mdash; Set/clear muted_at on participant</span>
+    ├── <span class="new">mute.service.ts</span> <span class="desc">NEW &mdash; Verify participant, toggle mute, publish event</span>
+    ├── <span class="new">mute.route.ts</span> <span class="desc">NEW &mdash; POST /:id/actions/mute { muted: boolean }</span>
+    ├── <span class="new">archive.repository.ts</span> <span class="desc">NEW &mdash; Set/clear archived_at on participant</span>
+    ├── <span class="new">archive.service.ts</span> <span class="desc">NEW &mdash; Verify participant, toggle archive, publish event</span>
+    ├── <span class="new">archive.route.ts</span> <span class="desc">NEW &mdash; POST /:id/actions/archive { archived: boolean }</span>
+    ├── <span class="new">mark-read.repository.ts</span> <span class="desc">NEW &mdash; Execute chat_mark_read RPC</span>
+    ├── <span class="new">mark-read.service.ts</span> <span class="desc">NEW &mdash; Verify participant, call RPC, publish event</span>
+    └── <span class="new">mark-read.route.ts</span> <span class="desc">NEW &mdash; POST /:id/actions/mark-read { lastReadMessageId? }</span>
+
+<span class="dir">services/chat-service/src/v3/</span>
+└── <span class="update">routes.ts</span> <span class="desc">UPDATE &mdash; Pass additional dependencies for views/actions</span>
+
+<span class="dir">services/api-gateway/src/routes/v3/</span>
+└── <span class="update">chat.ts</span> <span class="desc">UPDATE &mdash; Replace non-standard paths with views/actions URLs</span>
+
+<span class="dir">services/chat-service/src/v2/chat/</span>
+└── <span class="rewrite" style="color: var(--danger);">routes.ts</span> <span class="desc" style="color: var(--danger);">REMOVE V3 ALIASES &mdash; Delete 10 /api/v3/* route registrations from V2 file</span>
+    </div>
+
+    <div class="grid-3" style="margin-top: 1rem;">
+      <div class="card" style="border-left: 3px solid var(--success);">
+        <div style="font-size: 1.5rem; font-weight: 900; color: var(--success);">24</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Files to Create</div>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--warning);">
+        <div style="font-size: 1.5rem; font-weight: 900; color: var(--warning);">4</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Files to Rewrite</div>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--info);">
+        <div style="font-size: 1.5rem; font-weight: 900; color: var(--info);">2</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Files to Update</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Risks & Decisions -->
+  <section id="risks">
+    <h2>9. Key Risks &amp; Decisions</h2>
+
+    <div class="risk-card critical">
+      <div class="risk-title">Existing V3 skeleton has wrong data model</div>
+      <div class="risk-detail">V3 <code>create()</code> uses <code>participant_ids[]</code> for generic multi-party conversations, but V2 is strictly 1:1 with <code>participantUserId</code> + context + representation routing. V3 DELETE archives the conversation table, but V2 archives per-participant.</div>
+      <div class="risk-decision"><strong>Decision:</strong> Full rewrite of all 4 existing V3 skeleton files. No incremental patching.</div>
+    </div>
+
+    <div class="risk-card critical">
+      <div class="risk-title">V3 aliases in V2 routes.ts create route conflicts</div>
+      <div class="risk-detail">V2 <code>routes.ts</code> registers 10+ routes under <code>/api/v3/*</code> paths. New proper V3 files will conflict. The aliases must be removed when proper V3 handlers are ready.</div>
+      <div class="risk-decision"><strong>Decision:</strong> Remove V3 aliases from V2 file. This is the ONE exception to "never modify V2" &mdash; we're removing V3 paths from V2, not modifying V2 behavior.</div>
+    </div>
+
+    <div class="risk-card">
+      <div class="risk-title">DELETE method for mute/archive violates V3 standard</div>
+      <div class="risk-detail">V2 uses POST to mute/archive and DELETE to unmute/unarchive. V3 actions are POST-only. Frontend must change from separate POST/DELETE calls to single POST with boolean body.</div>
+      <div class="risk-decision"><strong>Decision:</strong> Merge into single POST action with <code>{ muted: boolean }</code> / <code>{ archived: boolean }</code> body. Frontend change is straightforward.</div>
+    </div>
+
+    <div class="risk-card info">
+      <div class="risk-title">Core CRUD POST create vs Start action</div>
+      <div class="risk-detail">V3 standard requires Core 5 with POST create, but the real business operation is find-or-create with routing &mdash; that's an action. Having both could cause ambiguity.</div>
+      <div class="risk-decision"><strong>Decision:</strong> Core CRUD POST create = simple insert (internal/service use). Frontend-facing find-or-create with routing = <code>/actions/start</code>. Document clearly.</div>
+    </div>
+
+    <div class="risk-card info">
+      <div class="risk-title">Messages endpoints overlap with conversations</div>
+      <div class="risk-detail">GET/POST <code>/conversations/:id/messages</code> are in V2 conversation routes but are really messages operations. V3 already has a separate messages resource.</div>
+      <div class="risk-decision"><strong>Decision:</strong> Leave in V3 messages resource. Do NOT duplicate in conversations migration. Out of scope.</div>
+    </div>
+
+    <div class="risk-card info">
+      <div class="risk-title">Related resources out of scope</div>
+      <div class="risk-detail">Presence, blocks, reports, attachments, admin moderation are all registered in the same V2 routes.ts file but are independent resources.</div>
+      <div class="risk-decision"><strong>Decision:</strong> Each gets its own migration plan: <code>/api:plan</code> for blocks, reports, attachments, presence, admin-moderation.</div>
+    </div>
+  </section>
+
+  <!-- Scope Summary -->
+  <section id="scope">
+    <h2>10. Migration Scope Summary</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>Backend (chat-service)</h4>
+        <table>
+          <tbody>
+            <tr><td>Core CRUD files</td><td style="text-align:right;">4 <span class="badge badge-rewrite">rewrite</span></td></tr>
+            <tr><td>View files (inbox + resync)</td><td style="text-align:right;">6 <span class="badge badge-create">new</span></td></tr>
+            <tr><td>Action files (start + 5 participant actions)</td><td style="text-align:right;">18 <span class="badge badge-create">new</span></td></tr>
+            <tr><td>V3 routes registry</td><td style="text-align:right;">1 <span class="badge badge-update">update</span></td></tr>
+            <tr><td>V2 routes (remove aliases)</td><td style="text-align:right;">1 <span class="badge badge-danger">cleanup</span></td></tr>
+            <tr><td style="font-weight:700;">Total backend</td><td style="text-align:right; font-weight:700;">30 files</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h4>Gateway + Frontend</h4>
+        <table>
+          <tbody>
+            <tr><td>Gateway V3 chat routes</td><td style="text-align:right;">1 <span class="badge badge-update">update</span></td></tr>
+            <tr><td>Portal app files</td><td style="text-align:right;">~10 <span class="badge badge-update">update</span></td></tr>
+            <tr><td>Candidate app files</td><td style="text-align:right;">~10 <span class="badge badge-update">update</span></td></tr>
+            <tr><td style="font-weight:700;">Total frontend</td><td style="text-align:right; font-weight:700;">~21 files</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 1rem; border-left: 3px solid var(--accent);">
+      <h4>Recommended Migration Order</h4>
+      <ol style="font-size: 0.875rem; padding-left: 1.25rem; line-height: 2;">
+        <li>Rewrite <strong>types.ts</strong> to match V2 data model</li>
+        <li>Rewrite <strong>repository.ts</strong> for flat CRUD</li>
+        <li>Rewrite <strong>service.ts</strong> for core CRUD operations</li>
+        <li>Create <strong>views/inbox</strong> (repository + service + route)</li>
+        <li>Create <strong>views/resync</strong> (repository + service + route)</li>
+        <li>Create <strong>actions/start</strong> (the most complex &mdash; ~165 lines of business logic)</li>
+        <li>Create <strong>actions/accept, decline, mute, archive, mark-read</strong> (simpler state transitions)</li>
+        <li>Rewrite <strong>routes.ts</strong> to register everything</li>
+        <li>Update <strong>api-gateway</strong> V3 chat routes</li>
+        <li>Remove <strong>V3 aliases</strong> from V2 routes.ts</li>
+        <li>Update <strong>frontend files</strong> (portal + candidate) with new URLs</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.8rem;">
+    Generated by <code>/api:plan chat-service conversations</code> &middot; March 2026 &middot; Review and approve before running <code>/api:migrate</code>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 Migration Plan: Messages Resource - Splits Network</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a25;
+    --border: #2a2a3a;
+    --text: #e0e0e8;
+    --text-muted: #8888a0;
+    --accent: #6c63ff;
+    --accent-light: #8b83ff;
+    --recruiter: #10b981;
+    --company: #3b82f6;
+    --candidate: #f59e0b;
+    --public: #8b5cf6;
+    --admin: #ef4444;
+    --action: #ec4899;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+    --info: #3b82f6;
+    --view: #8b5cf6;
+    --crud: #10b981;
+    --existing: #06b6d4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+  h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; }
+
+  .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+  .date { color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.8rem; }
+
+  section { margin-bottom: 3rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--surface2);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  tr:hover { background: var(--surface2); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .badge-crud { background: rgba(16, 185, 129, 0.15); color: var(--crud); }
+  .badge-view { background: rgba(139, 92, 246, 0.15); color: var(--view); }
+  .badge-action { background: rgba(236, 72, 153, 0.15); color: var(--action); }
+  .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+  .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .badge-info { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .badge-admin { background: rgba(239, 68, 68, 0.15); color: var(--admin); }
+  .badge-existing { background: rgba(6, 182, 212, 0.15); color: var(--existing); }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .note {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.875rem;
+  }
+
+  .note-warning {
+    border-left-color: var(--warning);
+  }
+
+  .note-success {
+    border-left-color: var(--success);
+  }
+
+  .note-danger {
+    border-left-color: var(--danger);
+  }
+
+  .file-tree {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+  }
+
+  .file-tree .new { color: var(--success); }
+  .file-tree .existing { color: var(--existing); }
+  .file-tree .dir { color: var(--text-muted); }
+  .file-tree .comment { color: var(--text-muted); font-style: italic; }
+
+  .consumer-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .consumer-group h4 {
+    margin-bottom: 0.5rem;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    background: var(--surface2);
+    padding: 0.1rem 0.35rem;
+  }
+
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0.5rem 0;
+  }
+
+  .flow-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .flow-arrow {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+  }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .toc a {
+    color: var(--accent-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: block;
+    padding: 0.25rem 0;
+  }
+
+  .toc a:hover { text-decoration: underline; }
+
+  .toc ol { padding-left: 1.5rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<p class="date">Migration Plan -- 2026-03-16</p>
+<h1>Messages V3 Migration</h1>
+<p class="subtitle">
+  Migration plan for the <code>messages</code> resource in <code>chat-service</code>.
+  Messages are a sub-resource of conversations, scoped to <code>/api/v3/chat/conversations/:id/messages</code>.
+  Also covers the admin-only <code>PATCH /chat/messages/:id</code> (message redaction).
+</p>
+
+<!-- Table of Contents -->
+<div class="toc">
+  <h3>Contents</h3>
+  <ol>
+    <li><a href="#summary">Executive Summary</a></li>
+    <li><a href="#v2-surface">V2 API Surface</a></li>
+    <li><a href="#consumers">Consumer Map</a></li>
+    <li><a href="#classification">Migration Classification</a></li>
+    <li><a href="#existing-v3">Existing V3 Status</a></li>
+    <li><a href="#auth-analysis">Role-Based Authorization Analysis</a></li>
+    <li><a href="#frontend-impact">Frontend Impact</a></li>
+    <li><a href="#file-plan">V3 File Plan</a></li>
+    <li><a href="#scope">Estimated Scope</a></li>
+    <li><a href="#risks">Risks and Notes</a></li>
+  </ol>
+</div>
+
+<!-- Section 1: Executive Summary -->
+<section id="summary">
+  <h2>1. Executive Summary</h2>
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-value">3</div>
+      <div class="stat-label">V2 Message Routes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Already in V3</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Action to Create</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">~9</div>
+      <div class="stat-label">Frontend Files to Update</div>
+    </div>
+  </div>
+
+  <div class="note note-success">
+    <strong>Good news:</strong> The core message routes (list messages and send message) are already migrated to V3 at
+    <code>services/chat-service/src/v3/messages/</code>. The remaining gap is the admin-only
+    <code>PATCH /v2/chat/messages/:id</code> redaction endpoint, which should become a V3 action.
+    The frontend already uses V3-style paths via the gateway (no <code>/v2/</code> prefix) so URL migration impact is low.
+  </div>
+</section>
+
+<!-- Section 2: V2 API Surface -->
+<section id="v2-surface">
+  <h2>2. V2 API Surface</h2>
+
+  <h3>2.1 Message-Specific Routes</h3>
+  <p>These are the V2 routes that directly deal with <code>chat_messages</code> table operations.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>V2 Path</th>
+        <th>Purpose</th>
+        <th>Auth</th>
+        <th>Request Shape</th>
+        <th>Response Shape</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-info">GET</span></td>
+        <td><code>/api/v2/chat/conversations/:id/messages</code></td>
+        <td>List messages in a conversation (cursor-based, newest first)</td>
+        <td>Required</td>
+        <td>Query: <code>after</code>, <code>before</code> (message IDs), <code>limit</code> (max 100)</td>
+        <td><code>{ data: ChatMessage[] }</code> -- flat, no joins</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-success">POST</span></td>
+        <td><code>/api/v2/chat/conversations/:id/messages</code></td>
+        <td>Send a message in a conversation</td>
+        <td>Required</td>
+        <td>Body: <code>{ body, clientMessageId, attachments[] }</code></td>
+        <td><code>{ data: ChatMessage }</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-warning">PATCH</span></td>
+        <td><code>/api/v2/chat/messages/:id</code></td>
+        <td>Redact/edit a message (admin-only)</td>
+        <td>Required (admin)</td>
+        <td>Body: <code>{ redacted: bool, reason?, editedBody? }</code></td>
+        <td><code>{ data: ChatMessage }</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 V2 Repository Methods (message-related)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>Table</th>
+        <th>Joins</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>listMessages()</code></td>
+        <td><code>chat_messages</code></td>
+        <td>None</td>
+        <td>Cursor-based pagination using <code>created_at</code> from after/before message IDs. Returns reversed for chronological order.</td>
+      </tr>
+      <tr>
+        <td><code>listMessagesByIds()</code></td>
+        <td><code>chat_messages</code></td>
+        <td>None</td>
+        <td>Batch fetch by message IDs. Used by report evidence.</td>
+      </tr>
+      <tr>
+        <td><code>insertMessage()</code></td>
+        <td><code>chat_messages</code></td>
+        <td>None</td>
+        <td>Insert with optional <code>kind</code> (user/system) and <code>client_message_id</code>.</td>
+      </tr>
+      <tr>
+        <td><code>updateMessageMetadata()</code></td>
+        <td><code>chat_messages</code></td>
+        <td>None</td>
+        <td>Used for routing metadata on system messages.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 V2 Service Methods (message-related)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>Business Logic</th>
+        <th>Events Published</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>listMessages()</code></td>
+        <td>Resolves identity, verifies participant access, delegates to repo</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><code>sendMessage()</code></td>
+        <td>
+          Verifies participant, checks request_state (pending/declined), checks blocks,
+          enforces pending-request message limit (1 msg), uses RPC <code>chat_send_message</code>,
+          handles idempotency via <code>clientMessageId</code> + unique constraint
+        </td>
+        <td>
+          <code>message.created</code> (Redis conv channel),
+          <code>conversation.updated</code> (Redis user channel),
+          <code>chat.message.created</code> (RabbitMQ domain event)
+        </td>
+      </tr>
+      <tr>
+        <td><code>updateMessageRedaction()</code></td>
+        <td>Admin-only: sets <code>redacted_at</code>, <code>redaction_reason</code>, or edits body with <code>edited_at</code></td>
+        <td><code>message.updated</code> (Redis conv channel)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2.4 V2 Event Types</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Channel</th>
+        <th>Trigger</th>
+        <th>Payload</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>message.created</code></td>
+        <td>Redis: <code>conv:{id}</code></td>
+        <td>sendMessage</td>
+        <td><code>{ conversationId, messageId, senderId, createdAt }</code></td>
+      </tr>
+      <tr>
+        <td><code>conversation.updated</code></td>
+        <td>Redis: <code>user:{id}</code></td>
+        <td>sendMessage</td>
+        <td><code>{ conversationId, lastMessageId, lastMessageAt }</code></td>
+      </tr>
+      <tr>
+        <td><code>chat.message.created</code></td>
+        <td>RabbitMQ domain</td>
+        <td>sendMessage</td>
+        <td><code>{ conversation_id, message_id, sender_user_id, recipient_user_id, created_at, body_preview }</code></td>
+      </tr>
+      <tr>
+        <td><code>message.updated</code></td>
+        <td>Redis: <code>conv:{id}</code></td>
+        <td>updateMessageRedaction</td>
+        <td><code>{ messageId, conversationId }</code></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Section 3: Consumer Map -->
+<section id="consumers">
+  <h2>3. Consumer Map</h2>
+
+  <h3>3.1 Frontend Consumers</h3>
+
+  <div class="consumer-group">
+    <h4>Portal App (apps/portal)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Endpoint Called</th>
+          <th>Usage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>src/components/chat/thread-panel.tsx</code></td>
+          <td>
+            <code>POST /chat/conversations/:id/messages</code><br>
+            <code>GET /chat/conversations/:id/messages</code>
+          </td>
+          <td>Send messages and load message history in chat thread sidebar. Uses V3-style paths (no <code>/v2/</code>).</td>
+        </tr>
+        <tr>
+          <td><code>src/lib/chat-start.ts</code></td>
+          <td><code>POST /chat/conversations/:id/messages</code></td>
+          <td>Helper function <code>sendChatMessage()</code> -- sends first message after starting conversation. V3-style path.</td>
+        </tr>
+        <tr>
+          <td><code>src/app/portal/admin/chat/components/chat-moderation-client.tsx</code></td>
+          <td>
+            <code>GET /admin/chat/reports/:id/evidence</code>
+          </td>
+          <td>Admin moderation panel -- fetches message evidence for reports. No direct PATCH to messages (action-based via report action).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="consumer-group">
+    <h4>Candidate App (apps/candidate)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Endpoint Called</th>
+          <th>Usage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>src/app/portal/messages/components/thread/thread-panel.tsx</code></td>
+          <td>
+            <code>POST /chat/conversations/:id/messages</code><br>
+            <code>GET /chat/conversations/:id/messages</code>
+          </td>
+          <td>Send messages and load message history in candidate chat thread. V3-style paths.</td>
+        </tr>
+        <tr>
+          <td><code>src/app/(public)/marketplace/[slug]/connect-modal.tsx</code></td>
+          <td><code>POST /chat/conversations/:id/messages</code></td>
+          <td>Send initial message when connecting with a recruiter from marketplace. V3-style path.</td>
+        </tr>
+        <tr>
+          <td><code>src/app/(public)/firms/[slug]/firm-connect-modal.tsx</code></td>
+          <td><code>POST /chat/conversations/:id/messages</code></td>
+          <td>Send initial message when connecting with a firm. V3-style path.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.2 Service Consumers</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>File</th>
+        <th>Usage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>chat-service (V2)</td>
+        <td><code>src/v2/chat/service.ts</code></td>
+        <td>
+          <code>sendMessage()</code> uses RPC <code>chat_send_message</code> directly.
+          <code>updateMessageRedaction()</code> writes to <code>chat_messages</code> directly.
+          V3 service has its own implementation.
+        </td>
+      </tr>
+      <tr>
+        <td>chat-service (jobs)</td>
+        <td><code>src/jobs/chat-moderation-worker.ts</code></td>
+        <td>Moderation worker may read/update messages for automated content moderation.</td>
+      </tr>
+      <tr>
+        <td>chat-service (jobs)</td>
+        <td><code>src/jobs/chat-retention.ts</code></td>
+        <td>Retention job redacts old messages as part of data lifecycle.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 Gateway Routes</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Gateway Path</th>
+        <th>Method</th>
+        <th>Auth</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/api/v3/chat/conversations/:id/messages</code></td>
+        <td>GET</td>
+        <td>required</td>
+        <td><span class="badge badge-existing">REGISTERED</span></td>
+      </tr>
+      <tr>
+        <td><code>/api/v3/chat/conversations/:id/messages</code></td>
+        <td>POST</td>
+        <td>required</td>
+        <td><span class="badge badge-existing">REGISTERED</span></td>
+      </tr>
+      <tr>
+        <td><code>/api/v3/chat/messages/:id</code></td>
+        <td>PATCH</td>
+        <td>required</td>
+        <td><span class="badge badge-existing">REGISTERED</span> (routes to V2 handler)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Section 4: Migration Classification -->
+<section id="classification">
+  <h2>4. Migration Classification</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>V2 Route</th>
+        <th>V3 Category</th>
+        <th>V3 Path</th>
+        <th>Status</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>GET /v2/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+        <td><code>GET /v3/chat/conversations/:conversationId/messages</code></td>
+        <td><span class="badge badge-existing">DONE</span></td>
+        <td>Flat query on <code>chat_messages</code>, no joins. Already implemented in V3 <code>messages/routes.ts</code>.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-crud">CRUD</span></td>
+        <td><code>POST /v3/chat/conversations/:conversationId/messages</code></td>
+        <td><span class="badge badge-existing">DONE</span></td>
+        <td>
+          Currently implemented as a route in V3 <code>messages/routes.ts</code>.
+          Handles idempotency, real-time events, and domain events.
+          <strong>Note:</strong> V3 uses direct <code>INSERT</code> rather than the V2 RPC <code>chat_send_message</code>,
+          which may mean V3 is missing the atomic counter/last_message update the RPC provides.
+        </td>
+      </tr>
+      <tr>
+        <td><code>PATCH /v2/chat/messages/:id</code></td>
+        <td><span class="badge badge-action">ACTION</span></td>
+        <td><code>POST /v3/messages/:id/actions/redact</code></td>
+        <td><span class="badge badge-danger">TODO</span></td>
+        <td>
+          Admin-only redaction/edit is a side-effect operation (sets redacted_at, publishes event).
+          Should become a V3 action, not a PATCH on core CRUD.
+          The PATCH at <code>/v3/chat/messages/:id</code> currently routes to the V2 handler.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note note-warning">
+    <strong>Architecture decision -- messages as sub-resource vs standalone:</strong>
+    Messages are accessed as a sub-resource of conversations (<code>/conversations/:id/messages</code>),
+    which is correct because messages always belong to a conversation.
+    However, the admin redaction endpoint operates on messages by ID directly (<code>/messages/:id</code>).
+    In V3, the redaction action should live under <code>/api/v3/messages/:id/actions/redact</code> as a
+    standalone resource action, since the admin operates on the message directly without a conversation context.
+  </div>
+</section>
+
+<!-- Section 5: Existing V3 Status -->
+<section id="existing-v3">
+  <h2>5. Existing V3 Status</h2>
+
+  <h3>5.1 What is Already Built</h3>
+
+  <div class="card">
+    <h4>Files Present</h4>
+    <div class="file-tree">
+      <span class="dir">services/chat-service/src/v3/messages/</span><br>
+      &nbsp;&nbsp;<span class="existing">types.ts</span> <span class="comment">-- MessageListParams, SendMessageInput, JSON schemas</span><br>
+      &nbsp;&nbsp;<span class="existing">repository.ts</span> <span class="comment">-- findAll, findById, create, findByClientMessageId, isParticipant, getOtherParticipants</span><br>
+      &nbsp;&nbsp;<span class="existing">service.ts</span> <span class="comment">-- getAll (list), send (create) with access control and events</span><br>
+      &nbsp;&nbsp;<span class="existing">routes.ts</span> <span class="comment">-- GET and POST on /conversations/:conversationId/messages</span><br>
+    </div>
+  </div>
+
+  <h3>5.2 Compliance Assessment of Existing V3 Code</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Check</th>
+        <th>Status</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Core CRUD: flat <code>select('*')</code>, no joins</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>Repository queries <code>chat_messages</code> only. No joins.</td>
+      </tr>
+      <tr>
+        <td>JSON schema validation on routes</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>Both GET and POST have <code>schema</code> with params and querystring/body.</td>
+      </tr>
+      <tr>
+        <td>Auth check on all routes</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>Both routes check <code>x-clerk-user-id</code> header.</td>
+      </tr>
+      <tr>
+        <td>No try/catch in routes</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>Routes delegate to service, no error handling in routes.</td>
+      </tr>
+      <tr>
+        <td>Service uses AccessContextResolver</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>Uses <code>AccessContextResolver</code> to resolve identity.</td>
+      </tr>
+      <tr>
+        <td>Service throws typed errors</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>Uses <code>ForbiddenError</code>, <code>BadRequestError</code> from shared-fastify.</td>
+      </tr>
+      <tr>
+        <td>Event publishing for mutations</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>
+          <code>send()</code> publishes <code>messageCreated</code> (Redis), <code>conversationUpdated</code> (Redis),
+          and <code>chat.message.created</code> (RabbitMQ).
+        </td>
+      </tr>
+      <tr>
+        <td>Idempotency on POST</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>Checks <code>client_message_id</code> for duplicates before insert.</td>
+      </tr>
+      <tr>
+        <td>Response envelope format</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>GET returns <code>{ data, pagination }</code>. POST returns <code>{ data }</code> with 201.</td>
+      </tr>
+      <tr>
+        <td>File sizes within limits</td>
+        <td><span class="badge badge-success">PASS</span></td>
+        <td>types: 52 lines, repository: 98 lines, service: 108 lines, routes: 54 lines.</td>
+      </tr>
+      <tr>
+        <td>Core 5 CRUD routes present</td>
+        <td><span class="badge badge-warning">PARTIAL</span></td>
+        <td>
+          Only 2 of 5 core routes: GET (list) and POST (create/send).
+          Missing: GET by ID, PATCH, DELETE.
+          This is intentional -- messages are a sub-resource and individual message operations
+          are limited. However, for full V3 compliance, the core 5 should exist even if some return 405.
+        </td>
+      </tr>
+      <tr>
+        <td>V3 send uses RPC vs direct insert</td>
+        <td><span class="badge badge-warning">WARN</span></td>
+        <td>
+          V2 uses <code>chat_send_message</code> RPC for atomic message insert + counter update + last_message update.
+          V3 uses direct <code>INSERT</code> via repository. This may cause
+          <code>last_message_at</code>/<code>last_message_id</code> on the conversation and
+          <code>unread_count</code> on participants to not update atomically.
+          <strong>Recommendation:</strong> V3 service should also use the RPC, or the V3 repository should
+          replicate the atomic updates.
+        </td>
+      </tr>
+      <tr>
+        <td>V3 send validates request_state</td>
+        <td><span class="badge badge-warning">WARN</span></td>
+        <td>
+          V2 checks participant <code>request_state</code> (pending, declined), blocks, archived status,
+          and enforces the 1-message limit for pending requests.
+          V3 only checks <code>isParticipant</code> -- missing all these business rules.
+          <strong>Recommendation:</strong> Port the V2 validation logic to V3 service.
+        </td>
+      </tr>
+      <tr>
+        <td>Redaction action</td>
+        <td><span class="badge badge-danger">MISSING</span></td>
+        <td>No V3 action for admin message redaction. The gateway routes PATCH to the V2 handler.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note note-danger">
+    <strong>Critical gap:</strong> The V3 <code>send()</code> method is missing several V2 business rules:
+    request state validation, block checking, archived check, pending-request message limit,
+    and attachment restrictions for pending requests. These must be ported before V3 can fully replace V2.
+  </div>
+</section>
+
+<!-- Section 6: Role-Based Authorization -->
+<section id="auth-analysis">
+  <h2>6. Role-Based Authorization Analysis</h2>
+
+  <div class="card">
+    <h3>Message Access Patterns by Role</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Operation</th>
+          <th>Recruiter</th>
+          <th>Candidate</th>
+          <th>Company</th>
+          <th>Admin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>List messages in conversation</td>
+          <td>Participant only</td>
+          <td>Participant only</td>
+          <td>N/A (no chat)</td>
+          <td>Via report evidence</td>
+        </tr>
+        <tr>
+          <td>Send message</td>
+          <td>Participant only</td>
+          <td>Participant only</td>
+          <td>N/A</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>Redact/edit message</td>
+          <td>N/A</td>
+          <td>N/A</td>
+          <td>N/A</td>
+          <td>Admin only</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note note-success">
+    <strong>No role-specific views needed.</strong> Message access is participant-based (same data shape for all roles).
+    The only role differentiation is admin-only redaction, which is a separate action endpoint.
+    No separate views per role are required for messages.
+  </div>
+</section>
+
+<!-- Section 7: Frontend Impact -->
+<section id="frontend-impact">
+  <h2>7. Frontend Impact</h2>
+
+  <div class="note note-success">
+    <strong>Low frontend migration impact.</strong> All frontend consumers already use V3-style paths
+    (e.g., <code>/chat/conversations/:id/messages</code>) through the gateway.
+    The gateway already proxies these to the V3 handlers. No URL changes needed for the main message endpoints.
+  </div>
+
+  <h3>7.1 Portal App Files</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Current Path</th>
+        <th>Change Needed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>src/components/chat/thread-panel.tsx</code> (line 249, 299)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-success">NONE</span> -- already V3-compatible path</td>
+      </tr>
+      <tr>
+        <td><code>src/lib/chat-start.ts</code> (line 40)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-success">NONE</span> -- already V3-compatible path</td>
+      </tr>
+      <tr>
+        <td><code>src/app/portal/admin/chat/components/chat-moderation-client.tsx</code></td>
+        <td><code>/admin/chat/reports/:id/evidence</code></td>
+        <td><span class="badge badge-warning">FUTURE</span> -- when admin routes migrate to V3</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 Candidate App Files</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Current Path</th>
+        <th>Change Needed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>src/app/portal/messages/components/thread/thread-panel.tsx</code> (line 195, 299)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-success">NONE</span> -- already V3-compatible path</td>
+      </tr>
+      <tr>
+        <td><code>src/app/(public)/marketplace/[slug]/connect-modal.tsx</code> (line 69)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-success">NONE</span> -- already V3-compatible path</td>
+      </tr>
+      <tr>
+        <td><code>src/app/(public)/firms/[slug]/firm-connect-modal.tsx</code> (line 69)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-success">NONE</span> -- already V3-compatible path</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 Admin App Files</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Current Path</th>
+        <th>Change Needed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>apps/admin/src/app/secure/chat/page.tsx</code></td>
+        <td><code>/chat/admin/flagged</code></td>
+        <td><span class="badge badge-warning">FUTURE</span> -- separate admin/moderation migration</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Summary:</strong> Zero frontend files need URL changes for message endpoints.
+    All consumers already call V3-compatible paths via the gateway. The gateway routes
+    (<code>services/api-gateway/src/routes/v3/chat.ts</code> lines 31-32) already proxy
+    to the V3 message handlers.
+  </div>
+</section>
+
+<!-- Section 8: V3 File Plan -->
+<section id="file-plan">
+  <h2>8. V3 File Plan</h2>
+
+  <div class="file-tree">
+    <span class="dir">services/chat-service/src/v3/messages/</span><br>
+    &nbsp;&nbsp;<span class="existing">types.ts</span> <span class="comment">-- EXISTS. Add RedactMessageInput interface + JSON schema.</span><br>
+    &nbsp;&nbsp;<span class="existing">repository.ts</span> <span class="comment">-- EXISTS. Add update() method for redaction writes.</span><br>
+    &nbsp;&nbsp;<span class="existing">service.ts</span> <span class="comment">-- EXISTS. Fix send() to include V2 business rules (request_state, blocks, RPC).</span><br>
+    &nbsp;&nbsp;<span class="existing">routes.ts</span> <span class="comment">-- EXISTS. Register redact action. Optionally add GET /:id, PATCH, DELETE stubs.</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">actions/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">redact.route.ts</span> <span class="comment">-- NEW. POST /api/v3/messages/:id/actions/redact</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">redact.service.ts</span> <span class="comment">-- NEW. Admin validation, redaction logic, event publishing</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">redact.repository.ts</span> <span class="comment">-- NEW. Update chat_messages with redacted_at, edited body</span><br>
+  </div>
+
+  <h3>8.1 Detailed File Changes</h3>
+
+  <div class="card">
+    <h4>New Files to Create (3 files)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Purpose</th>
+          <th>Est. Lines</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>actions/redact.route.ts</code></td>
+          <td>
+            Route: <code>POST /api/v3/messages/:id/actions/redact</code><br>
+            Auth check, schema validation, delegate to service.
+          </td>
+          <td>~40</td>
+        </tr>
+        <tr>
+          <td><code>actions/redact.service.ts</code></td>
+          <td>
+            Admin check via AccessContextResolver, find message, apply redaction/edit,
+            publish <code>message.updated</code> via ChatEventPublisher.
+          </td>
+          <td>~60</td>
+        </tr>
+        <tr>
+          <td><code>actions/redact.repository.ts</code></td>
+          <td>
+            <code>findById()</code> and <code>redact()</code> methods on <code>chat_messages</code>.
+            Sets <code>redacted_at</code>, <code>redaction_reason</code>, <code>body</code>, <code>edited_at</code>.
+          </td>
+          <td>~40</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h4>Existing Files to Modify (3 files)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Change</th>
+          <th>Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>types.ts</code></td>
+          <td>
+            Add <code>RedactMessageInput</code> interface and <code>redactMessageSchema</code> JSON schema.
+            Add <code>messageIdParamSchema</code> for the action route.
+          </td>
+          <td><span class="badge badge-success">LOW</span></td>
+        </tr>
+        <tr>
+          <td><code>service.ts</code></td>
+          <td>
+            Port V2 business rules to <code>send()</code>: request_state validation, block checking,
+            archived check, pending-request message limit. Consider switching to <code>chat_send_message</code> RPC.
+          </td>
+          <td><span class="badge badge-warning">MEDIUM</span> -- behavior change for existing V3 handler</td>
+        </tr>
+        <tr>
+          <td><code>routes.ts</code></td>
+          <td>
+            Import and register the redact action.
+            The action registration must come before any <code>:id</code> routes.
+          </td>
+          <td><span class="badge badge-success">LOW</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h4>Gateway Update (1 file)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>services/api-gateway/src/routes/v3/chat.ts</code></td>
+          <td>
+            Replace <code>{ path: '/chat/messages/:id', method: 'PATCH', auth: 'required' }</code>
+            with <code>{ path: '/messages/:id/actions/redact', method: 'POST', auth: 'required' }</code>.
+            Keep old PATCH route for backward compatibility until admin frontend migrates.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Section 9: Estimated Scope -->
+<section id="scope">
+  <h2>9. Estimated Scope</h2>
+
+  <div class="grid-3">
+    <div class="stat-card">
+      <div class="stat-value">3</div>
+      <div class="stat-label">New V3 Files</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">3</div>
+      <div class="stat-label">Existing V3 Files to Modify</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Gateway File to Update</div>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top: 1rem;">
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Frontend Files to Update (now)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">~140</div>
+      <div class="stat-label">New Lines of Code</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">~50</div>
+      <div class="stat-label">Lines to Modify</div>
+    </div>
+  </div>
+
+  <h3>Work Breakdown</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th>Description</th>
+        <th>Effort</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>
+          <strong>Fix V3 send() business rules</strong><br>
+          Port request_state validation, block checking, archived check, pending-request message limit from V2.
+          Consider switching to <code>chat_send_message</code> RPC for atomic counter updates.
+        </td>
+        <td><span class="badge badge-warning">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>
+          <strong>Create redact action</strong><br>
+          <code>actions/redact.route.ts</code>, <code>redact.service.ts</code>, <code>redact.repository.ts</code>.
+          Admin-only endpoint for message redaction/editing.
+        </td>
+        <td><span class="badge badge-success">SMALL</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>
+          <strong>Update types.ts</strong><br>
+          Add <code>RedactMessageInput</code> interface and JSON schema.
+        </td>
+        <td><span class="badge badge-success">SMALL</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>
+          <strong>Register action in routes.ts</strong><br>
+          Import and register the redact action route.
+        </td>
+        <td><span class="badge badge-success">SMALL</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>
+          <strong>Update gateway</strong><br>
+          Add redact action route to <code>services/api-gateway/src/routes/v3/chat.ts</code>.
+        </td>
+        <td><span class="badge badge-success">SMALL</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Section 10: Risks and Notes -->
+<section id="risks">
+  <h2>10. Risks and Notes</h2>
+
+  <div class="card">
+    <h3>10.1 Critical: V3 send() Missing Business Rules</h3>
+    <p>The V3 <code>MessageService.send()</code> is significantly simpler than V2's <code>ChatServiceV2.sendMessage()</code>. Missing rules:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>V2 Rule</th>
+          <th>V3 Status</th>
+          <th>Impact if Missing</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Check sender <code>request_state</code> (pending = cannot reply, declined = blocked)</td>
+          <td><span class="badge badge-danger">MISSING</span></td>
+          <td>Users could reply before accepting a request</td>
+        </tr>
+        <tr>
+          <td>Check recipient <code>request_state</code> (pending = max 1 msg, declined = blocked)</td>
+          <td><span class="badge badge-danger">MISSING</span></td>
+          <td>Users could spam pending requests with multiple messages</td>
+        </tr>
+        <tr>
+          <td>Check if recipient has <code>archived_at</code> set</td>
+          <td><span class="badge badge-danger">MISSING</span></td>
+          <td>Messages sent to archived conversations</td>
+        </tr>
+        <tr>
+          <td>Check <code>isBlocked()</code> between sender and recipient</td>
+          <td><span class="badge badge-danger">MISSING</span></td>
+          <td>Blocked users could still send messages</td>
+        </tr>
+        <tr>
+          <td>Attachment restriction for pending requests</td>
+          <td><span class="badge badge-danger">MISSING</span></td>
+          <td>Attachments sent in pending request conversations</td>
+        </tr>
+        <tr>
+          <td>Use <code>chat_send_message</code> RPC for atomic insert + counter update</td>
+          <td><span class="badge badge-warning">DIFFERENT</span></td>
+          <td>Conversation <code>last_message_at</code> and <code>unread_count</code> may not update atomically</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>10.2 Messages URL Structure Consideration</h3>
+    <p>
+      Messages are currently registered at <code>/api/v3/chat/conversations/:conversationId/messages</code>,
+      treating them as a sub-resource of conversations. This is correct for list/send operations.
+    </p>
+    <p>
+      The redact action operates on a message by its own ID. The V3 URL should be:
+      <code>POST /api/v3/messages/:id/actions/redact</code> (standalone resource action).
+      Alternatively, it could be <code>POST /api/v3/chat/conversations/:conversationId/messages/:id/actions/redact</code>,
+      but this is unnecessarily verbose since the admin knows the message ID directly.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>10.3 V3 Param Name Discrepancy</h3>
+    <p>
+      The existing V3 routes use <code>:conversationId</code> as the param name
+      (matching the JSON schema <code>conversationIdParamSchema</code>),
+      but the gateway routes use <code>:id</code>. Verify the gateway proxy correctly maps
+      <code>:id</code> in the gateway path to <code>:conversationId</code> in the service path,
+      or align param names.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>10.4 Admin Routes Not Yet Migrated</h3>
+    <p>
+      The admin moderation endpoints (<code>/admin/chat/reports</code>, <code>/admin/chat/audit</code>,
+      <code>/admin/chat/metrics</code>) are still V2-only. The message redaction action is a first step,
+      but full admin migration is a separate effort. The admin frontend
+      (<code>chat-moderation-client.tsx</code>) still calls V2 admin paths.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>10.5 Migration Lifecycle Status</h3>
+    <div class="flow-diagram">
+      <div class="flow-box" style="border-color: var(--success); color: var(--success);">/api:plan</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box" style="border-color: var(--warning); color: var(--warning);">/api:migrate (in progress)</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box">/api:validate</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box">/api:deprecate</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box">/api:remove</div>
+    </div>
+    <p style="margin-top: 0.75rem;">
+      The V3 messages resource is partially migrated. The core list/send routes exist but need business rule parity.
+      The redact action needs to be created. After these are complete, run <code>/api:validate</code>
+      to verify full compliance.
+    </p>
+  </div>
+</section>
+
+<footer style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.8rem;">
+  <p>Generated 2026-03-16 by Splits Network API Agent (Claude Opus 4.6)</p>
+  <p>Source: <code>services/chat-service/src/v2/chat/</code> + <code>services/chat-service/src/v3/messages/</code></p>
+</footer>
+
+</div>
+</body>
+</html>

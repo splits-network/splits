@@ -44,13 +44,13 @@ export default function Stats() {
                 const client = createAuthenticatedClient(token);
 
                 const [inboxRes, requestsRes, archivedRes] = await Promise.all([
-                    client.get("/chat/conversations", {
+                    client.get("/chat/conversations/views/list-for-user", {
                         params: { filter: "inbox", limit: 100 },
                     }) as Promise<any>,
-                    client.get("/chat/conversations", {
+                    client.get("/chat/conversations/views/list-for-user", {
                         params: { filter: "requests", limit: 100 },
                     }) as Promise<any>,
-                    client.get("/chat/conversations", {
+                    client.get("/chat/conversations/views/list-for-user", {
                         params: { filter: "archived", limit: 100 },
                     }) as Promise<any>,
                 ]);

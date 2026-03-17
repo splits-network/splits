@@ -12,6 +12,7 @@ import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { ChatEventPublisher } from "./v3/shared/chat-event-publisher";
+import { JobQueue } from "@splits-network/shared-job-queue";
 import Redis from "ioredis";
 import * as Sentry from "@sentry/node";
 
@@ -145,11 +146,21 @@ async function main() {
     });
     const chatEventPublisher = new ChatEventPublisher(v3Redis);
 
+    // Create attachment scan queue for V3 attachments
+    const v3AttachmentQueue = new JobQueue({
+        rabbitMqUrl: rabbitConfig.url,
+        queueName: "chat-attachment-scan",
+        logger: logger as any,
+    });
+    await v3AttachmentQueue.connect();
+
     // Register V3 routes (coexist with V2)
     registerV3Routes(app, {
         supabase: supabaseClient,
         eventPublisher: outboxPublisher,
         chatEventPublisher,
+        redis: v3Redis,
+        attachmentQueue: v3AttachmentQueue,
     });
 
     app.get("/health", async (request, reply) => {

@@ -28,7 +28,7 @@ export const messageListQuerySchema = {
     after: { type: 'string', format: 'uuid' },
     before: { type: 'string', format: 'uuid' },
   },
-  additionalProperties: true,
+  additionalProperties: false,
 };
 
 export const sendMessageSchema = {
@@ -47,5 +47,13 @@ export const conversationIdParamSchema = {
   required: ['conversationId'],
   properties: {
     conversationId: { type: 'string', format: 'uuid' },
+  },
+};
+
+export const messageIdParamSchema = {
+  type: 'object',
+  required: ['id'],
+  properties: {
+    id: { type: 'string', format: 'uuid' },
   },
 };

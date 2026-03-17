@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontend Scan: Conversations V3 Migration - Splits Network</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a25;
+    --border: #2a2a3a;
+    --text: #e0e0e8;
+    --text-muted: #8888a0;
+    --accent: #6c63ff;
+    --accent-light: #8b83ff;
+    --portal: #3b82f6;
+    --candidate: #f59e0b;
+    --admin: #ef4444;
+    --shared: #8b5cf6;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+    --info: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+  h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; }
+
+  .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+  .date { color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.8rem; }
+
+  section { margin-bottom: 3rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--surface2);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  tr:hover { background: var(--surface2); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .badge-portal { background: rgba(59, 130, 246, 0.15); color: var(--portal); }
+  .badge-candidate { background: rgba(245, 158, 11, 0.15); color: var(--candidate); }
+  .badge-admin { background: rgba(239, 68, 68, 0.15); color: var(--admin); }
+  .badge-shared { background: rgba(139, 92, 246, 0.15); color: var(--shared); }
+  .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+  .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .badge-info { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .badge-endpoint { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .badge-body { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+  .badge-action { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+  .badge-type { background: rgba(139, 92, 246, 0.15); color: var(--shared); }
+  .badge-nochange { background: rgba(136, 136, 160, 0.15); color: var(--text-muted); }
+  .badge-get { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .badge-post { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .badge-delete { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+  code {
+    background: var(--surface2);
+    padding: 0.1rem 0.35rem;
+    font-size: 0.8rem;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: var(--accent-light);
+  }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .stat-value { font-size: 2.5rem; font-weight: 900; line-height: 1; margin-bottom: 0.25rem; }
+  .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .toc a { color: var(--accent-light); text-decoration: none; display: block; padding: 0.25rem 0; font-size: 0.9rem; }
+  .toc a:hover { color: var(--text); }
+
+  .consumer-file {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  .consumer-file .file-path {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    color: var(--accent-light);
+    margin-bottom: 0.5rem;
+  }
+  .consumer-file .call-sites {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .consumer-file .call-sites code {
+    display: block;
+    margin: 0.25rem 0;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .flow-arrow {
+    display: inline-block;
+    color: var(--accent);
+    font-weight: 900;
+    margin: 0 0.5rem;
+  }
+
+  .risk-card {
+    background: var(--surface);
+    border-left: 3px solid var(--warning);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .risk-card.critical { border-left-color: var(--danger); }
+  .risk-card.info { border-left-color: var(--info); }
+  .risk-card.success { border-left-color: var(--success); }
+  .risk-title { font-weight: 700; margin-bottom: 0.5rem; }
+  .risk-detail { color: var(--text-muted); font-size: 0.875rem; }
+
+  .legend { display: flex; gap: 1.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-muted); }
+  .legend-dot { width: 10px; height: 10px; display: inline-block; }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    h1 { font-size: 1.75rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header style="margin-bottom: 3rem;">
+    <p class="date">Frontend Migration Scan &middot; March 2026</p>
+    <h1>Conversations Resource</h1>
+    <p class="subtitle">chat-service &mdash; All frontend consumers of conversation endpoints across portal, candidate, and admin apps</p>
+  </header>
+
+  <!-- Scope Stats -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--accent);">24</div>
+      <div class="stat-label">Files with References</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--portal);">14</div>
+      <div class="stat-label">Portal App Files</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--candidate);">9</div>
+      <div class="stat-label">Candidate App Files</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--admin);">1</div>
+      <div class="stat-label">Admin App Files</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--warning);">15</div>
+      <div class="stat-label">Files Needing Changes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--success);">9</div>
+      <div class="stat-label">No-Change Files</div>
+    </div>
+  </div>
+
+  <!-- Table of Contents -->
+  <div class="toc">
+    <h4>Contents</h4>
+    <a href="#mapping">1. V2-to-V3 Endpoint Mapping</a>
+    <a href="#critical-note">2. Critical: V3 Alias Complication</a>
+    <a href="#portal-consumers">3. Portal App Consumers</a>
+    <a href="#candidate-consumers">4. Candidate App Consumers</a>
+    <a href="#admin-consumers">5. Admin App Consumers</a>
+    <a href="#shared-package">6. Shared Package (chat-ui)</a>
+    <a href="#body-changes">7. Body Format Changes (Mute/Archive)</a>
+    <a href="#type-changes">8. Response Type Changes</a>
+    <a href="#classification-summary">9. Classification Summary</a>
+    <a href="#migration-order">10. Migration Priority Order</a>
+    <a href="#risks">11. Risks and Decisions</a>
+  </div>
+
+  <!-- 1. V2-to-V3 Endpoint Mapping -->
+  <section id="mapping">
+    <h2>1. V2-to-V3 Endpoint Mapping</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">
+      The <code>SplitsApiClient</code> defaults to <code>/api/v3</code> base path. Frontend calls using short paths like
+      <code>"/chat/conversations"</code> currently hit <code>/api/v3/chat/conversations</code> which is intercepted by
+      V3 aliases in the V2 routes file. After migration, these must call the proper V3 view/action endpoints.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>V2 Method</th>
+          <th>Frontend Currently Calls</th>
+          <th>Hits (via V3 alias)</th>
+          <th>V3 Target</th>
+          <th>Change Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/chat/conversations</code></td>
+          <td><code>/api/v3/chat/conversations</code></td>
+          <td><code>/api/v3/chat/conversations/views/list-for-user</code></td>
+          <td><span class="badge badge-endpoint">endpoint-swap</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/chat/conversations</code></td>
+          <td><code>/api/v3/chat/conversations</code></td>
+          <td><code>/api/v3/chat/conversations/actions/start</code></td>
+          <td><span class="badge badge-endpoint">endpoint-swap</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/chat/conversations/:id/resync</code></td>
+          <td><code>/api/v3/chat/conversations/:id/resync</code></td>
+          <td><code>/api/v3/chat/conversations/:id/actions/resync</code></td>
+          <td><span class="badge badge-endpoint">endpoint-swap</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/chat/conversations/:id/accept</code></td>
+          <td><code>/api/v3/chat/conversations/:id/accept</code></td>
+          <td><code>/api/v3/chat/conversations/:id/actions/accept</code></td>
+          <td><span class="badge badge-endpoint">endpoint-swap</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/chat/conversations/:id/decline</code></td>
+          <td><code>/api/v3/chat/conversations/:id/decline</code></td>
+          <td><code>/api/v3/chat/conversations/:id/actions/decline</code></td>
+          <td><span class="badge badge-endpoint">endpoint-swap</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/chat/conversations/:id/mute</code></td>
+          <td><code>/api/v3/chat/conversations/:id/mute</code></td>
+          <td><code>/api/v3/chat/conversations/:id/actions/mute</code></td>
+          <td><span class="badge badge-body">body-change</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-delete">DELETE</span></td>
+          <td><code>/chat/conversations/:id/mute</code></td>
+          <td><code>/api/v3/chat/conversations/:id/mute</code></td>
+          <td><code>/api/v3/chat/conversations/:id/actions/mute</code> + <code>{ muted: false }</code></td>
+          <td><span class="badge badge-body">body-change</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/chat/conversations/:id/archive</code></td>
+          <td><code>/api/v3/chat/conversations/:id/archive</code></td>
+          <td><code>/api/v3/chat/conversations/:id/actions/archive</code></td>
+          <td><span class="badge badge-body">body-change</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-delete">DELETE</span></td>
+          <td><code>/chat/conversations/:id/archive</code></td>
+          <td><code>/api/v3/chat/conversations/:id/archive</code></td>
+          <td><code>/api/v3/chat/conversations/:id/actions/archive</code> + <code>{ archived: false }</code></td>
+          <td><span class="badge badge-body">body-change</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/chat/conversations/:id/read-receipt</code></td>
+          <td><code>/api/v3/chat/conversations/:id/read-receipt</code></td>
+          <td><code>/api/v3/chat/conversations/:id/actions/read-receipt</code></td>
+          <td><span class="badge badge-endpoint">endpoint-swap</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/chat/conversations/:id/messages</code></td>
+          <td><code>/api/v3/chat/conversations/:id/messages</code></td>
+          <td><code>/api/v3/chat/conversations/:id/messages</code></td>
+          <td><span class="badge badge-nochange">no change</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/chat/conversations/:id/messages</code></td>
+          <td><code>/api/v3/chat/conversations/:id/messages</code></td>
+          <td><code>/api/v3/chat/conversations/:id/messages</code></td>
+          <td><span class="badge badge-nochange">no change</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:var(--success);"></span> endpoint-swap (path change only)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#ec4899;"></span> body-change (method + body restructure)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--text-muted);"></span> no change (path already correct)</div>
+    </div>
+  </section>
+
+  <!-- 2. Critical: V3 Alias Complication -->
+  <section id="critical-note">
+    <h2>2. Critical: V3 Alias Complication</h2>
+    <div class="risk-card critical">
+      <div class="risk-title">Frontend currently uses short paths that auto-prefix to /api/v3</div>
+      <div class="risk-detail">
+        <p>Because the <code>SplitsApiClient</code> defaults to <code>/api/v3</code> base path, all current frontend calls like
+        <code>client.get("/chat/conversations")</code> actually hit <code>/api/v3/chat/conversations</code>.</p>
+        <p style="margin-top:0.5rem;">The V2 routes file registered "fake" V3 aliases at these paths. Now that real V3 endpoints exist at
+        <strong>different paths</strong> (e.g., <code>/views/list-for-user</code> instead of bare <code>/conversations</code>),
+        the frontend must switch to <strong>full V3 paths</strong> to hit the proper V3 handlers.</p>
+        <p style="margin-top:0.5rem;"><strong>Key insight:</strong> The messages sub-resource (<code>/chat/conversations/:id/messages</code>) already
+        has proper V3 routes registered at the same path, so those calls need NO change.</p>
+      </div>
+    </div>
+    <div class="risk-card info">
+      <div class="risk-title">Gateway registers both old alias paths AND new V3 paths</div>
+      <div class="risk-detail">
+        The API gateway at <code>services/api-gateway/src/routes/v3/chat.ts</code> registers both the legacy alias paths
+        (<code>/chat/conversations/:id/accept</code>) and the new V3 action paths (<code>/chat/conversations/:id/actions/accept</code>).
+        This means migration can be incremental -- old paths will continue to work during the transition period.
+        However, the <strong>mute and archive</strong> endpoints change behavior: the V3 actions use a single POST with boolean body
+        instead of separate POST/DELETE.
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Portal App Consumers -->
+  <section id="portal-consumers">
+    <h2>3. Portal App Consumers</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">14 files in the portal app reference conversation-related APIs or types.</p>
+
+    <!-- portal-chat-sidebar.tsx -->
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/components/portal-chat-sidebar.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 50:</strong> <code>client.get("/chat/conversations", { params: { filter, limit: 100 } })</code>
+        <br>Change to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { filter, limit: 100 } })</code>
+      </div>
+    </div>
+
+    <!-- chat-start.ts (portal) -->
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/lib/chat-start.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 19:</strong> <code>client.post("/chat/conversations", { participantUserId, context })</code>
+        <br>Change to: <code>client.post("/api/v3/chat/conversations/actions/start", { participantUserId, context })</code>
+        <br><br>
+        <strong>Line 40:</strong> <code>client.post(`/chat/conversations/${conversationId}/messages`, { body, clientMessageId })</code>
+        <br>Status: <span class="badge badge-nochange">no change</span> -- messages sub-resource path is correct via auto-prefix
+      </div>
+    </div>
+
+    <!-- thread-panel.tsx (portal) -->
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/components/chat/thread-panel.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 50:</strong> <code>client.get(`/chat/conversations/${conversationId}/resync`)</code>
+        <br>Change to: <code>client.get(`/api/v3/chat/conversations/${conversationId}/actions/resync`)</code>
+        <br><br>
+        <strong>Line 143:</strong> <code>client.post(`/chat/conversations/${conversationId}/read-receipt`, { lastReadMessageId })</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${conversationId}/actions/read-receipt`, { lastReadMessageId })</code>
+        <br><br>
+        <strong>Line 249:</strong> <code>client.post(`/chat/conversations/${conversationId}/messages`, ...)</code>
+        <br>Status: <span class="badge badge-nochange">no change</span>
+        <br><br>
+        <strong>Line 299:</strong> <code>client.get(`/chat/conversations/${conversationId}/messages`, ...)</code>
+        <br>Status: <span class="badge badge-nochange">no change</span>
+      </div>
+    </div>
+
+    <!-- filter-context.tsx -->
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/app/portal/messages/contexts/filter-context.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 124:</strong> <code>client.get("/chat/conversations", { params: { filter: filters.mailbox, limit: 50 } })</code>
+        <br>Change to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { filter: filters.mailbox, limit: 50 } })</code>
+        <br><br>
+        <strong>Line 137:</strong> <code>client.get("/chat/conversations", { params: { filter: "requests", limit: 100 } })</code>
+        <br>Change to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { filter: "requests", limit: 100 } })</code>
+      </div>
+    </div>
+
+    <!-- actions-toolbar.tsx (Basel) -->
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/components/basel/messages/actions-toolbar.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-body">body-change</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Lines 86-88 (mute):</strong>
+        <code>client.delete(`/chat/conversations/${convoId}/mute`)</code> and <code>client.post(`/chat/conversations/${convoId}/mute`)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${convoId}/actions/mute`, { muted: true/false })</code>
+        <br><br>
+        <strong>Lines 107-109 (archive):</strong>
+        <code>client.delete(`/chat/conversations/${convoId}/archive`)</code> and <code>client.post(`/chat/conversations/${convoId}/archive`)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${convoId}/actions/archive`, { archived: true/false })</code>
+      </div>
+    </div>
+
+    <!-- detail-header.tsx -->
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/components/basel/messages/detail-header.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 94:</strong> <code>client.post(`/chat/conversations/${item.conversation.id}/accept`)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${item.conversation.id}/actions/accept`)</code>
+        <br><br>
+        <strong>Line 104:</strong> <code>client.post(`/chat/conversations/${item.conversation.id}/decline`)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${item.conversation.id}/actions/decline`)</code>
+      </div>
+    </div>
+
+    <!-- stats.tsx -->
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/components/basel/messages/stats.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Lines 47-55:</strong> Three parallel calls to <code>client.get("/chat/conversations", { params: { filter: "inbox"/"requests"/"archived", limit: 100 } })</code>
+        <br>Change all to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { ... } })</code>
+      </div>
+    </div>
+
+    <!-- firm-profile-client.tsx (portal public) -->
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/app/(public)/firms/[slug]/firm-profile-client.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 73:</strong> <code>client.get("/chat/conversations", { params: { limit: 100 } })</code>
+        <br>Change to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { limit: 100 } })</code>
+        <br><em>Used to check if user already has a conversation with a firm owner.</em>
+      </div>
+    </div>
+
+    <!-- NO-CHANGE FILES (Portal) -->
+    <h3 style="margin-top: 1.5rem;">No-Change Files (Portal)</h3>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">These files reference chat but do not make conversation API calls that need changing.</p>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/components/chat/types.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-type">type-update</span>
+      </div>
+      <div class="call-sites">Type definitions for <code>ConversationRow</code>, <code>ResyncData</code>, <code>Message</code>.
+        V3 response shape is identical to V2 alias response -- <strong>no type changes needed</strong>.
+        The V3 list-for-user view returns the same <code>{ conversation, participant }</code> shape.</div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/app/portal/messages/types.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Identical copy of <code>components/chat/types.ts</code>. Types are compatible with V3 response shapes.</div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/hooks/use-chat-gateway.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">WebSocket connection to chat-gateway. No HTTP API calls to conversation endpoints.</div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/hooks/use-presence.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Calls <code>/chat/presence</code> (presence resource, not conversations). Out of scope.</div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/components/basel/messages/split-detail-panel.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Layout wrapper. Uses types but makes no API calls.</div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/components/basel/messages/browse-detail-panel.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Layout wrapper. Uses types but makes no API calls.</div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/app/portal/admin/chat/components/chat-moderation-client.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Calls <code>/admin/chat/reports</code> and <code>/admin/chat/audit</code> -- admin endpoints, not conversation CRUD. Out of scope.</div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/portal/src/app/portal/admin/metrics/page.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-portal">Portal</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Calls <code>/admin/chat/metrics</code> -- admin metrics endpoint. Out of scope.</div>
+    </div>
+  </section>
+
+  <!-- 4. Candidate App Consumers -->
+  <section id="candidate-consumers">
+    <h2>4. Candidate App Consumers</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">9 files in the candidate app reference conversation-related APIs.</p>
+
+    <!-- candidate-chat-sidebar.tsx -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/components/candidate-chat-sidebar.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 39:</strong> <code>client.get("/chat/conversations", { params: { filter, limit: 100 } })</code>
+        <br>Change to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { filter, limit: 100 } })</code>
+      </div>
+    </div>
+
+    <!-- chat-start.ts (candidate) -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/lib/chat-start.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 19:</strong> <code>client.post("/chat/conversations", { participantUserId, context })</code>
+        <br>Change to: <code>client.post("/api/v3/chat/conversations/actions/start", { participantUserId, context })</code>
+      </div>
+    </div>
+
+    <!-- list-panel.tsx (candidate) -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/app/portal/messages/components/browse/list-panel.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 36:</strong> <code>client.get("/chat/conversations", { params: { filter, limit: 50 } })</code>
+        <br>Change to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { filter, limit: 50 } })</code>
+      </div>
+    </div>
+
+    <!-- thread-panel.tsx (candidate) -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/app/portal/messages/components/thread/thread-panel.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+        <span class="badge badge-body">body-change</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 57:</strong> <code>client.get(`/chat/conversations/${conversationId}/resync`)</code>
+        <br>Change to: <code>client.get(`/api/v3/chat/conversations/${conversationId}/actions/resync`)</code>
+        <br><br>
+        <strong>Line 75:</strong> <code>client.post(`/chat/conversations/${conversationId}/read-receipt`, ...)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${conversationId}/actions/read-receipt`, ...)</code>
+        <br><br>
+        <strong>Line 212:</strong> <code>client.post(`/chat/conversations/${conversationId}/accept`)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${conversationId}/actions/accept`)</code>
+        <br><br>
+        <strong>Line 221:</strong> <code>client.post(`/chat/conversations/${conversationId}/decline`)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${conversationId}/actions/decline`)</code>
+        <br><br>
+        <strong>Lines 232-237 (archive):</strong>
+        <code>client.delete(`/chat/conversations/${conversationId}/archive`)</code> and <code>client.post(...archive)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${conversationId}/actions/archive`, { archived: true/false })</code>
+        <br><br>
+        <strong>Lines 246-249 (mute):</strong>
+        <code>client.delete(`/chat/conversations/${conversationId}/mute`)</code> and <code>client.post(...mute)</code>
+        <br>Change to: <code>client.post(`/api/v3/chat/conversations/${conversationId}/actions/mute`, { muted: true/false })</code>
+        <br><br>
+        <strong>Lines 195, 299:</strong> Messages calls -- <span class="badge badge-nochange">no change</span>
+      </div>
+    </div>
+
+    <!-- use-candidate-notifications.ts -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/app/portal/dashboard/hooks/use-candidate-notifications.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 21:</strong> <code>client.get('/chat/conversations')</code>
+        <br>Change to: <code>client.get('/api/v3/chat/conversations/views/list-for-user')</code>
+        <br><em>Note: this hook processes <code>conv.unread_count</code> directly from the response. V3 list-for-user returns
+        <code>{ conversation, participant: { unread_count } }</code>, so the response traversal at line 29 will need updating
+        from <code>conv.unread_count</code> to <code>conv.participant?.unread_count</code>.</em>
+      </div>
+    </div>
+
+    <!-- connect-modal.tsx -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/app/(public)/marketplace/[slug]/connect-modal.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Uses <code>startChatConversation</code> from <code>chat-start.ts</code> (which will be updated)
+        and posts to <code>/chat/conversations/${id}/messages</code> (messages -- no change needed).</div>
+    </div>
+
+    <!-- firm-connect-modal.tsx -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/app/(public)/firms/[slug]/firm-connect-modal.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Uses <code>startChatConversation</code> from <code>chat-start.ts</code> (which will be updated)
+        and posts to <code>/chat/conversations/${id}/messages</code> (messages -- no change needed).</div>
+    </div>
+
+    <!-- recruiter-profile-client.tsx -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/app/(public)/marketplace/[slug]/recruiter-profile-client.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 233:</strong> <code>client.get("/chat/conversations", { params: { filter: "inbox", limit: 100 } })</code>
+        <br>Change to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { filter: "inbox", limit: 100 } })</code>
+        <br><em>Used to check if user has existing conversation with this recruiter.</em>
+      </div>
+    </div>
+
+    <!-- firm-profile-client.tsx (candidate public) -->
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/app/(public)/firms/[slug]/firm-profile-client.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-endpoint">endpoint-swap</span>
+      </div>
+      <div class="call-sites">
+        <strong>Line 68:</strong> <code>client.get("/chat/conversations", { params: { limit: 100 } })</code>
+        <br>Change to: <code>client.get("/api/v3/chat/conversations/views/list-for-user", { params: { limit: 100 } })</code>
+        <br><em>Used to check if user has existing conversation with firm owner.</em>
+      </div>
+    </div>
+
+    <!-- NO-CHANGE FILES (Candidate) -->
+    <h3 style="margin-top: 1.5rem;">No-Change Files (Candidate)</h3>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/hooks/use-chat-gateway.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">WebSocket connection only. No HTTP conversation API calls.</div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/candidate/src/hooks/use-presence.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-candidate">Candidate</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">Calls <code>/chat/presence</code> -- presence resource, not conversations.</div>
+    </div>
+  </section>
+
+  <!-- 5. Admin App Consumers -->
+  <section id="admin-consumers">
+    <h2>5. Admin App Consumers</h2>
+
+    <div class="consumer-file">
+      <div class="file-path">apps/admin/src/app/secure/chat/page.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-admin">Admin</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">
+        Calls <code>/chat/admin/flagged</code> via <code>useStandardList</code> -- admin moderation endpoint, not conversation CRUD.
+        Out of scope for conversations migration.
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Shared Package -->
+  <section id="shared-package">
+    <h2>6. Shared Package (chat-ui)</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">
+      The <code>packages/chat-ui</code> package does NOT make direct API calls. It receives a <code>fetchConversations</code>
+      callback from the host app. The API call lives in the app's sidebar component, not in the shared package.
+    </p>
+
+    <div class="consumer-file">
+      <div class="file-path">packages/chat-ui/src/context/chat-sidebar-context.tsx</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-shared">Shared</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">
+        Calls <code>fetchConversationsRef.current(filter)</code> -- a callback injected by the host app.
+        The actual API URL is in <code>portal-chat-sidebar.tsx</code> and <code>candidate-chat-sidebar.tsx</code>.
+        No direct API paths in this file.
+      </div>
+    </div>
+
+    <div class="consumer-file">
+      <div class="file-path">packages/chat-ui/src/types/chat-types.ts</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <span class="badge badge-shared">Shared</span>
+        <span class="badge badge-nochange">no change</span>
+      </div>
+      <div class="call-sites">
+        Defines <code>ConversationRow</code> type used by both apps. V3 view returns identical shape -- no change needed.
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Body Format Changes -->
+  <section id="body-changes">
+    <h2>7. Body Format Changes (Mute/Archive)</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">
+      The most significant behavioral change: V2 used separate POST (enable) and DELETE (disable) for mute and archive.
+      V3 uses a single POST with a boolean body.
+    </p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Mute: V2 Pattern</h3>
+        <code style="display:block;margin:0.5rem 0;">// Enable mute<br>client.post(`/chat/conversations/${id}/mute`)</code>
+        <code style="display:block;margin:0.5rem 0;">// Disable mute<br>client.delete(`/chat/conversations/${id}/mute`)</code>
+      </div>
+      <div class="card">
+        <h3>Mute: V3 Pattern</h3>
+        <code style="display:block;margin:0.5rem 0;">// Enable mute<br>client.post(`/api/v3/chat/conversations/${id}/actions/mute`, { muted: true })</code>
+        <code style="display:block;margin:0.5rem 0;">// Disable mute<br>client.post(`/api/v3/chat/conversations/${id}/actions/mute`, { muted: false })</code>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 1rem;">
+      <div class="card">
+        <h3>Archive: V2 Pattern</h3>
+        <code style="display:block;margin:0.5rem 0;">// Enable archive<br>client.post(`/chat/conversations/${id}/archive`)</code>
+        <code style="display:block;margin:0.5rem 0;">// Disable archive<br>client.delete(`/chat/conversations/${id}/archive`)</code>
+      </div>
+      <div class="card">
+        <h3>Archive: V3 Pattern</h3>
+        <code style="display:block;margin:0.5rem 0;">// Enable archive<br>client.post(`/api/v3/chat/conversations/${id}/actions/archive`, { archived: true })</code>
+        <code style="display:block;margin:0.5rem 0;">// Disable archive<br>client.post(`/api/v3/chat/conversations/${id}/actions/archive`, { archived: false })</code>
+      </div>
+    </div>
+
+    <h4 style="margin-top: 1.5rem;">Files affected by body-change</h4>
+    <table>
+      <thead>
+        <tr><th>File</th><th>App</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>apps/portal/src/components/basel/messages/actions-toolbar.tsx</code></td>
+          <td><span class="badge badge-portal">Portal</span></td>
+          <td>mute (lines 86-88), archive (lines 107-109)</td>
+        </tr>
+        <tr>
+          <td><code>apps/candidate/.../thread/thread-panel.tsx</code></td>
+          <td><span class="badge badge-candidate">Candidate</span></td>
+          <td>mute (lines 246-249), archive (lines 232-237)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 8. Response Type Changes -->
+  <section id="type-changes">
+    <h2>8. Response Type Changes</h2>
+
+    <div class="risk-card success">
+      <div class="risk-title">V3 list-for-user view returns identical shape to V2 alias</div>
+      <div class="risk-detail">
+        The V3 <code>ListForUserService</code> returns <code>{ conversation: { ..., participant_a, participant_b }, participant: { ... } }</code>
+        -- the exact same shape as the V2 alias handler. The frontend <code>ConversationRow</code> type is fully compatible.
+        <strong>No type changes needed.</strong>
+      </div>
+    </div>
+
+    <div class="risk-card success">
+      <div class="risk-title">V3 resync action returns identical shape to V2</div>
+      <div class="risk-detail">
+        The V3 resync action returns <code>{ data: { conversation, participant, messages } }</code> -- same as V2.
+        The <code>ResyncData</code> type is fully compatible. <strong>No type changes needed.</strong>
+      </div>
+    </div>
+
+    <div class="risk-card">
+      <div class="risk-title">use-candidate-notifications.ts response traversal needs update</div>
+      <div class="risk-detail">
+        The V2 alias returned a flat array where each item has <code>unread_count</code> at the top level.
+        The V3 list-for-user view returns <code>{ conversation, participant: { unread_count } }</code>.
+        The candidate notifications hook at line 29 accesses <code>conv.unread_count</code> directly, which will break.
+        Must change to <code>conv.participant?.unread_count || 0</code>.
+        <br><br>
+        <strong>However</strong>, need to verify: the V2 alias <code>normalizeRows()</code> in other consumers suggests the V2 response
+        already uses the nested shape. If the V2 alias returned the same nested shape, this may already work.
+        The <code>normalizeRows</code> function in <code>filter-context.tsx</code> handles both flat and nested shapes.
+        This hook does NOT use normalizeRows and accesses the data directly -- needs verification.
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Classification Summary -->
+  <section id="classification-summary">
+    <h2>9. Classification Summary</h2>
+
+    <table>
+      <thead>
+        <tr><th>Classification</th><th>Count</th><th>Files</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-endpoint">endpoint-swap</span></td>
+          <td><strong>11</strong></td>
+          <td>Change URL path from short V2 to full V3 view/action path</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-body">body-change</span></td>
+          <td><strong>2</strong></td>
+          <td>Mute/archive: POST+DELETE becomes single POST with boolean body</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-type">type-update</span></td>
+          <td><strong>1</strong></td>
+          <td>use-candidate-notifications response traversal may need update</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-nochange">no change</span></td>
+          <td><strong>13</strong></td>
+          <td>WebSocket hooks, type files, layout wrappers, admin endpoints, messages sub-resource</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top: 1.5rem;">By App</h3>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--portal);">8</div>
+        <div class="stat-label">Portal Files to Change</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--candidate);">7</div>
+        <div class="stat-label">Candidate Files to Change</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--admin);">0</div>
+        <div class="stat-label">Admin Files to Change</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--shared);">0</div>
+        <div class="stat-label">Shared Packages to Change</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Migration Priority Order -->
+  <section id="migration-order">
+    <h2>10. Migration Priority Order</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">Ordered by dependency and risk. Each step is one commit.</p>
+
+    <table>
+      <thead>
+        <tr><th>Priority</th><th>Step</th><th>App</th><th>Files</th><th>Risk</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Migrate <code>chat-start.ts</code> (start action)</td>
+          <td><span class="badge badge-portal">Portal</span> + <span class="badge badge-candidate">Candidate</span></td>
+          <td><code>apps/portal/src/lib/chat-start.ts</code><br><code>apps/candidate/src/lib/chat-start.ts</code></td>
+          <td><span class="badge badge-success">Low</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Migrate Portal list endpoints (sidebar, filter-context, stats, firm-profile)</td>
+          <td><span class="badge badge-portal">Portal</span></td>
+          <td>4 files: sidebar, filter-context, stats, firm-profile</td>
+          <td><span class="badge badge-success">Low</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Migrate Portal thread panel (resync, read-receipt)</td>
+          <td><span class="badge badge-portal">Portal</span></td>
+          <td><code>apps/portal/src/components/chat/thread-panel.tsx</code></td>
+          <td><span class="badge badge-success">Low</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Migrate Portal actions (accept, decline in detail-header)</td>
+          <td><span class="badge badge-portal">Portal</span></td>
+          <td><code>apps/portal/src/components/basel/messages/detail-header.tsx</code></td>
+          <td><span class="badge badge-success">Low</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Migrate Portal mute/archive (body-change in actions-toolbar)</td>
+          <td><span class="badge badge-portal">Portal</span></td>
+          <td><code>apps/portal/src/components/basel/messages/actions-toolbar.tsx</code></td>
+          <td><span class="badge badge-warning">Medium</span> -- method change</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Migrate Candidate list endpoints (sidebar, list-panel, profile pages, notifications)</td>
+          <td><span class="badge badge-candidate">Candidate</span></td>
+          <td>5 files</td>
+          <td><span class="badge badge-warning">Medium</span> -- notifications response shape</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Migrate Candidate thread panel (resync, actions, mute/archive body-change)</td>
+          <td><span class="badge badge-candidate">Candidate</span></td>
+          <td><code>apps/candidate/.../thread/thread-panel.tsx</code></td>
+          <td><span class="badge badge-warning">Medium</span> -- many call sites</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 11. Risks and Decisions -->
+  <section id="risks">
+    <h2>11. Risks and Decisions</h2>
+
+    <div class="risk-card critical">
+      <div class="risk-title">RISK: Mute/archive body-change could break if V3 aliases are removed first</div>
+      <div class="risk-detail">
+        The V2 routes file has V3 aliases for mute/archive that accept the old POST/DELETE pattern.
+        If these aliases are removed before the frontend is migrated, the mute/archive functionality will break.
+        <strong>Decision:</strong> Migrate frontend mute/archive calls BEFORE removing V2 aliases.
+        The gateway registers both old and new paths, so both will work during transition.
+      </div>
+    </div>
+
+    <div class="risk-card">
+      <div class="risk-title">RISK: use-candidate-notifications response shape uncertainty</div>
+      <div class="risk-detail">
+        The hook accesses <code>conv.unread_count</code> directly on each conversation item.
+        V3 list-for-user returns <code>{ conversation: {...}, participant: { unread_count } }</code>.
+        If the V2 alias already returned this nested shape (which other consumers suggest),
+        this hook was already broken or handles it differently.
+        <strong>Decision:</strong> Verify actual V2 response shape during migration. Update traversal to use
+        <code>conv.participant?.unread_count || conv.unread_count || 0</code> for safety.
+      </div>
+    </div>
+
+    <div class="risk-card info">
+      <div class="risk-title">NOTE: Messages sub-resource is out of scope</div>
+      <div class="risk-detail">
+        <code>GET/POST /chat/conversations/:id/messages</code> is registered at the same path in V3.
+        The auto-prefix already routes these correctly. These calls need NO migration.
+        The messages resource has its own migration plan at <code>.planning/api-migrations/messages-plan.html</code>.
+      </div>
+    </div>
+
+    <div class="risk-card info">
+      <div class="risk-title">NOTE: Presence, blocks, reports, admin endpoints are out of scope</div>
+      <div class="risk-detail">
+        Several files reference <code>/chat/presence</code>, <code>/chat/blocks</code>, <code>/chat/reports</code>,
+        <code>/admin/chat/*</code>. These are separate resources and not part of the conversations V3 migration.
+      </div>
+    </div>
+
+    <div class="risk-card success">
+      <div class="risk-title">ADVANTAGE: Gateway supports both old and new paths during transition</div>
+      <div class="risk-detail">
+        The API gateway registers both legacy alias paths (e.g., <code>/chat/conversations/:id/accept</code>)
+        and new V3 action paths (e.g., <code>/chat/conversations/:id/actions/accept</code>).
+        This means migration can be done incrementally per file without breaking anything.
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.8rem;">
+    <p>Generated by <code>/api-frontend:scan conversations</code> &middot; March 2026</p>
+    <p>Backend plan: <code>.planning/api-migrations/conversations-plan.html</code></p>
+    <p>Next step: Review and approve, then run <code>/api-frontend:migrate conversations</code></p>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -70,7 +70,7 @@ export default function FirmProfileClient({ firm }: FirmProfileClientProps) {
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res: any = await client.get("/chat/conversations", { params: { limit: 100 } });
+                const res: any = await client.get("/chat/conversations/views/list-for-user", { params: { limit: 100 } });
                 const conversations = res?.data || [];
                 const isConnected = conversations.some(
                     (c: any) => c.participant_a_id === contactUserId || c.participant_b_id === contactUserId,

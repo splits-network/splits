@@ -230,7 +230,7 @@ export default function RecruiterProfileClient({
                 const token = await getToken();
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
-                const res: any = await client.get("/chat/conversations", {
+                const res: any = await client.get("/chat/conversations/views/list-for-user", {
                     params: { filter: "inbox", limit: 100 },
                 });
                 const conversations = res?.data || [];

@@ -1,11 +1,14 @@
 /**
- * Conversations V3 Repository — Core CRUD
+ * Conversations V3 Repository -- Core CRUD
  *
- * Single table queries on chat_conversations. NO joins, NO role logic.
+ * Flat select('*') on chat_conversations. NO joins, NO role logic.
+ * Participant checks are helper queries on chat_conversation_participants.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ConversationListParams } from './types';
+import { ConversationListParams, ChatConversation } from './types';
+
+const SORTABLE_FIELDS = ['created_at', 'updated_at', 'last_message_at'];
 
 export class ConversationRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -13,7 +16,7 @@ export class ConversationRepository {
   async findAll(
     params: ConversationListParams,
     userId: string,
-  ): Promise<{ data: any[]; total: number }> {
+  ): Promise<{ data: ChatConversation[]; total: number }> {
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
     const offset = (page - 1) * limit;
@@ -31,25 +34,22 @@ export class ConversationRepository {
       return { data: [], total: 0 };
     }
 
-    let query = this.supabase
+    const sortBy = SORTABLE_FIELDS.includes(params.sort_by || '') ? params.sort_by! : 'last_message_at';
+    const sortAscending = params.sort_order === 'asc';
+
+    const query = this.supabase
       .from('chat_conversations')
       .select('*', { count: 'exact' })
-      .in('id', conversationIds);
-
-    if (params.search) {
-      query = query.ilike('subject', `%${params.search}%`);
-    }
-
-    query = query
-      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .in('id', conversationIds)
+      .order(sortBy, { ascending: sortAscending, nullsFirst: false })
       .range(offset, offset + limit - 1);
 
     const { data, count, error } = await query;
     if (error) throw error;
-    return { data: data || [], total: count || 0 };
+    return { data: (data || []) as ChatConversation[], total: count || 0 };
   }
 
-  async findById(id: string): Promise<any | null> {
+  async findById(id: string): Promise<ChatConversation | null> {
     const { data, error } = await this.supabase
       .from('chat_conversations')
       .select('*')
@@ -57,10 +57,10 @@ export class ConversationRepository {
       .maybeSingle();
 
     if (error) throw error;
-    return data;
+    return data as ChatConversation | null;
   }
 
-  async create(record: Record<string, any>): Promise<any> {
+  async create(record: Record<string, any>): Promise<ChatConversation> {
     const { data, error } = await this.supabase
       .from('chat_conversations')
       .insert(record)
@@ -68,25 +68,25 @@ export class ConversationRepository {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as ChatConversation;
   }
 
-  async update(id: string, updates: Record<string, any>): Promise<any> {
+  async update(id: string, updates: Record<string, any>): Promise<ChatConversation> {
     const { data, error } = await this.supabase
       .from('chat_conversations')
-      .update(updates)
+      .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as ChatConversation;
   }
 
   async softDelete(id: string): Promise<void> {
     const { error } = await this.supabase
       .from('chat_conversations')
-      .update({ archived: true })
+      .update({ updated_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;
@@ -102,18 +102,5 @@ export class ConversationRepository {
 
     if (error) throw error;
     return !!data;
-  }
-
-  async addParticipants(conversationId: string, userIds: string[]): Promise<void> {
-    const rows = userIds.map((userId) => ({
-      conversation_id: conversationId,
-      user_id: userId,
-    }));
-
-    const { error } = await this.supabase
-      .from('chat_conversation_participants')
-      .upsert(rows, { onConflict: 'conversation_id,user_id' });
-
-    if (error) throw error;
   }
 }

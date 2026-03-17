@@ -46,8 +46,8 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        const response: any = await client.get(
-            `/chat/conversations/${conversationId}/resync`,
+        const response: any = await client.post(
+            `/chat/conversations/${conversationId}/actions/resync`,
         );
         const payload = response?.data;
 
@@ -140,7 +140,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
         const client = createAuthenticatedClient(token);
         try {
             await client.post(
-                `/chat/conversations/${conversationId}/read-receipt`,
+                `/chat/conversations/${conversationId}/actions/read-receipt`,
                 { lastReadMessageId },
             );
         } catch {
@@ -529,7 +529,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                                             content={
                                                 msg.body || "Message removed"
                                             }
-                                            className={`text-sm ${isOwnMessage ? "text-primary-content" : "text-base-content/90"} [&_p]:m-0 [&_ul]:my-2 [&_ol]:my-2`}
+                                            className={`text-sm ${isOwnMessage ? "text-primary-content" : "text-base-content/90"} [&_p]:!m-0 [&_ul]:!my-2 [&_ol]:!my-2`}
                                         />
                                     </div>
                                     <div className="chat-footer opacity-60">

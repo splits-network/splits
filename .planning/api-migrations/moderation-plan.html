@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V2 to V3 Migration Plan: Chat Moderation</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #f8f9fa; color: #1a1a2e; }
+  h1 { font-size: 2rem; border-bottom: 3px solid #233876; padding-bottom: 0.5rem; }
+  h2 { font-size: 1.4rem; color: #233876; margin-top: 2rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.3rem; }
+  h3 { font-size: 1.1rem; color: #444; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  th, td { padding: 0.5rem 0.75rem; border: 1px solid #ddd; text-align: left; font-size: 0.9rem; }
+  th { background: #233876; color: white; font-weight: 600; }
+  tr:nth-child(even) { background: #f0f2f8; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.8rem; font-weight: 600; }
+  .badge-crud { background: #d4edda; color: #155724; }
+  .badge-view { background: #cce5ff; color: #004085; }
+  .badge-action { background: #fff3cd; color: #856404; }
+  .badge-new { background: #e2d5f1; color: #6f42c1; }
+  .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: 0.75rem 1rem; margin: 1rem 0; font-size: 0.9rem; }
+  .file-tree { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.85rem; line-height: 1.6; white-space: pre; overflow-x: auto; }
+  .scope-box { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0; }
+  .scope-card { background: white; border: 1px solid #ddd; border-radius: 4px; padding: 1rem 1.5rem; flex: 1; min-width: 180px; text-align: center; }
+  .scope-card .number { font-size: 2rem; font-weight: bold; color: #233876; }
+  .scope-card .label { font-size: 0.85rem; color: #666; }
+  code { background: #e8e8e8; padding: 1px 4px; border-radius: 2px; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<h1>V2 to V3 Migration Plan: Chat Moderation Resource</h1>
+<p><strong>Service:</strong> chat-service &nbsp;|&nbsp; <strong>Date:</strong> 2026-03-17 &nbsp;|&nbsp; <strong>Status:</strong> Plan Ready</p>
+
+<div class="note">
+  <strong>Context:</strong> "Moderation" is not a single DB table -- it is a domain grouping of admin-only operations spanning
+  <code>chat_reports</code>, <code>chat_moderation_audit</code>, and admin metrics aggregation. In V2 these live as routes
+  under <code>/api/v2/admin/chat/*</code> inside the monolithic chat routes file. The V3 migration extracts them into a
+  standalone <code>moderation</code> resource with proper CRUD, views, and actions.
+</div>
+
+<!-- ============================================================ -->
+<h2>1. V2 API Surface</h2>
+
+<table>
+  <thead>
+    <tr><th>Method</th><th>V2 Path</th><th>Description</th><th>Auth</th><th>Tables</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GET</td>
+      <td><code>/api/v2/admin/chat/reports</code></td>
+      <td>List all reports (paginated, cursor-based)</td>
+      <td>Admin only</td>
+      <td>chat_reports</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td><code>/api/v2/admin/chat/reports/:id/evidence</code></td>
+      <td>Get report + associated messages as evidence</td>
+      <td>Admin only</td>
+      <td>chat_reports, chat_messages</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td><code>/api/v2/admin/chat/reports/:id/action</code></td>
+      <td>Take moderation action on report (warn, mute, suspend, ban)</td>
+      <td>Admin only</td>
+      <td>chat_reports, chat_moderation_audit</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td><code>/api/v2/admin/chat/audit</code></td>
+      <td>List moderation audit log (paginated, cursor-based)</td>
+      <td>Admin only</td>
+      <td>chat_moderation_audit</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td><code>/api/v2/admin/chat/metrics</code></td>
+      <td>Admin dashboard metrics (counts across all chat tables)</td>
+      <td>Admin only</td>
+      <td>Multiple: messages, conversations, reports, blocks, attachments, moderation_audit, retention_runs</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Also related (user-facing, already V3-proxied):</strong></p>
+<table>
+  <thead>
+    <tr><th>Method</th><th>Path</th><th>Description</th><th>V3 Status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>POST</td>
+      <td><code>/api/v3/chat/reports</code></td>
+      <td>Submit a report (user-facing)</td>
+      <td>V3 alias exists in v2/chat/routes.ts, proxied in gateway</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td><code>/api/v3/chat/blocks</code></td>
+      <td>Block a user (user-facing)</td>
+      <td>V3 alias exists in v2/chat/routes.ts, proxied in gateway</td>
+    </tr>
+    <tr>
+      <td>DELETE</td>
+      <td><code>/api/v3/chat/blocks/:blockedUserId</code></td>
+      <td>Unblock a user (user-facing)</td>
+      <td>V3 alias exists in v2/chat/routes.ts, proxied in gateway</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>2. Consumer Map</h2>
+
+<h3>Portal App (apps/portal)</h3>
+<table>
+  <thead>
+    <tr><th>File</th><th>Endpoint Called</th><th>Data Used</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>app/portal/admin/chat/components/chat-moderation-client.tsx:58</code></td>
+      <td><code>GET /admin/chat/reports</code></td>
+      <td>Reports list (id, reporter, reported, category, status, created_at)</td>
+    </tr>
+    <tr>
+      <td><code>app/portal/admin/chat/components/chat-moderation-client.tsx:69</code></td>
+      <td><code>GET /admin/chat/audit</code></td>
+      <td>Audit log (id, actor, target, action, created_at)</td>
+    </tr>
+    <tr>
+      <td><code>app/portal/admin/chat/components/chat-moderation-client.tsx:81</code></td>
+      <td><code>GET /admin/chat/reports/:id/evidence</code></td>
+      <td>Report detail + messages array (sender_id, body, metadata.moderation)</td>
+    </tr>
+    <tr>
+      <td><code>app/portal/admin/chat/components/chat-moderation-client.tsx:125</code></td>
+      <td><code>POST /admin/chat/reports/:id/action</code></td>
+      <td>Takes action (warn/mute/suspend) and status change</td>
+    </tr>
+    <tr>
+      <td><code>app/portal/admin/metrics/page.tsx:183</code></td>
+      <td><code>GET /admin/chat/metrics</code></td>
+      <td>Admin metrics (totals.moderation_actions, etc.)</td>
+    </tr>
+    <tr>
+      <td><code>components/basel/messages/actions-toolbar.tsx:129</code></td>
+      <td><code>POST /chat/blocks</code></td>
+      <td>Block user (already V3-proxied)</td>
+    </tr>
+    <tr>
+      <td><code>components/basel/messages/actions-toolbar.tsx:148</code></td>
+      <td><code>POST /chat/reports</code></td>
+      <td>Submit report (already V3-proxied)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Candidate App (apps/candidate)</h3>
+<table>
+  <thead>
+    <tr><th>File</th><th>Endpoint Called</th><th>Data Used</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>app/portal/messages/components/thread/thread-panel.tsx:259</code></td>
+      <td><code>POST /chat/blocks</code></td>
+      <td>Block user (already V3-proxied)</td>
+    </tr>
+    <tr>
+      <td><code>app/portal/messages/components/thread/thread-panel.tsx:280</code></td>
+      <td><code>POST /chat/reports</code></td>
+      <td>Submit report (already V3-proxied)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Admin App (apps/admin)</h3>
+<table>
+  <thead>
+    <tr><th>File</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>components/sidebar/nav-config.ts:99</code></td>
+      <td>Nav link to <code>/secure/chat</code> (label: "Chat Moderation") -- static config only, no API call</td>
+    </tr>
+    <tr>
+      <td><code>components/header/breadcrumbs.tsx:23</code></td>
+      <td>Breadcrumb label mapping -- static config only</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Inter-service Calls</h3>
+<p>None found. The admin routes are only called from frontend apps via the API gateway.</p>
+
+<h3>API Gateway</h3>
+<table>
+  <thead>
+    <tr><th>File</th><th>Route</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>routes/v2/chat.ts</code></td>
+      <td><code>/api/v2/chat/*</code> (wildcard)</td>
+      <td>Catches all v2 chat routes including <code>/api/v2/admin/chat/*</code></td>
+    </tr>
+    <tr>
+      <td><code>routes/v3/chat.ts</code></td>
+      <td>No admin/moderation routes declared</td>
+      <td>Missing -- must be added in migration</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Important:</strong> The portal frontend uses <code>createAuthenticatedClient</code> which has a default
+  path prefix of <code>/api/v3</code>. The admin chat moderation page calls <code>/admin/chat/reports</code> which
+  resolves to <code>/api/v3/admin/chat/reports</code>. Currently these routes are NOT in the V3 gateway but ARE
+  handled by v2 chat route aliases in the v2 routes file. The V3 migration will create proper standalone routes
+  and gateway entries under the <code>/api/v3/moderation/*</code> namespace.
+</div>
+
+<!-- ============================================================ -->
+<h2>3. Migration Classification</h2>
+
+<table>
+  <thead>
+    <tr><th>V2 Route</th><th>V3 Category</th><th>V3 Path</th><th>Reason</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>GET /v2/admin/chat/reports</code></td>
+      <td><span class="badge badge-crud">Core CRUD</span></td>
+      <td><code>GET /v3/moderation/reports</code></td>
+      <td>Standard list of chat_reports, flat data, admin-only</td>
+    </tr>
+    <tr>
+      <td><code>GET /v2/admin/chat/reports/:id/evidence</code></td>
+      <td><span class="badge badge-view">View</span></td>
+      <td><code>GET /v3/moderation/reports/:id/view/evidence</code></td>
+      <td>Joins report + messages -- shaped data for evidence review</td>
+    </tr>
+    <tr>
+      <td><code>POST /v2/admin/chat/reports/:id/action</code></td>
+      <td><span class="badge badge-action">Action</span></td>
+      <td><code>POST /v3/moderation/reports/:id/actions/take-action</code></td>
+      <td>Side effects: creates audit entry, updates report status</td>
+    </tr>
+    <tr>
+      <td><code>GET /v2/admin/chat/audit</code></td>
+      <td><span class="badge badge-crud">Core CRUD</span></td>
+      <td><code>GET /v3/moderation/audit-log</code></td>
+      <td>Standard list of chat_moderation_audit, flat data, admin-only</td>
+    </tr>
+    <tr>
+      <td><code>GET /v2/admin/chat/metrics</code></td>
+      <td><span class="badge badge-view">View</span></td>
+      <td><code>GET /v3/moderation/views/metrics</code></td>
+      <td>Aggregation across multiple tables -- shaped admin dashboard data</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Design decision:</strong> "Moderation" becomes the top-level resource namespace at <code>/api/v3/moderation/</code>.
+  Under it, <code>reports</code> and <code>audit-log</code> are sub-resources with their own Core 5 CRUD.
+  The metrics view and evidence view are views under those sub-resources.
+  This is cleaner than <code>/admin/chat/*</code> because the admin check happens in the service layer
+  via <code>isPlatformAdmin</code>, not via URL path.
+</div>
+
+<!-- ============================================================ -->
+<h2>4. Frontend Impact</h2>
+
+<table>
+  <thead>
+    <tr><th>App</th><th>File</th><th>Change Required</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>portal</td>
+      <td><code>app/portal/admin/chat/components/chat-moderation-client.tsx</code></td>
+      <td>
+        <code>GET /admin/chat/reports</code> --> <code>GET /moderation/reports</code><br>
+        <code>GET /admin/chat/audit</code> --> <code>GET /moderation/audit-log</code><br>
+        <code>GET /admin/chat/reports/:id/evidence</code> --> <code>GET /moderation/reports/:id/view/evidence</code><br>
+        <code>POST /admin/chat/reports/:id/action</code> --> <code>POST /moderation/reports/:id/actions/take-action</code>
+      </td>
+    </tr>
+    <tr>
+      <td>portal</td>
+      <td><code>app/portal/admin/metrics/page.tsx</code></td>
+      <td><code>GET /admin/chat/metrics</code> --> <code>GET /moderation/views/metrics</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>User-facing report/block endpoints (<code>/chat/reports</code>, <code>/chat/blocks</code>) are already V3-proxied and do not need migration.</em></p>
+
+<!-- ============================================================ -->
+<h2>5. V3 File Plan</h2>
+
+<div class="file-tree">services/chat-service/src/v3/moderation/
+  types.ts                                 -- Shared types + JSON schemas (reports, audit)
+  reports/
+    repository.ts                          -- Core CRUD: chat_reports flat select
+    service.ts                             -- Admin check, pagination, event publishing
+    routes.ts                              -- Core 5 routes for /moderation/reports
+    views/
+      evidence.repository.ts               -- Report + messages join query
+      evidence.service.ts                  -- Admin check, evidence assembly
+      evidence.route.ts                    -- GET /moderation/reports/:id/view/evidence
+    actions/
+      take-action.repository.ts            -- Creates audit entry, updates report status
+      take-action.service.ts               -- Validates action, orchestrates mutations
+      take-action.route.ts                 -- POST /moderation/reports/:id/actions/take-action
+  audit-log/
+    repository.ts                          -- Core CRUD: chat_moderation_audit flat select
+    service.ts                             -- Admin check, pagination
+    routes.ts                              -- Core 5 routes for /moderation/audit-log
+  views/
+    metrics.repository.ts                  -- Multi-table count aggregation
+    metrics.service.ts                     -- Admin check, range validation
+    metrics.route.ts                       -- GET /moderation/views/metrics
+
+Gateway addition:
+  services/api-gateway/src/routes/v3/chat.ts   -- Add moderation route declarations
+</div>
+
+<!-- ============================================================ -->
+<h2>6. Estimated Scope</h2>
+
+<div class="scope-box">
+  <div class="scope-card">
+    <div class="number">13</div>
+    <div class="label">V3 Files to Create</div>
+  </div>
+  <div class="scope-card">
+    <div class="number">2</div>
+    <div class="label">Gateway Files to Update</div>
+  </div>
+  <div class="scope-card">
+    <div class="number">2</div>
+    <div class="label">Frontend Files to Update</div>
+  </div>
+  <div class="scope-card">
+    <div class="number">0</div>
+    <div class="label">V2 Files Modified</div>
+  </div>
+</div>
+
+<h3>Risk Assessment</h3>
+<ul>
+  <li><strong>Low risk:</strong> All admin-only endpoints. No public or cross-service consumers.</li>
+  <li><strong>Low risk:</strong> User-facing report/block already V3-proxied -- not part of this migration.</li>
+  <li><strong>Medium risk:</strong> The frontend currently calls <code>/api/v3/admin/chat/*</code> via v2 alias routes.
+      Need to ensure the new V3 routes work before updating frontend URLs.</li>
+</ul>
+
+</body>
+</html>

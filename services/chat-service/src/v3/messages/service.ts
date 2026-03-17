@@ -33,11 +33,25 @@ export class MessageService {
     return context.identityUserId;
   }
 
+  async getById(id: string, clerkUserId: string) {
+    const userId = await this.resolveUserId(clerkUserId);
+    const message = await this.repository.findById(id);
+    if (!message) throw new NotFoundError('Message', id);
+
+    // Verify user is a participant in the message's conversation
+    const participant = await this.repository.getParticipantState(message.conversation_id, userId);
+    if (!participant) {
+      throw new ForbiddenError('You are not a participant in this conversation');
+    }
+
+    return message;
+  }
+
   async getAll(conversationId: string, params: MessageListParams, clerkUserId: string) {
     const userId = await this.resolveUserId(clerkUserId);
 
-    const isParticipant = await this.repository.isParticipant(conversationId, userId);
-    if (!isParticipant) {
+    const participant = await this.repository.getParticipantState(conversationId, userId);
+    if (!participant) {
       throw new ForbiddenError('You are not a participant in this conversation');
     }
 
@@ -53,56 +67,86 @@ export class MessageService {
   async send(conversationId: string, input: SendMessageInput, clerkUserId: string) {
     const userId = await this.resolveUserId(clerkUserId);
 
-    const isParticipant = await this.repository.isParticipant(conversationId, userId);
-    if (!isParticipant) {
+    // 1. Verify sender is a participant and check their request state
+    const senderParticipant = await this.repository.getParticipantState(conversationId, userId);
+    if (!senderParticipant) {
       throw new ForbiddenError('You are not a participant in this conversation');
     }
-
-    // Idempotency: check for duplicate client_message_id
-    if (input.client_message_id) {
-      const existing = await this.repository.findByClientMessageId(userId, input.client_message_id);
-      if (existing) return existing;
+    if (senderParticipant.request_state === 'pending') {
+      throw new BadRequestError('Accept this request to reply');
+    }
+    if (senderParticipant.request_state === 'declined') {
+      throw new BadRequestError('Conversation declined');
     }
 
-    const record: Record<string, any> = {
-      conversation_id: conversationId,
-      sender_id: userId,
-      body: input.body,
-      kind: 'user',
-    };
-    if (input.client_message_id) record.client_message_id = input.client_message_id;
-    if (input.reply_to_message_id) record.reply_to_message_id = input.reply_to_message_id;
+    // 2. Get the other participant and validate their state
+    const otherParticipant = await this.repository.getOtherParticipant(conversationId, userId);
+    if (!otherParticipant) {
+      throw new BadRequestError('Conversation participant missing');
+    }
+    if (otherParticipant.archived_at) {
+      throw new BadRequestError('Recipient archived this conversation');
+    }
+    if (otherParticipant.request_state === 'declined') {
+      throw new BadRequestError('Conversation declined');
+    }
 
-    const message = await this.repository.create(record);
+    // 3. Check blocks between sender and recipient
+    const blocked = await this.repository.isBlocked(userId, otherParticipant.user_id);
+    if (blocked) {
+      throw new BadRequestError('Message could not be delivered');
+    }
 
-    // Real-time: notify conversation channel
-    await this.chatEventPublisher?.messageCreated(conversationId, {
-      conversationId,
-      messageId: message.id,
-      senderId: userId,
-      createdAt: message.created_at,
-    });
+    // 4. Pending request message limit (max 1 message when recipient hasn't accepted)
+    if (otherParticipant.request_state === 'pending') {
+      const messageCount = await this.repository.countMessages(conversationId);
+      if (messageCount >= 1) {
+        throw new BadRequestError('Request pending; cannot send additional messages');
+      }
+    }
 
-    // Real-time: notify other participants via user channel
-    const otherParticipants = await this.repository.getOtherParticipants(conversationId, userId);
-    for (const participantId of otherParticipants) {
-      await this.chatEventPublisher?.conversationUpdated(participantId, {
+    // 5. Send via atomic RPC (handles insert + last_message_at update)
+    try {
+      const message = await this.repository.sendViaRpc(
+        conversationId,
+        userId,
+        input.body,
+        input.client_message_id ?? null,
+      );
+
+      // Real-time: notify conversation channel
+      await this.chatEventPublisher?.messageCreated(conversationId, {
+        conversationId,
+        messageId: message.id,
+        senderId: userId,
+        createdAt: message.created_at,
+      });
+
+      // Real-time: notify other participant via user channel
+      await this.chatEventPublisher?.conversationUpdated(otherParticipant.user_id, {
         conversationId,
         lastMessageId: message.id,
         lastMessageAt: message.created_at,
       });
+
+      // Domain event for downstream consumers (notifications, etc.)
+      await this.eventPublisher?.publish('chat.message.created', {
+        conversation_id: conversationId,
+        message_id: message.id,
+        sender_user_id: userId,
+        recipient_user_id: otherParticipant.user_id,
+        created_at: message.created_at,
+        body_preview: input.body.slice(0, 140),
+      }, 'chat-service');
+
+      return message;
+    } catch (error: any) {
+      // Idempotency: handle unique constraint on client_message_id
+      if (error?.code === '23505' && input.client_message_id) {
+        const existing = await this.repository.findByClientMessageId(userId, input.client_message_id);
+        if (existing) return existing;
+      }
+      throw error;
     }
-
-    // Domain event for downstream consumers (notifications, etc.)
-    await this.eventPublisher?.publish('chat.message.created', {
-      conversation_id: conversationId,
-      message_id: message.id,
-      sender_user_id: userId,
-      recipient_user_ids: otherParticipants,
-      created_at: message.created_at,
-      body_preview: input.body.slice(0, 140),
-    }, 'chat-service');
-
-    return message;
   }
 }

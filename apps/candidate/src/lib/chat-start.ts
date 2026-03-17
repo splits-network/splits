@@ -16,7 +16,7 @@ export async function startChatConversation(
         throw new Error("Not authenticated");
     }
     const client = createAuthenticatedClient(token);
-    const response: any = await client.post("/chat/conversations", {
+    const response: any = await client.post("/chat/conversations/actions/start", {
         participantUserId,
         context: context || {},
     });

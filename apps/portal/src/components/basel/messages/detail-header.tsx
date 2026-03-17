@@ -91,7 +91,7 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
         const token = await getToken();
         if (!token) return;
         const client = createAuthenticatedClient(token);
-        await client.post(`/chat/conversations/${item.conversation.id}/accept`);
+        await client.post(`/chat/conversations/${item.conversation.id}/actions/accept`);
         refresh();
         requestChatRefresh();
     };
@@ -102,7 +102,7 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
         if (!token) return;
         const client = createAuthenticatedClient(token);
         await client.post(
-            `/chat/conversations/${item.conversation.id}/decline`,
+            `/chat/conversations/${item.conversation.id}/actions/decline`,
         );
         refresh();
         requestChatRefresh();

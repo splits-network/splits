@@ -180,7 +180,7 @@ export default function MarketplaceMetricsPage() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get("/admin/chat/metrics", {
+            const response: any = await client.get("/moderation/views/metrics", {
                 params: { rangeDays: dateRange },
             });
             setChatMetrics(response?.data || null);

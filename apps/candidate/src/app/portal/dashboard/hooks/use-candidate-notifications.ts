@@ -18,7 +18,7 @@ export function useCandidateNotifications() {
             const client = createAuthenticatedClient(token);
 
             const [messagesResult, notificationsResult] = await Promise.allSettled([
-                client.get('/chat/conversations'),
+                client.get('/chat/conversations/views/list-for-user'),
                 client.get('/notifications', {
                     params: { filters: { unread_only: true }, limit: 100 },
                 }),
