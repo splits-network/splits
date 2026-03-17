@@ -22,7 +22,7 @@ export function PricingFaqAccordion({ faqs }: PricingFaqAccordionProps) {
                         }
                         className="w-full flex items-center justify-between p-5 md:p-6 text-left hover:bg-base-content/5 transition-colors"
                     >
-                        <span className="text-base font-bold pr-4 text-base-content">
+                        <span className="text-base font-bold pr-4 text-neutral-content">
                             {faq.question}
                         </span>
                         <i
@@ -36,7 +36,7 @@ export function PricingFaqAccordion({ faqs }: PricingFaqAccordionProps) {
                             opacity: openIndex === index ? 1 : 0,
                         }}
                     >
-                        <div className="px-5 pb-5 md:px-6 md:pb-6 text-sm leading-relaxed text-base-content/65">
+                        <div className="px-5 pb-5 md:px-6 md:pb-6 text-sm leading-relaxed text-neutral-content/65">
                             {faq.answer}
                         </div>
                     </div>

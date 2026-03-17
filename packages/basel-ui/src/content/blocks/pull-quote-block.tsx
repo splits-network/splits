@@ -3,7 +3,7 @@ import type { PullQuoteBlock } from "@splits-network/shared-types";
 const bgMap: Record<string, { bg: string; text: string; border: string }> = {
     neutral: {
         bg: "bg-neutral",
-        text: "text-base-content",
+        text: "text-neutral-content",
         border: "border-secondary",
     },
     primary: {

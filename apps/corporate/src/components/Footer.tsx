@@ -4,6 +4,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useScrollReveal, BaselFooter } from "@splits-network/basel-ui";
+import type { FooterNavConfig } from "@splits-network/shared-types";
 
 // ─── Footer Links Data ──────────────────────────────────────────────────────
 
@@ -65,8 +66,12 @@ const BOTTOM_LEGAL = [
 
 // ─── Footer Component ───────────────────────────────────────────────────────
 
-export function Footer() {
+export function Footer({ footerNav }: { footerNav?: FooterNavConfig | null }) {
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const sections = footerNav?.sections;
+    const socialLinks = footerNav?.socialLinks ?? SOCIAL_LINKS;
+    const legalLinks = footerNav?.legalLinks ?? BOTTOM_LEGAL;
 
     useScrollReveal(containerRef);
 
@@ -117,7 +122,7 @@ export function Footer() {
                         split-fee collaboration.
                     </p>
                     <div className="social-row flex gap-2">
-                        {SOCIAL_LINKS.map((social) => (
+                        {socialLinks.map((social) => (
                             <a
                                 key={social.label}
                                 href={social.href}
@@ -133,72 +138,111 @@ export function Footer() {
                 </>
             }
             columns={
-                <>
-                    {/* Products */}
-                    <div className="footer-col scroll-reveal fade-up">
-                        <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
-                            <span className="w-4 h-0.5 bg-primary" />
-                            Products
-                        </h4>
-                        <ul className="space-y-2.5">
-                            {PRODUCT_LINKS.map((link) => (
-                                <li key={link.label}>
-                                    <a
-                                        href={link.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
-                                    >
-                                        {link.label}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                sections ? (
+                    <>
+                        {sections.map((section) => (
+                            <div
+                                key={section.title}
+                                className="footer-col scroll-reveal fade-up"
+                            >
+                                <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
+                                    <span className="w-4 h-0.5 bg-primary" />
+                                    {section.title}
+                                </h4>
+                                <ul className="space-y-2.5">
+                                    {section.links.map((link) => (
+                                        <li key={link.label}>
+                                            {"external" in link && link.external ? (
+                                                <a
+                                                    href={link.href}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                                >
+                                                    {link.label}
+                                                </a>
+                                            ) : (
+                                                <Link
+                                                    href={link.href}
+                                                    className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                                >
+                                                    {link.label}
+                                                </Link>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </>
+                ) : (
+                    <>
+                        {/* Products */}
+                        <div className="footer-col scroll-reveal fade-up">
+                            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
+                                <span className="w-4 h-0.5 bg-primary" />
+                                Products
+                            </h4>
+                            <ul className="space-y-2.5">
+                                {PRODUCT_LINKS.map((link) => (
+                                    <li key={link.label}>
+                                        <a
+                                            href={link.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                        >
+                                            {link.label}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
-                    {/* Company */}
-                    <div className="footer-col scroll-reveal fade-up">
-                        <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
-                            <span className="w-4 h-0.5 bg-primary" />
-                            Company
-                        </h4>
-                        <ul className="space-y-2.5">
-                            {COMPANY_LINKS.map((link) => (
-                                <li key={link.label}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                        {/* Company */}
+                        <div className="footer-col scroll-reveal fade-up">
+                            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
+                                <span className="w-4 h-0.5 bg-primary" />
+                                Company
+                            </h4>
+                            <ul className="space-y-2.5">
+                                {COMPANY_LINKS.map((link) => (
+                                    <li key={link.label}>
+                                        <Link
+                                            href={link.href}
+                                            className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
-                    {/* Legal */}
-                    <div className="footer-col scroll-reveal fade-up">
-                        <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
-                            <span className="w-4 h-0.5 bg-primary" />
-                            Legal
-                        </h4>
-                        <ul className="space-y-2.5">
-                            {LEGAL_LINKS.map((link) => (
-                                <li key={link.label}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                        {/* Legal */}
+                        <div className="footer-col scroll-reveal fade-up">
+                            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
+                                <span className="w-4 h-0.5 bg-primary" />
+                                Legal
+                            </h4>
+                            <ul className="space-y-2.5">
+                                {LEGAL_LINKS.map((link) => (
+                                    <li key={link.label}>
+                                        <Link
+                                            href={link.href}
+                                            className="text-sm text-neutral-content/60 hover:text-neutral-content transition-colors"
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
-                    {/* Empty 4th column for grid balance */}
-                    <div className="footer-col scroll-reveal fade-up" />
-                </>
+                        {/* Empty 4th column for grid balance */}
+                        <div className="footer-col scroll-reveal fade-up" />
+                    </>
+                )
             }
             bottomBar={
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 scroll-reveal fade-in">
@@ -210,7 +254,7 @@ export function Footer() {
                         </span>
                     </div>
                     <div className="flex items-center gap-4">
-                        {BOTTOM_LEGAL.map((link) => (
+                        {legalLinks.map((link) => (
                             <Link
                                 key={link.label}
                                 href={link.href}

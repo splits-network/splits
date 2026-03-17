@@ -10,7 +10,7 @@ import {
 import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { getHeaderNav } from "@/lib/content";
+import { getHeaderNav, getFooterNav } from "@/lib/content";
 import { SupportWidgetWrapper } from "@/components/support-widget-wrapper";
 
 export const metadata: Metadata = {
@@ -73,7 +73,10 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     // Fetch CMS navigation data (ISR cached, 5 min)
-    const headerNav = await getHeaderNav();
+    const [headerNav, footerNav] = await Promise.all([
+        getHeaderNav(),
+        getFooterNav(),
+    ]);
 
     const clarityId = process.env.NEXT_PUBLIC_CORPORATE_CLARITY_ID;
     const gaId = process.env.NEXT_PUBLIC_CORPORATE_GA_ID;
@@ -136,7 +139,7 @@ export default async function RootLayout({
                     <SupportWidgetWrapper>
                         <Header navItems={headerNav?.items} />
                         <main className="flex-grow">{children}</main>
-                        <Footer />
+                        <Footer footerNav={footerNav} />
                     </SupportWidgetWrapper>
                     <BaselCookieConsent
                         cookiePolicyHref="/cookie-policy"
