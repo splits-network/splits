@@ -1,8 +1,8 @@
 /**
- * V3 Route Registry — Chat Service
+ * V3 Route Registry -- Chat Service
  *
  * Registers all V3 resource routes alongside existing V2 routes.
- * V2 is untouched — both versions coexist and are functional.
+ * V2 is untouched -- both versions coexist and are functional.
  */
 
 import { FastifyInstance } from 'fastify';
