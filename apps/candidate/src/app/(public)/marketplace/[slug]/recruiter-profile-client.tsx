@@ -354,17 +354,15 @@ export default function RecruiterProfileClient({
                                 </p>
                                 <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-none text-base-content mb-3">
                                     {name}
-                                    {level && (
-                                        <span className="ml-3 align-middle inline-block">
-                                            <BaselLevelIndicator
-                                                level={level.current_level}
-                                                title={level.title}
-                                                totalXp={level.total_xp}
-                                            />
-                                        </span>
-                                    )}
                                 </h1>
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
+                                    {level && (
+                                        <BaselLevelIndicator
+                                            level={level.current_level}
+                                            title={level.title}
+                                            totalXp={level.total_xp}
+                                        />
+                                    )}
                                     {recruiter.location && (
                                         <span className="flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-location-dot text-xs" />

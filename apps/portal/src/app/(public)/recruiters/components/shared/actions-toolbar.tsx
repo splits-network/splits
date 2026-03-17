@@ -12,7 +12,7 @@ import { ModalPortal } from "@splits-network/shared-ui";
 import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName } from "../../types";
-import { useCompanyContext } from "../../contexts/company-context";
+import { useCompanyContext } from "@/app/portal/recruiters/contexts/company-context";
 import InviteRecruiterModal from "../modals/invite-recruiter-modal";
 import TerminateCompanyModal from "@/app/portal/companies/components/modals/terminate-company-modal";
 
@@ -52,18 +52,7 @@ export default function RecruiterActionsToolbar({
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [showTerminateModal, setShowTerminateModal] = useState(false);
 
-    // Try to use CompanyContext if available (for authenticated pages)
-    let companies: any[] = [];
-    let recruiterRelationships: Map<string, any> = new Map();
-    let refreshRelationships = () => {};
-    try {
-        const companyCtx = useCompanyContext();
-        companies = companyCtx.companies;
-        recruiterRelationships = companyCtx.recruiterRelationships;
-        refreshRelationships = companyCtx.refreshRelationships;
-    } catch {
-        // CompanyProvider not available (e.g., on public pages) - use defaults
-    }
+    const { companies, recruiterRelationships, refreshRelationships } = useCompanyContext();
 
     const companyRelationship = recruiterRelationships.get(recruiter.id);
     const hasActiveRelationship = companyRelationship?.status === "active";
