@@ -251,12 +251,14 @@ export default function CompanyInvitationsBaselPage() {
                                 />
                             )}
                             {viewMode === "split" && (
-                                <SplitView
-                                    invitations={invitations}
-                                    onSelect={handleSelect}
-                                    selectedId={selectedId}
-                                    onRefresh={refresh}
-                                />
+                                <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                    <SplitView
+                                        invitations={invitations}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedId}
+                                        onRefresh={refresh}
+                                    />
+                                </div>
                             )}
                         </>
                     )}

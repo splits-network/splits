@@ -248,13 +248,15 @@ export default function RolesPage() {
                                         />
                                     )}
                                     {viewMode === "split" && (
-                                        <SplitView
-                                            jobs={jobs}
-                                            onSelect={handleSelect}
-                                            selectedId={selectedJobId}
-                                            onRefresh={refresh}
-                                            onUpdateItem={updateItem}
-                                        />
+                                        <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                            <SplitView
+                                                jobs={jobs}
+                                                onSelect={handleSelect}
+                                                selectedId={selectedJobId}
+                                                onRefresh={refresh}
+                                                onUpdateItem={updateItem}
+                                            />
+                                        </div>
                                     )}
                                 </>
                             )}

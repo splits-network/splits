@@ -8,8 +8,8 @@ import { apiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import ApplicationWizardModal from "@/components/application-wizard-modal";
-import { BaselBadge } from "@splits-network/basel-ui";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
 import type { Job } from "../../types";
 import { formatCommuteTypes, formatJobLevel } from "../../types";
 import { statusSemanticColor } from "./status-color";
@@ -522,26 +522,21 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                         )}
                     </div>
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="relative shrink-0">
-                            {(job.company?.logo_url || job.firm?.logo_url) ? (
-                                <img
-                                    src={job.company?.logo_url || job.firm?.logo_url || ""}
-                                    alt={name}
-                                    className="w-12 h-12 object-contain border-2 border-base-300"
-                                />
-                            ) : (
-                                <div className="w-12 h-12 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-sm">
-                                    {companyInitials(name)}
-                                </div>
-                            )}
-                            {companyGamLevel && (
-                                <div className="absolute -bottom-1.5 -right-2">
-                                    <LevelBadge level={companyGamLevel} size="sm" />
-                                </div>
-                            )}
+                        <div className="shrink-0">
+                            <BaselAvatar
+                                initials={companyInitials(name)}
+                                src={job.company?.logo_url || job.firm?.logo_url}
+                                alt={name}
+                                size="md"
+                            />
                         </div>
                         <div>
-                            <p className="font-bold">{name}</p>
+                            <p className="font-bold flex items-center gap-2">
+                                {name}
+                                {companyGamLevel && (
+                                    <BaselLevelIndicator level={companyGamLevel.current_level} title={companyGamLevel.title} totalXp={companyGamLevel.total_xp} />
+                                )}
+                            </p>
                             {job.company?.industry && (
                                 <p className="text-sm text-base-content/50">
                                     {job.company.industry}

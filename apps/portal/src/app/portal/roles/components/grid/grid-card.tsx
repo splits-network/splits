@@ -3,7 +3,7 @@
 import type { Job } from "../../types";
 import { formatJobLevel, COMMUTE_TYPE_LABELS } from "../../types";
 import { statusBadgeColor, statusBorder } from "../shared/status-color";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
     salaryDisplay,
@@ -18,7 +18,7 @@ import {
 } from "../shared/helpers";
 import RoleActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { useGamification } from "@splits-network/shared-gamification";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function GridCard({
@@ -81,24 +81,13 @@ export function GridCard({
 
                 {/* Editorial block: Avatar + Company kicker → Title → Location */}
                 <div className="flex items-start gap-3">
-                    <div className="relative shrink-0 mt-0.5">
-                        {(job.company?.logo_url || job.firm?.logo_url) ? (
-                            <img
-                                src={job.company?.logo_url || job.firm?.logo_url || ""}
-                                alt={name}
-                                className="w-12 h-12 object-contain bg-base-100 border border-base-300 p-0.5"
-                            />
-                        ) : (
-                            <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
-                                {companyInitials(name)}
-                            </div>
-                        )}
-                        {companyLevel && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={companyLevel} size="sm" />
-                            </div>
-                        )}
-                    </div>
+                    <BaselAvatar
+                        initials={companyInitials(name)}
+                        src={job.company?.logo_url || job.firm?.logo_url}
+                        alt={name}
+                        size="md"
+                        className="mt-0.5"
+                    />
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
                             {name}
@@ -122,6 +111,12 @@ export function GridCard({
 
             {/* Inline metadata: salary · fee · payout · applicants */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {companyLevel && (
+                    <>
+                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                        <span className="text-base-content/20">&middot;</span>
+                    </>
+                )}
                 {metaItems.map((item, i) => (
                     <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />

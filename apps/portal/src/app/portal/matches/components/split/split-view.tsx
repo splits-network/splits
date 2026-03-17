@@ -1,9 +1,9 @@
 "use client";
 
 import type { EnrichedMatch } from "../../types";
-import { MobileDetailOverlay } from "@/components/standard-lists";
-import { SplitItem } from "./split-item";
+import { BaselSplitView } from "@splits-network/basel-ui";
 import { MatchDetailLoader } from "../shared/match-detail-loader";
+import { SplitItem } from "./split-item";
 
 export function SplitView({
     matches,
@@ -20,50 +20,35 @@ export function SplitView({
     onDismiss?: (id: string) => void;
     dismissing?: boolean;
 }) {
-    const selectedMatch = matches.find((m) => m.id === selectedId) ?? null;
-
     return (
-        <div className="flex border-2 border-base-300" style={{ minHeight: 600 }}>
-            {/* Left list -- hidden on mobile when a match is selected */}
-            <div
-                className={`w-full md:w-2/5 border-r-2 border-base-300 overflow-y-auto ${
-                    selectedId ? "hidden md:block" : "block"
-                }`}
-            >
-                {matches.map((match) => (
-                    <SplitItem
-                        key={match.id}
-                        match={match}
-                        isSelected={selectedId === match.id}
-                        onSelect={() => onSelect(match)}
-                    />
-                ))}
-            </div>
-
-            {/* Right detail -- MobileDetailOverlay handles mobile portal */}
-            <MobileDetailOverlay
-                isOpen={!!selectedId}
-                className="md:w-3/5 w-full bg-base-100"
-            >
-                {selectedId ? (
-                    <MatchDetailLoader
-                        matchId={selectedId}
-                        isPartner={isPartner}
-                        onClose={() => selectedMatch && onSelect(selectedMatch)}
-                        onDismiss={onDismiss}
-                        dismissing={dismissing}
-                    />
-                ) : (
-                    <div className="h-full flex items-center justify-center p-12">
-                        <div className="text-center">
-                            <i className="fa-duotone fa-regular fa-hand-pointer text-5xl text-base-content/30 mb-4" />
-                            <h3 className="font-bold text-base text-base-content/30 tracking-tight">
-                                Select a match to view details
-                            </h3>
-                        </div>
-                    </div>
-                )}
-            </MobileDetailOverlay>
-        </div>
+        <BaselSplitView
+            items={matches}
+            selectedId={selectedId}
+            getItemId={(m) => m.id}
+            estimatedItemHeight={90}
+            renderItem={(match, isSelected) => (
+                <SplitItem
+                    match={match}
+                    isSelected={isSelected}
+                    onSelect={() => onSelect(match)}
+                />
+            )}
+            renderDetail={(match) => (
+                <MatchDetailLoader
+                    matchId={match.id}
+                    isPartner={isPartner}
+                    onClose={() => onSelect(match)}
+                    onDismiss={onDismiss}
+                    dismissing={dismissing}
+                />
+            )}
+            emptyIcon="fa-hand-pointer"
+            emptyTitle="Select a match to view details"
+            initialListWidth={40}
+            onMobileClose={() => {
+                const selected = matches.find((m) => m.id === selectedId);
+                if (selected) onSelect(selected);
+            }}
+        />
     );
 }

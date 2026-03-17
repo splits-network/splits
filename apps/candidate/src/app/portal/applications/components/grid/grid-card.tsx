@@ -8,9 +8,9 @@ import {
     recruiterName,
     appliedAgo,
 } from "../shared/helpers";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselAvatar, BaselLevelIndicator, BaselBadge, getStageDisplay } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
 import ActionsToolbar from "../shared/actions-toolbar";
-import { BaselBadge, getStageDisplay } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 
 const PIPELINE_STAGES = [
@@ -81,23 +81,13 @@ export function GridCard({
             <div className="bg-base-300 px-5 pt-4 pb-4">
                 {/* Avatar + Title block */}
                 <div className="flex items-start gap-3">
-                    <div className="relative shrink-0 mt-0.5">
-                        {(app.job?.company?.logo_url || app.job?.firm?.logo_url) ? (
-                            <img
-                                src={app.job?.company?.logo_url || app.job?.firm?.logo_url || ""}
-                                alt={name}
-                                className="w-12 h-12 object-contain bg-base-100 border border-base-300 p-0.5"
-                            />
-                        ) : (
-                            <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
-                                {cInitials}
-                            </div>
-                        )}
-                        {companyLevel && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={companyLevel} size="sm" />
-                            </div>
-                        )}
+                    <div className="shrink-0 mt-0.5">
+                        <BaselAvatar
+                            initials={cInitials}
+                            src={app.job?.company?.logo_url || app.job?.firm?.logo_url}
+                            alt={name}
+                            size="md"
+                        />
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
@@ -128,6 +118,9 @@ export function GridCard({
 
             {/* Inline metadata: salary · location · type */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {companyLevel && (
+                    <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                )}
                 {[
                     { icon: "fa-dollar-sign", color: "text-success", value: salary || "TBD", muted: !salary, tooltip: "Salary range" },
                     { icon: "fa-location-dot", color: "text-info", value: location || "Not listed", muted: !location, tooltip: "Location" },

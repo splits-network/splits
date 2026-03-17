@@ -12,7 +12,7 @@ import { CandidateActivityTrackerWrapper } from "@/components/activity-tracker-w
 import { ToastProvider } from "@/lib/toast-context";
 import { CandidateChatSidebar } from "@/components/candidate-chat-sidebar";
 import { JsonLd } from "@splits-network/shared-ui";
-import { UserProfileProvider } from "@/contexts";
+import { UserProfileProvider, PresenceProvider } from "@/contexts";
 import { getCurrentUserProfile } from "@/lib/current-user-profile";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -187,6 +187,7 @@ export default async function RootLayout({
                 <body className="flex flex-col min-h-screen bg-base-200">
                     <ThemeProvider>
                         <UserProfileProvider initialProfile={initialProfile}>
+                          <PresenceProvider>
                             <GamificationWrapper>
                                 <ToastProvider>
                                     <SupportWidgetWrapper>
@@ -201,6 +202,7 @@ export default async function RootLayout({
                                     <CookieConsent />
                                 </ToastProvider>
                             </GamificationWrapper>
+                          </PresenceProvider>
                         </UserProfileProvider>
                     </ThemeProvider>
                     <DevDebugPanel />

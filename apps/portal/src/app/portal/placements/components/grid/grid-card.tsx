@@ -2,7 +2,7 @@
 
 import type { Placement } from "../../types";
 import { statusColorName, statusBorder } from "../shared/status-color";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar } from "@splits-network/basel-ui";
 import {
     isNew,
     candidateName,
@@ -42,11 +42,20 @@ export function GridCard({
                 {/* Overlapping avatars + Name block */}
                 <div className="flex items-start gap-3">
                     <div className="relative shrink-0 w-14 h-14 mt-0.5">
-                        <div className="absolute top-0 left-0 w-10 h-10 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none z-10 border-2 border-base-300">
-                            {candidateInitials(placement)}
+                        <div className="absolute top-0 left-0 z-10">
+                            <BaselAvatar
+                                initials={candidateInitials(placement)}
+                                alt={candidateName(placement)}
+                                size="sm"
+                            />
                         </div>
-                        <div className="absolute bottom-0 right-0 w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center text-sm font-black tracking-tight select-none border-2 border-base-300">
-                            {companyInitials(placement)}
+                        <div className="absolute bottom-0 right-0">
+                            <BaselAvatar
+                                initials={companyInitials(placement)}
+                                src={placement.job?.company?.logo_url}
+                                alt={companyName(placement)}
+                                size="sm"
+                            />
                         </div>
                     </div>
                     <div className="flex-1 min-w-0">

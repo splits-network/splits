@@ -8,10 +8,10 @@ import {
     recruiterName,
     appliedAgo,
 } from "../shared/helpers";
-import { getStageDisplay, semanticPill } from "@splits-network/basel-ui";
+import { getStageDisplay, semanticPill, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { DetailLoader } from "../shared/application-detail";
 import ActionsToolbar from "../shared/actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { useGamification } from "@splits-network/shared-gamification";
 
 export function TableRow({
     app,
@@ -53,7 +53,7 @@ export function TableRow({
                 {/* Position */}
                 <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                        <div className="relative shrink-0">
+                        <div className="shrink-0">
                             {app.job?.company?.logo_url ? (
                                 <img
                                     src={app.job.company.logo_url}
@@ -65,14 +65,12 @@ export function TableRow({
                                     {companyInitials(name)}
                                 </div>
                             )}
-                            {companyLevel && (
-                                <div className="absolute -bottom-1 -right-1">
-                                    <LevelBadge level={companyLevel} size="sm" />
-                                </div>
-                            )}
                         </div>
-                        <span className="font-bold text-sm text-base-content">
+                        <span className="font-bold text-sm text-base-content flex items-center gap-1.5">
                             {app.job?.title || "Untitled Position"}
+                            {companyLevel && (
+                                <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                            )}
                         </span>
                     </div>
                 </td>

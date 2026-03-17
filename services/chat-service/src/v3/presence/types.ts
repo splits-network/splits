@@ -28,10 +28,8 @@ export const batchStatusQuerySchema = {
   required: ['userIds'],
   properties: {
     userIds: {
-      oneOf: [
-        { type: 'string', minLength: 1 },
-        { type: 'array', items: { type: 'string', minLength: 1 }, minItems: 1, maxItems: 100 },
-      ],
+      type: 'string',
+      minLength: 1,
     },
   },
 };

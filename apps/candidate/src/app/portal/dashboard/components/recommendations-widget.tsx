@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { BaselSectionHeading } from "@splits-network/basel-ui";
 import { createAuthenticatedClient } from "@/lib/api-client";
 
 interface JobRecommendation {
@@ -142,11 +143,12 @@ export default function RecommendationsWidget({
             id="job-recommendations"
             className="scroll-reveal fade-up"
         >
-            <div className="flex items-center gap-2 mb-4">
-                <i className="fa-duotone fa-regular fa-building text-accent" />
-                <h3 className="text-base font-bold tracking-tight">
-                    Roles Sent to You
-                </h3>
+            <div className="flex items-end justify-between mb-4">
+                <BaselSectionHeading
+                    kicker="RECOMMENDATIONS"
+                    title="Roles sent to you"
+                    className="section-heading"
+                />
                 {pendingCount > 0 && (
                     <span className="badge badge-accent badge-sm">
                         {pendingCount} new

@@ -15,7 +15,7 @@ import type { Candidate, CandidateFilters, CandidateScope } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { isNew } from "./components/shared/helpers";
 import { useGamification } from "@splits-network/shared-gamification";
-import { PresenceProvider, useRegisterPresence } from "@/contexts";
+import { useRegisterPresence } from "@/contexts";
 import { CandidatesAnimator } from "./candidates-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -195,7 +195,7 @@ export default function CandidatesPage() {
     }
 
     return (
-        <PresenceProvider>
+        <>
             <CandidatesAnimator>
                 <HeaderSection stats={stats} />
 
@@ -273,13 +273,15 @@ export default function CandidatesPage() {
                                     />
                                 )}
                                 {viewMode === "split" && (
-                                    <SplitView
-                                        candidates={candidates}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedCandidateId}
-                                        onRefresh={refresh}
-                                        onUpdateItem={updateItem}
-                                    />
+                                    <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                        <SplitView
+                                            candidates={candidates}
+                                            onSelect={handleSelect}
+                                            selectedId={selectedCandidateId}
+                                            onRefresh={refresh}
+                                            onUpdateItem={updateItem}
+                                        />
+                                    </div>
                                 )}
                             </>
                         )}
@@ -312,6 +314,6 @@ export default function CandidatesPage() {
                     />
                 )}
             </ModalPortal>
-        </PresenceProvider>
+        </>
     );
 }

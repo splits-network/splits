@@ -254,14 +254,16 @@ export default function MatchesPage() {
                                 />
                             )}
                             {viewMode === "split" && (
-                                <SplitView
-                                    matches={matches}
-                                    onSelect={handleSelect}
-                                    selectedId={selectedMatchId}
-                                    isPartner={isPartner}
-                                    onDismiss={handleDismiss}
-                                    dismissing={dismissing}
-                                />
+                                <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                    <SplitView
+                                        matches={matches}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedMatchId}
+                                        isPartner={isPartner}
+                                        onDismiss={handleDismiss}
+                                        dismissing={dismissing}
+                                    />
+                                </div>
                             )}
                         </>
                     )}

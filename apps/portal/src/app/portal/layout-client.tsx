@@ -3,7 +3,8 @@
 /**
  * Client Wrapper for Authenticated Layout
  * Provides user profile context (includes subscription) and page title context.
- * Presence tracking is handled by the sidebar's WebSocket connection (useChatGateway + useActivityStatus).
+ * Presence tracking: usePresenceHeartbeat() connects to chat-gateway on mount,
+ * keeping the user online/idle in Redis for the duration of their session.
  *
  * Onboarding is now handled by the full-page /onboarding route.
  * This component includes a redirect guard: if onboarding is not complete,
@@ -13,6 +14,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageTitleProvider, DrawerProvider, useUserProfile } from "@/contexts";
+import { usePresenceHeartbeat } from "@/hooks/use-presence-heartbeat";
 
 function OnboardingRedirectGuard({ children }: { children: React.ReactNode }) {
     const { profile, isLoading, isAdmin, error } = useUserProfile();
@@ -37,6 +39,9 @@ export function AuthenticatedLayoutClient({
 }: {
     children: React.ReactNode;
 }) {
+    // Global presence: keeps user online/idle in Redis on every authenticated page
+    usePresenceHeartbeat();
+
     return (
         <PageTitleProvider>
             <DrawerProvider>

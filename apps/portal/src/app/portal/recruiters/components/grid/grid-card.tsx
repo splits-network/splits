@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
 import { statusBorder } from "../shared/status-color";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
     recruiterLocation,
@@ -18,9 +18,7 @@ import {
 } from "../shared/helpers";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
 import { usePresenceStatus } from "@/contexts";
-import { Presence } from "@/components/presense";
 import {
-    LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
 import { PlanBadge } from "@/components/entitlements/plan-badge";
@@ -73,52 +71,34 @@ export function GridCard({
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 px-5 pt-4 pb-4">
+            <div className="relative bg-base-300 px-5 pt-4 pb-4">
                 {/* Kicker row: status + modifier badges */}
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} variant="soft" size="sm">
-                            {formatStatus(status)}
+                <div className="flex items-center gap-2 flex-wrap mb-3">
+                    <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} variant="soft" size="sm">
+                        {formatStatus(status)}
+                    </BaselBadge>
+
+                    {recruiter.plan_tier && (
+                        <PlanBadge tier={recruiter.plan_tier as PlanTier} />
+                    )}
+
+                    {isNew(recruiter) && (
+                        <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
+                            New
                         </BaselBadge>
-
-                        {recruiter.plan_tier && (
-                            <PlanBadge tier={recruiter.plan_tier as PlanTier} />
-                        )}
-
-                        {isNew(recruiter) && (
-                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                                New
-                            </BaselBadge>
-                        )}
-                    </div>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                        {presenceStatus === "online" && (
-                            <Presence status={presenceStatus} variant="badge" />
-                        )}
-                    </div>
+                    )}
                 </div>
 
                 {/* Editorial block: Avatar + Firm kicker → Name → Location */}
                 <div className="flex items-start gap-3">
-                    <div className="relative shrink-0 mt-0.5">
-                        {recruiter.users?.profile_image_url ? (
-                            <img
-                                src={recruiter.users.profile_image_url}
-                                alt={name}
-                                className="w-12 h-12 object-cover border border-base-300"
-                            />
-                        ) : (
-                            <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
-                                {getInitials(name)}
-                            </div>
-                        )}
-                        {level && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={level} size="sm" />
-                            </div>
-                        )}
-                    </div>
+                    <BaselAvatar
+                        initials={getInitials(name)}
+                        src={recruiter.users?.profile_image_url}
+                        alt={name}
+                        size="md"
+                        presence={presenceStatus}
+                        className="mt-0.5"
+                    />
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
                             {recruiter.firm_name || "Independent"}
@@ -142,6 +122,12 @@ export function GridCard({
 
             {/* Inline metadata: placements · success · rating · experience */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {level && (
+                    <>
+                        <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />
+                        <span className="text-base-content/20">&middot;</span>
+                    </>
+                )}
                 {metaItems.map((item, i) => (
                     <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />

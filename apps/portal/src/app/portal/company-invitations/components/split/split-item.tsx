@@ -10,7 +10,7 @@ import {
 import { statusColorName, statusBorder } from "../shared/status-color";
 import { BaselBadge } from "@splits-network/basel-ui";
 import { isNew, postedAgo } from "../shared/helpers";
-import ConnectionActionsToolbar from "../shared/actions-toolbar";
+
 
 export function SplitItem({
     invitation,
@@ -30,7 +30,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : `bg-base-100 ${statusBorder(invitation.status)}`
@@ -57,23 +57,13 @@ export function SplitItem({
             </div>
 
             {/* Row 3: type + status pill */}
-            <div className="flex items-center justify-between gap-2 mt-0.5 pr-10">
+            <div className="flex items-center justify-between gap-2 mt-0.5">
                 <span className="text-sm font-bold text-base-content/60 capitalize">
                     {invitation.relationship_type}
                 </span>
                 <BaselBadge color={statusColorName(invitation.status)} size="xs" variant="soft">
                     {getStatusLabel(invitation.status)}
                 </BaselBadge>
-            </div>
-
-            {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
-                <ConnectionActionsToolbar
-                    invitation={invitation}
-                    variant="icon-only"
-                    size="xs"
-                    onRefresh={onRefresh}
-                />
             </div>
         </div>
     );

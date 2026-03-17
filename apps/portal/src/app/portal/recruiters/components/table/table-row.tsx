@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
 import { statusBorder } from "../shared/status-color";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import {
     recruiterLocation,
     formatStatus,
@@ -16,9 +16,10 @@ import {
 } from "../shared/helpers";
 import { DetailLoader } from "../shared/recruiter-detail";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { useGamification } from "@splits-network/shared-gamification";
 import { PlanBadge } from "@/components/entitlements/plan-badge";
 import type { PlanTier } from "@/contexts/user-profile-context";
+import { usePresenceStatus } from "@/contexts";
 
 export function TableRow({
     recruiter,
@@ -37,6 +38,9 @@ export function TableRow({
 }) {
     const { getLevel } = useGamification();
     const level = getLevel(recruiter.id);
+    const recruiterUserId = recruiter.users?.id;
+    const presenceData = usePresenceStatus(recruiterUserId);
+    const presenceStatus = presenceData?.status;
     const name = getDisplayName(recruiter);
     const location = recruiterLocation(recruiter);
     const status = recruiter.status || "active";
@@ -61,17 +65,13 @@ export function TableRow({
                 </td>
                 <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                        {recruiter.users?.profile_image_url ? (
-                            <img
-                                src={recruiter.users.profile_image_url}
-                                alt={name}
-                                className="w-8 h-8 object-cover border border-base-300"
-                            />
-                        ) : (
-                            <div className="w-8 h-8 flex items-center justify-center border border-base-300 bg-base-200 text-xs font-bold text-base-content/60">
-                                {getInitials(name)}
-                            </div>
-                        )}
+                        <BaselAvatar
+                            initials={getInitials(name)}
+                            src={recruiter.users?.profile_image_url}
+                            alt={name}
+                            size="sm"
+                            presence={presenceStatus}
+                        />
                         <div>
                             <div className="flex items-center gap-1.5">
                                 {isNew(recruiter) && (
@@ -81,7 +81,7 @@ export function TableRow({
                             </div>
                             {(level || recruiter.plan_tier) && (
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    {level && <LevelBadge level={level} size="sm" />}
+                                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />}
                                     {recruiter.plan_tier && <PlanBadge tier={recruiter.plan_tier as PlanTier} />}
                                 </div>
                             )}

@@ -217,12 +217,14 @@ export default function FirmsPage() {
                                     />
                                 )}
                                 {viewMode === "split" && (
-                                    <SplitView
-                                        firms={firms}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedFirmId}
-                                        onRefresh={refresh}
-                                    />
+                                    <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                        <SplitView
+                                            firms={firms}
+                                            onSelect={handleSelect}
+                                            selectedId={selectedFirmId}
+                                            onRefresh={refresh}
+                                        />
+                                    </div>
                                 )}
                             </>
                         )}

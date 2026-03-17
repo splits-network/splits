@@ -137,9 +137,9 @@ export default function CandidatePipelineChart({
                             <span className="text-sm text-base-content/60 w-18 text-right shrink-0 truncate">
                                 {stage.label}
                             </span>
-                            <div className="flex-1 h-6 bg-base-300/50 rounded overflow-hidden relative">
+                            <div className="flex-1 h-6 bg-base-300/50 overflow-hidden relative">
                                 <div
-                                    className={`h-full ${colorClass} rounded transition-all duration-500 ease-out`}
+                                    className={`h-full ${colorClass} transition-all duration-500 ease-out`}
                                     style={{ width: `${Math.max(pct, 2)}%` }}
                                 />
                                 <span className="absolute inset-y-0 left-2 flex items-center text-sm font-semibold tabular-nums text-base-content/80">

@@ -10,7 +10,7 @@ import {
     timeAgo,
     candidateName,
 } from "../shared/helpers";
-import ActionsToolbar from "../shared/actions-toolbar";
+
 
 export function SplitItem({
     invitation,
@@ -31,7 +31,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer p-4 transition-colors border-b border-base-200 border-l-4 ${
+            className={`cursor-pointer p-4 transition-colors border-b border-base-200 border-l-4 ${
                 isSelected
                     ? `bg-base-200/50 ${borderClass}`
                     : "bg-base-100 border-transparent hover:bg-base-200/30"
@@ -91,20 +91,6 @@ export function SplitItem({
                     </span>
                 </div>
             )}
-
-            {/* Actions */}
-            <div
-                className="absolute bottom-2 right-2"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <ActionsToolbar
-                    invitation={invitation}
-                    variant="icon-only"
-                    size="xs"
-                    showActions={{ viewCandidate: false }}
-                    onRefresh={onRefresh}
-                />
-            </div>
         </div>
     );
 }

@@ -15,7 +15,8 @@
         "react-dom": "^19.0.0"
     },
     "dependencies": {
-        "@splits-network/shared-types": "workspace:*"
+        "@splits-network/shared-types": "workspace:*",
+        "@tanstack/react-virtual": "^3.13.23"
     },
     "devDependencies": {
         "@types/react": "^19.0.1",

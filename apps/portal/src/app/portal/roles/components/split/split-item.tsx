@@ -11,7 +11,7 @@ import {
     postedAgo,
     companyName,
 } from "../shared/helpers";
-import RoleActionsToolbar from "../shared/actions-toolbar";
+
 import { SaveBookmark } from "@/components/save-bookmark";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
@@ -36,7 +36,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : `bg-base-100 ${statusBorder(job.status)}`
@@ -92,7 +92,7 @@ export function SplitItem({
             </div>
 
             {/* Row 4: badge bar — status, employment type, commute, 3rd party */}
-            <div className="flex flex-wrap items-center gap-1 mt-1.5 pr-10">
+            <div className="flex flex-wrap items-center gap-1 mt-1.5">
                 <BaselBadge color={statusBadgeColor(job.status)} size="xs" variant="soft">
                     {formatStatus(job.status)}
                 </BaselBadge>
@@ -121,18 +121,6 @@ export function SplitItem({
                         {thirdParty.label}
                     </BaselBadge>
                 )}
-            </div>
-
-            {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
-                <RoleActionsToolbar
-                    job={job}
-                    variant="icon-only"
-                    size="xs"
-                    showActions={{ viewDetails: false }}
-                    onRefresh={onRefresh}
-                    onUpdateItem={onUpdateItem}
-                />
             </div>
         </div>
     );

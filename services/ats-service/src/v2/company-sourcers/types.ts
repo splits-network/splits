@@ -14,9 +14,7 @@ export interface CompanySourcerCreate {
 }
 
 export interface CompanySourcerUpdate {
-    status?: 'pending' | 'active' | 'declined' | 'terminated';
-    relationship_end_date?: string;
-    termination_reason?: string;
+    notes?: string;
 }
 
 export { RecruiterCompany };

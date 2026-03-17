@@ -208,12 +208,14 @@ export default function PlacementsBaselPage() {
                                 />
                             )}
                             {viewMode === "split" && (
-                                <SplitView
-                                    placements={placements}
-                                    onSelect={handleSelect}
-                                    selectedId={selectedPlacementId}
-                                    onRefresh={refresh}
-                                />
+                                <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                    <SplitView
+                                        placements={placements}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedPlacementId}
+                                        onRefresh={refresh}
+                                    />
+                                </div>
                             )}
                         </>
                     )}

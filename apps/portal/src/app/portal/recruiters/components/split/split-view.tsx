@@ -1,8 +1,8 @@
 "use client";
 
 import type { RecruiterWithUser } from "../../types";
+import { BaselSplitView } from "@splits-network/basel-ui";
 import { DetailLoader } from "../shared/recruiter-detail";
-import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
 
 export function SplitView({
@@ -16,55 +16,34 @@ export function SplitView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const selectedRecruiter = recruiters.find((r) => r.id === selectedId);
-
     return (
-        <div
-            className="flex gap-0 border-2 border-base-300"
-            style={{ minHeight: 600 }}
-        >
-            {/* Left list */}
-            <div
-                className={`w-full md:w-1/3 border-r border-base-300 overflow-y-auto ${selectedId ? "hidden md:block" : "block"}`}
-            >
-                {recruiters.map((recruiter) => (
-                    <SplitItem
-                        key={recruiter.id}
-                        recruiter={recruiter}
-                        isSelected={selectedId === recruiter.id}
-                        onSelect={() => onSelect(recruiter)}
-                    />
-                ))}
-            </div>
-
-            {/* Right detail */}
-            <MobileDetailOverlay
-                isOpen={!!selectedRecruiter}
-                className="md:w-2/3 w-full bg-base-100 overflow-y-auto"
-            >
-                {selectedRecruiter ? (
-                    <DetailLoader
-                        recruiterId={selectedRecruiter.id}
-                        onClose={() => onSelect(selectedRecruiter)}
-                        onRefresh={onRefresh}
-                    />
-                ) : (
-                    <div className="flex-1 flex items-center justify-center p-12">
-                        <div className="text-center">
-                            <div className="w-16 h-16 mx-auto mb-6 bg-primary/10 flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-users text-2xl text-primary" />
-                            </div>
-                            <h3 className="font-black text-xl tracking-tight mb-2">
-                                Select a Recruiter
-                            </h3>
-                            <p className="text-sm text-base-content/50">
-                                Click a recruiter on the left to view their
-                                profile
-                            </p>
-                        </div>
-                    </div>
-                )}
-            </MobileDetailOverlay>
-        </div>
+        <BaselSplitView
+            items={recruiters}
+            selectedId={selectedId}
+            getItemId={(r) => r.id}
+            estimatedItemHeight={90}
+            renderItem={(recruiter, isSelected) => (
+                <SplitItem
+                    recruiter={recruiter}
+                    isSelected={isSelected}
+                    onSelect={() => onSelect(recruiter)}
+                />
+            )}
+            renderDetail={(recruiter) => (
+                <DetailLoader
+                    recruiterId={recruiter.id}
+                    onClose={() => onSelect(recruiter)}
+                    onRefresh={onRefresh}
+                />
+            )}
+            emptyIcon="fa-users"
+            emptyTitle="Select a Recruiter"
+            emptyDescription="Click a recruiter on the left to view their profile"
+            initialListWidth={33}
+            onMobileClose={() => {
+                const selected = recruiters.find((r) => r.id === selectedId);
+                if (selected) onSelect(selected);
+            }}
+        />
     );
 }

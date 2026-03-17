@@ -1,7 +1,7 @@
 "use client";
 
 import type { CompanyInvitation } from "../../types";
-import { MobileDetailOverlay } from "@/components/standard-lists";
+import { BaselSplitView } from "@splits-network/basel-ui";
 import { InvitationDetailLoader } from "../shared/invitation-detail-loader";
 import { SplitItem } from "./split-item";
 
@@ -16,47 +16,34 @@ export function SplitView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const selectedInv = invitations.find((inv) => inv.id === selectedId);
-
     return (
-        <div className="flex gap-0 border-2 border-base-300" style={{ minHeight: 600 }}>
-            {/* Left list */}
-            <div className={`w-full md:w-2/5 border-r-2 border-base-300 ${selectedId ? "hidden md:block" : "block"}`}>
-                {invitations.map((inv) => (
-                    <SplitItem
-                        key={inv.id}
-                        invitation={inv}
-                        isSelected={selectedId === inv.id}
-                        onSelect={() => onSelect(inv)}
-                    />
-                ))}
-            </div>
-
-            {/* Right detail */}
-            <MobileDetailOverlay
-                isOpen={!!selectedInv}
-                className="md:w-3/5 w-full bg-base-100"
-            >
-                {selectedInv ? (
-                    <InvitationDetailLoader
-                        invitationId={selectedInv.id}
-                        onClose={() => onSelect(selectedInv)}
-                        onRefresh={onRefresh}
-                    />
-                ) : (
-                    <div className="h-full flex items-center justify-center p-12">
-                        <div className="text-center">
-                            <i className="fa-duotone fa-regular fa-building-user text-5xl text-base-content/15 mb-6 block" />
-                            <h3 className="text-xl font-black tracking-tight mb-2">
-                                Select an Invitation
-                            </h3>
-                            <p className="text-sm text-base-content/50">
-                                Click an invitation on the left to view details
-                            </p>
-                        </div>
-                    </div>
-                )}
-            </MobileDetailOverlay>
-        </div>
+        <BaselSplitView
+            items={invitations}
+            selectedId={selectedId}
+            getItemId={(inv) => inv.id}
+            estimatedItemHeight={80}
+            renderItem={(invitation, isSelected) => (
+                <SplitItem
+                    invitation={invitation}
+                    isSelected={isSelected}
+                    onSelect={() => onSelect(invitation)}
+                />
+            )}
+            renderDetail={(invitation) => (
+                <InvitationDetailLoader
+                    invitationId={invitation.id}
+                    onClose={() => onSelect(invitation)}
+                    onRefresh={onRefresh}
+                />
+            )}
+            emptyIcon="fa-building-user"
+            emptyTitle="Select an Invitation"
+            emptyDescription="Click an invitation on the left to view details"
+            initialListWidth={40}
+            onMobileClose={() => {
+                const selected = invitations.find((i) => i.id === selectedId);
+                if (selected) onSelect(selected);
+            }}
+        />
     );
 }

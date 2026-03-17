@@ -8,9 +8,9 @@ import {
     memberCountDisplay,
     teamSizeDisplay,
 } from "../shared/helpers";
-import { FirmActionsToolbar } from "../shared/actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
-import { BaselBadge } from "@splits-network/basel-ui";
+
+import { useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 
 export function SplitItem({
     firm,
@@ -29,7 +29,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -39,7 +39,7 @@ export function SplitItem({
             <div className="flex items-start justify-between gap-2 mb-1">
                 <h4 className="font-bold text-sm tracking-tight truncate text-base-content flex items-center gap-1.5">
                     {firm.name}
-                    {firmLevel && <LevelBadge level={firmLevel} size="sm" />}
+                    {firmLevel && <BaselLevelIndicator level={firmLevel.current_level} title={firmLevel.title} totalXp={firmLevel.total_xp} />}
                 </h4>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {createdAgo(firm)}
@@ -64,17 +64,6 @@ export function SplitItem({
                     <i className="fa-duotone fa-regular fa-user-group mr-1" />
                     {teamSizeDisplay(firm.team_size_range)}
                 </span>
-            </div>
-
-            {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
-                <FirmActionsToolbar
-                    firm={firm}
-                    variant="icon-only"
-                    size="xs"
-                    showActions={{}}
-                    onRefresh={onRefresh}
-                />
             </div>
         </div>
     );

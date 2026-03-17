@@ -10,9 +10,7 @@ describe('Company sourcer routes (integration)', () => {
         service = {
             list: vi.fn().mockResolvedValue({ data: [], pagination: { total: 0, page: 1, limit: 25, total_pages: 0 } }),
             get: vi.fn().mockResolvedValue({ id: 'cs-1' }),
-            create: vi.fn().mockResolvedValue({ id: 'cs-1' }),
             update: vi.fn().mockResolvedValue({ id: 'cs-1' }),
-            delete: vi.fn().mockResolvedValue(undefined),
             checkProtection: vi.fn().mockResolvedValue({ has_protection: false }),
         };
     });
@@ -29,7 +27,7 @@ describe('Company sourcer routes (integration)', () => {
         expect(response.statusCode).toBe(500);
     });
 
-    it('creates company sourcer with auth', async () => {
+    it('does not expose create route (sourcer attribution is immutable)', async () => {
         const app = Fastify();
         await companySourcerRoutes(app, service);
 
@@ -43,6 +41,21 @@ describe('Company sourcer routes (integration)', () => {
             },
         });
 
-        expect(response.statusCode).toBe(201);
+        // POST should 404 — route no longer exists
+        expect(response.statusCode).toBe(404);
+    });
+
+    it('does not expose delete route (sourcer attribution is immutable)', async () => {
+        const app = Fastify();
+        await companySourcerRoutes(app, service);
+
+        const response = await app.inject({
+            method: 'DELETE',
+            url: '/company-sourcers/11111111-1111-1111-1111-111111111111',
+            headers: { 'x-clerk-user-id': 'clerk-1' },
+        });
+
+        // DELETE should 404 — route no longer exists
+        expect(response.statusCode).toBe(404);
     });
 });

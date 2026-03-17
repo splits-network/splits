@@ -19,10 +19,9 @@ import {
     companyTagline,
 } from "../shared/helpers";
 import {
-    LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { formatCompanySize } from "../../types";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
@@ -91,24 +90,13 @@ export function GridCard({
 
                 {/* Avatar + Name block */}
                 <div className="flex items-start gap-3">
-                    <div className="relative shrink-0 mt-0.5">
-                        {company.logo_url ? (
-                            <img
-                                src={company.logo_url}
-                                alt={name}
-                                className="w-12 h-12 object-contain bg-base-100"
-                            />
-                        ) : (
-                            <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
-                                {initials}
-                            </div>
-                        )}
-                        {level && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={level} size="sm" />
-                            </div>
-                        )}
-                    </div>
+                    <BaselAvatar
+                        initials={initials}
+                        src={company.logo_url}
+                        alt={name}
+                        size="md"
+                        className="mt-0.5"
+                    />
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
                             {industry || "Company"}
@@ -146,6 +134,12 @@ export function GridCard({
 
             {/* Inline metadata: size · stage · founded · roles */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {level && (
+                    <>
+                        <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />
+                        <span className="text-base-content/20">&middot;</span>
+                    </>
+                )}
                 {([
                     { icon: "fa-users", color: "text-primary", value: formatCompanySize(company.company_size) || "\u2014", muted: !company.company_size, tooltip: "Company size" },
                     { icon: "fa-rocket", color: "text-secondary", value: company.stage || "\u2014", muted: !company.stage, tooltip: "Company stage" },

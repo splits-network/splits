@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 import {
     relationshipStatusBadge,
     relationshipTypeBadge,
@@ -19,7 +19,7 @@ import {
     extractRelationship,
 } from "../shared/helpers";
 import { statusBorder } from "../shared/status-color";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { useGamification } from "@splits-network/shared-gamification";
 import { CompanyDetailLoader } from "../shared/company-detail";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
 
@@ -75,7 +75,7 @@ export function TableRow({
                 <td className="px-4 py-3">
                     <span className="font-bold text-sm text-base-content inline-flex items-center gap-1.5">
                         {name}
-                        {level && <LevelBadge level={level} size="sm" />}
+                        {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />}
                     </span>
                 </td>
 

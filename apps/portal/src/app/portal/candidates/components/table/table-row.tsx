@@ -14,12 +14,11 @@ import { statusBorder } from "../shared/status-color";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
 import { relationshipBadge, jobTypeBadges, accountBadge } from "../shared/candidate-badges";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 import {
-    LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
-import { Presence } from "@/components/presense";
+import { Presence } from "@/components/presence";
 import { usePresenceStatus } from "@/contexts";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
@@ -87,7 +86,7 @@ export function TableRow({
                                 onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
                             />
                         )}
-                        {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
+                        {level && <span className="ml-1.5 inline-block align-middle"><BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} /></span>}
                         {accountBadge(candidate) && (
                             <span
                                 className="ml-1.5 inline-block align-middle text-error"
@@ -121,7 +120,7 @@ export function TableRow({
                             ) : null;
                         })()}
                         <Presence
-                            variant="badge"
+                            variant="icon"
                             size="xs"
                             status={presenceStatus}
                         />

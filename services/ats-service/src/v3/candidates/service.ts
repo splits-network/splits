@@ -130,6 +130,10 @@ export class CandidateService {
 
     if (candidate.user_id) {
       await this.repository.createUserRole(candidate.user_id, candidate.id);
+
+      // Create sourcer record if candidate signed up via recruiter referral link/code.
+      // Sourcer attribution is immutable — this is the ONLY place it can be set.
+      await this.createSourcerFromReferral(candidate.id, candidate.user_id);
     }
 
     await this.eventPublisher?.publish('candidate.created', {
@@ -222,6 +226,61 @@ export class CandidateService {
     }
 
     return this.repository.getResumes(candidateId);
+  }
+
+  /**
+   * If the user signed up via a recruiter referral link/code, create the
+   * candidate_sourcers record. This is the ONLY legitimate creation path
+   * for candidate sourcer attribution — it is immutable after this point.
+   */
+  private async createSourcerFromReferral(candidateId: string, userId: string): Promise<void> {
+    try {
+      const { data: user } = await this.supabase
+        .from('users')
+        .select('referred_by_recruiter_id')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (!user?.referred_by_recruiter_id) return;
+
+      const now = new Date();
+      const protectionDays = 365;
+      const protectionExpires = new Date(now);
+      protectionExpires.setDate(protectionExpires.getDate() + protectionDays);
+
+      const { error } = await this.supabase
+        .from('candidate_sourcers')
+        .insert({
+          candidate_id: candidateId,
+          sourcer_recruiter_id: user.referred_by_recruiter_id,
+          sourcer_type: 'recruiter',
+          sourced_at: now.toISOString(),
+          protection_window_days: protectionDays,
+          protection_expires_at: protectionExpires.toISOString(),
+          notes: 'Sourced via referral signup',
+          created_at: now.toISOString(),
+        });
+
+      if (error) {
+        // Log but don't fail candidate creation — sourcer is important but not blocking
+        // Unique constraint will prevent duplicates if called twice
+        if (error.code !== '23505') {
+          throw error;
+        }
+      }
+
+      await this.eventPublisher?.publish('candidate.sourced', {
+        candidate_id: candidateId,
+        sourcer_recruiter_id: user.referred_by_recruiter_id,
+        sourcer_type: 'recruiter',
+        source_method: 'referral_signup',
+        sourced_at: now.toISOString(),
+        protection_expires_at: protectionExpires.toISOString(),
+      }, 'ats-service');
+    } catch (err: any) {
+      // Non-fatal — log and continue so candidate creation isn't blocked
+      // The sourcer record can be backfilled if needed
+    }
   }
 
   private emptyPage(params: CandidateListParams) {

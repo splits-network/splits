@@ -9,6 +9,7 @@ import {
     LoadingState,
     ErrorState,
 } from "@/hooks/use-standard-list";
+import { useRegisterPresence } from "@/contexts";
 import MarketplaceAnimator from "./marketplace-animator";
 import HeaderSection from "./components/header-section";
 import { ControlsBar } from "./components/controls-bar";
@@ -108,6 +109,15 @@ export default function MarketplaceClient({
         }
     }, [recruiters, registerEntities]);
 
+    // Register recruiter user IDs for presence batch fetching
+    const registerPresence = useRegisterPresence();
+    useEffect(() => {
+        const userIds = recruiters.map((r) => r.users?.id).filter(Boolean) as string[];
+        if (userIds.length > 0) {
+            registerPresence(userIds);
+        }
+    }, [recruiters, registerPresence]);
+
     const handleViewModeChange = useCallback(
         (newMode: ViewMode) => {
             if (newMode === viewMode) return;
@@ -206,11 +216,13 @@ export default function MarketplaceClient({
                                 onSelect={handleSelectRecruiter}
                             />
                         ) : (
-                            <SplitView
-                                recruiters={recruiters}
-                                selectedRecruiter={selectedRecruiter}
-                                onSelect={handleSelectRecruiter}
-                            />
+                            <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                <SplitView
+                                    recruiters={recruiters}
+                                    selectedRecruiter={selectedRecruiter}
+                                    onSelect={handleSelectRecruiter}
+                                />
+                            </div>
                         )}
                     </div>
 

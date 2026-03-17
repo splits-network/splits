@@ -2,9 +2,10 @@
 
 import type { Placement } from "../../types";
 import { statusColorName, statusBorder } from "../shared/status-color";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar } from "@splits-network/basel-ui";
 import {
     candidateName,
+    candidateInitials,
     jobTitle,
     companyName,
     timeAgo,
@@ -32,9 +33,14 @@ export function SplitItem({
                     : `bg-base-100 ${statusBorder(state)}`
             }`}
         >
-            {/* Row 1: candidate name + time ago */}
+            {/* Row 1: avatar + candidate name + time ago */}
             <div className="flex items-start justify-between gap-2 mb-1">
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                    <BaselAvatar
+                        initials={candidateInitials(placement)}
+                        alt={candidateName(placement)}
+                        size="xs"
+                    />
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {candidateName(placement)}
                     </h4>

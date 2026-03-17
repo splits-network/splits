@@ -53,6 +53,7 @@ export class OrganizationService {
     const now = new Date().toISOString();
     const record = {
       name: input.name,
+      slug: input.slug,
       type: input.type || 'company',
       created_at: now,
       updated_at: now,

@@ -4,31 +4,14 @@ import Link from "next/link";
 import type { Recruiter } from "../marketplace-client";
 import { getInitials } from "./status-color";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
+import { usePresenceStatus } from "@/contexts";
 
 interface GridCardProps {
     recruiter: Recruiter;
     isSelected?: boolean;
     onSelect?: (recruiter: Recruiter) => void;
-}
-
-function formatStatus(status: string) {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
-function statusColor(status: string) {
-    switch (status) {
-        case "active":
-            return "badge-info badge-soft badge-outline";
-        case "pending":
-            return "badge-warning badge-soft badge-outline";
-        case "suspended":
-            return "badge-error badge-soft badge-outline";
-        case "inactive":
-            return "badge-ghost";
-        default:
-            return "badge-ghost";
-    }
 }
 
 function memberSinceDisplay(recruiter: Recruiter) {
@@ -45,6 +28,26 @@ function isNew(recruiter: Recruiter) {
     return created > thirtyDaysAgo;
 }
 
+function placementsDisplay(recruiter: Recruiter) {
+    if (recruiter.total_placements == null) return "\u2014";
+    return String(recruiter.total_placements);
+}
+
+function successRateDisplay(recruiter: Recruiter) {
+    if (recruiter.success_rate == null) return null;
+    return `${Math.round(recruiter.success_rate)}%`;
+}
+
+function reputationDisplay(recruiter: Recruiter) {
+    if (recruiter.reputation_score == null) return null;
+    return recruiter.reputation_score.toFixed(1);
+}
+
+function experienceDisplay(recruiter: Recruiter) {
+    if (recruiter.years_experience == null || recruiter.years_experience <= 0) return null;
+    return `${recruiter.years_experience}yr`;
+}
+
 export default function GridCard({
     recruiter,
     isSelected,
@@ -52,251 +55,162 @@ export default function GridCard({
 }: GridCardProps) {
     const { getLevel } = useGamification();
     const level = getLevel(recruiter.id);
+    const presenceData = usePresenceStatus(recruiter.users?.id);
+    const presenceStatus = presenceData?.status;
     const name = recruiter.users?.name || recruiter.name || "Unknown Recruiter";
     const location = recruiter.location;
-    const status = recruiter.status || "active";
     const memberSince = memberSinceDisplay(recruiter);
 
-    const stats = [
-        recruiter.total_placements != null
-            ? { label: "Placed", value: String(recruiter.total_placements), icon: "fa-duotone fa-regular fa-handshake" }
-            : null,
-        recruiter.success_rate != null
-            ? { label: "Success", value: `${Math.round(recruiter.success_rate)}%`, icon: "fa-duotone fa-regular fa-bullseye" }
-            : null,
-        recruiter.reputation_score != null
-            ? { label: "Rating", value: recruiter.reputation_score.toFixed(1), icon: "fa-duotone fa-regular fa-star" }
-            : null,
-        recruiter.years_experience != null && recruiter.years_experience > 0
-            ? { label: "Exp.", value: `${recruiter.years_experience}yr`, icon: "fa-duotone fa-regular fa-clock" }
-            : null,
-    ].filter(Boolean) as { label: string; value: string; icon: string }[];
+    const successRate = successRateDisplay(recruiter);
+    const reputation = reputationDisplay(recruiter);
+    const experience = experienceDisplay(recruiter);
+
+    const metaItems: { icon: string; color: string; value: string; muted: boolean; tooltip: string }[] = [
+        { icon: "fa-handshake", color: "text-success", value: placementsDisplay(recruiter), muted: recruiter.total_placements == null, tooltip: "Total placements" },
+        { icon: "fa-bullseye", color: "text-primary", value: successRate || "\u2014", muted: !successRate, tooltip: "Hire success rate" },
+        { icon: "fa-star", color: "text-warning", value: reputation || "\u2014", muted: !reputation, tooltip: "Reputation score" },
+        { icon: "fa-clock", color: "text-info", value: experience || "\u2014", muted: !experience, tooltip: "Years of experience" },
+    ];
+
+    const specialties = recruiter.specialties || [];
+    const industries = recruiter.industries || [];
 
     return (
-        <div
+        <article
             onClick={() => onSelect?.(recruiter)}
             className={[
-                "recruiter-card group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-lg",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-colors",
                 isSelected
-                    ? "border-l-primary border-primary"
-                    : "border-l-primary hover:border-primary/40",
+                    ? "border-primary border-l-primary"
+                    : "border-l-primary hover:border-base-content/20",
             ].join(" ")}
         >
-            {/* Header Band */}
-            <div className="bg-base-300 border-b border-base-300 px-6 pt-6 pb-5">
-                {/* Kicker row: firm name + status badges */}
-                <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate">
-                        {recruiter.firm_name || "Independent"}
-                    </p>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <span className={`badge ${statusColor(status)}`}>
-                            {formatStatus(status)}
-                        </span>
-                        {isNew(recruiter) && (
-                            <span className="badge badge-warning badge-soft badge-outline">
-                                <i className="fa-duotone fa-regular fa-sparkles" />
-                                New
-                            </span>
-                        )}
+            {/* Zone 1: Header Band */}
+            <div className="relative bg-base-300 px-5 pt-4 pb-4">
+                {/* Modifier badges */}
+                {isNew(recruiter) && (
+                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                        <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
                     </div>
-                </div>
+                )}
 
-                {/* Avatar + Name block */}
-                <div className="flex items-end gap-4">
-                    <div className="relative shrink-0">
-                        {recruiter.users?.profile_image_url ? (
-                            <img
-                                src={recruiter.users.profile_image_url}
-                                alt={name}
-                                className="w-16 h-16 object-cover border-2 border-primary"
-                            />
-                        ) : (
-                            <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none">
-                                {getInitials(name)}
-                            </div>
-                        )}
-                        {level && (
-                            <div className="absolute -bottom-1.5 -right-2">
-                                <LevelBadge level={level} size="sm" />
-                            </div>
-                        )}
+                {/* Editorial block: Avatar + Firm kicker + Name + Location */}
+                <div className="flex items-start gap-3">
+                    <div className="shrink-0 mt-0.5">
+                        <BaselAvatar
+                            initials={getInitials(name)}
+                            src={recruiter.users?.profile_image_url}
+                            alt={name}
+                            size="md"
+                            presence={presenceStatus}
+                        />
                     </div>
-                    <div className="min-w-0">
-                        {recruiter.tagline && (
-                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5 truncate">
-                                {recruiter.tagline}
-                            </p>
-                        )}
-                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
+                            {recruiter.firm_name || "Independent"}
+                        </p>
+                        <h3 className="text-lg font-black tracking-tight leading-tight text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
                         </h3>
+                        <p className={`text-sm truncate mt-0.5 ${location ? "text-base-content/50" : "text-base-content/30"}`}>
+                            {location ? (
+                                <span className="flex items-center gap-1.5">
+                                    <i className="fa-duotone fa-regular fa-location-dot" />
+                                    {location}
+                                </span>
+                            ) : (
+                                "No location specified"
+                            )}
+                        </p>
                     </div>
                 </div>
 
-                {/* Location + Member since */}
-                <div className="flex items-center gap-4 mt-3 text-sm text-base-content/40">
-                    {location && (
-                        <span className="flex items-center gap-1.5">
-                            <i className="fa-duotone fa-regular fa-location-dot" />
-                            {location}
-                        </span>
-                    )}
-                    {memberSince && (
-                        <>
-                            {location && <span className="text-base-content/20">|</span>}
-                            <span className="flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-calendar" />
-                                Member since {memberSince}
-                            </span>
-                        </>
-                    )}
+                {/* Member since — always shown */}
+                <div className="mt-2.5">
+                    <span className={`text-sm ${memberSince ? "text-base-content/40" : "text-base-content/20"}`}>
+                        {memberSince ? `Member since ${memberSince}` : "Join date unknown"}
+                    </span>
                 </div>
             </div>
 
-            {/* Bio */}
-            {recruiter.bio && (
-                <div className="px-6 py-5 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                        About
-                    </p>
-                    <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
+            {/* Zone 2: Inline metadata bar */}
+            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {level && (
+                    <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />
+                )}
+                {metaItems.map((item, i) => (
+                    <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
+                        <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
+                        <span className="truncate">{item.value}</span>
+                    </span>
+                ))}
+            </div>
+
+            {/* Zone 3: About snippet */}
+            <div className="px-5 py-3 border-b border-base-300">
+                {recruiter.bio ? (
+                    <div className="text-sm text-base-content/60 leading-relaxed line-clamp-2">
                         <MarkdownRenderer content={recruiter.bio} />
                     </div>
-                </div>
-            )}
+                ) : (
+                    <p className="text-sm text-base-content/30">No bio provided</p>
+                )}
+            </div>
 
-            {/* Stats Row */}
-            {stats.length > 0 && (
-                <div className="border-b border-base-300">
-                    <div
-                        className="grid divide-x divide-base-300"
-                        style={{
-                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
-                        }}
-                    >
-                        {stats.map((stat, i) => {
-                            const iconStyles = [
-                                "bg-primary text-primary-content",
-                                "bg-secondary text-secondary-content",
-                                "bg-accent text-accent-content",
-                                "bg-warning text-warning-content",
-                            ];
-                            const iconStyle = iconStyles[i % iconStyles.length];
-                            return (
-                                <div
-                                    key={stat.label}
-                                    className="flex items-center gap-2.5 px-3 py-4"
-                                >
-                                    <div
-                                        className={`w-8 h-8 flex items-center justify-center shrink-0 ${iconStyle}`}
-                                    >
-                                        <i className={`${stat.icon} text-xs`} />
-                                    </div>
-                                    <div>
-                                        <span className="text-lg font-black text-base-content leading-none block">
-                                            {stat.value}
-                                        </span>
-                                        <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
-                                            {stat.label}
-                                        </span>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-
-            {/* Specialties + Industries tags */}
-            {((recruiter.specialties || []).length > 0 ||
-                (recruiter.industries || []).length > 0) && (
-                <div className="px-6 py-5 border-b border-base-300 space-y-4">
-                    {(recruiter.specialties || []).length > 0 && (
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                                Specialties
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {(recruiter.specialties || [])
-                                    .slice(0, 4)
-                                    .map((spec) => (
-                                        <span
-                                            key={spec}
-                                            className="badge badge-primary badge-soft badge-outline"
-                                        >
-                                            {spec}
-                                        </span>
-                                    ))}
-                                {(recruiter.specialties || []).length > 4 && (
-                                    <span className="badge badge-ghost">
-                                        +{(recruiter.specialties || []).length - 4}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+            {/* Zone 4: Tags — partnership + specialties + industries */}
+            <div className="px-5 py-3 border-b border-base-300">
+                <div className="flex flex-wrap gap-1.5">
+                    {recruiter.company_recruiter && (
+                        <BaselBadge color="primary" size="sm" icon="fa-building">
+                            Company
+                        </BaselBadge>
                     )}
-                    {(recruiter.industries || []).length > 0 && (
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                                Industries
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {(recruiter.industries || [])
-                                    .slice(0, 3)
-                                    .map((ind) => (
-                                        <span
-                                            key={ind}
-                                            className="badge badge-soft badge-outline"
-                                        >
-                                            {ind}
-                                        </span>
-                                    ))}
-                                {(recruiter.industries || []).length > 3 && (
-                                    <span className="badge badge-ghost">
-                                        +{(recruiter.industries || []).length - 3}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+                    {recruiter.candidate_recruiter && (
+                        <BaselBadge color="secondary" size="sm" icon="fa-user-tie">
+                            Candidate
+                        </BaselBadge>
                     )}
-                </div>
-            )}
-
-            {/* Partnership Badges */}
-            <div className="px-6 py-5 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                    Partnership
-                </p>
-                <div className="flex flex-wrap gap-2">
-                    <span
-                        className={`badge gap-2 ${recruiter.company_recruiter ? "badge-primary" : "badge-ghost"}`}
-                    >
-                        <i className="fa-duotone fa-regular fa-building" />
-                        Company Recruiter
-                    </span>
-                    <span
-                        className={`badge gap-2 ${recruiter.candidate_recruiter ? "badge-secondary" : "badge-ghost"}`}
-                    >
-                        <i className="fa-duotone fa-regular fa-user-tie" />
-                        Candidate Recruiter
-                    </span>
+                    {specialties.slice(0, 3).map((spec) => (
+                        <BaselBadge key={spec} variant="outline" size="sm">
+                            {spec}
+                        </BaselBadge>
+                    ))}
+                    {specialties.length > 3 && (
+                        <span className="text-sm font-semibold text-base-content/40 self-center">
+                            +{specialties.length - 3} more
+                        </span>
+                    )}
+                    {industries.slice(0, 2).map((ind) => (
+                        <BaselBadge key={ind} color="info" variant="soft" size="sm">
+                            {ind}
+                        </BaselBadge>
+                    ))}
+                    {industries.length > 2 && (
+                        <span className="text-sm font-semibold text-base-content/40 self-center">
+                            +{industries.length - 2}
+                        </span>
+                    )}
+                    {!recruiter.company_recruiter && !recruiter.candidate_recruiter && specialties.length === 0 && industries.length === 0 && (
+                        <span className="text-sm text-base-content/30">No details listed</span>
+                    )}
                 </div>
             </div>
 
-            {/* Footer: view link */}
+            {/* Zone 5: Footer — profile link */}
             <div
-                className="mt-auto flex items-center justify-end gap-3 px-6 py-4 border-t border-base-200"
+                className="mt-auto flex items-center justify-between gap-3 px-5 py-3"
                 onClick={(e) => e.stopPropagation()}
             >
                 <Link
                     href={`/marketplace/${recruiter.slug || recruiter.id}`}
-                    className="btn btn-sm btn-link gap-1"
+                    className="text-sm font-semibold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
                 >
                     View Profile
-                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
+                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs" />
                 </Link>
             </div>
-        </div>
+        </article>
     );
 }

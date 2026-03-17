@@ -2,7 +2,8 @@
 
 import type { Recruiter } from "../marketplace-client";
 import { getInitials, reputationColor } from "./status-color";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselLevelIndicator } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
 
 interface SplitItemProps {
     recruiter: Recruiter;
@@ -35,7 +36,7 @@ export default function SplitItem({
                     </div>
                     <h3 className="font-bold text-sm tracking-tight truncate">
                         {name}
-                        {level && <span className="ml-1.5 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
+                        {level && <span className="ml-1.5 inline-block align-middle"><BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} /></span>}
                     </h3>
                 </div>
                 {recruiter.reputation_score && (
