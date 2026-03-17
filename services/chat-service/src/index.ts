@@ -150,6 +150,7 @@ async function main() {
         supabase: supabaseClient,
         eventPublisher: outboxPublisher,
         chatEventPublisher,
+        redis: v3Redis,
     });
 
     app.get("/health", async (request, reply) => {

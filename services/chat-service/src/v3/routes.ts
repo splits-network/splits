@@ -7,20 +7,27 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
+import Redis from 'ioredis';
 import { IEventPublisher } from '../v2/shared/events';
 import { IChatEventPublisher } from './shared/chat-event-publisher';
 import { registerConversationRoutes } from './conversations/routes';
 import { registerMessageRoutes } from './messages/routes';
 import { registerMessagingCounterRoutes } from './messaging-counters/routes';
+import { registerPresenceRoutes } from './presence/routes';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;
   eventPublisher?: IEventPublisher;
   chatEventPublisher?: IChatEventPublisher;
+  redis?: Redis;
 }
 
 export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config) {
   registerConversationRoutes(app, config.supabase, config.eventPublisher, config.chatEventPublisher);
   registerMessageRoutes(app, config.supabase, config.eventPublisher, config.chatEventPublisher);
   registerMessagingCounterRoutes(app, config.supabase);
+
+  if (config.redis) {
+    registerPresenceRoutes(app, config.redis);
+  }
 }
