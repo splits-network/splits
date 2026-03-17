@@ -50,12 +50,23 @@ export class MessageRepository {
         return data;
     }
 
-    async create(record: Record<string, any>): Promise<any> {
+    /**
+     * Send a message using the atomic chat_send_message RPC.
+     * The RPC handles insert + last_message_at update atomically.
+     */
+    async sendViaRpc(
+        conversationId: string,
+        senderId: string,
+        body: string,
+        clientMessageId: string | null,
+    ): Promise<any> {
         const { data, error } = await this.supabase
-            .from('chat_messages')
-            .insert(record)
-            .select()
-            .single();
+            .rpc('chat_send_message', {
+                p_conversation_id: conversationId,
+                p_sender_id: senderId,
+                p_body: body ?? null,
+                p_client_message_id: clientMessageId ?? null,
+            });
 
         if (error) throw error;
         return data;
@@ -73,7 +84,31 @@ export class MessageRepository {
         return data;
     }
 
-    async getOtherParticipants(conversationId: string, excludeUserId: string): Promise<string[]> {
+    async getParticipantState(conversationId: string, userId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('chat_conversation_participants')
+            .select('*')
+            .eq('conversation_id', conversationId)
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async getOtherParticipant(conversationId: string, excludeUserId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .from('chat_conversation_participants')
+            .select('*')
+            .eq('conversation_id', conversationId)
+            .neq('user_id', excludeUserId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async getOtherParticipantUserIds(conversationId: string, excludeUserId: string): Promise<string[]> {
         const { data, error } = await this.supabase
             .from('chat_conversation_participants')
             .select('user_id')
@@ -84,15 +119,26 @@ export class MessageRepository {
         return (data || []).map((r: any) => r.user_id);
     }
 
-    async isParticipant(conversationId: string, userId: string): Promise<boolean> {
+    async isBlocked(userA: string, userB: string): Promise<boolean> {
         const { data, error } = await this.supabase
-            .from('chat_conversation_participants')
-            .select('conversation_id')
-            .eq('conversation_id', conversationId)
-            .eq('user_id', userId)
-            .maybeSingle();
+            .from('chat_user_blocks')
+            .select('blocker_user_id')
+            .or(
+                `and(blocker_user_id.eq.${userA},blocked_user_id.eq.${userB}),and(blocker_user_id.eq.${userB},blocked_user_id.eq.${userA})`
+            )
+            .limit(1);
 
         if (error) throw error;
-        return !!data;
+        return (data?.length || 0) > 0;
+    }
+
+    async countMessages(conversationId: string): Promise<number> {
+        const { count, error } = await this.supabase
+            .from('chat_messages')
+            .select('id', { count: 'exact', head: true })
+            .eq('conversation_id', conversationId);
+
+        if (error) throw error;
+        return count || 0;
     }
 }
