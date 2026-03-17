@@ -395,7 +395,7 @@ async function handleClientMessage(
 
     if (message.type === "read.receipt") {
         await fetch(
-            `${chatServiceUrl}/api/v2/chat/conversations/${message.conversationId}/read-receipt`,
+            `${chatServiceUrl}/api/v3/chat/conversations/${message.conversationId}/actions/read-receipt`,
             {
                 method: "POST",
                 headers: {
@@ -416,7 +416,7 @@ async function authorizeConversation(
     conversationId: string,
 ): Promise<boolean> {
     const response = await fetch(
-        `${chatServiceUrl}/api/v2/chat/conversations/${conversationId}/resync?limit=1`,
+        `${chatServiceUrl}/api/v3/chat/conversations/${conversationId}/actions/resync?limit=1`,
         {
             headers: {
                 "x-clerk-user-id": clerkUserId,
