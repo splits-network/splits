@@ -20,10 +20,6 @@ export function usePresenceHeartbeat() {
 
     const userId = profile?.id;
 
-    if (typeof window !== "undefined" && userId) {
-        console.log("[presence-heartbeat] active", { userId, activityStatus });
-    }
-
     useChatGateway({
         enabled: Boolean(userId),
         channels: userId ? [`user:${userId}`] : [],

@@ -96,7 +96,6 @@ export function useChatGateway({
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log("[portal-chat-gateway] WebSocket connected", { channels: channelsRef.current });
         retryRef.current = 0;
         ws.send(JSON.stringify({ type: "subscribe", channels: channelsRef.current }));
         onReconnectRef.current?.();
