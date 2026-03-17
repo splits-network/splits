@@ -43,15 +43,11 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
                 if (!token) return;
 
                 const client = createAuthenticatedClient(token);
-                const response: any = await client.get("/companies");
+                const response: any = await client.get("/companies", {
+                    params: { limit: 100 },
+                });
                 const allCompanies = response?.data || [];
-
-                const userCompanies = allCompanies.filter((c: Company) =>
-                    profile.organization_ids.includes(
-                        c.identity_organization_id || "",
-                    ),
-                );
-                setCompanies(userCompanies);
+                setCompanies(allCompanies);
             } catch (err) {
                 console.error("Failed to load companies:", err);
             }
