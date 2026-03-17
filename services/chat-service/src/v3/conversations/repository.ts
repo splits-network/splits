@@ -95,7 +95,7 @@ export class ConversationRepository {
   async isParticipant(conversationId: string, userId: string): Promise<boolean> {
     const { data, error } = await this.supabase
       .from('chat_conversation_participants')
-      .select('id')
+      .select('conversation_id')
       .eq('conversation_id', conversationId)
       .eq('user_id', userId)
       .maybeSingle();
