@@ -233,6 +233,14 @@ export default function HireClient({
         recruiterEmail ||
         "Unknown Recruiter";
 
+    /* Candidate sourcer — distinct from candidate recruiter */
+    const candidateSourcerRaw = (application.candidate as any)?.candidate_sourcer;
+    const candidateSourcer = Array.isArray(candidateSourcerRaw)
+        ? candidateSourcerRaw[0]
+        : candidateSourcerRaw;
+    const sourcerName = candidateSourcer?.recruiter?.user?.name || null;
+    const sourcerEmail = candidateSourcer?.recruiter?.user?.email || null;
+
     /* Completed state */
     if (completed) {
         return (
@@ -291,6 +299,8 @@ export default function HireClient({
                     companyName={companyName}
                     recruiterName={recruiterName}
                     recruiterEmail={recruiterEmail}
+                    sourcerName={sourcerName}
+                    sourcerEmail={sourcerEmail}
                     salary={salary}
                     startDate={startDate}
                 />
@@ -370,6 +380,8 @@ function StepReview({
     companyName,
     recruiterName,
     recruiterEmail,
+    sourcerName,
+    sourcerEmail,
     salary,
     startDate,
 }: {
@@ -379,6 +391,8 @@ function StepReview({
     companyName: string;
     recruiterName: string;
     recruiterEmail: string;
+    sourcerName: string | null;
+    sourcerEmail: string | null;
     salary: string;
     startDate: string;
 }) {
@@ -453,16 +467,25 @@ function StepReview({
                 </div>
             </div>
 
-            {/* Recruiter */}
+            {/* Sourcer */}
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-3">
                 Sourced By
             </p>
             <div className="bg-base-200 p-5 mb-6">
-                <p className="font-bold text-base-content">{recruiterName}</p>
-                {recruiterEmail && (
-                    <p className="text-sm text-base-content/60">
-                        <i className="fa-duotone fa-regular fa-envelope w-4 text-center mr-1" />
-                        {recruiterEmail}
+                {sourcerName ? (
+                    <>
+                        <p className="font-bold text-base-content">{sourcerName}</p>
+                        {sourcerEmail && (
+                            <p className="text-sm text-base-content/60">
+                                <i className="fa-duotone fa-regular fa-envelope w-4 text-center mr-1" />
+                                {sourcerEmail}
+                            </p>
+                        )}
+                    </>
+                ) : (
+                    <p className="font-bold text-base-content">
+                        <i className="fa-duotone fa-regular fa-globe w-4 text-center mr-2" />
+                        Splits Network
                     </p>
                 )}
             </div>

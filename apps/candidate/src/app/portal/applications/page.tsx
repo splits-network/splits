@@ -89,13 +89,13 @@ export default function ApplicationsBaselPage() {
         totalPages,
         refresh,
     } = useStandardList<Application, ApplicationFilters>({
-        endpoint: "/applications",
+        endpoint: "/applications/views/listing",
         defaultFilters: { stage: undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
         defaultLimit: 25,
         syncToUrl: true,
-        include: "job,recruiter,ai_review",
+        include: "ai_review",
     });
 
     const { registerEntities } = useGamification();

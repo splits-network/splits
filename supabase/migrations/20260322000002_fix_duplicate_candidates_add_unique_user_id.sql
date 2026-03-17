@@ -34,13 +34,20 @@ BEGIN
       SELECT id FROM candidates
       WHERE user_id = dup.user_id AND id != keeper_id
     LOOP
-      -- Reassign any applications from the dupe to the keeper
+      -- Reassign important relational data to the keeper
       UPDATE applications SET candidate_id = keeper_id WHERE candidate_id = dupe_id;
+      UPDATE placements SET candidate_id = keeper_id WHERE candidate_id = dupe_id;
+      UPDATE documents SET entity_id = keeper_id WHERE entity_type = 'candidate' AND entity_id = dupe_id;
 
-      -- Reassign any documents from the dupe to the keeper
-      UPDATE documents
-      SET entity_id = keeper_id
-      WHERE entity_type = 'candidate' AND entity_id = dupe_id;
+      -- Delete disposable/duplicate-safe references
+      DELETE FROM candidate_sourcers WHERE candidate_id = dupe_id;
+      DELETE FROM candidate_skills WHERE candidate_id = dupe_id;
+      DELETE FROM candidate_saved_jobs WHERE candidate_id = dupe_id;
+      DELETE FROM candidate_role_matches WHERE candidate_id = dupe_id;
+      DELETE FROM job_recommendations WHERE candidate_id = dupe_id;
+      DELETE FROM marketplace_events WHERE candidate_id = dupe_id;
+      DELETE FROM recruiter_candidates WHERE candidate_id = dupe_id;
+      DELETE FROM recruiter_saved_candidates WHERE candidate_id = dupe_id;
 
       -- Delete the duplicate candidate
       DELETE FROM candidates WHERE id = dupe_id;
