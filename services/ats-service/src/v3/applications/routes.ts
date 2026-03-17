@@ -20,6 +20,7 @@ import { PrescreenService } from './actions/prescreen.service';
 import { TerminationService } from './actions/termination.service';
 
 // View routes
+import { registerApplicationListingView } from './views/listing.route';
 import { registerApplicationDetailView } from './views/detail.route';
 
 // Action routes
@@ -45,6 +46,7 @@ export function registerApplicationRoutes(
   const terminationService = new TerminationService(repository, eventPublisher);
 
   // Register view routes BEFORE core CRUD (to avoid :id collision)
+  registerApplicationListingView(app, supabase);
   registerApplicationDetailView(app, supabase);
 
   // Register action routes BEFORE core CRUD (non-parameterized first)

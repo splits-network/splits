@@ -34,27 +34,6 @@ export class ApplicationService {
 
     const { data, total } = await this.repository.findAll(params, scope);
 
-    // Batch-load includes
-    if (params.include) {
-      const includes = params.include.split(',').map(i => i.trim());
-      const ids = data.map((a: any) => a.id);
-
-      if (includes.includes('ai_review') || includes.includes('ai-review')) {
-        const reviews = await this.repository.batchGetAIReviews(ids);
-        const map = new Map(reviews.map(r => [r.application_id, r]));
-        data.forEach((a: any) => { a.ai_review = map.get(a.id) || null; });
-      }
-      if (includes.includes('documents') || includes.includes('document')) {
-        const docs = await this.repository.batchGetDocuments(ids);
-        const map = new Map<string, any[]>();
-        docs.forEach((d: any) => {
-          if (!map.has(d.entity_id)) map.set(d.entity_id, []);
-          map.get(d.entity_id)!.push(d);
-        });
-        data.forEach((a: any) => { a.documents = map.get(a.id) || []; });
-      }
-    }
-
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
     return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };

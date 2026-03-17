@@ -7,6 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { ApplicationListParams } from './types';
 
+const SORTABLE_FIELDS = ['created_at', 'updated_at', 'stage', 'submitted_at'] as const;
+
 export interface ApplicationScopeFilters {
   candidate_id?: string;
   recruiter_id?: string;
@@ -15,15 +17,6 @@ export interface ApplicationScopeFilters {
   is_admin?: boolean;
   visible_stages?: string[];
 }
-
-const LIST_SELECT = `*,
-  candidate:candidates(id, full_name, email, phone, location, user_id,
-    candidate_sourcer:candidate_sourcers(sourcer_recruiter_id,
-      recruiter:recruiters(id, user_id, user:users!recruiters_user_id_fkey(name, email)))),
-  job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location,
-    description, logo_url, identity_organization_id),
-    firm:firms(id, name, logo_url),
-    job_requirements:job_requirements(*))`;
 
 export class ApplicationRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -38,7 +31,7 @@ export class ApplicationRepository {
 
     let query = this.supabase
       .from('applications')
-      .select(LIST_SELECT, { count: 'exact' });
+      .select('*', { count: 'exact' });
 
     // Apply scope filters from service layer
     query = this.applyScope(query, scopeFilters);
@@ -60,7 +53,7 @@ export class ApplicationRepository {
       );
     }
 
-    const sortBy = params.sort_by || 'created_at';
+    const sortBy = SORTABLE_FIELDS.includes(params.sort_by as any) ? params.sort_by! : 'created_at';
     const ascending = params.sort_order?.toLowerCase() === 'asc';
     query = query.order(sortBy, { ascending });
     query = query.range(offset, offset + limit - 1);

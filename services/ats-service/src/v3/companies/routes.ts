@@ -1,5 +1,5 @@
 /**
- * Companies V3 Routes — Core 5 CRUD + contacts
+ * Companies V3 Routes — Core 5 CRUD
  */
 
 import { FastifyInstance } from 'fastify';
@@ -7,6 +7,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { CompanyRepository } from './repository';
 import { CompanyService } from './service';
+import { registerCompanyContactsView } from './views/contacts.route';
 import {
   CreateCompanyInput,
   UpdateCompanyInput,
@@ -24,6 +25,9 @@ export function registerCompanyRoutes(
 ) {
   const repository = new CompanyRepository(supabase);
   const service = new CompanyService(repository, supabase, eventPublisher);
+
+  // --- Views (registered before :id routes to avoid collision) ---
+  registerCompanyContactsView(app, supabase);
 
   // --- Core 5 CRUD ---
 
@@ -88,20 +92,5 @@ export function registerCompanyRoutes(
     const { id } = request.params as { id: string };
     await service.delete(id, clerkUserId);
     return reply.send({ data: { message: 'Company deleted successfully' } });
-  });
-
-  // --- Additional routes ---
-
-  // GET /api/v3/companies/:id/contacts
-  app.get('/api/v3/companies/:id/contacts', {
-    schema: { params: idParamSchema },
-  }, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) {
-      return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
-    }
-    const { id } = request.params as { id: string };
-    const data = await service.getContacts(id, clerkUserId);
-    return reply.send({ data });
   });
 }

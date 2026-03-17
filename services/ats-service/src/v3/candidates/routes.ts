@@ -1,5 +1,5 @@
 /**
- * Candidates V3 Routes — CRUD + dashboard + resume endpoints
+ * Candidates V3 Routes — Core CRUD
  */
 
 import { FastifyInstance } from 'fastify';
@@ -18,6 +18,9 @@ import {
 } from './types';
 import { registerCandidateDetailView } from './views/detail.route';
 import { registerCandidateEnrichedView } from './views/enriched.route';
+import { registerCandidateDashboardStatsView } from './views/dashboard-stats.route';
+import { registerCandidateRecentApplicationsView } from './views/recent-applications.route';
+import { registerCandidatePrimaryResumeView } from './views/primary-resume.route';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -36,6 +39,9 @@ export function registerCandidateRoutes(
   // --- Views ---
   registerCandidateEnrichedView(app, supabase);
   registerCandidateDetailView(app, supabase);
+  registerCandidateDashboardStatsView(app, supabase);
+  registerCandidateRecentApplicationsView(app, supabase);
+  registerCandidatePrimaryResumeView(app, supabase);
 
   // --- Non-parameterized routes FIRST (before :id) ---
 
@@ -103,47 +109,4 @@ export function registerCandidateRoutes(
     return reply.send({ data: { message: 'Candidate deleted successfully' } });
   });
 
-  // --- Additional endpoints ---
-
-  // GET /api/v3/candidates/:id/dashboard-stats
-  app.get('/api/v3/candidates/:id/dashboard-stats', {
-    schema: { params: idParamSchema },
-  }, async (request, reply) => {
-    const clerkUserId = getClerkUserId(request);
-    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
-    const { id } = request.params as { id: string };
-    const data = await service.getDashboardStats(id, clerkUserId);
-    return reply.send({ data });
-  });
-
-  // GET /api/v3/candidates/:id/recent-applications
-  app.get('/api/v3/candidates/:id/recent-applications', {
-    schema: {
-      params: idParamSchema,
-      querystring: {
-        type: 'object',
-        properties: {
-          limit: { type: 'integer', minimum: 1, maximum: 25, default: 5 },
-        },
-      },
-    },
-  }, async (request, reply) => {
-    const clerkUserId = getClerkUserId(request);
-    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
-    const { id } = request.params as { id: string };
-    const { limit } = request.query as { limit?: number };
-    const data = await service.getRecentApplications(id, limit || 5, clerkUserId);
-    return reply.send({ data });
-  });
-
-  // GET /api/v3/candidates/:id/primary-resume
-  app.get('/api/v3/candidates/:id/primary-resume', {
-    schema: { params: idParamSchema },
-  }, async (request, reply) => {
-    const clerkUserId = getClerkUserId(request);
-    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
-    const { id } = request.params as { id: string };
-    const data = await service.getPrimaryResume(id, clerkUserId);
-    return reply.send({ data });
-  });
 }

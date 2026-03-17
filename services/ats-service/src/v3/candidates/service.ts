@@ -201,35 +201,6 @@ export class CandidateService {
     }, 'ats-service');
   }
 
-  async getDashboardStats(candidateId: string, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (context.candidateId !== candidateId && !context.isPlatformAdmin) {
-      throw new ForbiddenError('You can only view your own dashboard stats');
-    }
-    return this.repository.getDashboardStats(candidateId);
-  }
-
-  async getRecentApplications(candidateId: string, limit: number, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (context.candidateId !== candidateId && !context.isPlatformAdmin) {
-      throw new ForbiddenError('You can only view your own recent applications');
-    }
-    return this.repository.getRecentApplications(candidateId, limit);
-  }
-
-  async getPrimaryResume(candidateId: string, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    const canAccess = context.isPlatformAdmin || !!context.recruiterId ||
-      context.candidateId === candidateId ||
-      context.roles.some(r => ['company_admin', 'hiring_manager'].includes(r));
-
-    if (!canAccess) {
-      throw new ForbiddenError('You do not have permission to view this resume');
-    }
-
-    return this.repository.getPrimaryResume(candidateId);
-  }
-
   async getResumes(candidateId: string, clerkUserId: string) {
     const context = await this.accessResolver.resolve(clerkUserId);
     const canAccess = context.isPlatformAdmin || !!context.recruiterId ||
