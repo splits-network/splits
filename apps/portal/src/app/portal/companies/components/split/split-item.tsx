@@ -18,7 +18,7 @@ import {
 } from "../shared/helpers";
 import { statusBorder } from "../shared/status-color";
 import { useGamification } from "@splits-network/shared-gamification";
-import CompanyActionsToolbar from "../shared/actions-toolbar";
+
 
 export function SplitItem({
     item,
@@ -53,7 +53,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : `bg-base-100 ${statusBorder(relationship?.status)}`
@@ -82,7 +82,7 @@ export function SplitItem({
             </div>
 
             {/* Row 4: badge bar */}
-            <div className="flex flex-wrap items-center gap-1 mt-1.5 pr-10">
+            <div className="flex flex-wrap items-center gap-1 mt-1.5">
                 {relStatus && (
                     <BaselBadge color={relStatus.color} size="xs" variant="soft">
                         {relStatus.label}
@@ -103,17 +103,6 @@ export function SplitItem({
                         {stage.label}
                     </BaselBadge>
                 )}
-            </div>
-
-            {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
-                <CompanyActionsToolbar
-                    company={company}
-                    relationship={!isMarketplace ? (item as CompanyRelationship) : undefined}
-                    variant="icon-only"
-                    size="xs"
-                    onRefresh={onRefresh}
-                />
             </div>
         </div>
     );

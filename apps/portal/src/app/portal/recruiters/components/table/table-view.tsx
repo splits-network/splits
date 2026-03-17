@@ -28,7 +28,7 @@ export function TableView({
     ];
 
     return (
-        <div className="overflow-x-auto border-2 border-base-300 h-full">
+        <div className="border-2 border-base-300">
             <table className="w-full">
                 <thead>
                     <tr className="bg-base-300 text-base-content">

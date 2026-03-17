@@ -14,7 +14,6 @@ export interface CreateCandidateSourcerInput {
 
 export interface UpdateCandidateSourcerInput {
   notes?: string;
-  protection_window_days?: number;
 }
 
 export interface CandidateSourcerListParams {
@@ -53,7 +52,6 @@ export const updateSchema = {
   type: 'object',
   properties: {
     notes: { type: 'string', maxLength: 2000 },
-    protection_window_days: { type: 'integer', minimum: 0, maximum: 3650 },
   },
   additionalProperties: false,
 };

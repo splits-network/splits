@@ -19,8 +19,6 @@ export interface CandidateSourcerCreate {
 
 export interface CandidateSourcerUpdate {
     notes?: string;
-    protection_window_days?: number;
-    protection_expires_at?: Date;
 }
 
 export { CandidateSourcer };

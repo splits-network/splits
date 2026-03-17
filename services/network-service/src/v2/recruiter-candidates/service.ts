@@ -318,13 +318,8 @@ export class RecruiterCandidateServiceV2 {
             });
         }
 
-        if (relationship.candidate_id && relationship.recruiter_id) {
-            await this.eventPublisher.publish('candidate.sourcer_assignment_requested', {
-                candidate_id: relationship.candidate_id,
-                recruiter_id: relationship.recruiter_id,
-                source_method: 'invitation_accepted',
-            });
-        }
+        // Sourcer attribution is immutable — set only at signup via referral link/code.
+        // Invitation acceptance establishes representation, NOT sourcing.
 
         await this.eventPublisher.publish('candidate.consent_given', {
             relationship_id: updatedRelationship.id,

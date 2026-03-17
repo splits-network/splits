@@ -112,11 +112,13 @@ describe('RecruiterCandidateServiceV2 (unit)', () => {
             user_id: 'user-1',
             recruiter_id: 'rec-1',
         });
-        expect(eventPublisher.publish).toHaveBeenCalledWith('candidate.sourcer_assignment_requested', {
-            candidate_id: 'cand-1',
-            recruiter_id: 'rec-1',
-            source_method: 'invitation_accepted',
-        });
+        // candidate.sourcer_assignment_requested is no longer published on invitation acceptance
+        // Sourcer attribution is immutable — set only at signup via referral link/code
+        expect(eventPublisher.publish).not.toHaveBeenCalledWith(
+            'candidate.sourcer_assignment_requested',
+            expect.anything(),
+            expect.anything(),
+        );
         expect(eventPublisher.publish).toHaveBeenCalledWith(
             'candidate.consent_given',
             expect.objectContaining({ relationship_id: 'rel-1' })

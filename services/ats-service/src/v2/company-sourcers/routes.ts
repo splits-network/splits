@@ -2,6 +2,12 @@ import { FastifyInstance } from 'fastify';
 import { CompanySourcerServiceV2 } from './service';
 import { requireUserContext } from '../helpers';
 
+/**
+ * Company Sourcers V2 Routes — Read-only + notes update + check-protection
+ *
+ * Sourcer attribution is immutable — set once at onboarding via referral link/code.
+ * Create and delete routes have been removed to enforce this rule.
+ */
 export async function companySourcerRoutes(app: FastifyInstance, service: CompanySourcerServiceV2) {
     // List company sourcers
     app.get('/company-sourcers', {
@@ -80,40 +86,10 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
         return reply.send({ data: sourcer });
     });
 
-    // Create company sourcer
-    app.post('/company-sourcers', {
-        schema: {
-            description: 'Create a new company sourcer record',
-            tags: ['company-sourcers'],
-            body: {
-                type: 'object',
-                required: ['company_id', 'recruiter_id'],
-                properties: {
-                    company_id: { type: 'string', format: 'uuid' },
-                    recruiter_id: { type: 'string', format: 'uuid' },
-                    relationship_start_date: { type: 'string', format: 'date-time' },
-                    notes: { type: 'string' },
-                },
-            },
-        },
-    }, async (request, reply) => {
-        const { clerkUserId } = requireUserContext(request);
-        const body = request.body as any;
-
-        const sourcer = await service.create(clerkUserId, {
-            company_id: body.company_id,
-            recruiter_id: body.recruiter_id,
-            relationship_start_date: body.relationship_start_date,
-            notes: body.notes,
-        });
-
-        return reply.code(201).send({ data: sourcer });
-    });
-
-    // Update company sourcer
+    // Update company sourcer — notes only
     app.patch('/company-sourcers/:id', {
         schema: {
-            description: 'Update a company sourcer record',
+            description: 'Update a company sourcer record (notes only — attribution is immutable)',
             tags: ['company-sourcers'],
             params: {
                 type: 'object',
@@ -125,9 +101,7 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
             body: {
                 type: 'object',
                 properties: {
-                    status: { type: 'string', enum: ['pending', 'active', 'declined', 'terminated'] },
-                    relationship_end_date: { type: 'string', format: 'date-time' },
-                    termination_reason: { type: 'string' },
+                    notes: { type: 'string' },
                 },
             },
         },
@@ -137,33 +111,10 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
         const body = request.body as any;
 
         const updated = await service.update(id, clerkUserId, {
-            status: body.status,
-            relationship_end_date: body.relationship_end_date,
-            termination_reason: body.termination_reason,
+            notes: body.notes,
         });
 
         return reply.send({ data: updated });
-    });
-
-    // Delete company sourcer
-    app.delete('/company-sourcers/:id', {
-        schema: {
-            description: 'Delete a company sourcer record (admin only)',
-            tags: ['company-sourcers'],
-            params: {
-                type: 'object',
-                required: ['id'],
-                properties: {
-                    id: { type: 'string', format: 'uuid' },
-                },
-            },
-        },
-    }, async (request, reply) => {
-        const { clerkUserId } = requireUserContext(request);
-        const { id } = request.params as { id: string };
-
-        await service.delete(id, clerkUserId);
-        return reply.send({ data: { message: 'Company sourcer deleted successfully' } });
     });
 
     // Check protection status
@@ -185,4 +136,6 @@ export async function companySourcerRoutes(app: FastifyInstance, service: Compan
         const protection = await service.checkProtection(company_id);
         return reply.send({ data: protection });
     });
+
+    // POST and DELETE removed — sourcer attribution is immutable
 }

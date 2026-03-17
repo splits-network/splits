@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { PageTitleProvider } from "@/contexts/page-title-context";
 import { useUserProfile } from "@/contexts";
 import { PortalToolbar } from "@/components/portal-toolbar";
+import { usePresenceHeartbeat } from "@/hooks/use-presence-heartbeat";
 
 /**
  * Redirects users who haven't completed or skipped onboarding to /onboarding.
@@ -41,6 +42,9 @@ export function PortalLayoutClient({
 }: {
     children: React.ReactNode;
 }) {
+    // Global presence: keeps user online/idle in Redis on every authenticated page
+    usePresenceHeartbeat();
+
     return (
         <PageTitleProvider>
             <OnboardingRedirectGuard>

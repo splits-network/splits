@@ -53,7 +53,6 @@ export class DomainEventConsumerV3 {
         'ai_review.completed',
         'ai_review.failed',
         'candidate.link_requested',
-        'candidate.sourcer_assignment_requested',
         'resume.metadata.extracted',
         'resume.primary.changed',
       ];
@@ -101,9 +100,9 @@ export class DomainEventConsumerV3 {
           await this.handleCandidateLinkRequested(event);
           break;
 
-        case 'candidate.sourcer_assignment_requested':
-          await this.handleSourcerAssignment(event);
-          break;
+        // candidate.sourcer_assignment_requested — REMOVED
+        // Sourcer attribution is immutable, set only at signup via referral link/code.
+        // The event and handler have been removed to enforce this rule.
 
         case 'resume.metadata.extracted':
           await this.handleResumeMetadataExtracted(event);
@@ -175,69 +174,9 @@ export class DomainEventConsumerV3 {
     this.logger.info({ candidate_id, user_id }, 'Linked user to candidate profile');
   }
 
-  /**
-   * Assign sourcer credit to recruiter for first contact with candidate.
-   * Includes conflict detection and ownership.conflict_detected event publishing.
-   */
-  private async handleSourcerAssignment(event: DomainEvent): Promise<void> {
-    const { candidate_id, recruiter_id, source_method } = event.payload;
-
-    const existing = await this.candidateSourcerRepository.findByCandidateId(candidate_id);
-
-    if (existing) {
-      this.logger.warn(
-        { candidate_id, existing_sourcer_id: existing.sourcer_recruiter_id, requested_sourcer_id: recruiter_id },
-        'Sourcer already assigned — conflict detected'
-      );
-
-      await this.eventPublisher.publish('ownership.conflict_detected', {
-        candidate_id,
-        existing_sourcer_recruiter_id: existing.sourcer_recruiter_id,
-        requested_sourcer_recruiter_id: recruiter_id,
-        source_method,
-        existing_sourced_at: existing.sourced_at,
-        existing_protection_expires_at: existing.protection_expires_at,
-        conflict_detected_at: new Date().toISOString(),
-      });
-
-      return;
-    }
-
-    const protectionDays = 365;
-    const protectionExpiresAt = new Date(Date.now() + protectionDays * 86400000);
-
-    const sourcer = await this.candidateSourcerRepository.create({
-      candidate_id,
-      sourcer_recruiter_id: recruiter_id,
-      sourcer_type: 'recruiter',
-      sourced_at: new Date().toISOString(),
-      protection_window_days: protectionDays,
-      protection_expires_at: protectionExpiresAt.toISOString(),
-      notes: `Sourced via ${source_method}`,
-    });
-
-    // Update legacy candidate.recruiter_id for backward compatibility
-    const { error: legacyError } = await this.supabase
-      .from('candidates')
-      .update({ recruiter_id })
-      .eq('id', candidate_id);
-
-    if (legacyError) {
-      this.logger.warn({ candidate_id, recruiter_id, error: legacyError }, 'Failed to update legacy recruiter_id');
-    }
-
-    // Publish V2-compatible event name for notification consumers
-    await this.eventPublisher.publish('candidate.sourced', {
-      candidate_id,
-      sourcer_user_id: recruiter_id,
-      sourcer_type: 'recruiter',
-      source_method,
-      sourced_at: sourcer.sourced_at,
-      protection_expires_at: sourcer.protection_expires_at,
-    });
-
-    this.logger.info({ candidate_id, sourcer_id: sourcer.id, recruiter_id }, 'Assigned sourcer credit');
-  }
+  // handleSourcerAssignment — REMOVED
+  // Sourcer attribution is immutable, set only at signup via referral link/code.
+  // See identity-service user registration flow for the only legitimate sourcer creation path.
 
   /**
    * Sync AI-extracted resume structured data to application or candidate

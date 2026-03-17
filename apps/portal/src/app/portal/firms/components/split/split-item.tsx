@@ -8,7 +8,7 @@ import {
     memberCountDisplay,
     teamSizeDisplay,
 } from "../shared/helpers";
-import { FirmActionsToolbar } from "../shared/actions-toolbar";
+
 import { useGamification } from "@splits-network/shared-gamification";
 import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 
@@ -29,7 +29,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : "bg-base-100 border-transparent"
@@ -64,17 +64,6 @@ export function SplitItem({
                     <i className="fa-duotone fa-regular fa-user-group mr-1" />
                     {teamSizeDisplay(firm.team_size_range)}
                 </span>
-            </div>
-
-            {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
-                <FirmActionsToolbar
-                    firm={firm}
-                    variant="icon-only"
-                    size="xs"
-                    showActions={{}}
-                    onRefresh={onRefresh}
-                />
             </div>
         </div>
     );

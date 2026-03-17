@@ -6,6 +6,7 @@ import { getInitials } from "./status-color";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { useGamification } from "@splits-network/shared-gamification";
+import { usePresenceStatus } from "@/contexts";
 
 interface GridCardProps {
     recruiter: Recruiter;
@@ -54,6 +55,8 @@ export default function GridCard({
 }: GridCardProps) {
     const { getLevel } = useGamification();
     const level = getLevel(recruiter.id);
+    const presenceData = usePresenceStatus(recruiter.users?.id);
+    const presenceStatus = presenceData?.status;
     const name = recruiter.users?.name || recruiter.name || "Unknown Recruiter";
     const location = recruiter.location;
     const memberSince = memberSinceDisplay(recruiter);
@@ -101,6 +104,7 @@ export default function GridCard({
                             src={recruiter.users?.profile_image_url}
                             alt={name}
                             size="md"
+                            presence={presenceStatus}
                         />
                     </div>
                     <div className="flex-1 min-w-0">

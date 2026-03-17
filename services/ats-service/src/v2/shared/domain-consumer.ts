@@ -62,7 +62,6 @@ export class DomainEventConsumer {
 
             // Bind to candidate events from network service
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.link_requested');
-            await this.channel.bindQueue(this.queue, this.exchange, 'candidate.sourcer_assignment_requested');
 
             // Bind to resume metadata extraction events from AI service
             await this.channel.bindQueue(this.queue, this.exchange, 'resume.metadata.extracted');
@@ -124,9 +123,8 @@ export class DomainEventConsumer {
                     await this.handleCandidateLinkRequested(event);
                     break;
 
-                case 'candidate.sourcer_assignment_requested':
-                    await this.handleSourcerAssignment(event);
-                    break;
+                // candidate.sourcer_assignment_requested — REMOVED
+                // Sourcer attribution is immutable, set only at signup via referral link/code.
 
                 case 'resume.metadata.extracted':
                     await this.handleResumeMetadataExtracted(event);
@@ -549,123 +547,9 @@ export class DomainEventConsumer {
         }
     }
 
-    /**
-     * Handle candidate.sourcer_assignment_requested event
-     * Assigns sourcer credit to recruiter for first contact with candidate
-     * Includes conflict detection and ownership.conflict_detected event publishing
-     */
-    private async handleSourcerAssignment(event: DomainEvent): Promise<void> {
-        const { candidate_id, recruiter_id, source_method } = event.payload;
-
-        this.logger.info(
-            {
-                candidate_id,
-                recruiter_id,
-                source_method,
-                event_id: event.event_id,
-            },
-            'Assigning sourcer credit to recruiter'
-        );
-
-        try {
-            // Check for existing sourcer
-            const existing = await this.candidateSourcerRepository.findByCandidate(candidate_id);
-
-            if (existing) {
-                this.logger.warn(
-                    {
-                        candidate_id,
-                        existing_sourcer_id: existing.sourcer_recruiter_id,
-                        requested_sourcer_id: recruiter_id,
-                        event_id: event.event_id,
-                    },
-                    'Sourcer already assigned to candidate - conflict detected'
-                );
-
-                // Publish ownership.conflict_detected event for admin review
-                await this.eventPublisher.publish('ownership.conflict_detected', {
-                    candidate_id,
-                    existing_sourcer_recruiter_id: existing.sourcer_recruiter_id,
-                    requested_sourcer_recruiter_id: recruiter_id,
-                    source_method,
-                    existing_sourced_at: existing.sourced_at,
-                    existing_protection_expires_at: existing.protection_expires_at,
-                    conflict_detected_at: new Date().toISOString(),
-                });
-
-                // Do not throw - gracefully handle conflict by ignoring request
-                return;
-            }
-
-            // Calculate protection expiration
-            const protectionDays = 365;
-            const protectionExpiresAt = new Date(Date.now() + protectionDays * 24 * 60 * 60 * 1000);
-
-            // Create sourcer record
-            const sourcer = await this.candidateSourcerRepository.create({
-                candidate_id,
-                sourcer_recruiter_id: recruiter_id,
-                sourcer_type: 'recruiter',
-                sourced_at: new Date(),
-                protection_window_days: protectionDays,
-                protection_expires_at: protectionExpiresAt,
-                notes: `Sourced via ${source_method}`,
-            });
-
-            // Update legacy candidate.recruiter_id field for backward compatibility
-            const { error: legacyError } = await this.candidateRepository.getSupabase()
-                .from('candidates')
-                .update({ recruiter_id })
-                .eq('id', candidate_id);
-
-            if (legacyError) {
-                this.logger.warn(
-                    {
-                        candidate_id,
-                        recruiter_id,
-                        error: legacyError,
-                        event_id: event.event_id,
-                    },
-                    'Failed to update legacy recruiter_id field'
-                );
-            }
-
-            this.logger.info(
-                {
-                    candidate_id,
-                    sourcer_id: sourcer.id,
-                    recruiter_id,
-                    protection_expires_at: protectionExpiresAt,
-                    event_id: event.event_id,
-                },
-                'Successfully assigned sourcer credit to recruiter'
-            );
-
-            // Publish candidate.sourced event for notifications
-            await this.eventPublisher.publish('candidate.sourced', {
-                candidate_id,
-                sourcer_user_id: recruiter_id,
-                sourcer_type: 'recruiter',
-                source_method,
-                sourced_at: sourcer.sourced_at,
-                protection_expires_at: sourcer.protection_expires_at,
-            });
-        } catch (error: any) {
-            this.logger.error(
-                {
-                    err: error,
-                    candidate_id,
-                    recruiter_id,
-                    source_method,
-                    event_id: event.event_id,
-                    error_message: error.message,
-                },
-                'Failed to assign sourcer credit'
-            );
-
-            throw error; // Re-throw to trigger nack/requeue
-        }
-    }
+    // handleSourcerAssignment — REMOVED
+    // Sourcer attribution is immutable, set only at signup via referral link/code.
+    // See identity-service user registration flow for the only legitimate sourcer creation path.
 
     /**
      * Handle resume.metadata.extracted event from AI service

@@ -70,6 +70,7 @@ export function usePresence(
                 status: "online" | "idle" | "offline";
                 lastSeenAt: string | null;
             }>;
+            console.log("[usePresence] batch-status response", { requested: normalizedIds, data });
             const updates: Record<string, PresenceStatus> = {};
             data.forEach((item) => {
                 const s = item?.status;

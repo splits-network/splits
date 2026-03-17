@@ -12,7 +12,7 @@ import {
     joinedAgo,
     isNew,
 } from "../shared/helpers";
-import RecruiterActionsToolbar from "../shared/actions-toolbar";
+
 import { useGamification } from "@splits-network/shared-gamification";
 import { PlanBadge } from "@/components/entitlements/plan-badge";
 import type { PlanTier } from "@/contexts/user-profile-context";
@@ -38,7 +38,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : `bg-base-100 ${statusBorder(status)}`
@@ -73,7 +73,7 @@ export function SplitItem({
             </div>
 
             {/* Row 3: placements + success rate + status */}
-            <div className="flex items-center gap-2 mt-0.5 pr-10">
+            <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-sm font-bold text-base-content/60">
                     {placementsDisplay(recruiter)} placements
                 </span>
@@ -83,17 +83,6 @@ export function SplitItem({
                 <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} size="xs" variant="soft">
                     {formatStatus(status)}
                 </BaselBadge>
-            </div>
-
-            {/* Actions */}
-            <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>
-                <RecruiterActionsToolbar
-                    recruiter={recruiter}
-                    variant="icon-only"
-                    size="xs"
-                    showActions={{ viewDetails: false }}
-                    onRefresh={onRefresh}
-                />
             </div>
         </div>
     );

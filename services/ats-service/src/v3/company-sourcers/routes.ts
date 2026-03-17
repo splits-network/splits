@@ -1,5 +1,8 @@
 /**
- * Company Sourcers V3 Routes — Core 5 CRUD + check-protection
+ * Company Sourcers V3 Routes — Read-only + notes update + check-protection
+ *
+ * Sourcer attribution is immutable — set once at onboarding via referral link/code.
+ * Create and delete routes have been removed to enforce this rule.
  */
 
 import { FastifyInstance } from 'fastify';
@@ -8,11 +11,9 @@ import { IEventPublisher } from '../../v2/shared/events';
 import { CompanySourcerRepository } from './repository';
 import { CompanySourcerService } from './service';
 import {
-  CreateCompanySourcerInput,
   UpdateCompanySourcerInput,
   CompanySourcerListParams,
   listQuerySchema,
-  createSchema,
   updateSchema,
   idParamSchema,
   companyIdParamSchema,
@@ -41,7 +42,7 @@ export function registerCompanySourcerRoutes(
     return reply.send({ data: result });
   });
 
-  // --- Core 5 CRUD ---
+  // --- Read + notes-only update ---
 
   // GET /api/v3/company-sourcers — list
   app.get('/api/v3/company-sourcers', {
@@ -68,19 +69,7 @@ export function registerCompanySourcerRoutes(
     return reply.send({ data });
   });
 
-  // POST /api/v3/company-sourcers — create
-  app.post('/api/v3/company-sourcers', {
-    schema: { body: createSchema },
-  }, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) {
-      return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
-    }
-    const data = await service.create(request.body as CreateCompanySourcerInput, clerkUserId);
-    return reply.code(201).send({ data });
-  });
-
-  // PATCH /api/v3/company-sourcers/:id — update
+  // PATCH /api/v3/company-sourcers/:id — update notes only
   app.patch('/api/v3/company-sourcers/:id', {
     schema: { params: idParamSchema, body: updateSchema },
   }, async (request, reply) => {
@@ -93,16 +82,5 @@ export function registerCompanySourcerRoutes(
     return reply.send({ data });
   });
 
-  // DELETE /api/v3/company-sourcers/:id — delete (admin only)
-  app.delete('/api/v3/company-sourcers/:id', {
-    schema: { params: idParamSchema },
-  }, async (request, reply) => {
-    const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    if (!clerkUserId) {
-      return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
-    }
-    const { id } = request.params as { id: string };
-    await service.delete(id, clerkUserId);
-    return reply.send({ data: { message: 'Company sourcer record deleted successfully' } });
-  });
+  // POST and DELETE removed — sourcer attribution is immutable
 }

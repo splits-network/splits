@@ -169,9 +169,8 @@ export class RecruiterCandidateService {
     if (metadata.userId && rel.candidate_id) {
       await this.eventPublisher?.publish('candidate.link_requested', { candidate_id: rel.candidate_id, user_id: metadata.userId, recruiter_id: rel.recruiter_id }, 'network-service');
     }
-    if (rel.candidate_id && rel.recruiter_id) {
-      await this.eventPublisher?.publish('candidate.sourcer_assignment_requested', { candidate_id: rel.candidate_id, recruiter_id: rel.recruiter_id, source_method: 'invitation_accepted' }, 'network-service');
-    }
+    // Sourcer attribution is immutable — set only at signup via referral link/code.
+    // Invitation acceptance establishes representation, NOT sourcing.
     await this.eventPublisher?.publish('candidate.consent_given', { relationship_id: updated!.id, recruiter_id: updated!.recruiter_id, candidate_id: updated!.candidate_id, consent_given_at: updated!.consent_given_at }, 'network-service');
     return { success: true, message: 'Invitation accepted successfully', relationship_id: updated!.id, consent_given_at: updated!.consent_given_at };
   }

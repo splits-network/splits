@@ -11,7 +11,7 @@ import {
     lastSeenAgo,
 } from "../shared/helpers";
 import { statusBorder } from "../shared/status-color";
-import CandidateActionsToolbar from "../shared/actions-toolbar";
+
 import { SaveBookmark } from "@/components/save-bookmark";
 import {
     useGamification,
@@ -48,7 +48,7 @@ export function SplitItem({
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
                     : `bg-base-100 ${statusBorder(candidate.verification_status)}`
@@ -103,14 +103,14 @@ export function SplitItem({
             </div>
 
             {/* Row 3: salary */}
-            <div className="flex items-center gap-2 mt-0.5 pr-10">
+            <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-sm font-bold text-base-content/60">
                     {salaryDisplay(candidate) || <span className="text-base-content/30 font-normal">Not specified</span>}
                 </span>
             </div>
 
             {/* Row 4: badge bar — relationship, presence, job type, remote */}
-            <div className="flex flex-wrap items-center gap-1 mt-1.5 pr-10">
+            <div className="flex flex-wrap items-center gap-1 mt-1.5">
                 {rel && (
                     <BaselBadge color={rel.color} size="xs" variant={rel.variant}>
                         {rel.label}
@@ -131,21 +131,6 @@ export function SplitItem({
                         Remote
                     </BaselBadge>
                 )}
-            </div>
-
-            {/* Actions */}
-            <div
-                className="absolute bottom-2 right-2"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <CandidateActionsToolbar
-                    candidate={candidate}
-                    variant="icon-only"
-                    size="xs"
-                    showActions={{ viewDetails: false }}
-                    onRefresh={onRefresh}
-                    onUpdateItem={onUpdateItem}
-                />
             </div>
         </div>
     );

@@ -184,12 +184,11 @@ export class CandidateSourcerRepository {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Build update query with role-based filtering
+        // Only notes can be updated — sourcer attribution is immutable
         let query = this.supabase
             .from('candidate_sourcers')
             .update({
                 notes: updates.notes,
-                protection_window_days: updates.protection_window_days,
-                protection_expires_at: updates.protection_expires_at?.toISOString(),
             })
             .eq('id', id);
 

@@ -15,7 +15,7 @@ import type { Candidate, CandidateFilters, CandidateScope } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import { isNew } from "./components/shared/helpers";
 import { useGamification } from "@splits-network/shared-gamification";
-import { PresenceProvider, useRegisterPresence } from "@/contexts";
+import { useRegisterPresence } from "@/contexts";
 import { CandidatesAnimator } from "./candidates-animator";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
@@ -195,7 +195,7 @@ export default function CandidatesPage() {
     }
 
     return (
-        <PresenceProvider>
+        <>
             <CandidatesAnimator>
                 <HeaderSection stats={stats} />
 
@@ -314,6 +314,6 @@ export default function CandidatesPage() {
                     />
                 )}
             </ModalPortal>
-        </PresenceProvider>
+        </>
     );
 }

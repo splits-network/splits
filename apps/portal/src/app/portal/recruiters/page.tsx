@@ -20,7 +20,7 @@ import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
 import { useCompanyContext } from "./contexts/company-context";
 import { useGamification } from "@splits-network/shared-gamification";
-import { PresenceProvider, useRegisterPresence } from "@/contexts";
+import { useRegisterPresence } from "@/contexts";
 
 export default function RecruitersBaselPage() {
     return <RecruitersContent />;
@@ -168,7 +168,6 @@ function RecruitersContent() {
     }
 
     return (
-        <PresenceProvider>
         <RecruitersAnimator>
             <HeaderSection stats={stats} />
 
@@ -193,7 +192,7 @@ function RecruitersContent() {
                 onSortChange={handleSortChange}
             />
 
-            <section className="min-h-screen">
+            <section>
                 <div className="mx-auto">
                     {/* Content Area */}
                     <div
@@ -260,6 +259,5 @@ function RecruitersContent() {
                 </div>
             </section>
         </RecruitersAnimator>
-        </PresenceProvider>
     );
 }

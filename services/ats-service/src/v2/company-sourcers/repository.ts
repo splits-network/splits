@@ -135,12 +135,11 @@ export class CompanySourcerRepository {
     async update(id: string, clerkUserId: string, updates: CompanySourcerUpdate): Promise<RecruiterCompany> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
+        // Only notes can be updated — sourcer attribution is immutable
         let query = this.supabase
             .from('recruiter_companies')
             .update({
-                ...(updates.status && { status: updates.status }),
-                ...(updates.relationship_end_date && { relationship_end_date: updates.relationship_end_date }),
-                ...(updates.termination_reason && { termination_reason: updates.termination_reason }),
+                ...(updates.notes !== undefined && { notes: updates.notes }),
             })
             .eq('id', id)
             .eq('relationship_type', 'sourcer');

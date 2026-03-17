@@ -2,6 +2,12 @@ import { FastifyInstance } from 'fastify';
 import { CandidateSourcerServiceV2 } from './service';
 import { requireUserContext } from '../helpers';
 
+/**
+ * Candidate Sourcers V2 Routes — Read-only + notes update + check-protection
+ *
+ * Sourcer attribution is immutable — set once at signup via referral link/code.
+ * Create and delete routes have been removed to enforce this rule.
+ */
 export async function candidateSourcerRoutes(app: FastifyInstance, service: CandidateSourcerServiceV2) {
     // List candidate sourcers
     app.get('/candidate-sourcers', {
@@ -84,46 +90,10 @@ export async function candidateSourcerRoutes(app: FastifyInstance, service: Cand
         return reply.send({ data: sourcer });
     });
 
-    // Create candidate sourcer
-    app.post('/candidate-sourcers', {
-        schema: {
-            description: 'Create a new candidate sourcer record',
-            tags: ['candidate-sourcers'],
-            body: {
-                type: 'object',
-                required: ['candidate_id', 'sourcer_user_id', 'sourcer_type', 'protection_expires_at'],
-                properties: {
-                    candidate_id: { type: 'string', format: 'uuid' },
-                    sourcer_user_id: { type: 'string', format: 'uuid' },
-                    sourcer_type: { type: 'string', enum: ['recruiter', 'tsn'] },
-                    sourced_at: { type: 'string', format: 'date-time' },
-                    protection_window_days: { type: 'number', minimum: 1, default: 365 },
-                    protection_expires_at: { type: 'string', format: 'date-time' },
-                    notes: { type: 'string' },
-                },
-            },
-        },
-    }, async (request, reply) => {
-        const { clerkUserId } = requireUserContext(request);
-        const body = request.body as any;
-
-        const sourcer = await service.create(clerkUserId, {
-            candidate_id: body.candidate_id,
-            sourcer_recruiter_id: body.sourcer_recruiter_id,
-            sourcer_type: body.sourcer_type,
-            sourced_at: body.sourced_at ? new Date(body.sourced_at) : undefined,
-            protection_window_days: body.protection_window_days,
-            protection_expires_at: new Date(body.protection_expires_at),
-            notes: body.notes,
-        });
-
-        return reply.code(201).send({ data: sourcer });
-    });
-
-    // Update candidate sourcer
+    // Update candidate sourcer — notes only
     app.patch('/candidate-sourcers/:id', {
         schema: {
-            description: 'Update a candidate sourcer record',
+            description: 'Update a candidate sourcer record (notes only — attribution is immutable)',
             tags: ['candidate-sourcers'],
             params: {
                 type: 'object',
@@ -136,8 +106,6 @@ export async function candidateSourcerRoutes(app: FastifyInstance, service: Cand
                 type: 'object',
                 properties: {
                     notes: { type: 'string' },
-                    protection_window_days: { type: 'number', minimum: 1 },
-                    protection_expires_at: { type: 'string', format: 'date-time' },
                 },
             },
         },
@@ -148,32 +116,9 @@ export async function candidateSourcerRoutes(app: FastifyInstance, service: Cand
 
         const updated = await service.update(id, clerkUserId, {
             notes: body.notes,
-            protection_window_days: body.protection_window_days,
-            protection_expires_at: body.protection_expires_at ? new Date(body.protection_expires_at) : undefined,
         });
 
         return reply.send({ data: updated });
-    });
-
-    // Delete candidate sourcer
-    app.delete('/candidate-sourcers/:id', {
-        schema: {
-            description: 'Delete a candidate sourcer record (admin only)',
-            tags: ['candidate-sourcers'],
-            params: {
-                type: 'object',
-                required: ['id'],
-                properties: {
-                    id: { type: 'string', format: 'uuid' },
-                },
-            },
-        },
-    }, async (request, reply) => {
-        const { clerkUserId } = requireUserContext(request);
-        const { id } = request.params as { id: string };
-
-        await service.delete(id, clerkUserId);
-        return reply.send({ data: { message: 'Candidate sourcer deleted successfully' } });
     });
 
     // Check protection status
@@ -195,4 +140,6 @@ export async function candidateSourcerRoutes(app: FastifyInstance, service: Cand
         const protection = await service.checkProtection(candidate_id);
         return reply.send({ data: protection });
     });
+
+    // POST and DELETE removed — sourcer attribution is immutable
 }
