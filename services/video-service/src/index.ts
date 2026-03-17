@@ -169,13 +169,20 @@ async function main() {
         supabaseS3Bucket,
     });
 
-    // Register V3 routes (including webhook handler)
+    // Register V3 routes — fully self-contained, no V2 dependencies
     registerV3Routes(app, {
         supabase: supabaseClient,
         eventPublisher: outboxPublisher,
-        callRecordingService,
         livekitApiKey,
         livekitApiSecret,
+        livekitWsUrl,
+        s3Config: {
+            endpoint: supabaseS3Endpoint,
+            region: supabaseS3Region,
+            accessKey: supabaseS3AccessKey,
+            secretKey: supabaseS3SecretKey,
+            bucket: supabaseS3Bucket,
+        },
     });
 
     app.get("/health", async (request, reply) => {

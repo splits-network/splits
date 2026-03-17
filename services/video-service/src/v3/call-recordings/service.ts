@@ -1,83 +1,96 @@
 /**
- * Call Recordings V3 Service
+ * Call Recordings V3 Service — Core CRUD Business Logic
+ *
+ * Uses AccessContextResolver for authorization.
+ * Throws typed errors from shared-fastify.
+ * Publishes domain events for mutations.
+ * No HTTP concepts — no status codes, no request/reply.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { NotFoundError } from '@splits-network/shared-fastify';
+import { IEventPublisher } from '../../v2/shared/events';
 import { CallRecordingRepository } from './repository';
-import { CallRecordingListParams } from './types';
-
-const BUCKET = 'call-recordings';
+import { CallRecordingListParams, CreateCallRecordingInput, UpdateCallRecordingInput } from './types';
 
 export class CallRecordingService {
+  private accessResolver: AccessContextResolver;
+
   constructor(
     private repository: CallRecordingRepository,
     private supabase: SupabaseClient,
-  ) {}
+    private eventPublisher?: IEventPublisher,
+  ) {
+    this.accessResolver = new AccessContextResolver(supabase);
+  }
 
-  async list(params: CallRecordingListParams, clerkUserId: string) {
-    const userId = await this.repository.resolveUserId(clerkUserId);
-    const { data, total } = await this.repository.list(params);
+  async getAll(params: CallRecordingListParams, clerkUserId: string) {
+    await this.accessResolver.resolve(clerkUserId);
 
-    // Filter to recordings where user is a participant on the call
-    const callIds = [...new Set(data.map((r: any) => r.call_id))];
-    const participantCalls = new Set<string>();
+    const { data, total } = await this.repository.findAll(params);
 
-    for (const callId of callIds) {
-      const participants = await this.repository.getCallParticipants(callId);
-      if (participants.some((p: any) => p.user_id === userId)) {
-        participantCalls.add(callId);
-      }
-    }
-
-    const filtered = data.filter((r: any) => participantCalls.has(r.call_id));
-    const p = params.page || 1;
-    const l = params.limit || 25;
-
+    const page = params.page || 1;
+    const limit = Math.min(params.limit || 25, 100);
     return {
-      data: filtered,
-      pagination: { total, page: p, limit: l, total_pages: Math.ceil(total / l) },
+      data,
+      pagination: { total, page, limit, total_pages: Math.ceil(total / limit) },
     };
   }
 
-  async getPlaybackUrl(callId: string, clerkUserId: string, recordingId?: string) {
-    const userId = await this.repository.resolveUserId(clerkUserId);
-    const participants = await this.repository.getCallParticipants(callId);
+  async getById(id: string, clerkUserId: string) {
+    await this.accessResolver.resolve(clerkUserId);
 
-    if (!participants.some((p: any) => p.user_id === userId)) {
-      throw Object.assign(new Error('You are not a participant in this call'), { statusCode: 403 });
-    }
-
-    const blobUrl = await this.repository.findReadyRecording(callId, recordingId);
-    const storagePath = extractStoragePath(blobUrl);
-    const expiresIn = 3600;
-
-    const { data, error } = await this.supabase.storage
-      .from(BUCKET)
-      .createSignedUrl(storagePath, expiresIn);
-
-    if (error || !data?.signedUrl) {
-      throw Object.assign(
-        new Error(`Failed to generate signed URL: ${error?.message || 'Unknown error'}`),
-        { statusCode: 500 },
-      );
-    }
-
-    return {
-      url: data.signedUrl,
-      expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
-    };
+    const recording = await this.repository.findById(id);
+    if (!recording) throw new NotFoundError('CallRecording', id);
+    return recording;
   }
-}
 
-function extractStoragePath(blobUrl: string): string {
-  if (!blobUrl.startsWith('http')) return blobUrl;
-  try {
-    const parsed = new URL(blobUrl);
-    const pathParts = parsed.pathname.split('/');
-    const bucketIndex = pathParts.indexOf(BUCKET);
-    if (bucketIndex !== -1) return pathParts.slice(bucketIndex + 1).join('/');
-    return pathParts.slice(-3).join('/');
-  } catch {
-    return blobUrl;
+  async create(input: CreateCallRecordingInput, clerkUserId: string) {
+    const context = await this.accessResolver.resolve(clerkUserId);
+
+    const recording = await this.repository.create(input);
+
+    await this.eventPublisher?.publish('call_recording.created', {
+      recording_id: recording.id,
+      call_id: recording.call_id,
+      created_by: context.identityUserId,
+    }, 'video-service');
+
+    return recording;
+  }
+
+  async update(id: string, input: UpdateCallRecordingInput, clerkUserId: string) {
+    const context = await this.accessResolver.resolve(clerkUserId);
+
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new NotFoundError('CallRecording', id);
+
+    const updated = await this.repository.update(id, input);
+    if (!updated) throw new NotFoundError('CallRecording', id);
+
+    await this.eventPublisher?.publish('call_recording.updated', {
+      recording_id: id,
+      call_id: existing.call_id,
+      updated_fields: Object.keys(input),
+      updated_by: context.identityUserId,
+    }, 'video-service');
+
+    return updated;
+  }
+
+  async delete(id: string, clerkUserId: string) {
+    const context = await this.accessResolver.resolve(clerkUserId);
+
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new NotFoundError('CallRecording', id);
+
+    await this.repository.delete(id);
+
+    await this.eventPublisher?.publish('call_recording.deleted', {
+      recording_id: id,
+      call_id: existing.call_id,
+      deleted_by: context.identityUserId,
+    }, 'video-service');
   }
 }

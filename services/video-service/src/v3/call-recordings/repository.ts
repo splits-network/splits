@@ -1,32 +1,44 @@
 /**
- * Call Recordings V3 Repository
+ * Call Recordings V3 Repository — Pure Data Layer
+ *
+ * Flat select('*') against call_recordings table only.
+ * NO joins, NO HTTP errors, NO business logic.
+ * Returns null on not-found — service layer decides what to do.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CallRecordingListParams } from './types';
+import { CallRecordingListParams, CreateCallRecordingInput, UpdateCallRecordingInput } from './types';
+
+const SORTABLE_FIELDS = ['created_at', 'started_at', 'recording_status'];
 
 export class CallRecordingRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  async list(params: CallRecordingListParams) {
-    const { page = 1, limit = 25, call_id, recording_status } = params;
+  async findAll(
+    params: CallRecordingListParams
+  ): Promise<{ data: any[]; total: number }> {
+    const page = params.page || 1;
+    const limit = Math.min(params.limit || 25, 100);
     const offset = (page - 1) * limit;
 
     let query = this.supabase
       .from('call_recordings')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .select('*', { count: 'exact' });
 
-    if (call_id) query = query.eq('call_id', call_id);
-    if (recording_status) query = query.eq('recording_status', recording_status);
+    if (params.call_id) query = query.eq('call_id', params.call_id);
+    if (params.recording_status) query = query.eq('recording_status', params.recording_status);
 
-    const { data, error, count } = await query;
+    const sortBy = SORTABLE_FIELDS.includes(params.sort_by || '') ? params.sort_by! : 'created_at';
+    const ascending = params.sort_order === 'asc';
+    query = query.order(sortBy, { ascending });
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, count, error } = await query;
     if (error) throw error;
     return { data: data || [], total: count || 0 };
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('call_recordings')
       .select('*')
@@ -37,58 +49,42 @@ export class CallRecordingRepository {
     return data;
   }
 
-  async findReadyRecording(callId: string, recordingId?: string): Promise<string> {
-    if (recordingId) {
-      const { data, error } = await this.supabase
-        .from('call_recordings')
-        .select('blob_url, recording_status')
-        .eq('id', recordingId)
-        .eq('call_id', callId)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data || data.recording_status !== 'ready' || !data.blob_url) {
-        throw Object.assign(new Error('Recording is not available'), { statusCode: 400 });
-      }
-      return data.blob_url;
-    }
-
+  async create(input: CreateCallRecordingInput): Promise<any> {
     const { data, error } = await this.supabase
       .from('call_recordings')
-      .select('blob_url')
-      .eq('call_id', callId)
-      .eq('recording_status', 'ready')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .insert({
+        ...input,
+        recording_status: input.recording_status || 'pending',
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
     if (error) throw error;
-    if (!data?.blob_url) {
-      throw Object.assign(new Error('No ready recording available'), { statusCode: 400 });
+    return data;
+  }
+
+  async update(id: string, updates: UpdateCallRecordingInput): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('call_recordings')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
     }
-    return data.blob_url;
+    return data;
   }
 
-  async getCallParticipants(callId: string) {
-    const { data, error } = await this.supabase
-      .from('call_participants')
-      .select('id, call_id, user_id, role, joined_at, left_at')
-      .eq('call_id', callId)
-      .order('created_at', { ascending: true });
+  async delete(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('call_recordings')
+      .delete()
+      .eq('id', id);
 
     if (error) throw error;
-    return data || [];
-  }
-
-  async resolveUserId(clerkUserId: string): Promise<string> {
-    const { data, error } = await this.supabase
-      .from('users')
-      .select('id')
-      .eq('clerk_user_id', clerkUserId)
-      .maybeSingle();
-
-    if (error) throw error;
-    if (!data) throw Object.assign(new Error('User not found'), { statusCode: 404 });
-    return data.id;
   }
 }
