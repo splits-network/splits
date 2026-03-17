@@ -116,7 +116,17 @@ export class CandidateService {
       updated_at: now,
     };
 
-    const candidate = await this.repository.create(record);
+    let candidate;
+    try {
+      candidate = await this.repository.create(record);
+    } catch (err: any) {
+      // Handle race condition: unique constraint on user_id or email violated
+      if (err.code === '23505') {
+        const retry = await this.repository.findByEmail(input.email);
+        if (retry) return { candidate: retry, meta: { existing: true } };
+      }
+      throw err;
+    }
 
     if (candidate.user_id) {
       await this.repository.createUserRole(candidate.user_id, candidate.id);

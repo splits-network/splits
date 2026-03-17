@@ -92,6 +92,8 @@ export class CandidateRepository {
       .from('candidates')
       .select('*, user:users!user_id(id, email, name, clerk_user_id)')
       .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (error) throw error;
@@ -102,7 +104,9 @@ export class CandidateRepository {
     const { data, error } = await this.supabase
       .from('candidates')
       .select('*')
-      .eq('email', email)
+      .ilike('email', email)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (error) throw error;
