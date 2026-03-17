@@ -62,7 +62,7 @@ export function usePresence(
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get("/chat/presence", {
+            const response: any = await client.get("/presence/views/batch-status", {
                 params: { userIds: normalizedIds.join(",") },
             });
             const data = (response?.data || []) as Array<{
