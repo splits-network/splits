@@ -24,9 +24,8 @@ export class ConnectionService {
     async getAll(
         params: ConnectionListParams,
         clerkUserId: string,
-        headers?: Record<string, unknown>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const { data, total } = await this.repository.findAllForUser(
             clerkUserId,
             params,
@@ -47,9 +46,8 @@ export class ConnectionService {
     async getById(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, unknown>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const connection = await this.repository.findById(id);
         if (!connection) throw new NotFoundError("Connection", id);
         if (connection.clerk_user_id !== clerkUserId) {
@@ -63,9 +61,8 @@ export class ConnectionService {
     async delete(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, unknown>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError("Connection", id);
         if (existing.clerk_user_id !== clerkUserId) {

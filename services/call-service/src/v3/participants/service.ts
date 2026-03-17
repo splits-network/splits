@@ -25,9 +25,8 @@ export class ParticipantService {
         callId: string,
         params: ParticipantListParams,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const { data, total } = await this.repository.findAllForCall(
             callId,
             params,
@@ -48,9 +47,8 @@ export class ParticipantService {
     async getById(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const participant = await this.repository.findById(id);
         if (!participant) throw new NotFoundError("Participant", id);
         return participant;
@@ -60,9 +58,8 @@ export class ParticipantService {
         callId: string,
         input: AddParticipantInput,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
 
         const resolvedUserId = await this.repository.resolveUserId(
             input.user_id,
@@ -93,9 +90,8 @@ export class ParticipantService {
         callId: string,
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const existing = await this.repository.findById(id);
         if (!existing || existing.call_id !== callId) {
             throw new NotFoundError("Participant", id);

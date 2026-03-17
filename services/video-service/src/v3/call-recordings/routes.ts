@@ -80,7 +80,6 @@ export function registerCallRecordingRoutes(
             const result = await service.getAll(
                 request.query as CallRecordingListParams,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: result.data,
@@ -102,7 +101,6 @@ export function registerCallRecordingRoutes(
             const data = await service.getById(
                 id,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -120,7 +118,6 @@ export function registerCallRecordingRoutes(
             const data = await service.create(
                 request.body as CreateCallRecordingInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.code(201).send({ data });
         },
@@ -140,7 +137,6 @@ export function registerCallRecordingRoutes(
                 id,
                 request.body as UpdateCallRecordingInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -156,7 +152,7 @@ export function registerCallRecordingRoutes(
             const clerkUserId = request.headers["x-clerk-user-id"] as string;
             if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
             const { id } = request.params as { id: string };
-            await service.delete(id, clerkUserId, request.headers);
+            await service.delete(id, clerkUserId);
             return reply.send({
                 data: { message: "Call recording deleted successfully" },
             });

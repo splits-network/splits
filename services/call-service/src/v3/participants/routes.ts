@@ -52,7 +52,6 @@ export function registerParticipantRoutes(
                 callId,
                 request.query as ParticipantListParams,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: result.data,
@@ -83,7 +82,6 @@ export function registerParticipantRoutes(
             const data = await service.getById(
                 id,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -112,7 +110,6 @@ export function registerParticipantRoutes(
                 callId,
                 request.body as AddParticipantInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.code(201).send({ data });
         },
@@ -140,7 +137,7 @@ export function registerParticipantRoutes(
                 callId: string;
                 id: string;
             };
-            await service.delete(callId, id, clerkUserId, request.headers);
+            await service.delete(callId, id, clerkUserId);
             return reply.send({
                 data: { message: "Participant removed successfully" },
             });

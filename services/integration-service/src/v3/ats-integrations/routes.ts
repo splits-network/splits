@@ -50,7 +50,6 @@ export function registerATSIntegrationRoutes(
             const result = await service.getAll(
                 request.query as ATSListParams,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: result.data,
@@ -81,7 +80,6 @@ export function registerATSIntegrationRoutes(
             const data = await service.getById(
                 id,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -108,7 +106,6 @@ export function registerATSIntegrationRoutes(
             const data = await service.create(
                 request.body as CreateATSInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.code(201).send({ data });
         },
@@ -137,7 +134,6 @@ export function registerATSIntegrationRoutes(
                 id,
                 request.body as UpdateATSInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -162,7 +158,7 @@ export function registerATSIntegrationRoutes(
                     });
             }
             const { id } = request.params as { id: string };
-            await service.delete(id, clerkUserId, request.headers);
+            await service.delete(id, clerkUserId);
             return reply.send({
                 data: { message: "ATS integration disconnected successfully" },
             });

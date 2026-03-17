@@ -22,9 +22,8 @@ export class StatsService {
         clerkUserId: string,
         entityType?: string,
         entityId?: string,
-        headers?: Record<string, any>,
     ): Promise<CallStats> {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+        const context = await this.accessResolver.resolve(clerkUserId);
 
         const resolvedUserId = context.identityUserId;
         if (!resolvedUserId)

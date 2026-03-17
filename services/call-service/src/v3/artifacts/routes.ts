@@ -38,7 +38,7 @@ export function registerArtifactRoutes(
                     },
                 });
         }
-        const data = await service.listTags(clerkUserId, request.headers);
+        const data = await service.listTags(clerkUserId);
         return reply.send({ data });
     });
 
@@ -65,7 +65,6 @@ export function registerArtifactRoutes(
                 callId,
                 request.query as ArtifactListParams,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: result.data,
@@ -97,7 +96,6 @@ export function registerArtifactRoutes(
                 callId,
                 request.body as AddEntityLinkInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.code(201).send({ data });
         },
@@ -129,7 +127,6 @@ export function registerArtifactRoutes(
                 callId,
                 id,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: { message: "Entity link removed successfully" },

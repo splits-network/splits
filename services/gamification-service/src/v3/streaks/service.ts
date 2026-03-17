@@ -21,9 +21,8 @@ export class StreakService {
     async getAll(
         params: StreakListParams,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const { data, total } = await this.repository.findAll(params);
         const page = params.page || 1;
         const limit = Math.min(params.limit || 25, 100);
@@ -41,9 +40,8 @@ export class StreakService {
     async getById(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const streak = await this.repository.findById(id);
         if (!streak) throw new NotFoundError("Streak", id);
         return streak;

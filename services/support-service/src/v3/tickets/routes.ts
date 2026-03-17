@@ -112,7 +112,6 @@ export function registerTicketRoutes(
             const data = await service.create(
                 request.body as CreateTicketInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.code(201).send({ data });
         },

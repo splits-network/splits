@@ -83,7 +83,6 @@ export function registerSupportConversationRoutes(
                 await service.linkSession(
                     ctx.sessionId,
                     ctx.clerkUserId,
-                    request.headers,
                 );
             }
 

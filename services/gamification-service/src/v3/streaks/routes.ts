@@ -32,7 +32,6 @@ export function registerStreakRoutes(
             const result = await service.getAll(
                 request.query as StreakListParams,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: result.data,
@@ -58,7 +57,6 @@ export function registerStreakRoutes(
             const data = await service.getById(
                 (request.params as { id: string }).id,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },

@@ -32,7 +32,7 @@ export function registerNotificationRoutes(
         if (!clerkUserId) {
             return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
         }
-        const result = await service.markAllAsRead(clerkUserId, request.headers);
+        const result = await service.markAllAsRead(clerkUserId);
         return reply.send({ data: result });
     });
 
@@ -42,7 +42,7 @@ export function registerNotificationRoutes(
         if (!clerkUserId) {
             return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
         }
-        const result = await service.getUnreadCount(clerkUserId, request.headers);
+        const result = await service.getUnreadCount(clerkUserId);
         return reply.send({ data: result });
     });
 
@@ -52,7 +52,7 @@ export function registerNotificationRoutes(
         if (!clerkUserId) {
             return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
         }
-        const result = await service.getCountsByCategory(clerkUserId, request.headers);
+        const result = await service.getCountsByCategory(clerkUserId);
         return reply.send({ data: result });
     });
 
@@ -64,7 +64,7 @@ export function registerNotificationRoutes(
         if (!clerkUserId) {
             return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
         }
-        const result = await service.getAll(request.query as NotificationListParams, clerkUserId, request.headers);
+        const result = await service.getAll(request.query as NotificationListParams, clerkUserId);
         return reply.send({ data: result.data, pagination: result.pagination });
     });
 
@@ -77,7 +77,7 @@ export function registerNotificationRoutes(
             return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
         }
         const { id } = request.params as { id: string };
-        const data = await service.getById(id, clerkUserId, request.headers);
+        const data = await service.getById(id, clerkUserId);
         return reply.send({ data });
     });
 
@@ -90,7 +90,7 @@ export function registerNotificationRoutes(
             return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
         }
         const { id } = request.params as { id: string };
-        const data = await service.update(id, request.body as NotificationUpdateInput, clerkUserId, request.headers);
+        const data = await service.update(id, request.body as NotificationUpdateInput, clerkUserId);
         return reply.send({ data });
     });
 
@@ -103,7 +103,7 @@ export function registerNotificationRoutes(
             return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
         }
         const { id } = request.params as { id: string };
-        await service.dismiss(id, clerkUserId, request.headers);
+        await service.dismiss(id, clerkUserId);
         return reply.send({ data: { message: 'Notification dismissed successfully' } });
     });
 }

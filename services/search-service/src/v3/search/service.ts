@@ -20,9 +20,8 @@ export class SearchService {
     async search(
         clerkUserId: string,
         params: SearchParams,
-        headers?: Record<string, unknown>,
     ) {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+        const context = await this.accessResolver.resolve(clerkUserId);
         const mode = params.mode || "typeahead";
         const filters = params.filters ? JSON.parse(params.filters) : undefined;
 

@@ -24,9 +24,8 @@ export class CallService {
     async getAll(
         params: CallListParams,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const userId = await this.repository.resolveUserId(clerkUserId);
         if (!userId) throw new BadRequestError("Could not resolve user");
         const { data, total } = await this.repository.findAll(params, userId);
@@ -46,9 +45,8 @@ export class CallService {
     async getById(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const call = await this.repository.findById(id);
         if (!call) throw new NotFoundError("Call", id);
         return call;
@@ -57,7 +55,6 @@ export class CallService {
     async create(
         input: CreateCallInput,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
         const resolvedUserId = await this.repository.resolveUserId(clerkUserId);
         if (!resolvedUserId)
@@ -118,9 +115,8 @@ export class CallService {
         id: string,
         input: UpdateCallInput,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError("Call", id);
 
@@ -144,9 +140,8 @@ export class CallService {
     async delete(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError("Call", id);
         await this.repository.softDelete(id);

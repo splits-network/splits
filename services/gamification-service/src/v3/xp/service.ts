@@ -21,9 +21,8 @@ export class XpService {
     async getAll(
         params: XpListParams,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const { data, total } = await this.repository.findAll(params);
         const page = params.page || 1;
         const limit = Math.min(params.limit || 25, 100);
@@ -41,9 +40,8 @@ export class XpService {
     async getById(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const entry = await this.repository.findById(id);
         if (!entry) throw new NotFoundError("XpEntry", id);
         return entry;

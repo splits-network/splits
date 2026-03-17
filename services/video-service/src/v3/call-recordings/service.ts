@@ -32,9 +32,8 @@ export class CallRecordingService {
     async getAll(
         params: CallRecordingListParams,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
 
         const { data, total } = await this.repository.findAll(params);
 
@@ -54,9 +53,8 @@ export class CallRecordingService {
     async getById(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
 
         const recording = await this.repository.findById(id);
         if (!recording) throw new NotFoundError("CallRecording", id);
@@ -66,9 +64,8 @@ export class CallRecordingService {
     async create(
         input: CreateCallRecordingInput,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+        const context = await this.accessResolver.resolve(clerkUserId);
 
         const recording = await this.repository.create(input);
 
@@ -89,9 +86,8 @@ export class CallRecordingService {
         id: string,
         input: UpdateCallRecordingInput,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+        const context = await this.accessResolver.resolve(clerkUserId);
 
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError("CallRecording", id);
@@ -116,9 +112,8 @@ export class CallRecordingService {
     async delete(
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+        const context = await this.accessResolver.resolve(clerkUserId);
 
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError("CallRecording", id);

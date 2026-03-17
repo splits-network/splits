@@ -33,7 +33,6 @@ export function registerSearchRoutes(
             const result = await service.search(
                 clerkUserId,
                 request.query as SearchParams,
-                request.headers,
             );
             return reply.send({ data: result });
         },

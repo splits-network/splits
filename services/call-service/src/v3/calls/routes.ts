@@ -65,7 +65,6 @@ export function registerCallRoutes(
             const result = await service.getAll(
                 params,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: result.data,
@@ -96,7 +95,6 @@ export function registerCallRoutes(
             const data = await service.getById(
                 id,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -123,7 +121,6 @@ export function registerCallRoutes(
             const data = await service.create(
                 request.body as CreateCallInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.code(201).send({ data });
         },
@@ -152,7 +149,6 @@ export function registerCallRoutes(
                 id,
                 request.body as UpdateCallInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -177,7 +173,7 @@ export function registerCallRoutes(
                     });
             }
             const { id } = request.params as { id: string };
-            await service.delete(id, clerkUserId, request.headers);
+            await service.delete(id, clerkUserId);
             return reply.send({
                 data: { message: "Call deleted successfully" },
             });

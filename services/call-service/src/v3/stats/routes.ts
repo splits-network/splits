@@ -39,7 +39,6 @@ export function registerStatsRoutes(
                 clerkUserId,
                 query.entity_type,
                 query.entity_id,
-                request.headers,
             );
             return reply.send({ data });
         },

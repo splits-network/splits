@@ -25,9 +25,8 @@ export class ArtifactService {
         callId: string,
         params: ArtifactListParams,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const { data, total } = await this.repository.findEntityLinks(
             callId,
             params,
@@ -49,9 +48,8 @@ export class ArtifactService {
         callId: string,
         input: AddEntityLinkInput,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const link = await this.repository.createEntityLink(callId, input);
 
         await this.eventPublisher?.publish(
@@ -72,9 +70,8 @@ export class ArtifactService {
         callId: string,
         id: string,
         clerkUserId: string,
-        headers?: Record<string, any>,
     ) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+        await this.accessResolver.resolve(clerkUserId);
         const existing = await this.repository.findEntityLinkById(id);
         if (!existing || existing.call_id !== callId) {
             throw new NotFoundError("EntityLink", id);
@@ -82,8 +79,8 @@ export class ArtifactService {
         await this.repository.deleteEntityLink(id);
     }
 
-    async listTags(clerkUserId: string, headers?: Record<string, any>) {
-        await this.accessResolver.resolve(clerkUserId, headers);
+    async listTags(clerkUserId: string) {
+        await this.accessResolver.resolve(clerkUserId);
         return this.repository.listTags();
     }
 }

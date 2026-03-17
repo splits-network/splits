@@ -23,16 +23,16 @@ export class NotificationService {
         this.accessResolver = new AccessContextResolver(supabase);
     }
 
-    private async resolveUserId(clerkUserId: string, headers?: Record<string, any>): Promise<string> {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+    private async resolveUserId(clerkUserId: string): Promise<string> {
+        const context = await this.accessResolver.resolve(clerkUserId);
         if (!context.identityUserId) {
             throw new BadRequestError('User identity not found');
         }
         return context.identityUserId;
     }
 
-    async getAll(params: NotificationListParams, clerkUserId: string, headers?: Record<string, any>) {
-        const userId = await this.resolveUserId(clerkUserId, headers);
+    async getAll(params: NotificationListParams, clerkUserId: string) {
+        const userId = await this.resolveUserId(clerkUserId);
         const { data, total } = await this.repository.findAll(params, userId);
         const page = params.page || 1;
         const limit = Math.min(params.limit || 25, 100);
@@ -42,8 +42,8 @@ export class NotificationService {
         };
     }
 
-    async getById(id: string, clerkUserId: string, headers?: Record<string, any>) {
-        const userId = await this.resolveUserId(clerkUserId, headers);
+    async getById(id: string, clerkUserId: string) {
+        const userId = await this.resolveUserId(clerkUserId);
         const notification = await this.repository.findById(id);
         if (!notification) throw new NotFoundError('Notification', id);
         if (notification.recipient_user_id !== userId) {
@@ -52,8 +52,8 @@ export class NotificationService {
         return notification;
     }
 
-    async update(id: string, input: NotificationUpdateInput, clerkUserId: string, headers?: Record<string, any>) {
-        const userId = await this.resolveUserId(clerkUserId, headers);
+    async update(id: string, input: NotificationUpdateInput, clerkUserId: string) {
+        const userId = await this.resolveUserId(clerkUserId);
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError('Notification', id);
         if (existing.recipient_user_id !== userId) {
@@ -62,8 +62,8 @@ export class NotificationService {
         return this.repository.update(id, input);
     }
 
-    async dismiss(id: string, clerkUserId: string, headers?: Record<string, any>) {
-        const userId = await this.resolveUserId(clerkUserId, headers);
+    async dismiss(id: string, clerkUserId: string) {
+        const userId = await this.resolveUserId(clerkUserId);
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError('Notification', id);
         if (existing.recipient_user_id !== userId) {
@@ -72,20 +72,20 @@ export class NotificationService {
         await this.repository.softDelete(id);
     }
 
-    async markAllAsRead(clerkUserId: string, headers?: Record<string, any>) {
-        const userId = await this.resolveUserId(clerkUserId, headers);
+    async markAllAsRead(clerkUserId: string) {
+        const userId = await this.resolveUserId(clerkUserId);
         const count = await this.repository.markAllAsRead(userId);
         return { marked: count };
     }
 
-    async getUnreadCount(clerkUserId: string, headers?: Record<string, any>) {
-        const userId = await this.resolveUserId(clerkUserId, headers);
+    async getUnreadCount(clerkUserId: string) {
+        const userId = await this.resolveUserId(clerkUserId);
         const count = await this.repository.countUnread(userId);
         return { unread: count };
     }
 
-    async getCountsByCategory(clerkUserId: string, headers?: Record<string, any>) {
-        const userId = await this.resolveUserId(clerkUserId, headers);
+    async getCountsByCategory(clerkUserId: string) {
+        const userId = await this.resolveUserId(clerkUserId);
         return this.repository.countUnreadByCategory(userId);
     }
 }

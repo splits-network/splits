@@ -55,7 +55,6 @@ export function registerConnectionRoutes(
             const result = await service.getAll(
                 request.query as ConnectionListParams,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: result.data,
@@ -86,7 +85,6 @@ export function registerConnectionRoutes(
             const data = await service.getById(
                 id,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -111,7 +109,7 @@ export function registerConnectionRoutes(
                     });
             }
             const { id } = request.params as { id: string };
-            await service.delete(id, clerkUserId, request.headers);
+            await service.delete(id, clerkUserId);
             return reply.send({
                 data: { message: "Connection disconnected successfully" },
             });

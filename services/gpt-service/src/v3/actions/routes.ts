@@ -67,7 +67,6 @@ export function registerGptActionRoutes(
         const data = await service.getApplications(
             clerkUserId,
             query.include_inactive === "true",
-            request.headers,
         );
         return reply.send({ data });
     });

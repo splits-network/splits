@@ -49,9 +49,8 @@ export class GptActionsService {
     async getApplications(
         clerkUserId: string,
         includeInactive: boolean = false,
-        headers?: Record<string, unknown>,
     ) {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+        const context = await this.accessResolver.resolve(clerkUserId);
         if (!context.candidateId)
             throw new ForbiddenError("Candidate profile not found");
         return this.repository.getApplicationsByCandidate(
