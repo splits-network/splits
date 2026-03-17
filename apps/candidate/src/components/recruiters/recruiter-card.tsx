@@ -72,7 +72,7 @@ export function RecruiterCard({ relationship, showActions = true, onTerminate }:
                             <h3 className="font-semibold text-lg truncate flex items-center gap-2">
                                 {relationship.recruiter_name}
                                 {recruiterLevel && (
-                                    <BaselLevelIndicator level={recruiterLevel.current_level} title={recruiterLevel.title} totalXp={recruiterLevel.total_xp} />
+                                    <BaselLevelIndicator level={recruiterLevel.current_level} title={recruiterLevel.title} totalXp={recruiterLevel.total_xp} xpToNextLevel={recruiterLevel.xp_to_next_level} />
                                 )}
                             </h3>
                             <p className="text-sm text-base-content/70 truncate">

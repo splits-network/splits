@@ -241,6 +241,7 @@ export {
     semanticRadio,
     semanticCheckbox,
     semanticChip,
+    getTierColor,
 } from './utils/colors';
 
 // Application stage display

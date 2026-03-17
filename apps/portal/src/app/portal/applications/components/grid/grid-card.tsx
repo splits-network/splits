@@ -249,7 +249,7 @@ export function GridCard({
                         size="xs"
                     />
                     {companyLevel && (
-                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
                     )}
                     <span className="text-sm font-semibold text-base-content truncate">
                         {company}

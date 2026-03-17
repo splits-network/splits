@@ -12,4 +12,5 @@ export {
     semanticRadio,
     semanticCheckbox,
     semanticChip,
+    getTierColor,
 } from './colors';

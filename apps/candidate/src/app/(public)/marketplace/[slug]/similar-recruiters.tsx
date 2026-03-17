@@ -108,7 +108,7 @@ export default function SimilarRecruiters({
                                     <p className="text-sm font-bold truncate flex items-center gap-1.5">
                                         {name}
                                         {getLevel(r.id) && (
-                                            <BaselLevelIndicator level={getLevel(r.id)!.current_level} title={getLevel(r.id)!.title} totalXp={getLevel(r.id)!.total_xp} />
+                                            <BaselLevelIndicator level={getLevel(r.id)!.current_level} title={getLevel(r.id)!.title} totalXp={getLevel(r.id)!.total_xp} xpToNextLevel={getLevel(r.id)!.xp_to_next_level} />
                                         )}
                                     </p>
                                     <p className="text-sm text-base-content/50 truncate">

@@ -36,7 +36,7 @@ export default function SplitItem({
                     </div>
                     <h3 className="font-bold text-sm tracking-tight truncate">
                         {name}
-                        {level && <span className="ml-1.5 inline-block align-middle"><BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} /></span>}
+                        {level && <span className="ml-1.5 inline-block align-middle"><BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} xpToNextLevel={level.xp_to_next_level} /></span>}
                     </h3>
                 </div>
                 {recruiter.reputation_score && (

@@ -361,6 +361,7 @@ export default function RecruiterProfileClient({
                                             level={level.current_level}
                                             title={level.title}
                                             totalXp={level.total_xp}
+                                            xpToNextLevel={level.xp_to_next_level}
                                         />
                                     )}
                                     {recruiter.location && (

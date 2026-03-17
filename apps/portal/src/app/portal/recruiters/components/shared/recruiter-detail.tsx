@@ -153,7 +153,7 @@ function HeroHeader({
                 >
                     {level && (
                         <div className="flex items-center gap-2.5 px-3 py-4">
-                            <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />
+                            <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} xpToNextLevel={level.xp_to_next_level} />
                         </div>
                     )}
                     {!level && (

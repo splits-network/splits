@@ -62,7 +62,7 @@ export function LeaderboardList({ entries, myEntityId, loading, levelMap }: Lead
                                 {levelMap?.get(entry.entity_id) && (
                                     <div>
                                         <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-1">Level</p>
-                                        <BaselLevelIndicator level={levelMap.get(entry.entity_id)!.current_level} title={levelMap.get(entry.entity_id)!.title} totalXp={levelMap.get(entry.entity_id)!.total_xp} />
+                                        <BaselLevelIndicator level={levelMap.get(entry.entity_id)!.current_level} title={levelMap.get(entry.entity_id)!.title} totalXp={levelMap.get(entry.entity_id)!.total_xp} xpToNextLevel={levelMap.get(entry.entity_id)!.xp_to_next_level} />
                                     </div>
                                 )}
                                 {entry.metadata?.role && (

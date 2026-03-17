@@ -53,7 +53,7 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {name}
                     </h4>
-                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />}
+                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} xpToNextLevel={level.xp_to_next_level} />}
                     {recruiter.plan_tier && <PlanBadge tier={recruiter.plan_tier as PlanTier} />}
                 </div>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">

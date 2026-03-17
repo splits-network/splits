@@ -18,7 +18,7 @@ const img = {
 /* ─── Data ───────────────────────────────────────────────────────────────── */
 
 const stats = [
-    { value: "75/25", label: "Recruiter Split" },
+    { value: "100%", label: "Recruiter Split" },
     { value: "48hrs", label: "Avg. Response" },
     { value: "100%", label: "Fee Transparency" },
     { value: "$0", label: "Upfront Cost" },

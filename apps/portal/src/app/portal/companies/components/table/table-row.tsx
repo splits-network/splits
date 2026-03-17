@@ -75,7 +75,7 @@ export function TableRow({
                 <td className="px-4 py-3">
                     <span className="font-bold text-sm text-base-content inline-flex items-center gap-1.5">
                         {name}
-                        {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />}
+                        {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} xpToNextLevel={level.xp_to_next_level} />}
                     </span>
                 </td>
 

@@ -55,14 +55,8 @@ export function LeaderboardYourStats({ myRank, level, period, metric }: Leaderbo
                 <span className="text-5xl font-black text-primary">
                     #{myRank.rank}
                 </span>
-                {level && <LevelBadge level={level} size="sm" />}
+                {level && <LevelBadge level={level} size="md" />}
             </div>
-
-            {level && (
-                <p className="text-sm font-bold text-base-content/60 mt-1">
-                    {level.title}
-                </p>
-            )}
 
             <p className="text-sm font-bold text-base-content/60 mt-3">
                 {myRank.score.toLocaleString()} {metricLabel}

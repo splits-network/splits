@@ -73,7 +73,7 @@ export function SplitItem({
                             onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
                         />
                     )}
-                    {level && <span className="ml-1 inline-block align-middle"><BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} /></span>}
+                    {level && <span className="ml-1 inline-block align-middle"><BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} xpToNextLevel={level.xp_to_next_level} /></span>}
                     {acct && (
                         <span
                             className="ml-1 inline-block align-middle text-error"

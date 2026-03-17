@@ -17,6 +17,10 @@ export interface AccessContext {
  * AccessContextResolver - Reusable class for services
  * Initialize once with Supabase client, then call resolve() as needed
  *
+ * Supports two resolution modes:
+ * 1. From header: Read pre-resolved context from x-access-context header (API Gateway mode)
+ * 2. From database: Query Supabase directly (legacy mode)
+ *
  * @example
  * ```typescript
  * export class JobServiceV2 {
@@ -26,8 +30,9 @@ export interface AccessContext {
  *     this.accessResolver = new AccessContextResolver(supabase);
  *   }
  *
- *   async createJob(clerkUserId: string) {
- *     const context = await this.accessResolver.resolve(clerkUserId);
+ *   // In route handler - try header first, fallback to database
+ *   async createJob(clerkUserId: string, request?: { headers?: Record<string, any> }) {
+ *     const context = await this.accessResolver.resolve(clerkUserId, request?.headers);
  *     // Use context.identityUserId, context.roles, etc.
  *   }
  * }
@@ -38,9 +43,11 @@ export class AccessContextResolver {
 
     /**
      * Resolve access context for a Clerk user ID
+     * @param clerkUserId - Clerk user ID
+     * @param headers - Optional request headers (for header-based resolution)
      */
-    async resolve(clerkUserId?: string): Promise<AccessContext> {
-        return resolveAccessContext(this.supabase, clerkUserId);
+    async resolve(clerkUserId?: string, headers?: Record<string, any>): Promise<AccessContext> {
+        return resolveAccessContext(this.supabase, clerkUserId, headers);
     }
 }
 
@@ -59,13 +66,46 @@ const EMPTY_CONTEXT: AccessContext = {
 
 /**
  * Resolve role/access context starting from the Clerk user ID.
+ * 
+ * Supports two resolution modes:
+ * 1. Header mode: Read pre-resolved context from x-access-context header (faster, preferred)
+ * 2. Database mode: Query Supabase directly (fallback for direct service access)
+ * 
+ * @param supabase - Supabase client (only used if header resolution fails)
+ * @param clerkUserId - Clerk user ID
+ * @param headers - Optional request headers (for header-based resolution)
+ */
+export async function resolveAccessContext(
+    supabase: SupabaseClient,
+    clerkUserId?: string,
+    headers?: Record<string, any>
+): Promise<AccessContext> {
+    // Try header-based resolution first (API Gateway mode)
+    if (headers && headers['x-access-context']) {
+        try {
+            const headerContext = JSON.parse(headers['x-access-context']) as AccessContext;
+            console.log('Access context resolved from header for user:', clerkUserId);
+            return headerContext;
+        } catch (error) {
+            console.warn('Failed to parse x-access-context header, falling back to database:', error);
+            // Fall through to database resolution
+        }
+    }
+
+    // Fallback to database resolution (direct service access)
+    console.log('Access context resolved from database for user:', clerkUserId);
+    return resolveAccessContextFromDatabase(supabase, clerkUserId);
+}
+
+/**
+ * Internal function: Resolve access context from database
  * Reads from two tables in a single Supabase round-trip:
  * - memberships: org-scoped roles (company_admin, hiring_manager) with organization_id/company_id
  * - user_roles: entity-linked roles (recruiter, candidate) with role_entity_id, and system-level roles (platform_admin) with role_entity_id = NULL
  *
  * Returns an AccessContext with roles, org IDs, company IDs, recruiter/candidate IDs.
  */
-export async function resolveAccessContext(
+async function resolveAccessContextFromDatabase(
     supabase: SupabaseClient,
     clerkUserId?: string
 ): Promise<AccessContext> {

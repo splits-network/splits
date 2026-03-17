@@ -101,7 +101,7 @@ export function GridCard({
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
                 {firmLevel && (
                     <>
-                        <BaselLevelIndicator level={firmLevel.current_level} title={firmLevel.title} totalXp={firmLevel.total_xp} />
+                        <BaselLevelIndicator level={firmLevel.current_level} title={firmLevel.title} totalXp={firmLevel.total_xp} xpToNextLevel={firmLevel.xp_to_next_level} />
                         <span className="text-base-content/20">&middot;</span>
                     </>
                 )}

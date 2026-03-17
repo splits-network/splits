@@ -105,7 +105,7 @@ export default function CandidateMatchCard({
                 <p className="text-sm text-base-content/60 mt-1 truncate flex items-center gap-1.5">
                     <span className="font-semibold">{companyName}</span>
                     {companyLevel && (
-                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
                     )}
                 </p>
                 {job?.location && (
