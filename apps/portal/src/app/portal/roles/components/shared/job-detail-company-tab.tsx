@@ -5,7 +5,6 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { Job } from "../../types";
 import { companyName, companyInitials } from "./helpers";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
 import { CompanyTeamMembers } from "./company-team-members";
 
@@ -112,8 +111,6 @@ function useCompanyData(companyId: string | null | undefined) {
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 export function CompanyTab({ job }: { job: Job }) {
-    const { getLevel } = useGamification();
-    const companyLevel = job.company_id ? getLevel(job.company_id) : undefined;
     const name = companyName(job);
     const { company, members, perks, cultureTags, skills, loading } =
         useCompanyData(job.company_id);
@@ -176,11 +173,6 @@ export function CompanyTab({ job }: { job: Job }) {
                     ) : (
                         <div className="w-14 h-14 flex items-center justify-center border-2 border-base-300 bg-base-200 font-bold text-lg">
                             {companyInitials(name)}
-                        </div>
-                    )}
-                    {companyLevel && (
-                        <div className="absolute -bottom-1 -right-1">
-                            <LevelBadge level={companyLevel} size="sm" />
                         </div>
                     )}
                 </div>

@@ -9,7 +9,6 @@ import {
     EmptyState,
     ErrorState,
 } from "@/hooks/use-standard-list";
-import { useGamification } from "@splits-network/shared-gamification";
 import { ApplicationsAnimator } from "./applications-animator";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import type { Application, ApplicationFilters } from "./types";
@@ -101,17 +100,6 @@ export default function ApplicationsBaselPage() {
         defaultLimit: 25,
         syncToUrl: true,
     });
-
-    const { registerEntities } = useGamification();
-
-    useEffect(() => {
-        const companyIds = applications
-            .map((a) => a.job?.company?.id)
-            .filter((id): id is string => !!id);
-        if (companyIds.length > 0) {
-            registerEntities("company", [...new Set(companyIds)]);
-        }
-    }, [applications, registerEntities]);
 
     const handleSelect = useCallback((application: Application) => {
         setSelectedApplicationId((prev) =>

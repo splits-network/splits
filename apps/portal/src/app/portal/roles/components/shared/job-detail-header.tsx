@@ -13,7 +13,6 @@ import {
 } from "./helpers";
 import { PanelHeader, type PanelHeaderBadge, type PanelStat } from "@splits-network/basel-ui";
 import RoleActionsToolbar from "./actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 
 /* ─── Badge color → DaisyUI class mapping ────────────────────────────────── */
 
@@ -39,11 +38,9 @@ export function JobHeroHeader({
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
-    const { getLevel } = useGamification();
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const level = formatJobLevel(job.job_level);
-    const companyLevel = job.company_id ? getLevel(job.company_id) : undefined;
 
     /* Build header badges */
     const statusColor = statusBadgeColor(job.status);
@@ -84,13 +81,6 @@ export function JobHeroHeader({
                 initials: companyInitials(name),
                 imageUrl: job.company?.logo_url || job.firm?.logo_url || undefined,
             }}
-            avatarOverlay={
-                companyLevel ? (
-                    <div className="absolute -bottom-1 -right-1">
-                        <LevelBadge level={companyLevel} size="sm" />
-                    </div>
-                ) : undefined
-            }
             title={job.title}
             subtitle={name}
             meta={meta}

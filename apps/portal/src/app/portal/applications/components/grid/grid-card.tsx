@@ -21,8 +21,7 @@ import {
 import { getStageDisplay } from "@splits-network/basel-ui";
 import { getAIScoreBadgeColor } from "../shared/status-color";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
-import { useGamification } from "@splits-network/shared-gamification";
-import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar } from "@splits-network/basel-ui";
 
 const PIPELINE_STAGES = [
     "draft",
@@ -85,8 +84,6 @@ export function GridCard({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const { getLevel } = useGamification();
-    const companyLevel = application.job?.company?.id ? getLevel(application.job.company.id) : undefined;
     const firmJob = isFirmJob(application);
     const logoUrl = application.job?.company?.logo_url || application.job?.firm?.logo_url;
     const name = candidateName(application);
@@ -248,9 +245,6 @@ export function GridCard({
                         alt={company}
                         size="xs"
                     />
-                    {companyLevel && (
-                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
-                    )}
                     <span className="text-sm font-semibold text-base-content truncate">
                         {company}
                     </span>

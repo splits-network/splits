@@ -10,7 +10,6 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
-import { useGamification } from "@splits-network/shared-gamification";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Job, UnifiedJobFilters } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
@@ -124,17 +123,6 @@ export default function RolesPage() {
         limitKey: 'roles-per-page',
         syncToUrl: true,
     });
-
-    const { registerEntities } = useGamification();
-
-    useEffect(() => {
-        const companyIds = jobs
-            .map((j) => j.company_id)
-            .filter((id): id is string => !!id);
-        if (companyIds.length > 0) {
-            registerEntities("company", [...new Set(companyIds)]);
-        }
-    }, [jobs, registerEntities]);
 
     const handleSelect = useCallback((job: Job) => {
         setSelectedJobId((prev) => (prev === job.id ? null : job.id));
