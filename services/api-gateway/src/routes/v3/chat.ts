@@ -55,7 +55,10 @@ const chatV3Routes: V3RouteConfig[] = [
   { path: '/chat/attachments/:id/complete', method: 'POST', auth: 'required' },
   { path: '/chat/attachments/:id/download-url', method: 'GET', auth: 'required' },
 
-  // -- Messages (admin) --
+  // -- Messages Actions --
+  { path: '/chat/messages/:id/actions/redact', method: 'POST', auth: 'required' },
+
+  // -- Messages (admin, V2 compat) --
   { path: '/chat/messages/:id', method: 'PATCH', auth: 'required' },
 
   // -- Presence --
