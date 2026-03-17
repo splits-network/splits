@@ -3,9 +3,9 @@
 import Link from "next/link";
 import type { EnrichedMatch } from "@splits-network/shared-types";
 import { getMatchScoreLabel } from "@splits-network/shared-types";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselAvatar, BaselLevelIndicator, BaselBadge } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
 import MatchExplainer from "./match-explainer";
-import { BaselBadge } from "@splits-network/basel-ui";
 
 interface CandidateMatchCardProps {
     match: EnrichedMatch;
@@ -75,23 +75,13 @@ export default function CandidateMatchCard({
 
                 {/* Company avatar + match score */}
                 <div className="flex items-end gap-3">
-                    <div className="relative shrink-0">
-                        {company?.logo_url ? (
-                            <img
-                                src={company.logo_url}
-                                alt={companyName}
-                                className="w-14 h-14 object-contain bg-base-100 border border-base-300 p-1"
-                            />
-                        ) : (
-                            <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center text-lg font-black tracking-tight select-none">
-                                {initials}
-                            </div>
-                        )}
-                        {companyLevel && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={companyLevel} size="sm" />
-                            </div>
-                        )}
+                    <div className="shrink-0">
+                        <BaselAvatar
+                            initials={initials}
+                            src={company?.logo_url}
+                            alt={companyName}
+                            size="lg"
+                        />
                     </div>
                     <div className="min-w-0 overflow-hidden">
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
@@ -112,8 +102,11 @@ export default function CandidateMatchCard({
                 <h3 className="text-lg font-black tracking-tight leading-tight group-hover:text-primary transition-colors truncate">
                     {job?.title || "Open position"}
                 </h3>
-                <p className="text-sm text-base-content/60 mt-1 truncate">
+                <p className="text-sm text-base-content/60 mt-1 truncate flex items-center gap-1.5">
                     <span className="font-semibold">{companyName}</span>
+                    {companyLevel && (
+                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                    )}
                 </p>
                 {job?.location && (
                     <p className="text-sm text-base-content/40 mt-1.5 flex items-center gap-1.5">
@@ -220,23 +213,13 @@ export default function CandidateMatchCard({
             {/* Footer: actions */}
             <div className="mt-auto px-5 py-4">
                 <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative shrink-0">
-                        {company?.logo_url ? (
-                            <img
-                                src={company.logo_url}
-                                alt={companyName}
-                                className="w-9 h-9 object-contain bg-base-200 border border-base-300 p-1"
-                            />
-                        ) : (
-                            <div className="w-9 h-9 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
-                                {initials}
-                            </div>
-                        )}
-                        {companyLevel && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={companyLevel} size="sm" />
-                            </div>
-                        )}
+                    <div className="shrink-0">
+                        <BaselAvatar
+                            initials={initials}
+                            src={company?.logo_url}
+                            alt={companyName}
+                            size="sm"
+                        />
                     </div>
                     <div className="flex-1" />
                     <button

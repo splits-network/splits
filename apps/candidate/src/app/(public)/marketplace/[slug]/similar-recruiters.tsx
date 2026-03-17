@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { getInitials } from "../components/status-color";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
 
 interface SimilarRecruiter {
     id: string;
@@ -96,19 +97,19 @@ export default function SimilarRecruiters({
                     return (
                         <Link key={r.id} href={`/marketplace/${r.slug || r.id}`}>
                             <div className="flex items-center gap-3 p-3 bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer">
-                                <div className="relative shrink-0">
-                                    <div className="w-9 h-9 flex items-center justify-center bg-primary/10 text-primary font-bold text-sm">
-                                        {initials}
-                                    </div>
-                                    {getLevel(r.id) && (
-                                        <div className="absolute -bottom-1 -right-1">
-                                            <LevelBadge level={getLevel(r.id)!} size="sm" />
-                                        </div>
-                                    )}
+                                <div className="shrink-0">
+                                    <BaselAvatar
+                                        initials={initials}
+                                        alt={name}
+                                        size="sm"
+                                    />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold truncate">
+                                    <p className="text-sm font-bold truncate flex items-center gap-1.5">
                                         {name}
+                                        {getLevel(r.id) && (
+                                            <BaselLevelIndicator level={getLevel(r.id)!.current_level} title={getLevel(r.id)!.title} totalXp={getLevel(r.id)!.total_xp} />
+                                        )}
                                     </p>
                                     <p className="text-sm text-base-content/50 truncate">
                                         {r.tagline || "Recruiter"}

@@ -9,8 +9,8 @@ import {
     teamSizeDisplay,
 } from "../shared/helpers";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 
 export function SplitItem({
     firm,
@@ -39,7 +39,7 @@ export function SplitItem({
             <div className="flex items-start justify-between gap-2 mb-1">
                 <h4 className="font-bold text-sm tracking-tight truncate text-base-content flex items-center gap-1.5">
                     {firm.name}
-                    {firmLevel && <LevelBadge level={firmLevel} size="sm" />}
+                    {firmLevel && <BaselLevelIndicator level={firmLevel.current_level} title={firmLevel.title} totalXp={firmLevel.total_xp} />}
                 </h4>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {createdAgo(firm)}

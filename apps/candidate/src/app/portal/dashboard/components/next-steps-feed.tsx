@@ -184,8 +184,13 @@ export default function NextStepsFeed({
 
     if (loading) {
         return (
-            <div className="bg-base-200 p-8 h-full">
-                <div className="h-5 w-32 bg-base-content/10 animate-pulse mb-6" />
+            <div className="h-full">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <div className="h-5 w-32 bg-base-content/10 animate-pulse mb-2" />
+                        <div className="h-3.5 w-48 bg-base-content/5 animate-pulse" />
+                    </div>
+                </div>
                 <div className="space-y-4">
                     {[85, 72, 90, 78].map((w, i) => (
                         <div key={i} className="flex items-center gap-3">
@@ -208,7 +213,7 @@ export default function NextStepsFeed({
     }
 
     return (
-        <div className="bg-base-200 p-8 h-full">
+        <div className="h-full">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h3 className="text-lg font-bold text-base-content">
@@ -229,12 +234,12 @@ export default function NextStepsFeed({
             </div>
 
             {items.length > 0 ? (
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col">
                     {items.map((item) => (
                         <Link
                             key={item.id}
                             href={item.href}
-                            className="flex items-center gap-3 p-3 -mx-3 hover:bg-base-300/60 transition-all duration-150 group border-b border-base-content/5 last:border-0"
+                            className="flex items-center gap-3 py-3 hover:bg-base-content/5 transition-all duration-150 group border-b border-base-content/5 last:border-0"
                         >
                             <div
                                 className={`w-9 h-9 ${item.bgClass} flex items-center justify-center shrink-0`}
@@ -248,7 +253,7 @@ export default function NextStepsFeed({
                                 <div className="text-sm font-semibold text-base-content group-hover:text-primary transition-colors truncate">
                                     {item.title}
                                 </div>
-                                <div className="text-xs text-base-content/40 truncate">
+                                <div className="text-sm text-base-content/50 truncate">
                                     {item.description}
                                 </div>
                             </div>

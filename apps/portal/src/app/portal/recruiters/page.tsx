@@ -234,12 +234,14 @@ function RecruitersContent() {
                                     />
                                 )}
                                 {viewMode === "split" && (
-                                    <SplitView
-                                        recruiters={recruiters}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedRecruiterId}
-                                        onRefresh={refresh}
-                                    />
+                                    <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                        <SplitView
+                                            recruiters={recruiters}
+                                            onSelect={handleSelect}
+                                            selectedId={selectedRecruiterId}
+                                            onRefresh={refresh}
+                                        />
+                                    </div>
                                 )}
                             </>
                         )}

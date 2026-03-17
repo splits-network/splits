@@ -11,8 +11,8 @@ import {
 } from "../shared/helpers";
 import { FirmDetailLoader } from "../shared/firm-detail-loader";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 
 export function TableRow({
     firm,
@@ -54,7 +54,7 @@ export function TableRow({
                 <td className="px-4 py-3">
                     <span className="font-bold text-sm text-base-content inline-flex items-center gap-1.5">
                         {firm.name}
-                        {firmLevel && <LevelBadge level={firmLevel} size="sm" />}
+                        {firmLevel && <BaselLevelIndicator level={firmLevel.current_level} title={firmLevel.title} totalXp={firmLevel.total_xp} />}
                     </span>
                 </td>
 

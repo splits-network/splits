@@ -22,11 +22,10 @@ import RecruiterActionsToolbar from "./actions-toolbar";
 import { usePresenceStatus } from "@/contexts";
 import { Presence } from "@/components/presence";
 import {
-    LevelBadge,
     BadgeGrid,
     useGamification,
 } from "@splits-network/shared-gamification";
-import { BaselTabBar, BaselBadge } from "@splits-network/basel-ui";
+import { BaselTabBar, BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -99,24 +98,13 @@ function HeroHeader({
 
                 {/* Avatar + Identity */}
                 <div className="flex items-end gap-5">
-                    <div className="relative shrink-0">
-                        {recruiter.users?.profile_image_url ? (
-                            <img
-                                src={recruiter.users.profile_image_url}
-                                alt={name}
-                                className="w-20 h-20 object-cover border-2 border-primary"
-                            />
-                        ) : (
-                            <div className="w-20 h-20 bg-primary text-primary-content flex items-center justify-center text-2xl font-black tracking-tight select-none">
-                                {getInitials(name)}
-                            </div>
-                        )}
-                        {level && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={level} size="sm" />
-                            </div>
-                        )}
-                    </div>
+                    <BaselAvatar
+                        initials={getInitials(name)}
+                        src={recruiter.users?.profile_image_url}
+                        alt={name}
+                        size="lg"
+                        presence={presenceStatus}
+                    />
                     <div className="min-w-0 pb-1">
                         {recruiter.tagline && (
                             <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-1 truncate">
@@ -159,10 +147,26 @@ function HeroHeader({
                     </Link>
                 </div>
 
-                {/* Stats strip — always show all 4 */}
+                {/* Stats strip — always show all 4 + level */}
                 <div
-                    className="grid grid-cols-4 divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
+                    className="grid grid-cols-5 divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
                 >
+                    {level && (
+                        <div className="flex items-center gap-2.5 px-3 py-4">
+                            <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />
+                        </div>
+                    )}
+                    {!level && (
+                        <div className="flex items-center gap-2.5 px-3 py-4">
+                            <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10">
+                                <i className="fa-duotone fa-regular fa-trophy text-sm text-base-content/20" />
+                            </div>
+                            <div>
+                                <span className="text-lg font-black leading-none block text-base-content/30">&mdash;</span>
+                                <span className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 leading-none">Level</span>
+                            </div>
+                        </div>
+                    )}
                     {stats.map((stat) => (
                         <div
                             key={stat.label}

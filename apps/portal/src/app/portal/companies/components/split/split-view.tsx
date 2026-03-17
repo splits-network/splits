@@ -1,9 +1,8 @@
 "use client";
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
+import { BaselSplitView } from "@splits-network/basel-ui";
 import { CompanyDetailLoader } from "../shared/company-detail";
-import { companyId, rowId } from "../shared/helpers";
-import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
 
 export function SplitView({
@@ -19,58 +18,44 @@ export function SplitView({
     selectedId: string | null;
     onRefresh?: () => void;
 }) {
-    const isMarketplace = activeTab === "marketplace";
-    const selectedItem = items.find(
-        (item) => rowId(item, isMarketplace) === selectedId,
-    );
+    const getCompanyId = (item: Company | CompanyRelationship): string =>
+        "company_id" in item ? item.company_id : item.id;
 
     return (
-        <div
-            className="flex border-2 border-base-300"
-            style={{ minHeight: 600 }}
-        >
-            {/* Left list -- hidden on mobile when a company is selected */}
-            <div
-                className={`w-full md:w-1/3 border-r border-base-300 overflow-y-auto ${
-                    selectedId ? "hidden md:block" : "block"
-                }`}
-            >
-                {items.map((item) => (
-                    <SplitItem
-                        key={rowId(item, isMarketplace)}
-                        item={item}
-                        activeTab={activeTab}
-                        isSelected={
-                            selectedId === rowId(item, isMarketplace)
-                        }
-                        onSelect={() => onSelect(item)}
-                    />
-                ))}
-            </div>
-
-            {/* Right detail -- MobileDetailOverlay handles mobile portal */}
-            <MobileDetailOverlay
-                isOpen={!!(selectedItem && selectedId)}
-                className="md:w-2/3 w-full bg-base-100"
-            >
-                {selectedItem && selectedId ? (
+        <BaselSplitView
+            items={items}
+            selectedId={selectedId}
+            getItemId={(item) => "company_id" in item ? item.company_id : item.id}
+            estimatedItemHeight={90}
+            renderItem={(item, isSelected) => (
+                <SplitItem
+                    item={item}
+                    activeTab={activeTab}
+                    isSelected={isSelected}
+                    onSelect={() => onSelect(item)}
+                />
+            )}
+            renderDetail={(item) => {
+                const companyId = getCompanyId(item);
+                return (
                     <CompanyDetailLoader
-                        companyId={companyId(selectedItem, isMarketplace)}
-                        onClose={() => onSelect(selectedItem)}
+                        companyId={companyId}
+                        onClose={() => onSelect(item)}
                         onRefresh={onRefresh}
                     />
-                ) : (
-                    <div className="flex-1 flex items-center justify-center p-12">
-                        <div className="text-center">
-                            <div className="w-16 h-16 mx-auto mb-6 bg-primary/10 flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-building text-2xl text-primary" />
-                            </div>
-                            <h3 className="font-black text-xl tracking-tight mb-2">Select a Company</h3>
-                            <p className="text-sm text-base-content/50">Click a company on the left to view their profile</p>
-                        </div>
-                    </div>
-                )}
-            </MobileDetailOverlay>
-        </div>
+                );
+            }}
+            emptyIcon="fa-building"
+            emptyTitle="Select a Company"
+            emptyDescription="Click a company on the left to view their profile"
+            initialListWidth={33}
+            onMobileClose={() => {
+                const selected = items.find((i) => {
+                    const id = "company_id" in i ? i.company_id : i.id;
+                    return id === selectedId;
+                });
+                if (selected) onSelect(selected);
+            }}
+        />
     );
 }

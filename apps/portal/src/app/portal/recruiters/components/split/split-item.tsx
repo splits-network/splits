@@ -3,7 +3,7 @@
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
 import { statusBorder } from "../shared/status-color";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 import {
     recruiterLocation,
     formatStatus,
@@ -13,7 +13,7 @@ import {
     isNew,
 } from "../shared/helpers";
 import RecruiterActionsToolbar from "../shared/actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { useGamification } from "@splits-network/shared-gamification";
 import { PlanBadge } from "@/components/entitlements/plan-badge";
 import type { PlanTier } from "@/contexts/user-profile-context";
 
@@ -53,7 +53,7 @@ export function SplitItem({
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {name}
                     </h4>
-                    {level && <LevelBadge level={level} size="sm" />}
+                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />}
                     {recruiter.plan_tier && <PlanBadge tier={recruiter.plan_tier as PlanTier} />}
                 </div>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">

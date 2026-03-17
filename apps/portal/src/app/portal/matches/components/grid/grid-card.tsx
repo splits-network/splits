@@ -11,8 +11,8 @@ import {
     tierLabel,
     tierBadgeColor,
 } from "../../types";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 
 function companyInitials(match: EnrichedMatch): string {
     const name = companyDisplayName(match);
@@ -69,16 +69,17 @@ export function GridCard({
                 {/* Dual avatars + Name block */}
                 <div className="flex items-start gap-3">
                     <div className="relative shrink-0 mt-0.5 w-14 h-14">
-                        <div className="absolute top-0 left-0 w-10 h-10 bg-secondary text-secondary-content flex items-center justify-center text-sm font-black tracking-tight select-none z-10 border-2 border-base-300">
-                            {candidateInitials(match)}
+                        <div className="absolute top-0 left-0 z-10">
+                            <BaselAvatar
+                                initials={candidateInitials(match)}
+                                size="sm"
+                            />
                         </div>
-                        {candidateLevel && (
-                            <div className="absolute top-6 left-6 z-20">
-                                <LevelBadge level={candidateLevel} size="sm" />
-                            </div>
-                        )}
-                        <div className="absolute bottom-0 right-0 w-10 h-10 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none border-2 border-base-300">
-                            {companyInitials(match)}
+                        <div className="absolute bottom-0 right-0">
+                            <BaselAvatar
+                                initials={companyInitials(match)}
+                                size="sm"
+                            />
                         </div>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -114,6 +115,12 @@ export function GridCard({
 
             {/* Inline metadata: factor indicators */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {candidateLevel && (
+                    <>
+                        <BaselLevelIndicator level={candidateLevel.current_level} title={candidateLevel.title} totalXp={candidateLevel.total_xp} />
+                        <span className="text-base-content/20">&middot;</span>
+                    </>
+                )}
                 {metaItems.map((item, i) => (
                     <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.color} text-xs`} />

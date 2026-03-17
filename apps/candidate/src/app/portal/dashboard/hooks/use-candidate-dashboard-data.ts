@@ -39,6 +39,7 @@ export interface ActiveRecruiter {
     id: string;
     recruiter_name: string;
     recruiter_email: string;
+    recruiter_user_id: string | null;
     status: string;
     relationship_start_date: string;
     relationship_end_date: string;
@@ -86,7 +87,7 @@ export function useCandidateDashboardData() {
                 client.get<ApiResponse<Application[]>>('/applications', {
                     params: { include: 'job,company,recruiter' },
                 }),
-                client.get<ApiResponse<ActiveRecruiter[]>>('/recruiter-candidates'),
+                client.get<ApiResponse<ActiveRecruiter[]>>('/recruiter-candidates/views/list-for-candidate'),
                 client.get<{ data: EnrichedMatch[] }>('/matches', {
                     params: { limit: 5, status: 'active' },
                 }),

@@ -15,6 +15,7 @@ import {
   idParamSchema, tokenParamSchema,
 } from './types';
 import { registerRecruiterCandidateDetailView } from './views/detail.route';
+import { registerListForCandidateView } from './views/list-for-candidate.route';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -74,6 +75,7 @@ export function registerRecruiterCandidateRoutes(
   });
 
   // --- Views (before :id to avoid collision) ---
+  registerListForCandidateView(app, supabase);
   registerRecruiterCandidateDetailView(app, supabase);
 
   // --- Core CRUD ---

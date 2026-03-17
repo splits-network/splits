@@ -7,6 +7,7 @@ import {
     BaselChartCard,
     BaselKpiCard,
     BaselSectionHeading,
+    BaselAvatar,
 } from "@splits-network/basel-ui";
 import { usePresence } from "@/hooks/use-presence";
 import { useUserProfile } from "@/contexts";
@@ -28,6 +29,16 @@ import RecommendationsWidget from "./recommendations-widget";
 import UpcomingCallsWidget from "./upcoming-calls-widget";
 import { useUpcomingCalls } from "../hooks/use-upcoming-calls";
 import { relationshipColor } from "./status-color";
+
+/* Standard section padding — every section uses this */
+const SECTION = "py-8 lg:py-12 px-6 sm:px-8 lg:px-12";
+
+const PERIODS = [
+    { label: "3M", value: 3 },
+    { label: "6M", value: 6 },
+    { label: "1Y", value: 12 },
+    { label: "2Y", value: 24 },
+];
 
 interface CandidateDashboardProps {
     trendPeriod: number;
@@ -74,7 +85,7 @@ export default function CandidateDashboard({
     }, [candidateId]);
 
     const recruiterUserIds = useMemo(
-        () => activeRecruiters.map((r) => r.recruiter_email),
+        () => activeRecruiters.map((r) => r.recruiter_user_id),
         [activeRecruiters],
     );
     const presence = usePresence(recruiterUserIds);
@@ -91,10 +102,11 @@ export default function CandidateDashboard({
     }, [applications]);
 
     const loading = dataLoading;
+    const hasCalls = calls.length > 0 || callsLoading;
 
     return (
-        <div ref={contentRef} className="space-y-0">
-            {/* ── Error Alert ── */}
+        <div ref={contentRef}>
+            {/* ── Banners (thin, no section padding) ── */}
             {dataError && (
                 <div className="bg-error/5 border-l-4 border-error px-6 sm:px-8 lg:px-12 py-4">
                     <div className="container mx-auto flex items-start sm:items-center gap-3">
@@ -111,7 +123,6 @@ export default function CandidateDashboard({
                 </div>
             )}
 
-            {/* ── Pending Invitations Banner ── */}
             {!loading && pendingInvitations.length > 0 && (
                 <div className="bg-primary/5 border-l-4 border-primary px-6 sm:px-8 lg:px-12 py-4">
                     <div className="container mx-auto flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -148,10 +159,8 @@ export default function CandidateDashboard({
                 </div>
             )}
 
-            {/* ── Job Recommendations Banner ── */}
             <RecommendationsWidget variant="banner" />
 
-            {/* ── Urgency Bar ── */}
             {!loading && !profileLoading && (
                 <CandidateUrgencyBar
                     applications={applications}
@@ -164,8 +173,8 @@ export default function CandidateDashboard({
                 />
             )}
 
-            {/* ── KPI Strip ── */}
-            <section className="bg-base-200 py-4 lg:py-6 px-6 sm:px-8 lg:px-12">
+            {/* ─── Section 1: KPIs + Quick Actions (base-200) ─── */}
+            <section className={`bg-base-200 ${SECTION}`}>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                     <BaselKpiCard
                         label="Active Applications"
@@ -177,45 +186,44 @@ export default function CandidateDashboard({
                         label="Response Rate"
                         value={loading ? "--" : `${stats.responseRate}%`}
                         icon="fa-duotone fa-regular fa-chart-line-up"
-                        color="secondary"
+                        color="primary"
                     />
                     <BaselKpiCard
                         label="Interviews"
                         value={loading ? "--" : stats.interviews.toLocaleString()}
                         icon="fa-duotone fa-regular fa-calendar-check"
-                        color="warning"
+                        color="primary"
                     />
                     <BaselKpiCard
                         label="Offers"
                         value={loading ? "--" : stats.offers.toLocaleString()}
                         icon="fa-duotone fa-regular fa-trophy"
-                        color="accent"
+                        color="success"
                     />
                     <BaselKpiCard
                         label="Active Recruiters"
                         value={loading ? "--" : stats.active_relationships.toLocaleString()}
                         icon="fa-duotone fa-regular fa-users"
-                        color="success"
+                        color="primary"
                     />
                     {level ? (
                         <BaselKpiCard
                             label="Level"
                             value={`${level.current_level}`}
                             icon="fa-solid fa-star"
-                            color="info"
+                            color="primary"
                         />
                     ) : (
                         <BaselKpiCard
                             label="Total Apps"
                             value={loading ? "--" : stats.applications.toLocaleString()}
                             icon="fa-duotone fa-regular fa-paper-plane"
-                            color="info"
+                            color="primary"
                         />
                     )}
                 </div>
 
-                {/* Quick actions strip */}
-                <div className="mt-3 border-t border-base-content/5 pt-2">
+                <div className="mt-4 border-t border-base-content/5 pt-3">
                     <QuickActionsGrid
                         profileCompletion={profileCompletion?.percentage || 100}
                         messageCount={unreadMessages}
@@ -225,30 +233,47 @@ export default function CandidateDashboard({
                 </div>
             </section>
 
-            {/* ── Job Recommendations List ── */}
-            <section className="bg-base-100 py-4 lg:py-6 px-6 sm:px-8 lg:px-12">
-                <div className="container mx-auto">
-                    <RecommendationsWidget variant="list" />
+            {/* ─── Section 2: Recruiter + What's Next (base-100) ─── */}
+            <section className={`bg-base-100 ${SECTION}`}>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div className="lg:col-span-5 scroll-reveal fade-up">
+                        <RecruiterCard
+                            activeRecruiters={activeRecruiters}
+                            presence={presence}
+                            loading={loading}
+                        />
+                    </div>
+                    <div className="lg:col-span-7 scroll-reveal fade-up">
+                        <NextStepsFeed
+                            applications={applications}
+                            loading={loading}
+                        />
+                    </div>
                 </div>
             </section>
 
-            {/* ── Match Preview ── */}
-            <MatchPreviewWidget
-                matches={topMatches}
-                loading={loading}
-            />
+            {/* ─── Section 3: Calls + Recommendations (base-200) ─── */}
+            <section className={`bg-base-200 ${SECTION} space-y-8`}>
+                {hasCalls && (
+                    <UpcomingCallsWidget calls={calls} loading={callsLoading} />
+                )}
+                <RecommendationsWidget variant="list" />
+            </section>
 
-            {/* ── Upcoming Calls ── */}
-            {(calls.length > 0 || callsLoading) && (
-                <UpcomingCallsWidget calls={calls} loading={callsLoading} />
-            )}
+            {/* ─── Section 4: Matches (base-100) ─── */}
+            <section className={`bg-base-100 ${SECTION}`}>
+                <MatchPreviewWidget
+                    matches={topMatches}
+                    loading={loading}
+                />
+            </section>
 
-            {/* ── Pipeline + Momentum ── */}
-            <section className="bg-base-100 py-4 lg:py-6 px-6 sm:px-8 lg:px-12 space-y-4">
+            {/* ─── Section 5: Pipeline + Momentum (base-200) ─── */}
+            <section className={`bg-base-200 ${SECTION} space-y-6`}>
                 <BaselSectionHeading
                     kicker="PIPELINE"
                     title="Application Pipeline"
-                    className="section-heading mb-4"
+                    className="section-heading"
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -271,7 +296,7 @@ export default function CandidateDashboard({
                             title="Job Search Momentum"
                             subtitle="Your search health score"
                             icon="fa-duotone fa-regular fa-gauge-high"
-                            accentColor="secondary"
+                            accentColor="primary"
                             compact
                             className="h-full"
                         >
@@ -289,13 +314,31 @@ export default function CandidateDashboard({
                 </div>
             </section>
 
-            {/* ── Analytics Trends ── */}
-            <section className="bg-base-200 py-4 lg:py-6 px-6 sm:px-8 lg:px-12 space-y-4">
-                <BaselSectionHeading
-                    kicker="ANALYTICS"
-                    title="Your activity trends."
-                    className="section-heading mb-4"
-                />
+            {/* ─── Section 6: Analytics (base-100) ─── */}
+            <section className={`bg-base-100 ${SECTION} space-y-6`}>
+                <div className="flex items-end justify-between">
+                    <BaselSectionHeading
+                        kicker="ANALYTICS"
+                        title="Your activity trends"
+                        className="section-heading"
+                    />
+                    <div className="flex gap-1 bg-base-200 p-1">
+                        {PERIODS.map((p) => (
+                            <button
+                                key={p.value}
+                                onClick={() => onTrendPeriodChange(p.value)}
+                                className={`btn btn-sm ${
+                                    trendPeriod === p.value
+                                        ? "btn-primary"
+                                        : "btn-ghost"
+                                }`}
+                                style={{ borderRadius: 0 }}
+                            >
+                                {p.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="scroll-reveal fade-up">
@@ -320,7 +363,7 @@ export default function CandidateDashboard({
                         <BaselChartCard
                             title="Application Status"
                             subtitle={`${stats.activeApplications} active`}
-                            accentColor="accent"
+                            accentColor="primary"
                             compact
                             className="h-full"
                         >
@@ -336,7 +379,7 @@ export default function CandidateDashboard({
                         <BaselChartCard
                             title="Your Activity"
                             subtitle={`${recentActivityCount} last 30 days`}
-                            accentColor="info"
+                            accentColor="primary"
                             compact
                             className="h-full"
                         >
@@ -349,164 +392,185 @@ export default function CandidateDashboard({
                     </div>
                 </div>
             </section>
+        </div>
+    );
+}
 
-            {/* ── What's Next + Recruiter Sidebar ── */}
-            <section className="py-4 lg:py-6 px-6 sm:px-8 lg:px-12 bg-base-100">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                    {/* Left: Feed */}
-                    <div className="lg:col-span-7 scroll-reveal slide-from-left">
-                        <NextStepsFeed
-                            applications={applications}
-                            loading={loading}
-                        />
-                    </div>
+/* ── Recruiter Card ── */
 
-                    {/* Right: Recruiter */}
-                    <div className="lg:col-span-5 scroll-reveal slide-from-right space-y-4">
-                        <div className="bg-base-200 p-4">
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <h3 className="text-base font-bold text-base-content">
-                                        My Recruiter
-                                    </h3>
-                                    <p className="text-sm text-base-content/50">
-                                        Your active connections
-                                    </p>
-                                </div>
-                                <Link href="/portal/recruiters"
-                                    className="btn btn-ghost btn-sm text-primary"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    View all
-                                    <i className="fa-duotone fa-regular fa-arrow-right" />
-                                </Link>
-                            </div>
+type PresenceEntry = { status: "online" | "idle" | "offline"; lastSeenAt: string | null };
 
-                            {loading ? (
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-base-content/10 animate-pulse" />
-                                        <div className="flex-1 space-y-1.5">
-                                            <div className="h-3.5 bg-base-content/10 animate-pulse w-32" />
-                                            <div className="h-2.5 bg-base-content/5 animate-pulse w-20" />
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : activeRecruiters.length > 0 ? (
-                                <div className="space-y-3">
-                                    {activeRecruiters.map((rel) => {
-                                        const formatDate = (d: string) =>
-                                            new Date(d).toLocaleDateString(
-                                                "en-US",
-                                                {
-                                                    month: "short",
-                                                    day: "numeric",
-                                                    year: "numeric",
-                                                },
-                                            );
-                                        const expiresSoon =
-                                            rel.days_until_expiry !==
-                                                undefined &&
-                                            rel.days_until_expiry <= 30;
-                                        const statusClasses = expiresSoon
-                                            ? relationshipColor("expiring")
-                                            : relationshipColor("active");
+interface RecruiterCardProps {
+    activeRecruiters: Array<{
+        id: string;
+        recruiter_name: string;
+        recruiter_email: string;
+        recruiter_user_id: string | null;
+        relationship_start_date: string;
+        days_until_expiry?: number;
+    }>;
+    presence: Record<string, PresenceEntry>;
+    loading: boolean;
+}
 
-                                        return (
-                                            <div
-                                                key={rel.id}
-                                                className="flex items-center gap-3"
-                                            >
-                                                <div className="w-10 h-10 bg-primary/10 flex items-center justify-center shrink-0">
-                                                    <span className="text-sm font-bold text-primary">
-                                                        {rel.recruiter_name
-                                                            .charAt(0)
-                                                            .toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-semibold text-base-content truncate">
-                                                        {rel.recruiter_name}
-                                                    </div>
-                                                    <div className="text-sm text-base-content/40">
-                                                        Since{" "}
-                                                        {formatDate(
-                                                            rel.relationship_start_date,
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <span
-                                                    className={`text-sm font-bold uppercase tracking-wider px-2 py-0.5 ${statusClasses}`}
-                                                >
-                                                    {expiresSoon
-                                                        ? "Expires Soon"
-                                                        : "Active"}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
-                                    <div className="flex gap-2 mt-3">
-                                        <Link
-                                            href="/portal/messages"
-                                            className="btn btn-ghost btn-sm flex-1"
-                                            style={{ borderRadius: 0 }}
-                                        >
-                                            <i className="fa-duotone fa-regular fa-messages" />
-                                            Message
-                                        </Link>
-                                        <Link href="/portal/recruiters"
-                                            className="btn btn-ghost btn-sm flex-1"
-                                            style={{ borderRadius: 0 }}
-                                        >
-                                            <i className="fa-duotone fa-regular fa-clock-rotate-left" />
-                                            History
-                                        </Link>
-                                        <Link
-                                            href="/marketplace"
-                                            className="btn btn-ghost btn-sm flex-1"
-                                            style={{ borderRadius: 0 }}
-                                        >
-                                            <i className="fa-duotone fa-regular fa-store" />
-                                            Browse
-                                        </Link>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-center py-6">
-                                    <div className="w-12 h-12 bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                                        <i className="fa-duotone fa-regular fa-user-tie text-xl text-primary/30" />
-                                    </div>
-                                    <p className="text-sm font-semibold text-base-content/60">
-                                        No active recruiter
-                                    </p>
-                                    <p className="text-sm text-base-content/40 mt-1">
-                                        A recruiter can accelerate your job
-                                        search
-                                    </p>
-                                    <div className="flex gap-2 mt-4 justify-center">
-                                        <Link href="/portal/recruiters"
-                                            className="btn btn-ghost btn-sm"
-                                            style={{ borderRadius: 0 }}
-                                        >
-                                            <i className="fa-duotone fa-regular fa-clock-rotate-left" />
-                                            History
-                                        </Link>
-                                        <Link
-                                            href="/marketplace"
-                                            className="btn btn-primary btn-sm"
-                                            style={{ borderRadius: 0 }}
-                                        >
-                                            <i className="fa-duotone fa-regular fa-store" />
-                                            Browse Marketplace
-                                        </Link>
-                                    </div>
-                                </div>
-                            )}
+function getPresenceLabel(entry?: PresenceEntry): string | null {
+    if (!entry) return null;
+    if (entry.status === "online") return "Online now";
+    if (entry.status === "idle") return "Away";
+    if (entry.lastSeenAt) {
+        const diffMs = Date.now() - new Date(entry.lastSeenAt).getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        if (diffMins < 60) return `Last seen ${diffMins}m ago`;
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return `Last seen ${diffHours}h ago`;
+        const diffDays = Math.floor(diffHours / 24);
+        return `Last seen ${diffDays}d ago`;
+    }
+    return null;
+}
+
+function RecruiterCard({ activeRecruiters, presence, loading }: RecruiterCardProps) {
+    const formatDate = (d: string) =>
+        new Date(d).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        });
+
+    const count = activeRecruiters.length;
+
+    return (
+        <div className="h-full">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-base-content">
+                    My Recruiter
+                </h3>
+                {count > 1 && (
+                    <Link
+                        href="/portal/recruiters"
+                        className="btn btn-ghost btn-sm text-primary"
+                        style={{ borderRadius: 0 }}
+                    >
+                        View all ({count})
+                        <i className="fa-duotone fa-regular fa-arrow-right" />
+                    </Link>
+                )}
+            </div>
+
+            {loading ? (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-base-content/10 animate-pulse" />
+                        <div className="flex-1 space-y-1.5">
+                            <div className="h-4 bg-base-content/10 animate-pulse w-36" />
+                            <div className="h-3 bg-base-content/5 animate-pulse w-24" />
                         </div>
                     </div>
                 </div>
-            </section>
+            ) : count > 0 ? (
+                <div className="space-y-4">
+                    {activeRecruiters.map((rel) => {
+                        const expiresSoon =
+                            rel.days_until_expiry !== undefined &&
+                            rel.days_until_expiry <= 30;
+                        const presenceEntry = rel.recruiter_user_id
+                            ? presence[rel.recruiter_user_id]
+                            : undefined;
+                        const isOnline = presenceEntry?.status === "online";
+                        const presenceLabel = getPresenceLabel(presenceEntry);
 
+                        return (
+                            <div key={rel.id} className="space-y-3">
+                                <div className="flex items-center gap-4">
+                                    {/* Avatar */}
+                                    <div className="shrink-0">
+                                        <BaselAvatar
+                                            initials={rel.recruiter_name.charAt(0).toUpperCase()}
+                                            size="md"
+                                            presence={isOnline ? "online" : presenceEntry?.status || null}
+                                        />
+                                    </div>
+
+                                    {/* Name + presence context */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-base font-bold text-base-content truncate">
+                                            {rel.recruiter_name}
+                                        </div>
+                                        <div className="text-sm text-base-content/60">
+                                            {presenceLabel ? (
+                                                <span className={isOnline ? "text-success font-medium" : ""}>
+                                                    {presenceLabel}
+                                                </span>
+                                            ) : (
+                                                <>Since {formatDate(rel.relationship_start_date)}</>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Status badge */}
+                                    {expiresSoon ? (
+                                        <span className="badge badge-warning badge-sm font-bold uppercase tracking-wider">
+                                            Expires Soon
+                                        </span>
+                                    ) : (
+                                        <span className="badge badge-soft badge-success badge-sm font-bold uppercase tracking-wider">
+                                            Active
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Since date (shown separately when presence replaces it) */}
+                                {presenceLabel && (
+                                    <p className="text-sm text-base-content/50 pl-16">
+                                        Working together since {formatDate(rel.relationship_start_date)}
+                                    </p>
+                                )}
+                            </div>
+                        );
+                    })}
+
+                    {/* Actions */}
+                    <div className="border-t border-base-content/5 pt-4 mt-1 flex flex-col sm:flex-row gap-2">
+                        <Link
+                            href="/portal/messages"
+                            className="btn btn-primary btn-sm flex-1"
+                            style={{ borderRadius: 0 }}
+                        >
+                            <i className="fa-duotone fa-regular fa-messages" />
+                            Message {count === 1 ? activeRecruiters[0].recruiter_name.split(" ")[0] : "Recruiter"}
+                        </Link>
+                        <Link
+                            href="/portal/recruiters"
+                            className="btn btn-outline btn-sm flex-1"
+                            style={{ borderRadius: 0 }}
+                        >
+                            <i className="fa-duotone fa-regular fa-clock-rotate-left" />
+                            Relationship History
+                        </Link>
+                    </div>
+                </div>
+            ) : (
+                <div className="py-6">
+                    <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                        <i className="fa-duotone fa-regular fa-user-tie text-2xl text-primary/40" />
+                    </div>
+                    <p className="text-sm font-bold text-base-content text-center">
+                        You don&apos;t have a recruiter yet
+                    </p>
+                    <p className="text-sm text-base-content/60 mt-1 text-center leading-relaxed">
+                        A recruiter finds roles, preps you for interviews, and
+                        negotiates on your behalf — at no cost to you.
+                    </p>
+                    <Link
+                        href="/marketplace"
+                        className="btn btn-primary btn-sm w-full mt-4"
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-search" />
+                        Find a Recruiter
+                    </Link>
+                </div>
+            )}
         </div>
     );
 }

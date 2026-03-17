@@ -1,7 +1,7 @@
 "use client";
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 import {
     relationshipStatusBadge,
     relationshipTypeBadge,
@@ -17,7 +17,7 @@ import {
     extractRelationship,
 } from "../shared/helpers";
 import { statusBorder } from "../shared/status-color";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { useGamification } from "@splits-network/shared-gamification";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
@@ -63,7 +63,7 @@ export function SplitItem({
             <div className="flex items-center justify-between gap-2">
                 <h4 className="font-bold text-sm tracking-tight truncate text-base-content flex items-center gap-1.5">
                     {name}
-                    {level && <LevelBadge level={level} size="sm" />}
+                    {level && <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />}
                 </h4>
                 <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
                     {addedAgo(item)}

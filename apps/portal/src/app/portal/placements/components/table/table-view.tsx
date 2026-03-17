@@ -3,9 +3,10 @@
 import { Fragment } from "react";
 import type { Placement } from "../../types";
 import { statusColorName } from "../shared/status-color";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar } from "@splits-network/basel-ui";
 import {
     candidateName,
+    candidateInitials,
     jobTitle,
     companyName,
     formatDate,
@@ -76,6 +77,11 @@ export function TableView({
                                     {/* Candidate */}
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
+                                            <BaselAvatar
+                                                initials={candidateInitials(placement)}
+                                                alt={candidateName(placement)}
+                                                size="xs"
+                                            />
                                             {isNew(placement) && (
                                                 <span className="tooltip tooltip-bottom" data-tip="Placed in the last 7 days">
                                                     <i className="fa-duotone fa-regular fa-sparkles text-sm text-warning" />

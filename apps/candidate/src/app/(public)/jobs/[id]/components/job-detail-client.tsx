@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { useScrollReveal } from "@splits-network/basel-ui";
+import { useScrollReveal, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -25,7 +25,6 @@ import {
     type JobRequirement,
 } from "../../types";
 import {
-    LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
 
@@ -254,26 +253,13 @@ export default function JobDetailClient({
 
                         {/* Title + Company */}
                         <div className="flex items-start gap-5 mb-6">
-                            <div className="relative flex-shrink-0">
-                                {job.company?.logo_url ? (
-                                    <img
-                                        src={job.company.logo_url}
-                                        alt={`${companyDisplay} logo`}
-                                        className="w-14 h-14 object-contain"
-                                    />
-                                ) : (
-                                    <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
-                                        {initials}
-                                    </div>
-                                )}
-                                {companyLevel && (
-                                    <div className="absolute -bottom-1 -right-1">
-                                        <LevelBadge
-                                            level={companyLevel}
-                                            size="sm"
-                                        />
-                                    </div>
-                                )}
+                            <div className="flex-shrink-0">
+                                <BaselAvatar
+                                    initials={initials}
+                                    src={job.company?.logo_url}
+                                    alt={`${companyDisplay} logo`}
+                                    size="lg"
+                                />
                             </div>
                             <div>
                                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight">
@@ -281,8 +267,11 @@ export default function JobDetailClient({
                                         {job.title}
                                     </span>
                                 </h1>
-                                <p className="scroll-reveal fade-up detail-meta text-lg text-base-content/60 mt-2">
+                                <p className="scroll-reveal fade-up detail-meta text-lg text-base-content/60 mt-2 flex items-center gap-2">
                                     {companyDisplay}
+                                    {companyLevel && (
+                                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                                    )}
                                 </p>
                             </div>
                         </div>
@@ -593,30 +582,20 @@ export default function JobDetailClient({
                                 Company Info
                             </h3>
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="relative shrink-0">
-                                    {job.company?.logo_url ? (
-                                        <img
-                                            src={job.company.logo_url}
-                                            alt={`${companyDisplay} logo`}
-                                            className="w-12 h-12 object-contain"
-                                        />
-                                    ) : (
-                                        <div className="w-12 h-12 bg-accent text-accent-content flex items-center justify-center font-black text-lg">
-                                            {initials}
-                                        </div>
-                                    )}
-                                    {companyLevel && (
-                                        <div className="absolute -bottom-1 -right-1">
-                                            <LevelBadge
-                                                level={companyLevel}
-                                                size="sm"
-                                            />
-                                        </div>
-                                    )}
+                                <div className="shrink-0">
+                                    <BaselAvatar
+                                        initials={initials}
+                                        src={job.company?.logo_url}
+                                        alt={`${companyDisplay} logo`}
+                                        size="md"
+                                    />
                                 </div>
                                 <div>
-                                    <div className="font-bold">
+                                    <div className="font-bold flex items-center gap-2">
                                         {companyDisplay}
+                                        {companyLevel && (
+                                            <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                                        )}
                                     </div>
                                     {companyIndustry && (
                                         <div className="text-xs text-base-content/50">

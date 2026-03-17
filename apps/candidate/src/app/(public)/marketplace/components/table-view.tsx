@@ -3,7 +3,8 @@
 import Link from "next/link";
 import type { Recruiter } from "../marketplace-client";
 import { getInitials, reputationColor } from "./status-color";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselLevelIndicator } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
 
 interface TableViewProps {
     recruiters: Recruiter[];
@@ -75,7 +76,7 @@ export default function TableView({
                                         <div className="min-w-0">
                                             <p className="font-bold text-sm truncate">
                                                 {name}
-                                                {(() => { const lvl = getLevel(recruiter.id); return lvl ? <span className="ml-1.5 inline-block align-middle"><LevelBadge level={lvl} size="sm" /></span> : null; })()}
+                                                {(() => { const lvl = getLevel(recruiter.id); return lvl ? <span className="ml-1.5 inline-block align-middle"><BaselLevelIndicator level={lvl.current_level} title={lvl.title} totalXp={lvl.total_xp} /></span> : null; })()}
                                             </p>
                                             {recruiter.tagline && (
                                                 <div className="flex gap-1 mt-0.5">

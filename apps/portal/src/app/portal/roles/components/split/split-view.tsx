@@ -1,7 +1,7 @@
 "use client";
 
 import type { Job } from "../../types";
-import { MobileDetailOverlay } from "@/components/standard-lists";
+import { BaselSplitView } from "@splits-network/basel-ui";
 import { DetailLoader } from "../shared/job-detail";
 import { SplitItem } from "./split-item";
 
@@ -18,53 +18,35 @@ export function SplitView({
     onRefresh?: () => void;
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
-    const selectedJob = jobs.find((j) => j.id === selectedId) ?? null;
-
     return (
-        <div
-            className="flex border-2 border-base-300"
-            style={{ minHeight: 600 }}
-        >
-            {/* Left list — hidden on mobile when a job is selected */}
-            <div
-                className={`w-full md:w-1/3 border-r-2 border-base-300 overflow-y-auto ${
-                    selectedId ? "hidden md:block" : "block"
-                }`}
-            >
-                {jobs.map((job) => (
-                    <SplitItem
-                        key={job.id}
-                        job={job}
-                        isSelected={selectedId === job.id}
-                        onSelect={() => onSelect(job)}
-                        onUpdateItem={onUpdateItem}
-                    />
-                ))}
-            </div>
-
-            {/* Right detail — MobileDetailOverlay handles mobile portal */}
-            <MobileDetailOverlay
-                isOpen={!!selectedJob}
-                className="md:w-2/3 w-full bg-base-100"
-            >
-                {selectedJob ? (
-                    <DetailLoader
-                        jobId={selectedJob.id}
-                        onClose={() => onSelect(selectedJob)}
-                        onRefresh={onRefresh}
-                        onUpdateItem={onUpdateItem}
-                    />
-                ) : (
-                    <div className="h-full flex items-center justify-center p-12">
-                        <div className="text-center">
-                            <i className="fa-duotone fa-regular fa-hand-pointer text-5xl text-base-content/30 mb-4" />
-                            <h3 className="font-bold text-base text-base-content/30 tracking-tight">
-                                Select a role to view details
-                            </h3>
-                        </div>
-                    </div>
-                )}
-            </MobileDetailOverlay>
-        </div>
+        <BaselSplitView
+            items={jobs}
+            selectedId={selectedId}
+            getItemId={(j) => j.id}
+            estimatedItemHeight={90}
+            renderItem={(job, isSelected) => (
+                <SplitItem
+                    job={job}
+                    isSelected={isSelected}
+                    onSelect={() => onSelect(job)}
+                    onUpdateItem={onUpdateItem}
+                />
+            )}
+            renderDetail={(job) => (
+                <DetailLoader
+                    jobId={job.id}
+                    onClose={() => onSelect(job)}
+                    onRefresh={onRefresh}
+                    onUpdateItem={onUpdateItem}
+                />
+            )}
+            emptyIcon="fa-hand-pointer"
+            emptyTitle="Select a role to view details"
+            initialListWidth={33}
+            onMobileClose={() => {
+                const selected = jobs.find((j) => j.id === selectedId);
+                if (selected) onSelect(selected);
+            }}
+        />
     );
 }

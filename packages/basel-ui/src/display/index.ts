@@ -72,3 +72,13 @@ export {
     BaselSeparatorLabel,
     type BaselSeparatorLabelProps,
 } from './basel-separator-label';
+export {
+    BaselAvatar,
+    type BaselAvatarProps,
+    type BaselAvatarSize,
+    type BaselPresenceStatus,
+} from './basel-avatar';
+export {
+    BaselLevelIndicator,
+    type BaselLevelIndicatorProps,
+} from './basel-level-indicator';

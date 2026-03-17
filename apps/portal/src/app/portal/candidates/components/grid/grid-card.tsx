@@ -8,7 +8,7 @@ import {
 } from "../../types";
 import { statusColorName, statusBorder } from "../shared/status-color";
 import { relationshipBadge, accountBadge } from "../shared/candidate-badges";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import {
     candidateName,
     candidateInitials,
@@ -22,10 +22,8 @@ import {
 import CandidateActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
 import {
-    LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
-import { Presence } from "@/components/presence";
 import { usePresenceStatus } from "@/contexts";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
@@ -79,13 +77,8 @@ export function GridCard({
             {/* Header Band */}
             <div className="relative bg-base-300 px-5 pt-4 pb-4">
                 {/* Utility icons: absolute top-right */}
-                <div className="absolute top-3 right-3 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                    <Presence
-                        variant="icon"
-                        size="sm"
-                        status={presenceStatus}
-                    />
-                    {isRecruiter && (
+                {isRecruiter && (
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                         <SaveBookmark
                             entityType="candidate"
                             entityId={candidate.id}
@@ -94,21 +87,17 @@ export function GridCard({
                             size="sm"
                             onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
                         />
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Avatar + Name block */}
                 <div className="flex items-start gap-3">
-                    <div className="relative shrink-0 mt-0.5">
-                        <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
-                            {initials}
-                        </div>
-                        {level && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={level} size="sm" />
-                            </div>
-                        )}
-                    </div>
+                    <BaselAvatar
+                        initials={initials}
+                        size="md"
+                        presence={presenceStatus}
+                        className="mt-0.5"
+                    />
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
                             {company || "Candidate"}
@@ -142,6 +131,12 @@ export function GridCard({
 
             {/* Inline metadata: salary · type · availability */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {level && (
+                    <>
+                        <BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} />
+                        <span className="text-base-content/20">&middot;</span>
+                    </>
+                )}
                 {metaItems.map((item, i) => (
                     <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/60"}`} data-tip={item.tooltip}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />

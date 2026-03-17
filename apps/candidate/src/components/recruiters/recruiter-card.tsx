@@ -1,4 +1,5 @@
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
 
 // Type definition from my-recruiters-section (extended with additional fields)
 interface RecruiterRelationship {
@@ -60,23 +61,19 @@ export function RecruiterCard({ relationship, showActions = true, onTerminate }:
                 {/* Header with name and status */}
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3 flex-1">
-                        <div className="relative">
-                            <div className="avatar avatar-placeholder">
-                                <div className="bg-primary text-primary-content rounded-full w-12">
-                                    <span className="text-lg">
-                                        {relationship.recruiter_name.charAt(0).toUpperCase()}
-                                    </span>
-                                </div>
-                            </div>
-                            {recruiterLevel && (
-                                <div className="absolute -bottom-1 -right-1">
-                                    <LevelBadge level={recruiterLevel} size="sm" />
-                                </div>
-                            )}
+                        <div>
+                            <BaselAvatar
+                                initials={relationship.recruiter_name.charAt(0).toUpperCase()}
+                                alt={relationship.recruiter_name}
+                                size="md"
+                            />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-lg truncate">
+                            <h3 className="font-semibold text-lg truncate flex items-center gap-2">
                                 {relationship.recruiter_name}
+                                {recruiterLevel && (
+                                    <BaselLevelIndicator level={recruiterLevel.current_level} title={recruiterLevel.title} totalXp={recruiterLevel.total_xp} />
+                                )}
                             </h3>
                             <p className="text-sm text-base-content/70 truncate">
                                 {relationship.recruiter_email}

@@ -29,6 +29,7 @@ const networkV3Routes: V3RouteConfig[] = [
   { resource: 'recruiter-candidates', auth: 'required' },
 
   // ── Recruiter Candidates Views ──────────────────────────────────
+  { path: '/recruiter-candidates/views/list-for-candidate', method: 'GET', auth: 'required' },
   { path: '/recruiter-candidates/:id/view/detail', method: 'GET', auth: 'required' },
 
   // ── Recruiter Candidates Invitations ────────────────────────────

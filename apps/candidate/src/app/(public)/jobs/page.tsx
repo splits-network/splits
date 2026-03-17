@@ -237,11 +237,13 @@ function JobsPageInner() {
                                 />
                             )}
                             {viewMode === "split" && (
-                                <SplitView
-                                    jobs={jobs}
-                                    selectedId={selectedJobId}
-                                    onSelect={handleSelect}
-                                />
+                                <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                    <SplitView
+                                        jobs={jobs}
+                                        selectedId={selectedJobId}
+                                        onSelect={handleSelect}
+                                    />
+                                </div>
                             )}
                         </div>
                     )}

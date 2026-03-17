@@ -206,11 +206,13 @@ export default function MarketplaceClient({
                                 onSelect={handleSelectRecruiter}
                             />
                         ) : (
-                            <SplitView
-                                recruiters={recruiters}
-                                selectedRecruiter={selectedRecruiter}
-                                onSelect={handleSelectRecruiter}
-                            />
+                            <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                <SplitView
+                                    recruiters={recruiters}
+                                    selectedRecruiter={selectedRecruiter}
+                                    onSelect={handleSelectRecruiter}
+                                />
+                            </div>
                         )}
                     </div>
 

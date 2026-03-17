@@ -16,6 +16,8 @@ export {
     type BaselHeaderProps,
     BaselFooter,
     type BaselFooterProps,
+    BaselSplitView,
+    type BaselSplitViewProps,
 } from './layout';
 
 // Service status components
@@ -143,6 +145,12 @@ export {
     type BaselCheckListProps,
     BaselSeparatorLabel,
     type BaselSeparatorLabelProps,
+    BaselAvatar,
+    type BaselAvatarProps,
+    type BaselAvatarSize,
+    type BaselPresenceStatus,
+    BaselLevelIndicator,
+    type BaselLevelIndicatorProps,
 } from './display';
 
 // Content components (CMS article renderer + block components)

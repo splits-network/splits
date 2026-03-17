@@ -248,13 +248,15 @@ export default function CompaniesBaselPage() {
                                 />
                             )}
                             {viewMode === "split" && (
-                                <SplitView
-                                    items={active.data}
-                                    activeTab={activeTab}
-                                    onSelect={handleSelect}
-                                    selectedId={selectedCompanyId}
-                                    onRefresh={handleRefresh}
-                                />
+                                <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                    <SplitView
+                                        items={active.data}
+                                        activeTab={activeTab}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedCompanyId}
+                                        onRefresh={handleRefresh}
+                                    />
+                                </div>
                             )}
                         </>
                     )}

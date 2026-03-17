@@ -212,12 +212,14 @@ export default function ApplicationsBaselPage() {
                                 />
                             )}
                             {viewMode === "split" && (
-                                <SplitView
-                                    applications={applications}
-                                    onSelect={handleSelect}
-                                    selectedId={selectedApplicationId}
-                                    onRefresh={refresh}
-                                />
+                                <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                    <SplitView
+                                        applications={applications}
+                                        onSelect={handleSelect}
+                                        selectedId={selectedApplicationId}
+                                        onRefresh={refresh}
+                                    />
+                                </div>
                             )}
                         </>
                     )}

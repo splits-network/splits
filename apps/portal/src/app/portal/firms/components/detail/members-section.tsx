@@ -4,15 +4,14 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
-import { BaselConfirmModal, BaselEmptyState } from "@splits-network/basel-ui";
+import { BaselConfirmModal, BaselEmptyState, BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Firm, FirmMember, FirmInvitation } from "../../types";
 import { formatMemberRole, formatMemberStatus, formatDate } from "../../types";
 import { memberRoleBadgeColor, memberStatusBadgeColor, invitationStatusBadgeColor } from "../shared/status-color";
-import { BaselBadge } from "@splits-network/basel-ui";
 import { firmInitials } from "../shared/helpers";
 import { InviteMemberModal } from "../modals/invite-member-modal";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { useGamification } from "@splits-network/shared-gamification";
 
 interface MembersSectionProps {
     firm: Firm;
@@ -153,28 +152,27 @@ export function MembersSection({
                                         : ""
                                 }`}
                             >
-                                {/* Initials avatar */}
-                                <div className="relative flex-shrink-0">
-                                    <div
-                                        className="w-10 h-10 bg-base-200 border border-base-300 flex items-center justify-center text-sm font-bold"
-                
-                                    >
-                                        {firmInitials(
-                                            member.recruiter.user?.name ?? "",
+                                {/* Avatar */}
+                                <BaselAvatar
+                                    initials={firmInitials(member.recruiter.user?.name ?? "")}
+                                    size="sm"
+                                    alt={member.recruiter.user?.name ?? ""}
+                                />
+
+                                {/* Name + email + level */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                        <p className="font-bold text-sm truncate">
+                                            {member.recruiter.user?.name}
+                                        </p>
+                                        {member.recruiter_id && getLevel(member.recruiter_id) && (
+                                            <BaselLevelIndicator
+                                                level={getLevel(member.recruiter_id)!.current_level}
+                                                title={getLevel(member.recruiter_id)!.title}
+                                                totalXp={getLevel(member.recruiter_id)!.total_xp}
+                                            />
                                         )}
                                     </div>
-                                    {member.recruiter_id && getLevel(member.recruiter_id) && (
-                                        <div className="absolute -bottom-1 -right-1">
-                                            <LevelBadge level={getLevel(member.recruiter_id)!} size="sm" />
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Name + email */}
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-sm truncate">
-                                        {member.recruiter.user?.name}
-                                    </p>
                                     <p className="text-sm text-base-content/50 truncate">
                                         {member.recruiter.user?.email}
                                     </p>

@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useScrollReveal } from "@splits-network/basel-ui";
-import { LeaderboardRow, LevelBadge } from "@splits-network/shared-gamification";
+import { LeaderboardRow } from "@splits-network/shared-gamification";
+import { BaselLevelIndicator } from "@splits-network/basel-ui";
 import type { LeaderboardEntryInfo, EntityLevelInfo } from "@splits-network/shared-gamification";
 import { LoadingState } from "@splits-network/shared-ui";
 
@@ -61,7 +62,7 @@ export function LeaderboardList({ entries, myEntityId, loading, levelMap }: Lead
                                 {levelMap?.get(entry.entity_id) && (
                                     <div>
                                         <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-1">Level</p>
-                                        <LevelBadge level={levelMap.get(entry.entity_id)!} size="sm" />
+                                        <BaselLevelIndicator level={levelMap.get(entry.entity_id)!.current_level} title={levelMap.get(entry.entity_id)!.title} totalXp={levelMap.get(entry.entity_id)!.total_xp} />
                                     </div>
                                 )}
                                 {entry.metadata?.role && (

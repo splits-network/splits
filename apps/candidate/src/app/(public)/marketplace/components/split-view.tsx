@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Recruiter } from "../marketplace-client";
+import { BaselSplitView } from "@splits-network/basel-ui";
 import SplitItem from "./split-item";
 import ReputationDisplay from "./reputation-display";
 import { getInitials, reputationColor } from "./status-color";
@@ -17,74 +18,40 @@ export default function SplitView({
     selectedRecruiter,
     onSelect,
 }: SplitViewProps) {
-    const activeRecruiter = selectedRecruiter || recruiters[0] || null;
+    // Auto-select first recruiter when nothing is selected
+    const effectiveId =
+        selectedRecruiter?.id ?? recruiters[0]?.id ?? null;
 
     return (
-        <div
-            className="flex border-2 border-base-300"
-            style={{ minHeight: 600 }}
-        >
-            {/* Left list pane */}
-            <div
-                className={`w-full lg:w-[40%] xl:w-[35%] border-r-2 border-base-300 overflow-y-auto ${
-                    selectedRecruiter ? "hidden lg:block" : ""
-                }`}
-            >
-                {recruiters.map((recruiter) => (
-                    <SplitItem
-                        key={recruiter.id}
-                        recruiter={recruiter}
-                        isSelected={activeRecruiter?.id === recruiter.id}
-                        onSelect={onSelect}
-                    />
-                ))}
-            </div>
-
-            {/* Right detail pane */}
-            <div className="hidden lg:block flex-1 overflow-y-auto">
-                {activeRecruiter ? (
-                    <SplitDetailPanel recruiter={activeRecruiter} />
-                ) : (
-                    <div className="flex items-center justify-center h-full text-base-content/30">
-                        <div className="text-center">
-                            <i className="fa-duotone fa-regular fa-hand-pointer text-4xl mb-4 block" />
-                            <p className="text-sm font-bold uppercase tracking-wider">
-                                Select a recruiter to view details
-                            </p>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Mobile detail overlay */}
-            {selectedRecruiter && (
-                <div className="fixed inset-0 z-50 bg-base-100 overflow-y-auto lg:hidden">
-                    <div className="sticky top-0 bg-base-100 border-b-2 border-base-300 px-4 py-3 flex items-center justify-between">
-                        <button
-                            onClick={() => onSelect(selectedRecruiter)}
-                            className="btn btn-sm btn-ghost"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <i className="fa-duotone fa-regular fa-arrow-left mr-2" />
-                            Back
-                        </button>
-                        <Link
-                            href={`/marketplace/${selectedRecruiter.slug || selectedRecruiter.id}`}
-                            className="btn btn-sm btn-link gap-1"
-                        >
-                            Full Profile
-                            <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
-                        </Link>
-                    </div>
-                    <SplitDetailPanel recruiter={selectedRecruiter} />
-                </div>
+        <BaselSplitView
+            items={recruiters}
+            selectedId={effectiveId}
+            getItemId={(r) => r.id}
+            estimatedItemHeight={90}
+            renderItem={(recruiter, isSelected) => (
+                <SplitItem
+                    recruiter={recruiter}
+                    isSelected={isSelected}
+                    onSelect={onSelect}
+                />
             )}
-        </div>
+            renderDetail={(recruiter) => (
+                <SplitDetailPanel recruiter={recruiter} />
+            )}
+            emptyIcon="fa-hand-pointer"
+            emptyTitle="Select a recruiter to view details"
+            initialListWidth={38}
+            mobileBreakpoint="lg"
+            onMobileClose={() => {
+                if (selectedRecruiter) onSelect(selectedRecruiter);
+            }}
+        />
     );
 }
 
 function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
-    const name = recruiter.users?.name || recruiter.name || "Unknown Recruiter";
+    const name =
+        recruiter.users?.name || recruiter.name || "Unknown Recruiter";
     const initials = getInitials(name);
 
     return (
@@ -93,19 +60,14 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
             <div className="sticky top-0 bg-base-100 border-b border-base-300 px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                        {/* Specialty kicker */}
                         {recruiter.specialization && (
                             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-2">
                                 {recruiter.specialization}
                             </p>
                         )}
-
-                        {/* Name */}
                         <h2 className="text-2xl lg:text-3xl font-black leading-[0.95] tracking-tight mb-2">
                             {name}
                         </h2>
-
-                        {/* Meta row */}
                         <div className="flex flex-wrap gap-3 text-sm text-base-content/60">
                             {recruiter.location && (
                                 <span>
@@ -122,8 +84,6 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                             )}
                         </div>
                     </div>
-
-                    {/* Avatar */}
                     <div className="w-14 h-14 flex items-center justify-center bg-primary/10 text-primary font-black text-lg flex-shrink-0">
                         {initials}
                     </div>
@@ -164,7 +124,6 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                     </div>
                 </div>
 
-                {/* Tagline */}
                 {recruiter.tagline && (
                     <div>
                         <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-2">
@@ -176,7 +135,6 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                     </div>
                 )}
 
-                {/* Bio */}
                 {recruiter.bio && (
                     <div>
                         <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
@@ -188,7 +146,6 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                     </div>
                 )}
 
-                {/* Industries */}
                 {recruiter.industries && recruiter.industries.length > 0 && (
                     <div>
                         <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-3">
@@ -207,7 +164,6 @@ function SplitDetailPanel({ recruiter }: { recruiter: Recruiter }) {
                     </div>
                 )}
 
-                {/* CTA */}
                 <div className="border-t-2 border-base-300 pt-6">
                     <Link
                         href={`/marketplace/${recruiter.slug || recruiter.id}`}

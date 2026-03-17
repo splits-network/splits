@@ -21,8 +21,8 @@ import {
 import { getStageDisplay } from "@splits-network/basel-ui";
 import { getAIScoreBadgeColor } from "../shared/status-color";
 import ActionsToolbar from "@/app/portal/applications/components/shared/actions-toolbar";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 
 const PIPELINE_STAGES = [
     "draft",
@@ -128,9 +128,11 @@ export function GridCard({
             <div className="bg-base-300 px-5 pt-4 pb-4">
                 {/* Editorial block: Kicker → Display heading → Subtitle */}
                 <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none shrink-0 mt-0.5">
-                        {initials}
-                    </div>
+                    <BaselAvatar
+                        initials={initials}
+                        size="md"
+                        className="mt-0.5"
+                    />
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
                             {role}
@@ -240,24 +242,15 @@ export function GridCard({
             {/* Footer: company + actions */}
             <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300">
                 <div className="flex items-center gap-2 min-w-0">
-                    <div className="relative shrink-0">
-                        {logoUrl ? (
-                            <img
-                                src={logoUrl}
-                                alt={company}
-                                className="w-7 h-7 object-contain bg-base-100 border border-base-300 p-0.5"
-                            />
-                        ) : (
-                            <div className="w-7 h-7 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">
-                                {cInitials}
-                            </div>
-                        )}
-                        {companyLevel && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={companyLevel} size="sm" />
-                            </div>
-                        )}
-                    </div>
+                    <BaselAvatar
+                        initials={cInitials}
+                        src={logoUrl}
+                        alt={company}
+                        size="xs"
+                    />
+                    {companyLevel && (
+                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} />
+                    )}
                     <span className="text-sm font-semibold text-base-content truncate">
                         {company}
                     </span>

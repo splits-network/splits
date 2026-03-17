@@ -11,10 +11,9 @@ import {
 } from "../shared/helpers";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
 import {
-    LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 
 export function GridCard({
@@ -63,24 +62,13 @@ export function GridCard({
             <div className="bg-base-300 px-5 pt-4 pb-4">
                 {/* Editorial block: Avatar + Industry kicker → Name */}
                 <div className="flex items-start gap-3">
-                    <div className="relative shrink-0 mt-0.5">
-                        {firm.logo_url ? (
-                            <img
-                                src={firm.logo_url}
-                                alt={`${firm.name} logo`}
-                                className="w-12 h-12 object-contain bg-base-100"
-                            />
-                        ) : (
-                            <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
-                                {initials}
-                            </div>
-                        )}
-                        {firmLevel && (
-                            <div className="absolute -bottom-1 -right-1">
-                                <LevelBadge level={firmLevel} size="sm" />
-                            </div>
-                        )}
-                    </div>
+                    <BaselAvatar
+                        initials={initials}
+                        src={firm.logo_url}
+                        alt={`${firm.name} logo`}
+                        size="md"
+                        className="mt-0.5"
+                    />
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
                             {industries[0] || "Recruiting Firm"}
@@ -111,6 +99,12 @@ export function GridCard({
 
             {/* Inline metadata: members · team size · founded · marketplace */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {firmLevel && (
+                    <>
+                        <BaselLevelIndicator level={firmLevel.current_level} title={firmLevel.title} totalXp={firmLevel.total_xp} />
+                        <span className="text-base-content/20">&middot;</span>
+                    </>
+                )}
                 {metaItems.map((item, i) => (
                     <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />

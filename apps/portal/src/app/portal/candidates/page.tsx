@@ -273,13 +273,15 @@ export default function CandidatesPage() {
                                     />
                                 )}
                                 {viewMode === "split" && (
-                                    <SplitView
-                                        candidates={candidates}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedCandidateId}
-                                        onRefresh={refresh}
-                                        onUpdateItem={updateItem}
-                                    />
+                                    <div className="h-[calc(100vh-18rem)] min-h-[500px]">
+                                        <SplitView
+                                            candidates={candidates}
+                                            onSelect={handleSelect}
+                                            selectedId={selectedCandidateId}
+                                            onRefresh={refresh}
+                                            onUpdateItem={updateItem}
+                                        />
+                                    </div>
                                 )}
                             </>
                         )}

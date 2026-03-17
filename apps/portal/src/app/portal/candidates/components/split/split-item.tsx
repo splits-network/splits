@@ -2,7 +2,7 @@
 
 import type { Candidate } from "../../types";
 import { relationshipBadge, jobTypeBadges, accountBadge } from "../shared/candidate-badges";
-import { BaselBadge } from "@splits-network/basel-ui";
+import { BaselBadge, BaselLevelIndicator } from "@splits-network/basel-ui";
 import {
     candidateName,
     candidateTitle,
@@ -14,7 +14,6 @@ import { statusBorder } from "../shared/status-color";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
 import {
-    LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
 import { Presence } from "@/components/presence";
@@ -74,7 +73,7 @@ export function SplitItem({
                             onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
                         />
                     )}
-                    {level && <span className="ml-1 inline-block align-middle"><LevelBadge level={level} size="sm" /></span>}
+                    {level && <span className="ml-1 inline-block align-middle"><BaselLevelIndicator level={level.current_level} title={level.title} totalXp={level.total_xp} /></span>}
                     {acct && (
                         <span
                             className="ml-1 inline-block align-middle text-error"

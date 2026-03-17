@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BaselSectionHeading } from "@splits-network/basel-ui";
 import type { EnrichedMatch } from "@splits-network/shared-types";
 import { getMatchScoreLabel } from "@splits-network/shared-types";
 
@@ -18,9 +19,8 @@ function MatchPreviewCard({ match }: { match: EnrichedMatch }) {
     return (
         <Link
             href={`/jobs/${match.job_id}`}
-            className="group flex flex-col bg-base-100 border-2 border-base-200 p-5 transition-all hover:border-primary/30 hover:shadow-sm min-w-[260px] shrink-0"
+            className="group flex flex-col bg-base-100 border-2 border-base-200 p-5 transition-all hover:border-primary/30 min-w-[260px] shrink-0"
         >
-            {/* Score badge */}
             {scoreLabel && (
                 <span
                     className={`badge ${scoreLabel.badgeClass} gap-1 text-sm mb-3 self-start`}
@@ -30,17 +30,14 @@ function MatchPreviewCard({ match }: { match: EnrichedMatch }) {
                 </span>
             )}
 
-            {/* Job title */}
             <h4 className="text-base font-bold tracking-tight leading-tight group-hover:text-primary transition-colors mb-1 line-clamp-2">
                 {job?.title || "Open position"}
             </h4>
 
-            {/* Company */}
             <p className="text-sm text-base-content/60 mb-2">{companyName}</p>
 
-            {/* Location */}
             {job?.location && (
-                <div className="flex items-center gap-1 text-sm text-base-content/40">
+                <div className="flex items-center gap-1 text-sm text-base-content/50">
                     <i className="fa-duotone fa-regular fa-location-dot" />
                     {job.location}
                 </div>
@@ -76,7 +73,7 @@ function EmptyState() {
             <p className="text-sm font-semibold text-base-content/60">
                 Matches are being generated
             </p>
-            <p className="text-sm text-base-content/40 mt-1">
+            <p className="text-sm text-base-content/50 mt-1">
                 Complete your profile to surface the best opportunities
             </p>
         </div>
@@ -88,38 +85,34 @@ export default function MatchPreviewWidget({
     loading,
 }: MatchPreviewWidgetProps) {
     return (
-        <section className="py-12 bg-base-200 match-preview scroll-reveal fade-up">
-            <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-                <div className="flex items-end justify-between mb-8">
-                    <div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary mb-3">
-                            Recommended For You
-                        </p>
-                        <h2 className="text-2xl md:text-3xl font-black tracking-tight text-base-content">
-                            Your top matches
-                        </h2>
-                    </div>
-                    <Link
-                        href="/portal/matches"
-                        className="btn btn-ghost btn-sm rounded-none text-primary"
-                    >
-                        View All
-                        <i className="fa-duotone fa-regular fa-arrow-right" />
-                    </Link>
-                </div>
-
-                {loading ? (
-                    <LoadingSkeleton />
-                ) : matches.length === 0 ? (
-                    <EmptyState />
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                        {matches.map((match) => (
-                            <MatchPreviewCard key={match.id} match={match} />
-                        ))}
-                    </div>
-                )}
+        <div className="scroll-reveal fade-up">
+            <div className="flex items-end justify-between mb-6">
+                <BaselSectionHeading
+                    kicker="RECOMMENDED FOR YOU"
+                    title="Your top matches"
+                    className="section-heading"
+                />
+                <Link
+                    href="/portal/matches"
+                    className="btn btn-ghost btn-sm text-primary"
+                    style={{ borderRadius: 0 }}
+                >
+                    View All
+                    <i className="fa-duotone fa-regular fa-arrow-right" />
+                </Link>
             </div>
-        </section>
+
+            {loading ? (
+                <LoadingSkeleton />
+            ) : matches.length === 0 ? (
+                <EmptyState />
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                    {matches.map((match) => (
+                        <MatchPreviewCard key={match.id} match={match} />
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
