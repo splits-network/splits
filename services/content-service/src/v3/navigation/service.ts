@@ -42,12 +42,8 @@ export class NavigationService {
         return nav;
     }
 
-    async upsert(
-        input: UpsertNavigationInput,
-        clerkUserId: string,
-        headers?: Record<string, unknown>,
-    ) {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+    async upsert(input: UpsertNavigationInput, clerkUserId: string) {
+        const context = await this.accessResolver.resolve(clerkUserId);
         if (!context.isPlatformAdmin) {
             throw new ForbiddenError("Only admins can manage navigation");
         }
@@ -58,12 +54,8 @@ export class NavigationService {
         });
     }
 
-    async delete(
-        id: string,
-        clerkUserId: string,
-        headers?: Record<string, unknown>,
-    ) {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+    async delete(id: string, clerkUserId: string) {
+        const context = await this.accessResolver.resolve(clerkUserId);
         if (!context.isPlatformAdmin) {
             throw new ForbiddenError("Only admins can delete navigation");
         }

@@ -72,7 +72,6 @@ export function registerNavigationRoutes(
             const data = await service.upsert(
                 request.body as UpsertNavigationInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.code(201).send({ data });
         },
@@ -97,7 +96,7 @@ export function registerNavigationRoutes(
                     });
             }
             const { id } = request.params as { id: string };
-            await service.delete(id, clerkUserId, request.headers);
+            await service.delete(id, clerkUserId);
             return reply.send({
                 data: { message: "Navigation deleted successfully" },
             });

@@ -21,23 +21,16 @@ export class ImageService {
         this.accessResolver = new AccessContextResolver(supabase);
     }
 
-    private async requireAdmin(
-        clerkUserId: string,
-        headers?: Record<string, unknown>,
-    ) {
-        const context = await this.accessResolver.resolve(clerkUserId, headers);
+    private async requireAdmin(clerkUserId: string) {
+        const context = await this.accessResolver.resolve(clerkUserId);
         if (!context.isPlatformAdmin) {
             throw new ForbiddenError("Only admins can manage content images");
         }
         return context;
     }
 
-    async getAll(
-        params: ImageListParams,
-        clerkUserId: string,
-        headers?: Record<string, unknown>,
-    ) {
-        await this.requireAdmin(clerkUserId, headers);
+    async getAll(params: ImageListParams, clerkUserId: string) {
+        await this.requireAdmin(clerkUserId);
         const { data, total } = await this.repository.findAll(params);
         const page = params.page || 1;
         const limit = Math.min(params.limit || 25, 100);
@@ -52,35 +45,22 @@ export class ImageService {
         };
     }
 
-    async getById(
-        id: string,
-        clerkUserId: string,
-        headers?: Record<string, unknown>,
-    ) {
-        await this.requireAdmin(clerkUserId, headers);
+    async getById(id: string, clerkUserId: string) {
+        await this.requireAdmin(clerkUserId);
         const image = await this.repository.findById(id);
         if (!image) throw new NotFoundError("Image", id);
         return image;
     }
 
-    async update(
-        id: string,
-        input: UpdateImageInput,
-        clerkUserId: string,
-        headers?: Record<string, unknown>,
-    ) {
-        await this.requireAdmin(clerkUserId, headers);
+    async update(id: string, input: UpdateImageInput, clerkUserId: string) {
+        await this.requireAdmin(clerkUserId);
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError("Image", id);
         return this.repository.update(id, input);
     }
 
-    async delete(
-        id: string,
-        clerkUserId: string,
-        headers?: Record<string, unknown>,
-    ) {
-        await this.requireAdmin(clerkUserId, headers);
+    async delete(id: string, clerkUserId: string) {
+        await this.requireAdmin(clerkUserId);
         const existing = await this.repository.findById(id);
         if (!existing) throw new NotFoundError("Image", id);
         await this.repository.delete(id);

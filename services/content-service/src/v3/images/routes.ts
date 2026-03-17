@@ -43,7 +43,6 @@ export function registerImageRoutes(
             const result = await service.getAll(
                 request.query as ImageListParams,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({
                 data: result.data,
@@ -71,11 +70,7 @@ export function registerImageRoutes(
                     });
             }
             const { id } = request.params as { id: string };
-            const data = await service.getById(
-                id,
-                clerkUserId,
-                request.headers,
-            );
+            const data = await service.getById(id, clerkUserId);
             return reply.send({ data });
         },
     );
@@ -103,7 +98,6 @@ export function registerImageRoutes(
                 id,
                 request.body as UpdateImageInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -128,7 +122,7 @@ export function registerImageRoutes(
                     });
             }
             const { id } = request.params as { id: string };
-            await service.delete(id, clerkUserId, request.headers);
+            await service.delete(id, clerkUserId);
             return reply.send({
                 data: { message: "Image deleted successfully" },
             });

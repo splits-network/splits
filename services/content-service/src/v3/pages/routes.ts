@@ -93,7 +93,6 @@ export function registerPageRoutes(
             const data = await service.create(
                 request.body as CreatePageInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.code(201).send({ data });
         },
@@ -122,7 +121,6 @@ export function registerPageRoutes(
                 id,
                 request.body as UpdatePageInput,
                 clerkUserId,
-                request.headers,
             );
             return reply.send({ data });
         },
@@ -147,7 +145,7 @@ export function registerPageRoutes(
                     });
             }
             const { id } = request.params as { id: string };
-            await service.delete(id, clerkUserId, request.headers);
+            await service.delete(id, clerkUserId);
             return reply.send({
                 data: { message: "Page deleted successfully" },
             });
