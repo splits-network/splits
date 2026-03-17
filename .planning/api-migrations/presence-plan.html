@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 Migration Plan: Presence (chat-service)</title>
+<style>
+  :root {
+    --primary: #233876;
+    --secondary: #0f9d8a;
+    --accent: #db2777;
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --pass: #16a34a;
+    --warn: #d97706;
+    --fail: #dc2626;
+    --info: #2563eb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 3rem 2rem;
+    border-bottom: 4px solid var(--secondary);
+  }
+  header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+  header p { color: rgba(255,255,255,0.7); margin-top: 0.5rem; font-size: 0.95rem; }
+  .kicker {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .meta-bar {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+  }
+  .meta-bar strong { color: rgba(255,255,255,0.9); }
+  section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  section h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    color: var(--primary);
+  }
+  section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+  }
+  th {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(35,56,118,0.03); }
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    background: rgba(35,56,118,0.06);
+    padding: 0.15rem 0.4rem;
+    border-radius: 0;
+  }
+  .tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 0.25rem;
+  }
+  .tag-crud { background: var(--primary); color: white; }
+  .tag-view { background: var(--secondary); color: white; }
+  .tag-action { background: var(--accent); color: white; }
+  .tag-deprecated { background: var(--text-muted); color: white; }
+  .tag-none { background: #e2e8f0; color: var(--text-muted); }
+  .tag-method { background: #1e293b; color: white; padding: 0.1rem 0.4rem; font-size: 0.7rem; }
+  .note {
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    border-left: 3px solid;
+    font-size: 0.85rem;
+  }
+  .note-info { border-color: var(--info); background: rgba(37,99,235,0.05); }
+  .note-warn { border-color: var(--warn); background: rgba(217,119,6,0.05); }
+  .note-critical { border-color: var(--fail); background: rgba(220,38,38,0.05); }
+  .note-success { border-color: var(--pass); background: rgba(22,163,74,0.05); }
+  .file-tree {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 1.25rem 1.5rem;
+    margin: 0.75rem 0;
+  }
+  .file-tree .dir { color: var(--secondary); }
+  .file-tree .new { color: #4ade80; }
+  .file-tree .existing { color: #94a3b8; }
+  .file-tree .comment { color: #64748b; font-style: italic; }
+  .scope-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+  .scope-card {
+    padding: 1.25rem;
+    background: white;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .scope-card .number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .scope-card .label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .consumer-group { margin-bottom: 1.5rem; }
+  .consumer-group h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .consumer-group ul { list-style: none; padding-left: 0; }
+  .consumer-group li {
+    font-size: 0.8rem;
+    padding: 0.25rem 0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--text-muted);
+  }
+  .badge-count {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.25rem;
+  }
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+  }
+  .flow-box {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    background: white;
+    font-weight: 600;
+  }
+  .flow-arrow { color: var(--text-muted); font-size: 1.2rem; }
+  .flow-box.redis { border-color: #dc2626; }
+  .flow-box.ws { border-color: var(--secondary); }
+  .flow-box.service { border-color: var(--primary); }
+  .flow-box.gateway { border-color: var(--accent); }
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <span class="kicker" style="color: rgba(255,255,255,0.5);">V3 Migration Plan</span>
+    <h1>Presence Resource -- chat-service</h1>
+    <p>Redis-backed user presence tracking: online/idle/offline status queries and WebSocket-based pings.</p>
+    <div class="meta-bar">
+      <span>Service: <strong>chat-service</strong></span>
+      <span>Date: <strong>2026-03-16</strong></span>
+      <span>Status: <strong>Planning</strong></span>
+      <span>Lifecycle: <strong>/api:plan</strong></span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ================================================================== -->
+<!-- SECTION 1: EXECUTIVE SUMMARY -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Overview</span>
+  <h2>Executive Summary</h2>
+
+  <p style="font-size:0.9rem; margin-bottom:1rem;">
+    Presence is a <strong>Redis-only resource</strong> with no database table. It has two data flows:
+  </p>
+
+  <h3>Write Path (Presence Pings)</h3>
+  <div class="flow-diagram">
+    <div class="flow-box">Frontend</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box ws">chat-gateway (WebSocket)</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box redis">Redis <code>presence:user:{identityUserId}</code></div>
+  </div>
+  <div class="note note-success">
+    <strong>Write path is already migrated.</strong> Both portal and candidate apps send <code>presence.ping</code> via WebSocket through the chat-gateway. The V2 REST POST endpoints (<code>/ping</code>, <code>/offline</code>, <code>/batch</code>) are deprecated and have a known bug (write by clerkUserId, read by identityUserId).
+  </div>
+
+  <h3>Read Path (Presence Queries)</h3>
+  <div class="flow-diagram">
+    <div class="flow-box">Frontend hooks</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box gateway">api-gateway V3 proxy</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box service">chat-service <code>/api/v3/chat/presence</code></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box redis">Redis MGET</div>
+  </div>
+  <div class="note note-warn">
+    <strong>Read path is a V3 alias, not a proper V3 resource.</strong> The current <code>GET /api/v3/chat/presence</code> is a copy-pasted handler inside the V2 routes file (<code>v2/chat/routes.ts:112-158</code>). It has no types, no JSON schema validation, no proper three-layer architecture, and uses try/catch instead of the global error handler.
+  </div>
+
+  <h3>Key Decision: Presence is NOT a CRUD Resource</h3>
+  <div class="note note-info">
+    Presence has <strong>no database table</strong>. There are no records to create, update, or delete via REST. The "Core 5" CRUD pattern does not apply. The V3 migration should create:
+    <br><br>
+    &bull; <strong>1 View:</strong> <code>GET /api/v3/presence/views/batch-status</code> -- batch lookup of user online/idle/offline status from Redis<br>
+    &bull; <strong>0 Actions:</strong> Write path is handled entirely via WebSocket (chat-gateway), not REST<br>
+    &bull; <strong>0 Core CRUD routes:</strong> No database table to CRUD
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 2: V2 API SURFACE -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Current State</span>
+  <h2>V2 API Surface</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>Path</th>
+        <th>Handler Location</th>
+        <th>Request</th>
+        <th>Response</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tag tag-method">GET</span></td>
+        <td><code>/api/v2/chat/presence</code></td>
+        <td><code>v2/chat/routes.ts:63</code></td>
+        <td>Query: <code>userIds</code> (comma-sep string or array, max 100)</td>
+        <td><code>{ data: [{ userId, status, lastSeenAt }] }</code></td>
+        <td><span class="tag tag-view">Active</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-method">GET</span></td>
+        <td><code>/api/v3/chat/presence</code></td>
+        <td><code>v2/chat/routes.ts:112</code></td>
+        <td>Same as above (V3 alias)</td>
+        <td>Same as above</td>
+        <td><span class="tag tag-view">Active (alias)</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-method">POST</span></td>
+        <td><code>/api/v2/chat/presence/ping</code></td>
+        <td><code>v2/chat/routes.ts:163</code></td>
+        <td>None (auth only)</td>
+        <td><code>{ data: { status: "ok" } }</code></td>
+        <td><span class="tag tag-deprecated">Deprecated</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-method">POST</span></td>
+        <td><code>/api/v2/chat/presence/offline</code></td>
+        <td><code>v2/chat/routes.ts:190</code></td>
+        <td>None (auth only)</td>
+        <td><code>{ data: { status: "ok" } }</code></td>
+        <td><span class="tag tag-deprecated">Deprecated</span></td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-method">POST</span></td>
+        <td><code>/api/v2/chat/presence/batch</code></td>
+        <td><code>v2/chat/routes.ts:217</code></td>
+        <td>Body: <code>{ users: [{ userId, status, lastSeenAt? }] }</code> (max 50)</td>
+        <td><code>{ data: { status: "ok", updated: N } }</code></td>
+        <td><span class="tag tag-deprecated">Deprecated</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Gateway Routing</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Gateway Layer</th>
+        <th>Route</th>
+        <th>Auth</th>
+        <th>Proxies To</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>V2 gateway (<code>routes/v2/chat.ts</code>)</td>
+        <td><code>/api/v2/chat/*</code> (catch-all)</td>
+        <td>None (forwarded as-is)</td>
+        <td>chat-service</td>
+      </tr>
+      <tr>
+        <td>V2 gateway (<code>routes/presence.ts</code>)</td>
+        <td><code>POST /api/v2/presence/ping</code></td>
+        <td><code>requireAuth()</code></td>
+        <td><code>POST /api/v2/chat/presence/ping</code></td>
+      </tr>
+      <tr>
+        <td>V2 gateway (<code>routes/presence.ts</code>)</td>
+        <td><code>POST /api/v2/presence/offline</code></td>
+        <td><code>requireAuth()</code></td>
+        <td><code>POST /api/v2/chat/presence/offline</code></td>
+      </tr>
+      <tr>
+        <td>V2 gateway (<code>routes/presence.ts</code>)</td>
+        <td><code>POST /api/v2/presence/batch</code></td>
+        <td><code>requireAuth()</code></td>
+        <td><code>POST /api/v2/chat/presence/batch</code></td>
+      </tr>
+      <tr>
+        <td>V3 gateway (<code>routes/v3/chat.ts</code>)</td>
+        <td><code>GET /api/v3/chat/presence</code></td>
+        <td><code>required</code></td>
+        <td><code>GET /api/v3/chat/presence</code> (alias in v2 routes file)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Data Store</h3>
+  <div class="note note-info">
+    <strong>Redis only.</strong> No Supabase/Postgres table. All presence data is stored as ephemeral Redis keys with TTLs:
+    <br><br>
+    &bull; Key pattern: <code>presence:user:{identityUserId}</code><br>
+    &bull; Value: <code>{ status: "online"|"idle", lastSeenAt: ISO8601 }</code><br>
+    &bull; TTL: 90 seconds (online), 30 seconds (offline)<br>
+    &bull; Operations: <code>MGET</code> for batch reads, <code>SETEX</code> for writes
+  </div>
+
+  <h3>Known Bug in V2 POST Endpoints</h3>
+  <div class="note note-critical">
+    The V2 POST endpoints (<code>/ping</code>, <code>/offline</code>, <code>/batch</code>) write to <code>presence:user:${clerkUserId}</code> but the GET endpoint reads by <code>identityUserId</code>. Data written via these REST endpoints is <strong>never read correctly</strong>. The WebSocket-based presence.ping in chat-gateway correctly uses <code>identityUserId</code>.
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 3: CONSUMER MAP -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Consumers</span>
+  <h2>Consumer Map</h2>
+
+  <h3>GET /api/v3/chat/presence (Active -- Read Path)</h3>
+  <p style="font-size:0.85rem; margin-bottom:1rem;">
+    Both apps call <code>client.get("/chat/presence", { params: { userIds } })</code> which resolves to <code>GET /api/v3/chat/presence</code> via the shared API client's <code>/api/v3</code> path prefix.
+  </p>
+
+  <div class="consumer-group">
+    <h4>apps/portal/src/ <span class="badge-count">26 files</span></h4>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">Core hooks and context (all consumers use these indirectly):</p>
+    <ul>
+      <li>hooks/use-presence.ts -- <code>client.get("/chat/presence", { params: { userIds } })</code></li>
+      <li>contexts/presence-context.tsx -- PresenceProvider wrapping usePresence</li>
+      <li>contexts/index.ts -- re-exports PresenceProvider, usePresenceStatus, useRegisterPresence</li>
+    </ul>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin:0.5rem 0;">Direct usePresence() consumers (bypass context):</p>
+    <ul>
+      <li>app/portal/messages/contexts/filter-context.tsx</li>
+      <li>app/portal/applications/components/shared/actions-toolbar.tsx</li>
+      <li>app/(public)/recruiters/components/shared/actions-toolbar.tsx</li>
+      <li>components/calls/participant-picker.tsx</li>
+    </ul>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin:0.5rem 0;">usePresenceStatus() consumers (via PresenceProvider context):</p>
+    <ul>
+      <li>app/portal/candidates/components/table/table-row.tsx</li>
+      <li>app/portal/candidates/components/split/split-item.tsx</li>
+      <li>app/portal/candidates/components/grid/grid-card.tsx</li>
+      <li>app/portal/candidates/components/shared/actions-toolbar.tsx</li>
+      <li>app/portal/recruiters/components/grid/grid-card.tsx</li>
+      <li>app/portal/recruiters/components/shared/actions-toolbar.tsx</li>
+      <li>app/portal/recruiters/components/shared/recruiter-detail.tsx</li>
+    </ul>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin:0.5rem 0;">PresenceProvider wrappers (page-level):</p>
+    <ul>
+      <li>app/portal/candidates/page.tsx</li>
+      <li>app/portal/recruiters/page.tsx</li>
+    </ul>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin:0.5rem 0;">Presence display only (consume status, no API calls):</p>
+    <ul>
+      <li>components/basel/messages/detail-header.tsx</li>
+      <li>components/basel/messages/split-view.tsx</li>
+      <li>components/basel/messages/split-item.tsx</li>
+      <li>components/basel/messages/browse-list-item.tsx</li>
+      <li>components/basel/messages/browse-view.tsx</li>
+      <li>components/chat/thread-panel.tsx</li>
+      <li>app/portal/firms/components/modals/wizard-steps/step-contact.tsx</li>
+      <li>app/portal/candidates/components/shared/helpers.ts</li>
+    </ul>
+  </div>
+
+  <div class="consumer-group">
+    <h4>apps/candidate/src/ <span class="badge-count">10 files</span></h4>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">Core hook:</p>
+    <ul>
+      <li>hooks/use-presence.ts -- <code>client.get("/chat/presence", { params: { userIds } })</code></li>
+    </ul>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin:0.5rem 0;">Direct consumers:</p>
+    <ul>
+      <li>app/(public)/marketplace/[slug]/recruiter-profile-client.tsx</li>
+      <li>app/portal/applications/components/shared/actions-toolbar.tsx</li>
+      <li>app/portal/messages/components/browse/list-panel.tsx</li>
+      <li>app/portal/dashboard/components/candidate-dashboard.tsx</li>
+    </ul>
+    <p style="font-size:0.8rem; color:var(--text-muted); margin:0.5rem 0;">Presence display only:</p>
+    <ul>
+      <li>app/portal/messages/components/thread/thread-panel.tsx</li>
+      <li>app/portal/messages/components/browse/list-item.tsx</li>
+      <li>app/onboarding/steps/contact-step.tsx</li>
+    </ul>
+  </div>
+
+  <div class="consumer-group">
+    <h4>apps/corporate/ <span class="badge-count">0 files</span></h4>
+    <p style="font-size:0.8rem; color:var(--text-muted);">No presence consumers.</p>
+  </div>
+
+  <div class="consumer-group">
+    <h4>packages/ <span class="badge-count">3 files</span></h4>
+    <ul>
+      <li>chat-ui/src/hooks/use-chat-gateway.ts -- WebSocket presence.ping (write path only)</li>
+      <li>chat-ui/src/context/chat-sidebar-context.tsx -- presence display</li>
+      <li>support-widget/src/hooks/use-support-gateway.ts -- WebSocket presence.ping (write path only)</li>
+    </ul>
+  </div>
+
+  <div class="consumer-group">
+    <h4>services/ <span class="badge-count">2 files</span></h4>
+    <ul>
+      <li>chat-gateway/src/index.ts -- WebSocket presence.ping handler (writes to Redis)</li>
+      <li>api-gateway/src/routes/presence.ts -- V2 REST proxy for POST /ping, /offline, /batch</li>
+    </ul>
+  </div>
+
+  <h3>POST /api/v2/presence/* (Deprecated -- Write Path)</h3>
+  <div class="note note-success">
+    <strong>Zero frontend consumers.</strong> No frontend code calls the REST POST presence endpoints. All presence writes go through the WebSocket chat-gateway. The V2 gateway routes in <code>routes/presence.ts</code> and the chat-service POST handlers are dead code.
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 4: MIGRATION CLASSIFICATION -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Classification</span>
+  <h2>Migration Classification</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>V2 Route</th>
+        <th>V3 Category</th>
+        <th>V3 Path</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>GET /v2/chat/presence</code></td>
+        <td><span class="tag tag-view">View</span></td>
+        <td><code>GET /api/v3/presence/views/batch-status</code></td>
+        <td>Batch lookup of user status from Redis. Not a CRUD resource (no DB table). Returns shaped data for a specific use case (batch status check).</td>
+      </tr>
+      <tr>
+        <td><code>GET /v3/chat/presence</code> (alias)</td>
+        <td><span class="tag tag-view">View</span></td>
+        <td><code>GET /api/v3/presence/views/batch-status</code></td>
+        <td>Same handler as above. The alias should be removed once the proper V3 view exists and consumers are updated.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/chat/presence/ping</code></td>
+        <td><span class="tag tag-none">No migration</span></td>
+        <td>N/A</td>
+        <td>Dead code. Write path handled by WebSocket. Has known bug (clerkUserId vs identityUserId). Remove via <code>/api:remove</code>.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/chat/presence/offline</code></td>
+        <td><span class="tag tag-none">No migration</span></td>
+        <td>N/A</td>
+        <td>Dead code. Same bug and WebSocket replacement.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/chat/presence/batch</code></td>
+        <td><span class="tag tag-none">No migration</span></td>
+        <td>N/A</td>
+        <td>Dead code. Same bug and WebSocket replacement.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/presence/ping</code> (gateway)</td>
+        <td><span class="tag tag-none">No migration</span></td>
+        <td>N/A</td>
+        <td>Gateway proxy to dead chat-service endpoint. Remove.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/presence/offline</code> (gateway)</td>
+        <td><span class="tag tag-none">No migration</span></td>
+        <td>N/A</td>
+        <td>Gateway proxy to dead chat-service endpoint. Remove.</td>
+      </tr>
+      <tr>
+        <td><code>POST /v2/presence/batch</code> (gateway)</td>
+        <td><span class="tag tag-none">No migration</span></td>
+        <td>N/A</td>
+        <td>Gateway proxy to dead chat-service endpoint. Remove.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Architecture Decision: Standalone Resource vs Chat Sub-resource</h3>
+  <div class="note note-info">
+    <strong>Recommendation: <code>/api/v3/presence/</code> as a standalone resource namespace.</strong>
+    <br><br>
+    Presence is conceptually independent of chat -- it tracks user online/idle/offline status across the entire platform (recruiters, candidates, messaging, calls). It is consumed by recruiter lists, candidate lists, application toolbars, and messages -- not just chat. Nesting it under <code>/chat/presence</code> is a V2 legacy artifact.
+    <br><br>
+    The V3 path <code>GET /api/v3/presence/views/batch-status</code> reflects this: presence is a first-class resource, and the batch-status view is its primary (and likely only) read interface.
+  </div>
+
+  <h3>Why No Core CRUD?</h3>
+  <div class="note note-info">
+    Presence has no database table. There are no presence "records" to list, get by ID, create, update, or delete. The data is ephemeral Redis keys written via WebSocket and read via a single batch GET endpoint. Core 5 CRUD routes would be meaningless.
+    <br><br>
+    The V3 presence resource consists of <strong>only a single view</strong>. This is valid -- not every resource needs CRUD. A view-only resource with no CRUD is appropriate when the resource is read-only from the REST API perspective.
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 5: ROLE-BASED AUTHORIZATION ANALYSIS -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Authorization</span>
+  <h2>Role-Based Authorization Analysis</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Endpoint</th>
+        <th>Roles</th>
+        <th>Data Difference</th>
+        <th>Separate Views?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>GET /presence/views/batch-status</code></td>
+        <td>Recruiter, Candidate, Admin</td>
+        <td>None. All roles see the same data: online/idle/offline status. No role-specific joins or filters.</td>
+        <td><strong>No.</strong> One view for all roles.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note note-success">
+    No role-based branching needed. Presence data is identical for all authenticated users. The only authorization required is "user is authenticated" -- enforced at the gateway level via <code>auth: 'required'</code>.
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 6: FRONTEND IMPACT -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Frontend Impact</span>
+  <h2>Frontend Migration Scope</h2>
+
+  <h3>URL Change</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Current Call</th>
+        <th>Resolved URL</th>
+        <th>New Call</th>
+        <th>Resolved URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>client.get("/chat/presence", ...)</code></td>
+        <td><code>GET /api/v3/chat/presence</code></td>
+        <td><code>client.get("/presence/views/batch-status", ...)</code></td>
+        <td><code>GET /api/v3/presence/views/batch-status</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Response Shape Change</h3>
+  <div class="note note-success">
+    <strong>No response shape change.</strong> The response remains <code>{ data: [{ userId, status, lastSeenAt }] }</code>. The V3 view returns the exact same structure. Frontend consumers other than the two hooks need zero changes.
+  </div>
+
+  <h3>Files Requiring URL Updates</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>App</th>
+        <th>File</th>
+        <th>Change</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>portal</td>
+        <td><code>src/hooks/use-presence.ts</code></td>
+        <td><code>"/chat/presence"</code> &rarr; <code>"/presence/views/batch-status"</code></td>
+      </tr>
+      <tr>
+        <td>candidate</td>
+        <td><code>src/hooks/use-presence.ts</code></td>
+        <td><code>"/chat/presence"</code> &rarr; <code>"/presence/views/batch-status"</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note note-info">
+    Only <strong>2 files</strong> need URL updates. Both are centralized hooks. All other consumers (26 portal files, 10 candidate files) use these hooks indirectly and require zero changes.
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 7: V3 FILE PLAN -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">File Plan</span>
+  <h2>V3 File Structure</h2>
+
+  <div class="file-tree">
+    <span class="dir">services/chat-service/src/v3/</span><br>
+    &nbsp;&nbsp;<span class="existing">routes.ts</span> <span class="comment">-- existing, add registerPresenceRoutes()</span><br>
+    &nbsp;&nbsp;<span class="existing">conversations/</span> <span class="comment">-- existing</span><br>
+    &nbsp;&nbsp;<span class="existing">messages/</span> <span class="comment">-- existing</span><br>
+    &nbsp;&nbsp;<span class="existing">messaging-counters/</span> <span class="comment">-- existing</span><br>
+    &nbsp;&nbsp;<span class="dir">presence/</span> <span class="comment">-- NEW</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">types.ts</span> <span class="comment">-- PresenceStatus type, query schema</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">routes.ts</span> <span class="comment">-- registers view routes only (no CRUD)</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">views/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="new">batch-status.repository.ts</span> <span class="comment">-- Redis MGET query</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="new">batch-status.service.ts</span> <span class="comment">-- parse, normalize, auth check</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="new">batch-status.route.ts</span> <span class="comment">-- GET /api/v3/presence/views/batch-status</span><br>
+    <br>
+    <span class="dir">services/api-gateway/src/routes/v3/</span><br>
+    &nbsp;&nbsp;<span class="existing">chat.ts</span> <span class="comment">-- existing, update: move presence to dedicated config</span><br>
+    &nbsp;&nbsp;<span class="comment">-- OR add presence view route to chat.ts (since same service)</span><br>
+  </div>
+
+  <h3>File Descriptions</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Purpose</th>
+        <th>Est. Lines</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>presence/types.ts</code></td>
+        <td>PresenceStatus interface, PresenceEntry type, query JSON schema (userIds validation)</td>
+        <td>~40</td>
+      </tr>
+      <tr>
+        <td><code>presence/routes.ts</code></td>
+        <td>Registers view routes. No CRUD registration.</td>
+        <td>~20</td>
+      </tr>
+      <tr>
+        <td><code>presence/views/batch-status.repository.ts</code></td>
+        <td>Redis MGET for batch presence lookup. Parses JSON values, handles missing keys. Accepts Redis client.</td>
+        <td>~60</td>
+      </tr>
+      <tr>
+        <td><code>presence/views/batch-status.service.ts</code></td>
+        <td>Validates/normalizes userIds input. Calls repository. Returns shaped response. Max 100 IDs cap.</td>
+        <td>~50</td>
+      </tr>
+      <tr>
+        <td><code>presence/views/batch-status.route.ts</code></td>
+        <td>GET route with JSON schema on querystring. Auth check. Calls service.</td>
+        <td>~40</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Dependency: Redis Client</h3>
+  <div class="note note-warn">
+    The presence repository needs a Redis client, not a Supabase client. The V3 route registration config (<code>RegisterV3Config</code>) currently only passes <code>supabase</code>, <code>eventPublisher</code>, and <code>chatEventPublisher</code>. A Redis client must be added to the config or passed directly to the presence routes registration function.
+    <br><br>
+    The existing V2 code creates a Redis instance in <code>registerChatRoutes()</code> from <code>config.redisConfig</code>. The V3 migration should accept a pre-created Redis instance to avoid duplication.
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 8: GATEWAY PLAN -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Gateway</span>
+  <h2>API Gateway Changes</h2>
+
+  <h3>V3 Gateway (routes/v3/chat.ts)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Action</th>
+        <th>Route Config</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Add</td>
+        <td><code>{ path: '/presence/views/batch-status', method: 'GET', auth: 'required' }</code></td>
+      </tr>
+      <tr>
+        <td>Keep (compat)</td>
+        <td><code>{ path: '/chat/presence', method: 'GET', auth: 'required' }</code> -- remove after frontend migration</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>V2 Gateway Cleanup (after migration)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Action</th>
+        <th>File</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Deprecate then remove</td>
+        <td><code>routes/presence.ts</code></td>
+        <td>POST /v2/presence/ping, /offline, /batch -- zero consumers, dead code</td>
+      </tr>
+      <tr>
+        <td>Deprecate then remove</td>
+        <td><code>routes/v2/presence.ts</code></td>
+        <td>Thin wrapper re-exporting routes/presence.ts</td>
+      </tr>
+      <tr>
+        <td>Update</td>
+        <td><code>routes/v2/routes.ts</code></td>
+        <td>Remove registerPresenceRoutes import and call</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 9: MIGRATION STEPS -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Execution</span>
+  <h2>Migration Steps</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th>Command</th>
+        <th>What Happens</th>
+        <th>Files Created/Modified</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><code>/api:migrate</code></td>
+        <td>Create V3 presence resource with batch-status view. No CRUD. Wire Redis dependency. Register in V3 routes. Add gateway route.</td>
+        <td>5 new, 2 modified</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><code>/api:validate</code></td>
+        <td>Validate V3 presence resource compliance (adapted for view-only resource)</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><code>/api-frontend:migrate</code></td>
+        <td>Update portal and candidate use-presence.ts hooks to use new V3 URL</td>
+        <td>2 modified</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><code>/api:deprecate</code></td>
+        <td>Add deprecation headers to V2 chat/presence GET and all POST endpoints. Add deprecation logging.</td>
+        <td>1 modified (v2/chat/routes.ts -- headers only)</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><code>/api:remove</code></td>
+        <td>Remove V2 presence POST handlers from chat-service. Remove gateway presence.ts proxy. Remove V3 alias from V2 routes file. Remove old gateway config.</td>
+        <td>Multiple files cleaned up</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 10: ESTIMATED SCOPE -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Scope</span>
+  <h2>Estimated Scope</h2>
+
+  <div class="scope-grid">
+    <div class="scope-card">
+      <div class="number">5</div>
+      <div class="label">New V3 Files</div>
+    </div>
+    <div class="scope-card">
+      <div class="number">2</div>
+      <div class="label">Modified Service Files</div>
+    </div>
+    <div class="scope-card">
+      <div class="number">1</div>
+      <div class="label">Gateway File Updated</div>
+    </div>
+    <div class="scope-card">
+      <div class="number">2</div>
+      <div class="label">Frontend Files Updated</div>
+    </div>
+    <div class="scope-card">
+      <div class="number">~210</div>
+      <div class="label">Estimated New Lines</div>
+    </div>
+    <div class="scope-card">
+      <div class="number">3</div>
+      <div class="label">V2 Files to Remove (later)</div>
+    </div>
+  </div>
+
+  <h3>Complexity Assessment</h3>
+  <div class="note note-success">
+    <strong>Low complexity.</strong> This is a small, focused migration:
+    <br><br>
+    &bull; Single view, no CRUD, no actions<br>
+    &bull; Redis-only (no Supabase schema or migration needed)<br>
+    &bull; Response shape is unchanged<br>
+    &bull; Only 2 frontend files need URL updates<br>
+    &bull; V2 POST endpoints are dead code with zero consumers<br>
+    &bull; Write path (WebSocket) is already production-stable and unaffected<br>
+    <br>
+    The main consideration is wiring the Redis client through the V3 registration config, since existing V3 resources only use Supabase.
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- SECTION 11: RISKS & CONSIDERATIONS -->
+<!-- ================================================================== -->
+<section>
+  <span class="kicker">Risks</span>
+  <h2>Risks and Considerations</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Risk</th>
+        <th>Severity</th>
+        <th>Mitigation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Redis client not available in V3 config</td>
+        <td><span class="tag" style="background:var(--warn); color:white;">Medium</span></td>
+        <td>Extend <code>RegisterV3Config</code> to accept an optional Redis instance, or pass it directly to <code>registerPresenceRoutes()</code></td>
+      </tr>
+      <tr>
+        <td>V3 alias in V2 routes conflicts with new V3 route</td>
+        <td><span class="tag" style="background:var(--warn); color:white;">Medium</span></td>
+        <td>The new V3 route uses a different path (<code>/presence/views/batch-status</code>), so no conflict. The old <code>/chat/presence</code> alias can coexist until removed.</td>
+      </tr>
+      <tr>
+        <td>Frontend URL change breaks existing calls during deployment</td>
+        <td><span class="tag" style="background:var(--pass); color:white;">Low</span></td>
+        <td>Keep the old <code>/chat/presence</code> route active in the gateway during the transition. Frontend and backend can be deployed independently.</td>
+      </tr>
+      <tr>
+        <td>Redis connection lifecycle (startup/shutdown)</td>
+        <td><span class="tag" style="background:var(--pass); color:white;">Low</span></td>
+        <td>Reuse the existing Redis instance from V2 <code>registerChatRoutes()</code> -- pass it through to V3 registration. Do not create a duplicate connection.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+</div>
+
+<footer>
+  Generated by /api:plan -- Splits Network API Agent -- 2026-03-16
+</footer>
+
+</body>
+</html>

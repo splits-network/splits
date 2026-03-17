@@ -12,7 +12,7 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant } from './participant-helper';
+import { resolveAndValidateParticipant } from '../lib/participant-helper';
 import { DetailViewRepository } from '../views/detail.repository';
 import { idParamSchema } from '../types';
 

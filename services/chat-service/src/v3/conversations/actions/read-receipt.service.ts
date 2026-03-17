@@ -7,7 +7,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { ReadReceiptActionRepository } from './read-receipt.repository';
 import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant } from './participant-helper';
+import { resolveAndValidateParticipant } from '../lib/participant-helper';
 
 export class ReadReceiptActionService {
   constructor(

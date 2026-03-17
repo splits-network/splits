@@ -14,6 +14,7 @@ import {
   messageListQuerySchema,
   sendMessageSchema,
   conversationIdParamSchema,
+  messageIdParamSchema,
 } from './types';
 
 // --- Action registrations ---
@@ -30,6 +31,43 @@ export function registerMessageRoutes(
 
   // --- Actions (before :id to avoid collision) ---
   registerRedactAction(app, supabase, eventPublisher, chatEventPublisher);
+
+  // GET /api/v3/chat/messages/:id — get a single message
+  app.get('/api/v3/chat/messages/:id', {
+    schema: { params: messageIdParamSchema },
+  }, async (request, reply) => {
+    const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    if (!clerkUserId) {
+      return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
+    }
+    const { id } = request.params as { id: string };
+    const data = await service.getById(id, clerkUserId);
+    return reply.send({ data });
+  });
+
+  // PATCH /api/v3/chat/messages/:id — not supported (use actions/redact)
+  app.patch('/api/v3/chat/messages/:id', {
+    schema: { params: messageIdParamSchema },
+  }, async (_request, reply) => {
+    return reply.status(400).send({
+      error: {
+        code: 'NOT_SUPPORTED',
+        message: 'Messages cannot be updated directly. Use POST /messages/:id/actions/redact instead.',
+      },
+    });
+  });
+
+  // DELETE /api/v3/chat/messages/:id — not supported
+  app.delete('/api/v3/chat/messages/:id', {
+    schema: { params: messageIdParamSchema },
+  }, async (_request, reply) => {
+    return reply.status(400).send({
+      error: {
+        code: 'NOT_SUPPORTED',
+        message: 'Messages cannot be deleted. Use POST /messages/:id/actions/redact to redact content.',
+      },
+    });
+  });
 
   // GET /api/v3/chat/conversations/:conversationId/messages
   app.get('/api/v3/chat/conversations/:conversationId/messages', {

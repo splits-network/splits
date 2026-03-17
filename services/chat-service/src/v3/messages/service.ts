@@ -33,6 +33,20 @@ export class MessageService {
     return context.identityUserId;
   }
 
+  async getById(id: string, clerkUserId: string) {
+    const userId = await this.resolveUserId(clerkUserId);
+    const message = await this.repository.findById(id);
+    if (!message) throw new NotFoundError('Message', id);
+
+    // Verify user is a participant in the message's conversation
+    const participant = await this.repository.getParticipantState(message.conversation_id, userId);
+    if (!participant) {
+      throw new ForbiddenError('You are not a participant in this conversation');
+    }
+
+    return message;
+  }
+
   async getAll(conversationId: string, params: MessageListParams, clerkUserId: string) {
     const userId = await this.resolveUserId(clerkUserId);
 

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontend Scan: Messages V2-to-V3 Migration - Splits Network</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a25;
+    --border: #2a2a3a;
+    --text: #e0e0e8;
+    --text-muted: #8888a0;
+    --accent: #6c63ff;
+    --accent-light: #8b83ff;
+    --portal: #10b981;
+    --candidate: #f59e0b;
+    --admin: #ef4444;
+    --corporate: #8b5cf6;
+    --video: #06b6d4;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+  h4 { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+  .date { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+
+  section { margin-bottom: 3rem; }
+
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.875rem; }
+  th, td { border: 1px solid var(--border); padding: 0.6rem 0.75rem; text-align: left; }
+  th { background: var(--surface); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; color: var(--text-muted); }
+  td { background: var(--surface2); vertical-align: top; }
+
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    background: var(--surface);
+    padding: 0.1rem 0.35rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+  .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+  .badge-info { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+  .badge-portal { background: rgba(16, 185, 129, 0.15); color: var(--portal); }
+  .badge-candidate { background: rgba(245, 158, 11, 0.15); color: var(--candidate); }
+  .badge-admin { background: rgba(239, 68, 68, 0.15); color: var(--admin); }
+  .badge-video { background: rgba(6, 182, 212, 0.15); color: var(--video); }
+  .badge-already { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
+
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .note {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.875rem;
+  }
+
+  .note-success { border-left-color: var(--success); }
+  .note-warning { border-left-color: var(--warning); }
+  .note-danger { border-left-color: var(--danger); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .toc a {
+    color: var(--accent-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: block;
+    padding: 0.25rem 0;
+  }
+
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { padding-left: 1.5rem; }
+
+  .verdict-box {
+    background: var(--surface);
+    border: 2px solid var(--success);
+    padding: 1.5rem;
+    text-align: center;
+    margin: 1.5rem 0;
+  }
+
+  .verdict-box h3 {
+    color: var(--success);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0.75rem 0;
+  }
+
+  .flow-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .flow-arrow { color: var(--text-muted); font-size: 1.2rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<p class="date">Frontend Scan Report -- 2026-03-16</p>
+<h1>Messages Frontend Scan</h1>
+<p class="subtitle">
+  V2-to-V3 frontend migration analysis for the <code>messages</code> resource in <code>chat-service</code>.
+  Messages are a sub-resource of conversations, accessed via <code>/chat/conversations/:id/messages</code>.
+</p>
+
+<!-- Table of Contents -->
+<div class="toc">
+  <h3>Contents</h3>
+  <ol>
+    <li><a href="#verdict">Verdict</a></li>
+    <li><a href="#endpoint-map">V2-to-V3 Endpoint Mapping</a></li>
+    <li><a href="#url-mechanics">URL Construction Mechanics</a></li>
+    <li><a href="#already-migrated">Already Migrated (V3)</a></li>
+    <li><a href="#consumer-inventory">Consumer Inventory by App</a></li>
+    <li><a href="#non-api-refs">Non-API References (No Change Needed)</a></li>
+    <li><a href="#admin-future">Admin Moderation (Future Scope)</a></li>
+    <li><a href="#types">Types Assessment</a></li>
+    <li><a href="#scope">Estimated Scope</a></li>
+  </ol>
+</div>
+
+<!-- Section 1: Verdict -->
+<section id="verdict">
+  <h2>1. Verdict</h2>
+
+  <div class="verdict-box">
+    <h3>ZERO FRONTEND FILES NEED MIGRATION</h3>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      All message API consumers already resolve to V3 endpoints.
+      The default <code>pathPrefix</code> in <code>SplitsApiClient</code> is <code>/api/v3</code>,
+      so every short-path call like <code>/chat/conversations/:id/messages</code> already hits
+      <code>/api/v3/chat/conversations/:id/messages</code> -- which is the registered V3 gateway route.
+    </p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Files to Migrate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">7</div>
+      <div class="stat-label">Files Already on V3</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Admin Files (Future)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Unrelated (Video Chat)</div>
+    </div>
+  </div>
+
+  <div class="note note-success">
+    <strong>Why zero migration?</strong>
+    The <code>SplitsApiClient</code> (at <code>packages/shared-api-client/src/index.ts</code> line 138)
+    defaults its <code>pathPrefix</code> to <code>/api/v3</code>. All portal and candidate app API clients
+    inherit this default. When frontend code calls <code>client.post('/chat/conversations/123/messages', ...)</code>,
+    the client prepends <code>/api/v3</code>, sending the request to <code>/api/v3/chat/conversations/123/messages</code>.
+    This is already the V3 gateway route (registered at <code>services/api-gateway/src/routes/v3/chat.ts</code> lines 31-32).
+    The admin support-chat app uses explicit <code>/api/v3/</code> full paths, so it is also on V3.
+  </div>
+</section>
+
+<!-- Section 2: Endpoint Mapping -->
+<section id="endpoint-map">
+  <h2>2. V2-to-V3 Endpoint Mapping</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>V2 Path</th>
+        <th>V3 Path</th>
+        <th>V3 Status</th>
+        <th>Frontend Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-info">GET</span></td>
+        <td><code>/api/v2/chat/conversations/:id/messages</code></td>
+        <td><code>/api/v3/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-success">REGISTERED</span></td>
+        <td><span class="badge badge-success">NONE</span> -- already resolving to V3</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-success">POST</span></td>
+        <td><code>/api/v2/chat/conversations/:id/messages</code></td>
+        <td><code>/api/v3/chat/conversations/:id/messages</code></td>
+        <td><span class="badge badge-success">REGISTERED</span></td>
+        <td><span class="badge badge-success">NONE</span> -- already resolving to V3</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-warning">PATCH</span></td>
+        <td><code>/api/v2/chat/messages/:id</code></td>
+        <td><code>/api/v3/chat/messages/:id/actions/redact</code></td>
+        <td><span class="badge badge-success">REGISTERED</span></td>
+        <td><span class="badge badge-warning">FUTURE</span> -- admin moderation (no current frontend consumer)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Note on the redact endpoint:</strong> The V3 action route <code>POST /api/v3/chat/messages/:id/actions/redact</code>
+    is registered in the gateway (line 59 of <code>v3/chat.ts</code>), but no frontend file currently calls it.
+    The admin moderation panel (<code>chat-moderation-client.tsx</code>) operates via <code>/admin/chat/reports/:id/action</code>,
+    which is a separate admin workflow. When admin chat moderation migrates to V3, the redact action endpoint
+    will become relevant.
+  </div>
+</section>
+
+<!-- Section 3: URL Construction Mechanics -->
+<section id="url-mechanics">
+  <h2>3. URL Construction Mechanics</h2>
+
+  <div class="card">
+    <h3>How Short Paths Become V3</h3>
+
+    <p style="margin-bottom: 1rem;">The <code>SplitsApiClient</code> at <code>packages/shared-api-client/src/index.ts</code> (line 163):</p>
+
+    <div class="flow-diagram">
+      <div class="flow-box">client.post('/chat/conversations/123/messages')</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box">hasVersionPrefix = false</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box">baseUrl + '/api/v3' + '/chat/conversations/123/messages'</div>
+    </div>
+
+    <p style="margin-top: 1rem; margin-bottom: 0.5rem;">Both portal and candidate apps use this client:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>App</th>
+          <th>API Client Class</th>
+          <th>Underlying Client</th>
+          <th>Default pathPrefix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-portal">PORTAL</span></td>
+          <td><code>ApiClient extends AppApiClient</code></td>
+          <td><code>SplitsApiClient</code></td>
+          <td><code>/api/v3</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-candidate">CANDIDATE</span></td>
+          <td><code>ApiClient (wraps SplitsApiClient)</code></td>
+          <td><code>SplitsApiClient</code></td>
+          <td><code>/api/v3</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-admin">ADMIN</span></td>
+          <td><code>AppApiClient via createAdminClient</code></td>
+          <td><code>SplitsApiClient</code></td>
+          <td><code>/api/v3</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note note-success">
+      All three app clients default to <code>/api/v3</code>. Short-path calls
+      (those not starting with <code>/api/v</code>) automatically route to V3 endpoints.
+      The admin support-chat uses explicit full <code>/api/v3/...</code> paths via <code>fetch()</code>,
+      which also resolve correctly.
+    </div>
+  </div>
+</section>
+
+<!-- Section 4: Already Migrated -->
+<section id="already-migrated">
+  <h2>4. Already Migrated (V3)</h2>
+
+  <p style="margin-bottom: 1rem;">These files make message API calls that already resolve to V3 endpoints. No changes needed.</p>
+
+  <h3>4.1 Portal App</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Lines</th>
+        <th>API Call</th>
+        <th>Resolves To</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>apps/portal/src/components/chat/thread-panel.tsx</code></td>
+        <td>249</td>
+        <td><code>client.post('/chat/conversations/:id/messages', {...})</code></td>
+        <td><code>POST /api/v3/chat/conversations/:id/messages</code></td>
+      </tr>
+      <tr>
+        <td><code>apps/portal/src/components/chat/thread-panel.tsx</code></td>
+        <td>299</td>
+        <td><code>client.get('/chat/conversations/:id/messages', {params: {before, limit}})</code></td>
+        <td><code>GET /api/v3/chat/conversations/:id/messages</code></td>
+      </tr>
+      <tr>
+        <td><code>apps/portal/src/lib/chat-start.ts</code></td>
+        <td>40</td>
+        <td><code>client.post('/chat/conversations/:id/messages', {body, clientMessageId})</code></td>
+        <td><code>POST /api/v3/chat/conversations/:id/messages</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 Candidate App</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Lines</th>
+        <th>API Call</th>
+        <th>Resolves To</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/messages/components/thread/thread-panel.tsx</code></td>
+        <td>195</td>
+        <td><code>client.post('/chat/conversations/:id/messages', {body, clientMessageId})</code></td>
+        <td><code>POST /api/v3/chat/conversations/:id/messages</code></td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/messages/components/thread/thread-panel.tsx</code></td>
+        <td>300</td>
+        <td><code>client.get('/chat/conversations/:id/messages', {params: {before, limit}})</code></td>
+        <td><code>GET /api/v3/chat/conversations/:id/messages</code></td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/(public)/marketplace/[slug]/connect-modal.tsx</code></td>
+        <td>69</td>
+        <td><code>client.post('/chat/conversations/:id/messages', {body})</code></td>
+        <td><code>POST /api/v3/chat/conversations/:id/messages</code></td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/(public)/firms/[slug]/firm-connect-modal.tsx</code></td>
+        <td>69</td>
+        <td><code>client.post('/chat/conversations/:id/messages', {body})</code></td>
+        <td><code>POST /api/v3/chat/conversations/:id/messages</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 Admin App (Support Chat)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Lines</th>
+        <th>API Call</th>
+        <th>Resolves To</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>apps/admin/src/app/secure/support-chat/components/support-thread.tsx</code></td>
+        <td>27</td>
+        <td><code>fetch('${GATEWAY_URL}/api/v3/support/admin/support/conversations/:id/messages?limit=100')</code></td>
+        <td><code>GET /api/v3/support/admin/support/conversations/:id/messages</code></td>
+      </tr>
+      <tr>
+        <td><code>apps/admin/src/app/secure/support-chat/components/support-thread.tsx</code></td>
+        <td>70</td>
+        <td><code>fetch('${GATEWAY_URL}/api/v3/support/admin/support/conversations/:id/messages', {method: 'POST'})</code></td>
+        <td><code>POST /api/v3/support/admin/support/conversations/:id/messages</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note note-success">
+    <strong>Note:</strong> The admin support-chat calls use the <strong>support service</strong> endpoints
+    (<code>/api/v3/support/...</code>), not the chat-service message endpoints. These are a different
+    backend resource entirely and are out of scope for the chat-service messages migration.
+  </div>
+</section>
+
+<!-- Section 5: Consumer Inventory by App -->
+<section id="consumer-inventory">
+  <h2>5. Consumer Inventory by App</h2>
+
+  <h3>5.1 Portal App -- 3 API consumers (all V3)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Call Type</th>
+        <th>Endpoint Used</th>
+        <th>Classification</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>src/components/chat/thread-panel.tsx</code> (L249)</td>
+        <td>direct-call (POST)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td>Send message in thread</td>
+        <td><span class="badge badge-already">V3</span></td>
+      </tr>
+      <tr>
+        <td><code>src/components/chat/thread-panel.tsx</code> (L299)</td>
+        <td>direct-call (GET)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td>Load older messages (pagination)</td>
+        <td><span class="badge badge-already">V3</span></td>
+      </tr>
+      <tr>
+        <td><code>src/lib/chat-start.ts</code> (L40)</td>
+        <td>direct-call (POST)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td>Send initial message after starting conversation</td>
+        <td><span class="badge badge-already">V3</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Candidate App -- 4 API consumers (all V3)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Call Type</th>
+        <th>Endpoint Used</th>
+        <th>Classification</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>src/app/portal/messages/components/thread/thread-panel.tsx</code> (L195)</td>
+        <td>direct-call (POST)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td>Send message in thread</td>
+        <td><span class="badge badge-already">V3</span></td>
+      </tr>
+      <tr>
+        <td><code>src/app/portal/messages/components/thread/thread-panel.tsx</code> (L300)</td>
+        <td>direct-call (GET)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td>Load older messages (pagination)</td>
+        <td><span class="badge badge-already">V3</span></td>
+      </tr>
+      <tr>
+        <td><code>src/app/(public)/marketplace/[slug]/connect-modal.tsx</code> (L69)</td>
+        <td>direct-call (POST)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td>Send message when connecting with recruiter</td>
+        <td><span class="badge badge-already">V3</span></td>
+      </tr>
+      <tr>
+        <td><code>src/app/(public)/firms/[slug]/firm-connect-modal.tsx</code> (L69)</td>
+        <td>direct-call (POST)</td>
+        <td><code>/chat/conversations/:id/messages</code></td>
+        <td>Send message when connecting with firm</td>
+        <td><span class="badge badge-already">V3</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 Admin App -- 0 chat-service message consumers</h3>
+
+  <div class="note">
+    The admin app has <strong>no direct consumers</strong> of the chat-service message endpoints.<br><br>
+    <strong>Support-chat</strong> (<code>apps/admin/src/app/secure/support-chat/</code>) uses the
+    <em>support-service</em> endpoints, which are a separate resource.<br>
+    <strong>Chat moderation</strong> (<code>apps/portal/src/app/portal/admin/chat/</code>, not in admin app)
+    uses <code>/admin/chat/reports</code> endpoints which are admin-only workflows and do not directly
+    call message CRUD endpoints.
+  </div>
+
+  <h3>5.4 Corporate App -- 0 consumers</h3>
+  <p>No message API consumers found. The corporate app is a marketing site with no chat functionality.</p>
+
+  <h3>5.5 Video App -- 0 chat-service message consumers</h3>
+  <div class="note">
+    <code>apps/video/src/components/chat-tab.tsx</code> uses LiveKit's built-in data channel for in-call chat.
+    This is <strong>not related</strong> to the chat-service message endpoints.
+  </div>
+</section>
+
+<!-- Section 6: Non-API References -->
+<section id="non-api-refs">
+  <h2>6. Non-API References (No Change Needed)</h2>
+
+  <p style="margin-bottom: 1rem;">
+    These files contain the word "messages" but are <strong>not API consumers</strong>.
+    They are page routes, navigation links, UI components, or type definitions. No migration needed.
+  </p>
+
+  <h3>6.1 Page Routes &amp; Navigation (routing to /portal/messages)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Reference</th>
+        <th>Why No Change</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>apps/portal/src/app/portal/messages/page.tsx</code></td>
+        <td>Messages page component</td>
+        <td>Page route, not API call</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/messages/page.tsx</code></td>
+        <td>Messages page component</td>
+        <td>Page route, not API call</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/messages/[id]/page.tsx</code></td>
+        <td>Redirect to <code>/portal/messages?conversationId=</code></td>
+        <td>Client-side redirect, not API call</td>
+      </tr>
+      <tr>
+        <td><code>apps/portal/src/components/sidebar.tsx</code></td>
+        <td><code>href: "/portal/messages"</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/components/navigation/authenticated-nav.tsx</code></td>
+        <td><code>href="/portal/messages"</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/dashboard/hooks/use-urgency-items.ts</code></td>
+        <td><code>href: '/portal/messages'</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/dashboard/components/quick-actions-grid.tsx</code></td>
+        <td><code>href: "/portal/messages"</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/components/dashboard/at-a-glance.tsx</code></td>
+        <td><code>href: "/portal/messages"</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/dashboard/components/candidate-dashboard.tsx</code></td>
+        <td><code>href="/portal/messages"</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/portal/src/components/portal-chat-sidebar.tsx</code></td>
+        <td><code>messagesPagePath="/portal/messages"</code></td>
+        <td>Navigation prop</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/components/candidate-chat-sidebar.tsx</code></td>
+        <td><code>messagesPagePath="/portal/messages"</code></td>
+        <td>Navigation prop</td>
+      </tr>
+      <tr>
+        <td><code>apps/portal/src/app/(public)/firms/[slug]/firm-profile-client.tsx</code></td>
+        <td><code>window.location.href = '/portal/messages?conversation='</code></td>
+        <td>Client-side redirect</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/(public)/marketplace/[slug]/recruiter-profile-client.tsx</code></td>
+        <td><code>href="/portal/messages"</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/(public)/firms/[slug]/hero-section.tsx</code></td>
+        <td><code>href="/portal/messages"</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/portal/src/app/(public)/firms/[slug]/hero-section.tsx</code></td>
+        <td><code>href="/portal/messages"</code></td>
+        <td>Navigation link</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/applications/components/shared/actions-toolbar.tsx</code></td>
+        <td><code>router.push('/portal/messages?conversationId=')</code></td>
+        <td>Client-side navigation</td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/applications/components/shared/application-detail.tsx</code></td>
+        <td><code>router.push('/portal/messages?conversationId=')</code></td>
+        <td>Client-side navigation</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 UI Components (display only, no API calls)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>apps/portal/src/components/basel/messages/header-section.tsx</code></td><td>Basel messages page header</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/split-view.tsx</code></td><td>Basel split view layout</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/split-item.tsx</code></td><td>Basel list item</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/split-detail-panel.tsx</code></td><td>Basel detail panel</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/browse-view.tsx</code></td><td>Basel browse view</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/browse-list-item.tsx</code></td><td>Basel browse list item</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/browse-detail-panel.tsx</code></td><td>Basel browse detail panel</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/controls-bar.tsx</code></td><td>Basel controls bar</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/detail-header.tsx</code></td><td>Basel detail header</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/actions-toolbar.tsx</code></td><td>Basel actions toolbar</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/messages/stats.tsx</code></td><td>Basel stats component</td></tr>
+      <tr><td><code>apps/candidate/src/app/portal/messages/components/messages-header.tsx</code></td><td>Candidate messages header</td></tr>
+      <tr><td><code>apps/candidate/src/app/portal/messages/components/browse/detail-panel.tsx</code></td><td>Candidate browse detail</td></tr>
+      <tr><td><code>apps/candidate/src/app/portal/messages/components/thread/thread-messages.tsx</code></td><td>Candidate thread messages list</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.3 Documentation &amp; SEO</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>apps/portal/src/app/(public)/documentation/feature-guides/messages/page.tsx</code></td><td>Documentation page</td></tr>
+      <tr><td><code>apps/portal/src/app/(public)/documentation/seo.ts</code></td><td>SEO metadata for messages docs</td></tr>
+      <tr><td><code>apps/portal/src/app/(public)/documentation/components/docs-nav.ts</code></td><td>Nav link to messages docs</td></tr>
+      <tr><td><code>apps/portal/src/app/sitemap.ts</code></td><td>Sitemap entry</td></tr>
+      <tr><td><code>apps/corporate/src/app/showcase/messages/one/page.tsx</code></td><td>Showcase page (design reference)</td></tr>
+      <tr><td><code>apps/corporate/src/app/showcase/page.tsx</code></td><td>Showcase index</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.4 Email Integration (different "messages" -- not chat)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>apps/portal/src/components/basel/email/compose-email-modal.tsx</code></td><td><code>/integrations/email/:id/messages/send</code> -- email, not chat</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/email/email-context.tsx</code></td><td><code>/integrations/email/:id/messages</code> -- email, not chat</td></tr>
+      <tr><td><code>apps/portal/src/components/basel/email/email-thread-panel.tsx</code></td><td><code>/integrations/email/:id/messages</code> -- email, not chat</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Section 7: Admin Moderation (Future) -->
+<section id="admin-future">
+  <h2>7. Admin Moderation (Future Scope)</h2>
+
+  <div class="note note-warning">
+    <strong>Out of scope for this migration.</strong> The admin moderation endpoints
+    (<code>/admin/chat/reports</code>, <code>/admin/chat/audit</code>, <code>/chat/admin/flagged</code>)
+    are separate admin workflows, not the core chat-service message CRUD endpoints.
+    They will be migrated in a separate admin-focused migration pass.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Endpoint</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>apps/portal/src/app/portal/admin/chat/components/chat-moderation-client.tsx</code></td>
+        <td>
+          <code>GET /admin/chat/reports</code><br>
+          <code>GET /admin/chat/audit</code><br>
+          <code>GET /admin/chat/reports/:id/evidence</code><br>
+          <code>POST /admin/chat/reports/:id/action</code>
+        </td>
+        <td>Admin report queue and evidence viewer. Does not call message CRUD endpoints directly.</td>
+      </tr>
+      <tr>
+        <td><code>apps/admin/src/app/secure/chat/page.tsx</code></td>
+        <td><code>GET /chat/admin/flagged</code> (via useStandardList)</td>
+        <td>Admin flagged messages list. Separate admin moderation endpoint.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Section 8: Types Assessment -->
+<section id="types">
+  <h2>8. Types Assessment</h2>
+
+  <h3>8.1 Frontend Message Types</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Type Name</th>
+        <th>Fields</th>
+        <th>V3 Compatible?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>apps/portal/src/components/chat/types.ts</code></td>
+        <td><code>Message</code></td>
+        <td><code>id, sender_id, body, kind?, metadata?, created_at</code></td>
+        <td><span class="badge badge-success">YES</span></td>
+      </tr>
+      <tr>
+        <td><code>apps/candidate/src/app/portal/messages/components/thread/types.ts</code></td>
+        <td><code>MessageItem</code></td>
+        <td><code>id, sender_id, body, created_at</code></td>
+        <td><span class="badge badge-success">YES</span></td>
+      </tr>
+      <tr>
+        <td><code>apps/portal/src/app/portal/messages/types.ts</code></td>
+        <td><code>Message</code></td>
+        <td><code>id, sender_id, body, kind?, metadata?, created_at</code></td>
+        <td><span class="badge badge-success">YES</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>8.2 V3 Backend Response Shape</h3>
+
+  <p style="margin-bottom: 0.75rem;">
+    The V3 message repository (<code>services/chat-service/src/v3/messages/repository.ts</code>)
+    uses <code>select('*')</code> on <code>chat_messages</code> table. The response shape includes:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Used by Frontend?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>uuid</td><td>Yes</td></tr>
+      <tr><td><code>conversation_id</code></td><td>uuid</td><td>Implicit (from URL)</td></tr>
+      <tr><td><code>sender_id</code></td><td>text</td><td>Yes</td></tr>
+      <tr><td><code>body</code></td><td>text | null</td><td>Yes</td></tr>
+      <tr><td><code>kind</code></td><td>"user" | "system"</td><td>Portal: yes, Candidate: no</td></tr>
+      <tr><td><code>metadata</code></td><td>jsonb | null</td><td>Portal: yes (system messages), Candidate: no</td></tr>
+      <tr><td><code>client_message_id</code></td><td>uuid | null</td><td>Not displayed</td></tr>
+      <tr><td><code>reply_to_message_id</code></td><td>uuid | null</td><td>Not displayed yet</td></tr>
+      <tr><td><code>redacted_at</code></td><td>timestamp | null</td><td>Not displayed</td></tr>
+      <tr><td><code>redaction_reason</code></td><td>text | null</td><td>Not displayed</td></tr>
+      <tr><td><code>edited_at</code></td><td>timestamp | null</td><td>Not displayed</td></tr>
+      <tr><td><code>created_at</code></td><td>timestamp</td><td>Yes</td></tr>
+      <tr><td><code>updated_at</code></td><td>timestamp</td><td>Not displayed</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note note-success">
+    <strong>No type changes needed.</strong> The frontend message types are a subset of the V3 response.
+    All fields the frontend uses (<code>id</code>, <code>sender_id</code>, <code>body</code>,
+    <code>kind</code>, <code>metadata</code>, <code>created_at</code>) are present in the V3 response.
+    The V3 response includes additional fields (<code>redacted_at</code>, <code>edited_at</code>, etc.)
+    that the frontend can safely ignore since TypeScript types are structural, not nominal.
+  </div>
+</section>
+
+<!-- Section 9: Estimated Scope -->
+<section id="scope">
+  <h2>9. Estimated Scope</h2>
+
+  <div class="grid-3">
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Endpoint Swaps</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Type Updates</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Include Removals</div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Filter Renames</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Action Calls</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Test Updates</div>
+    </div>
+  </div>
+
+  <h3>Summary by App</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>App</th>
+        <th>API Consumer Files</th>
+        <th>Already V3</th>
+        <th>Needs Migration</th>
+        <th>Future / Out of Scope</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-portal">PORTAL</span></td>
+        <td>3</td>
+        <td>3</td>
+        <td>0</td>
+        <td>1 (chat moderation)</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-candidate">CANDIDATE</span></td>
+        <td>4</td>
+        <td>4</td>
+        <td>0</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-admin">ADMIN</span></td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>1 (flagged messages)</td>
+      </tr>
+      <tr>
+        <td>Corporate</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-video">VIDEO</span></td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0 (uses LiveKit, not chat-service)</td>
+      </tr>
+      <tr style="font-weight: bold;">
+        <td>TOTAL</td>
+        <td>7</td>
+        <td>7</td>
+        <td>0</td>
+        <td>2</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="verdict-box">
+    <h3>No Frontend Migration Work Required</h3>
+    <p style="color: var(--text-muted);">
+      All 7 message API consumers are already on V3 paths.
+      The messages resource frontend migration can be marked as <strong>COMPLETE</strong>.
+      The remaining admin moderation endpoints are a separate migration scope.
+    </p>
+  </div>
+
+  <div class="note">
+    <strong>Recommended next step:</strong> Run <code>/api-frontend:validate messages</code> to formally
+    confirm zero V2 references. Since all consumers already use V3, this should pass immediately.
+    Then proceed to the V2 deprecation phase (<code>/api:deprecate chat-service messages</code>).
+  </div>
+</section>
+
+</div>
+</body>
+</html>

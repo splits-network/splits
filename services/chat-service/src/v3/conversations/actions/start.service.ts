@@ -11,7 +11,7 @@ import { BadRequestError } from '@splits-network/shared-fastify';
 import { StartActionRepository } from './start.repository';
 import { IEventPublisher } from '../../../v2/shared/events';
 import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { assertContextAccess } from './context-access';
+import { assertContextAccess } from '../lib/context-access';
 
 interface StartInput {
   participantUserId: string;

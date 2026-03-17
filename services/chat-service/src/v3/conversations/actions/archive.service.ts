@@ -8,7 +8,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { ArchiveActionRepository } from './archive.repository';
 import { IEventPublisher } from '../../../v2/shared/events';
 import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant } from './participant-helper';
+import { resolveAndValidateParticipant } from '../lib/participant-helper';
 
 export class ArchiveActionService {
   constructor(

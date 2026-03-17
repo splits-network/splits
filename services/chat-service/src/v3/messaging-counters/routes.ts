@@ -49,4 +49,38 @@ export function registerMessagingCounterRoutes(
     const data = await service.getById(id, clerkUserId);
     return reply.send({ data });
   });
+
+  // POST /api/v3/messaging-counters — not supported (system-managed)
+  app.post('/api/v3/messaging-counters', async (_request, reply) => {
+    return reply.status(400).send({
+      error: {
+        code: 'NOT_SUPPORTED',
+        message: 'Messaging counters are system-managed and cannot be created manually.',
+      },
+    });
+  });
+
+  // PATCH /api/v3/messaging-counters/:id — not supported (system-managed)
+  app.patch('/api/v3/messaging-counters/:id', {
+    schema: { params: idParamSchema },
+  }, async (_request, reply) => {
+    return reply.status(400).send({
+      error: {
+        code: 'NOT_SUPPORTED',
+        message: 'Messaging counters are system-managed and cannot be updated manually.',
+      },
+    });
+  });
+
+  // DELETE /api/v3/messaging-counters/:id — not supported (system-managed)
+  app.delete('/api/v3/messaging-counters/:id', {
+    schema: { params: idParamSchema },
+  }, async (_request, reply) => {
+    return reply.status(400).send({
+      error: {
+        code: 'NOT_SUPPORTED',
+        message: 'Messaging counters are system-managed and cannot be deleted.',
+      },
+    });
+  });
 }

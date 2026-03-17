@@ -126,8 +126,8 @@ export function ActionsToolbar({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.post(`/chat/blocks`, {
-                blockedUserId: otherUserId,
+            await client.post(`/blocks`, {
+                blocked_user_id: otherUserId,
             });
             toast.success("User blocked.");
             refresh();
@@ -145,7 +145,7 @@ export function ActionsToolbar({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.post(`/chat/reports`, {
+            await client.post(`/chat/reports/actions/submit`, {
                 conversationId: convoId,
                 reportedUserId: otherUserId,
                 category: reportCategory,

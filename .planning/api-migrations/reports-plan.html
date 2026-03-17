@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>V2 to V3 Migration Plan -- Chat Reports</title>
+<style>
+  :root { --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a; --text: #e4e4e7; --muted: #9ca3af; --primary: #233876; --accent: #0f9d8a; --warn: #f59e0b; --error: #ef4444; --success: #10b981; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; }
+  h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.25rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; margin: 2.5rem 0 1rem; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+  h3 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+  .kicker { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); }
+  .subtitle { color: var(--muted); margin-bottom: 2rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  th, td { text-align: left; padding: 0.6rem 0.8rem; border: 1px solid var(--border); font-size: 0.875rem; }
+  th { background: var(--surface); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; color: var(--muted); }
+  td { background: var(--bg); }
+  code { background: var(--surface); padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.8rem; color: var(--accent); }
+  .badge { display: inline-block; padding: 0.15em 0.5em; border-radius: 3px; font-size: 0.75rem; font-weight: 600; }
+  .badge-crud { background: var(--primary); color: #fff; }
+  .badge-action { background: var(--warn); color: #000; }
+  .badge-view { background: var(--accent); color: #000; }
+  .badge-new { background: var(--success); color: #000; }
+  .file-tree { font-family: monospace; font-size: 0.85rem; line-height: 1.8; background: var(--surface); padding: 1rem 1.5rem; border: 1px solid var(--border); }
+  .file-tree .new { color: var(--success); }
+  .file-tree .existing { color: var(--muted); }
+  .section { margin-bottom: 3rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); padding: 1.25rem; }
+  .card-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 0.5rem; }
+  .stat { font-size: 2rem; font-weight: 800; }
+  .stat-label { font-size: 0.85rem; color: var(--muted); }
+  .note { background: var(--surface); border-left: 3px solid var(--warn); padding: 0.75rem 1rem; font-size: 0.875rem; margin: 1rem 0; }
+</style>
+</head>
+<body>
+
+<p class="kicker">V2 to V3 Migration Plan</p>
+<h1>Chat Reports Resource</h1>
+<p class="subtitle">Service: chat-service | Table: chat_reports, chat_moderation_audit | Generated: 2026-03-17</p>
+
+<!-- ============================================================ -->
+<h2>1. V2 API Surface</h2>
+
+<p>The "reports" resource spans two concerns: <strong>user-facing report submission</strong> and <strong>admin moderation</strong> (reports queue, evidence, actions, audit log, metrics). All currently live in the monolithic <code>v2/chat/routes.ts</code> file.</p>
+
+<table>
+  <thead>
+    <tr><th>Method</th><th>V2 Path</th><th>Purpose</th><th>Auth</th><th>Tables</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>POST</code></td>
+      <td><code>/api/v2/chat/reports</code></td>
+      <td>Submit a report (user-facing)</td>
+      <td>Required</td>
+      <td>chat_reports, chat_messages (evidence)</td>
+    </tr>
+    <tr>
+      <td><code>GET</code></td>
+      <td><code>/api/v2/admin/chat/reports</code></td>
+      <td>List all reports (admin only)</td>
+      <td>Required + isPlatformAdmin</td>
+      <td>chat_reports</td>
+    </tr>
+    <tr>
+      <td><code>GET</code></td>
+      <td><code>/api/v2/admin/chat/reports/:id/evidence</code></td>
+      <td>Get report with evidence messages</td>
+      <td>Required + isPlatformAdmin</td>
+      <td>chat_reports, chat_messages</td>
+    </tr>
+    <tr>
+      <td><code>POST</code></td>
+      <td><code>/api/v2/admin/chat/reports/:id/action</code></td>
+      <td>Take moderation action on report</td>
+      <td>Required + isPlatformAdmin</td>
+      <td>chat_reports, chat_moderation_audit</td>
+    </tr>
+    <tr>
+      <td><code>GET</code></td>
+      <td><code>/api/v2/admin/chat/audit</code></td>
+      <td>List moderation audit log</td>
+      <td>Required + isPlatformAdmin</td>
+      <td>chat_moderation_audit</td>
+    </tr>
+    <tr>
+      <td><code>GET</code></td>
+      <td><code>/api/v2/admin/chat/metrics</code></td>
+      <td>Admin dashboard metrics</td>
+      <td>Required + isPlatformAdmin</td>
+      <td>Multiple tables (counts)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Note:</strong> V3 aliases already exist for <code>POST /api/v3/chat/reports</code> in the V2 routes file (line 902). This alias calls the same V2 service. The V3 gateway has a proxy entry for it. The admin endpoints have no V3 aliases yet.
+</div>
+
+<!-- ============================================================ -->
+<h2>2. Consumer Map</h2>
+
+<h3>User-facing: POST /chat/reports</h3>
+<table>
+  <thead><tr><th>App</th><th>File</th><th>Call</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>portal</td>
+      <td><code>apps/portal/src/components/basel/messages/actions-toolbar.tsx:148</code></td>
+      <td><code>client.post('/chat/reports', { ... })</code></td>
+    </tr>
+    <tr>
+      <td>candidate</td>
+      <td><code>apps/candidate/src/app/portal/messages/components/thread/thread-panel.tsx:280</code></td>
+      <td><code>client.post('/chat/reports', { ... })</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Admin: GET/POST /admin/chat/reports, /admin/chat/audit, /admin/chat/metrics</h3>
+<table>
+  <thead><tr><th>App</th><th>File</th><th>Calls</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>portal</td>
+      <td><code>apps/portal/src/app/portal/admin/chat/components/chat-moderation-client.tsx</code></td>
+      <td>
+        <code>client.get('/admin/chat/reports')</code> (line 58)<br/>
+        <code>client.get('/admin/chat/reports/:id/evidence')</code> (line 81)<br/>
+        <code>client.post('/admin/chat/reports/:id/action')</code> (line 125)<br/>
+        <code>client.get('/admin/chat/audit')</code> (line 69)
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Path prefix:</strong> The shared API client defaults to <code>/api/v3</code> prefix. Frontend calls like <code>client.get('/admin/chat/reports')</code> become <code>GET /api/v3/admin/chat/reports</code>. Currently these have NO gateway route in V3 -- they likely fall through to the V2 catch-all (<code>/api/v2/chat/*</code>) via some path rewriting, or are broken. The V3 migration must add proper gateway routes.
+</div>
+
+<!-- ============================================================ -->
+<h2>3. Migration Classification</h2>
+
+<table>
+  <thead>
+    <tr><th>V2 Route</th><th>V3 Category</th><th>V3 Path</th><th>Reason</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>POST /v2/chat/reports</code></td>
+      <td><span class="badge badge-action">Action</span></td>
+      <td><code>POST /v3/chat/reports/actions/submit</code></td>
+      <td>Side-effect: creates report + collects evidence messages. Not CRUD (no list/get/update/delete for normal users).</td>
+    </tr>
+    <tr>
+      <td><code>GET /v2/admin/chat/reports</code></td>
+      <td><span class="badge badge-crud">Core CRUD</span></td>
+      <td><code>GET /v3/chat/reports</code></td>
+      <td>Standard list of reports (flat, single table). Admin-only via service layer.</td>
+    </tr>
+    <tr>
+      <td><code>GET /v2/admin/chat/reports/:id</code></td>
+      <td><span class="badge badge-crud">Core CRUD</span></td>
+      <td><code>GET /v3/chat/reports/:id</code></td>
+      <td>Standard get by ID (flat). Does not exist in V2 but needed for Core 5.</td>
+    </tr>
+    <tr>
+      <td><code>GET /v2/admin/chat/reports/:id/evidence</code></td>
+      <td><span class="badge badge-view">View</span></td>
+      <td><code>GET /v3/chat/reports/:id/view/evidence</code></td>
+      <td>Joins chat_reports + chat_messages. Shaped response with evidence bundle.</td>
+    </tr>
+    <tr>
+      <td><code>POST /v2/admin/chat/reports/:id/action</code></td>
+      <td><span class="badge badge-action">Action</span></td>
+      <td><code>POST /v3/chat/reports/:id/actions/moderate</code></td>
+      <td>Side-effect: updates report status + creates moderation audit record.</td>
+    </tr>
+    <tr>
+      <td>N/A (Core 5 requirement)</td>
+      <td><span class="badge badge-crud">Core CRUD</span></td>
+      <td><code>POST /v3/chat/reports</code></td>
+      <td>Core 5 POST. Redirects to /actions/submit (same pattern as conversations).</td>
+    </tr>
+    <tr>
+      <td>N/A (Core 5 requirement)</td>
+      <td><span class="badge badge-crud">Core CRUD</span></td>
+      <td><code>PATCH /v3/chat/reports/:id</code></td>
+      <td>Core 5 PATCH. Admin updates report status directly (simple field update).</td>
+    </tr>
+    <tr>
+      <td>N/A (Core 5 requirement)</td>
+      <td><span class="badge badge-crud">Core CRUD</span></td>
+      <td><code>DELETE /v3/chat/reports/:id</code></td>
+      <td>Core 5 DELETE. Soft-delete a report (admin only).</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Scope note:</strong> The admin audit log (<code>GET /admin/chat/audit</code>) and admin metrics (<code>GET /admin/chat/metrics</code>) are separate resources, not part of the reports migration. They should be migrated as their own resources in a future pass.
+</div>
+
+<!-- ============================================================ -->
+<h2>4. Frontend Impact</h2>
+
+<table>
+  <thead>
+    <tr><th>File</th><th>Current Call</th><th>New V3 Call</th><th>Change</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>apps/portal/.../actions-toolbar.tsx</code></td>
+      <td><code>POST /chat/reports</code></td>
+      <td><code>POST /chat/reports/actions/submit</code></td>
+      <td>URL change only</td>
+    </tr>
+    <tr>
+      <td><code>apps/candidate/.../thread-panel.tsx</code></td>
+      <td><code>POST /chat/reports</code></td>
+      <td><code>POST /chat/reports/actions/submit</code></td>
+      <td>URL change only</td>
+    </tr>
+    <tr>
+      <td><code>apps/portal/.../chat-moderation-client.tsx</code></td>
+      <td><code>GET /admin/chat/reports</code></td>
+      <td><code>GET /chat/reports</code></td>
+      <td>URL change (admin prefix removed, admin auth in service)</td>
+    </tr>
+    <tr>
+      <td><code>apps/portal/.../chat-moderation-client.tsx</code></td>
+      <td><code>GET /admin/chat/reports/:id/evidence</code></td>
+      <td><code>GET /chat/reports/:id/view/evidence</code></td>
+      <td>URL change to view pattern</td>
+    </tr>
+    <tr>
+      <td><code>apps/portal/.../chat-moderation-client.tsx</code></td>
+      <td><code>POST /admin/chat/reports/:id/action</code></td>
+      <td><code>POST /chat/reports/:id/actions/moderate</code></td>
+      <td>URL change to action pattern</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2>5. V3 File Plan</h2>
+
+<div class="file-tree">
+<span class="existing">services/chat-service/src/v3/</span><br/>
+<span class="existing">&nbsp;&nbsp;routes.ts</span> <em style="color:var(--warn)">(update: register reports)</em><br/>
+<span class="new">&nbsp;&nbsp;reports/</span><br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;types.ts</span> &mdash; ChatReport, CreateReportInput, UpdateReportInput, JSON schemas<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;repository.ts</span> &mdash; Core CRUD on chat_reports (flat, no joins)<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;service.ts</span> &mdash; Admin auth via AccessContextResolver, typed errors<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;routes.ts</span> &mdash; Core 5 routes + view/action registration<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;views/</span><br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;evidence.repository.ts</span> &mdash; Report + messages join<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;evidence.service.ts</span> &mdash; Admin check, evidence shaping<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;evidence.route.ts</span> &mdash; GET /chat/reports/:id/view/evidence<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;actions/</span><br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;submit.repository.ts</span> &mdash; Insert report + fetch evidence messages<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;submit.service.ts</span> &mdash; Participant check, evidence collection, insert<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;submit.route.ts</span> &mdash; POST /chat/reports/actions/submit<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;moderate.repository.ts</span> &mdash; Update report status + insert audit record<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;moderate.service.ts</span> &mdash; Admin check, validation, event publishing<br/>
+<span class="new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;moderate.route.ts</span> &mdash; POST /chat/reports/:id/actions/moderate<br/>
+<br/>
+<span class="existing">services/api-gateway/src/routes/v3/chat.ts</span> <em style="color:var(--warn)">(update: add reports routes)</em>
+</div>
+
+<!-- ============================================================ -->
+<h2>6. Estimated Scope</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">New V3 Files</div>
+    <div class="stat">13</div>
+    <div class="stat-label">types + repo + service + routes + 3 views + 6 actions</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Files to Update</div>
+    <div class="stat">2</div>
+    <div class="stat-label">v3/routes.ts + api-gateway chat.ts</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Frontend Files (future)</div>
+    <div class="stat">3</div>
+    <div class="stat-label">actions-toolbar.tsx, thread-panel.tsx, chat-moderation-client.tsx</div>
+  </div>
+  <div class="card">
+    <div class="card-title">V2 Files Modified</div>
+    <div class="stat" style="color:var(--success)">0</div>
+    <div class="stat-label">V2 is untouched per migration rules</div>
+  </div>
+</div>
+
+</body>
+</html>

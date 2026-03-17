@@ -43,17 +43,47 @@ const chatV3Routes: V3RouteConfig[] = [
   { path: '/chat/conversations/:id/archive', method: 'DELETE', auth: 'required' },
   { path: '/chat/conversations/:id/read-receipt', method: 'POST', auth: 'required' },
 
-  // -- Blocks --
-  { path: '/chat/blocks', method: 'POST', auth: 'required' },
-  { path: '/chat/blocks/:blockedUserId', method: 'DELETE', auth: 'required' },
+  // -- Blocks (V3 CRUD) --
+  { resource: 'chat/blocks', auth: 'required' },
 
-  // -- Reports --
+  // -- Reports Views (before :id to avoid collision) --
+  { path: '/chat/reports/:id/view/evidence', method: 'GET', auth: 'required' },
+
+  // -- Reports Actions (before :id to avoid collision) --
+  { path: '/chat/reports/actions/submit', method: 'POST', auth: 'required' },
+  { path: '/chat/reports/:id/actions/moderate', method: 'POST', auth: 'required' },
+
+  // -- Reports Core CRUD (admin-only, enforced in service layer) --
+  { resource: 'chat/reports', auth: 'required' },
+
+  // -- Reports V2 compat (remove after frontend migration) --
   { path: '/chat/reports', method: 'POST', auth: 'required' },
 
-  // -- Attachments --
+  // -- Attachments V3 (proper URL structure) --
+  { path: '/chat/attachments/actions/init-upload', method: 'POST', auth: 'required' },
+  { path: '/chat/attachments/:id/actions/complete-upload', method: 'POST', auth: 'required' },
+  { path: '/chat/attachments/:id/view/download', method: 'GET', auth: 'required' },
+  { resource: 'chat/attachments', auth: 'required' },
+
+  // -- Attachments V2 compat (remove after frontend migration) --
   { path: '/chat/attachments/init', method: 'POST', auth: 'required' },
   { path: '/chat/attachments/:id/complete', method: 'POST', auth: 'required' },
   { path: '/chat/attachments/:id/download-url', method: 'GET', auth: 'required' },
+
+  // -- Moderation: Metrics View (before any :id routes) --
+  { path: '/moderation/views/metrics', method: 'GET', auth: 'required' },
+
+  // -- Moderation: Audit Log Core CRUD --
+  { path: '/moderation/audit-log', method: 'GET', auth: 'required' },
+  { path: '/moderation/audit-log/:id', method: 'GET', auth: 'required' },
+  { path: '/moderation/audit-log', method: 'POST', auth: 'required' },
+  { path: '/moderation/audit-log/:id', method: 'PATCH', auth: 'required' },
+  { path: '/moderation/audit-log/:id', method: 'DELETE', auth: 'required' },
+
+  // -- Messages Core CRUD --
+  { path: '/chat/messages/:id', method: 'GET', auth: 'required' },
+  { path: '/chat/messages/:id', method: 'PATCH', auth: 'required' },
+  { path: '/chat/messages/:id', method: 'DELETE', auth: 'required' },
 
   // -- Messages Actions --
   { path: '/chat/messages/:id/actions/redact', method: 'POST', auth: 'required' },
@@ -72,7 +102,10 @@ const chatV3Routes: V3RouteConfig[] = [
 
   // -- Messaging Counters --
   { path: '/messaging-counters', method: 'GET', auth: 'required' },
+  { path: '/messaging-counters', method: 'POST', auth: 'required' },
   { path: '/messaging-counters/:id', method: 'GET', auth: 'required' },
+  { path: '/messaging-counters/:id', method: 'PATCH', auth: 'required' },
+  { path: '/messaging-counters/:id', method: 'DELETE', auth: 'required' },
 ];
 
 export function registerChatV3Routes(app: FastifyInstance, services: ServiceRegistry) {
