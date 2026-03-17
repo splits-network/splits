@@ -651,10 +651,6 @@ async function main() {
         supabaseKey,
     );
 
-    // Initialize Supabase client for auth headers context injection
-    const { setSupabaseClient } = await import('./helpers/auth-headers');
-    setSupabaseClient(supabase);
-
     // Register V2 proxy routes (legacy)
     registerV2GatewayRoutes(app, services, { eventPublisher, redis, supabase });
 

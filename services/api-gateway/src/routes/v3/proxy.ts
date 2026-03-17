@@ -70,8 +70,7 @@ async function proxyGet(
     try {
         const queryString = buildQueryString(request.query as Record<string, any>);
         const fullPath = queryString ? `${servicePath}?${queryString}` : servicePath;
-        const headers = await buildAuthHeaders(request);
-        const data = await client.get(fullPath, undefined, getCorrelationId(request), headers);
+        const data = await client.get(fullPath, undefined, getCorrelationId(request), buildAuthHeaders(request));
         return reply.send(data);
     } catch (error: any) {
         return reply.status(error.statusCode || 500).send(
@@ -90,7 +89,7 @@ async function proxyMutate(
 ) {
     try {
         const correlationId = getCorrelationId(request);
-        const headers = await buildAuthHeaders(request);
+        const headers = buildAuthHeaders(request);
         let data: any;
 
         if (method === 'delete') {
