@@ -145,10 +145,13 @@ export class SupportConversationRepository {
         clerkUserId: string,
         headers?: Record<string, unknown>,
     ): Promise<void> {
-        const { resolveAccessContext } = await import(
-            "@splits-network/shared-access-context"
+        const { resolveAccessContext } =
+            await import("@splits-network/shared-access-context");
+        const ctx = await resolveAccessContext(
+            this.supabase,
+            clerkUserId,
+            headers,
         );
-        const ctx = await resolveAccessContext(this.supabase, clerkUserId, headers);
         const userId = ctx.identityUserId || null;
 
         const updates: Record<string, any> = {

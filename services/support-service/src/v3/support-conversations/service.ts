@@ -67,12 +67,15 @@ export class SupportConversationService {
         );
 
         if (this.supportEventPublisher) {
-            await this.supportEventPublisher.publishToConversation(conversation.id, {
-                type: "conversation.created",
-                eventVersion: 1,
-                serverTime: new Date().toISOString(),
-                data: { conversation },
-            });
+            await this.supportEventPublisher.publishToConversation(
+                conversation.id,
+                {
+                    type: "conversation.created",
+                    eventVersion: 1,
+                    serverTime: new Date().toISOString(),
+                    data: { conversation },
+                },
+            );
             await this.supportEventPublisher.publishToAdminQueue({
                 type: "support.conversation.new",
                 eventVersion: 1,
@@ -109,7 +112,11 @@ export class SupportConversationService {
         return this.repository.findVisitorConversations(sessionId, clerkUserId);
     }
 
-    async listMessages(conversationId: string, limit: number = 50, before?: string) {
+    async listMessages(
+        conversationId: string,
+        limit: number = 50,
+        before?: string,
+    ) {
         return this.repository.listMessages(conversationId, limit, before);
     }
 
@@ -124,15 +131,20 @@ export class SupportConversationService {
             senderId,
             body,
         );
-        await this.repository.update(conversationId, { status: "waiting_on_admin" });
+        await this.repository.update(conversationId, {
+            status: "waiting_on_admin",
+        });
 
         if (this.supportEventPublisher) {
-            await this.supportEventPublisher.publishToConversation(conversationId, {
-                type: "message.new",
-                eventVersion: 1,
-                serverTime: new Date().toISOString(),
-                data: { message },
-            });
+            await this.supportEventPublisher.publishToConversation(
+                conversationId,
+                {
+                    type: "message.new",
+                    eventVersion: 1,
+                    serverTime: new Date().toISOString(),
+                    data: { message },
+                },
+            );
             await this.supportEventPublisher.publishToAdminQueue({
                 type: "support.message.new",
                 eventVersion: 1,
@@ -144,7 +156,15 @@ export class SupportConversationService {
         return message;
     }
 
-    async linkSession(sessionId: string, clerkUserId: string, headers?: Record<string, unknown>) {
-        await this.repository.linkSessionToUser(sessionId, clerkUserId, headers);
+    async linkSession(
+        sessionId: string,
+        clerkUserId: string,
+        headers?: Record<string, unknown>,
+    ) {
+        await this.repository.linkSessionToUser(
+            sessionId,
+            clerkUserId,
+            headers,
+        );
     }
 }
