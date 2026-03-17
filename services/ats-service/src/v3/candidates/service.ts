@@ -101,6 +101,14 @@ export class CandidateService {
     // Check for existing candidate by email
     const existing = await this.repository.findByEmail(input.email);
     if (existing) {
+      // Claim unclaimed candidate (e.g. recruiter-created with no user_id)
+      if (!existing.user_id && input.user_id) {
+        await this.repository.update(existing.id, { user_id: input.user_id });
+        await this.repository.createUserRole(input.user_id, existing.id);
+        await this.createSourcerFromReferral(existing.id, input.user_id);
+        const claimed = await this.repository.findById(existing.id);
+        return { candidate: claimed || existing, meta: { existing: true, claimed: true } };
+      }
       return { candidate: existing, meta: { existing: true } };
     }
 
