@@ -61,7 +61,10 @@ const chatV3Routes: V3RouteConfig[] = [
   // -- Messages (admin, V2 compat) --
   { path: '/chat/messages/:id', method: 'PATCH', auth: 'required' },
 
-  // -- Presence --
+  // -- Presence V3 (standalone resource, served by chat-service) --
+  { path: '/presence/views/batch-status', method: 'GET', auth: 'required' },
+
+  // -- Presence V2 compat (remove after frontend migration) --
   { path: '/chat/presence', method: 'GET', auth: 'required' },
 
   // -- Messaging Counters Views --
