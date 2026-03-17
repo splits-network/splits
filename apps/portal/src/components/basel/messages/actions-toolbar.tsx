@@ -83,10 +83,10 @@ export function ActionsToolbar({
             if (!token) return;
             const client = createAuthenticatedClient(token);
             if (isMuted) {
-                await client.delete(`/chat/conversations/${convoId}/mute`);
+                await client.post(`/chat/conversations/${convoId}/actions/mute`, { muted: false });
                 toast.success("Conversation unmuted.");
             } else {
-                await client.post(`/chat/conversations/${convoId}/mute`);
+                await client.post(`/chat/conversations/${convoId}/actions/mute`, { muted: true });
                 toast.success("Conversation muted.");
             }
             refresh();
@@ -104,10 +104,10 @@ export function ActionsToolbar({
             if (!token) return;
             const client = createAuthenticatedClient(token);
             if (isArchived) {
-                await client.delete(`/chat/conversations/${convoId}/archive`);
+                await client.post(`/chat/conversations/${convoId}/actions/archive`, { archived: false });
                 toast.success("Conversation unarchived.");
             } else {
-                await client.post(`/chat/conversations/${convoId}/archive`);
+                await client.post(`/chat/conversations/${convoId}/actions/archive`, { archived: true });
                 toast.success("Conversation archived.");
             }
             refresh();
