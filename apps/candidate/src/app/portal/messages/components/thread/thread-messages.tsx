@@ -186,7 +186,7 @@ export function ThreadMessages({
                                             content={
                                                 msg.body || "Message removed"
                                             }
-                                            className={`[&_p]:m-0 [&_ul]:my-2 [&_ol]:my-2 ${isOwn ? "text-primary-content" : "text-base-content/90"}`}
+                                            className={`[&_p]:!m-0 [&_ul]:!my-2 [&_ol]:!my-2 ${isOwn ? "text-primary-content" : "text-base-content/90"}`}
                                         />
                                     </div>
                                 </div>
