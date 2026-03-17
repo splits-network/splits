@@ -5,10 +5,9 @@ import { useAuth } from "@clerk/nextjs";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
     BadgeGrid,
-    LevelBadge,
     MiniLeaderboard,
 } from "@splits-network/shared-gamification";
-import { BaselTabBar, useScrollReveal } from "@splits-network/basel-ui";
+import { BaselTabBar, BaselAvatar, BaselLevelIndicator, useScrollReveal } from "@splits-network/basel-ui";
 import type {
     BadgeAward,
     EntityLevelInfo,
@@ -16,8 +15,7 @@ import type {
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { ApiClient } from "@/lib/api-client";
 import { formatRelativeTime } from "@/lib/utils";
-import { usePresence } from "@/hooks/use-presence";
-import { Presence } from "@/components/presence";
+import { useRegisterPresence, usePresenceStatus } from "@/contexts";
 import ConnectModal, { type ConnectModalHandle } from "./connect-modal";
 import SimilarRecruiters from "./similar-recruiters";
 
@@ -212,12 +210,12 @@ export default function RecruiterProfileClient({
     const [badges, setBadges] = useState<BadgeAward[]>([]);
     const [level, setLevel] = useState<EntityLevelInfo | null>(null);
     const { isSignedIn, getToken } = useAuth();
-    const presence = usePresence([recruiter.user_id], {
-        enabled: Boolean(recruiter.user_id),
-    });
-    const presenceStatus = recruiter.user_id
-        ? presence[recruiter.user_id]?.status
-        : undefined;
+    const registerPresence = useRegisterPresence();
+    useEffect(() => {
+        if (recruiter.user_id) registerPresence([recruiter.user_id]);
+    }, [recruiter.user_id, registerPresence]);
+    const presenceData = usePresenceStatus(recruiter.user_id);
+    const presenceStatus = presenceData?.status;
 
     /* ─── Check existing connection ──────────────────────────────────── */
 
@@ -332,13 +330,6 @@ export default function RecruiterProfileClient({
                                 <i className="fa-duotone fa-regular fa-badge-check text-sm" />
                                 Verified
                             </span>
-                            {presenceStatus === "online" && (
-                                <Presence
-                                    status={presenceStatus}
-                                    variant="badge"
-                                    size="sm"
-                                />
-                            )}
                         </div>
                     </div>
 
@@ -346,17 +337,13 @@ export default function RecruiterProfileClient({
                     <div className="flex flex-col lg:flex-row lg:items-end gap-8">
                         <div className="flex items-end gap-5 flex-1">
                             <div className="profile-avatar scroll-reveal pop-in shrink-0">
-                                {recruiter.users?.profile_image_url ? (
-                                    <img
-                                        src={recruiter.users.profile_image_url}
-                                        alt={name}
-                                        className="w-20 h-20 lg:w-24 lg:h-24 object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-20 h-20 lg:w-24 lg:h-24 bg-primary text-primary-content flex items-center justify-center text-2xl lg:text-3xl font-black tracking-tight select-none">
-                                        {getInitials(name)}
-                                    </div>
-                                )}
+                                <BaselAvatar
+                                    initials={getInitials(name)}
+                                    src={recruiter.users?.profile_image_url}
+                                    alt={name}
+                                    size="xl"
+                                    presence={presenceStatus}
+                                />
                             </div>
 
                             <div className="profile-name scroll-reveal fade-up min-w-0 pb-1">
@@ -369,9 +356,10 @@ export default function RecruiterProfileClient({
                                     {name}
                                     {level && (
                                         <span className="ml-3 align-middle inline-block">
-                                            <LevelBadge
-                                                level={level}
-                                                size="md"
+                                            <BaselLevelIndicator
+                                                level={level.level}
+                                                title={level.title}
+                                                totalXp={level.totalXp}
                                             />
                                         </span>
                                     )}
