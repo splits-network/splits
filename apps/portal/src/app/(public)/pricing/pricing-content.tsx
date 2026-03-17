@@ -187,22 +187,22 @@ export function PricingContent() {
                         </p>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-8">
-                            <span className="scroll-reveal fade-up inline-block text-base-content">
+                            <span className="scroll-reveal fade-up inline-block text-neutral-content">
                                 Predictable
                             </span>{" "}
-                            <span className="scroll-reveal fade-up inline-block text-base-content">
+                            <span className="scroll-reveal fade-up inline-block text-neutral-content">
                                 costs.
                             </span>
                             <br />
                             <span className="scroll-reveal fade-up inline-block text-primary">
                                 Compounding
                             </span>{" "}
-                            <span className="scroll-reveal fade-up inline-block text-base-content">
+                            <span className="scroll-reveal fade-up inline-block text-neutral-content">
                                 returns.
                             </span>
                         </h1>
 
-                        <p className="scroll-reveal fade-up text-lg md:text-xl text-base-content/70 leading-relaxed max-w-xl mb-10">
+                        <p className="scroll-reveal fade-up text-lg md:text-xl text-neutral-content/70 leading-relaxed max-w-xl mb-10">
                             Three tiers. One transparent model. Your
                             subscription is the only recurring cost -- placement
                             earnings are yours to keep. Start free, scale when
@@ -217,7 +217,7 @@ export function PricingContent() {
                                 <i className="fa-duotone fa-regular fa-rocket" />
                                 Start Recruiting
                             </a>
-                            <span className="text-sm font-semibold uppercase tracking-[0.15em] text-base-content/50">
+                            <span className="text-sm font-semibold uppercase tracking-[0.15em] text-neutral-content/50">
                                 Free tier. No credit card. No expiration.
                             </span>
                         </div>
@@ -350,7 +350,7 @@ export function PricingContent() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="grid lg:grid-cols-5 gap-12 items-center">
                         <div className="scroll-reveal slide-from-left lg:col-span-4 border-l-4 border-secondary pl-8 md:pl-12">
-                            <p className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-[0.95] text-base-content">
+                            <p className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-[0.95] text-neutral-content">
                                 The platform charges a subscription. It does not
                                 take a cut of your placements. That distinction
                                 changes the economics of every deal you close.

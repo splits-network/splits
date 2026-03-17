@@ -569,35 +569,69 @@ export class OutboxWorker {
     private timer: NodeJS.Timeout | null = null;
     private processing = false;
     private readonly maxAttempts: number;
+    private currentPollInterval: number;
+    private consecutiveEmptyPolls = 0;
+    private readonly maxPollInterval: number;
+    private subscription: any = null;
+    private fallbackTimer: NodeJS.Timeout | null = null;
+    private useRealtime: boolean = true;
 
     constructor(
         private supabase: SupabaseClient,
         private eventPublisher: EventPublisher,
         private sourceService: string,
         private logger: Logger,
-        private pollIntervalMs = 5000,
+        private pollIntervalMs = 120000, // 2-minute fallback when realtime fails
         private batchSize = 50,
         maxAttempts = 5,
+        useRealtime = true, // Enable realtime subscriptions by default
     ) {
         this.maxAttempts = maxAttempts;
+        this.currentPollInterval = pollIntervalMs;
+        this.maxPollInterval = Math.max(pollIntervalMs * 4, 300000); // Max 5 minutes
+        this.useRealtime = useRealtime;
     }
 
     start(): void {
-        if (this.timer) return;
-        // Run immediately on start to flush any events that accumulated during downtime.
+        if (this.timer || this.subscription) return;
+
+        // Run immediately on start to flush any events that accumulated during downtime
         void this.poll();
-        this.timer = setInterval(() => void this.poll(), this.pollIntervalMs);
+
+        if (this.useRealtime) {
+            this.setupRealTimeSubscription();
+        } else {
+            this.startFallbackPolling();
+        }
+
         this.logger.info(
-            { sourceService: this.sourceService, pollIntervalMs: this.pollIntervalMs },
-            'OutboxWorker started'
+            {
+                sourceService: this.sourceService,
+                useRealtime: this.useRealtime,
+                fallbackInterval: this.pollIntervalMs
+            },
+            'OutboxWorker started with real-time notifications + polling fallback'
         );
     }
 
     stop(): void {
+        // Clean up real-time subscription
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+            this.subscription = null;
+        }
+
+        // Clean up polling timers
         if (this.timer) {
-            clearInterval(this.timer);
+            clearTimeout(this.timer);
             this.timer = null;
         }
+
+        if (this.fallbackTimer) {
+            clearTimeout(this.fallbackTimer);
+            this.fallbackTimer = null;
+        }
+
         this.logger.info({ sourceService: this.sourceService }, 'OutboxWorker stopped');
     }
 
@@ -656,7 +690,43 @@ export class OutboxWorker {
                 return;
             }
 
-            if (!events || events.length === 0) return;
+            if (!events || events.length === 0) {
+                // Increase backoff when no events found
+                this.consecutiveEmptyPolls++;
+                if (this.consecutiveEmptyPolls <= 3) {
+                    const prevInterval = this.currentPollInterval;
+                    this.currentPollInterval = Math.min(
+                        this.currentPollInterval * 1.5,
+                        this.maxPollInterval
+                    );
+                    if (this.currentPollInterval !== prevInterval) {
+                        this.logger.debug(
+                            {
+                                sourceService: this.sourceService,
+                                consecutiveEmptyPolls: this.consecutiveEmptyPolls,
+                                prevInterval: prevInterval,
+                                newInterval: this.currentPollInterval
+                            },
+                            'OutboxWorker: No events found, increasing poll interval'
+                        );
+                    }
+                }
+                return;
+            }
+
+            // Reset backoff when events found
+            if (this.consecutiveEmptyPolls > 0) {
+                this.logger.debug(
+                    {
+                        sourceService: this.sourceService,
+                        consecutiveEmptyPolls: this.consecutiveEmptyPolls,
+                        resettingInterval: this.pollIntervalMs
+                    },
+                    'OutboxWorker: Events found, resetting poll interval'
+                );
+                this.consecutiveEmptyPolls = 0;
+                this.currentPollInterval = this.pollIntervalMs;
+            }
 
             this.logger.info(
                 { count: events.length, sourceService: this.sourceService },
@@ -668,7 +738,16 @@ export class OutboxWorker {
             }
         } finally {
             this.processing = false;
+            // Schedule next poll with current interval (may be backed off)
+            this.scheduleNextPoll();
         }
+    }
+
+    private scheduleNextPoll(): void {
+        if (this.timer) {
+            clearTimeout(this.timer);
+        }
+        this.timer = setTimeout(() => void this.poll(), this.currentPollInterval);
     }
 
     private async deliver(event: { id: string; event_type: string; payload: Record<string, any>; attempts: number }): Promise<void> {
@@ -715,5 +794,79 @@ export class OutboxWorker {
                     : 'OutboxWorker failed to deliver event, will retry'
             );
         }
+    }
+
+    /**
+     * Set up real-time subscription to outbox_events table
+     * Listens for INSERT events for this service's events only
+     */
+    private setupRealTimeSubscription(): void {
+        try {
+            const channelName = `outbox_worker_${this.sourceService}_${Date.now()}`;
+
+            this.subscription = this.supabase
+                .channel(channelName)
+                .on('postgres_changes',
+                    {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'outbox_events',
+                        filter: `source_service=eq.${this.sourceService}`
+                    },
+                    (payload) => {
+                        this.logger.debug(
+                            { sourceService: this.sourceService, eventId: payload.new?.id },
+                            'OutboxWorker: Real-time event received, processing immediately'
+                        );
+                        // Process immediately when new event is inserted
+                        void this.poll();
+                    }
+                )
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        this.logger.info(
+                            { sourceService: this.sourceService, channel: channelName },
+                            'OutboxWorker: Real-time subscription active'
+                        );
+                        // Start fallback polling at longer intervals as backup
+                        this.startFallbackPolling();
+                    } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+                        this.logger.warn(
+                            { sourceService: this.sourceService, status, channel: channelName },
+                            'OutboxWorker: Real-time subscription failed, using polling only'
+                        );
+                        // If subscription fails, just use regular polling
+                        if (!this.fallbackTimer) {
+                            this.startFallbackPolling();
+                        }
+                    }
+                });
+
+        } catch (error) {
+            this.logger.error(
+                { sourceService: this.sourceService, error: error instanceof Error ? error.message : String(error) },
+                'OutboxWorker: Failed to setup real-time subscription, falling back to polling'
+            );
+            this.startFallbackPolling();
+        }
+    }
+
+    /**
+     * Start fallback polling at longer intervals (as backup to real-time)
+     */
+    private startFallbackPolling(): void {
+        if (this.fallbackTimer) return;
+
+        // Use longer intervals since this is just a fallback
+        const fallbackInterval = Math.max(this.pollIntervalMs, 120000); // At least 2 minutes
+
+        this.fallbackTimer = setInterval(() => {
+            void this.poll();
+        }, fallbackInterval);
+
+        this.logger.debug(
+            { sourceService: this.sourceService, interval: fallbackInterval },
+            'OutboxWorker: Fallback polling started'
+        );
     }
 }
