@@ -46,7 +46,7 @@ export function registerNavigationRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const data = await service.upsert(request.body as UpsertNavigationInput, clerkUserId);
+    const data = await service.upsert(request.body as UpsertNavigationInput, clerkUserId, request.headers);
     return reply.code(201).send({ data });
   });
 
@@ -59,7 +59,7 @@ export function registerNavigationRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    await service.delete(id, clerkUserId);
+    await service.delete(id, clerkUserId, request.headers);
     return reply.send({ data: { message: 'Navigation deleted successfully' } });
   });
 }

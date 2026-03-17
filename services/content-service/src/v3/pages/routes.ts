@@ -63,7 +63,7 @@ export function registerPageRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const data = await service.create(request.body as CreatePageInput, clerkUserId);
+    const data = await service.create(request.body as CreatePageInput, clerkUserId, request.headers);
     return reply.code(201).send({ data });
   });
 
@@ -76,7 +76,7 @@ export function registerPageRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    const data = await service.update(id, request.body as UpdatePageInput, clerkUserId);
+    const data = await service.update(id, request.body as UpdatePageInput, clerkUserId, request.headers);
     return reply.send({ data });
   });
 
@@ -89,7 +89,7 @@ export function registerPageRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    await service.delete(id, clerkUserId);
+    await service.delete(id, clerkUserId, request.headers);
     return reply.send({ data: { message: 'Page deleted successfully' } });
   });
 }

@@ -48,14 +48,14 @@ export class TicketService {
         return ticket;
     }
 
-    async create(input: CreateTicketInput, clerkUserId?: string) {
+    async create(input: CreateTicketInput, clerkUserId?: string, headers?: Record<string, unknown>) {
         let userId: string | null = null;
         let visitorName = input.visitor_name || null;
         let visitorEmail = input.visitor_email || null;
 
         if (clerkUserId) {
             try {
-                const ctx = await this.accessResolver.resolve(clerkUserId);
+                const ctx = await this.accessResolver.resolve(clerkUserId, headers);
                 userId = ctx.identityUserId || null;
 
                 if (userId && (!visitorName || !visitorEmail)) {

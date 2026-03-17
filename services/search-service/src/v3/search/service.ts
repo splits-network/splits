@@ -14,8 +14,8 @@ export class SearchService {
     this.accessResolver = new AccessContextResolver(supabase);
   }
 
-  async search(params: SearchParams, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
+  async search(clerkUserId: string, params: SearchParams, headers?: Record<string, unknown>) {
+    const context = await this.accessResolver.resolve(clerkUserId, headers);
     const mode = params.mode || 'typeahead';
     const filters = params.filters ? JSON.parse(params.filters) : undefined;
 

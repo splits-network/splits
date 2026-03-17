@@ -28,7 +28,7 @@ export function registerATSIntegrationRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const result = await service.getAll(request.query as ATSListParams, clerkUserId);
+    const result = await service.getAll(request.query as ATSListParams, clerkUserId, request.headers);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
 
@@ -41,7 +41,7 @@ export function registerATSIntegrationRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    const data = await service.getById(id, clerkUserId);
+    const data = await service.getById(id, clerkUserId, request.headers);
     return reply.send({ data });
   });
 
@@ -53,7 +53,7 @@ export function registerATSIntegrationRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const data = await service.create(request.body as CreateATSInput, clerkUserId);
+    const data = await service.create(request.body as CreateATSInput, clerkUserId, request.headers);
     return reply.code(201).send({ data });
   });
 
@@ -66,7 +66,7 @@ export function registerATSIntegrationRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    const data = await service.update(id, request.body as UpdateATSInput, clerkUserId);
+    const data = await service.update(id, request.body as UpdateATSInput, clerkUserId, request.headers);
     return reply.send({ data });
   });
 
@@ -79,7 +79,7 @@ export function registerATSIntegrationRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    await service.delete(id, clerkUserId);
+    await service.delete(id, clerkUserId, request.headers);
     return reply.send({ data: { message: 'ATS integration disconnected successfully' } });
   });
 }

@@ -80,7 +80,7 @@ export function registerSupportConversationRoutes(
             // Only link if both sessionId and clerkUserId are present
             // Anonymous users will have sessionId but no clerkUserId
             if (ctx.clerkUserId) {
-                await service.linkSession(ctx.sessionId, ctx.clerkUserId);
+                await service.linkSession(ctx.sessionId, ctx.clerkUserId, request.headers);
             }
 
             return reply.send({ data: { status: "ok" } });

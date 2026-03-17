@@ -25,8 +25,8 @@ export class CallRecordingService {
     this.accessResolver = new AccessContextResolver(supabase);
   }
 
-  async getAll(params: CallRecordingListParams, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async getAll(params: CallRecordingListParams, clerkUserId: string, headers?: Record<string, any>) {
+    await this.accessResolver.resolve(clerkUserId, headers);
 
     const { data, total } = await this.repository.findAll(params);
 
@@ -38,16 +38,16 @@ export class CallRecordingService {
     };
   }
 
-  async getById(id: string, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async getById(id: string, clerkUserId: string, headers?: Record<string, any>) {
+    await this.accessResolver.resolve(clerkUserId, headers);
 
     const recording = await this.repository.findById(id);
     if (!recording) throw new NotFoundError('CallRecording', id);
     return recording;
   }
 
-  async create(input: CreateCallRecordingInput, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
+  async create(input: CreateCallRecordingInput, clerkUserId: string, headers?: Record<string, any>) {
+    const context = await this.accessResolver.resolve(clerkUserId, headers);
 
     const recording = await this.repository.create(input);
 
@@ -60,8 +60,8 @@ export class CallRecordingService {
     return recording;
   }
 
-  async update(id: string, input: UpdateCallRecordingInput, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
+  async update(id: string, input: UpdateCallRecordingInput, clerkUserId: string, headers?: Record<string, any>) {
+    const context = await this.accessResolver.resolve(clerkUserId, headers);
 
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('CallRecording', id);
@@ -79,8 +79,8 @@ export class CallRecordingService {
     return updated;
   }
 
-  async delete(id: string, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
+  async delete(id: string, clerkUserId: string, headers?: Record<string, any>) {
+    const context = await this.accessResolver.resolve(clerkUserId, headers);
 
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('CallRecording', id);

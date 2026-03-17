@@ -144,7 +144,7 @@ export class SupportConversationService {
         return message;
     }
 
-    async linkSession(sessionId: string, clerkUserId: string) {
-        await this.repository.linkSessionToUser(sessionId, clerkUserId);
+    async linkSession(sessionId: string, clerkUserId: string, headers?: Record<string, unknown>) {
+        await this.repository.linkSessionToUser(sessionId, clerkUserId, headers);
     }
 }

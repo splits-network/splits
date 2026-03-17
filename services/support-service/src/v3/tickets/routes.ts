@@ -72,7 +72,7 @@ export function registerTicketRoutes(
     schema: { body: createSchema },
   }, async (request, reply) => {
     const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
-    const data = await service.create(request.body as CreateTicketInput, clerkUserId);
+    const data = await service.create(request.body as CreateTicketInput, clerkUserId, request.headers);
     return reply.code(201).send({ data });
   });
 

@@ -42,7 +42,7 @@ export function registerConnectionRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const result = await service.getAll(request.query as ConnectionListParams, clerkUserId);
+    const result = await service.getAll(request.query as ConnectionListParams, clerkUserId, request.headers);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
 
@@ -55,7 +55,7 @@ export function registerConnectionRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    const data = await service.getById(id, clerkUserId);
+    const data = await service.getById(id, clerkUserId, request.headers);
     return reply.send({ data });
   });
 
@@ -68,7 +68,7 @@ export function registerConnectionRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    await service.delete(id, clerkUserId);
+    await service.delete(id, clerkUserId, request.headers);
     return reply.send({ data: { message: 'Connection disconnected successfully' } });
   });
 

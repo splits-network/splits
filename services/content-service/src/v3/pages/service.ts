@@ -23,8 +23,8 @@ export class PageService {
     this.accessResolver = new AccessContextResolver(supabase);
   }
 
-  private async requireAdmin(clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
+  private async requireAdmin(clerkUserId: string, headers?: Record<string, unknown>) {
+    const context = await this.accessResolver.resolve(clerkUserId, headers);
     if (!context.isPlatformAdmin) {
       throw new ForbiddenError('Only admins can manage content pages');
     }
@@ -53,8 +53,8 @@ export class PageService {
     return page;
   }
 
-  async create(input: CreatePageInput, clerkUserId: string) {
-    await this.requireAdmin(clerkUserId);
+  async create(input: CreatePageInput, clerkUserId: string, headers?: Record<string, unknown>) {
+    await this.requireAdmin(clerkUserId, headers);
 
     const existing = await this.repository.findBySlug(input.slug);
     if (existing) {
@@ -85,8 +85,8 @@ export class PageService {
     return page;
   }
 
-  async update(id: string, input: UpdatePageInput, clerkUserId: string) {
-    await this.requireAdmin(clerkUserId);
+  async update(id: string, input: UpdatePageInput, clerkUserId: string, headers?: Record<string, unknown>) {
+    await this.requireAdmin(clerkUserId, headers);
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('Page', id);
 
@@ -106,8 +106,8 @@ export class PageService {
     return page;
   }
 
-  async delete(id: string, clerkUserId: string) {
-    await this.requireAdmin(clerkUserId);
+  async delete(id: string, clerkUserId: string, headers?: Record<string, unknown>) {
+    await this.requireAdmin(clerkUserId, headers);
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('Page', id);
 

@@ -17,7 +17,7 @@ export function registerSearchRoutes(app: FastifyInstance, supabase: SupabaseCli
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const result = await service.search(request.query as SearchParams, clerkUserId);
+    const result = await service.search(clerkUserId, request.query as SearchParams, request.headers);
     return reply.send({ data: result });
   });
 }

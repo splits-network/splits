@@ -25,7 +25,7 @@ export function registerStatsRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const query = request.query as StatsQueryParams;
-    const data = await service.getStats(clerkUserId, query.entity_type, query.entity_id);
+    const data = await service.getStats(clerkUserId, query.entity_type, query.entity_id, request.headers);
     return reply.send({ data });
   });
 }

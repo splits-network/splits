@@ -20,8 +20,8 @@ export class ATSIntegrationService {
     this.accessResolver = new AccessContextResolver(supabase);
   }
 
-  async getAll(params: ATSListParams, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async getAll(params: ATSListParams, clerkUserId: string, headers?: Record<string, unknown>) {
+    await this.accessResolver.resolve(clerkUserId, headers);
     if (!params.company_id) throw new BadRequestError('company_id is required');
     const { data, total } = await this.repository.findAll(params);
     const page = params.page || 1;
@@ -32,15 +32,15 @@ export class ATSIntegrationService {
     };
   }
 
-  async getById(id: string, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async getById(id: string, clerkUserId: string, headers?: Record<string, unknown>) {
+    await this.accessResolver.resolve(clerkUserId, headers);
     const integration = await this.repository.findById(id);
     if (!integration) throw new NotFoundError('ATSIntegration', id);
     return integration;
   }
 
-  async create(input: CreateATSInput, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async create(input: CreateATSInput, clerkUserId: string, headers?: Record<string, unknown>) {
+    await this.accessResolver.resolve(clerkUserId, headers);
     const created = await this.repository.create(input);
 
     await this.eventPublisher?.publish('ats_integration.created', {
@@ -52,15 +52,15 @@ export class ATSIntegrationService {
     return created;
   }
 
-  async update(id: string, input: UpdateATSInput, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async update(id: string, input: UpdateATSInput, clerkUserId: string, headers?: Record<string, unknown>) {
+    await this.accessResolver.resolve(clerkUserId, headers);
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('ATSIntegration', id);
     return this.repository.update(id, input);
   }
 
-  async delete(id: string, clerkUserId: string) {
-    await this.accessResolver.resolve(clerkUserId);
+  async delete(id: string, clerkUserId: string, headers?: Record<string, unknown>) {
+    await this.accessResolver.resolve(clerkUserId, headers);
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('ATSIntegration', id);
     await this.repository.delete(id);

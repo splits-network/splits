@@ -43,7 +43,7 @@ export function registerCallRoutes(
       filters = raw.filters;
     }
     const params: CallListParams = { ...raw, ...filters };
-    const result = await service.getAll(params, clerkUserId);
+    const result = await service.getAll(params, clerkUserId, request.headers);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
 
@@ -56,7 +56,7 @@ export function registerCallRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    const data = await service.getById(id, clerkUserId);
+    const data = await service.getById(id, clerkUserId, request.headers);
     return reply.send({ data });
   });
 
@@ -68,7 +68,7 @@ export function registerCallRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const data = await service.create(request.body as CreateCallInput, clerkUserId);
+    const data = await service.create(request.body as CreateCallInput, clerkUserId, request.headers);
     return reply.code(201).send({ data });
   });
 
@@ -81,7 +81,7 @@ export function registerCallRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    const data = await service.update(id, request.body as UpdateCallInput, clerkUserId);
+    const data = await service.update(id, request.body as UpdateCallInput, clerkUserId, request.headers);
     return reply.send({ data });
   });
 
@@ -94,7 +94,7 @@ export function registerCallRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    await service.delete(id, clerkUserId);
+    await service.delete(id, clerkUserId, request.headers);
     return reply.send({ data: { message: 'Call deleted successfully' } });
   });
 }

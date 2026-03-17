@@ -28,7 +28,7 @@ export function registerArtifactRoutes(
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
-    const data = await service.listTags(clerkUserId);
+    const data = await service.listTags(clerkUserId, request.headers);
     return reply.send({ data });
   });
 
@@ -41,7 +41,7 @@ export function registerArtifactRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { callId } = request.params as { callId: string };
-    const result = await service.getEntityLinks(callId, request.query as ArtifactListParams, clerkUserId);
+    const result = await service.getEntityLinks(callId, request.query as ArtifactListParams, clerkUserId, request.headers);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
 
@@ -54,7 +54,7 @@ export function registerArtifactRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { callId } = request.params as { callId: string };
-    const data = await service.createEntityLink(callId, request.body as AddEntityLinkInput, clerkUserId);
+    const data = await service.createEntityLink(callId, request.body as AddEntityLinkInput, clerkUserId, request.headers);
     return reply.code(201).send({ data });
   });
 
@@ -67,7 +67,7 @@ export function registerArtifactRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { callId, id } = request.params as { callId: string; id: string };
-    await service.deleteEntityLink(callId, id, clerkUserId);
+    await service.deleteEntityLink(callId, id, clerkUserId, request.headers);
     return reply.send({ data: { message: 'Entity link removed successfully' } });
   });
 }

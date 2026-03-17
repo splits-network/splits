@@ -31,7 +31,7 @@ export function registerParticipantRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { callId } = request.params as { callId: string };
-    const result = await service.getAll(callId, request.query as ParticipantListParams, clerkUserId);
+    const result = await service.getAll(callId, request.query as ParticipantListParams, clerkUserId, request.headers);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
 
@@ -44,7 +44,7 @@ export function registerParticipantRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    const data = await service.getById(id, clerkUserId);
+    const data = await service.getById(id, clerkUserId, request.headers);
     return reply.send({ data });
   });
 
@@ -57,7 +57,7 @@ export function registerParticipantRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { callId } = request.params as { callId: string };
-    const data = await service.create(callId, request.body as AddParticipantInput, clerkUserId);
+    const data = await service.create(callId, request.body as AddParticipantInput, clerkUserId, request.headers);
     return reply.code(201).send({ data });
   });
 
@@ -70,7 +70,7 @@ export function registerParticipantRoutes(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { callId, id } = request.params as { callId: string; id: string };
-    await service.delete(callId, id, clerkUserId);
+    await service.delete(callId, id, clerkUserId, request.headers);
     return reply.send({ data: { message: 'Participant removed successfully' } });
   });
 }

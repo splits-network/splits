@@ -37,7 +37,7 @@ export function registerGptActionRoutes(app: FastifyInstance, supabase: Supabase
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const query = request.query as { include_inactive?: string };
-    const data = await service.getApplications(clerkUserId, query.include_inactive === 'true');
+    const data = await service.getApplications(clerkUserId, query.include_inactive === 'true', request.headers);
     return reply.send({ data });
   });
 }
