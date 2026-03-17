@@ -18,6 +18,8 @@ const integrationV3Routes: V3RouteConfig[] = [
   { path: '/integrations/connections', method: 'GET', auth: 'required' },
   { path: '/integrations/connections/:id', method: 'GET', auth: 'required' },
   { path: '/integrations/connections/:id', method: 'DELETE', auth: 'required' },
+  { path: '/integrations/connections/initiate', method: 'POST', auth: 'required' },
+  { path: '/integrations/connections/callback', method: 'POST', auth: 'required' },
 
   // ── ATS Integrations Core CRUD ─────────────────────────────────
   { path: '/integrations/ats', method: 'GET', auth: 'required' },

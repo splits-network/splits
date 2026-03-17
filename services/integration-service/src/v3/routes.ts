@@ -22,7 +22,7 @@ interface RegisterV3Config {
 
 export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config) {
   registerProviderRoutes(app, config.supabase);
-  registerConnectionRoutes(app, config.supabase, config.eventPublisher);
+  registerConnectionRoutes(app, config.supabase, config.eventPublisher, config.logger, config.crypto);
   registerATSIntegrationRoutes(app, config.supabase, config.eventPublisher);
 
   // Calendar webhook routes require logger, crypto, and eventPublisher
