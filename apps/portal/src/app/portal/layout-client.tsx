@@ -13,7 +13,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { PageTitleProvider, DrawerProvider, PresenceProvider, useUserProfile } from "@/contexts";
+import { PageTitleProvider, DrawerProvider, useUserProfile } from "@/contexts";
 import { usePresenceHeartbeat } from "@/hooks/use-presence-heartbeat";
 
 function OnboardingRedirectGuard({ children }: { children: React.ReactNode }) {
@@ -43,12 +43,10 @@ export function AuthenticatedLayoutClient({
     usePresenceHeartbeat();
 
     return (
-        <PresenceProvider>
-            <PageTitleProvider>
-                <DrawerProvider>
-                    <OnboardingRedirectGuard>{children}</OnboardingRedirectGuard>
-                </DrawerProvider>
-            </PageTitleProvider>
-        </PresenceProvider>
+        <PageTitleProvider>
+            <DrawerProvider>
+                <OnboardingRedirectGuard>{children}</OnboardingRedirectGuard>
+            </DrawerProvider>
+        </PageTitleProvider>
     );
 }

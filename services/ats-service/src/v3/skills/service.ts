@@ -43,7 +43,6 @@ export class SkillService {
     const record = {
       name: input.name,
       slug,
-      category: input.category || null,
       created_by: context.identityUserId,
     };
 

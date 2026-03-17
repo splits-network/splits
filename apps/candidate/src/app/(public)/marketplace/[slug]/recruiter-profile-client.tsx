@@ -357,9 +357,9 @@ export default function RecruiterProfileClient({
                                     {level && (
                                         <span className="ml-3 align-middle inline-block">
                                             <BaselLevelIndicator
-                                                level={level.level}
+                                                level={level.current_level}
                                                 title={level.title}
-                                                totalXp={level.totalXp}
+                                                totalXp={level.total_xp}
                                             />
                                         </span>
                                     )}

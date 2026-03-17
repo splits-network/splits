@@ -1,11 +1,10 @@
 "use client";
 
 import { useRef, useState, useEffect, useMemo } from "react";
-import { useScrollReveal } from "@splits-network/basel-ui";
+import { useScrollReveal, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
     BadgeGrid,
-    LevelBadge,
     MiniLeaderboard,
 } from "@splits-network/shared-gamification";
 import type {
@@ -29,6 +28,7 @@ import {
 import RecruiterActionsToolbar from "../components/shared/actions-toolbar";
 import { createUnauthenticatedClient } from "@/lib/api-client";
 import { BaselTabBar } from "@splits-network/basel-ui";
+import { useRegisterPresence, usePresenceStatus } from "@/contexts";
 
 type ProfileTab = "about" | "experience" | "reviews";
 
@@ -107,6 +107,14 @@ export default function RecruiterProfileClient({
     const [activeTab, setActiveTab] = useState<ProfileTab>("about");
     const [badges, setBadges] = useState<BadgeAward[]>([]);
     const [level, setLevel] = useState<EntityLevelInfo | null>(null);
+
+    const recruiterUserId = recruiter.users?.id;
+    const registerPresence = useRegisterPresence();
+    useEffect(() => {
+        if (recruiterUserId) registerPresence([recruiterUserId]);
+    }, [recruiterUserId, registerPresence]);
+    const presenceData = usePresenceStatus(recruiterUserId);
+    const presenceStatus = presenceData?.status;
 
     /* ─── Fetch gamification data ─────────────────────────────────────── */
 
@@ -216,12 +224,6 @@ export default function RecruiterProfileClient({
                                 <i className="fa-duotone fa-regular fa-badge-check text-sm" />
                                 Verified
                             </span>
-                            {recruiter.status === "active" && (
-                                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider">
-                                    <span className="inline-block w-2 h-2 bg-success" />
-                                    <span className="text-success">Online</span>
-                                </span>
-                            )}
                         </div>
                     </div>
 
@@ -229,17 +231,13 @@ export default function RecruiterProfileClient({
                     <div className="flex flex-col lg:flex-row lg:items-end gap-8">
                         <div className="flex items-end gap-5 flex-1">
                             <div className="scroll-reveal scale-in shrink-0">
-                                {recruiter.users?.profile_image_url ? (
-                                    <img
-                                        src={recruiter.users.profile_image_url}
-                                        alt={name}
-                                        className="w-20 h-20 lg:w-24 lg:h-24 object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-20 h-20 lg:w-24 lg:h-24 bg-primary text-primary-content flex items-center justify-center text-2xl lg:text-3xl font-black tracking-tight select-none">
-                                        {getInitials(name)}
-                                    </div>
-                                )}
+                                <BaselAvatar
+                                    initials={getInitials(name)}
+                                    src={recruiter.users?.profile_image_url}
+                                    alt={name}
+                                    size="xl"
+                                    presence={presenceStatus}
+                                />
                             </div>
 
                             <div className="scroll-reveal fade-up min-w-0 pb-1">
@@ -252,9 +250,10 @@ export default function RecruiterProfileClient({
                                     {name}
                                     {level && (
                                         <span className="ml-3 align-middle inline-block">
-                                            <LevelBadge
-                                                level={level}
-                                                size="md"
+                                            <BaselLevelIndicator
+                                                level={level.current_level}
+                                                title={level.title}
+                                                totalXp={level.total_xp}
                                             />
                                         </span>
                                     )}

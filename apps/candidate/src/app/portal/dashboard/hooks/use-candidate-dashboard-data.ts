@@ -84,8 +84,8 @@ export function useCandidateDashboardData() {
 
             // Fetch applications, recruiter relationships, and top matches in parallel
             const [appsResult, recruitersResult, matchesResult] = await Promise.allSettled([
-                client.get<ApiResponse<Application[]>>('/applications', {
-                    params: { include: 'job,company,recruiter' },
+                client.get<ApiResponse<Application[]>>('/applications/views/listing', {
+                    params: { limit: 100 },
                 }),
                 client.get<ApiResponse<ActiveRecruiter[]>>('/recruiter-candidates/views/list-for-candidate'),
                 client.get<{ data: EnrichedMatch[] }>('/matches', {

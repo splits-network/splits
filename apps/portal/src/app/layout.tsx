@@ -11,7 +11,7 @@ import { JsonLd } from "@splits-network/shared-ui";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
-import { UserProfileProvider, type UserProfile } from "@/contexts";
+import { UserProfileProvider, PresenceProvider, type UserProfile } from "@/contexts";
 import { getCurrentUserProfile } from "@/lib/current-user-profile";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -187,6 +187,7 @@ export default async function RootLayout({
                             <UserProfileProvider
                                 initialProfile={initialProfile}
                             >
+                              <PresenceProvider>
                                 <CompanyProvider>
                                 <GamificationWrapper>
                                 <ToastProvider>
@@ -201,6 +202,7 @@ export default async function RootLayout({
                                 </ToastProvider>
                                 </GamificationWrapper>
                                 </CompanyProvider>
+                              </PresenceProvider>
                                 <DevDebugPanel />
                                 <PortalActivityTrackerWrapper />
                             </UserProfileProvider>

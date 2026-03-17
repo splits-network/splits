@@ -23,7 +23,6 @@ export class CultureTagRepository {
       .select('*', { count: 'exact' });
 
     if (params.q) query = query.ilike('name', `%${params.q.trim()}%`);
-    if (params.category) query = query.eq('category', params.category);
 
     query = query.order('name').range(offset, offset + limit - 1);
 
