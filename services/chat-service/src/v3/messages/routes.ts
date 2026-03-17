@@ -1,5 +1,5 @@
 /**
- * Messages V3 Routes — List & Send
+ * Messages V3 Routes — List, Send & Actions
  */
 
 import { FastifyInstance } from 'fastify';
@@ -16,6 +16,9 @@ import {
   conversationIdParamSchema,
 } from './types';
 
+// --- Action registrations ---
+import { registerRedactAction } from './actions/redact.route';
+
 export function registerMessageRoutes(
   app: FastifyInstance,
   supabase: SupabaseClient,
@@ -24,6 +27,9 @@ export function registerMessageRoutes(
 ) {
   const repository = new MessageRepository(supabase);
   const service = new MessageService(repository, supabase, eventPublisher, chatEventPublisher);
+
+  // --- Actions (before :id to avoid collision) ---
+  registerRedactAction(app, supabase, eventPublisher, chatEventPublisher);
 
   // GET /api/v3/chat/conversations/:conversationId/messages
   app.get('/api/v3/chat/conversations/:conversationId/messages', {
