@@ -47,7 +47,7 @@ export const listQuerySchema = {
     sort_by: { type: 'string', enum: ['created_at', 'fit_score'] },
     sort_order: { type: 'string', enum: ['asc', 'desc'] },
   },
-  additionalProperties: true,
+  additionalProperties: false,
 };
 
 export const createReviewSchema = {

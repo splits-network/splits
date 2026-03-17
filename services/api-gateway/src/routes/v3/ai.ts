@@ -10,7 +10,13 @@ import { ServiceRegistry } from '../../clients';
 import { registerV3Routes, V3RouteConfig } from './proxy';
 
 const aiV3Routes: V3RouteConfig[] = [
-  // ── AI Reviews ─────────────────────────────────────────────────
+  // ── AI Reviews — Views (before :id to avoid param collision) ──
+  { path: '/ai-reviews/views/job-stats', method: 'GET', auth: 'required' },
+
+  // ── AI Reviews — Actions ──────────────────────────────────────
+  { path: '/ai-reviews/actions/analyze', method: 'POST', auth: 'required' },
+
+  // ── AI Reviews — Core CRUD ────────────────────────────────────
   { path: '/ai-reviews', method: 'GET', auth: 'required' },
   { path: '/ai-reviews', method: 'POST', auth: 'required' },
   { path: '/ai-reviews/:id', method: 'GET', auth: 'required' },

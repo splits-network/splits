@@ -12,6 +12,8 @@ import {
   CreateReviewInput, AIReviewListParams,
   idParamSchema, listQuerySchema, createReviewSchema,
 } from './types';
+import { registerJobStatsViewRoute } from './views/job-stats.route';
+import { registerAnalyzeActionRoute } from './actions/analyze.route';
 
 export function registerReviewRoutes(
   app: FastifyInstance,
@@ -20,6 +22,10 @@ export function registerReviewRoutes(
 ) {
   const repository = new AIReviewRepository(supabase);
   const service = new AIReviewService(repository, supabase, eventPublisher);
+
+  // Register views and actions BEFORE parameterized routes to avoid collisions
+  registerJobStatsViewRoute(app, supabase);
+  registerAnalyzeActionRoute(app, supabase, eventPublisher);
 
   // GET /api/v3/ai-reviews
   app.get('/api/v3/ai-reviews', {
