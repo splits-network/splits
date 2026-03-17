@@ -56,9 +56,6 @@ const chatV3Routes: V3RouteConfig[] = [
   // -- Reports Core CRUD (admin-only, enforced in service layer) --
   { resource: 'chat/reports', auth: 'required' },
 
-  // -- Reports V2 compat (remove after frontend migration) --
-  { path: '/chat/reports', method: 'POST', auth: 'required' },
-
   // -- Attachments V3 (proper URL structure) --
   { path: '/chat/attachments/actions/init-upload', method: 'POST', auth: 'required' },
   { path: '/chat/attachments/:id/actions/complete-upload', method: 'POST', auth: 'required' },
@@ -87,9 +84,6 @@ const chatV3Routes: V3RouteConfig[] = [
 
   // -- Messages Actions --
   { path: '/chat/messages/:id/actions/redact', method: 'POST', auth: 'required' },
-
-  // -- Messages (admin, V2 compat) --
-  { path: '/chat/messages/:id', method: 'PATCH', auth: 'required' },
 
   // -- Presence V3 (standalone resource, served by chat-service) --
   { path: '/presence/views/batch-status', method: 'GET', auth: 'required' },
