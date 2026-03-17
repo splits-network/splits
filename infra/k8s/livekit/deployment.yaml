@@ -4,7 +4,7 @@ metadata:
     name: livekit-server
     namespace: splits-network
 spec:
-    replicas: ${REPLICAS:-2}
+    replicas: 1
     selector:
         matchLabels:
             app: livekit-server
@@ -59,16 +59,14 @@ spec:
                           cpu: 2000m
                           memory: 2Gi
                   livenessProbe:
-                      httpGet:
-                          path: /
+                      tcpSocket:
                           port: 7880
-                      initialDelaySeconds: 10
+                      initialDelaySeconds: 30
                       periodSeconds: 10
                   readinessProbe:
-                      httpGet:
-                          path: /
+                      tcpSocket:
                           port: 7880
-                      initialDelaySeconds: 5
+                      initialDelaySeconds: 10
                       periodSeconds: 5
             volumes:
                 - name: livekit-config

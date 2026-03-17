@@ -11,7 +11,6 @@ import { Logger } from '@splits-network/shared-logging';
 export class AIReviewServiceV2 {
     private openaiApiKey: string;
     private modelVersion: string;
-    private atsServiceUrl: string;
 
     constructor(
         private repository: AIReviewRepository,
@@ -20,27 +19,23 @@ export class AIReviewServiceV2 {
     ) {
         this.openaiApiKey = process.env.OPENAI_API_KEY || '';
         this.modelVersion = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-        this.atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://ats-service:3003';
 
         if (!this.openaiApiKey) {
-            this.logger.warn('⚠️ OPENAI_API_KEY not set. AI review service will not function.');
+            this.logger.warn('OPENAI_API_KEY not set. AI review service will not function.');
         }
-        this.logger.info(`🤖 AI Review Service initialized with model: ${this.modelVersion}`);
+        this.logger.info(`AI Review Service initialized with model: ${this.modelVersion}`);
     }
 
     /**
-     * Enrich minimal application data by fetching full details from ATS service
+     * Enrich minimal application data by fetching full details via direct DB queries.
      */
     async enrichApplicationData(input: Partial<AIReviewInput>): Promise<AIReviewInput> {
         return this.enrichInputIfNeeded(input);
     }
 
     /**
-     * Fetch application data for stage transition logic
-     * Returns: { recruiter_id, candidate_id, job_id, company_id }
-     */
-    /**
-     * Enrich minimal input with full application data if needed
+     * Enrich minimal input with full application data if needed.
+     * Uses direct Supabase queries instead of HTTP calls to ATS service.
      */
     private async enrichInputIfNeeded(input: Partial<AIReviewInput>): Promise<AIReviewInput> {
         // If all required fields provided, return as-is
@@ -53,24 +48,14 @@ export class AIReviewServiceV2 {
             return input as AIReviewInput;
         }
 
-        // Fetch full application with job requirements, documents, AND pre-screen answers
-        const response = await fetch(
-            `${this.atsServiceUrl}/api/v2/applications/${input.application_id}?include=job,candidate,job_requirements,documents,pre_screen_answers`,
-            {
-                headers: {
-                    'x-internal-service-key': process.env.INTERNAL_SERVICE_KEY || '',
-                },
-            }
-        );
+        // Fetch application with related data directly from the database
+        const application = await this.repository.getApplicationForEnrichment(input.application_id!);
 
-        if (!response.ok) {
-            throw new Error(`Failed to fetch application data: HTTP ${response.status}`);
+        if (!application) {
+            throw new Error(`Application not found: ${input.application_id}`);
         }
 
-        const { data: application } = (await response.json()) as { data: any };
-
-        // Job requirements are nested under job from the V2 applications endpoint
-        const jobRequirements = application.job?.job_requirements || [];
+        const jobRequirements = application.job_requirements || [];
 
         // Fetch actual job skills from DB (skill names like "Python", "React")
         const jobId = input.job_id || application.job_id;

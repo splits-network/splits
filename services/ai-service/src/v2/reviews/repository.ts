@@ -187,6 +187,45 @@ export class AIReviewRepository {
         })).filter((s: any) => s.name);
     }
 
+    /**
+     * Fetch application with related data for AI review enrichment.
+     * Replaces the old HTTP call to ATS service.
+     */
+    async getApplicationForEnrichment(applicationId: string): Promise<any | null> {
+        const { data: application, error } = await this.supabase
+            .from('applications')
+            .select('*')
+            .eq('id', applicationId)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!application) return null;
+
+        // Fetch related data in parallel
+        const [jobResult, candidateResult, documentsResult, preScreenResult, jobRequirementsResult] = await Promise.all([
+            application.job_id
+                ? this.supabase.from('jobs').select('*').eq('id', application.job_id).maybeSingle()
+                : { data: null, error: null },
+            application.candidate_id
+                ? this.supabase.from('candidates').select('*').eq('id', application.candidate_id).maybeSingle()
+                : { data: null, error: null },
+            this.supabase.from('documents').select('*').eq('entity_id', applicationId),
+            this.supabase.from('pre_screen_answers').select('*').eq('application_id', applicationId),
+            application.job_id
+                ? this.supabase.from('job_requirements').select('*').eq('job_id', application.job_id)
+                : { data: null, error: null },
+        ]);
+
+        return {
+            ...application,
+            job: jobResult.data || null,
+            candidate: candidateResult.data || null,
+            documents: documentsResult.data || [],
+            pre_screen_answers: preScreenResult.data || [],
+            job_requirements: jobRequirementsResult.data || [],
+        };
+    }
+
     async getStatsByJobId(jobId: string): Promise<any> {
         // Get all AI reviews for applications on this job
         const { data: reviews, error } = await this.supabase

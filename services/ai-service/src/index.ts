@@ -16,7 +16,7 @@ import swaggerUi from "@fastify/swagger-ui";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
-import { DomainEventConsumer } from "./domain-consumer";
+import { DomainEventConsumer } from "./v3/shared/domain-consumer";
 import { AIReviewRepository } from "./v2/reviews/repository";
 import { AIReviewServiceV2 } from "./v2/reviews/service";
 import { ResumeExtractionService } from "./v2/resume-extraction/service";
@@ -185,20 +185,21 @@ async function main() {
         logger,
     );
 
-    // Initialize domain event consumer (listens for application + document + call recording events)
+    // Initialize V3 domain event consumer (listens for application + document + call recording events)
     let domainConsumer: DomainEventConsumer | null = null;
     try {
-        domainConsumer = new DomainEventConsumer(
-            rabbitConfig.url,
+        domainConsumer = new DomainEventConsumer({
+            rabbitMqUrl: rabbitConfig.url,
+            supabase: supabaseClient,
             aiReviewService,
             resumeExtractionService,
             resumeExtractionRepository,
-            callPipelineService,
-            outboxPublisher || undefined,
+            callPipelineService: callPipelineService,
+            eventPublisher: outboxPublisher || undefined,
             logger,
-        );
+        });
         await domainConsumer.connect();
-        logger.info("Domain event consumer connected and listening for events");
+        logger.info("V3 domain event consumer connected and listening for events");
     } catch (error) {
         logger.error({ err: error }, "Failed to connect domain event consumer");
     }
