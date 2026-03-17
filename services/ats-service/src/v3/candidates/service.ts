@@ -116,7 +116,17 @@ export class CandidateService {
       updated_at: now,
     };
 
-    const candidate = await this.repository.create(record);
+    let candidate;
+    try {
+      candidate = await this.repository.create(record);
+    } catch (err: any) {
+      // Handle race condition: unique constraint on user_id or email violated
+      if (err.code === '23505') {
+        const retry = await this.repository.findByEmail(input.email);
+        if (retry) return { candidate: retry, meta: { existing: true } };
+      }
+      throw err;
+    }
 
     if (candidate.user_id) {
       await this.repository.createUserRole(candidate.user_id, candidate.id);
@@ -199,35 +209,6 @@ export class CandidateService {
       candidateId: id,
       deletedBy: context.identityUserId,
     }, 'ats-service');
-  }
-
-  async getDashboardStats(candidateId: string, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (context.candidateId !== candidateId && !context.isPlatformAdmin) {
-      throw new ForbiddenError('You can only view your own dashboard stats');
-    }
-    return this.repository.getDashboardStats(candidateId);
-  }
-
-  async getRecentApplications(candidateId: string, limit: number, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (context.candidateId !== candidateId && !context.isPlatformAdmin) {
-      throw new ForbiddenError('You can only view your own recent applications');
-    }
-    return this.repository.getRecentApplications(candidateId, limit);
-  }
-
-  async getPrimaryResume(candidateId: string, clerkUserId: string) {
-    const context = await this.accessResolver.resolve(clerkUserId);
-    const canAccess = context.isPlatformAdmin || !!context.recruiterId ||
-      context.candidateId === candidateId ||
-      context.roles.some(r => ['company_admin', 'hiring_manager'].includes(r));
-
-    if (!canAccess) {
-      throw new ForbiddenError('You do not have permission to view this resume');
-    }
-
-    return this.repository.getPrimaryResume(candidateId);
   }
 
   async getResumes(candidateId: string, clerkUserId: string) {

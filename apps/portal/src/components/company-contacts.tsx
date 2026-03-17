@@ -48,7 +48,7 @@ export default function CompanyContacts({
             if (!token) return;
             const client = createAuthenticatedClient(token);
 
-            const contactsRes = await client.get(`/companies/${companyId}/contacts`).catch(() => ({
+            const contactsRes = await client.get(`/companies/${companyId}/view/contacts`).catch(() => ({
                 data: [],
             }));
 

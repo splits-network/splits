@@ -7,6 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CandidateListParams } from './types';
 
+const SORTABLE_FIELDS = ['created_at', 'updated_at', 'full_name', 'email', 'status', 'location'] as const;
+
 interface ScopeFilters {
   candidate_ids?: string[];
   user_id?: string;
@@ -53,7 +55,7 @@ export class CandidateRepository {
     }
 
     // Sorting
-    const sortBy = params.sort_by || 'created_at';
+    const sortBy = SORTABLE_FIELDS.includes(params.sort_by as any) ? params.sort_by! : 'created_at';
     const ascending = params.sort_order === 'asc';
     query = query.order(sortBy, { ascending });
 
@@ -90,6 +92,8 @@ export class CandidateRepository {
       .from('candidates')
       .select('*, user:users!user_id(id, email, name, clerk_user_id)')
       .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (error) throw error;
@@ -100,7 +104,9 @@ export class CandidateRepository {
     const { data, error } = await this.supabase
       .from('candidates')
       .select('*')
-      .eq('email', email)
+      .ilike('email', email)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (error) throw error;
@@ -140,76 +146,6 @@ export class CandidateRepository {
       .eq('id', id);
 
     if (error) throw error;
-  }
-
-  async getDashboardStats(candidateId: string) {
-    const interviewStages = ['phone_screen', 'technical_interview', 'onsite_interview', 'final_interview'];
-    const offerStages = ['offer_extended'];
-
-    const [apps, interviews, offers, relationships] = await Promise.all([
-      this.supabase.from('applications').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId),
-      this.supabase.from('applications').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId).in('stage', interviewStages),
-      this.supabase.from('applications').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId).in('stage', offerStages),
-      this.supabase.from('recruiter_candidates').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId).eq('status', 'active'),
-    ]);
-
-    if (apps.error) throw apps.error;
-    if (interviews.error) throw interviews.error;
-    if (offers.error) throw offers.error;
-    if (relationships.error) throw relationships.error;
-
-    return {
-      applications: apps.count || 0,
-      interviews: interviews.count || 0,
-      offers: offers.count || 0,
-      active_relationships: relationships.count || 0,
-    };
-  }
-
-  async getRecentApplications(candidateId: string, limit = 5) {
-    const safeLimit = Math.max(1, Math.min(limit, 25));
-
-    const { data, error } = await this.supabase
-      .from('applications')
-      .select(`id, job_id, stage, status, created_at, updated_at,
-        job:jobs(id, title, location, company:companies(id, name))`)
-      .eq('candidate_id', candidateId)
-      .order('created_at', { ascending: false })
-      .range(0, safeLimit - 1);
-
-    if (error) throw error;
-
-    return (data || []).map((app: any) => ({
-      id: app.id,
-      job_id: app.job_id,
-      job_title: app.job?.title || 'Unknown Position',
-      company: app.job?.company?.name || 'Unknown Company',
-      location: app.job?.location || null,
-      status: app.status,
-      stage: app.stage,
-      applied_at: app.created_at,
-      updated_at: app.updated_at,
-    }));
-  }
-
-  async getPrimaryResume(candidateId: string): Promise<any | null> {
-    const { data, error } = await this.supabase
-      .from('documents')
-      .select('*')
-      .eq('entity_type', 'candidate')
-      .eq('entity_id', candidateId)
-      .eq('document_type', 'resume')
-      .eq('metadata->>is_primary_for_candidate', 'true')
-      .maybeSingle();
-
-    if (error) throw error;
-    if (!data) return null;
-
-    const { data: signedUrlData } = await this.supabase.storage
-      .from(data.bucket_name)
-      .createSignedUrl(data.storage_path, 3600);
-
-    return { ...data, download_url: signedUrlData?.signedUrl || null };
   }
 
   async getResumes(candidateId: string): Promise<any[]> {

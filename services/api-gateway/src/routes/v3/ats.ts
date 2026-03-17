@@ -87,15 +87,15 @@ const atsV3Routes: V3RouteConfig[] = [
   { path: '/candidates/me', method: 'GET', auth: 'required' },
   { path: '/candidates/views/enriched', method: 'GET', auth: 'required' },
   { path: '/candidates/:id/view/detail', method: 'GET', auth: 'required' },
-  { path: '/candidates/:id/dashboard-stats', method: 'GET', auth: 'required' },
-  { path: '/candidates/:id/recent-applications', method: 'GET', auth: 'required' },
-  { path: '/candidates/:id/primary-resume', method: 'GET', auth: 'required' },
+  { path: '/candidates/:id/view/dashboard-stats', method: 'GET', auth: 'required' },
+  { path: '/candidates/:id/view/recent-applications', method: 'GET', auth: 'required' },
+  { path: '/candidates/:id/view/primary-resume', method: 'GET', auth: 'required' },
 
   // ── Companies Core CRUD ───────────────────────────────────────
   { resource: 'companies', auth: 'required' },
 
   // ── Companies Views ───────────────────────────────────────────
-  { path: '/companies/:id/contacts', method: 'GET', auth: 'required' },
+  { path: '/companies/:id/view/contacts', method: 'GET', auth: 'required' },
 
   // ── Applications Core CRUD ────────────────────────────────────
   { resource: 'applications', auth: 'required' },

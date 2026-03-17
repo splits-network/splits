@@ -146,20 +146,4 @@ export class CompanyService {
     }, 'ats-service');
   }
 
-  async getContacts(companyId: string, clerkUserId: string) {
-    const company = await this.repository.findById(companyId);
-    if (!company) throw new NotFoundError('Company', companyId);
-
-    const context = await this.accessResolver.resolve(clerkUserId);
-    if (!context.isPlatformAdmin) {
-      const isOrgMember = company.identity_organization_id &&
-        context.organizationIds.includes(company.identity_organization_id);
-      const isRecruiter = context.recruiterId && context.roles.includes('recruiter');
-      if (!isOrgMember && !isRecruiter) {
-        throw new ForbiddenError('You do not have access to this company\'s contacts');
-      }
-    }
-
-    return this.repository.findContacts(companyId);
-  }
 }
